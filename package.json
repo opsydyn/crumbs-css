@@ -3,9 +3,13 @@
   "private": true,
   "workspaces": ["apps/*", "docs", "packages/*"],
   "scripts": {
-    "dev": "bun run --filter '*' dev",
-    "build": "bun run --filter '*' build",
+    "build": "bun run --filter @crumbs/css build",
+    "check": "bun run build && bun run typecheck && bun run test",
+    "dev": "bun run --filter @crumbs/css build",
     "docs:dev": "bun run --cwd docs dev",
-    "docs:build": "bun run --cwd docs build"
+    "docs:build": "bun run --cwd docs build",
+    "release:check": "bun run --filter @crumbs/css release:check",
+    "test": "bun run --filter @crumbs/css test",
+    "typecheck": "bun run --filter @crumbs/css typecheck"
   }
 }

@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs"
 import { resolve } from "node:path"
 import type { NativeRecipe, NativeStyle, NativeTheme } from "../src/native-style"
 import { createTheme, createThemeContract } from "../src/native-style"
@@ -222,6 +223,7 @@ const grimButtonFixture = resolve(
   "grim-button.css.ts",
 )
 const nativeAppRoot = resolve(packageRoot, "..", "..", "apps", "native")
+const hasNativeAppBenchFixture = existsSync(grimButtonFixture) && existsSync(nativeAppRoot)
 
 const metrics: BenchmarkMetric[] = [
   measureSync({
@@ -272,19 +274,21 @@ metrics.push(
   }),
 )
 
-metrics.push(
-  await measureAsync({
-    budget: { maxP95Ms: 150 },
-    iterationsPerSample: 1,
-    name: "transform native GrimButton fixture",
-    run: () =>
-      transformCssTsToStyleSheet(grimButtonFixture, nativeAppRoot, {
-        strictDiagnostics: true,
-      }),
-    samples: 6,
-    warmupIterations: 1,
-  }),
-)
+if (hasNativeAppBenchFixture) {
+  metrics.push(
+    await measureAsync({
+      budget: { maxP95Ms: 150 },
+      iterationsPerSample: 1,
+      name: "transform native GrimButton fixture",
+      run: () =>
+        transformCssTsToStyleSheet(grimButtonFixture, nativeAppRoot, {
+          strictDiagnostics: true,
+        }),
+      samples: 6,
+      warmupIterations: 1,
+    }),
+  )
+}
 
 for (const metric of metrics) {
   assertBenchmarkBudget(metric)

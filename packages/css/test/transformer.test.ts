@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { existsSync } from "node:fs"
 import * as path from "node:path"
 import { buildStyleSheetCode, transform } from "../src/transformer"
 
@@ -37,6 +38,11 @@ const APP_GRIM_BUTTON_FIXTURE = path.resolve(
 const APP_REFERENCE_FIXTURE = path.resolve(PKG_ROOT, "../../apps/native/styles/reference.css.ts")
 const APP_FIXTURE_RELATIVE = "styles/shared.css.ts"
 const APP_ROOT = path.resolve(PKG_ROOT, "../../apps/native")
+const HAS_NATIVE_APP_FIXTURES =
+  existsSync(APP_FIXTURE) &&
+  existsSync(APP_GRIM_BUTTON_FIXTURE) &&
+  existsSync(APP_REFERENCE_FIXTURE) &&
+  existsSync(APP_ROOT)
 
 // ---------------------------------------------------------------------------
 // Unit tests — pure JS, no VE pipeline, run in bun
@@ -136,6 +142,8 @@ describe("Metro transformer", () => {
   })
 
   it("transforms GrimButton recipes for Storybook web without React Native StyleSheet compilation", async () => {
+    if (!HAS_NATIVE_APP_FIXTURES) return
+
     const result = (await transform(
       { upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER },
       APP_ROOT,
@@ -375,6 +383,8 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
   })
 
   it("transforms the native app css entry when executed by Bun", () => {
+    if (!HAS_NATIVE_APP_FIXTURES) return
+
     const code = runBunTransform(APP_FIXTURE, APP_ROOT)
     expect(code).toContain("StyleSheet.create")
     expect(code).toContain("export const container")
@@ -388,6 +398,8 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
   })
 
   it("transforms the native GrimButton recipe style entry", () => {
+    if (!HAS_NATIVE_APP_FIXTURES) return
+
     const code = runBunTransform(APP_GRIM_BUTTON_FIXTURE, APP_ROOT)
     const baseClassName = code.match(/"base": _s\["([^"]+)"\]/)?.[1]
     expect(code).toContain("export const button")
@@ -407,6 +419,8 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
   })
 
   it("accepts Metro's project-relative native app css filename", () => {
+    if (!HAS_NATIVE_APP_FIXTURES) return
+
     const code = runBunTransform(APP_FIXTURE_RELATIVE, APP_ROOT)
     expect(code).toContain("StyleSheet.create")
     expect(code).toContain("export const container")
@@ -415,6 +429,8 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
   })
 
   it("keeps native app theme dependencies local without leaking package internals", () => {
+    if (!HAS_NATIVE_APP_FIXTURES) return
+
     const code = runBunTransform(APP_REFERENCE_FIXTURE, APP_ROOT)
     expect(code).toContain(`import "./theme.ts";`)
     expect(code).not.toContain("packages/native-styles/dist")

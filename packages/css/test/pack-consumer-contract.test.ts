@@ -8,12 +8,12 @@ import {
   symlinkSync,
   writeFileSync,
 } from "node:fs"
+import { createRequire } from "node:module"
 import { tmpdir } from "node:os"
 import { dirname, resolve } from "node:path"
 
-const REPO_ROOT = resolve(import.meta.dir, "../../..")
 const PACKAGE_ROOT = resolve(import.meta.dir, "..")
-const ROOT_NODE_MODULES = resolve(REPO_ROOT, "node_modules")
+const requireFromPackage = createRequire(resolve(PACKAGE_ROOT, "package.json"))
 
 type SpawnResult = ReturnType<typeof Bun.spawnSync>
 
@@ -36,8 +36,12 @@ function run(
   return result
 }
 
+function resolveInstalledPackageRoot(packageName: string): string {
+  return dirname(requireFromPackage.resolve(`${packageName}/package.json`))
+}
+
 function linkRootDependency(consumerRoot: string, packageName: string): void {
-  const source = resolve(ROOT_NODE_MODULES, packageName)
+  const source = resolveInstalledPackageRoot(packageName)
   if (!existsSync(source)) {
     throw new Error(`Missing root dependency required by consumer contract: ${packageName}`)
   }
@@ -208,7 +212,7 @@ describe("@crumbs/css packed consumer contract", () => {
     writeFileSync(resolve(consumerRoot, "consumer-types.ts"), consumerTypeSource)
     writeConsumerTsconfig(consumerRoot, "tsconfig.node16.json", "Node16", "Node16")
     writeConsumerTsconfig(consumerRoot, "tsconfig.bundler.json", "ESNext", "Bundler")
-    run([resolve(ROOT_NODE_MODULES, ".bin", "tsc"), "-p", "tsconfig.node16.json"], consumerRoot)
-    run([resolve(ROOT_NODE_MODULES, ".bin", "tsc"), "-p", "tsconfig.bundler.json"], consumerRoot)
+    run([resolve(resolveInstalledPackageRoot("typescript"), "bin", "tsc"), "-p", "tsconfig.node16.json"], consumerRoot)
+    run([resolve(resolveInstalledPackageRoot("typescript"), "bin", "tsc"), "-p", "tsconfig.bundler.json"], consumerRoot)
   })
 })
