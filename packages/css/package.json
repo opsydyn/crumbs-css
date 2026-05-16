@@ -1,0 +1,99 @@
+{
+  "name": "@crumbs/css",
+  "version": "0.1.0-alpha.0",
+  "description": "Vanilla-extract-shaped React Native style authoring, theming, recipes, and Metro transforms.",
+  "packageManager": "bun@1.3.11",
+  "sideEffects": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "COMPATIBILITY.md",
+    "README.md",
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style": {
+      "types": "./dist/style.d.mts",
+      "import": "./dist/style.mjs",
+      "require": "./dist/style.cjs"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.mts",
+      "import": "./dist/theme.mjs",
+      "require": "./dist/theme.cjs"
+    },
+    "./metro-plugin": {
+      "types": "./dist/metro-plugin.d.mts",
+      "import": "./dist/metro-plugin.mjs",
+      "require": "./dist/metro-plugin.cjs"
+    },
+    "./dist/transformer": {
+      "types": "./dist/transformer.d.mts",
+      "import": "./dist/transformer.mjs",
+      "require": "./dist/transformer.cjs"
+    },
+    "./dist/metro-plugin": {
+      "types": "./dist/metro-plugin.d.mts",
+      "import": "./dist/metro-plugin.mjs",
+      "require": "./dist/metro-plugin.cjs"
+    },
+    "./dist/theme": {
+      "types": "./dist/theme.d.mts",
+      "import": "./dist/theme.mjs",
+      "require": "./dist/theme.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "bench:native-styles": "bun bench/native-styles.bench.ts",
+    "build": "tsdown",
+    "prepare": "bun run build",
+    "release:check": "bun run build && bun run typecheck && bun run test && bun run bench:native-styles && bun pm pack --dry-run",
+    "test": "bun test",
+    "typecheck": "tsgo --noEmit"
+  },
+  "keywords": [
+    "react-native",
+    "vanilla-extract",
+    "metro",
+    "expo",
+    "styles",
+    "theming"
+  ],
+  "author": "Alan P Currie",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.0.0",
+    "bun": ">=1.3.0"
+  },
+  "dependencies": {
+    "@vanilla-extract/css": "^1.20.1",
+    "@vanilla-extract/integration": "^8.0.10",
+    "css-to-react-native": "^3.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/react": "~19.2.10",
+    "@typescript/native-preview": "latest",
+    "fast-check": "^4.7.0",
+    "react": "19.2.0",
+    "react-native": "0.83.6",
+    "tsdown": "^0.21.8",
+    "typescript": "~5.9.2"
+  },
+  "peerDependencies": {
+    "metro": ">=0.83 <1",
+    "react": ">=19 <20",
+    "react-native": ">=0.83 <0.84"
+  }
+}
