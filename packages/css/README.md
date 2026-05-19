@@ -71,6 +71,8 @@ export const title = style({
 })
 ```
 
+Full example: [examples/basic.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/basic.css.ts)
+
 ## Themes
 
 Create a contract and concrete themes in plain TypeScript:
@@ -119,6 +121,8 @@ export const title = style({
   fontWeight: 700,
 })
 ```
+
+Full examples: [examples/theme.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/theme.ts), [examples/themed.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/themed.css.ts)
 
 ## Runtime resolution
 
@@ -201,6 +205,8 @@ export function Button() {
 }
 ```
 
+Full example: [examples/pressable-variants.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/pressable-variants.css.ts)
+
 ## Typed native helpers
 
 Use `viewStyle`, `textStyle`, and `imageStyle` when a style targets a specific React Native primitive. Inputs are token-aware and catch cross-kind props at typecheck:
@@ -229,6 +235,8 @@ export const crest = imageStyle({
 ```
 
 Use `style` for deliberately mixed style exports and `styleVariants` for grouped state styles.
+
+Full example: [examples/typed-helpers.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/typed-helpers.css.ts)
 
 ## Recipes
 
@@ -302,6 +310,8 @@ export function Button({ disabled = false, size = "md", tone = "primary" }: Butt
   )
 }
 ```
+
+Full example: [examples/recipe.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/recipe.css.ts)
 
 Recipe style arrays are ordered for predictable React Native override behavior: base first, variants in author-defined order, then matching compound variants. Later entries override earlier ones using React Native's style-array merge semantics.
 
