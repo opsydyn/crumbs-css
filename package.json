@@ -3,6 +3,10 @@
   "private": true,
   "workspaces": ["apps/*", "docs", "packages/*"],
   "scripts": {
+    "app:dev": "bun run --filter @crumbs/storybook dev",
+    "app:storybook": "bun run --filter @crumbs/storybook storybook",
+    "app:storybook:web": "bun run --filter @crumbs/storybook storybook:web",
+    "app:typecheck": "bun run --filter @crumbs/storybook typecheck",
     "build": "bun run --filter @crumbs/css build",
     "check": "bun run build && bun run typecheck && bun run test",
     "dev": "bun run --filter @crumbs/css build",

@@ -1,7 +1,9 @@
 import { defineConfig } from "tsdown"
 
+const shouldClean = process.env.CRUMBS_CSS_SKIP_CLEAN !== "1"
+
 export default defineConfig({
-  clean: true,
+  clean: shouldClean,
   dts: {
     cjsReexport: true,
   },
