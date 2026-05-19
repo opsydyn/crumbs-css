@@ -1,4 +1,4 @@
-import { useThemedStyles } from "@crumbs/css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import * as Menubar from "@rn-primitives/menubar"
 import { useState } from "react"
 import { Text, View } from "react-native"

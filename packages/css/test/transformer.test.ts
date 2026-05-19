@@ -351,31 +351,31 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
 
   it("rejects @media rules with an actionable native compatibility diagnostic", () => {
     expect(() => runNodeTransform(FIXTURE_UNSUPPORTED_MEDIA)).toThrow(
-      "@crumbs/css does not support @media rules in React Native styles",
+      "@opsydyn/crumbs-css does not support @media rules in React Native styles",
     )
   })
 
   it("rejects keyframes with an actionable native compatibility diagnostic", () => {
     expect(() => runNodeTransform(FIXTURE_UNSUPPORTED_KEYFRAMES)).toThrow(
-      "@crumbs/css does not support @keyframes rules in React Native styles",
+      "@opsydyn/crumbs-css does not support @keyframes rules in React Native styles",
     )
   })
 
   it("rejects global selectors with an actionable native compatibility diagnostic", () => {
     expect(() => runNodeTransform(FIXTURE_UNSUPPORTED_GLOBAL)).toThrow(
-      "@crumbs/css does not support selectors, global styles, or pseudo classes in React Native styles",
+      "@opsydyn/crumbs-css does not support selectors, global styles, or pseudo classes in React Native styles",
     )
   })
 
   it("rejects selectors with an actionable native compatibility diagnostic", () => {
     expect(() => runNodeTransform(FIXTURE_UNSUPPORTED_SELECTORS)).toThrow(
-      "@crumbs/css does not support selectors, global styles, or pseudo classes in React Native styles",
+      "@opsydyn/crumbs-css does not support selectors, global styles, or pseudo classes in React Native styles",
     )
   })
 
   it("strict diagnostics reject dropped declarations with file and export context", () => {
     expect(() => runBunTransformStrict(FIXTURE_UNSUPPORTED_DECLARATION)).toThrow(
-      '@crumbs/css dropped "transition: all 0.3s" while transforming export "link"',
+      '@opsydyn/crumbs-css dropped "transition: all 0.3s" while transforming export "link"',
     )
     expect(() => runBunTransformStrict(FIXTURE_UNSUPPORTED_DECLARATION)).toThrow(
       "fixtures/unsupported-declaration.css.ts",

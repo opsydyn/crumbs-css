@@ -1,4 +1,4 @@
-import { style } from "@crumbs/css/style"
+import { style } from "@opsydyn/crumbs-css/style"
 
 export const screen = style({
   flex: 1,

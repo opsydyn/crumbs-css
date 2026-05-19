@@ -1,13 +1,13 @@
 import { describe, expect, it } from "bun:test"
-import type { NativeRecipe } from "@crumbs/css/style"
-import { createTheme, createThemeContract } from "@crumbs/css/style"
+import type { NativeRecipe } from "@opsydyn/crumbs-css/style"
+import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
 import {
   createRecipeResolver,
   createThemeTokenReference,
   resolveRecipeStyle,
   resolveThemeStyles,
   resolveThemeTokens,
-} from "@crumbs/css/theme"
+} from "@opsydyn/crumbs-css/theme"
 
 function captureWarnings(run: () => void): ReadonlyArray<string> {
   const originalWarn = console.warn

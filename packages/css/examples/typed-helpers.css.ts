@@ -1,4 +1,4 @@
-import { imageStyle, textStyle, viewStyle } from "@crumbs/css/style"
+import { imageStyle, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme"
 
 export const panel = viewStyle({

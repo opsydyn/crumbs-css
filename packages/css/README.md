@@ -2,7 +2,7 @@
   <img src="./crumbs-css-header.png" alt="Crumbs CSS" width="100%" />
 </p>
 
-# @crumbs/css
+# @opsydyn/crumbs-css
 
 React Native style authoring with a familiar vanilla-extract-shaped API.
 
@@ -26,7 +26,7 @@ bun run build
 In the native app, the Metro config should point at the built transformer:
 
 ```js
-const { withNativeStyles } = require("@crumbs/css/metro-plugin")
+const { withNativeStyles } = require("@opsydyn/crumbs-css/metro-plugin")
 
 module.exports = withNativeStyles(config)
 ```
@@ -46,11 +46,11 @@ output when transformer behavior changes.
 
 ## Author native styles
 
-Import authoring helpers from `@crumbs/css/style`, not the package root.
+Import authoring helpers from `@opsydyn/crumbs-css/style`, not the package root.
 This keeps Metro/plugin code out of `.css.ts` evaluation.
 
 ```ts
-import { style } from "@crumbs/css/style"
+import { style } from "@opsydyn/crumbs-css/style"
 
 export const screen = style({
   flex: 1,
@@ -74,7 +74,7 @@ This example is backed by [examples/basic.css.ts](./examples/basic.css.ts).
 Create a contract and concrete themes in plain TypeScript:
 
 ```ts
-import { createTheme, createThemeContract } from "@crumbs/css/style"
+import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
 
 export const vars = createThemeContract({
   color: {
@@ -102,7 +102,7 @@ export const darkTheme = createTheme(vars, {
 Use the contract in `.css.ts` files:
 
 ```ts
-import { style } from "@crumbs/css/style"
+import { style } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme"
 
 export const screen = style({
@@ -127,7 +127,7 @@ Wrap the app in `ThemeProvider`, then resolve imported style modules with
 `useThemedStyles`.
 
 ```tsx
-import { ThemeProvider } from "@crumbs/css/theme"
+import { ThemeProvider } from "@opsydyn/crumbs-css/theme"
 import { Slot } from "expo-router"
 import { darkTheme } from "../styles/theme"
 
@@ -141,7 +141,7 @@ export default function RootLayout() {
 ```
 
 ```tsx
-import { useThemedStyles } from "@crumbs/css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { Text, View } from "react-native"
 import * as s from "./screen.css"
 
@@ -166,7 +166,7 @@ React Native has no CSS pseudo-class selector matching. Use explicit variants an
 select them from component state:
 
 ```ts
-import { style, styleVariants } from "@crumbs/css/style"
+import { style, styleVariants } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme"
 
 export const button = styleVariants({
@@ -191,7 +191,7 @@ export const buttonLabel = style({
 ```
 
 ```tsx
-import { useThemedStyles } from "@crumbs/css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { Pressable, Text } from "react-native"
 import * as s from "./button.css"
 
@@ -217,7 +217,7 @@ types, so theme contract values work without casts and obvious cross-kind props
 are caught during typecheck.
 
 ```ts
-import { imageStyle, textStyle, viewStyle } from "@crumbs/css/style"
+import { imageStyle, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme"
 
 export const panel = viewStyle({
@@ -248,7 +248,7 @@ Use `recipe` for reusable native component surfaces with base styles, variants,
 defaults, and compound variants.
 
 ```ts
-import { recipe } from "@crumbs/css/style"
+import { recipe } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme"
 
 export const button = recipe({
@@ -293,8 +293,8 @@ export const button = recipe({
 Resolve the themed recipe once, then select explicit state in component code:
 
 ```tsx
-import type { NativeRecipeProps } from "@crumbs/css/style"
-import { createRecipeResolver, useThemedStyles } from "@crumbs/css/theme"
+import type { NativeRecipeProps } from "@opsydyn/crumbs-css/style"
+import { createRecipeResolver, useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { useMemo } from "react"
 import { Pressable } from "react-native"
 import * as s from "./button.css"
@@ -337,20 +337,20 @@ React Native's normal style-array merge semantics.
 Unsupported browser CSS features fail the transform with actionable diagnostics:
 
 ```txt
-@crumbs/css does not support @media rules in React Native styles.
+@opsydyn/crumbs-css does not support @media rules in React Native styles.
 ```
 
 Use component code, dimensions, or platform hooks to choose explicit native style
 exports instead.
 
 ```txt
-@crumbs/css does not support @keyframes rules in React Native styles.
+@opsydyn/crumbs-css does not support @keyframes rules in React Native styles.
 ```
 
 Use React Native animation APIs instead.
 
 ```txt
-@crumbs/css does not support selectors, global styles, or pseudo classes in React Native styles.
+@opsydyn/crumbs-css does not support selectors, global styles, or pseudo classes in React Native styles.
 ```
 
 Use explicit exports or `styleVariants`, then select styles from component props or
@@ -375,7 +375,7 @@ config.transformer = {
 Strict diagnostics include the dropped declaration, export name, and source file:
 
 ```txt
-@crumbs/css dropped "transition: all 0.3s" while transforming export "link" in fixtures/unsupported-declaration.css.ts.
+@opsydyn/crumbs-css dropped "transition: all 0.3s" while transforming export "link" in fixtures/unsupported-declaration.css.ts.
 ```
 
 For one-off checks, set `CRUMBS_CSS_STRICT=1` before running Metro.
@@ -395,7 +395,7 @@ JSON for future CI capture.
 
 ## Verification
 
-Before shipping `@crumbs/css` changes, run:
+Before shipping `@opsydyn/crumbs-css` changes, run:
 
 ```sh
 cd packages/css

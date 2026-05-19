@@ -1,10 +1,10 @@
 import { describe, expect, it } from "bun:test"
-import type { NativeTheme, NativeThemeValue } from "@crumbs/css/style"
+import type { NativeTheme, NativeThemeValue } from "@opsydyn/crumbs-css/style"
 import {
   createThemeTokenReference,
   type NativeThemeTokenReference,
   resolveThemeTokens,
-} from "@crumbs/css/theme"
+} from "@opsydyn/crumbs-css/theme"
 import fc from "fast-check"
 
 type StyleEntry = false | null | Record<string, unknown> | ReadonlyArray<StyleEntry> | undefined

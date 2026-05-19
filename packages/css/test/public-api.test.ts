@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test"
-import * as rootApi from "@crumbs/css"
-import * as styleApi from "@crumbs/css/style"
-import * as themeApi from "@crumbs/css/theme"
+import * as rootApi from "@opsydyn/crumbs-css"
+import * as styleApi from "@opsydyn/crumbs-css/style"
+import * as themeApi from "@opsydyn/crumbs-css/theme"
 
 function namedApiKeys(api: object): ReadonlyArray<string> {
   return Object.keys(api)
@@ -9,7 +9,7 @@ function namedApiKeys(api: object): ReadonlyArray<string> {
     .sort()
 }
 
-describe("@crumbs/css public API contract", () => {
+describe("@opsydyn/crumbs-css public API contract", () => {
   it("keeps the style subpath focused on css.ts authoring APIs", () => {
     expect(namedApiKeys(styleApi)).toEqual([
       "NativeRecipeClassType",

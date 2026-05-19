@@ -20,7 +20,7 @@ function captureWarnings(run: () => void): ReadonlyArray<string> {
   return warnings
 }
 
-describe("@crumbs/css diagnostics", () => {
+describe("@opsydyn/crumbs-css diagnostics", () => {
   it("codes unsupported media compatibility errors", () => {
     expect(() =>
       assertNativeCssCompatibility("@media (min-width: 600px) { .a { flex: 1; } }"),

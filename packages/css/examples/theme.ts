@@ -1,4 +1,4 @@
-import { createTheme, createThemeContract } from "@crumbs/css/style"
+import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
 
 export const vars = createThemeContract({
   color: {

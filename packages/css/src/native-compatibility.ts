@@ -19,14 +19,14 @@ export function assertNativeCssCompatibility(css: string): void {
   if (atRule?.[1] === "media") {
     throw new NativeStylesCompatibilityError(
       NativeStylesDiagnosticCode.UnsupportedMedia,
-      "@crumbs/css does not support @media rules in React Native styles. " +
+      "@opsydyn/crumbs-css does not support @media rules in React Native styles. " +
         "Move responsive branching into component code and choose explicit native style exports.",
     )
   }
   if (atRule !== null) {
     throw new NativeStylesCompatibilityError(
       NativeStylesDiagnosticCode.UnsupportedAtRule,
-      `@crumbs/css does not support @${atRule[1]} rules in React Native styles. ` +
+      `@opsydyn/crumbs-css does not support @${atRule[1]} rules in React Native styles. ` +
         "Use React Native runtime APIs or explicit component state instead.",
     )
   }
@@ -35,7 +35,7 @@ export function assertNativeCssCompatibility(css: string): void {
   if (unsupportedSelector !== null) {
     throw new NativeStylesCompatibilityError(
       NativeStylesDiagnosticCode.UnsupportedSelector,
-      "@crumbs/css does not support selectors, global styles, or pseudo classes in React Native styles. " +
+      "@opsydyn/crumbs-css does not support selectors, global styles, or pseudo classes in React Native styles. " +
         `Unsupported selector: "${unsupportedSelector}". ` +
         "Split stateful or nested styles into explicit style exports and select them from component props.",
     )

@@ -60,7 +60,7 @@ function createPackedConsumer(): string {
   }
   const tarball = resolve(tempRoot, tarballName)
 
-  const packageRoot = resolve(tempRoot, "consumer", "node_modules", "@crumbs", "css")
+  const packageRoot = resolve(tempRoot, "consumer", "node_modules", "@opsydyn", "crumbs-css")
   mkdirSync(packageRoot, { recursive: true })
   run(["tar", "-xzf", tarball, "--strip-components=1", "-C", packageRoot], tempRoot)
 
@@ -80,11 +80,11 @@ function createPackedConsumer(): string {
 }
 
 const consumerTypeSource = `
-  import { NativeStylesDiagnosticCode } from "@crumbs/css";
-  import { createTheme, createThemeContract, type NativeRecipeProps, recipe } from "@crumbs/css/style";
-  import { createRecipeResolver, resolveThemeTokens } from "@crumbs/css/theme";
-  import { withNativeStyles } from "@crumbs/css/metro-plugin";
-  import { transformCssTsToStyleSheet } from "@crumbs/css/dist/transformer";
+  import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
+  import { createTheme, createThemeContract, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
+  import { createRecipeResolver, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
+  import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
+  import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
 
   const vars = createThemeContract({
     color: {
@@ -147,10 +147,10 @@ function writeConsumerTsconfig(
   )
 }
 
-describe("@crumbs/css packed consumer contract", () => {
+describe("@opsydyn/crumbs-css packed consumer contract", () => {
   it("ships only the compiled npm surface and can be consumed outside the monorepo", () => {
     const consumerRoot = createPackedConsumer()
-    const packageRoot = resolve(consumerRoot, "node_modules", "@crumbs", "css")
+    const packageRoot = resolve(consumerRoot, "node_modules", "@opsydyn", "crumbs-css")
 
     expect(existsSync(resolve(packageRoot, "dist", "index.mjs"))).toBe(true)
     expect(existsSync(resolve(packageRoot, "dist", "index.cjs"))).toBe(true)
@@ -165,8 +165,10 @@ describe("@crumbs/css packed consumer contract", () => {
     const packedPackageJson = JSON.parse(
       readFileSync(resolve(packageRoot, "package.json"), "utf8"),
     ) as {
+      readonly name: string
       readonly private?: boolean
     }
+    expect(packedPackageJson.name).toBe("@opsydyn/crumbs-css")
     expect(packedPackageJson.private).not.toBe(true)
 
     writeFileSync(
@@ -177,11 +179,11 @@ describe("@crumbs/css packed consumer contract", () => {
     writeFileSync(
       resolve(consumerRoot, "runtime.cjs"),
       `
-        const root = require("@crumbs/css");
-        const style = require("@crumbs/css/style");
-        const theme = require("@crumbs/css/theme");
-        const metro = require("@crumbs/css/metro-plugin");
-        const transformer = require("@crumbs/css/dist/transformer");
+        const root = require("@opsydyn/crumbs-css");
+        const style = require("@opsydyn/crumbs-css/style");
+        const theme = require("@opsydyn/crumbs-css/theme");
+        const metro = require("@opsydyn/crumbs-css/metro-plugin");
+        const transformer = require("@opsydyn/crumbs-css/dist/transformer");
 
         if (typeof root.withNativeStyles !== "function") throw new Error("missing root withNativeStyles");
         if (typeof style.createThemeContract !== "function") throw new Error("missing style createThemeContract");
@@ -195,11 +197,11 @@ describe("@crumbs/css packed consumer contract", () => {
     writeFileSync(
       resolve(consumerRoot, "runtime.mjs"),
       `
-        import { NativeStylesDiagnosticCode } from "@crumbs/css";
-        import { createThemeContract } from "@crumbs/css/style";
-        import { createRecipeResolver } from "@crumbs/css/theme";
-        import { withNativeStyles } from "@crumbs/css/metro-plugin";
-        import { transformCssTsToStyleSheet } from "@crumbs/css/dist/transformer";
+        import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
+        import { createThemeContract } from "@opsydyn/crumbs-css/style";
+        import { createRecipeResolver } from "@opsydyn/crumbs-css/theme";
+        import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
+        import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
 
         if (typeof NativeStylesDiagnosticCode.UnsupportedSelector !== "string") throw new Error("missing root diagnostic code");
         if (typeof createThemeContract !== "function") throw new Error("missing style createThemeContract");

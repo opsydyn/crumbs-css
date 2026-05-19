@@ -8,7 +8,7 @@ import {
   type NativeThemeValue,
   type ThemeContract,
   type ThemeContractInput,
-} from "@crumbs/css/style"
+} from "@opsydyn/crumbs-css/style"
 import fc from "fast-check"
 
 type ContractNode = {

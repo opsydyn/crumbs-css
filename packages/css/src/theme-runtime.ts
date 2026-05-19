@@ -54,7 +54,7 @@ export function ThemeProvider<TContract extends Record<string, unknown>>({
 export function useTheme<TContract extends Record<string, unknown>>(): NativeTheme<TContract> {
   const theme = use(NativeThemeContext)
   if (theme === null) {
-    throw new Error("useTheme must be used within a ThemeProvider from @crumbs/css/theme")
+    throw new Error("useTheme must be used within a ThemeProvider from @opsydyn/crumbs-css/theme")
   }
   return theme as NativeTheme<TContract>
 }

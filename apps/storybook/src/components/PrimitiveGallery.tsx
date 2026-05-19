@@ -1,4 +1,4 @@
-import { useThemedStyles } from "@crumbs/css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import * as Accordion from "@rn-primitives/accordion"
 import * as AlertDialog from "@rn-primitives/alert-dialog"
 import * as AspectRatio from "@rn-primitives/aspect-ratio"

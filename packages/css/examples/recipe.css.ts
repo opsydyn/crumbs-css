@@ -1,4 +1,4 @@
-import { recipe } from "@crumbs/css/style"
+import { recipe } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme"
 
 export const button = recipe({

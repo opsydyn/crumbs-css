@@ -1,6 +1,6 @@
-# @crumbs/css native compatibility matrix
+# @opsydyn/crumbs-css native compatibility matrix
 
-`@crumbs/css` intentionally implements a React Native subset of
+`@opsydyn/crumbs-css` intentionally implements a React Native subset of
 vanilla-extract authoring. It is not a browser CSS runtime.
 
 ## Supported
@@ -14,7 +14,7 @@ vanilla-extract authoring. It is not a browser CSS runtime.
 | `createRecipeResolver(recipe)` | Supported | Creates a typed component-facing selector that delegates to `resolveRecipeStyle` so ordering, fallback behavior, and diagnostics stay centralized. |
 | React Native view/text/image style props | Supported | Converted through `css-to-react-native` where needed. |
 | numeric values | Supported | Preserved as native numbers. |
-| `@crumbs/css/style` typed helpers | Supported | `viewStyle`, `textStyle`, and `imageStyle` accept token-aware React Native style inputs and avoid userland `as unknown as TextStyle` casts. |
+| `@opsydyn/crumbs-css/style` typed helpers | Supported | `viewStyle`, `textStyle`, and `imageStyle` accept token-aware React Native style inputs and avoid userland `as unknown as TextStyle` casts. |
 | `createThemeContract` / `createTheme` | Supported | Produces exact typed theme contracts and token maps. |
 | `var(--crumbs-...)` native theme tokens | Supported | Serialized as `crumbs.css.theme-token` references. |
 | `ThemeProvider` / `useThemedStyles` | Supported | Resolves token references against the active native theme. |
@@ -46,7 +46,7 @@ Strict diagnostics also turn dropped individual declarations into hard
 `NativeStylesDeclarationError` failures:
 
 ```txt
-@crumbs/css dropped "transition: all 0.3s" while transforming export "link" in fixtures/unsupported-declaration.css.ts.
+@opsydyn/crumbs-css dropped "transition: all 0.3s" while transforming export "link" in fixtures/unsupported-declaration.css.ts.
 ```
 
 ## Diagnostic codes
@@ -174,7 +174,7 @@ Create a resolver for the themed recipe, then select recipe styles from
 component state:
 
 ```tsx
-import { createRecipeResolver, useThemedStyles } from "@crumbs/css/theme"
+import { createRecipeResolver, useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { useMemo } from "react"
 import * as s from "./button.css"
 

@@ -1,4 +1,4 @@
-import { useThemedStyles } from "@crumbs/css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { ScrollView, Text, View } from "react-native"
 import { labelOfThemeMode } from "../styles/theme"
 import { PrimitiveGallery } from "./PrimitiveGallery"

@@ -1,6 +1,6 @@
 const { getDefaultConfig } = require("expo/metro-config")
 const { withStorybook } = require("@storybook/react-native/metro/withStorybook")
-const { withNativeStyles } = require("@crumbs/css/metro-plugin")
+const { withNativeStyles } = require("@opsydyn/crumbs-css/metro-plugin")
 const path = require("node:path")
 
 const projectRoot = __dirname

@@ -1,4 +1,4 @@
-import { textStyle, viewStyle } from "@crumbs/css/style"
+import { textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
 import { vars } from "../styles/theme"
 
 export const screen = viewStyle({

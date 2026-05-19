@@ -1,4 +1,4 @@
-import { ThemeProvider } from "@crumbs/css/theme"
+import { ThemeProvider } from "@opsydyn/crumbs-css/theme"
 import { StatusBar } from "expo-status-bar"
 import { createContext, useContext, useState, type ReactNode } from "react"
 import {

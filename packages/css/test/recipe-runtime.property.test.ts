@@ -4,8 +4,8 @@ import type {
   NativeRecipeSelection,
   NativeRecipeVariantsConfig,
   NativeStyle,
-} from "@crumbs/css/style"
-import { createRecipeResolver, resolveRecipeStyle } from "@crumbs/css/theme"
+} from "@opsydyn/crumbs-css/style"
+import { createRecipeResolver, resolveRecipeStyle } from "@opsydyn/crumbs-css/theme"
 import fc from "fast-check"
 
 type SelectionValue = boolean | string

@@ -497,7 +497,7 @@ function isRecipeClassRef(value: unknown): value is { readonly className: string
 // Bust the Metro transform cache when the transformer itself is rebuilt.
 export function getCacheKey(): string {
   return createHash("md5")
-    .update("@crumbs/css")
+    .update("@opsydyn/crumbs-css")
     .update(readFileSync(__filename))
     .digest("hex")
 }

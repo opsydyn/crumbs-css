@@ -1,4 +1,4 @@
-import { styleVariants } from "@crumbs/css/style"
+import { styleVariants } from "@opsydyn/crumbs-css/style"
 import { vars } from "./themed.css"
 
 export const button = styleVariants({

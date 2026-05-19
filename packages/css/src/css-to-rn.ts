@@ -321,7 +321,7 @@ function formatDroppedDeclarationMessage(
   const location = filePath === undefined ? "" : ` in ${filePath}`
 
   return (
-    `@crumbs/css dropped "${declaration.prop}: ${declaration.value}" ` +
+    `@opsydyn/crumbs-css dropped "${declaration.prop}: ${declaration.value}" ` +
     `while transforming ${target}${location}. ${declaration.reason}.`
   )
 }
