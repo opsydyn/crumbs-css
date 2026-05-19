@@ -44,7 +44,7 @@ jobs:
             ${{ runner.os }}-bun-
 
       - name: Install workspace dependencies
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Build and validate release
         run: bun run release:check

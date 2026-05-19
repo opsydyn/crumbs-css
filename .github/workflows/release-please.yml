@@ -58,7 +58,7 @@ jobs:
 
       - name: Install workspace dependencies
         if: ${{ steps.release.outputs['packages/css--release_created'] == 'true' && env.NPM_TOKEN != '' }}
-        run: bun install --frozen-lockfile
+        run: bun install
 
       - name: Validate release commit
         if: ${{ steps.release.outputs['packages/css--release_created'] == 'true' && env.NPM_TOKEN != '' }}
