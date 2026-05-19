@@ -54,7 +54,7 @@ jobs:
         working-directory: packages/css
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance
+        run: npm publish --access public --provenance --tag alpha
 
       - name: Note missing NPM token
         if: ${{ env.NPM_TOKEN == '' }}
