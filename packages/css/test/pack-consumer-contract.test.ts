@@ -157,6 +157,7 @@ describe("@crumbs/css packed consumer contract", () => {
     expect(existsSync(resolve(packageRoot, "dist", "index.d.mts"))).toBe(true)
     expect(existsSync(resolve(packageRoot, "dist", "index.d.cts"))).toBe(true)
     expect(existsSync(resolve(packageRoot, "dist", "transformer.cjs"))).toBe(true)
+    expect(existsSync(resolve(packageRoot, "LICENSE"))).toBe(true)
     expect(existsSync(resolve(packageRoot, "src"))).toBe(false)
     expect(existsSync(resolve(packageRoot, "test"))).toBe(false)
     expect(existsSync(resolve(packageRoot, "fixtures"))).toBe(false)

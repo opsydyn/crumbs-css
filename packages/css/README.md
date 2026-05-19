@@ -19,14 +19,14 @@ the supported matrix and hard diagnostics.
 Build the transformer before starting Expo/Metro:
 
 ```sh
-cd packages/native-styles
+cd packages/css
 bun run build
 ```
 
 In the native app, the Metro config should point at the built transformer:
 
 ```js
-const { withNativeStyles } = require("@crumbs/css/dist/metro-plugin")
+const { withNativeStyles } = require("@crumbs/css/metro-plugin")
 
 module.exports = withNativeStyles(config)
 ```
@@ -36,7 +36,7 @@ native app uses:
 
 ```json
 {
-  "dev": "cd ../../packages/native-styles && bun run build && cd ../../apps/native && expo start --clear"
+  "dev": "cd ../../packages/css && bun run build && cd ../../apps/native && expo start --clear"
 }
 ```
 
@@ -395,10 +395,10 @@ JSON for future CI capture.
 
 ## Verification
 
-Before shipping native-styles changes, run:
+Before shipping `@crumbs/css` changes, run:
 
 ```sh
-cd packages/native-styles
+cd packages/css
 bun test
 bun run typecheck
 bun run build
