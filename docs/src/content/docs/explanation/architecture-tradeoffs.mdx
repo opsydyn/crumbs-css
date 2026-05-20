@@ -1,0 +1,22 @@
+---
+title: Architecture tradeoffs
+description: Current architecture choices and why the package intentionally stops short of full browser CSS parity.
+---
+
+`@opsydyn/crumbs-css` makes a few deliberate tradeoffs:
+
+## Metro-transform first
+
+The package leans on Metro instead of inventing a browser-like runtime CSS engine for React Native.
+
+## Explicit state over selector magic
+
+Interactive state is selected from component props and callbacks, not inferred from pseudo classes.
+
+## Native subset, not browser emulation
+
+Unsupported features are rejected or dropped with diagnostics instead of being partially emulated.
+
+## Familiar API, native rules
+
+The package borrows the shape of vanilla-extract because that authoring model is productive, but it does not claim browser parity where React Native has no equivalent primitive.

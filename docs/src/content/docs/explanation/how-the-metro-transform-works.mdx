@@ -1,0 +1,14 @@
+---
+title: How the Metro transform works
+description: A high-level explanation of how .css.ts authoring becomes native style output.
+---
+
+At a high level:
+
+1. author `.css.ts` with helpers from `@opsydyn/crumbs-css/style`
+2. Metro sees the file through `withNativeStyles`
+3. the transformer evaluates the vanilla-extract-shaped module
+4. compatible declarations are converted into native style payloads
+5. the transformed module exports React Native-friendly values
+
+This is why Metro configuration is mandatory. The package is not a runtime CSS interpreter; it is a compiler and runtime resolution layer built around Metro.

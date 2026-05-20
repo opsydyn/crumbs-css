@@ -1,0 +1,38 @@
+---
+title: Enable strict diagnostics
+description: Turn dropped declarations into hard Metro failures with file and export context.
+---
+
+By default, some unsupported declarations are dropped on a best-effort basis. Use strict diagnostics when you want CI or local development to fail immediately.
+
+## Metro config
+
+```js
+config.transformer = {
+  ...(config.transformer ?? {}),
+  nativeStyles: {
+    strictDiagnostics: true,
+  },
+}
+```
+
+## Environment variable
+
+For one-off checks:
+
+```sh
+CRUMBS_CSS_STRICT=1 expo start --clear
+```
+
+## What changes in strict mode
+
+Dropped declarations become hard failures with export and file context, for example:
+
+```txt
+@opsydyn/crumbs-css dropped "transition: all 0.3s" while transforming export "link" in src/button.css.ts.
+```
+
+## Related reference
+
+- [Diagnostics](/reference/diagnostics/)
+- [Compatibility](/reference/compatibility/)

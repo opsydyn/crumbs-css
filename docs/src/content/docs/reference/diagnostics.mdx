@@ -1,0 +1,32 @@
+---
+title: Diagnostics
+description: Stable diagnostic codes and the kinds of transform/runtime failures they represent.
+---
+
+Diagnostic codes are exported from the package root as `NativeStylesDiagnosticCode`. Tooling should key on codes rather than full message text.
+
+## Codes
+
+| Code | Meaning |
+| --- | --- |
+| `CRUMBS_CSS_UNSUPPORTED_MEDIA` | A `.css.ts` file authored a CSS media rule. |
+| `CRUMBS_CSS_UNSUPPORTED_AT_RULE` | A `.css.ts` file authored another browser-only at-rule. |
+| `CRUMBS_CSS_UNSUPPORTED_SELECTOR` | A `.css.ts` file authored selectors, pseudo classes, globals, or nested selectors. |
+| `CRUMBS_CSS_DROPPED_DECLARATION` | A declaration could not be converted to a React Native style prop. |
+| `CRUMBS_CSS_CSS_VARIABLE_DROPPED` | A browser CSS variable was used instead of a native theme token or TypeScript value. |
+| `CRUMBS_CSS_PARTIAL_RECIPE_PAYLOAD` | Runtime received a partial transformed recipe and used the base fallback. |
+| `CRUMBS_CSS_INVALID_RECIPE_VARIANT` | Runtime received a selected recipe variant value that is not declared. |
+
+## Message shape
+
+Diagnostics are formatted like:
+
+```txt
+[crumbs-css:CRUMBS_CSS_UNSUPPORTED_MEDIA] ...
+```
+
+## Strict diagnostics
+
+Enable strict diagnostics when you want dropped declarations to fail instead of being skipped:
+
+- [Enable strict diagnostics](/how-to/enable-strict-diagnostics/)

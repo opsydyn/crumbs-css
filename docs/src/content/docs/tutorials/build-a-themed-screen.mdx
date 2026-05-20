@@ -1,0 +1,93 @@
+---
+title: Build a themed screen
+description: Create a theme contract, apply a theme, and resolve themed styles at runtime.
+---
+
+This tutorial adds a real theme contract and uses runtime token resolution in a screen component.
+
+## 1. Define a theme contract
+
+```ts
+import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
+
+export const vars = createThemeContract({
+  color: {
+    canvas: null,
+    text: null,
+  },
+  space: {
+    screen: null,
+  },
+})
+
+export const darkTheme = createTheme(vars, {
+  color: {
+    canvas: "#0a0a0a",
+    text: "#f5f5f5",
+  },
+  space: {
+    screen: 24,
+  },
+})
+```
+
+## 2. Use the contract in `.css.ts`
+
+```ts
+import { style } from "@opsydyn/crumbs-css/style"
+import { vars } from "./theme"
+
+export const screen = style({
+  backgroundColor: vars.color.canvas,
+  flex: 1,
+  justifyContent: "center",
+  padding: vars.space.screen,
+})
+
+export const title = style({
+  color: vars.color.text,
+  fontSize: 24,
+  fontWeight: 700,
+})
+```
+
+## 3. Provide the theme
+
+```tsx
+import { ThemeProvider } from "@opsydyn/crumbs-css/theme"
+import { darkTheme } from "./theme"
+
+export function App({ children }) {
+  return <ThemeProvider theme={darkTheme}>{children}</ThemeProvider>
+}
+```
+
+## 4. Resolve the themed styles
+
+```tsx
+import { Text, View } from "react-native"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import * as s from "./screen.css"
+
+export function Screen() {
+  const styles = useThemedStyles(s)
+
+  return (
+    <View style={styles.screen}>
+      <Text style={styles.title}>Themed screen</Text>
+    </View>
+  )
+}
+```
+
+## What you learned
+
+- `createThemeContract` defines the shape and token names
+- `createTheme` creates concrete values
+- `ThemeProvider` exposes the active theme
+- `useThemedStyles` resolves token references before render
+
+Next:
+
+- [Use themes](/how-to/use-themes/)
+- [Build your first button recipe](/tutorials/build-your-first-button-recipe/)

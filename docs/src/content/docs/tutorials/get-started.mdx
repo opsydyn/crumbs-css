@@ -1,0 +1,82 @@
+---
+title: Get started
+description: Install @opsydyn/crumbs-css in an Expo app and get the Metro transformer working.
+---
+
+This tutorial gets you to the first successful setup in an Expo + Metro app.
+
+## 1. Install the package
+
+```sh
+bun add @opsydyn/crumbs-css
+```
+
+You also need `react`, `react-native`, and `metro`, which Expo already provides.
+
+## 2. Wrap Metro
+
+In `metro.config.js`:
+
+```js
+const { getDefaultConfig } = require("expo/metro-config")
+const { withNativeStyles } = require("@opsydyn/crumbs-css/metro-plugin")
+
+const config = getDefaultConfig(__dirname)
+
+module.exports = withNativeStyles(config)
+```
+
+## 3. Add a `.css.ts` module
+
+Create `app/styles/screen.css.ts`:
+
+```ts
+import { style } from "@opsydyn/crumbs-css/style"
+
+export const screen = style({
+  alignItems: "center",
+  flex: 1,
+  justifyContent: "center",
+  padding: 24,
+})
+
+export const title = style({
+  color: "#c8aa6e",
+  fontSize: 24,
+  fontWeight: 700,
+})
+```
+
+## 4. Use the compiled styles
+
+```tsx
+import { Text, View } from "react-native"
+import * as s from "./styles/screen.css"
+
+export function Screen() {
+  return (
+    <View style={s.screen}>
+      <Text style={s.title}>crumbs-css is wired up</Text>
+    </View>
+  )
+}
+```
+
+## 5. Start Expo
+
+```sh
+expo start --clear
+```
+
+If Metro starts cleanly and the screen renders, the transform pipeline is working.
+
+## What you learned
+
+- the package is installed like a normal dependency
+- Metro must be wrapped with `withNativeStyles`
+- `.css.ts` authoring compiles into native style output at transform time
+
+Next:
+
+- [Build a themed screen](/tutorials/build-a-themed-screen/)
+- [Configure Metro](/how-to/configure-metro/)

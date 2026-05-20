@@ -1,0 +1,43 @@
+---
+title: Use typed helpers
+description: Apply viewStyle, textStyle, and imageStyle when a style targets one React Native primitive.
+---
+
+Use the narrowest helper when the style is intended for a single primitive:
+
+- `viewStyle`
+- `textStyle`
+- `imageStyle`
+
+## Example
+
+```ts
+import { imageStyle, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
+
+export const panel = viewStyle({
+  padding: 24,
+})
+
+export const title = textStyle({
+  fontSize: 18,
+  fontWeight: "700",
+})
+
+export const crest = imageStyle({
+  height: 48,
+  resizeMode: "cover",
+  width: 48,
+})
+```
+
+## Why use them
+
+They improve type safety for native styles:
+
+- obvious cross-kind props fail earlier
+- theme tokens remain supported
+- intent is clearer to readers and tooling
+
+## When not to use them
+
+Use `style` when a single export intentionally mixes properties across style kinds or you want a generic native style surface.

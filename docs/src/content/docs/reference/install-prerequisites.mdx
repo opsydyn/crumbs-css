@@ -1,0 +1,28 @@
+---
+title: Install prerequisites
+description: What consumers need in place before @opsydyn/crumbs-css can work.
+---
+
+## Required peer dependencies
+
+- `react`
+- `react-native`
+- `metro`
+
+Expo apps already satisfy the Metro side of this setup.
+
+## Required app setup
+
+- Metro must be wrapped with `withNativeStyles`
+- `.css.ts` authoring modules should import from `@opsydyn/crumbs-css/style`
+- themed styles should be resolved before render
+
+## Recommended environment
+
+- Expo or React Native app using Metro
+- clean Metro cache after configuration changes
+- Storybook or Expo Dev Client for visual integration checks
+
+## Current scope
+
+This package is documented for React Native consumers first. Browser CSS runtime parity is out of scope.

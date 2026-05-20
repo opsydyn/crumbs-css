@@ -1,0 +1,14 @@
+---
+title: Why themes resolve at runtime
+description: Why themed style exports carry token references until component render time.
+---
+
+Theme contracts define stable token identities, but the active theme is a runtime concern. That is why themed exports intentionally carry token references until they are resolved against the active theme.
+
+This design lets the package:
+
+- keep theme contracts typed
+- share the same authored style module across theme values
+- defer concrete value selection until the app chooses a theme
+
+The consequence is explicit runtime resolution. Consumers must use `ThemeProvider` plus `useThemedStyles` or one of the lower-level token resolution helpers.

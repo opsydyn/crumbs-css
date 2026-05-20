@@ -1,0 +1,75 @@
+---
+title: Build your first button recipe
+description: Create a reusable button surface with explicit native state variants.
+---
+
+This tutorial creates a reusable button using `recipe` and `createRecipeResolver`.
+
+## 1. Define the recipe
+
+```ts
+import { recipe } from "@opsydyn/crumbs-css/style"
+
+export const button = recipe({
+  base: {
+    alignItems: "center",
+    borderRadius: 8,
+    padding: 12,
+  },
+  defaultVariants: {
+    pressed: false,
+    tone: "primary",
+  },
+  variants: {
+    pressed: {
+      false: {},
+      true: { opacity: 0.82 },
+    },
+    tone: {
+      primary: { backgroundColor: "#c8aa6e" },
+      danger: { backgroundColor: "#9f2f25" },
+    },
+  },
+})
+```
+
+## 2. Resolve the themed recipe once
+
+```tsx
+import { createRecipeResolver, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { useMemo } from "react"
+import * as s from "./button.css"
+
+export function Button() {
+  const styles = useThemedStyles(s)
+  const resolveButtonStyle = useMemo(() => createRecipeResolver(styles.button), [styles.button])
+
+  return null
+}
+```
+
+## 3. Select state from component code
+
+```tsx
+import { Pressable } from "react-native"
+
+export function Button() {
+  const styles = useThemedStyles(s)
+  const resolveButtonStyle = useMemo(() => createRecipeResolver(styles.button), [styles.button])
+
+  return <Pressable style={({ pressed }) => resolveButtonStyle({ pressed, tone: "primary" })} />
+}
+```
+
+## Why this pattern matters
+
+React Native has no CSS pseudo-class selector matching. `recipe` keeps the state model explicit and makes merge order predictable:
+
+1. base
+2. selected variants in author-defined order
+3. matching compound variants
+
+Next:
+
+- [Use recipes and state variants](/how-to/use-recipes-and-state-variants/)
+- [Compatibility](/reference/compatibility/)

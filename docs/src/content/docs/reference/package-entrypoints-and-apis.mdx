@@ -1,0 +1,50 @@
+---
+title: Package entrypoints and APIs
+description: Public package entrypoints and what each one is for.
+---
+
+## Entrypoints
+
+### `@opsydyn/crumbs-css`
+
+Use the package root for:
+
+- `NativeStylesDiagnosticCode`
+- `withNativeStyles`
+
+### `@opsydyn/crumbs-css/style`
+
+Use this entrypoint in `.css.ts` authoring modules for:
+
+- `style`
+- `styleVariants`
+- `recipe`
+- `createThemeContract`
+- `createTheme`
+- `viewStyle`
+- `textStyle`
+- `imageStyle`
+- type exports such as `NativeRecipeProps`
+
+### `@opsydyn/crumbs-css/theme`
+
+Use this entrypoint in runtime/component code for:
+
+- `ThemeProvider`
+- `useTheme`
+- `useThemedStyle`
+- `useThemedStyles`
+- `resolveThemeTokens`
+- `resolveThemeStyles`
+- `resolveRecipeStyle`
+- `createRecipeResolver`
+
+### `@opsydyn/crumbs-css/metro-plugin`
+
+Use this entrypoint in `metro.config.js` for:
+
+- `withNativeStyles`
+
+### `@opsydyn/crumbs-css/dist/transformer`
+
+Advanced/debugging surface for direct transformer access. Most consumers should not import this directly in app code.

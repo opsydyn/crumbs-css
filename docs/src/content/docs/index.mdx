@@ -1,40 +1,43 @@
 ---
-title: Welcome to Starlight
-description: Get started building your docs site with Starlight.
-template: splash # Remove or comment out this line to display the site sidebar on this page.
+title: crumbs-css
+description: React Native style authoring with a familiar vanilla-extract-shaped API.
+template: splash
 hero:
-  tagline: Congrats on setting up a new Starlight project!
+  tagline: Metro-transform-based styling, typed theme contracts, and explicit native state patterns for React Native apps.
   image:
     file: ../../assets/crumbs-css-logo.png
   actions:
-    - text: Example Guide
-      link: /guides/example/
+    - text: Start the tutorial
+      link: /tutorials/get-started/
       icon: right-arrow
-    - text: Read the Starlight docs
-      link: https://starlight.astro.build
+    - text: Read the package quickstart
+      link: https://github.com/opsydyn/crumbs-css/blob/main/packages/css/README.md
       icon: external
       variant: minimal
 ---
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-## Next steps
+## Documentation map
+
+This site follows the Diataxis model:
+
+- **Tutorials** teach the package by building something real.
+- **How-to guides** solve one task at a time.
+- **Reference** defines the package contract and current guarantees.
+- **Explanation** covers architecture and tradeoffs.
 
 <CardGrid stagger>
-	<Card title="Update content" icon="pencil">
-		Edit `src/content/docs/index.mdx` to see this page change.
-	</Card>
-	<Card title="Change page layout" icon="document">
-		Delete `template: splash` in `src/content/docs/index.mdx` to display a
-		sidebar on this page.
-	</Card>
-	<Card title="Add new content" icon="add-document">
-		Add Markdown or MDX files to `src/content/docs` to create new pages.
-	</Card>
-	<Card title="Configure your site" icon="setting">
-		Edit your `sidebar` and other config in `astro.config.mjs`.
-	</Card>
-	<Card title="Read the docs" icon="open-book">
-		Learn more in [the Starlight Docs](https://starlight.astro.build/).
-	</Card>
+  <Card title="Tutorials" icon="open-book">
+    Start with a working Expo + Metro setup, then build a themed screen and a button recipe.
+  </Card>
+  <Card title="How-to Guides" icon="set-square">
+    Jump straight to Metro setup, themes, typed helpers, recipes, strict diagnostics, and Storybook.
+  </Card>
+  <Card title="Reference" icon="document">
+    Look up entrypoints, compatibility, diagnostics, runtime guarantees, and install prerequisites.
+  </Card>
+  <Card title="Explanation" icon="pencil">
+    Understand why the package is Metro-transform-based, how runtime theme resolution works, and where it intentionally stops short of browser CSS.
+  </Card>
 </CardGrid>

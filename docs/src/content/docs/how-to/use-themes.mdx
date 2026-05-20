@@ -1,0 +1,51 @@
+---
+title: Use themes
+description: Define theme contracts, provide themes, and resolve tokens in components.
+---
+
+## Define a contract
+
+Use `createThemeContract` to define stable token names:
+
+```ts
+const vars = createThemeContract({
+  color: {
+    text: null,
+  },
+})
+```
+
+## Create a theme
+
+Use `createTheme` to provide concrete values:
+
+```ts
+const darkTheme = createTheme(vars, {
+  color: {
+    text: "#f5f5f5",
+  },
+})
+```
+
+## Provide the active theme
+
+Wrap the relevant subtree with `ThemeProvider`:
+
+```tsx
+<ThemeProvider theme={darkTheme}>{children}</ThemeProvider>
+```
+
+## Resolve themed styles
+
+Use `useThemedStyles`, `useThemedStyle`, `resolveThemeStyles`, or `resolveThemeTokens` before render. Raw themed exports intentionally contain token references until runtime resolution.
+
+## Common mistakes
+
+- using browser CSS variables like `var(--brand)` instead of a theme contract
+- reading themed style exports directly without resolving them
+- mixing “contract shape” and “concrete values” in the same module without clear naming
+
+## Related reference
+
+- [Runtime model and guarantees](/reference/runtime-model-and-guarantees/)
+- [Diagnostics](/reference/diagnostics/)

@@ -1,0 +1,37 @@
+---
+title: Runtime model and guarantees
+description: What the package guarantees today and how styles move from authoring time to render time.
+---
+
+## Current runtime model
+
+- `.css.ts` modules are transformed by Metro
+- authoring helpers come from `@opsydyn/crumbs-css/style`
+- themed style exports contain token references until runtime resolution
+- `ThemeProvider` and `useThemedStyles` resolve those tokens against the active theme
+
+## Current guarantees
+
+- React Native focused
+- Metro-transform-based
+- predictable recipe ordering
+- explicit state selection for interactive styles
+- stable diagnostic codes for tooling and CI
+
+## What it does not guarantee
+
+- browser CSS parity
+- global cascade
+- selector matching
+- CSS-only responsive behavior
+- CSS keyframe animations
+
+## Recipe ordering guarantee
+
+Resolved recipe arrays are ordered like this:
+
+1. base
+2. selected variants in author-defined order
+3. matching compound variants in array order
+
+Later entries override earlier ones using normal React Native style-array semantics.

@@ -1,0 +1,34 @@
+---
+title: Configure Metro
+description: Wrap Metro so crumbs-css can transform .css.ts modules for React Native.
+---
+
+## Expo app
+
+Use the default Expo Metro config and wrap it:
+
+```js
+const { getDefaultConfig } = require("expo/metro-config")
+const { withNativeStyles } = require("@opsydyn/crumbs-css/metro-plugin")
+
+const config = getDefaultConfig(__dirname)
+
+module.exports = withNativeStyles(config)
+```
+
+## Why this is required
+
+`@opsydyn/crumbs-css` compiles `.css.ts` files at Metro transform time. Without the wrapper, Metro will evaluate the authoring module as plain JavaScript instead of converting it into native style output.
+
+## When to clear Metro cache
+
+Use `expo start --clear` when:
+
+- you have changed Metro configuration
+- you are debugging stale `.css.ts` transform output
+- you have upgraded the package and want a clean transform pass
+
+## Related guides
+
+- [Get started](/tutorials/get-started/)
+- [Enable strict diagnostics](/how-to/enable-strict-diagnostics/)

@@ -6,9 +6,35 @@
 
 React Native style authoring with a familiar vanilla-extract-shaped API.
 
-Compiles `.css.ts` files to React Native `StyleSheet.create` output for Metro. Supports flat styles, composition, typed native style helpers, theme contracts, runtime theme resolution, and explicit state variants.
+Full consumer documentation lives in the Starlight docs workspace in this repo:
+[github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
 
-It is not a browser CSS runtime. See [COMPATIBILITY.md](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/COMPATIBILITY.md) for the supported property matrix and hard diagnostics.
+## What it is
+
+`@opsydyn/crumbs-css` compiles `.css.ts` modules into React Native style payloads at Metro transform time. It gives React Native apps a familiar authoring surface for:
+
+- `style`
+- `styleVariants`
+- `recipe`
+- `createThemeContract`
+- `createTheme`
+
+## Current guarantees
+
+- React Native focused, not a browser CSS runtime
+- Metro-transform based
+- Typed authoring helpers for view, text, and image styles
+- Runtime theme token resolution with `ThemeProvider` and `useThemedStyles`
+- Explicit state handling through `styleVariants` and `recipe`
+
+## Current limits
+
+- No browser cascade, selectors, globals, or pseudo classes
+- No CSS media queries or keyframes
+- No web vanilla-extract completeness where React Native has no equivalent
+
+See the full compatibility matrix in
+[COMPATIBILITY.md](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/COMPATIBILITY.md).
 
 ## Install
 
@@ -18,136 +44,69 @@ bun add @opsydyn/crumbs-css
 npm install @opsydyn/crumbs-css
 ```
 
-Peer dependencies: `react`, `react-native`, and `metro` (provided by Expo).
+Peer dependencies: `react`, `react-native`, and `metro`.
 
-## Metro setup
+## Minimal Metro setup
 
-Build the transformer before starting Expo/Metro:
-
-```sh
-cd node_modules/@opsydyn/crumbs-css && bun run build
-```
-
-Or add a prebuild step to your app's `package.json`:
-
-```json
-{
-  "scripts": {
-    "prebuild": "cd node_modules/@opsydyn/crumbs-css && bun run build",
-    "dev": "expo start --clear"
-  }
-}
-```
-
-In `metro.config.js`, wrap your config with `withNativeStyles`:
+For an Expo app, wrap the default Metro config:
 
 ```js
+const { getDefaultConfig } = require("expo/metro-config")
 const { withNativeStyles } = require("@opsydyn/crumbs-css/metro-plugin")
+
+const config = getDefaultConfig(__dirname)
 
 module.exports = withNativeStyles(config)
 ```
 
-The transformer cache key hashes the built transformer file so Metro invalidates stale `.css.ts` output when transformer behavior changes.
+The package ships with a pre-built transformer. Metro cache invalidation is based on the transformer file, so package updates invalidate stale `.css.ts` output automatically.
 
-## Author native styles
-
-Import from `@opsydyn/crumbs-css/style`, not the package root — this keeps Metro/plugin code out of `.css.ts` evaluation.
+## Minimal theme example
 
 ```ts
-import { style } from "@opsydyn/crumbs-css/style"
-
-export const screen = style({
-  flex: 1,
-  alignItems: "center",
-  justifyContent: "center",
-  padding: 24,
-})
-
-export const title = style({
-  color: "#c8aa6e",
-  fontSize: 28,
-  fontWeight: 700,
-  marginBottom: 8,
-})
-```
-
-Full example: [examples/basic.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/basic.css.ts)
-
-## Themes
-
-Create a contract and concrete themes in plain TypeScript:
-
-```ts
+// theme.ts
 import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
 
 export const vars = createThemeContract({
   color: {
-    accent: null,
     canvas: null,
     text: null,
-  },
-  space: {
-    screen: null,
   },
 })
 
 export const darkTheme = createTheme(vars, {
   color: {
-    accent: "#c8aa6e",
     canvas: "#0a0a0a",
     text: "#f5f5f5",
-  },
-  space: {
-    screen: 24,
   },
 })
 ```
 
-Use the contract in `.css.ts` files:
-
 ```ts
+// screen.css.ts
 import { style } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme"
 
 export const screen = style({
-  flex: 1,
   backgroundColor: vars.color.canvas,
-  padding: vars.space.screen,
+  flex: 1,
+  justifyContent: "center",
 })
 
 export const title = style({
-  color: vars.color.accent,
-  fontSize: 28,
+  color: vars.color.text,
+  fontSize: 24,
   fontWeight: 700,
 })
 ```
 
-Full examples: [examples/theme.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/theme.ts), [examples/themed.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/themed.css.ts)
-
-## Runtime resolution
-
-Wrap the app in `ThemeProvider`, then resolve imported style modules with `useThemedStyles`:
-
 ```tsx
-import { ThemeProvider } from "@opsydyn/crumbs-css/theme"
-import { Slot } from "expo-router"
-import { darkTheme } from "../styles/theme"
-
-export default function RootLayout() {
-  return (
-    <ThemeProvider theme={darkTheme}>
-      <Slot />
-    </ThemeProvider>
-  )
-}
-```
-
-```tsx
-import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { Text, View } from "react-native"
+import { darkTheme } from "./theme"
 import * as s from "./screen.css"
 
-export function Screen() {
+function Screen() {
   const styles = useThemedStyles(s)
 
   return (
@@ -156,190 +115,68 @@ export function Screen() {
     </View>
   )
 }
-```
 
-Raw themed `StyleSheet` entries intentionally contain token references. Always call `useThemedStyles`, `useThemedStyle`, `resolveThemeStyles`, or `resolveThemeTokens` before rendering themed styles.
-
-## Pressable variants
-
-React Native has no CSS pseudo-class selector matching. Use explicit variants and select them from component state:
-
-```ts
-import { style, styleVariants } from "@opsydyn/crumbs-css/style"
-import { vars } from "./theme"
-
-export const button = styleVariants({
-  default: {
-    backgroundColor: vars.color.accent,
-    borderRadius: 8,
-    paddingBottom: 10,
-    paddingLeft: 16,
-    paddingRight: 16,
-    paddingTop: 10,
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-})
-
-export const buttonLabel = style({
-  color: vars.color.canvas,
-  fontSize: 14,
-  fontWeight: 700,
-})
-```
-
-```tsx
-import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
-import { Pressable, Text } from "react-native"
-import * as s from "./button.css"
-
-export function Button() {
-  const styles = useThemedStyles(s)
-
+export function App() {
   return (
-    <Pressable style={({ pressed }) => [styles.button.default, pressed && styles.button.pressed]}>
-      <Text style={styles.buttonLabel}>Press me</Text>
-    </Pressable>
+    <ThemeProvider theme={darkTheme}>
+      <Screen />
+    </ThemeProvider>
   )
 }
 ```
 
-Full example: [examples/pressable-variants.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/pressable-variants.css.ts)
-
-## Typed native helpers
-
-Use `viewStyle`, `textStyle`, and `imageStyle` when a style targets a specific React Native primitive. Inputs are token-aware and catch cross-kind props at typecheck:
+## Minimal recipe example
 
 ```ts
-import { imageStyle, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
-import { vars } from "./theme"
-
-export const panel = viewStyle({
-  backgroundColor: vars.color.canvas,
-  padding: vars.space.screen,
-})
-
-export const title = textStyle({
-  color: vars.color.text,
-  fontSize: 18,
-  fontWeight: "700",
-})
-
-export const crest = imageStyle({
-  height: 48,
-  resizeMode: "cover",
-  tintColor: vars.color.text,
-  width: 48,
-})
-```
-
-Use `style` for deliberately mixed style exports and `styleVariants` for grouped state styles.
-
-Full example: [examples/typed-helpers.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/typed-helpers.css.ts)
-
-## Recipes
-
-Use `recipe` for reusable native component surfaces with base styles, variants, defaults, and compound variants:
-
-```ts
+// button.css.ts
 import { recipe } from "@opsydyn/crumbs-css/style"
-import { vars } from "./theme"
 
 export const button = recipe({
   base: {
     alignItems: "center",
     borderRadius: 8,
-    flexDirection: "row",
+    padding: 12,
   },
   defaultVariants: {
-    disabled: false,
     pressed: false,
-    size: "md",
     tone: "primary",
   },
   variants: {
-    tone: {
-      primary: { backgroundColor: vars.color.accent },
-      danger: { backgroundColor: "#9f2f25" },
-    },
-    size: {
-      sm: { padding: 8 },
-      md: { padding: vars.space.screen },
-    },
     pressed: {
       false: {},
       true: { opacity: 0.82 },
     },
-    disabled: {
-      false: {},
-      true: { opacity: 0.6 },
+    tone: {
+      primary: { backgroundColor: "#c8aa6e" },
+      danger: { backgroundColor: "#9f2f25" },
     },
   },
-  compoundVariants: [
-    {
-      variants: { disabled: true, tone: "primary" },
-      style: { opacity: 0.5 },
-    },
-  ],
 })
 ```
 
-Resolve the themed recipe once, then select state in component code:
-
 ```tsx
-import type { NativeRecipeProps } from "@opsydyn/crumbs-css/style"
 import { createRecipeResolver, useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { useMemo } from "react"
 import { Pressable } from "react-native"
 import * as s from "./button.css"
 
-type ButtonProps = NativeRecipeProps<typeof s.button> & {
-  readonly disabled?: boolean
-}
-
-export function Button({ disabled = false, size = "md", tone = "primary" }: ButtonProps) {
+export function Button() {
   const styles = useThemedStyles(s)
   const resolveButtonStyle = useMemo(() => createRecipeResolver(styles.button), [styles.button])
 
-  return (
-    <Pressable
-      disabled={disabled}
-      style={({ pressed }) => resolveButtonStyle({ disabled, pressed, size, tone })}
-    />
-  )
+  return <Pressable style={({ pressed }) => resolveButtonStyle({ pressed, tone: "primary" })} />
 }
 ```
 
-Full example: [examples/recipe.css.ts](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/examples/recipe.css.ts)
-
-Recipe style arrays are ordered for predictable React Native override behavior: base first, variants in author-defined order, then matching compound variants. Later entries override earlier ones using React Native's style-array merge semantics.
-
 ## Diagnostics
 
-Unsupported browser CSS features fail the transform with actionable diagnostics:
+Unsupported browser-only features fail fast with actionable diagnostics such as:
 
-```
+```txt
 @opsydyn/crumbs-css does not support @media rules in React Native styles.
 ```
 
-Use component code, dimensions, or platform hooks to choose explicit native style exports instead.
-
-```
-@opsydyn/crumbs-css does not support @keyframes rules in React Native styles.
-```
-
-Use React Native animation APIs instead.
-
-```
-@opsydyn/crumbs-css does not support selectors, global styles, or pseudo classes in React Native styles.
-```
-
-Use explicit exports or `styleVariants`, then select styles from component props or state.
-
-Plain browser CSS variables such as `var(--brand)` are dropped with a warning. Use `createThemeContract` or plain TypeScript constants instead.
-
-Enable strict diagnostics in Metro to fail on individual declarations that would otherwise be silently dropped:
+For stricter declaration-level failures, enable Metro strict diagnostics:
 
 ```js
 config.transformer = {
@@ -350,28 +187,8 @@ config.transformer = {
 }
 ```
 
-Strict output includes the dropped declaration, export name, and source file:
+## Learn more
 
-```
-@opsydyn/crumbs-css dropped "transition: all 0.3s" while transforming export "link" in src/button.css.ts.
-```
-
-For one-off checks, set `CRUMBS_CSS_STRICT=1` before running Metro.
-
-## Performance
-
-Run the package perf harness:
-
-```sh
-bun run bench:native-styles
-```
-
-Covers recipe selection, `createRecipeResolver`, themed recipe selection, theme-module resolution, and transformer cost for representative fixtures.
-
-## Acknowledgements
-
-`@opsydyn/crumbs-css` is directly inspired by [vanilla-extract](https://vanilla-extract.style/) — the zero-runtime CSS-in-TypeScript library by [Mark Dalgleish](https://github.com/markdalgleish) and the team at [Seek](https://github.com/seek-oss). The authoring API, theme contract model, and recipe abstraction are all shaped by vanilla-extract's design. If you work on web, use vanilla-extract.
-
-## Repository
-
-[github.com/opsydyn/crumbs-css](https://github.com/opsydyn/crumbs-css)
+- Docs workspace: [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
+- Compatibility matrix: [COMPATIBILITY.md](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/COMPATIBILITY.md)
+- Repository: [github.com/opsydyn/crumbs-css](https://github.com/opsydyn/crumbs-css)

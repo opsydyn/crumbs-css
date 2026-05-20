@@ -1,0 +1,34 @@
+---
+title: Compatibility
+description: Supported features, dropped features, and browser CSS features that are intentionally unsupported.
+---
+
+`@opsydyn/crumbs-css` is a React Native subset of vanilla-extract-shaped authoring. It is not a browser CSS runtime.
+
+## Supported
+
+- `style`
+- composition through `style([base, extra])`
+- `styleVariants`
+- `recipe`
+- `createRecipeResolver`
+- `createThemeContract` and `createTheme`
+- typed native helpers
+- runtime theme token resolution
+
+## Dropped or unsupported
+
+- vendor-prefixed properties
+- browser CSS variables such as `var(--brand)`
+- CSS selectors and pseudo classes
+- `globalStyle`
+- nested selectors and selector lists
+- `@media`
+- `@keyframes`
+- browser-only at-rules such as `@supports`, `@font-face`, and `@layer`
+
+## Where to look for the full matrix
+
+The package-level compatibility matrix is maintained in:
+
+[packages/css/COMPATIBILITY.md](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/COMPATIBILITY.md)

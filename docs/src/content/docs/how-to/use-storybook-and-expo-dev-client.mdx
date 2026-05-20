@@ -1,0 +1,35 @@
+---
+title: Use Storybook and Expo Dev Client
+description: Use the Storybook app as a visual smoke test environment for crumbs-css in React Native.
+---
+
+The repo includes an Expo Storybook app in `apps/storybook/`. It is useful for:
+
+- visual checks of themed components
+- verifying Metro transform behavior
+- smoke testing Expo Dev Client support
+
+## Start Storybook
+
+From the repo root:
+
+```sh
+bun run app:storybook
+```
+
+For web:
+
+```sh
+bun run app:storybook:web
+```
+
+## What to check
+
+- `.css.ts` modules compile without Metro errors
+- themed components resolve correctly with `ThemeProvider`
+- recipes and state variants behave as expected
+- strict diagnostics still fail in known unsupported cases
+
+## When to use this instead of unit tests
+
+Use Storybook when the question is visual or integration-oriented. Use package tests when the question is type contract, transform behavior, or runtime invariants.

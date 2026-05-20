@@ -1,0 +1,41 @@
+---
+title: Use recipes and state variants
+description: Model interactive native component states explicitly with styleVariants and recipe.
+---
+
+## Use `styleVariants` for simple state maps
+
+```ts
+export const button = styleVariants({
+  default: { opacity: 1 },
+  pressed: { opacity: 0.8 },
+})
+```
+
+This is a good fit when the state model is small and you only need named branches.
+
+## Use `recipe` for reusable component surfaces
+
+Use `recipe` when you need:
+
+- defaults
+- multiple variant groups
+- compound variants
+- one reusable component-facing surface
+
+## Resolve recipes in component code
+
+```tsx
+const styles = useThemedStyles(s)
+const resolveButtonStyle = useMemo(() => createRecipeResolver(styles.button), [styles.button])
+```
+
+Then select state explicitly:
+
+```tsx
+<Pressable style={({ pressed }) => resolveButtonStyle({ pressed, tone: "primary" })} />
+```
+
+## Why explicit state is the rule
+
+React Native has no CSS selector engine. There is no native equivalent of `&:hover`, `&:focus`, or `&:active` in `.css.ts`. State must come from component props or runtime callbacks.

@@ -1,0 +1,340 @@
+@layer starlight.custom {
+	:root,
+	::backdrop {
+		--crumbs-color-butter: hsl(42, 96%, 80%);
+		--crumbs-color-gold: hsl(36, 90%, 64%);
+		--crumbs-color-caramel: hsl(26, 60%, 49%);
+		--crumbs-color-cocoa: hsl(23, 31%, 18%);
+		--crumbs-color-jam: hsl(9, 63%, 69%);
+		--crumbs-color-mint: hsl(154, 42%, 69%);
+		--crumbs-shell-bg: hsla(24, 26%, 14%, 0.9);
+		--crumbs-panel-bg: hsla(26, 26%, 15%, 0.9);
+		--crumbs-card-bg: linear-gradient(180deg, hsla(34, 18%, 18%, 0.96), hsla(24, 24%, 12%, 0.94));
+		--crumbs-hero-bg:
+			radial-gradient(circle at top left, hsla(42, 88%, 68%, 0.14), transparent 32%),
+			radial-gradient(circle at bottom right, hsla(9, 63%, 69%, 0.12), transparent 30%),
+			linear-gradient(160deg, hsla(34, 23%, 18%, 0.92), hsla(22, 28%, 12%, 0.96));
+
+		--sl-color-white: hsl(42, 44%, 96%);
+		--sl-color-gray-1: hsl(38, 22%, 90%);
+		--sl-color-gray-2: hsl(34, 14%, 74%);
+		--sl-color-gray-3: hsl(29, 12%, 59%);
+		--sl-color-gray-4: hsl(24, 15%, 40%);
+		--sl-color-gray-5: hsl(23, 18%, 24%);
+		--sl-color-gray-6: hsl(24, 22%, 16%);
+		--sl-color-black: hsl(20, 30%, 10%);
+
+		--sl-color-orange-low: hsl(30, 52%, 22%);
+		--sl-color-orange: var(--crumbs-color-gold);
+		--sl-color-orange-high: hsl(40, 95%, 84%);
+		--sl-color-green-low: hsl(152, 30%, 19%);
+		--sl-color-green: hsl(154, 44%, 61%);
+		--sl-color-green-high: hsl(154, 56%, 82%);
+		--sl-color-blue-low: hsl(199, 39%, 20%);
+		--sl-color-blue: hsl(199, 72%, 66%);
+		--sl-color-blue-high: hsl(200, 72%, 85%);
+		--sl-color-purple-low: hsl(345, 33%, 23%);
+		--sl-color-purple: hsl(344, 58%, 70%);
+		--sl-color-purple-high: hsl(345, 68%, 86%);
+		--sl-color-red-low: hsl(10, 44%, 20%);
+		--sl-color-red: var(--crumbs-color-jam);
+		--sl-color-red-high: hsl(12, 76%, 84%);
+
+		--sl-color-accent-low: hsl(35, 55%, 22%);
+		--sl-color-accent: var(--crumbs-color-gold);
+		--sl-color-accent-high: hsl(42, 95%, 82%);
+		--sl-color-text: var(--sl-color-gray-2);
+		--sl-color-text-accent: var(--sl-color-accent-high);
+		--sl-color-text-invert: var(--sl-color-black);
+		--sl-color-bg: hsl(22, 30%, 10%);
+		--sl-color-bg-nav: var(--crumbs-shell-bg);
+		--sl-color-bg-sidebar: var(--crumbs-panel-bg);
+		--sl-color-bg-inline-code: hsl(24, 18%, 20%);
+		--sl-color-bg-accent: var(--sl-color-accent-high);
+		--sl-color-hairline-light: hsla(38, 20%, 65%, 0.18);
+		--sl-color-hairline: hsla(38, 18%, 42%, 0.16);
+		--sl-color-hairline-shade: hsla(22, 34%, 8%, 0.92);
+		--sl-shadow-sm: 0 10px 28px hsla(22, 48%, 5%, 0.14);
+		--sl-shadow-md: 0 18px 44px hsla(22, 48%, 5%, 0.22);
+		--sl-shadow-lg: 0 28px 72px hsla(22, 52%, 4%, 0.34);
+	}
+
+	:root[data-theme='light'],
+	[data-theme='light'] ::backdrop {
+		--crumbs-shell-bg: hsla(44, 75%, 98%, 0.9);
+		--crumbs-panel-bg: hsla(41, 56%, 96%, 0.95);
+		--crumbs-card-bg: linear-gradient(180deg, hsla(42, 46%, 98%, 0.98), hsla(40, 40%, 95%, 0.96));
+		--crumbs-hero-bg:
+			radial-gradient(circle at top left, hsla(41, 94%, 65%, 0.18), transparent 34%),
+			radial-gradient(circle at bottom right, hsla(9, 63%, 69%, 0.14), transparent 30%),
+			linear-gradient(160deg, hsla(42, 62%, 98%, 0.96), hsla(40, 44%, 94%, 0.98));
+
+		--sl-color-white: hsl(24, 32%, 16%);
+		--sl-color-gray-1: hsl(24, 30%, 18%);
+		--sl-color-gray-2: hsl(23, 22%, 28%);
+		--sl-color-gray-3: hsl(24, 14%, 42%);
+		--sl-color-gray-4: hsl(28, 12%, 56%);
+		--sl-color-gray-5: hsl(34, 20%, 78%);
+		--sl-color-gray-6: hsl(40, 32%, 94%);
+		--sl-color-gray-7: hsl(44, 55%, 98%);
+		--sl-color-black: hsl(42, 100%, 99%);
+
+		--sl-color-orange-low: hsl(40, 90%, 89%);
+		--sl-color-orange: hsl(35, 88%, 56%);
+		--sl-color-orange-high: hsl(29, 56%, 30%);
+		--sl-color-green-low: hsl(152, 34%, 89%);
+		--sl-color-green: hsl(152, 42%, 42%);
+		--sl-color-green-high: hsl(154, 40%, 22%);
+		--sl-color-blue-low: hsl(201, 62%, 92%);
+		--sl-color-blue: hsl(201, 76%, 56%);
+		--sl-color-blue-high: hsl(202, 64%, 29%);
+		--sl-color-purple-low: hsl(344, 54%, 92%);
+		--sl-color-purple: hsl(344, 58%, 66%);
+		--sl-color-purple-high: hsl(345, 40%, 28%);
+		--sl-color-red-low: hsl(10, 72%, 90%);
+		--sl-color-red: hsl(9, 63%, 62%);
+		--sl-color-red-high: hsl(10, 48%, 31%);
+
+		--sl-color-accent-low: hsl(40, 84%, 91%);
+		--sl-color-accent: hsl(30, 58%, 34%);
+		--sl-color-accent-high: hsl(27, 54%, 28%);
+		--sl-color-text: var(--sl-color-gray-2);
+		--sl-color-text-accent: var(--sl-color-accent);
+		--sl-color-text-invert: var(--sl-color-black);
+		--sl-color-bg: hsl(42, 100%, 99%);
+		--sl-color-bg-nav: var(--crumbs-shell-bg);
+		--sl-color-bg-sidebar: var(--crumbs-panel-bg);
+		--sl-color-bg-inline-code: hsl(40, 36%, 92%);
+		--sl-color-bg-accent: var(--sl-color-accent);
+		--sl-color-hairline-light: hsla(28, 22%, 44%, 0.16);
+		--sl-color-hairline: hsla(30, 18%, 56%, 0.18);
+		--sl-color-hairline-shade: hsla(36, 26%, 74%, 0.56);
+		--sl-shadow-sm: 0 10px 24px hsla(26, 48%, 18%, 0.08);
+		--sl-shadow-md: 0 18px 40px hsla(26, 40%, 18%, 0.12);
+		--sl-shadow-lg: 0 24px 56px hsla(26, 38%, 18%, 0.16);
+	}
+
+	body {
+		background-color: var(--sl-color-bg);
+	}
+
+	.main-frame {
+		background:
+			radial-gradient(circle at top right, hsla(41, 96%, 74%, 0.08), transparent 24%),
+			radial-gradient(circle at 12% 22%, hsla(9, 63%, 69%, 0.08), transparent 18%),
+			var(--sl-color-bg);
+	}
+
+	.header,
+	.sidebar-pane {
+		backdrop-filter: blur(16px);
+	}
+
+	.header {
+		box-shadow: 0 10px 30px hsla(22, 38%, 8%, 0.12);
+	}
+
+	.sidebar-content::after {
+		background: linear-gradient(180deg, transparent, hsla(42, 80%, 68%, 0.06));
+	}
+
+	.site-title {
+		color: var(--sl-color-white);
+	}
+
+	.site-title img {
+		filter: drop-shadow(0 10px 18px hsla(31, 76%, 40%, 0.24));
+	}
+
+	button[data-open-modal] {
+		border-radius: 999px;
+		transition:
+			border-color 180ms ease,
+			box-shadow 180ms ease,
+			transform 180ms ease;
+	}
+
+	@media (min-width: 50rem) {
+		button[data-open-modal] {
+			background: hsla(0, 0%, 100%, 0.02);
+			box-shadow: inset 0 1px 0 hsla(42, 38%, 96%, 0.04);
+		}
+
+		:root[data-theme='light'] button[data-open-modal] {
+			background: hsla(42, 44%, 100%, 0.9);
+			box-shadow: inset 0 1px 0 hsla(0, 0%, 100%, 0.8);
+		}
+
+		button[data-open-modal]:hover {
+			box-shadow: 0 0 0 4px hsla(38, 92%, 64%, 0.12);
+			transform: translateY(-1px);
+		}
+	}
+
+	button[data-open-modal] kbd {
+		border: 1px solid var(--sl-color-hairline-light);
+		background: hsla(42, 30%, 94%, 0.08);
+	}
+
+	.hero {
+		position: relative;
+		padding: clamp(1.25rem, 2vw, 2rem);
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 1.5rem;
+		background: var(--crumbs-hero-bg);
+		box-shadow: var(--sl-shadow-md);
+		overflow: clip;
+	}
+
+	.hero::after {
+		content: '';
+		position: absolute;
+		inset: auto -6rem -7rem auto;
+		width: 12rem;
+		height: 12rem;
+		border-radius: 50%;
+		background: radial-gradient(circle, hsla(154, 42%, 69%, 0.16), transparent 65%);
+		pointer-events: none;
+	}
+
+	.hero > img,
+	.hero > .hero-html {
+		filter: drop-shadow(0 24px 40px hsla(24, 54%, 8%, 0.2));
+	}
+
+	.hero h1 {
+		letter-spacing: -0.04em;
+		text-wrap: balance;
+	}
+
+	.hero .tagline {
+		max-width: 34ch;
+		text-wrap: pretty;
+	}
+
+	.hero .sl-link-button.primary {
+		box-shadow: 0 12px 28px hsla(35, 74%, 34%, 0.22);
+	}
+
+	.hero .sl-link-button.secondary,
+	.hero .sl-link-button.minimal {
+		color: var(--sl-color-white);
+	}
+
+	.hero .sl-link-button:hover {
+		transform: translateY(-1px);
+	}
+
+	.card {
+		border-radius: 1rem;
+		background: var(--crumbs-card-bg);
+		box-shadow: var(--sl-shadow-sm);
+		transition:
+			transform 180ms ease,
+			border-color 180ms ease,
+			box-shadow 180ms ease;
+	}
+
+	.card:hover {
+		transform: translateY(-2px);
+		box-shadow: var(--sl-shadow-md);
+		border-color: var(--sl-card-border);
+	}
+
+	.card .icon {
+		border-radius: 999px;
+		box-shadow: inset 0 1px 0 hsla(42, 34%, 100%, 0.26);
+	}
+
+	.content-panel + .content-panel {
+		border-top-color: var(--sl-color-hairline-light);
+	}
+
+	.sl-markdown-content :is(h1, h2, h3) {
+		letter-spacing: -0.025em;
+		text-wrap: balance;
+	}
+
+	.sl-markdown-content a {
+		text-decoration-thickness: 0.08em;
+		text-underline-offset: 0.18em;
+	}
+
+	.sl-markdown-content code:not(pre code) {
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 0.45rem;
+		padding: 0.1rem 0.35rem;
+	}
+
+	:where(pre, .astro-code) {
+		border: 1px solid var(--sl-color-hairline-light);
+		border-radius: 1rem;
+		box-shadow: var(--sl-shadow-sm);
+	}
+
+	.right-sidebar,
+	.sidebar-pane {
+		scrollbar-color: var(--sl-color-accent) transparent;
+	}
+
+	@media (max-width: 49.999rem) {
+		.hero {
+			padding: 1.25rem;
+			border-radius: 1.25rem;
+		}
+	}
+
+	@media (prefers-reduced-motion: no-preference) {
+		.hero .sl-link-button,
+		.card,
+		button[data-open-modal] {
+			will-change: transform;
+		}
+	}
+}
+
+:root,
+::backdrop {
+	--crumbs-color-brand-low: hsl(234, 58%, 22%);
+	--crumbs-color-brand: hsl(233, 86%, 60%);
+	--crumbs-color-brand-high: hsl(230, 100%, 84%);
+	--crumbs-color-nav-title: hsl(344, 52%, 74%);
+	--sl-color-accent-low: var(--crumbs-color-brand-low);
+	--sl-color-accent: var(--crumbs-color-brand);
+	--sl-color-accent-high: var(--crumbs-color-brand-high);
+	--sl-color-text-accent: var(--crumbs-color-brand-high);
+	--sl-color-bg-accent: var(--crumbs-color-brand);
+}
+
+:root[data-theme='light'],
+[data-theme='light'] ::backdrop {
+	--crumbs-color-brand-low: hsl(232, 84%, 92%);
+	--crumbs-color-brand: hsl(233, 78%, 58%);
+	--crumbs-color-brand-high: hsl(231, 54%, 28%);
+	--crumbs-color-nav-title: hsl(344, 34%, 41%);
+	--sl-color-accent-low: var(--crumbs-color-brand-low);
+	--sl-color-accent: var(--crumbs-color-brand);
+	--sl-color-accent-high: var(--crumbs-color-brand-high);
+	--sl-color-text-accent: var(--crumbs-color-brand);
+	--sl-color-bg-accent: var(--crumbs-color-brand);
+}
+
+.site-title {
+	color: var(--crumbs-color-nav-title);
+}
+
+.sl-link-button.primary {
+	background: linear-gradient(180deg, hsl(233, 88%, 64%), hsl(233, 78%, 56%));
+	border-color: hsl(233, 82%, 58%);
+	color: hsl(0, 0%, 100%);
+	box-shadow: 0 14px 30px hsla(233, 70%, 42%, 0.28);
+}
+
+.sl-link-button.primary:hover {
+	color: hsl(0, 0%, 100%);
+	box-shadow: 0 16px 34px hsla(233, 70%, 42%, 0.34);
+}
+
+:root[data-theme='light'] .sl-link-button.primary {
+	box-shadow: 0 12px 28px hsla(233, 68%, 46%, 0.22);
+}
