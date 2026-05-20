@@ -4,6 +4,8 @@ import starlight from '@astrojs/starlight';
 
 // https://astro.build/config
 export default defineConfig({
+	site: 'https://opsydyn.github.io',
+	base: '/crumbs-css',
 	integrations: [
 		starlight({
 			title: 'crumbs-css',
