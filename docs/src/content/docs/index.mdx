@@ -8,7 +8,7 @@ hero:
     file: ../../assets/crumbs-css-logo.png
   actions:
     - text: Start the tutorial
-      link: /tutorials/get-started/
+      link: /crumbs-css/tutorials/get-started/
       icon: right-arrow
     - text: Read the package quickstart
       link: https://github.com/opsydyn/crumbs-css/blob/main/packages/css/README.md
@@ -16,7 +16,7 @@ hero:
       variant: minimal
 ---
 
-import { Card, CardGrid } from '@astrojs/starlight/components';
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
 
 ## Documentation map
 
@@ -28,16 +28,24 @@ This site follows the Diataxis model:
 - **Explanation** covers architecture and tradeoffs.
 
 <CardGrid stagger>
-  <Card title="Tutorials" icon="open-book">
-    Start with a working Expo + Metro setup, then build a themed screen and a button recipe.
-  </Card>
-  <Card title="How-to Guides" icon="set-square">
-    Jump straight to Metro setup, themes, typed helpers, recipes, strict diagnostics, and Storybook.
-  </Card>
-  <Card title="Reference" icon="document">
-    Look up entrypoints, compatibility, diagnostics, runtime guarantees, and install prerequisites.
-  </Card>
-  <Card title="Explanation" icon="pencil">
-    Understand why the package is Metro-transform-based, how runtime theme resolution works, and where it intentionally stops short of browser CSS.
-  </Card>
+  <LinkCard
+    title="Tutorials"
+    href="/crumbs-css/tutorials/get-started/"
+    description="Start with a working Expo + Metro setup, then build a themed screen and a button recipe."
+  />
+  <LinkCard
+    title="How-to Guides"
+    href="/crumbs-css/how-to/configure-metro/"
+    description="Jump straight to Metro setup, themes, typed helpers, recipes, strict diagnostics, and Storybook."
+  />
+  <LinkCard
+    title="Reference"
+    href="/crumbs-css/reference/package-entrypoints-and-apis/"
+    description="Look up entrypoints, compatibility, diagnostics, runtime guarantees, and install prerequisites."
+  />
+  <LinkCard
+    title="Explanation"
+    href="/crumbs-css/explanation/why-crumbs-css-exists/"
+    description="Understand why the package is Metro-transform-based, how runtime theme resolution works, and where it intentionally stops short of browser CSS."
+  />
 </CardGrid>
