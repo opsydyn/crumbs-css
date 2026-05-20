@@ -55,12 +55,25 @@ jobs:
         if: ${{ steps.release.outputs['packages/css--release_created'] == 'true' && env.NPM_TOKEN != '' }}
         run: bun run release:check
 
+      - name: Resolve npm dist-tag
+        if: ${{ steps.release.outputs['packages/css--release_created'] == 'true' && env.NPM_TOKEN != '' }}
+        id: npm_tag
+        working-directory: packages/css
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" == *-* ]]; then
+            PRERELEASE=${VERSION#*-}
+            echo "tag=${PRERELEASE%%.*}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish package to npm
         if: ${{ steps.release.outputs['packages/css--release_created'] == 'true' && env.NPM_TOKEN != '' }}
         working-directory: packages/css
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance
+        run: npm publish --access public --provenance --tag ${{ steps.npm_tag.outputs.tag }}
 
       - name: Note missing NPM token
         if: ${{ steps.release.outputs['packages/css--release_created'] == 'true' && env.NPM_TOKEN == '' }}

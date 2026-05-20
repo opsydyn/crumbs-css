@@ -49,12 +49,24 @@ jobs:
       - name: Build and validate release
         run: bun run release:check
 
+      - name: Resolve npm dist-tag
+        id: npm_tag
+        working-directory: packages/css
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          if [[ "$VERSION" == *-* ]]; then
+            PRERELEASE=${VERSION#*-}
+            echo "tag=${PRERELEASE%%.*}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm
         if: ${{ env.NPM_TOKEN != '' }}
         working-directory: packages/css
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public --provenance --tag alpha
+        run: npm publish --access public --provenance --tag ${{ steps.npm_tag.outputs.tag }}
 
       - name: Note missing NPM token
         if: ${{ env.NPM_TOKEN == '' }}
