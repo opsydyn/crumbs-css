@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1-alpha.1](https://github.com/opsydyn/crumbs-css/compare/v0.1.0-alpha.1...v0.1.1-alpha.1) (2026-05-20)
+
+
+### Bug Fixes
+
+* **css:** refresh npm readme ([279c2fb](https://github.com/opsydyn/crumbs-css/commit/279c2fb819e9d31819a03044e9e66fdb1576be31))
+
 ## [0.1.0-alpha.1](https://github.com/opsydyn/crumbs-css/compare/v0.1.0-alpha.0...v0.1.0-alpha.1) (2026-05-19)
 
 
