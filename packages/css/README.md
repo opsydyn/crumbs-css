@@ -9,6 +9,9 @@ React Native style authoring with a familiar vanilla-extract-shaped API.
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
 
+Published docs are also available at
+[opsydyn.github.io/crumbs-css](https://opsydyn.github.io/crumbs-css/).
+
 ## What it is
 
 `@opsydyn/crumbs-css` compiles `.css.ts` modules into React Native style payloads at Metro transform time. It gives React Native apps a familiar authoring surface for:
