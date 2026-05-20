@@ -48,15 +48,6 @@ jobs:
         if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
-      - name: Scope workspaces to docs only
-        run: |
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.workspaces = ['docs'];
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-          "
-
       - name: Install docs dependencies
         run: bun install --frozen-lockfile
 
