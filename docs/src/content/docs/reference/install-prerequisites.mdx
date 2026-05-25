@@ -11,6 +11,14 @@ description: What consumers need in place before @opsydyn/crumbs-css can work.
 
 Expo apps already satisfy the Metro side of this setup.
 
+## Validated baseline
+
+The current package contract is validated against:
+
+- Expo SDK 56
+- React 19.2
+- React Native 0.85
+
 ## Required app setup
 
 - Metro must be wrapped with `withNativeStyles`
@@ -22,6 +30,13 @@ Expo apps already satisfy the Metro side of this setup.
 - Expo or React Native app using Metro
 - clean Metro cache after configuration changes
 - Storybook or Expo Dev Client for visual integration checks
+
+## Known Expo Doctor caveat under Bun
+
+If the consumer app is installed with Bun, `expo-doctor` can still report
+duplicate Expo packages from Bun's `.bun/` symlink layout even when every
+duplicate is the same version. Treat that warning as advisory until Expo Doctor
+and Bun converge on the same install model.
 
 ## Current scope
 

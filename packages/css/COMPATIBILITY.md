@@ -3,6 +3,23 @@
 `@opsydyn/crumbs-css` intentionally implements a React Native subset of
 vanilla-extract authoring. It is not a browser CSS runtime.
 
+## Validated native baseline
+
+The current published contract is validated against:
+
+- Expo SDK 56
+- React 19.2
+- React Native 0.85
+
+When the Storybook consumer app is installed with Bun, `expo-doctor` may still
+report duplicate Expo packages from Bun's `.bun/` symlink layout even when the
+duplicate versions are identical. Treat that remaining warning as advisory until
+Expo Doctor and Bun converge on the same install model.
+
+The package currently declares `react-native` peer compatibility as
+`>=0.85 <0.86`. Earlier React Native baselines should not be assumed supported
+unless they are exercised explicitly in a future compatibility pass.
+
 ## Supported
 
 | Feature | Status | Native behavior |

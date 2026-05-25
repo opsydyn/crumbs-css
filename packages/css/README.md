@@ -12,6 +12,12 @@ Full consumer documentation lives in the Starlight docs workspace in this repo:
 Published docs are also available at
 [opsydyn.github.io/crumbs-css](https://opsydyn.github.io/crumbs-css/).
 
+Validated consumer baseline:
+
+- Expo SDK 56
+- React 19.2
+- React Native 0.85
+
 ## What it is
 
 `@opsydyn/crumbs-css` compiles `.css.ts` modules into React Native style payloads at Metro transform time. It gives React Native apps a familiar authoring surface for:
@@ -48,6 +54,8 @@ npm install @opsydyn/crumbs-css
 ```
 
 Peer dependencies: `react`, `react-native`, and `metro`.
+
+Current `react-native` peer range: `>=0.85 <0.86`.
 
 ## Minimal Metro setup
 
