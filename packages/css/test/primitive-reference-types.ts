@@ -97,3 +97,10 @@ viewStyle({ flex: "1 2" })
 const flexVars = createThemeContract({ packedFlex: { value: null } })
 style({ flex: flexVars.packedFlex.value })
 styleVariants({ token: { flex: flexVars.packedFlex.value } })
+
+style({ paddingInline: 3, marginBlock: "25%", paddingInlineStart: flexVars.packedFlex.value })
+viewStyle({ borderStartStartRadius: flexVars.packedFlex.value, borderEndEndRadius: 3 })
+// @ts-expect-error native spacing aliases require a single value
+style({ paddingInline: "1px 2px" })
+// @ts-expect-error nested variant aliases require a single value
+styleVariants({ invalid: [{ marginBlock: "1px 2px" }] })

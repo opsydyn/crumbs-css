@@ -50,13 +50,13 @@ Keep primitive reference annotations when you want their native result types. Wi
 
 Compiled border width/color shorthands expand to physical top/right/bottom/left properties for both tokens and literals, including width/color output from a literal CSS `border` shorthand. Multi-value literals retain their per-side values. Later broad or side declarations win before class/composition merging; only surviving tokens are resolved. The literal border style field stays global. Typed border fixtures cover direct rules, nested/repeated bases, primitive helpers, variants and recipes in native and web emitters.
 
-Regenerate dependent compiled artifacts together and pass complete styles to React Native; compiled shorthand fields are no longer present. Mixing old shorthand artifacts with new longhands is not qualified. Raw runtime styles retain native behavior. Logical start/end/RTL conflicts and side-specific compound border behavior remain separate work. Embedded compound token expressions and unsupported side border-style output retain existing strict diagnostics. No runtime normalization or semantic token validation was added.
+Regenerate dependent compiled artifacts together and pass complete styles to React Native; compiled shorthand fields are no longer present. Mixing old shorthand artifacts with new longhands is not qualified. Raw runtime styles retain native behavior. Start/end fields retain the distinct native precedence described below; side-specific compound border behavior remains separate work. Embedded compound token expressions and unsupported side border-style output retain existing strict diagnostics. No runtime normalization or semantic token validation was added.
 
 ## Physical radius precedence
 
 Compiled `borderRadius` expands to top-left, top-right, bottom-right and bottom-left corner properties for both tokens and literals before merging. Later broad/corner declarations win across rules, nested/repeated compositions, primitive helpers, variants and recipes. Multi-value literals, percentages and zero retain their values; only surviving tokens are resolved. Independent reference properties cover declaration sequences and compiled compositions in addition to both native and web emitters.
 
-Regenerate dependent artifacts together and pass complete styles to React Native; mixed old shorthand/new corner artifacts remain unqualified. Raw runtime styles keep native behavior. Logical/RTL corner conflicts remain outside this contract. Elliptical CSS radii and embedded multi-value token expressions retain existing strict rejection.
+Regenerate dependent artifacts together and pass complete styles to React Native; mixed old shorthand/new corner artifacts remain unqualified. Raw runtime styles keep native behavior. Logical corner fields retain the native precedence described below. Elliptical CSS radii and embedded multi-value token expressions retain existing strict rejection.
 
 
 ## Native numeric flex
@@ -64,6 +64,13 @@ Regenerate dependent artifacts together and pass complete styles to React Native
 Compiled finite numeric `flex` remains a native field, including negative values and zero. Tokens retain the same field. Later declarations replace only the same property, while explicit grow/shrink/basis siblings survive in either authored order. Yoga determines their combined layout semantics; Crumbs does not expand numeric flex into browser defaults. See [React Native flexbox](https://reactnative.dev/docs/flexbox).
 
 Generic inline authoring now matches primitive helpers: `flex` accepts a number or branded Crumbs token. CSS keyword/multi-part/length/percentage flex forms and nonfinite literals fail strict compilation with `CRUMBS_CSS_DROPPED_DECLARATION`. Use explicit native grow/shrink/basis properties to migrate CSS shorthand intent. Permissive conversion drops unsupported forms. Token value-domain validation remains future work. Regenerate dependent compiled artifacts together; mixed old/new flex artifacts remain unqualified. Raw runtime styles retain platform behavior, and compiler parity does not establish visual parity between native and web.
+
+
+## Spacing aliases and direction-dependent overlaps
+
+Crumbs ordered authoring normalizes spacing Inline/Block aliases to physical pairs, BlockStart/End to top/bottom, and InlineStart/End to native Start/End fields before merging. Later declarations replace the same canonical field. Raw React Native aliases have fixed native precedence/fallback rules; compiled authoring and raw runtime styles do not promise identical alias winners. Generic inline types and strict compilation reject multi-value CSS alias forms; use separate sides. Regenerate dependent compiled artifacts together and pass complete styles to React Native; mixed old/new alias artifacts remain unqualified.
+
+Logical spacing and border fields stay distinct from physical fields. The installed React Native 0.85.3 Yoga source prefers mapped logical spacing/border widths, while Fabric border colors/radii prefer explicit physical fields. Broad compiled border colors/radii fill physical fields. Top/bottom start/end radius names precede start/start etc.; all eight existing native logical radius fields now pass compiler admission. All surviving tokens require values even when native precedence masks a field. Independent regressions specify compiler preservation and selected source-grounded LTR/RTL precedence cases; they do not establish native rendering, device RTL settings or web visual parity. Crumbs adds no runtime direction mapping or browser writing-mode support. Raw runtime styles retain native alias rules. Inset aliases and side compound borders remain separate work. See [React Native layout aliases](https://github.com/react/react-native-website/blob/main/docs/layout-props.md).
 
 
 ## Required coverage and optional native capabilities

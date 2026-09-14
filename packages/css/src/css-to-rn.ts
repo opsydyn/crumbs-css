@@ -25,10 +25,26 @@ const CANONICAL_LONGHANDS = new Map<string, ReadonlyArray<string>>([
   ["margin", ["marginTop", "marginRight", "marginBottom", "marginLeft"]],
   ["marginHorizontal", ["marginLeft", "marginRight"]],
   ["marginVertical", ["marginTop", "marginBottom"]],
+  ["paddingInline", ["paddingLeft", "paddingRight"]],
+  ["paddingBlock", ["paddingTop", "paddingBottom"]],
+  ["paddingInlineStart", ["paddingStart"]],
+  ["paddingInlineEnd", ["paddingEnd"]],
+  ["paddingBlockStart", ["paddingTop"]],
+  ["paddingBlockEnd", ["paddingBottom"]],
+  ["marginInline", ["marginLeft", "marginRight"]],
+  ["marginBlock", ["marginTop", "marginBottom"]],
+  ["marginInlineStart", ["marginStart"]],
+  ["marginInlineEnd", ["marginEnd"]],
+  ["marginBlockStart", ["marginTop"]],
+  ["marginBlockEnd", ["marginBottom"]],
   ["gap", ["rowGap", "columnGap"]],
   ["borderWidth", ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"]],
   ["borderColor", ["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"]],
   ["borderRadius", ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"]],
+])
+const NATIVE_SPACING_ALIASES = new Set([
+  "paddingInline", "paddingBlock", "paddingInlineStart", "paddingInlineEnd", "paddingBlockStart", "paddingBlockEnd",
+  "marginInline", "marginBlock", "marginInlineStart", "marginInlineEnd", "marginBlockStart", "marginBlockEnd",
 ])
 const NATIVE_STYLE_PROPS = new Set([
   "alignContent",
@@ -46,6 +62,8 @@ const NATIVE_STYLE_PROPS = new Set([
   "borderColor",
   "borderCurve",
   "borderEndColor",
+  "borderEndEndRadius",
+  "borderEndStartRadius",
   "borderEndWidth",
   "borderLeftColor",
   "borderLeftWidth",
@@ -53,6 +71,8 @@ const NATIVE_STYLE_PROPS = new Set([
   "borderRightColor",
   "borderRightWidth",
   "borderStartColor",
+  "borderStartEndRadius",
+  "borderStartStartRadius",
   "borderStartWidth",
   "borderStyle",
   "borderTopColor",
@@ -252,6 +272,20 @@ export function cssDeclarationsToRN(
         )
       }
       continue
+    }
+
+    if (NATIVE_SPACING_ALIASES.has(toReactNativePropName(prop))) {
+      const literal = value.trim()
+      const dimension = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(?:px|%)?$/i.exec(literal)
+      if (literal !== "auto" && (dimension === null || !Number.isFinite(Number(dimension[1])))) {
+        dropped.push({
+          code: NativeStylesDiagnosticCode.DroppedDeclaration,
+          prop,
+          reason: "native spacing aliases require one finite dimension, auto or a Crumbs token; use separate side properties for multiple CSS values",
+          value,
+        })
+        continue
+      }
     }
 
     // Native numeric flex is an independent Yoga field, not a CSS shorthand.

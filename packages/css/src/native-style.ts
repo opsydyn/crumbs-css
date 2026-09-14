@@ -19,7 +19,10 @@ export type NativeStyleComposition<TInput, TStyle = NativePrimitiveReference> = 
   TInput | TStyle | NativeStyleComposition<TInput, TStyle>
 >
 type NativePrimitiveReference = ImageStyle | TextStyle | ViewStyle
-type NativeFlatStyleRule = Omit<StyleRule, "flex"> & { readonly flex?: number | NativeThemeVar }
+type NativeSpacingAlias = "paddingInline" | "paddingBlock" | "paddingInlineStart" | "paddingInlineEnd" | "paddingBlockStart" | "paddingBlockEnd"
+  | "marginInline" | "marginBlock" | "marginInlineStart" | "marginInlineEnd" | "marginBlockStart" | "marginBlockEnd"
+type NativeFlatStyleRule = Omit<StyleRule, "flex" | NativeSpacingAlias> &
+  Pick<StaticNativeStyleInput<NativeStyle>, "flex" | NativeSpacingAlias>
 export type NativeStyleRule = NativeFlatStyleRule | StaticNativeStyleInput<NativeStyle> |
   NativeStyleComposition<NativeFlatStyleRule | StaticNativeStyleInput<NativeStyle>, NativePrimitiveReference>
 
