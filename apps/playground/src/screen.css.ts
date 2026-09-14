@@ -3,7 +3,8 @@ import { vars } from "./theme.css"
 
 export const screenTitle = "Crumbs playground"
 export const root = viewStyle({ flex: 1, backgroundColor: vars.playground.color.canvas, padding: vars.playground.space.gap, paddingTop: 60 })
-export const panel = viewStyle({ backgroundColor: vars.playground.color.panel, padding: vars.playground.space.gap, borderRadius: 12, marginBottom: 12, transform: [{ translateX: 0 }, { scale: 1 }], shadowOffset: { width: 0, height: 2 } })
+const panelCornerBase = viewStyle({ borderTopLeftRadius: 3 })
+export const panel = viewStyle([panelCornerBase, { backgroundColor: vars.playground.color.panel, padding: vars.playground.space.gap, borderRadius: vars.playground.radius.panel, marginBottom: 12, transform: [{ translateX: 0 }, { scale: 1 }], shadowOffset: { width: 0, height: 2 } }])
 export const copy = textStyle({ color: vars.playground.color.text, fontSize: 16 })
 export const title = textStyle([copy, { fontSize: 24, fontWeight: "700", marginBottom: 12 }])
 const inputBorderBase = textStyle({ borderLeftWidth: 3, borderTopColor: vars.playground.color.text })

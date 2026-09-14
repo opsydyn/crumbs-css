@@ -28,6 +28,7 @@ const CANONICAL_LONGHANDS = new Map<string, ReadonlyArray<string>>([
   ["gap", ["rowGap", "columnGap"]],
   ["borderWidth", ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"]],
   ["borderColor", ["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"]],
+  ["borderRadius", ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"]],
 ])
 const NATIVE_STYLE_PROPS = new Set([
   "alignContent",

@@ -50,7 +50,14 @@ Keep primitive reference annotations when you want their native result types. Wi
 
 Compiled border width/color shorthands expand to physical top/right/bottom/left properties for both tokens and literals, including width/color output from a literal CSS `border` shorthand. Multi-value literals retain their per-side values. Later broad or side declarations win before class/composition merging; only surviving tokens are resolved. The literal border style field stays global. Typed border fixtures cover direct rules, nested/repeated bases, primitive helpers, variants and recipes in native and web emitters.
 
-Regenerate dependent compiled artifacts together and pass complete styles to React Native; compiled shorthand fields are no longer present. Mixing old shorthand artifacts with new longhands is not qualified. Raw runtime styles retain native behavior. Corner radii, logical start/end/RTL conflicts and side-specific compound border behavior remain separate work. Embedded compound token expressions and unsupported side border-style output retain existing strict diagnostics. No runtime normalization or semantic token validation was added.
+Regenerate dependent compiled artifacts together and pass complete styles to React Native; compiled shorthand fields are no longer present. Mixing old shorthand artifacts with new longhands is not qualified. Raw runtime styles retain native behavior. Logical start/end/RTL conflicts and side-specific compound border behavior remain separate work. Embedded compound token expressions and unsupported side border-style output retain existing strict diagnostics. No runtime normalization or semantic token validation was added.
+
+## Physical radius precedence
+
+Compiled `borderRadius` expands to top-left, top-right, bottom-right and bottom-left corner properties for both tokens and literals before merging. Later broad/corner declarations win across rules, nested/repeated compositions, primitive helpers, variants and recipes. Multi-value literals, percentages and zero retain their values; only surviving tokens are resolved. Independent reference properties cover declaration sequences and compiled compositions in addition to both native and web emitters.
+
+Regenerate dependent artifacts together and pass complete styles to React Native; mixed old shorthand/new corner artifacts remain unqualified. Raw runtime styles keep native behavior. Logical/RTL corner conflicts remain outside this contract. Elliptical CSS radii and embedded multi-value token expressions retain existing strict rejection.
+
 
 ## Required coverage and optional native capabilities
 

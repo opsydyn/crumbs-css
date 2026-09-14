@@ -1,0 +1,215 @@
+{
+  "slice": "M0.2 physical border-radius precedence",
+  "sourceRevision": "d3fabdf plus approved radius-precedence working changes",
+  "redEvidence": {
+    "command": "bun test packages/css/test/radius-precedence.test.ts before converter repair",
+    "passing": 1,
+    "failing": 6,
+    "assertions": 32,
+    "shrunkCompositionCounterexample": [
+      {
+        "borderRadius": "var(--crumbs-radius-regression-wide)"
+      },
+      {
+        "borderRadius": 0
+      },
+      {
+        "borderRadius": 0
+      }
+    ]
+  },
+  "packageCheck": {
+    "command": "bun run check",
+    "tests": 203,
+    "assertions": 7269,
+    "files": 31,
+    "exitCode": 0
+  },
+  "properties": [
+    {
+      "domain": "ordered physical radius declarations",
+      "runs": 100,
+      "seed": 20260924
+    },
+    {
+      "domain": "compiled nested/repeated-base compositions",
+      "runs": 100,
+      "seed": 20260925
+    }
+  ],
+  "publicFormatProbes": [
+    {
+      "format": "mjs",
+      "useStyleSheet": true,
+      "status": "passed",
+      "playgroundPanelCorners": 12,
+      "compiledShorthandField": "absent"
+    },
+    {
+      "format": "mjs",
+      "useStyleSheet": false,
+      "status": "passed",
+      "playgroundPanelCorners": 12,
+      "compiledShorthandField": "absent"
+    },
+    {
+      "format": "cjs",
+      "useStyleSheet": true,
+      "status": "passed",
+      "playgroundPanelCorners": 12,
+      "compiledShorthandField": "absent"
+    },
+    {
+      "format": "cjs",
+      "useStyleSheet": false,
+      "status": "passed",
+      "playgroundPanelCorners": 12,
+      "compiledShorthandField": "absent"
+    }
+  ],
+  "workspaceBundleMaps": [
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/web/index-3373c09f346d2e67580ede70346508b3.js.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/ios/index-8ed4c03a7fd29bb0c81ba8b7de18ce24.hbc.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/android/index-283455e190f0db952472ece0ce656396.hbc.map",
+      "crumbs": 1
+    }
+  ],
+  "benchmark": {
+    "metrics": [
+      {
+        "budget": {
+          "maxP95Ms": 0.0025,
+          "minHz": 400000
+        },
+        "hz": 38280354.59858073,
+        "iterations": 300000,
+        "maxMs": 6.23599999999999e-05,
+        "meanMs": 2.612305999999999e-05,
+        "minMs": 1.765664000000015e-05,
+        "name": "raw style array selection",
+        "p50Ms": 1.8396679999999605e-05,
+        "p95Ms": 6.23599999999999e-05,
+        "samples": 12,
+        "totalMs": 7.836917999999997,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 2102516.9608991975,
+        "iterations": 300000,
+        "maxMs": 0.0009360366799999997,
+        "meanMs": 0.0004756204200000001,
+        "minMs": 0.0002927649999999994,
+        "name": "resolveRecipeStyle selection",
+        "p50Ms": 0.00031611168000000075,
+        "p95Ms": 0.0009360366799999997,
+        "samples": 12,
+        "totalMs": 142.68612600000003,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 3023066.054456831,
+        "iterations": 300000,
+        "maxMs": 0.00042267832,
+        "meanMs": 0.00033078999333333286,
+        "minMs": 0.0002946899999999982,
+        "name": "createRecipeResolver selection",
+        "p50Ms": 0.0003111133199999995,
+        "p95Ms": 0.00042267832,
+        "samples": 12,
+        "totalMs": 99.23699799999986,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.0075,
+          "minHz": 125000
+        },
+        "hz": 3180700.9991461816,
+        "iterations": 300000,
+        "maxMs": 0.00038327831999999945,
+        "meanMs": 0.00031439610333333347,
+        "minMs": 0.0002817433199999982,
+        "name": "themed recipe resolver selection",
+        "p50Ms": 0.0003105150000000003,
+        "p95Ms": 0.00038327831999999945,
+        "samples": 12,
+        "totalMs": 94.31883100000005,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 1.5
+        },
+        "hz": 8110.608696451484,
+        "iterations": 240,
+        "maxMs": 0.16316454999999905,
+        "meanMs": 0.12329530833333327,
+        "minMs": 0.10300204999999778,
+        "name": "resolveThemeStyles 240 exports",
+        "p50Ms": 0.12035830000000089,
+        "p95Ms": 0.16316454999999905,
+        "samples": 12,
+        "totalMs": 29.590873999999985,
+        "warmupIterations": 20
+      },
+      {
+        "budget": {
+          "maxP95Ms": 100
+        },
+        "hz": 165.09520792998507,
+        "iterations": 6,
+        "maxMs": 7.846374999999966,
+        "meanMs": 6.057111000000002,
+        "minMs": 5.2135410000000775,
+        "name": "transform README recipe fixture",
+        "p50Ms": 5.45733400000006,
+        "p95Ms": 7.846374999999966,
+        "samples": 6,
+        "totalMs": 36.34266600000001,
+        "warmupIterations": 1
+      },
+      {
+        "budget": {
+          "maxP95Ms": 150
+        },
+        "hz": 190.67820646934987,
+        "iterations": 6,
+        "maxMs": 5.502292000000011,
+        "meanMs": 5.2444378333333175,
+        "minMs": 4.737124999999992,
+        "name": "transform package-owned consumer button fixture",
+        "p50Ms": 5.304709000000003,
+        "p95Ms": 5.502292000000011,
+        "samples": 6,
+        "totalMs": 31.466626999999903,
+        "warmupIterations": 1
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "native-device performance",
+        "status": "not-run",
+        "reason": "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate."
+      }
+    ]
+  },
+  "storybookTypecheck": "passed",
+  "docsPages": 20,
+  "nativeAcceptance": "Not rerun; Android remains deferred until last",
+  "publication": "None; unrelated release-version edits excluded"
+}

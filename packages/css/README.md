@@ -237,3 +237,5 @@ Compiled physical border widths/colors now normalize to four sides for tokens, l
 
 
 Generic `style` compositions and `styleVariants` now preserve complete primitive references and enforce compatible native inline overrides. Literal-only rules keep the legacy generic result; mixed references return a union. See [primitive-reference types and migration](./COMPATIBILITY.md#primitive-references-and-generic-composition-types), including explicit legacy type selection for generic forwarding functions.
+
+Compiled physical border radii now expand to four corners for tokens and literals, preserving broad/corner authored order. Regenerate dependent artifacts together. See [alpha radius migration](./COMPATIBILITY.md#supported) for the physical-only boundary and unsupported elliptical CSS expressions.
