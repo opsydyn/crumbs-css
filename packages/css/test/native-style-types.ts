@@ -175,3 +175,9 @@ recipe({
   ],
   variants: { size: { sm: {}, md: {} } },
 })
+
+viewStyle({ transform: [{translateX: 4}, {rotate: '45deg'}, {matrix: [1,0,0,0,0,1,0,0,0,0,1,0,2,3,0,1]}], shadowOffset: {width: 2, height: 3} })
+// @ts-expect-error Static compiler inputs must not accept animated transform nodes.
+viewStyle({ transform: [{scale: {} as import('react-native').Animated.Value}] })
+style({transform: [{scale: 2}], shadowOffset: {width: 1, height: 2}})
+styleVariants({active: {transform: [{rotate: '45deg'}], shadowOffset: {width: 1, height: 2}}})

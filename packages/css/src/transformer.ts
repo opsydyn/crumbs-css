@@ -19,6 +19,7 @@ import { cssDeclarationsToRN } from "./css-to-rn"
 import { assertNativeCssCompatibility } from "./native-compatibility"
 import { isNativeStyleMap, NativeStyleMapType } from "./native-style-map"
 import { parseCssClassRules } from "./parse-virtual-css"
+import { splitStructuredNativeValues } from "./structured-native-values"
 
 // Minimal esbuild plugin shape. `setup` receives `build: unknown` so it doesn't
 // conflict with esbuild's PluginBuild, which is pulled in transitively and has
@@ -144,6 +145,7 @@ async function processVanillaFileForNative({
   outputCss = true,
   identOption = process.env.NODE_ENV === "production" ? "short" : "debug",
   serializeVirtualCssPath,
+  nativeValuesByClass,
 }: {
   source: string
   filePath: string
@@ -154,6 +156,7 @@ async function processVanillaFileForNative({
     fileScope: FileScope
     source: string
   }) => string | Promise<string>
+  nativeValuesByClass: Map<string, Record<string, unknown>>
 }): Promise<string> {
   const cssByFileScope = new Map<string, CssBlock[]>()
   const localClassNames = new Set<string>()
@@ -162,6 +165,13 @@ async function processVanillaFileForNative({
   const cssAdapter: Adapter = {
     appendCss: (css, fileScope) => {
       if (!outputCss) return
+      if (css.type === "local") {
+        const { cssRule, nativeValues } = splitStructuredNativeValues(
+          css.rule as Record<string, unknown>, `${fileScope.filePath} (class ${css.selector})`,
+        )
+        if (Object.keys(nativeValues).length > 0) nativeValuesByClass.set(css.selector, nativeValues)
+        css = { ...css, rule: cssRule }
+      }
       const serialisedFileScope = stringifyFileScope(fileScope)
       const fileScopeCss = cssByFileScope.get(serialisedFileScope) ?? []
       fileScopeCss.push(css)
@@ -276,10 +286,12 @@ export async function transformCssTsToStyleSheet(
     esbuildOptions: { plugins: [capturePlugin] },
   })
 
+  const nativeValuesByClass = new Map<string, Record<string, unknown>>()
   const vanillaFile = await processVanillaFileForNative({
     source,
     filePath: absoluteFilePath,
     identOption,
+    nativeValuesByClass,
   })
 
   const lines = vanillaFile.split("\n")
@@ -324,6 +336,10 @@ export async function transformCssTsToStyleSheet(
         classStyles.set(cls, rnStyles)
       }
     }
+  }
+
+  for (const [cls, nativeValues] of nativeValuesByClass) {
+    classStyles.set(cls, { ...classStyles.get(cls), ...nativeValues })
   }
 
   // Resolve composed class names (space-separated) by merging their styles.

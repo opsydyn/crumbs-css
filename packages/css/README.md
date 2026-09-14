@@ -149,7 +149,9 @@ Later authored entries override the same canonical native property. Compositions
 
 ## Runtime structured values
 
-Runtime theme resolution preserves supplied native structured arrays/objects, their references and scalar siblings. Typed view/text/image results retain their primitive types. Compiled variant maps carry internal metadata with unchanged string keys, including through object spread; ambiguous legacy maps should be regenerated. This runtime behavior does not establish end-to-end compiler support for structured authoring inputs. Nested token resolution and the compiler boundary remain separate work; see [compatibility](./COMPATIBILITY.md).
+Runtime theme resolution preserves supplied native structured arrays/objects, their references and scalar siblings. Typed view/text/image results retain their primitive types. Compiled variant maps carry internal metadata with unchanged string keys, including through object spread; ambiguous legacy maps should be regenerated.
+
+Static transform arrays and numeric `shadowOffset` / `textShadowOffset` now compile directly as native values, preserving transform order and whole-value composition replacement. Animated values, nested tokens and other unsupported structured shapes fail explicitly; pass them through React Native's runtime `style` prop. See the exact supported operations and migration notes in [compatibility](./COMPATIBILITY.md#static-structured-compiler-boundary).
 
 ## Minimal recipe example
 

@@ -24,7 +24,7 @@ unless they are exercised explicitly in a future compatibility pass.
 
 | Feature | Status | Native behavior |
 | --- | --- | --- |
-| `style({...})` | Supported | Compiles flat declarations to `StyleSheet.create`. |
+| `style({...})` | Supported subset | Compiles flat declarations and the static native structured subset below to `StyleSheet.create`. |
 | Crumbs `style([base, extra])` composition | Supported subset | Later authored entries win for the same canonical native property; multiple/repeated bases and nested arrays preserve order. Primitive helpers and `styleVariants` accept compositions. Physical padding/margin and gap normalize identically for tokens and literals. Other shorthand families remain unqualified. |
 | `styleVariants({...})` | Supported | Exports a nested map of explicit native state styles. |
 | `recipe({...})` | Supported | Exports native-first base, variants, defaults, and compound variants for explicit runtime selection. |
@@ -36,6 +36,7 @@ unless they are exercised explicitly in a future compatibility pass.
 | `var(--crumbs-...)` native theme tokens | Supported | Serialized as `crumbs.css.theme-token` references. |
 | `ThemeProvider` / `useThemedStyles` | Supported | Resolves token references against the active native theme. |
 | Structured values in runtime styles | Supported at resolution | Transform arrays/order, shadow offsets, font variants, filters, shadows, background arrays and opaque native values retain their shape/reference and scalar siblings. This does not qualify their `.css.ts` conversion. |
+| Static native structured authoring | Supported subset | `transform` arrays and numeric `shadowOffset` / `textShadowOffset` bypass CSS serialization. Order and whole-value composition replacement survive both object and StyleSheet emission, imported bases, helpers, variant maps and recipes. |
 | Metro dependency imports | Supported | Side-effect imports keep hot reload aware of dependent `.css.ts` files. |
 
 Crumbs composition is ordered native authoring, not a browser cascade. It captures inline declarations separately and retains repeated bases: `style([a, b, a])` applies `a` again after `b`. Physical padding/margin, their horizontal/vertical aliases, and gap normalize before merging, so later token or literal declarations replace overlapping longhands. Direct `@vanilla-extract/css` compositions retain upstream class-list processing and do not carry the same authored-order guarantee. Use Crumbs helpers for ordered native composition.
@@ -44,7 +45,15 @@ Crumbs composition is ordered native authoring, not a browser cascade. It captur
 
 Runtime resolution treats native structured property values as opaque values, replaces them as whole values in ordered arrays, and resolves top-level token references only. It never evaluates animated nodes or recursively resolves nested token references. Primitive-specific view/text/image outputs survive direct resolution, hooks, namespace resolution and typed style arrays.
 
-Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker. Compiler support for typed structured inputs such as `transform` and `shadowOffset` remains a separate, incomplete compatibility boundary; this runtime fix does not repair CSS conversion.
+Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
+
+### Static structured compiler boundary
+
+Transform arrays accept exactly one operation per entry: finite numeric `perspective`, `scale`, `scaleX`, `scaleY`; finite numeric or percentage `translateX` / `translateY`; `rotate`, `rotateX`, `rotateY`, `rotateZ`, `skewX`, `skewY` with numeric `deg` / `rad` strings; or `matrix` with exactly 16 finite numbers. Empty transform arrays are preserved. Offsets require exactly finite numeric `width` and `height`. No nested merging, unit conversion or nested token evaluation occurs. CSS transform strings retain the existing CSS converter contract.
+
+Direct primitive helpers exclude animated transform nodes by type. Runtime-native style types remain broader for resolved styles/composition references; the compiler validates actual structured values in all authoring paths. Animated nodes, nested tokens, malformed/sparse arrays and other array/object property families (including structured filters, box shadows, font variants and transform origins) fail with `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE`, even with strict diagnostics disabled. Pass these values through React Native's runtime `style` prop. Rule containers such as `vars`, selectors and conditions retain their existing separate compatibility checks. Arbitrary non-style exports and browser-string conversion remain separate contracts.
+
+**Alpha migration:** previously accepted structured shapes may now compile correctly or fail explicitly instead of being dropped or misconverted. Regenerate dependent artifacts together. This compiler evidence does not qualify native rendering or platform-specific transform/shadow behavior.
 
 ## Warn and drop
 
@@ -85,8 +94,8 @@ token.
 
 For repeated declarations targeting the same native property, later token or
 literal values replace earlier values in declaration order. This does not yet
-guarantee normalization of token-backed shorthands against their longhands or
-semantic token domains; those are separate roadmap work.
+guarantee normalization of every shorthand family or semantic token domains;
+physical spacing normalization is covered above, and other families remain roadmap work.
 
 Diagnostic codes are stable package contract values exported from the package root
 as `NativeStylesDiagnosticCode`. Tooling and CI should key on codes rather than
@@ -94,6 +103,7 @@ full message text.
 
 | Code | Meaning |
 | --- | --- |
+| `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` | Compile-time rejection of an unsupported static native array/object shape, with property, file/class and runtime-style migration guidance. Always fatal. |
 | `CRUMBS_CSS_UNSUPPORTED_MEDIA` | A `.css.ts` file authored a CSS media rule. |
 | `CRUMBS_CSS_UNSUPPORTED_AT_RULE` | A `.css.ts` file authored another browser-only at-rule. |
 | `CRUMBS_CSS_UNSUPPORTED_SELECTOR` | A `.css.ts` file authored selectors, pseudo classes, globals, or nested selectors. |

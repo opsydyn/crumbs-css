@@ -15,9 +15,18 @@ export type NativeStyle = ImageStyle & TextStyle & ViewStyle
 export type NativeStyleComposition<TInput, TStyle = NativeStyle> = ReadonlyArray<
   TInput | TStyle | NativeStyleComposition<TInput, TStyle>
 >
-export type NativeStyleRule = StyleRule | NativeStyleComposition<StyleRule>
+export type NativeStyleRule = StyleRule | StaticNativeStyleInput<NativeStyle> |
+  NativeStyleComposition<StyleRule | StaticNativeStyleInput<NativeStyle>>
+type StaticTransformEntry<TEntry> = TEntry extends unknown ? {
+  readonly [K in keyof TEntry]: TEntry[K] extends ReadonlyArray<unknown>
+    ? number[] : Extract<TEntry[K], string | number>
+} : never
+type NativeStaticTransform = StaticTransformEntry<Extract<NonNullable<ViewStyle["transform"]>, ReadonlyArray<unknown>>[number]>
 export type NativeStyleInput<TStyle> = {
   readonly [K in keyof TStyle]?: NativeStyleValueInput<TStyle[K]>
+}
+type StaticNativeStyleInput<TStyle> = Omit<NativeStyleInput<TStyle>, "transform"> & {
+  readonly transform?: string | ReadonlyArray<NativeStaticTransform> | undefined
 }
 export type NativeImageStyleInput = NativeStyleInput<ImageStyle>
 export type NativeTextStyleInput = NativeStyleInput<TextStyle>
@@ -116,21 +125,21 @@ export function style(rule: NativeStyleRule, debugId?: string): NativeStyle {
 }
 
 export function viewStyle(
-  rule: NativeViewStyleInput | NativeStyleComposition<NativeViewStyleInput, ViewStyle>,
+  rule: StaticNativeStyleInput<ViewStyle> | NativeStyleComposition<StaticNativeStyleInput<ViewStyle>, ViewStyle>,
   debugId?: string,
 ): ViewStyle {
   return authorStyle(rule, debugId) as unknown as ViewStyle
 }
 
 export function textStyle(
-  rule: NativeTextStyleInput | NativeStyleComposition<NativeTextStyleInput, TextStyle>,
+  rule: StaticNativeStyleInput<TextStyle> | NativeStyleComposition<StaticNativeStyleInput<TextStyle>, TextStyle>,
   debugId?: string,
 ): TextStyle {
   return authorStyle(rule, debugId) as unknown as TextStyle
 }
 
 export function imageStyle(
-  rule: NativeImageStyleInput | NativeStyleComposition<NativeImageStyleInput, ImageStyle>,
+  rule: StaticNativeStyleInput<ImageStyle> | NativeStyleComposition<StaticNativeStyleInput<ImageStyle>, ImageStyle>,
   debugId?: string,
 ): ImageStyle {
   return authorStyle(rule, debugId) as unknown as ImageStyle

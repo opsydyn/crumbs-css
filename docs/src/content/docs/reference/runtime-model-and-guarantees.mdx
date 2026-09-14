@@ -24,7 +24,9 @@ Runtime resolution preserves supplied transform arrays and their order, native o
 
 Compiled `styleVariants` maps carry internal metadata while preserving their string keys and TypeScript variant keys. Object spread preserves this metadata. Unmarked legacy maps remain compatible when their shape is unambiguous; native structured-value shapes take precedence over ambiguous map shapes. JSON serialization drops map identity, so regenerate compiler artifacts when relying on native-property-like variant names.
 
-This resolution behavior does not qualify `.css.ts` conversion of structured inputs such as transform arrays or shadow offsets. That compiler compatibility boundary remains incomplete. Nested token evaluation is also outside the current resolution contract.
+The compiler captures static transform arrays and numeric `shadowOffset` / `textShadowOffset` before CSS serialization. Both emission modes preserve order and whole-value replacement, including imported bases, primitive helpers, variants and recipes. Transform entries accept one operation: finite numeric perspective/scales, finite numeric or percentage translations, deg/rad rotations/skews, or a 16-number matrix. Empty transforms are retained; offsets require finite numeric width and height.
+
+Other structured authoring shapes, animated nodes and nested tokens fail with `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` even with permissive diagnostics. Direct primitive helpers also exclude animated transform nodes by type. Pass unsupported native values through React Native's runtime `style` prop. CSS strings retain the existing converter contract. Regenerate dependent artifacts together after upgrading; compiled-output checks do not establish native rendering or platform-specific shadow behavior. Nested token evaluation remains outside the current resolution contract.
 
 ## What it does not guarantee
 

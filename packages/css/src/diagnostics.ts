@@ -6,6 +6,7 @@ export const NativeStylesDiagnosticCode = {
   UnsupportedAtRule: "CRUMBS_CSS_UNSUPPORTED_AT_RULE",
   UnsupportedMedia: "CRUMBS_CSS_UNSUPPORTED_MEDIA",
   UnsupportedSelector: "CRUMBS_CSS_UNSUPPORTED_SELECTOR",
+  UnsupportedStructuredValue: "CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE",
 } as const
 
 export type NativeStylesDiagnosticCode =
