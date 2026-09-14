@@ -289,4 +289,15 @@ The user requested moving forward with the upgrade plan. The first bounded slice
 - Full qualification: `bun run check` passed build/typechecking and 123 tests with 5,238 assertions; `bun run docs:build` built 20 pages; the package benchmark passed its existing local Bun budgets after build completion. An initial benchmark overlapped the clean build and failed on temporarily absent `dist` files; the sequential rerun passed. `git diff --check` passed. These are package/local checks, not device acceptance.
 - Remaining limits: token shorthand/longhand normalization, semantic token domains, malformed-reference admission, composition, structured native values, identity, and runtime import isolation are not repaired by this slice. No Expo playground or device acceptance is claimed.
 
-The next bounded candidate is the M0.9 Expo consumer feedback setup. M1 and wider API work remain gated on M0.
+### 2026-09-14 — M0.9 Expo consumer feedback setup
+
+Approved bounded implementation: [Expo playground plan](superpowers/plans/2026-09-14-expo-playground.md). The app complements Storybook with a 1,000-row list, editable form, nested scopes and an explicitly theme-bridged portal. It uses public package exports on the existing Expo 56 baseline.
+
+- Workspace mode builds public `dist`, watches Crumbs source and restarts Metro after output changes. A content-preserving source touch caused rebuilding/restarting; the Metro status endpoint responded; SIGTERM stopped both Metro and the watcher.
+- Packed mode installed the working-tree `0.1.2-alpha.2` tarball outside workspace resolution. Published `alpha` resolved to exact `0.1.2-alpha.1` and installed outside the workspace. Both modes verify actual package metadata and canonical entry paths, retain an isolated npm lockfile and record consumer identity. Mode/version/revision are displayed in the app.
+- Workspace, packed and published-alpha consumers each passed TypeScript checking and production iOS, Android and web exports. Published `latest` resolved to `0.1.0-alpha.1` and correctly failed npm installation because its React Native peer range is `>=0.83 <0.84`; no override or workspace fallback was applied.
+- Package build/typecheck passed; the final full suite passed 127 tests / 5,255 assertions, including staging-isolation, metadata-mismatch and escaped-link checks. Docs built 20 pages and `git diff --check` passed. The completed slice is committed separately from the token fix and shared React dependency baseline.
+- Local npm cache permissions and sandbox network restrictions were prerequisite issues, resolved with temporary caches and authorized network execution. Temporary-path aliases on macOS are canonicalized before verifying package isolation.
+- Remaining qualification: native/device rendering, keyboard and accessibility behavior, frame/startup/editor budgets and real user feedback. M0.9 remains unchecked until the journeys are exercised on native targets. This setup does not repair other M0 correctness or runtime-import findings, complete M1.9 measurement work, or broaden compatibility support.
+
+The next bounded candidate is native playground journey acceptance, followed by native composition precedence/type repair. M1 and wider API work remain gated on M0.

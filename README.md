@@ -34,11 +34,16 @@ At runtime, `ThemeProvider` and `useThemedStyles` resolve token references into 
 | `bun run test` | Run the package test suite. |
 | `bun run typecheck` | Typecheck the published package. |
 | `bun run app:storybook` | Start the Expo Storybook app for component development. |
+| `bun run playground` | Run the Expo consumer with Crumbs build watching and Metro restarts. |
+| `bun run playground:packed --check` | Typecheck and bundle an isolated consumer of the working-tree tarball. |
+| `bun run playground:published --version=alpha --check` | Qualify an exact registry artifact in an isolated consumer. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
 | `bun run release:check` | Build, typecheck, test, bench, and pack the package. |
 
 ### Workspace layout
+
+See the [Expo playground guide](apps/playground/README.md) for consumer modes and feedback journeys.
 
 ```
 packages/
