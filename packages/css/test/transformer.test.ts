@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { existsSync } from "node:fs"
 import * as path from "node:path"
+import { runInNewContext } from "node:vm"
 import { buildStyleSheetCode, transform } from "../src/transformer"
 
 const PKG_ROOT = path.resolve(__dirname, "..")
@@ -43,6 +44,15 @@ const HAS_NATIVE_APP_FIXTURES =
   existsSync(APP_GRIM_BUTTON_FIXTURE) &&
   existsSync(APP_REFERENCE_FIXTURE) &&
   existsSync(APP_ROOT)
+
+function evaluateNativeExports(code: string): Record<string, unknown> {
+  const exports: Record<string, unknown> = {}
+  runInNewContext(code.replace(/^import .*;$/gm, "").replace(/export const (\w+) =/g, "exports.$1 ="), {
+    exports,
+    StyleSheet: { create: (styles: unknown) => styles },
+  })
+  return exports
+}
 
 // ---------------------------------------------------------------------------
 // Unit tests — pure JS, no VE pipeline, run in bun
@@ -247,7 +257,9 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
 
   it("README pressable variants example compiles to a nested style map", () => {
     const code = runBunTransform(EXAMPLE_PRESSABLE_VARIANTS)
-    expect(code).toContain("export const button = {")
+    const button = evaluateNativeExports(code).button as Record<string, { opacity?: number }>
+    expect(Object.keys(button)).toEqual(["default", "pressed"])
+    expect(button.pressed?.opacity).toBe(0.8)
     expect(code).toContain('"default": _s[')
     expect(code).toContain('"pressed": _s[')
     expect(code).toContain("export const buttonLabel")
@@ -342,7 +354,10 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
 
   it("styleVariants exports a nested StyleSheet map", () => {
     const code = runBunTransform(FIXTURE_VARIANTS)
-    expect(code).toContain("export const button = {")
+    const button = evaluateNativeExports(code).button as Record<string, { opacity?: number }>
+    expect(Object.keys(button)).toEqual(["default", "pressed"])
+    expect(button.default?.opacity).toBe(1)
+    expect(button.pressed?.opacity).toBe(0.8)
     expect(code).toContain('"default": _s[')
     expect(code).toContain('"pressed": _s[')
     expect(code).toContain("--crumbs-color-canvas")

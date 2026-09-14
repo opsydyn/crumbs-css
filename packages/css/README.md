@@ -147,6 +147,10 @@ export const title = textStyle([copy, { fontSize: 24, fontWeight: "700" }])
 
 Later authored entries override the same canonical native property. Compositions accept multiple bases, repeated bases and nested readonly arrays, and `styleVariants` accepts composed values. Inline properties retain each primitive helper's type checks. Crumbs preserves this sequence explicitly; importing `style` directly from vanilla-extract does not provide this native ordering guarantee. Token and literal physical padding/margin, horizontal/vertical aliases and gap normalize before merging. Compiled artifacts expose longhands; other shorthand families remain unqualified. See the migration notes in [compatibility](./COMPATIBILITY.md).
 
+## Runtime structured values
+
+Runtime theme resolution preserves supplied native structured arrays/objects, their references and scalar siblings. Typed view/text/image results retain their primitive types. Compiled variant maps carry internal metadata with unchanged string keys, including through object spread; ambiguous legacy maps should be regenerated. This runtime behavior does not establish end-to-end compiler support for structured authoring inputs. Nested token resolution and the compiler boundary remain separate work; see [compatibility](./COMPATIBILITY.md).
+
 ## Minimal recipe example
 
 ```ts

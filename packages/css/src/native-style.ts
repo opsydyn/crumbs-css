@@ -2,6 +2,7 @@ import { type StyleRule, style as vanillaStyle } from "@vanilla-extract/css"
 import { markCompositionUsed, registerComposition } from "@vanilla-extract/css/adapter"
 import { getFileScope } from "@vanilla-extract/css/fileScope"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
+import { markNativeStyleMap } from "./native-style-map"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -158,7 +159,7 @@ export function styleVariants<TVariants extends Readonly<Record<string, NativeSt
   for (const [name, rule] of Object.entries(variants) as Array<[keyof TVariants, NativeStyleRule]>) {
     result[name] = style(rule, debugId === undefined ? undefined : `${debugId}_${String(name)}`)
   }
-  return result as NativeStyleVariants<TVariants>
+  return markNativeStyleMap(result) as NativeStyleVariants<TVariants>
 }
 
 export function recipe<TVariants extends NativeRecipeVariantsConfig>(

@@ -18,6 +18,14 @@ description: What the package guarantees today and how styles move from authorin
 - explicit state selection for interactive styles
 - stable diagnostic codes for tooling and CI
 
+## Native structured values and variant maps
+
+Runtime resolution preserves supplied transform arrays and their order, native objects such as shadow offsets, scalar siblings and structured-value references. Ordered style arrays replace nested values as whole values. Only top-level token references are resolved; animated nodes are never evaluated by the resolver. Typed view/text/image inputs retain their primitive result types through direct resolvers, hooks, namespace resolution and style arrays.
+
+Compiled `styleVariants` maps carry internal metadata while preserving their string keys and TypeScript variant keys. Object spread preserves this metadata. Unmarked legacy maps remain compatible when their shape is unambiguous; native structured-value shapes take precedence over ambiguous map shapes. JSON serialization drops map identity, so regenerate compiler artifacts when relying on native-property-like variant names.
+
+This resolution behavior does not qualify `.css.ts` conversion of structured inputs such as transform arrays or shadow offsets. That compiler compatibility boundary remains incomplete. Nested token evaluation is also outside the current resolution contract.
+
 ## What it does not guarantee
 
 - browser CSS parity

@@ -7,6 +7,7 @@ import {
   useMemo,
 } from "react"
 import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diagnostics"
+import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import type {
   NativeRecipe,
   NativeRecipeSelection,
@@ -15,7 +16,8 @@ import type {
   NativeTheme,
 } from "./native-style"
 import { NativeRecipeType } from "./native-style"
-import { isThemeTokenReference } from "./theme-token"
+import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
+import { type NativeThemeTokenReference, isThemeTokenReference } from "./theme-token"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -59,7 +61,25 @@ export function useTheme<TContract extends Record<string, unknown>>(): NativeThe
   return theme as NativeTheme<TContract>
 }
 
-export function useThemedStyle(style: unknown): NativeStyle | undefined {
+type NativePrimitiveStyle = ImageStyle | TextStyle | ViewStyle
+type TokenizedNativeStyle<TStyle> = {
+  readonly [K in keyof TStyle]?: TStyle[K] | NativeThemeTokenReference
+}
+type TokenizedNativePrimitiveStyle = TokenizedNativeStyle<ImageStyle> |
+  TokenizedNativeStyle<TextStyle> | TokenizedNativeStyle<ViewStyle>
+type RecursiveStyleLeaf<TInput> = [Extract<TInput, NativePrimitiveStyle>] extends [never]
+  ? NativeStyle : Extract<TInput, NativePrimitiveStyle>
+type ResolvedNativeStyleInput<TInput, TSeen = never> = TInput extends false | null | undefined
+  ? undefined
+  : TInput extends NativePrimitiveStyle
+    ? TInput
+    : TInput extends ReadonlyArray<infer TEntry>
+      ? TInput extends TSeen
+        ? RecursiveStyleLeaf<TEntry>
+        : ResolvedNativeStyleInput<TEntry, TSeen | TInput>
+      : NativeStyle
+
+export function useThemedStyle<TInput>(style: TInput): ResolvedNativeStyleInput<TInput> | undefined {
   const theme = useTheme()
   return useMemo(() => resolveThemeTokens(style, theme), [style, theme])
 }
@@ -67,11 +87,13 @@ export function useThemedStyle(style: unknown): NativeStyle | undefined {
 type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>>> = {
   readonly [K in keyof TStyles]: TStyles[K] extends NativeRecipe<infer TVariants>
     ? NativeRecipe<TVariants>
-    : TStyles[K] extends NativeStyle
-      ? NativeStyle | undefined
-      : TStyles[K] extends Readonly<Record<string, unknown>>
-        ? { readonly [V in keyof TStyles[K]]: NativeStyle | undefined }
-        : NativeStyle | undefined
+    : TStyles[K] extends NativePrimitiveStyle
+      ? TStyles[K] | undefined
+      : TStyles[K] extends TokenizedNativePrimitiveStyle
+        ? NativeStyle | undefined
+        : TStyles[K] extends Readonly<Record<string, unknown>>
+          ? { readonly [V in keyof TStyles[K]]: ResolvedNativeStyleInput<TStyles[K][V]> | undefined }
+          : ResolvedNativeStyleInput<TStyles[K]> | undefined
 }
 
 export function useThemedStyles<TStyles extends Readonly<Record<string, unknown>>>(
@@ -92,10 +114,10 @@ export function resolveThemeStyles<TStyles extends Readonly<Record<string, unkno
   return resolved as ResolvedThemeStyles<TStyles>
 }
 
-export function resolveThemeTokens(
-  style: unknown,
+export function resolveThemeTokens<TInput>(
+  style: TInput,
   theme: NativeTheme<Record<string, unknown>>,
-): NativeStyle | undefined {
+): ResolvedNativeStyleInput<TInput> | undefined {
   const flattened = flattenStyle(style)
   if (flattened === undefined) return undefined
 
@@ -104,7 +126,7 @@ export function resolveThemeTokens(
     resolved[key] = isThemeTokenReference(value) ? resolveTokenValue(value.varName, theme) : value
   }
 
-  return resolved as NativeStyle
+  return resolved as ResolvedNativeStyleInput<TInput>
 }
 
 export function resolveRecipeStyle<TVariants extends NativeRecipeVariantsConfig>(
@@ -170,7 +192,7 @@ function resolveStyleExport(
     for (const [key, value] of Object.entries(style)) {
       resolved[key] = resolveThemeTokens(value, theme)
     }
-    return resolved
+    return isNativeStyleMap(style) ? markNativeStyleMap(resolved) : resolved
   }
   return resolveThemeTokens(style, theme)
 }
@@ -267,9 +289,28 @@ function isNativeRecipe(value: unknown): value is NativeRecipe<NativeRecipeVaria
 
 function isNestedStyleMap(value: unknown): value is Readonly<Record<string, unknown>> {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false
-  return Object.values(value).some(
-    (entry) => typeof entry === "object" && entry !== null && !isThemeTokenReference(entry),
-  )
+  if (isNativeStyleMap(value)) return true
+  const entries = Object.entries(value)
+  return entries.length > 0 && entries.every(([key, entry]) => {
+    if (isStructuredNativeValue(key, entry)) return false
+    return entry === undefined || entry === null || entry === false ||
+      (typeof entry === "object" && !isThemeTokenReference(entry))
+  })
+}
+
+const NATIVE_ARRAY_VALUE_PROPS = new Set([
+  "transform", "transformOrigin", "transformMatrix", "fontVariant", "filter", "boxShadow",
+  "experimental_backgroundImage", "experimental_backgroundSize",
+  "experimental_backgroundPosition", "experimental_backgroundRepeat",
+])
+
+function isStructuredNativeValue(key: string, value: unknown): boolean {
+  if (Array.isArray(value)) return NATIVE_ARRAY_VALUE_PROPS.has(key)
+  if (typeof value !== "object" || value === null || isThemeTokenReference(value)) return false
+  if (key === "color" || key.endsWith("Color")) return true
+  if ((key === "shadowOffset" || key === "textShadowOffset") && "width" in value && "height" in value) return true
+  // Animated nodes are opaque native values; never execute them here.
+  return "__getValue" in value && typeof value.__getValue === "function"
 }
 
 function resolveTokenValue(varName: string, theme: NativeTheme<Record<string, unknown>>): unknown {

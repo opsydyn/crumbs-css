@@ -17,6 +17,7 @@ import {
 } from "@vanilla-extract/integration"
 import { cssDeclarationsToRN } from "./css-to-rn"
 import { assertNativeCssCompatibility } from "./native-compatibility"
+import { isNativeStyleMap, NativeStyleMapType } from "./native-style-map"
 import { parseCssClassRules } from "./parse-virtual-css"
 
 // Minimal esbuild plugin shape. `setup` receives `build: unknown` so it doesn't
@@ -219,9 +220,27 @@ async function processVanillaFileForNative({
 
   return serializeVanillaModule(
     cssImports,
-    evalResult as Record<string, unknown>,
+    captureNativeStyleMapMetadata(evalResult) as Record<string, unknown>,
     unusedCompositionRegex,
   )
+}
+
+function captureNativeStyleMapMetadata(value: unknown): unknown {
+  if (typeof value !== "object" || value === null) return value
+  if (isNativeStyleMap(value)) {
+    return {
+      $$type: NativeStyleMapType,
+      styles: Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, captureNativeStyleMapMetadata(entry)])),
+    }
+  }
+  if (Array.isArray(value)) {
+    const captured = value.map(captureNativeStyleMapMetadata)
+    return captured.some((entry, index) => entry !== value[index]) ? captured : value
+  }
+  const entries = Object.entries(value)
+  const captured = entries.map(([key, entry]) => [key, captureNativeStyleMapMetadata(entry)] as const)
+  return captured.some(([, entry], index) => entry !== entries[index]?.[1])
+    ? Object.fromEntries(captured) : value
 }
 
 /**
@@ -445,6 +464,9 @@ function serializeExportValue(
   value: unknown,
   classStyles: ReadonlyMap<string, Record<string, unknown>>,
 ): string {
+  if (typeof value === "object" && value !== null && "$$type" in value && value.$$type === NativeStyleMapType && "styles" in value) {
+    return `Object.defineProperty(${serializeExportValue(value.styles, classStyles)}, Symbol.for(${JSON.stringify(NativeStyleMapType)}), { value: true, enumerable: true })`
+  }
   if (isRecipeClassRef(value)) {
     return classStyles.has(value.className) ? `_s["${value.className}"]` : "undefined"
   }
