@@ -1,0 +1,60 @@
+{
+  "sourceRevision": "c6e5635ba393421e2006d8754be5baeb5113a470",
+  "sourceState": "Working tree based on sourceRevision; retained source and emitted hashes identify this audit before its commit",
+  "package": {
+    "command": "bun run check",
+    "exitCode": 0,
+    "tests": 260,
+    "assertions": 11244,
+    "files": 38,
+    "packedPublicTypes": "Node16 and Bundler fixtures passed within package suite",
+    "publicDeclarationEffectImports": 0
+  },
+  "audit": {
+    "command": "CRUMBS_AUDIT_NODE_FLOOR=/path/to/exact/node-v22.0.0 bun packages/css/bench/effect-boundary-audit.ts",
+    "exitCode": 0,
+    "repeatedProcessSamples": 60,
+    "bundledCodecReceipts": "passed both formats and Node versions",
+    "externalFloorCjsControl": "expected ERR_REQUIRE_ESM",
+    "externalPositiveControls": 3,
+    "sourceAndEmittedHashesAfterFinalBuild": "match retained audit"
+  },
+  "consumers": {
+    "workspace": {
+      "command": "bun run playground:check",
+      "exitCode": 0,
+      "typecheck": "passed",
+      "expoExports": "ios/android/web JavaScript",
+      "runtimeMaps": 3,
+      "effectSources": 0
+    },
+    "packed": {
+      "command": "npm pack --ignore-scripts; npm install --ignore-scripts --no-audit --no-fund <local-tarball>; tsc --noEmit; expo export --platform all --source-maps",
+      "exitCode": 0,
+      "isolation": "retained isolated npm consumer outside workspace, refreshed from local current tarball; existing Expo dependencies reused",
+      "runtimeMaps": 3,
+      "effectSources": 0,
+      "identity": "packed-consumer.json"
+    }
+  },
+  "storybook": {
+    "command": "bun run app:typecheck",
+    "exitCode": 0
+  },
+  "docs": {
+    "command": "bun run docs:build",
+    "exitCode": 0,
+    "pages": 20
+  },
+  "status": {
+    "M1.3a": "complete",
+    "M1.3b": "deferred: no actual external-theme decoding entrypoint exists",
+    "M1": "in progress",
+    "nativeAndroid": "deferred until last",
+    "devicePerformance": "not run",
+    "push": "none",
+    "publication": "none",
+    "unrelatedReleaseVersionEdits": "preserved and excluded"
+  },
+  "retainedTextLogs": "Trailing whitespace normalized; numeric/raw JSON samples retained without rounding"
+}

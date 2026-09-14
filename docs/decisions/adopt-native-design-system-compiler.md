@@ -75,6 +75,8 @@ Compilation, normalization, and code generation are not automatically reversible
 
 Use Effect error handling and resource management in compiler/tooling where they address a concrete need. Keep the runtime dependency graph separate. Runtime theme decoding may live behind a dedicated entrypoint with a measured footprint. Normal consumer APIs must not require Effect environments, services, runners, or Effect-valued return types.
 
+Implementation evidence — 2026-09-14 M1.3a: exact Effect external CommonJS fails on the declared Node 22.0.0 tooling floor. Tooling JavaScript now bundles exact Effect/subpath imports; ordinary runtime remains isolated and its application maps deny Effect. A private initial-contract candidate passes both formats on floor/current Node. [Audit and limits](../assessments/2026-09-14-effect-boundary-audit.md) retain host measurements; the actual external-theme decoder does not exist and M1.3b remains deferred. Repeat qualification at concrete ingress wiring. This bounded implementation does not accept the whole proposed ADR or establish device budgets.
+
 ### D4. Use Optic for composable focuses, with one canonical theme value
 
 Use Effect 4 `Optic` for repeated nested access, immutable theme transformations, optional overrides, and tagged IR passes where it improves clarity. Construct reusable optics outside render loops. Direct flat lookup remains the performance baseline for resolved token access.

@@ -36,3 +36,8 @@ Ordinary `/theme` runtime graphs remain React-only in both emitted formats. Emit
 M1.1 is complete. M1 remains in progress. No Crumbs payload schema, artifact version, external theme decoder, optic theme-update API, measured Effect initialization budget or native performance improvement is delivered by this dependency-selection slice. No native/device run, push, publication or release-version edit is included. Existing working-tree version edits are preserved and excluded from this commit.
 
 Next bounded slice: **M1.2**, define internal schemas for tagged declarations/references, contract identity, structured diagnostics and an explicit artifact version. Specify exact fields, finite domains, codec round-trip domains and invalid-input diagnostics before wiring them into compiler/runtime paths. Start only after user approval.
+
+
+## Follow-up evidence — M1.3a
+
+The [emitted boundary audit](2026-09-14-effect-boundary-audit.md) now demonstrates external CommonJS failure on exact Node 22.0.0 and qualifies tooling-only Effect bundling with a private emitted initial-contract candidate in both formats. Current transformer/theme initialization is measured separately. Ordinary runtime maps deny Effect. The real external-theme decoder remains absent/unqualified under M1.3b; repeat this audit when concrete ingress is wired. The M1.1 evidence above remains the historical dependency/API selection, not a claim that external Effect CommonJS works across the declared Node range.

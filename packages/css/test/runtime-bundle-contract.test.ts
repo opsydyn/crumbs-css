@@ -10,6 +10,9 @@ describe('Metro runtime bundle source contract', () => {
   for (const name of ['style.cjs','index.mjs','transformer.cjs','metro-plugin.cjs']) expect(() => assertRuntimeBundleSources([`/app/node_modules/@opsydyn/crumbs-css/dist/${name}`])).toThrow(/Non-runtime Crumbs/)
   for (const name of ['@vanilla-extract/css','@vanilla-extract/integration','css-to-react-native','esbuild']) expect(() => assertRuntimeBundleSources([`/app/node_modules/${name}/index.js`])).toThrow(/Compiler dependency/)
  })
+ it('rejects Effect in ordinary app maps including Bun and Windows paths', () => {
+  for (const source of ['/app/node_modules/effect/dist/Schema.js', '/repo/node_modules/.bun/effect@4.0.0-rc.115/node_modules/effect/dist/Schema.js', 'C:\\app\\node_modules\\effect\\dist\\Schema.js']) expect(() => assertRuntimeBundleSources([source])).toThrow(/Effect dependency/)
+ })
  it('fails absent or incomplete retained maps and accepts indexed source maps', async () => {
   const dir = mkdtempSync(path.join(tmpdir(),'crumbs-runtime-maps-'))
   try {

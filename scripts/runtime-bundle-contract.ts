@@ -7,6 +7,9 @@ export function assertRuntimeBundleSources(sources: ReadonlyArray<string>): numb
   let crumbs = 0
   for (const original of sources) {
     const source = original.replaceAll("\\", "/")
+    if (/(?:^|\/)node_modules\/effect\//.test(source)) {
+      throw new Error(`Effect dependency in ordinary runtime bundle: ${source}`)
+    }
     if (/(?:^|\/)node_modules\/(?:@vanilla-extract\/|css-to-react-native\/|esbuild\/)/.test(source)) {
       throw new Error(`Compiler dependency in runtime bundle: ${source}`)
     }

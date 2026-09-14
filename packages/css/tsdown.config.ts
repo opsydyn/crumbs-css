@@ -1,20 +1,11 @@
 import { defineConfig } from "tsdown"
 import { writeFileSync } from "node:fs"
+import { compilerDependencies, runtimeDependencies } from "./build-policy.ts"
 
 const shouldClean = process.env.CRUMBS_CSS_SKIP_CLEAN !== "1"
 
 const common = {
-  deps: {
-    neverBundle: [
-      /^node:/,
-      /^@vanilla-extract\//,
-      "css-to-react-native",
-      "metro",
-      "metro-transform-worker",
-      "react",
-      "react-native",
-    ],
-  },
+  deps: runtimeDependencies,
   format: ["esm" as const, "cjs" as const],
   outDir: "dist",
   shims: true,
@@ -37,6 +28,7 @@ export default defineConfig([
     clean: false,
     dts: false,
     entry: toolEntries,
+    deps: compilerDependencies,
   },
   // One declaration graph preserves nominal token brands across public entries.
   {
