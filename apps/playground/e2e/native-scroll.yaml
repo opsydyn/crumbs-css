@@ -1,0 +1,29 @@
+appId: host.exp.Exponent
+---
+- runFlow: open-playground.yaml
+- swipe:
+    start: 50%, 80%
+    end: 50%, 48%
+    duration: 1000
+- copyTextFrom:
+    id: crumbs-scroll-probe
+- runScript: read-probe.js
+- assertTrue: ${output.probe.y > 0 && output.probe.first > 1 && output.probe.drags > 0}
+- evalScript: ${output.forward = output.probe}
+- takeScreenshot: forward-light
+- tapOn: Switch to dark
+- copyTextFrom:
+    id: crumbs-scroll-probe
+- runScript: read-probe.js
+- assertTrue: ${output.probe.y === output.forward.y && output.probe.first === output.forward.first}
+- assertVisible: Switch to light
+- takeScreenshot: forward-dark
+- swipe:
+    start: 50%, 48%
+    end: 50%, 80%
+    duration: 1000
+- copyTextFrom:
+    id: crumbs-scroll-probe
+- runScript: read-probe.js
+- assertTrue: ${output.probe.y < output.forward.y && output.probe.first < output.forward.first && output.probe.drags > output.forward.drags}
+- takeScreenshot: reverse-dark

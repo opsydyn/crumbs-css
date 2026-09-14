@@ -1,0 +1,5 @@
+appId: host.exp.Exponent
+---
+- runFlow: open-playground.yaml
+# Deliberately omit the gesture. This flow must fail; it qualifies the acceptance assertion.
+- assertTrue: ${output.probe.y > 0 && output.probe.first > 1 && output.probe.drags > 0}

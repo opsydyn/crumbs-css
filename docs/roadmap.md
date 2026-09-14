@@ -315,3 +315,15 @@ Next recommended slice: establish a reliable native gesture acceptance path for 
 [Native input evidence](acceptance/2026-09-14-scroll/README.md) records a development-only opt-in FlatList probe. Coordinate taps changed the theme correctly, but two automated drags (including an explicitly raised Simulator window) delivered touch starts/ends without move callbacks, native drag starts, offset changes or visible-row advancement. Reported content height exceeded the viewport height. No layout/compiler defect was demonstrated, so neither was changed.
 
 The probe is off by default and guarded out of production UI. It supplies stable test IDs and an acceptance contract for real swipes, theme position preservation and reverse movement. Native swipe acceptance remains pending the explicit Maestro/XCTest runner choice required by the computer-use tool instructions; M0.9 remains unchecked. No new package dependency was added.
+
+### 2026-09-14 — Maestro native scroll acceptance
+
+The user selected Maestro. The [completed native scroll evidence](acceptance/2026-09-14-maestro/README.md) records Maestro 2.10.0 / Java 17.0.20.1 on the dedicated iPhone 17 / iOS 26.5 simulator in Expo Go 56.0.4. Reusable flows perform actual native swipes and admit probe measurements before asserting scrolling, exact theme position preservation and reverse movement. Maestro remains an external development tool.
+
+- The negative control completed startup with offset 0, row 1 and zero drags, then failed the deliberately unsatisfied scrolling assertion.
+- Two fresh-launch positive runs passed. Forward swipes reached row 5 at offsets 259 and 261 respectively; each theme change preserved that exact offset and row. Reverse swipes returned to row 1 at offsets 8 and 14, with a second native drag. Six raw screenshots, JUnit reports and hashed structured measurements are retained.
+- No app scrolling defect was demonstrated or repaired. A Maestro initialization hang was traced to Android fallback discovery probing an unrelated local IPv4 service; a process-local Java IPv6 preference avoided the collision without changing that service.
+- The decoder's red admission cases failed before implementation; green package qualification passed build/typechecking and 130 tests / 5,263 assertions. `bun run playground:check` passed consumer typechecking and production iOS, Android and web exports; docs built 20 pages. Native tests ran before the clean package build, avoiding Metro/compiler output races. Retained artifact hashes and documentation links were verified.
+- M0.9 remains unchecked because Android native acceptance has not run. Probe-enabled development runs do not qualify release performance, standalone apps, physical devices or screen-reader behavior. Pending release-version changes are excluded from this slice.
+
+Next recommended slice: install the Android SDK/emulator prerequisites and qualify the playground's native Android journeys, reusing the Maestro scroll assertions. This would resolve the remaining platform gap in M0.9 before returning to native composition precedence/type repairs. Begin only after user approval.
