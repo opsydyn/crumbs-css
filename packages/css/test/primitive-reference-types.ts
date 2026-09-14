@@ -111,3 +111,67 @@ viewStyle({ insetBlockEnd: "auto", insetBlockStart: -2 })
 style({ inset: "1px 2px" })
 // @ts-expect-error nested variant inset aliases accept one dimension
 styleVariants({ invalid: [{ insetInline: "1px 2px" }] })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderTop: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderRight: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBottom: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderLeft: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderInline: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBlock: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderInlineStart: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderInlineEnd: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBlockStart: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBlockEnd: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderTopStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderRightStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBottomStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderLeftStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderInlineStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBlockStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderInlineStartStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderInlineEndStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBlockStartStyle: "solid" })
+
+// @ts-expect-error side compound/style borders have no supported native authoring contract
+style({ padding: 1, borderBlockEndStyle: "solid" })
+
+style({ border: "2px solid red", borderLeftWidth: 3, borderStyle: "solid" })
+// @ts-expect-error nested variant side declarations remain unsupported
+styleVariants({ invalid: [{ padding: 1, borderTop: "2px solid red" }] })

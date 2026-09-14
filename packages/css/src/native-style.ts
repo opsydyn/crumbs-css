@@ -22,8 +22,11 @@ type NativePrimitiveReference = ImageStyle | TextStyle | ViewStyle
 type NativeSpacingAlias = "paddingInline" | "paddingBlock" | "paddingInlineStart" | "paddingInlineEnd" | "paddingBlockStart" | "paddingBlockEnd"
   | "marginInline" | "marginBlock" | "marginInlineStart" | "marginInlineEnd" | "marginBlockStart" | "marginBlockEnd"
 type NativeInsetAlias = "inset" | "insetInline" | "insetBlock" | "insetInlineStart" | "insetInlineEnd" | "insetBlockStart" | "insetBlockEnd"
+type NativeSideBorder = "borderTop" | "borderRight" | "borderBottom" | "borderLeft" | "borderInline" | "borderBlock"
+  | "borderInlineStart" | "borderInlineEnd" | "borderBlockStart" | "borderBlockEnd"
+type UnsupportedSideBorderInput = { readonly [K in NativeSideBorder | `${NativeSideBorder}Style`]?: never }
 type NativeFlatStyleRule = Omit<StyleRule, "flex" | NativeSpacingAlias | NativeInsetAlias> &
-  Pick<StaticNativeStyleInput<NativeStyle>, "flex" | NativeSpacingAlias | NativeInsetAlias>
+  Pick<StaticNativeStyleInput<NativeStyle>, "flex" | NativeSpacingAlias | NativeInsetAlias> & UnsupportedSideBorderInput
 export type NativeStyleRule = NativeFlatStyleRule | StaticNativeStyleInput<NativeStyle> |
   NativeStyleComposition<NativeFlatStyleRule | StaticNativeStyleInput<NativeStyle>, NativePrimitiveReference>
 
@@ -63,7 +66,7 @@ type StaticTransformEntry<TEntry> = TEntry extends unknown ? {
 type NativeStaticTransform = StaticTransformEntry<Extract<NonNullable<ViewStyle["transform"]>, ReadonlyArray<unknown>>[number]>
 export type NativeStyleInput<TStyle> = {
   readonly [K in keyof TStyle]?: NativeStyleValueInput<TStyle[K]>
-}
+} & UnsupportedSideBorderInput
 type StaticNativeStyleInput<TStyle> = Omit<NativeStyleInput<TStyle>, "transform"> & {
   readonly transform?: string | ReadonlyArray<NativeStaticTransform> | undefined
 }

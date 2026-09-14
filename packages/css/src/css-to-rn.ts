@@ -54,6 +54,10 @@ const NATIVE_DIMENSION_ALIASES = new Set([
   "marginInline", "marginBlock", "marginInlineStart", "marginInlineEnd", "marginBlockStart", "marginBlockEnd",
   "inset", "insetInline", "insetBlock", "insetInlineStart", "insetInlineEnd", "insetBlockStart", "insetBlockEnd",
 ])
+const NATIVE_UNSUPPORTED_SIDE_BORDERS = new Set([
+  "borderTop", "borderRight", "borderBottom", "borderLeft", "borderInline", "borderBlock",
+  "borderInlineStart", "borderInlineEnd", "borderBlockStart", "borderBlockEnd",
+].flatMap(prop => [prop, `${prop}Style`]))
 const NATIVE_STYLE_PROPS = new Set([
   "alignContent",
   "alignItems",
@@ -237,6 +241,17 @@ export function cssDeclarationsToRN(
         code: NativeStylesDiagnosticCode.DroppedDeclaration,
         prop,
         reason: "React Native has no browser vendor prefixes",
+        value,
+      })
+      continue
+    }
+
+    // Give unsupported side borders one actionable diagnostic before conversion.
+    if (NATIVE_UNSUPPORTED_SIDE_BORDERS.has(toReactNativePropName(prop))) {
+      dropped.push({
+        code: NativeStylesDiagnosticCode.DroppedDeclaration,
+        prop,
+        reason: "side-specific compound borders and side border styles are unsupported; use explicit side width/color properties with the global borderStyle",
         value,
       })
       continue

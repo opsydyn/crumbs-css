@@ -245,3 +245,5 @@ Numeric `flex` now stays a native field for tokens and literals; explicit grow/s
 Spacing Inline/Block aliases now normalize before ordered merging; direction-dependent Start/End fields remain native. Four existing logical radius fields now pass compilation. Regenerate compiled artifacts together; see [spacing-alias migration and native precedence](./COMPATIBILITY.md#supported).
 
 Inset aliases now normalize to native sides/start/end before ordered merging for tokens and literals. Unsupported multi-value CSS forms require explicit side properties. Regenerate compiled artifacts together; see [alpha inset migration](./COMPATIBILITY.md#supported).
+
+Generic authoring now rejects unsupported side compound/style borders with actionable compiler migration guidance. Use side width/color plus global borderStyle where the native primitive supports it; literal broad border remains supported. See [side-border admission](./COMPATIBILITY.md#supported).
