@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import fc from "fast-check"
 import { cssDeclarationsToRN, NativeStylesDeclarationError } from "../src/css-to-rn"
 import { NativeStylesDiagnosticCode } from "../src/diagnostics"
-import { isThemeTokenReference } from "../src/theme-token"
+import { createThemeTokenReference, isThemeTokenReference } from "../src/theme-token"
 
 type ValidDeclaration = {
   readonly expectedProp: string
@@ -38,6 +38,36 @@ const themeTokenPropArbitrary = fc.constantFrom(
 )
 
 describe("css declaration conversion properties", () => {
+  it("preserves declaration order for generated mixtures of tokens and literals", () => {
+    const entry = fc.oneof(
+      fc.constantFrom(
+        { prop: "color", nativeProp: "color", value: "red", expected: "red" },
+        { prop: "background-color", nativeProp: "backgroundColor", value: "blue", expected: "blue" },
+        { prop: "opacity", nativeProp: "opacity", value: "0.5", expected: 0.5 },
+      ),
+      fc.constantFrom(
+        { prop: "color", nativeProp: "color", value: "var(--crumbs-color-accent)", expected: createThemeTokenReference("--crumbs-color-accent") },
+        { prop: "background-color", nativeProp: "backgroundColor", value: "var(--crumbs-color-canvas)", expected: createThemeTokenReference("--crumbs-color-canvas") },
+        { prop: "opacity", nativeProp: "opacity", value: "var(--crumbs-opacity-disabled)", expected: createThemeTokenReference("--crumbs-opacity-disabled") },
+      ),
+    )
+    fc.assert(fc.property(fc.array(entry, { minLength: 1, maxLength: 30 }), (entries) => {
+      const expected: Record<string, unknown> = {}
+      for (const item of entries) expected[item.nativeProp] = item.expected
+      expect(cssDeclarationsToRN(entries.map(({ prop, value }) => [prop, value] as const), {
+        strictDiagnostics: true,
+      })).toEqual(expected)
+    }), { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED })
+  })
+
+  it("rejects generated unknown properties even when their value is a native token", () => {
+    fc.assert(fc.property(fc.nat(), (suffix) => {
+      expect(() => cssDeclarationsToRN([
+        [`unknown-native-property-${suffix}`, "var(--crumbs-color-accent)"],
+      ], { strictDiagnostics: true })).toThrow(NativeStylesDeclarationError)
+    }), { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED })
+  })
+
   it("keeps valid declarations beside unsupported declarations in non-strict mode", () => {
     fc.assert(
       fc.property(

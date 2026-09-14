@@ -68,6 +68,17 @@ Strict diagnostics also turn dropped individual declarations into hard
 
 ## Diagnostic codes
 
+Native theme references are checked against the same native property support
+list used for literal declarations. An unsupported property such as
+`transition` is dropped in default mode and fails with
+`CRUMBS_CSS_DROPPED_DECLARATION` in strict mode even when its value is a native
+token.
+
+For repeated declarations targeting the same native property, later token or
+literal values replace earlier values in declaration order. This does not yet
+guarantee normalization of token-backed shorthands against their longhands or
+semantic token domains; those are separate roadmap work.
+
 Diagnostic codes are stable package contract values exported from the package root
 as `NativeStylesDiagnosticCode`. Tooling and CI should key on codes rather than
 full message text.

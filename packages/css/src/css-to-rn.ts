@@ -188,7 +188,6 @@ export function cssDeclarationsToRN(
   declarations: ReadonlyArray<readonly [string, string]>,
   options: CssDeclarationsToRNOptions = {},
 ): Record<string, unknown> {
-  const themed: Record<string, unknown> = {}
   const converted: Record<string, unknown> = {}
   const dropped: DroppedDeclaration[] = []
 
@@ -205,7 +204,19 @@ export function cssDeclarationsToRN(
 
     const nativeThemeVarName = parseNativeThemeVarName(value)
     if (nativeThemeVarName !== null) {
-      themed[toReactNativePropName(prop)] = createThemeTokenReference(nativeThemeVarName)
+      const nativeProp = toReactNativePropName(prop)
+      if (!NATIVE_STYLE_PROPS.has(nativeProp)) {
+        dropped.push({
+          code: NativeStylesDiagnosticCode.DroppedDeclaration,
+          prop,
+          reason: "React Native StyleSheet does not support this CSS declaration",
+          value,
+        })
+        continue
+      }
+      // Keep references and literals in one ordered result: later declarations
+      // replace earlier declarations regardless of how their values resolve.
+      converted[nativeProp] = createThemeTokenReference(nativeThemeVarName)
       continue
     }
 
@@ -242,7 +253,7 @@ export function cssDeclarationsToRN(
     )
   }
 
-  return { ...converted, ...themed }
+  return converted
 }
 
 function transformDeclaration(

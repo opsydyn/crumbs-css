@@ -11,6 +11,7 @@ Monorepo for `@opsydyn/crumbs-css` — React Native style authoring with a famil
 - **Docs site workspace:** [`docs/`](./docs) is the primary consumer documentation surface and follows a Diataxis structure.
 - **npm quickstart:** [`packages/css/README.md`](./packages/css/README.md) is the concise package-level entrypoint.
 - **Repository overview:** this README covers workspace layout, development commands, and release operations.
+- **Architecture and future work:** [decision records](./docs/decisions/README.md), the [design-system roadmap](./docs/roadmap.md), and the [2026-09-06 assessment](./docs/assessments/2026-09-06-design-system-assessment.md) capture proposed direction and its evidence. Roadmap features are not current package guarantees.
 
 ## Package
 

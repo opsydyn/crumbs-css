@@ -39,3 +39,14 @@ src/content/docs/
 - Keep the docs site aligned with the published package surface, not future plans.
 - Prefer linking from READMEs into the docs site rather than duplicating long examples.
 - Treat package naming, Metro setup, theme/runtime terminology, and release wording as contract text.
+
+## Architecture and planning
+
+Repository planning documents live outside the site's `src/content/docs/` collection:
+
+- [Architecture decision index](./decisions/README.md)
+- [Native design-system compiler ADR](./decisions/adopt-native-design-system-compiler.md)
+- [Design-system roadmap](./roadmap.md)
+- [2026-09-06 assessment](./assessments/2026-09-06-design-system-assessment.md)
+
+The ADR and roadmap are proposed. Their acceptance criteria describe future work; update consumer-facing reference pages only when the corresponding behavior ships.

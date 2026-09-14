@@ -1,7 +1,48 @@
 import { describe, expect, it } from "bun:test"
-import { cssDeclarationsToRN } from "../src/css-to-rn"
+import { cssDeclarationsToRN, NativeStylesDeclarationError } from "../src/css-to-rn"
+import { NativeStylesDiagnosticCode } from "../src/diagnostics"
+import { createThemeTokenReference } from "../src/theme-token"
 
 describe("cssDeclarationsToRN", () => {
+  it("lets a later literal replace a token on the same native property", () => {
+    expect(cssDeclarationsToRN([
+      ["color", "var(--crumbs-color-accent)"],
+      ["color", "blue"],
+    ])).toEqual({ color: "blue" })
+  })
+
+  it("lets a later token replace a literal on the same native property", () => {
+    expect(cssDeclarationsToRN([
+      ["color", "blue"],
+      ["color", "var(--crumbs-color-accent)"],
+    ])).toEqual({ color: createThemeTokenReference("--crumbs-color-accent") })
+  })
+
+  it("rejects unsupported token properties with strict diagnostic context", () => {
+    let failure: unknown
+    try {
+      cssDeclarationsToRN([["transition", "var(--crumbs-color-accent)"]], {
+        context: { filePath: "button.css.ts", exportName: "button" },
+        strictDiagnostics: true,
+      })
+    } catch (error) {
+      failure = error
+    }
+    expect(failure).toBeInstanceOf(NativeStylesDeclarationError)
+    const error = failure as NativeStylesDeclarationError
+    expect(error.code).toBe(NativeStylesDiagnosticCode.DroppedDeclaration)
+    expect(error.message).toContain('transition: var(--crumbs-color-accent)')
+    expect(error.message).toContain('export "button"')
+    expect(error.message).toContain("button.css.ts")
+  })
+
+  it("drops unsupported token properties without losing valid adjacent declarations", () => {
+    expect(cssDeclarationsToRN([
+      ["transition", "var(--crumbs-color-accent)"],
+      ["color", "red"],
+    ])).toEqual({ color: "red" })
+  })
+
   it("converts font-size px to number", () => {
     expect(cssDeclarationsToRN([["font-size", "16px"]])).toEqual({ fontSize: 16 })
   })
