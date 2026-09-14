@@ -1,6 +1,7 @@
 // Internal export-kind metadata bridge for ADR D1; public map keys stay intact.
 export const NativeStyleMapType = "crumbs.css.style-map" as const
 export const NativeStyleMapSymbol = Symbol.for(NativeStyleMapType)
+export const NativeRecipeClassSymbol = Symbol.for("crumbs.css.recipe-class-reference")
 
 export function markNativeStyleMap<TMap extends object>(map: TMap): TMap {
   Object.defineProperty(map, NativeStyleMapSymbol, { value: true, enumerable: true })

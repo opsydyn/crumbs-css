@@ -38,6 +38,7 @@ unless they are exercised explicitly in a future compatibility pass.
 | Structured values in runtime styles | Supported at resolution | Transform arrays/order, shadow offsets, font variants, filters, shadows, background arrays and opaque native values retain their shape/reference and scalar siblings. This does not qualify their `.css.ts` conversion. |
 | Static native structured authoring | Supported subset | `transform` arrays and numeric `shadowOffset` / `textShadowOffset` bypass CSS serialization. Order and whole-value composition replacement survive both object and StyleSheet emission, imported bases, helpers, variant maps and recipes. |
 | Metro dependency imports | Supported | Side-effect imports keep hot reload aware of dependent `.css.ts` files. |
+| Ordinary named `.css.ts` exports | Supported data subset | Strings, finite numbers (including negative zero), booleans, null, undefined, dense arrays and plain/null-prototype records preserve their data values. Unsupported values fail explicitly. |
 
 Crumbs composition is ordered native authoring, not a browser cascade. It captures inline declarations separately and retains repeated bases: `style([a, b, a])` applies `a` again after `b`. Physical padding/margin, their horizontal/vertical aliases, and gap normalize before merging, so later token or literal declarations replace overlapping longhands. Direct `@vanilla-extract/css` compositions retain upstream class-list processing and do not carry the same authored-order guarantee. Use Crumbs helpers for ordered native composition.
 
@@ -58,6 +59,14 @@ Transform arrays accept exactly one operation per entry: finite numeric `perspec
 Direct primitive helpers exclude animated transform nodes by type. Runtime-native style types remain broader for resolved styles/composition references; the compiler validates actual structured values in all authoring paths. Animated nodes, nested tokens, malformed/sparse arrays and other array/object property families (including structured filters, box shadows, font variants and transform origins) fail with `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE`, even with strict diagnostics disabled. Pass these values through React Native's runtime `style` prop. Rule containers such as `vars`, selectors and conditions retain their existing separate compatibility checks. Arbitrary non-style exports and browser-string conversion remain separate contracts.
 
 **Alpha migration:** previously accepted structured shapes may now compile correctly or fail explicitly instead of being dropped or misconverted. Regenerate dependent artifacts together. This compiler evidence does not qualify native rendering or platform-specific transform/shadow behavior.
+
+## Ordinary export contract
+
+The `.css.ts` compiler preserves named identifier exports containing the data subset above, including own `undefined` fields and `__proto__` keys. Null-prototype records remain null-prototype records. Shared object identity, frozen status and writable/configurable descriptor flags are not part of the emitted data contract. Ordinary tag-shaped records are preserved as data; they do not become recipe class references or variant-map metadata. Internal authored metadata is captured separately before vanilla-extract serialization. Import ordinary constants directly; theme resolvers accept style inputs, so omit ordinary constants from namespaces passed to `useThemedStyles`.
+
+Functions (including function serializers), bigint, symbols/symbol-keyed data, non-finite numbers, sparse/extended arrays, class/built-in instances, inherited data, accessors, non-enumerable fields, cycles and default/non-identifier exports fail with `CRUMBS_CSS_UNSUPPORTED_EXPORT`, file and export-path context, even with permissive declaration diagnostics. Move runtime values to regular `.ts` modules. Compiler-generated getters for module bindings are evaluated once; nested data accessors are rejected rather than evaluated. This is not a sandbox for untrusted authoring code.
+
+**Legacy style-handle limitation:** build-time style handles remain strings. A string equal to a registered class/composition handle is interpreted as a style reference, including aliases or nested values. Arbitrary strings remain ordinary strings and composition cleanup cannot rewrite them. Provenance for deliberately identical ordinary strings awaits the M2 native IR. Internal symbol markers are reserved compiler metadata, not an authentication boundary. Regenerate dependent artifacts after upgrading; source-authored recipes acquire their reference metadata during compilation.
 
 ## Warn and drop
 
@@ -107,6 +116,7 @@ full message text.
 
 | Code | Meaning |
 | --- | --- |
+| `CRUMBS_CSS_UNSUPPORTED_EXPORT` | `.css.ts` export contains an unsupported value or export name; error includes file and data path. Always fatal. |
 | `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE` | Constructor or resolver rejected a malformed native token reference/name. |
 | `CRUMBS_CSS_MISSING_THEME_TOKEN` | The active theme has no own value for a valid reference name. |
 | `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` | Compile-time rejection of an unsupported static native array/object shape, with property, file/class and runtime-style migration guidance. Always fatal. |

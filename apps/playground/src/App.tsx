@@ -2,10 +2,11 @@ import { useRef, useState } from "react"
 import { FlatList, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native"
 import { Portal, PortalHost } from "@rn-primitives/portal"
 import { ThemeProvider, resolveRecipeStyle, useThemedStyles } from "@opsydyn/crumbs-css/theme"
-import * as styles from "./screen.css"
+import * as screen from "./screen.css"
 import { dark, light } from "./theme"
 
 const rows = Array.from({ length: 1000 }, (_, id) => ({ id: String(id), label: `Design system component ${id + 1}` }))
+const { screenTitle, ...styles } = screen
 type Journey = "List" | "Form" | "Scopes"
 const scrollProbeEnabled = __DEV__ && process.env.EXPO_PUBLIC_CRUMBS_SCROLL_PROBE === "true"
 
@@ -27,7 +28,7 @@ function Playground({ isDark, toggle }: { isDark: boolean; toggle: () => void })
     if (index !== null && index !== undefined) setScrollProbe(previous => ({ ...previous, first: index + 1 }))
   }).current
   return <View style={s.root}>
-    <Text style={s.title}>Crumbs playground</Text>
+    <Text style={s.title}>{screenTitle}</Text>
     <Text style={s.copy}>{process.env.EXPO_PUBLIC_CRUMBS_MODE ?? "unverified"} · Crumbs {process.env.EXPO_PUBLIC_CRUMBS_VERSION ?? "unrecorded"}</Text>
     <Text style={s.copy}>Revision {process.env.EXPO_PUBLIC_CRUMBS_REVISION ?? "unrecorded"}</Text>
     <Pressable accessibilityRole="button" onPress={toggle} style={[...resolveRecipeStyle(s.button)]}><Text style={s.copy}>Switch to {isDark ? "light" : "dark"}</Text></Pressable>

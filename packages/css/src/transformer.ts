@@ -17,7 +17,8 @@ import {
 } from "@vanilla-extract/integration"
 import { cssDeclarationsToRN } from "./css-to-rn"
 import { assertNativeCssCompatibility } from "./native-compatibility"
-import { isNativeStyleMap, NativeStyleMapType } from "./native-style-map"
+import { NativeStyleMapType } from "./native-style-map"
+import {captureNativeExports, ExportRecordType, ExportStringType, ExportUndefinedType, ExportNegativeZeroType} from "./export-values"
 import { parseCssClassRules } from "./parse-virtual-css"
 import { splitStructuredNativeValues } from "./structured-native-values"
 
@@ -230,27 +231,10 @@ async function processVanillaFileForNative({
 
   return serializeVanillaModule(
     cssImports,
-    captureNativeStyleMapMetadata(evalResult) as Record<string, unknown>,
-    unusedCompositionRegex,
+    captureNativeExports(evalResult as Record<string, unknown>, filePath,
+      new Set([...localClassNames, ...composedClassLists.map(entry => entry.classList)]), unusedCompositionRegex),
+    null,
   )
-}
-
-function captureNativeStyleMapMetadata(value: unknown): unknown {
-  if (typeof value !== "object" || value === null) return value
-  if (isNativeStyleMap(value)) {
-    return {
-      $$type: NativeStyleMapType,
-      styles: Object.fromEntries(Object.entries(value).map(([key, entry]) => [key, captureNativeStyleMapMetadata(entry)])),
-    }
-  }
-  if (Array.isArray(value)) {
-    const captured = value.map(captureNativeStyleMapMetadata)
-    return captured.some((entry, index) => entry !== value[index]) ? captured : value
-  }
-  const entries = Object.entries(value)
-  const captured = entries.map(([key, entry]) => [key, captureNativeStyleMapMetadata(entry)] as const)
-  return captured.some(([, entry], index) => entry !== entries[index]?.[1])
-    ? Object.fromEntries(captured) : value
 }
 
 /**
@@ -408,7 +392,7 @@ function toRelativeImport(fromDir: string, absoluteDependencyPath: string): stri
 }
 
 function collectStyleExports(source: string, exportMap: Map<string, StyleExportValue>): void {
-  const exports: Record<string, unknown> = {}
+  const exports: Record<string, unknown> = Object.create(null)
   const cjsSource = source.replace(
     /export\s+(?:var|const|let)\s+(\w+)\s*=/g,
     (_, name: string) => `exports.${name} =`,
@@ -480,6 +464,16 @@ function serializeExportValue(
   value: unknown,
   classStyles: ReadonlyMap<string, Record<string, unknown>>,
 ): string {
+  if (typeof value === "object" && value !== null && "$$type" in value) {
+    if (value.$$type === ExportStringType && "value" in value) return JSON.stringify(value.value)
+    if (value.$$type === ExportUndefinedType) return "undefined"
+    if (value.$$type === ExportNegativeZeroType) return "-0"
+    if (value.$$type === ExportRecordType && "entries" in value) {
+      const record = `{ ${(value.entries as Array<[string, unknown]>).map(([key, entry]) =>
+        `${key === "__proto__" ? `[${JSON.stringify(key)}]` : JSON.stringify(key)}: ${serializeExportValue(entry, classStyles)}`).join(", ")} }`
+      return "nullPrototype" in value && value.nullPrototype === true ? `Object.assign(Object.create(null), ${record})` : record
+    }
+  }
   if (typeof value === "object" && value !== null && "$$type" in value && value.$$type === NativeStyleMapType && "styles" in value) {
     return `Object.defineProperty(${serializeExportValue(value.styles, classStyles)}, Symbol.for(${JSON.stringify(NativeStyleMapType)}), { value: true, enumerable: true })`
   }

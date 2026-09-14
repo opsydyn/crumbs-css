@@ -2,7 +2,7 @@ import { type StyleRule, style as vanillaStyle } from "@vanilla-extract/css"
 import { markCompositionUsed, registerComposition } from "@vanilla-extract/css/adapter"
 import { getFileScope } from "@vanilla-extract/css/fileScope"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
-import { markNativeStyleMap } from "./native-style-map"
+import { markNativeStyleMap, NativeRecipeClassSymbol } from "./native-style-map"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -218,10 +218,10 @@ export function createTheme<TContract extends Record<string, unknown>>(
 }
 
 function recipeClass(rule: NativeViewStyleInput, debugId?: string): NativeRecipeClassRef {
-  return {
+  return Object.defineProperty({
     $$type: NativeRecipeClassType,
     className: vanillaStyle(rule as StyleRule, debugId),
-  }
+  }, NativeRecipeClassSymbol, { value: true, enumerable: true }) as NativeRecipeClassRef
 }
 
 function recipeDebugId(
