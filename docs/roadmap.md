@@ -301,3 +301,11 @@ Approved bounded implementation: [Expo playground plan](superpowers/plans/2026-0
 - Remaining qualification: native/device rendering, keyboard and accessibility behavior, frame/startup/editor budgets and real user feedback. M0.9 remains unchecked until the journeys are exercised on native targets. This setup does not repair other M0 correctness or runtime-import findings, complete M1.9 measurement work, or broaden compatibility support.
 
 The next bounded candidate is native playground journey acceptance, followed by native composition precedence/type repair. M1 and wider API work remain gated on M0.
+
+### 2026-09-14 — Partial iOS simulator acceptance
+
+[Acceptance evidence](acceptance/2026-09-14-ios/README.md) records the workspace `0.1.2-alpha.2` consumer at `732ff76 (working tree)` in official Expo Go 56.0.4 on a dedicated iPhone 17 / iOS 26.5 simulator. Startup identity, light/dark list rendering, form text and switch state across a theme change, software-keyboard visibility, distinct nested scopes and explicitly bridged portal opening/closing passed direct native observation. Seven raw screenshots and a structured result with hashes are retained.
+
+Native list gestures remain unverified: the attempted automation gestures did not change visible rows, and the cause was not established. Android acceptance could not run because the configured Android SDK/emulator tools were absent. M0.9 remains unchecked. Physical-device rendering, release frame/startup performance and screen-reader journeys remain separate gates. The unrelated release-version edits are preserved.
+
+Next recommended slice: establish a reliable native gesture acceptance path for the list and resolve any demonstrated scrolling defect. Android toolchain setup follows as a separate prerequisite for Android acceptance. Wider compiler/API milestones remain gated on M0.
