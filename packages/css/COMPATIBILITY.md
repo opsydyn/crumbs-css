@@ -5,7 +5,7 @@ vanilla-extract authoring. It is not a browser CSS runtime.
 
 ## Validated native baseline
 
-The current published contract is validated against:
+The current workspace/packed consumer baseline is:
 
 - Expo SDK 56
 - React 19.2
@@ -19,6 +19,19 @@ Expo Doctor and Bun converge on the same install model.
 The package currently declares `react-native` peer compatibility as
 `>=0.85 <0.86`. Earlier React Native baselines should not be assumed supported
 unless they are exercised explicitly in a future compatibility pass.
+
+## Coverage and qualification
+
+| Check | Coverage | Absence / limitation |
+| --- | --- | --- |
+| Required package-owned consumer fixtures | Themed styles, variant maps, recipes, web object emission, project-relative filenames and local theme imports; emitted native values are evaluated in the transformer tests. | Missing fixture projects/files or directory impostors fail with the required fixture path. These checks never depend on an optional application checkout. |
+| Host Bun benchmarks | Five runtime operations and two warm compiler fixtures, including the required consumer button. | Missing required consumer fixtures fail before measurements; all seven metrics have budgets. Batch-average runtime quantiles are not individual operation tails. |
+| Production Expo bundle qualification | Workspace and isolated packed consumers retain iOS, Android and web source maps and reject compiler code in runtime bundles. | This is JavaScript bundle/type qualification, separate from native startup and device rendering. See the M0.7 retained evidence in the repository roadmap. |
+| iOS native functional acceptance | Retained playground/Maestro reports cover the documented simulator journeys. | Not rerun by package tests or host benchmarks; no physical-device or release-performance claim. |
+| Android native acceptance | Not run; user deferred it until last. | Android production JavaScript exports do not qualify native Android behavior. |
+| Native/device performance | Not run by this harness; reported explicitly as `not-run` with a reason in benchmark JSON. | Hermes, rendering/frame time, memory and device measurements require separate qualification. |
+
+Compiler fixtures live under `packages/css/fixtures/consumer`, with a shared required-file admission check used by tests and benchmarks. They are test assets and are excluded from the published tarball. Removing an application directory cannot turn these scenarios into silent passes. Optional native capabilities remain visibly unqualified; they are not substitutes for mandatory compiler coverage.
 
 ## Runtime dependency boundary
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { existsSync } from "node:fs"
+import { consumerFixtures } from "../test-support/consumer-fixtures"
 import * as path from "node:path"
 import { runInNewContext } from "node:vm"
 import { buildStyleSheetCode, transform } from "../src/transformer"
@@ -31,19 +31,7 @@ const FIXTURE_UNSUPPORTED_SELECTORS = path.resolve(
   PKG_ROOT,
   "fixtures/unsupported-selectors.css.ts",
 )
-const APP_FIXTURE = path.resolve(PKG_ROOT, "../../apps/native/styles/shared.css.ts")
-const APP_GRIM_BUTTON_FIXTURE = path.resolve(
-  PKG_ROOT,
-  "../../apps/native/styles/grim-button.css.ts",
-)
-const APP_REFERENCE_FIXTURE = path.resolve(PKG_ROOT, "../../apps/native/styles/reference.css.ts")
-const APP_FIXTURE_RELATIVE = "styles/shared.css.ts"
-const APP_ROOT = path.resolve(PKG_ROOT, "../../apps/native")
-const HAS_NATIVE_APP_FIXTURES =
-  existsSync(APP_FIXTURE) &&
-  existsSync(APP_GRIM_BUTTON_FIXTURE) &&
-  existsSync(APP_REFERENCE_FIXTURE) &&
-  existsSync(APP_ROOT)
+const consumer = consumerFixtures()
 
 function evaluateNativeExports(code: string): Record<string, unknown> {
   const exports: Record<string, unknown> = {}
@@ -151,13 +139,11 @@ describe("Metro transformer", () => {
     expect(result.code).not.toContain("@vanilla-extract/css")
   })
 
-  it("transforms GrimButton recipes for Storybook web without React Native StyleSheet compilation", async () => {
-    if (!HAS_NATIVE_APP_FIXTURES) return
-
+  it("transforms package-owned button recipes for web without React Native StyleSheet compilation", async () => {
     const result = (await transform(
       { upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER },
-      APP_ROOT,
-      APP_GRIM_BUTTON_FIXTURE,
+      consumer.root,
+      consumer.button,
       Buffer.from(""),
       { dev: true, platform: "web" },
     )) as { readonly code: string }
@@ -166,7 +152,7 @@ describe("Metro transformer", () => {
     expect(result.code).not.toContain("@vanilla-extract/css")
     expect(result.code).toContain('"$$type": "crumbs.css.recipe"')
     expect(result.code).toContain('"base": _s[')
-    expect(result.code).toContain("--crumbs-font-display")
+    expect(result.code).toContain("--crumbs-fixture-font-display")
   })
 })
 
@@ -228,9 +214,6 @@ function runBunTransformStrict(fixturePath: string, cwd = PKG_ROOT): string {
   return result.stdout.toString()
 }
 
-function escapedRegExp(value: string): string {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
-}
 
 describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
   it("transforms simple.css.ts to StyleSheet code", () => {
@@ -397,57 +380,61 @@ describe("transformCssTsToStyleSheet via Node.js (integration)", () => {
     )
   })
 
-  it("transforms the native app css entry when executed by Bun", () => {
-    if (!HAS_NATIVE_APP_FIXTURES) return
-
-    const code = runBunTransform(APP_FIXTURE, APP_ROOT)
+  it("transforms the package-owned consumer css entry when executed by Bun", () => {
+    const code = runBunTransform(consumer.shared, consumer.root)
     expect(code).toContain("StyleSheet.create")
     expect(code).toContain("export const container")
     expect(code).toContain("export const heading")
-    expect(code).toContain("export const button = {")
+    const styles = evaluateNativeExports(code) as {
+      container: { backgroundColor: unknown; paddingTop: unknown }
+      heading: { fontSize: number }
+      button: Record<string, { minHeight: number; opacity?: number }>
+    }
+    expect(styles.heading.fontSize).toBe(24)
+    expect(styles.container.backgroundColor).toMatchObject({ varName: "--crumbs-fixture-color-canvas" })
+    expect(styles.container.paddingTop).toMatchObject({ varName: "--crumbs-fixture-space-md" })
+    expect(Object.keys(styles.button)).toEqual(["default", "pressed"])
+    expect(styles.button.default?.minHeight).toBe(48)
+    expect(styles.button.pressed?.opacity).toBe(0.82)
     expect(code).toContain('"default": _s[')
     expect(code).toContain('"pressed": _s[')
     expect(code).toContain("crumbs.css.theme-token")
-    expect(code).toContain("--crumbs-color-canvas")
+    expect(code).toContain("--crumbs-fixture-color-canvas")
     expect(code).not.toContain("@vanilla-extract/css")
   })
 
-  it("transforms the native GrimButton recipe style entry", () => {
-    if (!HAS_NATIVE_APP_FIXTURES) return
-
-    const code = runBunTransform(APP_GRIM_BUTTON_FIXTURE, APP_ROOT)
-    const baseClassName = code.match(/"base": _s\["([^"]+)"\]/)?.[1]
-    expect(code).toContain("export const button")
-    expect(code).toContain('"$$type": "crumbs.css.recipe"')
-    expect(code).toContain('"$$debugName": "grimButton"')
-    expect(code).toContain('"tone"')
-    expect(code).toContain('"primary"')
-    expect(code).toContain('"disabled"')
-    expect(code).toContain("--crumbs-color-accent")
-    expect(baseClassName).toBeDefined()
-    expect(code).toMatch(
-      RegExp(`"${escapedRegExp(baseClassName ?? "")}": \\{[^\\n]*"minHeight":48`),
-    )
-    expect(code).toMatch(
-      RegExp(`"${escapedRegExp(baseClassName ?? "")}": \\{[^\\n]*"backgroundColor"`),
-    )
+  it("transforms the package-owned button recipe style entry", () => {
+    const code = runBunTransform(consumer.button, consumer.root)
+    const { button } = evaluateNativeExports(code) as { button: {
+      $$type: string
+      $$debugName: string
+      base: { minHeight: number; backgroundColor: unknown }
+      variants: Record<string, Record<string, unknown>>
+      defaultVariants: unknown
+      compoundVariants: unknown
+    } }
+    expect(button.$$type).toBe("crumbs.css.recipe")
+    expect(button.$$debugName).toBe("fixtureButton")
+    expect(button.base.minHeight).toBe(48)
+    expect(button.base.backgroundColor).toMatchObject({ varName: "--crumbs-fixture-color-accent" })
+    expect(Object.keys(button.variants)).toEqual(["tone", "disabled", "pressed"])
+    expect(button.variants.tone?.primary).toMatchObject({ backgroundColor: { varName: "--crumbs-fixture-color-accent" } })
+    expect(button.variants.disabled?.true).toEqual({ opacity: 0.64 })
+    expect(button.defaultVariants).toEqual({ tone: "primary", disabled: false, pressed: false })
+    expect(button.compoundVariants).toEqual([{ variants: { disabled: true, tone: "primary" }, style: { opacity: 0.5 } }])
   })
 
-  it("accepts Metro's project-relative native app css filename", () => {
-    if (!HAS_NATIVE_APP_FIXTURES) return
-
-    const code = runBunTransform(APP_FIXTURE_RELATIVE, APP_ROOT)
+  it("accepts Metro's project-relative package-owned consumer css filename", () => {
+    const code = runBunTransform("styles/shared.css.ts", consumer.root)
     expect(code).toContain("StyleSheet.create")
     expect(code).toContain("export const container")
     expect(code).toContain("export const heading")
     expect(code).not.toContain("@vanilla-extract/css")
   })
 
-  it("keeps native app theme dependencies local without leaking package internals", () => {
-    if (!HAS_NATIVE_APP_FIXTURES) return
-
-    const code = runBunTransform(APP_REFERENCE_FIXTURE, APP_ROOT)
-    expect(code).toContain(`import "./theme.ts";`)
+  it("keeps package-owned consumer theme dependencies local without leaking package internals", () => {
+    const code = runBunTransform(consumer.reference, consumer.root)
+    expect(code).toContain(`import "./theme.css.ts";`)
     expect(code).not.toContain("packages/native-styles/dist")
     expect(code).not.toContain("/dist/style")
     expect(code).not.toContain("/dist/theme-token")

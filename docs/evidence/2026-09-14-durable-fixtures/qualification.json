@@ -1,0 +1,180 @@
+{
+  "slice": "M0.8",
+  "sourceRevision": "06dda18 plus approved durable-fixture working changes",
+  "environment": {
+    "bun": "1.4.2",
+    "node": "v24.15.0",
+    "os": "Darwin",
+    "architecture": "arm64"
+  },
+  "packageCheck": {
+    "command": "bun run check",
+    "tests": 185,
+    "assertions": 6738,
+    "files": 28,
+    "exitCode": 0
+  },
+  "redEvidence": {
+    "command": "bun test packages/css/test/transformer.test.ts (silent returns removed, old paths retained)",
+    "passing": 30,
+    "failing": 5,
+    "cause": "Absent apps/native fixtures previously allowed five empty passes"
+  },
+  "requiredFixtureAbsence": [
+    {
+      "command": [
+        "bun",
+        "test",
+        "packages/css/test/transformer.test.ts"
+      ],
+      "exitCode": 1,
+      "requiredFixture": "button.css.ts",
+      "diagnostic": "Required Crumbs consumer fixture missing or invalid"
+    },
+    {
+      "command": [
+        "bun",
+        "run",
+        "--cwd",
+        "packages/css",
+        "bench:native-styles"
+      ],
+      "exitCode": 1,
+      "requiredFixture": "button.css.ts",
+      "diagnostic": "Required Crumbs consumer fixture missing or invalid"
+    }
+  ],
+  "benchmark": {
+    "metrics": [
+      {
+        "budget": {
+          "maxP95Ms": 0.0025,
+          "minHz": 400000
+        },
+        "hz": 45065060.4277396,
+        "iterations": 300000,
+        "maxMs": 7.012499999999989e-05,
+        "meanMs": 2.2190139999999965e-05,
+        "minMs": 1.5096680000000333e-05,
+        "name": "raw style array selection",
+        "p50Ms": 1.5836679999999887e-05,
+        "p95Ms": 7.012499999999989e-05,
+        "samples": 12,
+        "totalMs": 6.65704199999999,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 3795548.575569839,
+        "iterations": 300000,
+        "maxMs": 0.00033414332000000004,
+        "meanMs": 0.0002634665266666668,
+        "minMs": 0.00024280000000000086,
+        "name": "resolveRecipeStyle selection",
+        "p50Ms": 0.0002561500000000001,
+        "p95Ms": 0.00033414332000000004,
+        "samples": 12,
+        "totalMs": 79.03995800000003,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 3907415.966819161,
+        "iterations": 300000,
+        "maxMs": 0.00027150999999999955,
+        "meanMs": 0.00025592361,
+        "minMs": 0.0002477200000000005,
+        "name": "createRecipeResolver selection",
+        "p50Ms": 0.0002519049999999993,
+        "p95Ms": 0.00027150999999999955,
+        "samples": 12,
+        "totalMs": 76.777083,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.0075,
+          "minHz": 125000
+        },
+        "hz": 3842693.0576677574,
+        "iterations": 300000,
+        "maxMs": 0.00032478163999999994,
+        "meanMs": 0.0002602341599999999,
+        "minMs": 0.0002431216399999994,
+        "name": "themed recipe resolver selection",
+        "p50Ms": 0.00025086663999999927,
+        "p95Ms": 0.00032478163999999994,
+        "samples": 12,
+        "totalMs": 78.07024799999996,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 1.5
+        },
+        "hz": 9779.469299984374,
+        "iterations": 240,
+        "maxMs": 0.13020204999999976,
+        "meanMs": 0.10225503749999992,
+        "minMs": 0.08759374999999921,
+        "name": "resolveThemeStyles 240 exports",
+        "p50Ms": 0.09498334999999827,
+        "p95Ms": 0.13020204999999976,
+        "samples": 12,
+        "totalMs": 24.54120899999998,
+        "warmupIterations": 20
+      },
+      {
+        "budget": {
+          "maxP95Ms": 100
+        },
+        "hz": 216.42873753762692,
+        "iterations": 6,
+        "maxMs": 6.414541999999983,
+        "meanMs": 4.620458500000012,
+        "minMs": 3.4507500000000277,
+        "name": "transform README recipe fixture",
+        "p50Ms": 3.9657920000000217,
+        "p95Ms": 6.414541999999983,
+        "samples": 6,
+        "totalMs": 27.722751000000073,
+        "warmupIterations": 1
+      },
+      {
+        "budget": {
+          "maxP95Ms": 150
+        },
+        "hz": 233.57095025149016,
+        "iterations": 6,
+        "maxMs": 7.054666999999995,
+        "meanMs": 4.281354333333326,
+        "minMs": 3.3281670000000076,
+        "name": "transform package-owned consumer button fixture",
+        "p50Ms": 3.750833,
+        "p95Ms": 7.054666999999995,
+        "samples": 6,
+        "totalMs": 25.688125999999954,
+        "warmupIterations": 1
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "native-device performance",
+        "status": "not-run",
+        "reason": "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate."
+      }
+    ]
+  },
+  "docs": {
+    "pages": 20,
+    "exitCode": 0
+  },
+  "nativeAcceptance": "Not rerun; Android native remains deferred until last",
+  "publication": "None; pre-existing release-version changes excluded"
+}

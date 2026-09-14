@@ -40,6 +40,12 @@ The compiler captures static transform arrays and numeric `shadowOffset` / `text
 
 Other structured authoring shapes, animated nodes and nested tokens fail with `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` even with permissive diagnostics. Direct primitive helpers also exclude animated transform nodes by type. Pass unsupported native values through React Native's runtime `style` prop. CSS strings retain the existing converter contract. Regenerate dependent artifacts together after upgrading; compiled-output checks do not establish native rendering or platform-specific shadow behavior. Nested token evaluation remains outside the current resolution contract.
 
+## Required coverage and optional native capabilities
+
+Package tests use durable consumer fixtures for themed styles, variant maps, recipes, web object emission, relative filenames and local theme imports. Tests and benchmarks admit the same required files; missing files/projects and directory impostors fail with the fixture path. An absent app cannot silently remove these checks.
+
+The host Bun harness always measures five runtime operations and two warm compiler fixtures. Its JSON explicitly reports native/device performance as `not-run` with a reason. Batch-average quantiles are not individual-operation tails; these checks do not measure Hermes, React rendering, frame time or retained memory. Retained iOS simulator functional evidence is separate from these automated gates. Android native acceptance remains deferred and unqualified even when its production JavaScript export succeeds.
+
 ## What it does not guarantee
 
 - browser CSS parity

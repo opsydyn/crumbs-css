@@ -1,4 +1,4 @@
-import { existsSync } from "node:fs"
+import { consumerFixtures } from "../test-support/consumer-fixtures"
 import { resolve } from "node:path"
 import type { NativeRecipe, NativeStyle, NativeTheme } from "../src/native-style"
 import { createTheme, createThemeContract } from "../src/native-style"
@@ -213,17 +213,7 @@ const resolveThemedButton = createRecipeResolver(themedStyles.button)
 
 const packageRoot = resolve(import.meta.dir, "..")
 const recipeFixture = resolve(packageRoot, "examples", "recipe.css.ts")
-const grimButtonFixture = resolve(
-  packageRoot,
-  "..",
-  "..",
-  "apps",
-  "native",
-  "styles",
-  "grim-button.css.ts",
-)
-const nativeAppRoot = resolve(packageRoot, "..", "..", "apps", "native")
-const hasNativeAppBenchFixture = existsSync(grimButtonFixture) && existsSync(nativeAppRoot)
+const consumer = consumerFixtures()
 
 const metrics: BenchmarkMetric[] = [
   measureSync({
@@ -274,25 +264,27 @@ metrics.push(
   }),
 )
 
-if (hasNativeAppBenchFixture) {
-  metrics.push(
-    await measureAsync({
-      budget: { maxP95Ms: 150 },
-      iterationsPerSample: 1,
-      name: "transform native GrimButton fixture",
-      run: () =>
-        transformCssTsToStyleSheet(grimButtonFixture, nativeAppRoot, {
-          strictDiagnostics: true,
-        }),
-      samples: 6,
-      warmupIterations: 1,
-    }),
-  )
-}
+metrics.push(
+  await measureAsync({
+    budget: { maxP95Ms: 150 },
+    iterationsPerSample: 1,
+    name: "transform package-owned consumer button fixture",
+    run: () => transformCssTsToStyleSheet(consumer.button, consumer.root, { strictDiagnostics: true }),
+    samples: 6,
+    warmupIterations: 1,
+  }),
+)
 
 for (const metric of metrics) {
   assertBenchmarkBudget(metric)
   console.log(formatMetric(metric))
 }
 
-console.log(JSON.stringify({ metrics }, null, 2))
+console.log(JSON.stringify({
+  metrics,
+  capabilities: [{
+    name: "native-device performance",
+    status: "not-run",
+    reason: "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate.",
+  }],
+}, null, 2))

@@ -228,3 +228,6 @@ config.transformer = {
 - Docs workspace: [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
 - Compatibility matrix: [COMPATIBILITY.md](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/COMPATIBILITY.md)
 - Repository: [github.com/opsydyn/crumbs-css](https://github.com/opsydyn/crumbs-css)
+
+
+Required consumer regression fixtures and both compiler benchmark fixtures belong to the package. Missing required coverage fails rather than disappearing when an app is absent. Host benchmark JSON explicitly reports native/device performance as unmeasured; see [coverage and qualification](./COMPATIBILITY.md#coverage-and-qualification).
