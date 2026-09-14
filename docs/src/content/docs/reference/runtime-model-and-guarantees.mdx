@@ -20,6 +20,8 @@ description: What the package guarantees today and how styles move from authorin
 
 ## Native structured values and variant maps
 
+Native token references are exact data DTOs with own enumerable `$$type: "crumbs.css.theme-token"` and `varName` fields. Names match `--crumbs-[A-Za-z0-9_-]+`. Constructors and resolution reject malformed tagged values with `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE`; the boolean guard returns false without executing reference accessors. Inherited fields, arrays and extra metadata fields are unsupported. JSON-decoded and null-prototype DTOs remain valid. Active theme lookup requires an own token value; missing or inherited values fail with `CRUMBS_CSS_MISSING_THEME_TOKEN`. Regenerate legacy/extended references when upgrading. These checks do not replace full theme/artifact schema validation.
+
 Runtime resolution preserves supplied transform arrays and their order, native objects such as shadow offsets, scalar siblings and structured-value references. Ordered style arrays replace nested values as whole values. Only top-level token references are resolved; animated nodes are never evaluated by the resolver. Typed view/text/image inputs retain their primitive result types through direct resolvers, hooks, namespace resolution and style arrays.
 
 Compiled `styleVariants` maps carry internal metadata while preserving their string keys and TypeScript variant keys. Object spread preserves this metadata. Unmarked legacy maps remain compatible when their shape is unambiguous; native structured-value shapes take precedence over ambiguous map shapes. JSON serialization drops map identity, so regenerate compiler artifacts when relying on native-property-like variant names.

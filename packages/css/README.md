@@ -149,6 +149,8 @@ Later authored entries override the same canonical native property. Compositions
 
 ## Runtime structured values
 
+Token-reference payloads require exactly own enumerable `$$type` and `varName` data fields and a `--crumbs-[A-Za-z0-9_-]+` name. Malformed tagged values fail with a stable diagnostic; guards never evaluate reference accessors. Theme resolution uses own token values and reports missing values with `CRUMBS_CSS_MISSING_THEME_TOKEN`. See [compatibility](./COMPATIBILITY.md) for migration details.
+
 Runtime theme resolution preserves supplied native structured arrays/objects, their references and scalar siblings. Typed view/text/image results retain their primitive types. Compiled variant maps carry internal metadata with unchanged string keys, including through object spread; ambiguous legacy maps should be regenerated.
 
 Static transform arrays and numeric `shadowOffset` / `textShadowOffset` now compile directly as native values, preserving transform order and whole-value composition replacement. Animated values, nested tokens and other unsupported structured shapes fail explicitly; pass them through React Native's runtime `style` prop. See the exact supported operations and migration notes in [compatibility](./COMPATIBILITY.md#static-structured-compiler-boundary).

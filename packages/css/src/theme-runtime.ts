@@ -17,7 +17,7 @@ import type {
 } from "./native-style"
 import { NativeRecipeType } from "./native-style"
 import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
-import { type NativeThemeTokenReference, isThemeTokenReference } from "./theme-token"
+import { type NativeThemeTokenReference, assertThemeTokenReference, isThemeTokenReferenceCandidate } from "./theme-token"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -123,7 +123,10 @@ export function resolveThemeTokens<TInput>(
 
   const resolved: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(flattened)) {
-    resolved[key] = isThemeTokenReference(value) ? resolveTokenValue(value.varName, theme) : value
+    if (isThemeTokenReferenceCandidate(value)) {
+      assertThemeTokenReference(value, key)
+      resolved[key] = resolveTokenValue(value.varName, theme)
+    } else resolved[key] = value
   }
 
   return resolved as ResolvedNativeStyleInput<TInput>
@@ -294,7 +297,7 @@ function isNestedStyleMap(value: unknown): value is Readonly<Record<string, unkn
   return entries.length > 0 && entries.every(([key, entry]) => {
     if (isStructuredNativeValue(key, entry)) return false
     return entry === undefined || entry === null || entry === false ||
-      (typeof entry === "object" && !isThemeTokenReference(entry))
+      (typeof entry === "object" && !isThemeTokenReferenceCandidate(entry))
   })
 }
 
@@ -306,7 +309,7 @@ const NATIVE_ARRAY_VALUE_PROPS = new Set([
 
 function isStructuredNativeValue(key: string, value: unknown): boolean {
   if (Array.isArray(value)) return NATIVE_ARRAY_VALUE_PROPS.has(key)
-  if (typeof value !== "object" || value === null || isThemeTokenReference(value)) return false
+  if (typeof value !== "object" || value === null || isThemeTokenReferenceCandidate(value)) return false
   if (key === "color" || key.endsWith("Color")) return true
   if ((key === "shadowOffset" || key === "textShadowOffset") && "width" in value && "height" in value) return true
   // Animated nodes are opaque native values; never execute them here.
@@ -314,8 +317,9 @@ function isStructuredNativeValue(key: string, value: unknown): boolean {
 }
 
 function resolveTokenValue(varName: string, theme: NativeTheme<Record<string, unknown>>): unknown {
-  if (!(varName in theme.tokens)) {
-    throw new Error(`Theme token "${varName}" is missing from the active native theme`)
+  if (!Object.prototype.hasOwnProperty.call(theme.tokens, varName)) {
+    throw new Error(formatNativeStylesDiagnostic(NativeStylesDiagnosticCode.MissingThemeToken,
+      `Theme token "${varName}" is missing from the active native theme`))
   }
   return theme.tokens[varName]
 }

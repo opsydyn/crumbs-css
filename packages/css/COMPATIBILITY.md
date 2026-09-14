@@ -45,6 +45,10 @@ Crumbs composition is ordered native authoring, not a browser cascade. It captur
 
 Runtime resolution treats native structured property values as opaque values, replaces them as whole values in ordered arrays, and resolves top-level token references only. It never evaluates animated nodes or recursively resolves nested token references. Primitive-specific view/text/image outputs survive direct resolution, hooks, namespace resolution and typed style arrays.
 
+Native token references require exactly two own enumerable data fields: `$$type: "crumbs.css.theme-token"` and a string `varName` matching `--crumbs-[A-Za-z0-9_-]+`. Plain objects (including JSON-decoded and null-prototype objects) are accepted; arrays, inherited fields, accessors, extra fields and invalid names are rejected. The boolean guard returns false without executing accessors. Constructors and resolution of invalid tagged values fail with `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE`. Accessor tags are treated as invalid candidates rather than evaluated. Resolution validates surviving top-level values after composition, so overridden invalid references and opaque nested values are not evaluated. Active theme lookup requires an own token property; absent or inherited tokens fail with `CRUMBS_CSS_MISSING_THEME_TOKEN`. These checks do not validate complete theme/artifact schemas or token semantic domains.
+
+**Alpha token migration:** regenerate old or extended reference payloads into the exact data shape above. Metadata belongs outside the reference DTO; token names cannot contain whitespace, punctuation other than hyphen/underscore, or an empty suffix. Missing-token diagnostics now carry a stable code.
+
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
 ### Static structured compiler boundary
@@ -103,6 +107,8 @@ full message text.
 
 | Code | Meaning |
 | --- | --- |
+| `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE` | Constructor or resolver rejected a malformed native token reference/name. |
+| `CRUMBS_CSS_MISSING_THEME_TOKEN` | The active theme has no own value for a valid reference name. |
 | `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` | Compile-time rejection of an unsupported static native array/object shape, with property, file/class and runtime-style migration guidance. Always fatal. |
 | `CRUMBS_CSS_UNSUPPORTED_MEDIA` | A `.css.ts` file authored a CSS media rule. |
 | `CRUMBS_CSS_UNSUPPORTED_AT_RULE` | A `.css.ts` file authored another browser-only at-rule. |
