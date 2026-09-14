@@ -76,6 +76,8 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [ ] M1.5: Add baseline workloads for static/themed list mount and scroll, repeated recipe selections, theme and scope changes, orientation/font-scale changes, and retained memory after repeated mount/unmount.
 - [x] M1.5a: Add repeatable Expo static/themed list mount/rerender/theme-switch/unmount sequences, with run identity, actual lifecycle counts and style-reference observations. Web functional receipts and JavaScript consumer qualification do not close native/device gates.
 - [x] M1.5b: Add repeatable recipe-selection and nested-scope switch workloads with the same explicit run/observation protocol. Scrolling, orientation/font scaling and retained-memory qualification remain further M1.5 work.
+- [x] M1.5c: Add repeatable static/themed list scrolling with actual offset/geometry/viewable-row callbacks and terminal completion/cancellation/deadline reports. Development web functional evidence remains separate from native frame/device qualification.
+- [ ] M1.5d: Add orientation/font-scale context-change workloads with actual React Native dimensions/font-scale observations and hook reference behavior.
 - [ ] M1.6: Establish a release-mode Hermes measurement run on at least one Android and one iOS device. Record device/OS, Expo/RN/Hermes versions, build mode, thermal conditions, scenario size, warmup, sample count, and artifact identity. Missing device access leaves this gate incomplete.
 - [ ] M1.7: Add editor/typechecker fixtures at 100, 1,000, and 10,000 tokens, including slot recipes and conditions. Record checking time, type-instantiation/memory statistics where supported, and completion latency on a reproducible editor/TypeScript setup.
 - [ ] M1.8: Commit a machine-readable budget file and measurement protocol before optimization work. Include absolute ceilings and baseline comparisons for JS/UI frames, allocations, retained memory, runtime bytes/initialization, cold/warm transform cost, incremental rebuild, and editor cost. Choose thresholds from the measured baseline and noise; reviewers approve the recorded values, not an invented universal timing target.
@@ -623,3 +625,12 @@ Next recommended slice: **M1.5b** — repeatable recipe-selection and nested-sco
 - Parent M1.5 remains open for scrolling, orientation/font scale and retained memory. Development web receipts do not qualify native frames, release Hermes/device performance or memory. Android native remains last; M1.3b remains absent/unqualified. No push/publication and unrelated release edits are excluded.
 
 Next recommended slice: **M1.5c** — repeatable list scrolling with observed offset/visible-row receipts and explicit completion/cancellation. Begin only after approval.
+
+### 2026-09-14 — M1.5c Expo scrolling callback workloads
+
+- Added five middle/end/top scroll cycles for static/themed lists at 25/100/1,000 rows. Independent fixed-geometry targets require fresh scroll and viewability callbacks, matching offsets/content/viewport/visible rows and a settling interval; commands do not count as observations.
+- Terminal completion, user/navigation cancellation and deadline reports retain raw observations, callback history, identity and Profiler data. Negative tests prevent stale, partial or late receipts from closing the run.
+- Final development web evidence covers six cases/thirty cycles/ninety destinations plus user/navigation cancellation. Package checks, workspace/packed Expo types and three maps each, Storybook types and docs pass; see [assessment and evidence](assessments/2026-09-14-expo-scroll-workloads.md).
+- Programmatic callback receipts do not qualify native touch/fling, painted visibility, frame/retained-memory budgets or release Hermes devices. Parent M1.5 and M1.3b remain open; Android native remains last. No push/publication or unrelated release version edits.
+
+Next recommended slice: **M1.5d** — orientation/font-scale context-change workloads, recording actual React Native context and hook reference behavior. Browser dimension evidence must remain distinct from native font-scale/device acceptance. Begin only after approval.
