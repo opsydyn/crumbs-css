@@ -75,7 +75,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.4: Correct benchmark labels: batch-average quantiles are not operation-latency quantiles. Make raw and recipe baselines perform equivalent selection/default/compound work. Separate cold transforms from warm transforms and cached/uncached runtime paths.
 - [ ] M1.5: Add baseline workloads for static/themed list mount and scroll, repeated recipe selections, theme and scope changes, orientation/font-scale changes, and retained memory after repeated mount/unmount.
 - [x] M1.5a: Add repeatable Expo static/themed list mount/rerender/theme-switch/unmount sequences, with run identity, actual lifecycle counts and style-reference observations. Web functional receipts and JavaScript consumer qualification do not close native/device gates.
-- [ ] M1.5b: Add repeatable recipe-selection and nested-scope switch workloads with the same explicit run/observation protocol. Scrolling, orientation/font scaling and retained-memory qualification remain further M1.5 work.
+- [x] M1.5b: Add repeatable recipe-selection and nested-scope switch workloads with the same explicit run/observation protocol. Scrolling, orientation/font scaling and retained-memory qualification remain further M1.5 work.
 - [ ] M1.6: Establish a release-mode Hermes measurement run on at least one Android and one iOS device. Record device/OS, Expo/RN/Hermes versions, build mode, thermal conditions, scenario size, warmup, sample count, and artifact identity. Missing device access leaves this gate incomplete.
 - [ ] M1.7: Add editor/typechecker fixtures at 100, 1,000, and 10,000 tokens, including slot recipes and conditions. Record checking time, type-instantiation/memory statistics where supported, and completion latency on a reproducible editor/TypeScript setup.
 - [ ] M1.8: Commit a machine-readable budget file and measurement protocol before optimization work. Include absolute ceilings and baseline comparisons for JS/UI frames, allocations, retained memory, runtime bytes/initialization, cold/warm transform cost, incremental rebuild, and editor cost. Choose thresholds from the measured baseline and noise; reviewers approve the recorded values, not an invented universal timing target.
@@ -615,3 +615,11 @@ Approved continuation under ADR D6/D12, based on `7e0e879`. The public-API Expo 
 - M1.5a closes as a repeatable functional workload foundation. Parent M1.5 remains open for recipe/scope/scroll/orientation/font-scale/memory workloads; M1.6/M1.8 retain release Hermes/device/budget qualification. M1.3b remains absent/unqualified. Native Android stays last. Unrelated release manifest/package/lockfile version edits are excluded; no push/publication occurs.
 
 Next recommended slice: **M1.5b** — repeatable recipe-selection and nested-scope switch workloads in Expo, recording selection order and observed style/reference changes under the same run protocol. Begin only after user approval.
+
+### 2026-09-14 — M1.5b Expo recipe and nested scope workloads
+
+- Added five-cycle recipe defaults/explicit selections/compound overrides and independent parent/nested theme switches to Measure, retaining literal style oracles, actual hook identities, uncached recipe array observations, lifecycle counts and raw Profiler/commit receipts.
+- Two final-source web runs verify ten cycles/seventy ordered steps. Package, workspace/packed Expo types and three JavaScript maps each, Storybook types and documentation build pass. Evidence and diagnostic observer repairs are retained in [the assessment](assessments/2026-09-14-expo-recipe-scope-workloads.md).
+- Parent M1.5 remains open for scrolling, orientation/font scale and retained memory. Development web receipts do not qualify native frames, release Hermes/device performance or memory. Android native remains last; M1.3b remains absent/unqualified. No push/publication and unrelated release edits are excluded.
+
+Next recommended slice: **M1.5c** — repeatable list scrolling with observed offset/visible-row receipts and explicit completion/cancellation. Begin only after approval.

@@ -1,3 +1,4 @@
+import { RecipeScopePanel } from "./RecipeScopePanel"
 import { Profiler, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import type { ViewStyle, TextStyle } from "react-native"
 import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
@@ -40,7 +41,7 @@ function ThemedList(props: Omit<Parameters<typeof ObservedList>[0], "styles">) {
   return <ObservedList {...props} styles={styles} />
 }
 
-export function MeasurementPanel() {
+export function ListMeasurementPanel() {
   const [kind, setKind] = useState<WorkloadKind>("themed")
   const [size, setSize] = useState(100)
   const [run, setRun] = useState<{ id: string; startedAt: string; plan: ReturnType<typeof createWorkloadPlan>; capture: Capture } | null>(null)
@@ -91,4 +92,9 @@ export function MeasurementPanel() {
     </Profiler>}</View></ThemeProvider>}
     {report !== "" && <><Text testID="crumbs-measure-complete">Run complete · {verified ? "sequence verified" : "needs review"} · copy JSON</Text><TextInput testID="crumbs-measure-report" accessibilityLabel="Measurement JSON report" multiline editable={false} value={report} style={{ flex: 1, fontSize: 11, color: "#172438", backgroundColor: "#ffffff" }} /></>}
   </View>
+}
+
+export function MeasurementPanel() {
+  const [scenario, setScenario] = useState("list")
+  return <View style={{flex:1}}><View style={{flexDirection:"row",gap:12}}>{["list","recipe/scopes"].map(value=><Pressable key={value} accessibilityRole="button" onPress={()=>setScenario(value)}><Text>{value === "list" ? "List workloads" : "Recipe/scope workloads"}</Text></Pressable>)}</View>{scenario === "list" ? <ListMeasurementPanel/> : <RecipeScopePanel/>}</View>
 }

@@ -1,0 +1,87 @@
+{
+  "slice": "M1.5b",
+  "baseRevision": "92e6fad",
+  "commands": {
+    "bun run check": {
+      "exitCode": 0,
+      "tests": 271,
+      "assertions": 11569,
+      "files": 41
+    },
+    "bun run playground:check": {
+      "exitCode": 0,
+      "typecheck": "passed",
+      "runtimeMaps": 3
+    },
+    "bun /tmp/crumbs-m15b-packed.ts": {
+      "exitCode": 0,
+      "typecheck": "passed",
+      "runtimeMaps": 3
+    },
+    "bun run app:typecheck": {
+      "exitCode": 0
+    },
+    "bun run docs:build": {
+      "exitCode": 0,
+      "pages": 20
+    }
+  },
+  "live": {
+    "platform": "Expo development web",
+    "finalRuns": 2,
+    "cycles": 10,
+    "orderedSteps": 70,
+    "summaries": [
+      {
+        "complete": true,
+        "stylesVerified": true,
+        "referencesVerified": true,
+        "lifecycleBalanced": true,
+        "verified": true
+      },
+      {
+        "complete": true,
+        "stylesVerified": true,
+        "referencesVerified": true,
+        "lifecycleBalanced": true,
+        "verified": true
+      }
+    ],
+    "counts": [
+      {
+        "mounts": 10,
+        "unmounts": 10
+      },
+      {
+        "mounts": 10,
+        "unmounts": 10
+      }
+    ],
+    "listRegression": {
+      "kind": "themed",
+      "rows": 100,
+      "cycles": 5,
+      "summary": {
+        "complete": true,
+        "memoIdentityVerified": true,
+        "lifecycleBalanced": true
+      }
+    },
+    "screenshot": "web-complete.png visually inspected; controls and JSON report readable",
+    "runtimeErrorsSinceFinalRunStart": 0
+  },
+  "diagnosticReceipts": "web-run-1 observer mismatch; web-run-2/3 before empty-string JSX repair. Final receipts are web-final-1/2. One intermediate whole check transiently could not resolve installed fast-check declarations; unchanged rerun passed. Final gates retained.",
+  "limits": [
+    "instrumented functional receipts with uncontrolled host load; no calibrated CPU/frame performance baseline",
+    "no retained-memory leak, orientation/font-scale, scrolling, thermal or release-device qualification",
+    "native iOS not rerun; native Android last",
+    "M1.3b external theme decoder absent/unqualified; ADR proposed"
+  ],
+  "excludedPreexistingEdits": [
+    ".release-please-manifest.json",
+    "bun.lock",
+    "packages/css/package.json"
+  ],
+  "push": false,
+  "publication": false
+}
