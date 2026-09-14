@@ -1,0 +1,117 @@
+{
+  "slice": "M1.5d",
+  "baseRevision": "7df7671",
+  "commands": {
+    "bun run check": {
+      "exitCode": 0,
+      "tests": 280,
+      "assertions": 11638,
+      "files": 43
+    },
+    "bun run playground:check": {
+      "exitCode": 0,
+      "typecheck": "passed",
+      "runtimeMaps": 3
+    },
+    "bun /tmp/crumbs-m15d-packed.ts": {
+      "exitCode": 0,
+      "typecheck": "passed",
+      "runtimeMaps": 3
+    },
+    "bun run app:typecheck": {
+      "exitCode": 0
+    },
+    "bun run docs:build": {
+      "exitCode": 0,
+      "pages": 20
+    }
+  },
+  "live": {
+    "platform": "Expo development web; actual RN useWindowDimensions",
+    "orientationRuns": 2,
+    "cycles": 10,
+    "acceptedOrientationSteps": 40,
+    "baselines": [
+      {
+        "fontScale": 1,
+        "height": 600,
+        "scale": 1,
+        "width": 800
+      },
+      {
+        "fontScale": 1,
+        "height": 800,
+        "scale": 1,
+        "width": 600
+      }
+    ],
+    "summaries": [
+      {
+        "status": "completed",
+        "reason": null,
+        "complete": true,
+        "referencesVerified": true,
+        "verified": true,
+        "observedSteps": 20
+      },
+      {
+        "status": "completed",
+        "reason": null,
+        "complete": true,
+        "referencesVerified": true,
+        "verified": true,
+        "observedSteps": 20
+      }
+    ],
+    "fontScaleNegative": {
+      "summary": {
+        "status": "timed-out",
+        "reason": "waiting for actual font-scale change",
+        "complete": false,
+        "referencesVerified": false,
+        "verified": false,
+        "observedSteps": 2
+      },
+      "actualFontScale": 1,
+      "realDimensionChangesObserved": true,
+      "nativeFontScaleAcceptance": false
+    },
+    "cancellation": [
+      {
+        "status": "cancelled",
+        "reason": "user",
+        "complete": false,
+        "referencesVerified": false,
+        "verified": false,
+        "observedSteps": 2
+      },
+      {
+        "status": "cancelled",
+        "reason": "navigation",
+        "complete": false,
+        "referencesVerified": false,
+        "verified": false,
+        "observedSteps": 2
+      }
+    ],
+    "runtimeErrorsSince": "2026-09-14T21:30:59.387Z",
+    "runtimeErrors": 0,
+    "screenshot": "web-complete.png visually reviewed; controls, RN values, completed status and JSON readable",
+    "temporaryBrowserViewport": "reset after validation"
+  },
+  "testFixtures": "Unit tests use synthetic native-like context/fontScale inputs only; they are not live native context receipts. Live values come from the hook without injected dimensions.",
+  "limits": [
+    "browser dimensions are not native rotation or OS font-scale/text appearance acceptance",
+    "native font-scale change/restore remains unqualified",
+    "instrumentation/uncontrolled host load; no frame/paint/release-device/thermal/retained-memory budget",
+    "native iOS not rerun; Android stays last",
+    "parent M1.5 open; M1.3b absent/unqualified; ADR proposed"
+  ],
+  "excludedPreexistingEdits": [
+    ".release-please-manifest.json",
+    "bun.lock",
+    "packages/css/package.json"
+  ],
+  "push": false,
+  "publication": false
+}

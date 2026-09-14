@@ -1,3 +1,4 @@
+import { ContextMeasurementPanel } from "./ContextMeasurementPanel"
 import { ScrollMeasurementPanel } from "./ScrollMeasurementPanel"
 import { RecipeScopePanel } from "./RecipeScopePanel"
 import { Profiler, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
@@ -97,5 +98,5 @@ export function ListMeasurementPanel() {
 
 export function MeasurementPanel() {
   const [scenario, setScenario] = useState("list")
-  return <View style={{flex:1}}><View style={{flexDirection:"row",gap:12}}>{["list","recipe/scopes","scroll"].map(value=><Pressable key={value} accessibilityRole="button" onPress={()=>setScenario(value)}><Text>{value === "list" ? "List workloads" : value === "scroll" ? "Scroll workloads" : "Recipe/scope workloads"}</Text></Pressable>)}</View>{scenario === "list" ? <ListMeasurementPanel/> : scenario === "scroll" ? <ScrollMeasurementPanel/> : <RecipeScopePanel/>}</View>
+  return <View style={{flex:1}}><View style={{flexDirection:"row",gap:12}}>{["list","recipe/scopes","scroll","context"].map(value=><Pressable key={value} accessibilityRole="button" onPress={()=>setScenario(value)}><Text>{value === "list" ? "List workloads" : value === "scroll" ? "Scroll workloads" : value === "context" ? "Context workloads" : "Recipe/scope workloads"}</Text></Pressable>)}</View>{scenario === "list" ? <ListMeasurementPanel/> : scenario === "scroll" ? <ScrollMeasurementPanel/> : scenario === "context" ? <ContextMeasurementPanel/> : <RecipeScopePanel/>}</View>
 }

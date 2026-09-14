@@ -1,0 +1,50 @@
+import { expect, it } from "bun:test"
+import { ContextRecorder } from "../../../apps/playground/src/context-plan"
+const baseline={width:375,height:812,scale:2,fontScale:1}
+it("requires actual orientation changes and restoration with stable themed hook references",()=>{
+ const recorder=new ContextRecorder("orientation",baseline,1)
+ recorder.request(0)
+ expect(recorder.observe(0,baseline,"initial",10)).toBe(true)
+ expect(recorder.observe(0,baseline,"same",15)).toBe(false)
+ recorder.request(20)
+ expect(recorder.observe(1,baseline,"same",30)).toBe(true)
+ recorder.request(40)
+ expect(recorder.observe(2,baseline,"same",50)).toBe(false)
+ expect(recorder.observe(2,{...baseline,width:812,height:375},"same",60)).toBe(true)
+ recorder.request(70)
+ expect(recorder.observe(3,{...baseline,width:812,height:375},"same",80)).toBe(false)
+ expect(recorder.observe(3,baseline,"same",90)).toBe(true)
+ expect(recorder.status).toBe("completed")
+ expect(recorder.summary().referencesVerified).toBe(true)
+ expect(recorder.observations).toHaveLength(4)
+})
+it("cannot qualify font scaling using a resize or a constant web font-scale",()=>{
+ const recorder=new ContextRecorder("font-scale",baseline,1)
+ for(let i=0;i<2;i++){recorder.request(i*20);expect(recorder.observe(i,baseline,i===0?"initial":"same",i*20+10)).toBe(true)}
+ recorder.request(40)
+ expect(recorder.observe(2,baseline,"same",50)).toBe(false)
+ expect(recorder.observe(2,{...baseline,width:812,height:375},"same",60)).toBe(false)
+ expect(recorder.observe(2,{...baseline,fontScale:1.3},"same",70)).toBe(true)
+ recorder.request(80)
+ expect(recorder.observe(3,{...baseline,fontScale:1.3},"same",90)).toBe(false)
+ expect(recorder.observe(3,baseline,"same",100)).toBe(true)
+ expect(recorder.status).toBe("completed")
+})
+it("fails closed on stale, nonfinite, duplicate and late observations, and cancellation",()=>{
+ const recorder=new ContextRecorder("orientation",baseline,1);recorder.request(100)
+ expect(recorder.observe(0,baseline,"initial",99)).toBe(false)
+ expect(recorder.observe(0,{...baseline,fontScale:NaN},"initial",110)).toBe(false)
+ expect(recorder.observe(0,baseline,"initial",30101)).toBe(false)
+ recorder.timeout(30101);expect(recorder.status).toBe("timed-out")
+ expect(recorder.summary().complete).toBe(false)
+ recorder.cancel("late");expect(recorder.status).toBe("timed-out")
+ const cancelled=new ContextRecorder("font-scale",baseline,1);cancelled.cancel("user");cancelled.request(0)
+ expect(cancelled.observe(0,baseline,"initial",10)).toBe(false)
+ expect(cancelled.summary().complete).toBe(false)
+ for(const cycles of [0,21,1.5])expect(()=>new ContextRecorder("orientation",baseline,cycles)).toThrow()
+})
+it("separates a complete context sequence from failed hook identity evidence",()=>{
+ const recorder=new ContextRecorder("orientation",baseline,1)
+ for(let i=0;i<4;i++){recorder.request(i*20);expect(recorder.observe(i,i===2?{...baseline,width:812,height:375}:baseline,"changed",i*20+10)).toBe(true)}
+ expect(recorder.summary()).toMatchObject({complete:true,referencesVerified:false,verified:false})
+})
