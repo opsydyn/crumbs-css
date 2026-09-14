@@ -46,6 +46,8 @@ Complete view/text/image references retain their primitive types through generic
 
 Keep primitive reference annotations when you want their native result types. Widening to `NativeStyleRule` deliberately selects the legacy contract; generic forwarders can use `style<NativeStyleRule>(rule)` or the equivalent explicit variant type argument. The default composition reference type is the primitive union; use its second type parameter for target-specific aliases. Direct inline animated values, arbitrary browser class strings and incompatible inline fields remain rejected. Structural typing does not establish provenance; compiler admission remains independent. Recipe inputs are unchanged.
 
+Direct generic `NativeStyle` references currently fail authoring typechecking in `style(base)` and direct variant entries. Use `style([base])` or `styleVariants({ state: [base] })` until repaired; complete View/Text/Image direct references retain their separately tested contract. This remaining M0.2 type gap is not established by a green package check alone.
+
 ## Physical border precedence
 
 Compiled border width/color shorthands expand to physical top/right/bottom/left properties for both tokens and literals, including width/color output from a literal CSS `border` shorthand. Multi-value literals retain their per-side values. Later broad or side declarations win before class/composition merging; only surviving tokens are resolved. The literal border style field stays global. Typed border fixtures cover direct rules, nested/repeated bases, primitive helpers, variants and recipes in native and web emitters.

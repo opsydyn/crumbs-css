@@ -28,7 +28,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 
 | Milestone | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
-| M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; token validation/order, consumer setup, iOS scroll and native composition slices |
+| M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; E1–E7 regression task closed, direct generic-reference typing and native Android gates open |
 | M1 | Select Effect 4 boundary implementation and establish budgets | M0 | Not started |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
 | M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | Not started |
@@ -50,7 +50,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 
 **Affected files:** `packages/css/src/native-style.ts`, `theme-runtime.ts`, `theme-token.ts`, `css-to-rn.ts`, `transformer.ts`, `parse-virtual-css.ts`, `tsdown.config.ts`; matching `test/` files, `fixtures/`, `COMPATIBILITY.md`, and current `apps/storybook/src/components/` fixtures.
 
-- [ ] M0.1: Add durable regressions for assessment E1–E7. Each regression fails for the demonstrated behavior before its fix; validate errors and output values, not only generated-code substrings.
+- [x] M0.1: Add durable regressions for assessment E1–E7. Each regression fails for the demonstrated behavior before its fix; validate errors and output values, not only generated-code substrings.
 - [ ] M0.2: Repair native composition typing and conflict order. Cover multiple bases, nested compositions, token/literal conflicts, and shorthand/longhand precedence. Use a separately implemented reference evaluator.
 - [x] M0.3: Stop classifying structured styles as variant maps. Preserve transform arrays and scalar siblings through resolution. Preserve primitive-specific result types.
 - [x] M0.4: Define the structured-value compatibility boundary. Preserve supported `transform` and `shadowOffset` inputs end to end using explicit metadata/native handling. If a typed property family cannot yet be preserved, narrow its accepted subset and emit a specific diagnostic with migration guidance; never leave accepted-but-dropped behavior.
@@ -521,3 +521,15 @@ Approved bounded M0.2 continuation under ADR D2. Generic inline/native input typ
 - Migration: replace unsupported side compounds/style fields with side width/color and global borderStyle where the primitive supports it (View/Text); ImageStyle remains narrower. Literal broad border retains existing canonical output. Upstream vanilla-extract types remain upstream, while native compilation enforces the rejection boundary. Supported compiled shapes, runtime behavior and permissive whole-declaration dropping remain unchanged. No per-side style feature, public API, dependency or Effect was added. M0.1/M0.2 remain unchecked pending evidence consolidation and a source-grounded closure audit. Native/device acceptance was not rerun, Android remains last, and no publication or unrelated release-version changes are included.
 
 Next recommended slice: M0.1/M0.2 evidence consolidation and closure audit — map assessment E1–E7 to durable regressions, verified repairs or explicit type-aligned rejections; audit remaining composition/admission gaps and close only gates supported by retained evidence. This establishes readiness for M1 Effect contracts without starting that milestone automatically. Begin only after user approval.
+
+
+### 2026-09-14 — M0.1 regression promotion and M0.2 closure audit
+
+Approved evidence consolidation at source revision `b23ee66`. [Closure audit](assessments/2026-09-14-m0-closure-audit.md) maps every original E1–E7 counterexample to durable value/error and positive type regressions, its repair revision, historical before-fix execution evidence and current qualification limits. M0.1 is complete for this regression task; it does not close M0.2 or M0 overall.
+
+- Current build/typechecking passed 235 tests / 8,573 assertions across 35 files, including mandatory consumer fixtures, packed Node16/Bundler authoring contracts, emitted runtime graph checks and CommonJS import denial. Workspace consumer typing and fresh iOS/Android/web production exports/runtime maps passed. Storybook typing and the 20-page docs build passed.
+- The current local tarball was installed into the retained isolated npm Expo consumer and its source refreshed from the current playground. Existing Expo dependencies were reused, not freshly bootstrapped. Independent consumer typing, fresh iOS/Android/web exports and runtime map qualification passed. Retained artifact hash, installed identity and maps are in the [qualification record](evidence/2026-09-14-m0-closure-audit/qualification.json). A temporary npm cache avoided host cache write permissions; offline metadata resolution failed before the ordinary npm install succeeded, without force or legacy peer bypass.
+- M0.2 remains open: a cast-free public [type reproducer](evidence/2026-09-14-m0-closure-audit/direct-native-reference.css.ts) exits 2 with two errors for `style(generic)` and a direct variant entry when `generic` has the legacy `NativeStyle` return type. Array-wrapped equivalents pass. This reveals a missing positive direct generic-reference contract despite the green suite. Compatibility and user-facing docs now state the workaround without suppressing the reproducer or claiming a repair.
+- Original counterexamples are repaired within their documented subsets. Token domains/provider association, independent graph/package identities, immutable artifact metadata, editor/device budgets, broader distribution and CI/release policy remain later tasks. Historical red records and iOS Maestro evidence were reviewed, not rerun. No native/device acceptance, Effect dependency, runtime change, release/publish action or unrelated release-version change is included. Android remains last and M0.9 stays open.
+
+Next recommended slice: repair direct generic NativeStyle reference typing for `style(base)` and `styleVariants({ state: base })`, with positive package/packed Node16/Bundler fixtures and both-emitter output regressions, while preserving primitive inference and inline negatives. Then re-audit M0.2 closure before proposing M1 Effect contracts. Begin only after user approval.

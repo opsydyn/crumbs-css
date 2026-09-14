@@ -10,6 +10,8 @@ Source files, tests, build outputs, and documentation were inspected. Additional
 
 The subsequent [ADR](../decisions/adopt-native-design-system-compiler.md) and [roadmap](../roadmap.md) distinguish proposed decisions from current behavior.
 
+Current promotion status: [M0 regression and composition closure audit](2026-09-14-m0-closure-audit.md). The findings and measurements below remain the original historical snapshot.
+
 ## Existing strengths
 
 - Familiar `.css.ts` authoring, Metro integration, and explicit native state selection.

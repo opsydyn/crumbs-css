@@ -1,0 +1,151 @@
+{
+  "slice": "M0.1 regression promotion and M0.2 closure audit",
+  "sourceRevision": "b23ee66",
+  "decisions": {
+    "M0.1": "complete for original E1\u2013E7 durable regressions",
+    "M0.2": "open: direct generic NativeStyle references fail public typechecking",
+    "M0": "in progress",
+    "M0.9": "open: Android native deferred until last",
+    "M1": "not started"
+  },
+  "packageCheck": {
+    "command": "bun run check",
+    "exitCode": 0,
+    "tests": 235,
+    "assertions": 8573,
+    "files": 35
+  },
+  "originalFindings": [
+    {
+      "id": "E1",
+      "repair": "2129e50",
+      "tests": [
+        "native-style-types.ts",
+        "native-composition.test.ts"
+      ],
+      "historicalRed": "Four composition regressions and positive array types failed",
+      "status": "original array counterexample repaired; broader direct generic reference gap open"
+    },
+    {
+      "id": "E2",
+      "repair": "5ed3af3",
+      "tests": [
+        "structured-compiler.test.ts",
+        "native-style-types.ts"
+      ],
+      "historicalRed": "Five initial authored-input regressions failed",
+      "status": "supported static subset repaired; unsupported structured authoring rejected"
+    },
+    {
+      "id": "E3",
+      "repair": "0835497",
+      "tests": [
+        "structured-runtime.test.ts",
+        "structured-runtime-types.ts"
+      ],
+      "historicalRed": "Four runtime and eight primitive result type regressions failed",
+      "status": "original transform/scalar corruption repaired; nested values opaque"
+    },
+    {
+      "id": "E4",
+      "repair": "06dda18",
+      "tests": [
+        "runtime-isolation.test.ts",
+        "runtime-bundle-contract.test.ts"
+      ],
+      "historicalRed": "Three old-build graph/denial regressions failed",
+      "status": "theme runtime boundary repaired; graph/device performance separate"
+    },
+    {
+      "id": "E5",
+      "repair": "initial token declaration slice and a27b316",
+      "tests": [
+        "css-to-rn.test.ts",
+        "theme-token-admission.test.ts"
+      ],
+      "historicalRed": "Token/property-order and reference admission red cases retained in execution ledger",
+      "status": "property/order/reference shape repaired; domains/provider/schema remain later work"
+    },
+    {
+      "id": "E6",
+      "repair": "d6a5c82",
+      "tests": [
+        "theme-contract-ownership.test.ts"
+      ],
+      "historicalRed": "Four initial ownership regressions failed",
+      "status": "local raw-path ownership repaired; independent graph/provider identities later"
+    },
+    {
+      "id": "E7",
+      "repair": "ab72f6b",
+      "tests": [
+        "ordinary-exports.test.ts"
+      ],
+      "historicalRed": "Four initial ordinary export regressions failed",
+      "status": "dense named data subset preserved; unsupported data explicitly rejected"
+    }
+  ],
+  "historicalEvidence": "Reviewed recorded before-fix execution evidence; historical builds not rerun in this audit",
+  "knownTypeGap": {
+    "command": "./node_modules/.bin/tsgo --noEmit --strict --skipLibCheck --module preserve --moduleResolution bundler --target es2022 docs/evidence/2026-09-14-m0-closure-audit/direct-native-reference.css.ts",
+    "exitCode": 2,
+    "errorCount": 2,
+    "failingForms": [
+      "style(generic)",
+      "styleVariants({ direct: generic })"
+    ],
+    "acceptedForms": [
+      "style([generic])",
+      "array variant entry"
+    ],
+    "suppressedDiagnostics": false,
+    "runtimeRepair": "none; this audit preserves the reproducer"
+  },
+  "workspaceMaps": [
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/web/index-d486dd6162d121d3c99d1781e8b57c2c.js.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/ios/index-9d543716c68dddcf5af17b2e318a7b80.hbc.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/android/index-e353100c11b91ae073364b6e9aeeee17.hbc.map",
+      "crumbs": 1
+    }
+  ],
+  "packedConsumer": {
+    "sourceRevision": "b23ee66",
+    "refresh": "Current local tarball installed with npm into retained isolated Expo consumer; SDK dependencies reused; current playground source copied",
+    "identity": {
+      "mode": "packed",
+      "version": "0.1.2-alpha.2",
+      "entry": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/node_modules/@opsydyn/crumbs-css/dist/theme.cjs"
+    },
+    "packageRealPath": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/node_modules/@opsydyn/crumbs-css",
+    "tarballSha256": "3b8def04cd4690964649b02ea9eb4f344ccac469551cd6ece34870c89057b1a8",
+    "typecheck": "passed",
+    "maps": [
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/web/index-81432b0f39e5333122495bab8d905a8e.js.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/ios/index-597c17744a15d372acf7cc71c1f06c45.hbc.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/android/index-cd456339c5cc466e151f39690cdd612d.hbc.map",
+        "crumbs": 1
+      }
+    ],
+    "nativeAcceptance": "not run",
+    "publication": "none"
+  },
+  "storybookTypecheck": "passed",
+  "docsPages": 20,
+  "nativeAcceptance": "Not rerun; historical iOS evidence only; Android deferred until last",
+  "performance": "No new host/device/editor measurement or performance claim in this audit",
+  "publication": "none; original release-version edits excluded"
+}
