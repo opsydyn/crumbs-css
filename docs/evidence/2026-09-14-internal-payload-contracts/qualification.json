@@ -1,0 +1,128 @@
+{
+  "observedOn": "2026-09-14",
+  "sourceRevision": "1ce7bac plus this approved M1.2 implementation; accompanying commit records the slice",
+  "effectVersion": "4.0.0-rc.115",
+  "scope": "Initial internal shape/data contracts; no public entrypoint or compiler/provider migration",
+  "red": {
+    "command": "bun test packages/css/test/payload-contracts.test.ts",
+    "exitCode": 1,
+    "failure": "Missing new contracts/payloads module before implementation",
+    "retainedLog": "before-implementation.diagnostics.txt",
+    "note": "This records missing-module test-first failure, not a claim that every later adversarial test was independently run against an old implementation"
+  },
+  "packageCheck": {
+    "command": "bun run check",
+    "exitCode": 0,
+    "tests": 254,
+    "assertions": 11221,
+    "testFiles": 37,
+    "newBoundaryTests": 10
+  },
+  "seededProperties": [
+    {
+      "seed": 4121,
+      "runs": 150,
+      "domain": "Independent ordered literal artifacts with string/boolean/bounded integer values, source indexes and identity versions",
+      "assertions": "JSON representation and decoded values equal the independently constructed model; nested unknown identity fields rejected; source input order unchanged"
+    },
+    {
+      "seed": 4122,
+      "runs": 100,
+      "domain": "Different-owner qualified references across identity versions",
+      "assertions": "Artifact rejects mismatched owner; standalone reference data/JSON round trips preserve its own identity"
+    },
+    {
+      "seed": 4123,
+      "runs": 100,
+      "domain": "Mixed qualified references, ordered static transforms and shadow offsets",
+      "assertions": "Independent structured artifacts round trip; added unknown structured fields rejected"
+    }
+  ],
+  "boundaryPolicies": {
+    "unknownFields": "error at all nested schema boundaries; no silent stripping",
+    "numeric": "Finite numbers, safe integer version/location/index domains; negative/fractional native scalars permitted; signed zero rejected at initial JSON boundary; finite numeric text for angles/percentages",
+    "descriptors": "Same-realm plain/null-prototype records, dense undecorated arrays and own enumerable data fields; no getter/toJSON execution; reject unsupported values/prototypes, cycles and nesting beyond 64 containers",
+    "proxyAndCrossRealm": "Not provided; Proxy inspection traps are not inert",
+    "identity": "Complete owner/name/version tuple; qualified reference must match artifact header; data identity does not prove provider/package ownership",
+    "encoding": "Schema decoding/encoding with ordinary data failure results; typed encode and explicit encodeUnknown; semantic JSON round trip rather than reference/byte round trip",
+    "artifactVersion": "Literal 1 for internal prototype envelope; other versions fail without fallback; not a published compiler/runtime ABI"
+  },
+  "typeContracts": {
+    "path": "packages/css/test/payload-contract-types.ts",
+    "positive": "Schema-derived readonly identity/declaration/artifact/reference/diagnostic types, typed encode and ordinary ContractResult",
+    "negative": "Unsupported typed artifact version, missing reference identity, unknown diagnostic code, string source positions, mutation of readonly identity, distinct-representation schema passed to shape codec helper"
+  },
+  "workspaceExpo": {
+    "command": "bun run playground:check",
+    "exitCode": 0,
+    "maps": [
+      {
+        "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/web/index-d486dd6162d121d3c99d1781e8b57c2c.js.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/ios/index-9d543716c68dddcf5af17b2e318a7b80.hbc.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/android/index-e353100c11b91ae073364b6e9aeeee17.hbc.map",
+        "crumbs": 1
+      }
+    ]
+  },
+  "packedExpo": {
+    "sourceRevision": "1ce7bac",
+    "refresh": "Local current tarball installed into retained isolated npm Expo consumer; existing Expo dependency installation reused; current app source copied",
+    "identity": {
+      "mode": "packed",
+      "version": "0.1.2-alpha.2",
+      "entry": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/node_modules/@opsydyn/crumbs-css/dist/theme.cjs"
+    },
+    "packageRealPath": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/node_modules/@opsydyn/crumbs-css",
+    "tarballSha256": "8da46b8b780f055064152800b8669b4f97a86d179e8553fe0fb613f9052281ff",
+    "typecheck": "passed",
+    "maps": [
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/web/index-f3c228eeaf62bf9a44089cf8e8d1bea9.js.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/ios/index-57489cb9a7e4d7de9bfbb026d6f38259.hbc.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/android/index-cd456339c5cc466e151f39690cdd612d.hbc.map",
+        "crumbs": 1
+      }
+    ],
+    "nativeAcceptance": "not run",
+    "publication": "none"
+  },
+  "storybook": {
+    "command": "bun run app:typecheck",
+    "exitCode": 0
+  },
+  "docs": {
+    "command": "bun run docs:build",
+    "exitCode": 0,
+    "pages": 20
+  },
+  "runtimeBoundary": "Existing emitted declarations contain no Effect imports; theme ESM/CommonJS graphs are React-only; pack-consumer Node16/Bundler and runtime denial tests pass. New internal source codecs execute under Bun tests and are not part of those emitted public graphs.",
+  "delivery": {
+    "M1.2": "complete for initial schemas and boundary tests",
+    "M1": "in progress",
+    "nextRecommended": "M1.3 emitted Effect boundary loading/graph/initialization qualification; await approval",
+    "M0.9NativeAndroid": "deferred until last"
+  },
+  "limits": [
+    "Shape/property syntax validation is not native primitive/property/value or token-domain admission; those checks remain existing compiler and M2/M3 responsibilities",
+    "No public schema/decoder, production schema ingress or atomic theme-update API",
+    "No emitted private-contract CJS/oldest-Node loading or Effect initialization measurement; those remain M1.3",
+    "No byte canonicalization/hash or class/Proxy/reference-identity round-trip promise",
+    "No JSON byte-size/streaming/heap budget established",
+    "Existing public negative-zero behavior unchanged; migration requires an explicit M2 policy",
+    "Packed npm consumer reuses existing Expo dependencies",
+    "No new dependency/version change, native/device run, benchmark superiority, publication or push",
+    "Preexisting release manifest/package/lockfile version edits excluded"
+  ]
+}

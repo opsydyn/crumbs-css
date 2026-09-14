@@ -240,3 +240,8 @@ Revisit the relevant decision if Effect 4's measured runtime footprint defeats t
 ## Implementation evidence — 2026-09-14
 
 Approved M1.1 selects and pins `effect@4.0.0-rc.115` internally. [Exact artifact/API selection](../assessments/2026-09-14-effect4-api-selection.md) records registry metadata, installed source hashes, Schema/Codec/Optic probes, plain consumer boundaries and ESM/CommonJS caller qualification on Node 24.15.0. This is a release candidate; Codec is a Schema type view and optional optic updates require explicit failure handling. No production Crumbs schema migration or Effect runtime budget is claimed. M1.2 and M1.3 retain those separate tasks. The broader ADR status and unchecked verification criteria remain unchanged.
+
+
+### Initial schema boundary evidence — 2026-09-14
+
+Approved M1.2 defines internal schema-derived identity/reference/declaration/diagnostic types and a version-1 prototype artifact envelope, with strict data/JSON codecs. [Contract policies and qualification](../assessments/2026-09-14-internal-payload-contracts.md) specify finite/safe-integer fields, signed-zero rejection at the new JSON boundary, descriptor-safe admission, structured issue paths and independent shrinking round trips. These shape contracts do not replace property/token-domain admission or migrate existing compiler/provider behavior. Actual emitted Effect boundary loading and initialization remain M1.3; compiler/ABI migration remains M2. Broader verification criteria are not promoted by this slice.

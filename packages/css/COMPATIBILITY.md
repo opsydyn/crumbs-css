@@ -35,7 +35,7 @@ Compiler fixtures live under `packages/css/fixtures/consumer`, with a shared req
 
 ## Internal Effect dependency
 
-The package pins `effect@4.0.0-rc.115` as its own implementation dependency; consumers do not add an Effect peer dependency or use services/runners. This is an ESM prerelease. This slice qualifies its APIs without migrating production Crumbs validation or changing public entrypoints/types. Ordinary runtime artifacts remain React-only. [Exact selection and limits](../../docs/assessments/2026-09-14-effect4-api-selection.md) distinguish installed dependency size, current Node interoperability, and future initialization/device measurements.
+The package pins `effect@4.0.0-rc.115` as its own implementation dependency; consumers do not add an Effect peer dependency or use services/runners. This is an ESM prerelease. Its APIs and initial internal shape/data codecs are qualified without migrating production Crumbs validation or changing public entrypoints/types. [Initial contract policies](../../docs/assessments/2026-09-14-internal-payload-contracts.md) distinguish shape validation from native property/token-domain admission and published artifact compatibility. Ordinary runtime artifacts remain React-only. [Exact selection and limits](../../docs/assessments/2026-09-14-effect4-api-selection.md) distinguish installed dependency size, current Node interoperability, and future initialization/device measurements.
 
 ## Runtime dependency boundary
 
