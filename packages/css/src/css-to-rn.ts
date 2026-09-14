@@ -18,7 +18,7 @@ const CSS_VAR_RE = /var\s*\(/
 const NATIVE_THEME_VAR_RE = /^var\s*\(\s*(--crumbs-[^)]+?)\s*\)$/
 const NATIVE_UNIT_LENGTH_PROPS = new Set(["line-height"])
 const NUMERIC_VALUE_RE = /^-?\d+(?:\.\d+)?$/
-const SPACING_LONGHANDS = new Map<string, ReadonlyArray<string>>([
+const CANONICAL_LONGHANDS = new Map<string, ReadonlyArray<string>>([
   ["padding", ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"]],
   ["paddingHorizontal", ["paddingLeft", "paddingRight"]],
   ["paddingVertical", ["paddingTop", "paddingBottom"]],
@@ -26,6 +26,8 @@ const SPACING_LONGHANDS = new Map<string, ReadonlyArray<string>>([
   ["marginHorizontal", ["marginLeft", "marginRight"]],
   ["marginVertical", ["marginTop", "marginBottom"]],
   ["gap", ["rowGap", "columnGap"]],
+  ["borderWidth", ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"]],
+  ["borderColor", ["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"]],
 ])
 const NATIVE_STYLE_PROPS = new Set([
   "alignContent",
@@ -225,7 +227,7 @@ export function cssDeclarationsToRN(
       }
       // Keep references and literals in one ordered result: later declarations
       // replace earlier declarations regardless of how their values resolve.
-      assignCanonicalSpacing(converted, { [nativeProp]: createThemeTokenReference(nativeThemeVarName) })
+      assignCanonicalDeclarations(converted, { [nativeProp]: createThemeTokenReference(nativeThemeVarName) })
       continue
     }
 
@@ -251,7 +253,7 @@ export function cssDeclarationsToRN(
       continue
     }
 
-    assignCanonicalSpacing(converted, transformDeclaration(normalizeNativeDeclaration(prop, value), dropped))
+    assignCanonicalDeclarations(converted, transformDeclaration(normalizeNativeDeclaration(prop, value), dropped))
   }
 
   const firstDropped = dropped[0]
@@ -267,12 +269,12 @@ export function cssDeclarationsToRN(
 
 // ADR D2: normalize before merging so value representation cannot change
 // shorthand/longhand winners. This work stays entirely in the compiler.
-function assignCanonicalSpacing(
+function assignCanonicalDeclarations(
   target: Record<string, unknown>,
   declarations: Readonly<Record<string, unknown>>,
 ): void {
   for (const [prop, value] of Object.entries(declarations)) {
-    const longhands = SPACING_LONGHANDS.get(prop)
+    const longhands = CANONICAL_LONGHANDS.get(prop)
     if (longhands === undefined) target[prop] = value
     else for (const longhand of longhands) target[longhand] = value
   }

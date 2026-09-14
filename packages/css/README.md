@@ -231,3 +231,6 @@ config.transformer = {
 
 
 Required consumer regression fixtures and both compiler benchmark fixtures belong to the package. Missing required coverage fails rather than disappearing when an app is absent. Host benchmark JSON explicitly reports native/device performance as unmeasured; see [coverage and qualification](./COMPATIBILITY.md#coverage-and-qualification).
+
+
+Compiled physical border widths/colors now normalize to four sides for tokens, literals and literal CSS `border` output. Later broad/side declarations preserve authored order across compositions. Regenerate compiled artifacts together; raw runtime styles retain native behavior. See [alpha border migration](./COMPATIBILITY.md#supported) for the physical-only boundary.

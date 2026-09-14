@@ -40,6 +40,12 @@ The compiler captures static transform arrays and numeric `shadowOffset` / `text
 
 Other structured authoring shapes, animated nodes and nested tokens fail with `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` even with permissive diagnostics. Direct primitive helpers also exclude animated transform nodes by type. Pass unsupported native values through React Native's runtime `style` prop. CSS strings retain the existing converter contract. Regenerate dependent artifacts together after upgrading; compiled-output checks do not establish native rendering or platform-specific shadow behavior. Nested token evaluation remains outside the current resolution contract.
 
+## Physical border precedence
+
+Compiled border width/color shorthands expand to physical top/right/bottom/left properties for both tokens and literals, including width/color output from a literal CSS `border` shorthand. Multi-value literals retain their per-side values. Later broad or side declarations win before class/composition merging; only surviving tokens are resolved. The literal border style field stays global. Typed border fixtures cover direct rules, nested/repeated bases, primitive helpers, variants and recipes in native and web emitters.
+
+Regenerate dependent compiled artifacts together and pass complete styles to React Native; compiled shorthand fields are no longer present. Mixing old shorthand artifacts with new longhands is not qualified. Raw runtime styles retain native behavior. Corner radii, logical start/end/RTL conflicts and side-specific compound border behavior remain separate work. Embedded compound token expressions and unsupported side border-style output retain existing strict diagnostics. No runtime normalization or semantic token validation was added.
+
 ## Required coverage and optional native capabilities
 
 Package tests use durable consumer fixtures for themed styles, variant maps, recipes, web object emission, relative filenames and local theme imports. Tests and benchmarks admit the same required files; missing files/projects and directory impostors fail with the fixture path. An absent app cannot silently remove these checks.
