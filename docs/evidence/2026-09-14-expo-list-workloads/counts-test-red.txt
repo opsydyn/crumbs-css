@@ -1,0 +1,25 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/playground-workload.test.ts:
+(pass) Expo list measurement plan > uses five identical mount/rerender/theme-switch/unmount cycles [0.25ms]
+(pass) Expo list measurement plan > fails invalid sizes and does not equate missing observations with acceptance [0.09ms]
+(pass) Expo list measurement plan > requires each step and the actual lifecycle/memo receipts [0.13ms]
+33 | it("keeps static references stable and rejects impossible lifecycle counts", () => {
+34 |   const plan = createWorkloadPlan("static", 25, 5)
+35 |   const observations: WorkloadObservation[] = plan.steps.map(step => ({ step: step.index, action: step.action, requestToLayoutEffectMs: 1, styleIdentity: step.action === "mount" ? "initial" : step.action === "unmount" ? "absent" : "same" }))
+36 |   const counts = { listMounts: 5, listUnmounts: 5, rowMounts: 50, rowUnmounts: 50 }
+37 |   expect(summarizeWorkload(plan, observations, counts).memoIdentityVerified).toBe(true)
+38 |   for (const rowMounts of [Infinity, 1.5]) expect(summarizeWorkload(plan, observations, { ...counts, rowMounts, rowUnmounts: rowMounts }).lifecycleBalanced).toBe(false)
+                                                                                                                                                                  ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (/Users/alancurrie/Projects/crumbs-css/packages/css/test/playground-workload.test.ts:38:158)
+(fail) keeps static references stable and rejects impossible lifecycle counts [0.22ms]
+
+ 3 pass
+ 1 fail
+ 29 expect() calls
+Ran 4 tests across 1 file. [9.00ms]

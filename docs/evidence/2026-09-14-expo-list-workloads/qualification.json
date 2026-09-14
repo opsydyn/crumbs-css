@@ -1,0 +1,83 @@
+{
+  "baseRevision": "7e0e879",
+  "sourceState": "M1.5a working tree; source-identity.json identifies tested app files",
+  "installedAppVersions": {
+    "expo": "56.0.4",
+    "react": "19.2.5",
+    "react-native": "0.85.3",
+    "react-native-web": "0.21.2",
+    "@opsydyn/crumbs-css": "0.1.2-alpha.2"
+  },
+  "package": {
+    "command": "bun run check",
+    "exitCode": 0,
+    "tests": 269,
+    "assertions": 11556,
+    "files": 40,
+    "build": "passed",
+    "typecheck": "passed",
+    "packedPublicContracts": "passed within package suite"
+  },
+  "workspace": {
+    "command": "bun run playground:check",
+    "exitCode": 0,
+    "typecheck": "passed",
+    "expoExports": "ios/android/web production JavaScript",
+    "finalUIRefresh": "passed",
+    "runtimeMaps": 3,
+    "effectSources": 0
+  },
+  "packed": {
+    "commands": "npm pack --ignore-scripts after completed package build; npm install local tarball; tsc --noEmit; expo export --platform all --source-maps",
+    "exitCode": 0,
+    "runtimeMaps": 3,
+    "effectSources": 0,
+    "isolation": "existing isolated npm consumer outside workspace, refreshed tarball and current app source; Expo dependencies reused",
+    "identity": "packed-consumer.json",
+    "initialIncompletePack": "excluded; first pack overlapped build cleanup and lacked DTS; sequential fresh packing passed"
+  },
+  "storybook": {
+    "command": "bun run app:typecheck",
+    "exitCode": 0
+  },
+  "docs": {
+    "command": "bun run docs:build",
+    "exitCode": 0,
+    "pages": 20
+  },
+  "liveWeb": {
+    "app": "Actual Expo development app via browser UI at localhost:8091",
+    "cases": 6,
+    "kinds": [
+      "static",
+      "themed"
+    ],
+    "requestedRowCounts": [
+      25,
+      100,
+      1000
+    ],
+    "cycles": 30,
+    "orderedStepObservations": 120,
+    "allVerificationSummaries": "passed",
+    "memoIdentity": "themed same reference on rerender, changed on local theme switch; static same reference",
+    "lifecycle": "all six runs observed five list mounts/five unmounts and positive balanced row effects",
+    "cancelReset": "observed idle controls and no unfinished report after leaving an active run and returning",
+    "profiling": "optional development React render work retained, not device/frame/budget evidence",
+    "timingConditions": "instrumented web host; other tooling active; not controlled idle-host performance comparisons",
+    "screenshotReview": "static/themed completion screenshots inspected"
+  },
+  "status": {
+    "M1.5a": "complete functional workload foundation",
+    "M1.5": "remaining recipe/scope/scroll/orientation/font-scale/retained-memory workloads",
+    "M1": "in progress",
+    "M1.3b": "no actual external-theme decoder exists",
+    "nativeDeviceAcceptance": "not run in this slice",
+    "nativeAndroid": "deferred until last",
+    "releaseHermesMemoryFramesBudgets": "not qualified",
+    "push": "none",
+    "publication": "none",
+    "releaseVersionEdits": "three preexisting edits preserved and excluded"
+  },
+  "retainedTextLogs": "trailing whitespace normalized"
+}
