@@ -29,7 +29,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | Milestone | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
 | M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; M0.1 and M0.2 closed for documented compiler contracts; native Android acceptance deferred |
-| M1 | Select Effect 4 boundary implementation and establish budgets | M0 | Not started |
+| M1 | Select Effect 4 boundary implementation and establish budgets | M0 | In progress; M1.1 exact artifact/API selection complete; native Android remains deferred |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
 | M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | Not started |
 | M4 | Shared resolution, compiled selection, and bounded caches | M2, M3 | Not started |
@@ -67,7 +67,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Decisions:** D3, D4, D6, D12.\
 **Affected paths:** `packages/css/package.json`, `bun.lock`, new `packages/css/src/contracts/`, `bench/`, consumer fixtures, `test/perf-harness.test.ts`, and `.github/workflows/ci.yml`.
 
-- [ ] M1.1: Select one exact published Effect 4 version, verify its Schema/Codec/Optic APIs, and record it with import paths and package metadata. Add it as an internal dependency; do not leak Effect execution requirements through public authoring/hooks.
+- [x] M1.1: Select one exact published Effect 4 version, verify its Schema/Codec/Optic APIs, and record it with import paths and package metadata. Add it as an internal dependency; do not leak Effect execution requirements through public authoring/hooks.
 - [ ] M1.2: Define initial schemas for tagged native declarations/references, contract identity, structured diagnostics, and an explicit artifact version. Specify unknown-field and finite-number handling. Add encode/decode tests at these boundaries.
 - [ ] M1.3: Audit the dependency graph and initialization footprint for compiler, ordinary runtime, and external-theme decoding entrypoints separately. Test both module formats using the exact installed Effect version.
 - [ ] M1.4: Correct benchmark labels: batch-average quantiles are not operation-latency quantiles. Make raw and recipe baselines perform equivalent selection/default/compound work. Separate cold transforms from warm transforms and cached/uncached runtime paths.
@@ -545,3 +545,16 @@ Approved bounded continuation under ADR D1/D2. Complete native reference detecti
 - Re-audit closes M0.2 for the documented compiler composition/order subset, using the existing independent shorthand-family suites plus these direct-reference contracts. [Historical closure audit](assessments/2026-09-14-m0-closure-audit.md) retains its original result and records this subsequent promotion. M0 remains in progress with native Android acceptance deferred until last. These gates do not qualify arbitrary animated native authoring, all native properties, device RTL/layout, token domains or release performance. No new benchmark or native/device measurements, publication or push occurred.
 
 Next recommended slice: M1.1 — verify one exact published Effect 4 version and its Schema/Codec/Optic APIs, record the chosen imports and package metadata, then pin it as an internal dependency while preserving ordinary consumer APIs. Begin only after user approval.
+
+
+### 2026-09-14 — M1.1 exact Effect 4 dependency and API selection
+
+Approved continuation under ADR D3/D4, with native Android acceptance deferred until last. Pin `effect@4.0.0-rc.115` as a package dependency and in the workspace lockfile. Live registry metadata records publication on September 11, 2026, MIT licensing, ESM exports and no declared dependencies/peers/engines. The registry stable tag remains Effect 3; the selected 4.x artifact is an exact release candidate, not a floating tag/range or snapshot. [Selection and import conventions](assessments/2026-09-14-effect4-api-selection.md) and [metadata/qualification](evidence/2026-09-14-effect4-selection/qualification.json) retain the exact artifact and installed source hashes.
+
+- Nine executable upstream capability tests verify explicit finite/excess-field policies, typed service-free Codec views within Schema, distinct encode/decode representations, JSON codec derivation, nested immutable optics, schema-derived focuses, own-key optional lookup and explicit update failure handling. Independent seeded properties cover 100 codec and 100 lens-law cases; type contracts reject bad encoding types, nested keys and replacements. These probes do not define or migrate production Crumbs payloads.
+- Fresh `bun run check` passes 244 tests / 9,239 assertions across 36 files, including public packed Node16/Bundler contracts and React-only runtime graph/denial checks. Frozen installation passes without changes. Public declarations import no Effect, and ordinary consumers require no Effect peer dependency, services or runners.
+- Exact Effect subpaths execute from ESM and CommonJS callers on Node 24.15.0. CommonJS uses synchronous ESM interoperability; the selected artifact has no distinct CJS export. Qualification of the oldest supported tooling Node and emitted compiler/decoder loading rules remains M1.3; engines/peer ranges are unchanged.
+- Workspace and refreshed isolated npm tarball consumers pass types, all three Expo JavaScript exports and runtime map checks. A separate source-map inspection finds zero Effect sources in each of the six application maps. Storybook typechecking and the 20-page docs build pass. The isolated consumer reuses its existing Expo dependency installation. No initialization/device benchmark or native acceptance is inferred from package installation or graph isolation.
+- M1.1 closes; M1 remains in progress. Production schema/codec ingress, atomic optic updates, initialization footprints and calibrated budgets remain later tasks. No public API, production runtime/compiler code, push or publication changed. Preexisting release manifest and package/lockfile version edits remain excluded from this commit; only Effect dependency additions are staged from those two files.
+
+Next recommended slice: M1.2 — define internal schemas for tagged native declarations/references, contract identity, structured diagnostics and an explicit artifact version, with deliberate finite/exact-field policies and valid/invalid codec contracts. Specify boundaries before wiring validation into compiler or runtime paths. Begin only after user approval.

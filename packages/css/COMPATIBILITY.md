@@ -33,6 +33,10 @@ unless they are exercised explicitly in a future compatibility pass.
 
 Compiler fixtures live under `packages/css/fixtures/consumer`, with a shared required-file admission check used by tests and benchmarks. They are test assets and are excluded from the published tarball. Removing an application directory cannot turn these scenarios into silent passes. Optional native capabilities remain visibly unqualified; they are not substitutes for mandatory compiler coverage.
 
+## Internal Effect dependency
+
+The package pins `effect@4.0.0-rc.115` as its own implementation dependency; consumers do not add an Effect peer dependency or use services/runners. This is an ESM prerelease. This slice qualifies its APIs without migrating production Crumbs validation or changing public entrypoints/types. Ordinary runtime artifacts remain React-only. [Exact selection and limits](../../docs/assessments/2026-09-14-effect4-api-selection.md) distinguish installed dependency size, current Node interoperability, and future initialization/device measurements.
+
 ## Runtime dependency boundary
 
 Import application runtime APIs from `@opsydyn/crumbs-css/theme` (or its existing `dist/theme` alias). Both ESM and CommonJS runtime artifacts depend externally only on React; their emitted graph contains no Node built-ins, authoring entrypoints, esbuild, vanilla-extract integration or CSS conversion code. Shared tags are pure data. One declaration graph preserves nominal token types across authoring and runtime entries.

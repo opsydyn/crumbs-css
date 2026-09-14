@@ -235,3 +235,8 @@ Revisit the relevant decision if Effect 4's measured runtime footprint defeats t
 - [Effect 4 Schema migration guide](https://github.com/Effect-TS/effect/blob/main/migration/schema.md) and [Optic guide](https://github.com/Effect-TS/effect/blob/main/packages/effect/OPTIC.md). These track upstream development; implementation must verify the selected release.
 - [DTCG stable technical reports](https://www.designtokens.org/technical-reports/), including the [2025.10 format](https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/) and [resolver](https://www.w3.org/community/reports/design-tokens/CG-FINAL-resolver-20251028/).
 - [React Native StyleSheet](https://reactnative.dev/docs/stylesheet.html), [accessibility](https://reactnative.dev/docs/accessibility.html), and [Text](https://reactnative.dev/docs/text).
+
+
+## Implementation evidence — 2026-09-14
+
+Approved M1.1 selects and pins `effect@4.0.0-rc.115` internally. [Exact artifact/API selection](../assessments/2026-09-14-effect4-api-selection.md) records registry metadata, installed source hashes, Schema/Codec/Optic probes, plain consumer boundaries and ESM/CommonJS caller qualification on Node 24.15.0. This is a release candidate; Codec is a Schema type view and optional optic updates require explicit failure handling. No production Crumbs schema migration or Effect runtime budget is claimed. M1.2 and M1.3 retain those separate tasks. The broader ADR status and unchecked verification criteria remain unchanged.
