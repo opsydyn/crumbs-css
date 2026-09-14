@@ -149,6 +149,8 @@ Later authored entries override the same canonical native property. Compositions
 
 ## Runtime structured values
 
+Legacy token ownership uses exact raw paths: repeated identical paths can share a token name, while different paths that sanitize to the same name fail atomically. Theme creation rejects misplaced/unregistered leaves and exposed token paths are frozen. Namespace contract roots by package/design system until explicit package identities arrive; see [compatibility](./COMPATIBILITY.md#legacy-contract-ownership).
+
 Named `.css.ts` exports can include ordinary finite primitives, dense arrays and plain data records alongside styles. These values survive compilation; unsupported runtime values fail with `CRUMBS_CSS_UNSUPPORTED_EXPORT`. Import constants directly and keep them outside style namespaces passed to theme resolvers. See [compatibility](./COMPATIBILITY.md#ordinary-export-contract) for identity limits and migration guidance.
 
 Token-reference payloads require exactly own enumerable `$$type` and `varName` data fields and a `--crumbs-[A-Za-z0-9_-]+` name. Malformed tagged values fail with a stable diagnostic; guards never evaluate reference accessors. Theme resolution uses own token values and reports missing values with `CRUMBS_CSS_MISSING_THEME_TOKEN`. See [compatibility](./COMPATIBILITY.md) for migration details.

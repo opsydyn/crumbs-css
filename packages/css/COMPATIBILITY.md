@@ -50,6 +50,14 @@ Native token references require exactly two own enumerable data fields: `$$type:
 
 **Alpha token migration:** regenerate old or extended reference payloads into the exact data shape above. Metadata belongs outside the reference DTO; token names cannot contain whitespace, punctuation other than hyphen/underscore, or an empty suffix. Missing-token diagnostics now carry a stable code.
 
+### Legacy contract ownership
+
+Until M3 introduces explicit package/contract identities, a token's owner is its exact raw path (the array of unsanitized key segments). Identical paths may be reused across contract definitions and produce independent theme value maps. Different paths that sanitize to the same `--crumbs-…` name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`; registration validates the whole contract before publishing any metadata. Failed definitions cannot overwrite an existing owner or leave partially registered tokens. Exposed token paths are frozen.
+
+`createTheme` requires registered leaves at their owning paths. Relocated, unregistered or invalid leaves fail with `CRUMBS_CSS_INVALID_THEME_CONTRACT`; they are never silently skipped. Generated contracts preserve own prototype-like keys. Clones at identical paths can reuse already registered tokens, but decoded contracts must be rebuilt in the owning authoring module when that registry is absent.
+
+The registry is local to an authoring module instance (or a bundled compilation graph), not a cross-package manifest. Exact-path reuse deliberately shares legacy token identity; it does not establish distinct provider compatibility or prevent independently compiled graphs from choosing the same names. Namespace contract roots by design system/package now, avoid sanitizer collisions, and regenerate dependent artifacts after changing paths. Wrong-provider detection, semantic domains and stable package identity remain M3 work. No counter/random suffix or evaluation-order-dependent naming is introduced; existing non-colliding token strings remain unchanged.
+
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
 ### Static structured compiler boundary
@@ -116,6 +124,8 @@ full message text.
 
 | Code | Meaning |
 | --- | --- |
+| `CRUMBS_CSS_THEME_TOKEN_COLLISION` | Different raw paths claim the same legacy native token name; the contract is not registered. |
+| `CRUMBS_CSS_INVALID_THEME_CONTRACT` | A contract contains an invalid or misplaced/unregistered native token leaf. |
 | `CRUMBS_CSS_UNSUPPORTED_EXPORT` | `.css.ts` export contains an unsupported value or export name; error includes file and data path. Always fatal. |
 | `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE` | Constructor or resolver rejected a malformed native token reference/name. |
 | `CRUMBS_CSS_MISSING_THEME_TOKEN` | The active theme has no own value for a valid reference name. |

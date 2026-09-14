@@ -3,6 +3,7 @@ import { markCompositionUsed, registerComposition } from "@vanilla-extract/css/a
 import { getFileScope } from "@vanilla-extract/css/fileScope"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import { markNativeStyleMap, NativeRecipeClassSymbol } from "./native-style-map"
+import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diagnostics"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -203,9 +204,24 @@ export function recipe<TVariants extends NativeRecipeVariantsConfig>(
 }
 
 export function createThemeContract<T extends ThemeContractInput>(shape: T): ThemeContract<T> {
-  return createThemeContractNode(shape, [], {
+  const state: ThemeContractBuildState = {
     tokenPathsByVarName: new Map(),
-  }) as ThemeContract<T>
+  }
+  const contract = createThemeContractNode(shape, [], state)
+  // ADR D5 / M0.6: legacy identity is the exact raw path; validate the entire
+  // transaction before publishing metadata. Explicit package identities await M3.
+  for (const [varName, path] of state.tokenPathsByVarName) {
+    const previous = themeTokenRegistry.get(`var(${varName})` as NativeThemeVar)
+    if (previous !== undefined && !samePath(previous.path, path)) {
+      throw new Error(formatNativeStylesDiagnostic(NativeStylesDiagnosticCode.ThemeTokenCollision,
+        `Native theme token "${varName}" for raw path ${JSON.stringify(path)} is already owned by ${JSON.stringify(previous.path)}. Namespace contract roots or rename the colliding path; existing metadata was not changed.`))
+    }
+  }
+  for (const [varName, path] of state.tokenPathsByVarName) {
+    const token = `var(${varName})` as NativeThemeVar
+    if (!themeTokenRegistry.has(token)) themeTokenRegistry.set(token, Object.freeze({path: Object.freeze([...path]), varName}))
+  }
+  return contract as ThemeContract<T>
 }
 
 export function createTheme<TContract extends Record<string, unknown>>(
@@ -248,13 +264,14 @@ function createThemeContractNode(
   path: ReadonlyArray<string>,
   state: ThemeContractBuildState,
 ): Record<string, unknown> {
+  if (!isRecord(shape)) invalidThemeContract(path, "expected an object of nested records and null leaves")
   const contract: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(shape)) {
     const nextPath = [...path, key]
-    contract[key] =
-      value === null
-        ? createThemeVar(nextPath, state)
-        : createThemeContractNode(value, nextPath, state)
+    const node = value === null
+      ? createThemeVar(nextPath, state)
+      : createThemeContractNode(value, nextPath, state)
+    Object.defineProperty(contract, key, {value: node, enumerable: true, writable: true, configurable: true})
   }
   return contract
 }
@@ -264,15 +281,15 @@ function createThemeVar(
   state: ThemeContractBuildState,
 ): NativeThemeVar {
   const varName = `--crumbs-${path.map(sanitizeTokenSegment).join("-")}`
+  if (varName === "--crumbs-") invalidThemeContract(path, "empty native token name")
   const existingPath = state.tokenPathsByVarName.get(varName)
   if (existingPath !== undefined) {
-    throw new Error(
+    throw new Error(formatNativeStylesDiagnostic(NativeStylesDiagnosticCode.ThemeTokenCollision,
       `Duplicate native theme token "${varName}" for "${formatPath(path)}"; already used by "${formatPath(existingPath)}"`,
-    )
+    ))
   }
   state.tokenPathsByVarName.set(varName, path)
   const token = `var(${varName})` as NativeThemeVar
-  themeTokenRegistry.set(token, { path, varName })
   return token
 }
 
@@ -307,14 +324,24 @@ function collectThemeValues(
     }
     const themeValue = values[key]
     if (isThemeVar(contractValue)) {
+      if (!samePath(getThemeTokenPath(contractValue), nextPath)) invalidThemeContract(nextPath, "token is registered to a different raw path")
       if (typeof themeValue !== "string" && typeof themeValue !== "number") {
         throw new Error(`Theme value for "${formatPath(nextPath)}" must be a string or number`)
       }
       tokens[getThemeVarName(contractValue)] = themeValue
     } else if (isRecord(contractValue)) {
       collectThemeValues(contractValue, themeValue, nextPath, tokens)
-    }
+    } else invalidThemeContract(nextPath, "expected a registered native token leaf")
   }
+}
+
+function samePath(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
+  return left.length === right.length && left.every((segment, index) => segment === right[index])
+}
+
+function invalidThemeContract(path: ReadonlyArray<string>, reason: string): never {
+  throw new Error(formatNativeStylesDiagnostic(NativeStylesDiagnosticCode.InvalidThemeContract,
+    `Invalid native theme contract at "${formatPath(path)}": ${reason}. Reuse the owning createThemeContract result without relocating leaves; rebuild serialized contracts in their owning authoring module.`))
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
