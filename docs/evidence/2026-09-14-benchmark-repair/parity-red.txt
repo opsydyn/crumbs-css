@@ -1,0 +1,65 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/benchmark-workloads.test.ts:
+ 6 |   it("performs defaults, selection, filtering and compound work in identical style order", () => {
+ 7 |     const resolve = createRecipeResolver(recipe)
+ 8 |     for (const selection of selections) {
+ 9 |       const expected = resolveRecipeStyle(recipe, selection)
+10 |       const raw = rawStyleSelection(selection)
+11 |       expect(raw).toEqual(expected)
+                       ^
+error: expect(received).toEqual(expected)
+
+  [
+    {
+      "backgroundColor": "#a43628",
+      "borderRadius": 10,
+      "minHeight": 48,
+      "paddingBottom": 12,
+      "paddingLeft": 18,
+      "paddingRight": 18,
+      "paddingTop": 12,
+    },
+-   {},
+-   {
+-     "width": "100%",
+-   },
+-   {},
+-   {},
+-   {
+-     "backgroundColor": "#a43628",
+-   },
++   undefined,
++   undefined,
++   undefined,
++   undefined,
++   undefined,
+  ]
+
+- Expected  - 9
++ Received  + 5
+
+      at <anonymous> (/Users/alancurrie/Projects/crumbs-css/packages/css/test/benchmark-workloads.test.ts:11:19)
+(fail) recipe benchmark workload parity > performs defaults, selection, filtering and compound work in identical style order [0.42ms]
+15 |   })
+16 |   it("covers defaults, partial overrides, undefined and compound matches", () => {
+17 |     expect(selections).toContainEqual({})
+18 |     expect(selections).toContainEqual({ disabled: true })
+19 |     expect(selections).toContainEqual({ tone: undefined })
+20 |     expect(rawStyleSelection({ disabled: true }).at(-1)).toBe(recipe.compoundVariants![0]!.style)
+                                                              ^
+error: expect(received).toBe(expected)
+
+Expected: {
+  opacity: 0.5,
+}
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/Projects/crumbs-css/packages/css/test/benchmark-workloads.test.ts:20:58)
+(fail) recipe benchmark workload parity > covers defaults, partial overrides, undefined and compound matches [0.09ms]
+(pass) recipe benchmark workload parity > starts each measured implementation on the same independent selection sequence [0.05ms]
+
+ 1 pass
+ 2 fail
+ 24 expect() calls
+Ran 3 tests across 1 file. [49.00ms]

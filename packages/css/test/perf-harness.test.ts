@@ -7,7 +7,7 @@ import {
 } from "../bench/perf-harness"
 
 describe("native-styles perf harness", () => {
-  it("summarizes sample durations into per-iteration metrics", () => {
+  it("summarizes sample durations into explicit batch-mean metrics with raw samples", () => {
     const metric = summarizeSamples({
       iterationsPerSample: 10,
       name: "resolver",
@@ -18,12 +18,15 @@ describe("native-styles perf harness", () => {
     expect(metric).toMatchObject({
       hz: 400,
       iterations: 40,
-      maxMs: 4,
-      meanMs: 2.5,
-      minMs: 1,
+      batchMeanMaxMs: 4,
+      meanOperationMs: 2.5,
+      batchMeanMinMs: 1,
       name: "resolver",
-      p50Ms: 2,
-      p95Ms: 4,
+      batchMeanP50Ms: 2,
+      batchMeanP95Ms: 4,
+      iterationsPerSample: 10,
+      sampleKind: "batch-mean-ms-per-operation",
+      sampleDurationsMs: [10, 20, 30, 40],
       samples: 4,
       totalMs: 100,
       warmupIterations: 5,
@@ -33,7 +36,7 @@ describe("native-styles perf harness", () => {
   it("formats metrics for human-readable benchmark output", () => {
     const metric = summarizeSamples({
       budget: {
-        maxP95Ms: 1,
+        maxBatchMeanP95Ms: 1,
       },
       iterationsPerSample: 10,
       name: "resolver",
@@ -41,14 +44,16 @@ describe("native-styles perf harness", () => {
       warmupIterations: 1,
     })
 
-    expect(formatMetric(metric)).toContain("resolver hz=1,000ops/s mean=1.000000ms")
-    expect(formatMetric(metric)).toContain("budget=maxP95Ms:1")
+    expect(formatMetric(metric)).toContain("resolver hz=1,000ops/s mean-operation=1.000000ms")
+    expect(formatMetric(metric)).toContain("batch-mean-p95=1.000000ms");
+    expect(formatMetric(metric)).not.toMatch(/(?:^| )p95=/);
+    expect(formatMetric(metric)).toContain("budget=maxBatchMeanP95Ms:1")
   })
 
   it("fails when a benchmark exceeds its p95 budget", () => {
     const metric = summarizeSamples({
       budget: {
-        maxP95Ms: 1,
+        maxBatchMeanP95Ms: 1,
       },
       iterationsPerSample: 1,
       name: "slow resolver",
@@ -57,7 +62,7 @@ describe("native-styles perf harness", () => {
     })
 
     expect(() => assertBenchmarkBudget(metric)).toThrow(
-      "slow resolver p95 2.000000ms exceeded budget 1.000000ms",
+      "slow resolver batch-mean-p95 2.000000ms exceeded budget 1.000000ms",
     )
   })
 
@@ -73,5 +78,14 @@ describe("native-styles perf harness", () => {
     expect(metric.iterations).toBe(4)
     expect(metric.samples).toBe(2)
     expect(metric.hz).toBeGreaterThan(0)
+  })
+})
+
+describe("benchmark input integrity", () => {
+  it("rejects invalid counts and durations instead of emitting meaningless rates", () => {
+    const valid = { iterationsPerSample: 10, name: "integrity", sampleDurations: [10], warmupIterations: 0 }
+    for (const iterationsPerSample of [0, -1, 0.5, Infinity]) expect(() => summarizeSamples({ ...valid, iterationsPerSample })).toThrow()
+    for (const sampleDurations of [[], [NaN], [Infinity], [-1], [0]]) expect(() => summarizeSamples({ ...valid, sampleDurations })).toThrow()
+    expect(() => summarizeSamples({ ...valid, warmupIterations: -1 })).toThrow()
   })
 })

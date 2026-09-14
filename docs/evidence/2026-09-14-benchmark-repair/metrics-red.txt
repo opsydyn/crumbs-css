@@ -1,0 +1,106 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/perf-harness.test.ts:
+13 |       name: "resolver",
+14 |       sampleDurations: [10, 20, 30, 40],
+15 |       warmupIterations: 5,
+16 |     })
+17 |
+18 |     expect(metric).toMatchObject({
+                        ^
+error: expect(received).toMatchObject(expected)
+
+  {
+-   "batchMeanMaxMs": 4,
+-   "batchMeanMinMs": 1,
+-   "batchMeanP50Ms": 2,
+-   "batchMeanP95Ms": 4,
+    "hz": 400,
+    "iterations": 40,
+-   "iterationsPerSample": 10,
+-   "meanOperationMs": 2.5,
++   "maxMs": 4,
++   "meanMs": 2.5,
++   "minMs": 1,
+    "name": "resolver",
+-   "sampleDurationsMs": [
+-     10,
+-     20,
+-     30,
+-     40,
+-   ],
+-   "sampleKind": "batch-mean-ms-per-operation",
++   "p50Ms": 2,
++   "p95Ms": 4,
+    "samples": 4,
+    "totalMs": 100,
+    "warmupIterations": 5,
+  }
+
+- Expected  - 13
++ Received  + 5
+
+      at <anonymous> (/Users/alancurrie/Projects/crumbs-css/packages/css/test/perf-harness.test.ts:18:20)
+(fail) native-styles perf harness > summarizes sample durations into explicit batch-mean metrics with raw samples [1.22ms]
+42 |       name: "resolver",
+43 |       sampleDurations: [10],
+44 |       warmupIterations: 1,
+45 |     })
+46 |
+47 |     expect(formatMetric(metric)).toContain("resolver hz=1,000ops/s mean-operation=1.000000ms")
+                                      ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "resolver hz=1,000ops/s mean-operation=1.000000ms"
+Received: "resolver hz=1,000ops/s mean=1.000000ms p50=1.000000ms p95=1.000000ms samples=1 iterations=10 budget=maxBatchMeanP95Ms:1"
+
+      at <anonymous> (/Users/alancurrie/Projects/crumbs-css/packages/css/test/perf-harness.test.ts:47:34)
+(fail) native-styles perf harness > formats metrics for human-readable benchmark output [1.16ms]
+59 |       name: "slow resolver",
+60 |       sampleDurations: [2],
+61 |       warmupIterations: 1,
+62 |     })
+63 |
+64 |     expect(() => assertBenchmarkBudget(metric)).toThrow(
+                                                     ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "slow resolver batch-mean-p95 2.000000ms exceeded budget 1.000000ms"
+
+Received function did not throw
+Received value: undefined
+
+      at <anonymous> (/Users/alancurrie/Projects/crumbs-css/packages/css/test/perf-harness.test.ts:64:49)
+(fail) native-styles perf harness > fails when a benchmark exceeds its p95 budget [0.07ms]
+(pass) native-styles perf harness > measures async work [0.22ms]
+82 | })
+83 |
+84 | describe("benchmark input integrity", () => {
+85 |   it("rejects invalid counts and durations instead of emitting meaningless rates", () => {
+86 |     const valid = { iterationsPerSample: 10, name: "integrity", sampleDurations: [10], warmupIterations: 0 }
+87 |     for (const iterationsPerSample of [0, -1, 0.5, Infinity]) expect(() => summarizeSamples({ ...valid, iterationsPerSample })).toThrow()
+                                                                                                                                     ^
+error: expect(received).toThrow()
+
+Received function did not throw
+Received value: {
+  hz: 0,
+  iterations: 0,
+  maxMs: Infinity,
+  meanMs: Infinity,
+  minMs: Infinity,
+  name: "integrity",
+  p50Ms: Infinity,
+  p95Ms: Infinity,
+  samples: 1,
+  totalMs: 10,
+  warmupIterations: 0,
+}
+
+      at <anonymous> (/Users/alancurrie/Projects/crumbs-css/packages/css/test/perf-harness.test.ts:87:129)
+(fail) benchmark input integrity > rejects invalid counts and durations instead of emitting meaningless rates [0.10ms]
+
+ 1 pass
+ 4 fail
+ 7 expect() calls
+Ran 5 tests across 1 file. [11.00ms]

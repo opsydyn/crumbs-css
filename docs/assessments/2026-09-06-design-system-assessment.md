@@ -178,6 +178,8 @@ Source: the session run of [native-styles.bench.ts](../../packages/css/bench/nat
 - The optional native application benchmark uses an absent `apps/native` path and did not run.
 - No Hermes frames, React commits, bundle initialization, retained memory, or editor latency were measured in this assessment.
 
+Follow-up — 2026-09-14 M1.4: the [host workload repair](2026-09-14-benchmark-workloads.md) now labels batch-mean quantiles, equalizes static raw/recipe defaults/compounds/filter work and separates fresh-process first transforms from warmed transforms. The historical table above is preserved; its old raw/recipe ratio is not comparable to the new workload. React memo lifecycle and release-device performance remain unmeasured.
+
 Current React Native describes `StyleSheet.create` as an identity function. Emitting it does not itself establish a speed advantage; useful comparisons measure removed work, identity stability, updates, bytes, and allocation. [React Native StyleSheet](https://reactnative.dev/docs/stylesheet.html).
 
 ## Enterprise assurance gaps

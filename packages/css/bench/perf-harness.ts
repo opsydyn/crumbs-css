@@ -1,18 +1,21 @@
 export type BenchmarkBudget = {
-  readonly maxP95Ms?: number
+  readonly maxBatchMeanP95Ms?: number
   readonly minHz?: number
 }
 
 export type BenchmarkMetric = {
   readonly budget?: BenchmarkBudget
   readonly hz: number
+  readonly iterationsPerSample: number
+  readonly sampleKind: "batch-mean-ms-per-operation"
+  readonly sampleDurationsMs: ReadonlyArray<number>
   readonly iterations: number
-  readonly maxMs: number
-  readonly meanMs: number
-  readonly minMs: number
+  readonly batchMeanMaxMs: number
+  readonly meanOperationMs: number
+  readonly batchMeanMinMs: number
   readonly name: string
-  readonly p50Ms: number
-  readonly p95Ms: number
+  readonly batchMeanP50Ms: number
+  readonly batchMeanP95Ms: number
   readonly samples: number
   readonly totalMs: number
   readonly warmupIterations: number
@@ -119,6 +122,9 @@ export function summarizeSamples({
   readonly sampleDurations: ReadonlyArray<number>
   readonly warmupIterations: number
 }): BenchmarkMetric {
+  if (!Number.isSafeInteger(iterationsPerSample) || iterationsPerSample <= 0) throw Error("Iterations per sample must be a positive safe integer")
+  if (!Number.isSafeInteger(warmupIterations) || warmupIterations < 0) throw Error("Warmup must be a nonnegative safe integer")
+  if (sampleDurations.some(duration => !Number.isFinite(duration) || duration <= 0)) throw Error("Sample durations must be positive and finite")
   if (sampleDurations.length === 0) {
     throw new Error("Benchmark must include at least one sample")
   }
@@ -127,18 +133,21 @@ export function summarizeSamples({
   const totalMs = sampleDurations.reduce((sum, value) => sum + value, 0)
   const sortedDurations = [...sampleDurations].sort((a, b) => a - b)
   const perIteration = sortedDurations.map((duration) => duration / iterationsPerSample)
-  const meanMs = totalMs / iterations
+  const meanOperationMs = totalMs / iterations
 
   return {
     ...(budget === undefined ? {} : { budget }),
+    iterationsPerSample,
+    sampleKind: "batch-mean-ms-per-operation",
+    sampleDurationsMs: [...sampleDurations],
     hz: iterations / (totalMs / 1000),
     iterations,
-    maxMs: lastValue(sortedDurations) / iterationsPerSample,
-    meanMs,
-    minMs: firstValue(sortedDurations) / iterationsPerSample,
+    batchMeanMaxMs: lastValue(sortedDurations) / iterationsPerSample,
+    meanOperationMs,
+    batchMeanMinMs: firstValue(sortedDurations) / iterationsPerSample,
     name,
-    p50Ms: percentile(perIteration, 0.5),
-    p95Ms: percentile(perIteration, 0.95),
+    batchMeanP50Ms: percentile(perIteration, 0.5),
+    batchMeanP95Ms: percentile(perIteration, 0.95),
     samples: sampleDurations.length,
     totalMs,
     warmupIterations,
@@ -146,10 +155,10 @@ export function summarizeSamples({
 }
 
 export function assertBenchmarkBudget(metric: BenchmarkMetric): void {
-  if (metric.budget?.maxP95Ms !== undefined && metric.p95Ms > metric.budget.maxP95Ms) {
+  if (metric.budget?.maxBatchMeanP95Ms !== undefined && metric.batchMeanP95Ms > metric.budget.maxBatchMeanP95Ms) {
     throw new Error(
-      `${metric.name} p95 ${formatMs(metric.p95Ms)} exceeded budget ${formatMs(
-        metric.budget.maxP95Ms,
+      `${metric.name} batch-mean-p95 ${formatMs(metric.batchMeanP95Ms)} exceeded budget ${formatMs(
+        metric.budget.maxBatchMeanP95Ms,
       )}`,
     )
   }
@@ -168,9 +177,9 @@ export function formatMetric(metric: BenchmarkMetric): string {
   return [
     metric.name,
     `hz=${formatHz(metric.hz)}`,
-    `mean=${formatMs(metric.meanMs)}`,
-    `p50=${formatMs(metric.p50Ms)}`,
-    `p95=${formatMs(metric.p95Ms)}`,
+    `mean-operation=${formatMs(metric.meanOperationMs)}`,
+    `batch-mean-p50=${formatMs(metric.batchMeanP50Ms)}`,
+    `batch-mean-p95=${formatMs(metric.batchMeanP95Ms)}`,
     `samples=${metric.samples}`,
     `iterations=${metric.iterations}`,
     budget,
