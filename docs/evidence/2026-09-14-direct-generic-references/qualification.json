@@ -1,0 +1,99 @@
+{
+  "sourceRevision": "e522d5f plus this approved repair; implementation recorded in the accompanying commit",
+  "scope": "Direct generic NativeStyle reference admission and recursive static inline validation; no runtime or emitter implementation change",
+  "red": {
+    "command": "bun run typecheck",
+    "exitCode": 2,
+    "directPositiveContractErrors": 8,
+    "unusedAnimatedInlineNegative": 1,
+    "retained": "before-fix.diagnostics.txt",
+    "note": "The unused negative demonstrates existing generic-reference composition accepted an animated inline transform. Nested variant negative was added after this red run."
+  },
+  "green": {
+    "command": "bun run check",
+    "exitCode": 0,
+    "tests": 235,
+    "assertions": 8591,
+    "testFiles": 35,
+    "packageTypeContracts": "Direct and repeated NativeStyle references, per-entry primitive inference, nested/repeated arrays, recursive aliases, widened/generic forwarding rules and supported CSS border shorthand; unsupported inline flex/side borders/animated transforms rejected",
+    "packedTypeContracts": "pack-consumer-contract.test.ts reuses primitive-reference-types.ts through public package imports under Node16 and Bundler",
+    "emitterContracts": "primitive-references.test.ts verifies exact direct/repeated/nested values and variant-map identity for StyleSheet and plain-object emitters"
+  },
+  "originalPublicReproducer": {
+    "path": "../2026-09-14-m0-closure-audit/direct-native-reference.css.ts",
+    "workspace": "tsgo strict Bundler exit 0",
+    "isolatedPackedConsumer": "tsc strict Bundler exit 0",
+    "suppressedErrors": false,
+    "historicalDiagnostics": "Historical closure-audit diagnostics retained unchanged"
+  },
+  "workspaceExpo": {
+    "command": "bun run playground:check",
+    "exitCode": 0,
+    "maps": [
+      {
+        "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/web/index-d486dd6162d121d3c99d1781e8b57c2c.js.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/ios/index-9d543716c68dddcf5af17b2e318a7b80.hbc.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/android/index-e353100c11b91ae073364b6e9aeeee17.hbc.map",
+        "crumbs": 1
+      }
+    ],
+    "meaning": "iOS/Android/web JavaScript exports and compiler/Node runtime graph denial; no native/device acceptance"
+  },
+  "packedExpo": {
+    "sourceRevision": "e522d5f",
+    "refresh": "Local current tarball installed into retained isolated npm Expo consumer; existing Expo dependency installation reused; current app source copied",
+    "identity": {
+      "mode": "packed",
+      "version": "0.1.2-alpha.2",
+      "entry": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/node_modules/@opsydyn/crumbs-css/dist/theme.cjs"
+    },
+    "packageRealPath": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/node_modules/@opsydyn/crumbs-css",
+    "tarballSha256": "36399a9e4eda49c13564fe0d8ab51d8e167011856a4daf45fd5cc699db6d6ad9",
+    "typecheck": "passed",
+    "maps": [
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/web/index-f3c228eeaf62bf9a44089cf8e8d1bea9.js.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/ios/index-57489cb9a7e4d7de9bfbb026d6f38259.hbc.map",
+        "crumbs": 1
+      },
+      {
+        "file": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-playground-Hi18x8/dist/_expo/static/js/android/index-cd456339c5cc466e151f39690cdd612d.hbc.map",
+        "crumbs": 1
+      }
+    ],
+    "nativeAcceptance": "not run",
+    "publication": "none"
+  },
+  "storybook": {
+    "command": "bun run app:typecheck",
+    "exitCode": 0
+  },
+  "docs": {
+    "command": "bun run docs:build",
+    "exitCode": 0,
+    "pages": 20
+  },
+  "closure": {
+    "M0.1": "closed previously for original E1-E7",
+    "M0.2": "closed for documented compiler composition/order subset, using prior independent family reference suites plus these direct-reference contracts",
+    "M0": "in progress",
+    "M0.9": "native Android acceptance deferred by user until last",
+    "nextRecommended": "M1.1 exact published Effect 4 version and Schema/Codec/Optic API verification; internal dependency; await approval"
+  },
+  "limits": [
+    "Complete native references recognized structurally; runtime provenance is not established",
+    "No all-property, token-domain, provider identity, native layout/RTL, release Hermes or editor-budget qualification",
+    "No new benchmark measurements or native/device runs",
+    "No publication, push, dependency or public API addition",
+    "Preexisting release manifest, lockfile and package-version edits excluded"
+  ]
+}

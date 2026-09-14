@@ -175,3 +175,21 @@ style({ padding: 1, borderBlockEndStyle: "solid" })
 style({ border: "2px solid red", borderLeftWidth: 3, borderStyle: "solid" })
 // @ts-expect-error nested variant side declarations remain unsupported
 styleVariants({ invalid: [{ padding: 1, borderTop: "2px solid red" }] })
+
+// Generic style references are native references, not fresh inline declarations.
+const genericBase = style({ opacity: 0.5 })
+const genericDirect = style(genericBase)
+const genericAgain = style(genericDirect)
+const genericDirectVariants = styleVariants({ direct: genericBase, again: genericDirect, array: [genericBase], view })
+const genericReferenceChecks: [Equal<typeof genericDirect, NativeStyle>, Equal<typeof genericAgain, NativeStyle>, Equal<typeof genericDirectVariants.direct, NativeStyle>, Equal<typeof genericDirectVariants.array, NativeStyle>, Equal<typeof genericDirectVariants.view, ViewStyle>] = [true, true, true, true, true]
+void genericReferenceChecks
+style([genericBase, [{ border: "2px solid red", borderStyle: "solid" }]])
+styleVariants({ shorthand: [genericBase, { border: "2px solid red" }] })
+// @ts-expect-error Generic references do not relax inline native flex values.
+style([genericBase, { flex: "1 0 auto" }])
+// @ts-expect-error Generic references do not relax nested unsupported side borders.
+styleVariants({ invalid: [genericBase, [{ borderTop: "2px solid red" }]] })
+// @ts-expect-error Generic reference overrides still require static inline transforms.
+style([genericBase, { transform: [{ scale: new Animated.Value(1) }] }])
+// @ts-expect-error Nested variant overrides also require static inline transforms.
+styleVariants({ invalid: [genericBase, [{ transform: [{ scale: new Animated.Value(1) }] }]] })

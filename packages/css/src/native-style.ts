@@ -54,11 +54,20 @@ type CheckedComposition<T, TReference, TSeen = never> = T extends ReadonlyArray<
       ? T extends PrimitiveInlineInput<TReference> ? unknown : never
       : never
     : unknown
-type CheckedNativeRule<T> = NativeStyleRule extends T ? NativeStyleRule
-  : [CompositionReferences<T>] extends [never] ? NativeStyleRule
-  // Legacy generic references retain the existing vanilla-extract inline subset.
-  : keyof NativeStyle extends keyof CompositionReferences<T> ? NativeStyleRule
-    : CheckedComposition<T, CompositionReferences<T>>
+type CheckedGenericComposition<T, TSeen = never> = T extends ReadonlyArray<unknown>
+  ? T extends TSeen ? unknown
+    : { readonly [K in keyof T]: CheckedGenericComposition<T[K], TSeen | T> }
+  : [CompletePrimitiveReference<T>] extends [never]
+    ? T extends NativeFlatStyleRule | StaticNativeStyleInput<NativeStyle> ? unknown : never
+    : unknown
+type CheckedNativeRule<T> = [CompletePrimitiveReference<T>] extends [never]
+  ? NativeStyleRule extends T ? NativeStyleRule
+    : [CompositionReferences<T>] extends [never] ? NativeStyleRule
+      // Generic references retain CSS shorthand inputs, but inline entries must
+      // satisfy static authoring rules rather than the weak primitive interfaces.
+      : keyof NativeStyle extends keyof CompositionReferences<T> ? CheckedGenericComposition<T>
+        : CheckedComposition<T, CompositionReferences<T>>
+  : unknown
 type StaticTransformEntry<TEntry> = TEntry extends unknown ? {
   readonly [K in keyof TEntry]: TEntry[K] extends ReadonlyArray<unknown>
     ? number[] : Extract<TEntry[K], string | number>

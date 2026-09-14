@@ -28,7 +28,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 
 | Milestone | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
-| M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; E1–E7 regression task closed, direct generic-reference typing and native Android gates open |
+| M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; M0.1 and M0.2 closed for documented compiler contracts; native Android acceptance deferred |
 | M1 | Select Effect 4 boundary implementation and establish budgets | M0 | Not started |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
 | M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | Not started |
@@ -51,7 +51,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Affected files:** `packages/css/src/native-style.ts`, `theme-runtime.ts`, `theme-token.ts`, `css-to-rn.ts`, `transformer.ts`, `parse-virtual-css.ts`, `tsdown.config.ts`; matching `test/` files, `fixtures/`, `COMPATIBILITY.md`, and current `apps/storybook/src/components/` fixtures.
 
 - [x] M0.1: Add durable regressions for assessment E1–E7. Each regression fails for the demonstrated behavior before its fix; validate errors and output values, not only generated-code substrings.
-- [ ] M0.2: Repair native composition typing and conflict order. Cover multiple bases, nested compositions, token/literal conflicts, and shorthand/longhand precedence. Use a separately implemented reference evaluator.
+- [x] M0.2: Repair native composition typing and conflict order. Cover multiple bases, nested compositions, token/literal conflicts, and shorthand/longhand precedence. Use a separately implemented reference evaluator.
 - [x] M0.3: Stop classifying structured styles as variant maps. Preserve transform arrays and scalar siblings through resolution. Preserve primitive-specific result types.
 - [x] M0.4: Define the structured-value compatibility boundary. Preserve supported `transform` and `shadowOffset` inputs end to end using explicit metadata/native handling. If a typed property family cannot yet be preserved, narrow its accepted subset and emit a specific diagnostic with migration guidance; never leave accepted-but-dropped behavior.
 - [x] M0.5: Apply identical property checks to token and literal declarations, retain declaration order, validate token reference shape, and preserve ordinary non-style exports or reject them explicitly under a documented export contract.
@@ -533,3 +533,15 @@ Approved evidence consolidation at source revision `b23ee66`. [Closure audit](as
 - Original counterexamples are repaired within their documented subsets. Token domains/provider association, independent graph/package identities, immutable artifact metadata, editor/device budgets, broader distribution and CI/release policy remain later tasks. Historical red records and iOS Maestro evidence were reviewed, not rerun. No native/device acceptance, Effect dependency, runtime change, release/publish action or unrelated release-version change is included. Android remains last and M0.9 stays open.
 
 Next recommended slice: repair direct generic NativeStyle reference typing for `style(base)` and `styleVariants({ state: base })`, with positive package/packed Node16/Bundler fixtures and both-emitter output regressions, while preserving primitive inference and inline negatives. Then re-audit M0.2 closure before proposing M1 Effect contracts. Begin only after user approval.
+
+
+### 2026-09-14 — Direct generic references and M0.2 closure
+
+Approved bounded continuation under ADR D1/D2. Complete native reference detection now runs before generic inline admission, so `style(base)` and direct `styleVariants` entries accept a generic `NativeStyle` result without revalidating it as a fresh declaration. Recursive generic composition checks keep inline entries within static authoring rules while preserving supported CSS border shorthand. This also repairs the newly demonstrated animated inline transform admission gap beside generic references. No runtime/emitter implementation, public API or dependency changed.
+
+- Before repair, eight new positive direct-reference contracts failed typechecking and one animated-transform negative was unused. [Retained diagnostics and qualification](evidence/2026-09-14-direct-generic-references/qualification.json) distinguish the demonstrated failures from the subsequent nested-variant negative.
+- Fresh `bun run check` passes 235 tests / 8,591 assertions across 35 files. Package and packed Node16/Bundler contracts cover direct/repeated generic references, per-entry primitive inference, nested compositions, CSS shorthand and existing widened/recursive forwarding forms; unsupported inline values remain rejected. Both emitters preserve exact values and tagged variant-map identity. The original unsuppressed closure-audit reproducer now passes in workspace and isolated packed consumers.
+- Workspace and refreshed local-tarball Expo typechecking/JavaScript exports pass, with all three runtime maps qualified separately in each consumer. The retained isolated npm consumer reuses its Expo dependency installation. Storybook typechecking and the 20-page docs build pass. Preexisting release manifest/version/lockfile edits remain excluded.
+- Re-audit closes M0.2 for the documented compiler composition/order subset, using the existing independent shorthand-family suites plus these direct-reference contracts. [Historical closure audit](assessments/2026-09-14-m0-closure-audit.md) retains its original result and records this subsequent promotion. M0 remains in progress with native Android acceptance deferred until last. These gates do not qualify arbitrary animated native authoring, all native properties, device RTL/layout, token domains or release performance. No new benchmark or native/device measurements, publication or push occurred.
+
+Next recommended slice: M1.1 — verify one exact published Effect 4 version and its Schema/Codec/Optic APIs, record the chosen imports and package metadata, then pin it as an internal dependency while preserving ordinary consumer APIs. Begin only after user approval.

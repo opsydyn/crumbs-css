@@ -23,6 +23,16 @@ describe("primitive references in generic authoring", () => {
       expect(variants.text).toEqual(exports.texts)
       expect(variants.image).toEqual({ resizeMode: "cover" })
       expect(isNativeStyleMap(variants)).toBe(true)
+      expect(exports.genericDirect).toEqual({ opacity: 0.5 })
+      expect(exports.genericAgain).toEqual({ opacity: 0.5 })
+      expect(exports.genericRepeated).toEqual({ opacity: 0.5 })
+      const genericVariants = exports.genericVariants as Record<string, unknown>
+      expect(Object.keys(genericVariants)).toEqual(["direct", "again", "array", "override"])
+      expect(genericVariants.direct).toEqual({ opacity: 0.5 })
+      expect(genericVariants.again).toEqual({ opacity: 0.5 })
+      expect(genericVariants.array).toEqual({ opacity: 0.5 })
+      expect(genericVariants.override).toEqual({ opacity: 1 })
+      expect(isNativeStyleMap(genericVariants)).toBe(true)
     })
   }
 })

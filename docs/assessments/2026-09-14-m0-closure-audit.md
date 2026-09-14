@@ -43,3 +43,10 @@ Until repaired, wrap generic references in arrays. Complete primitive View/Text/
 These gates do not qualify native layout, device RTL, release Hermes measurements, editor budgets, accessible journeys, release publication or Android native acceptance. Android remains last. Historical iOS Maestro evidence is retained separately and was not rerun. E8 domains/provider association, E9 optimization, E10 honest measurement and the broader E11 CI/distribution/release-policy work remain owned by later roadmap tasks.
 
 Next bounded slice: repair direct generic NativeStyle reference typing with positive package/packed Node16/Bundler contracts and both-emitter regressions, preserving existing inline negatives. Then rerun M0.2 closure review. Begin only after user approval.
+
+
+## Subsequent direct-reference repair and M0.2 promotion
+
+The approved repair based on `e522d5f` supersedes the remaining type-gap decision above. The same unsuppressed public reproducer now exits zero. Package and packed Node16/Bundler contracts cover direct/repeated generic references, per-entry primitive inference, nested compositions and CSS border shorthand; negative contracts reject unsupported flex/side borders and animated inline transforms. Recursive inline validation also closes the discovered generic-composition animated-transform admission gap. Both emitters retain exact values and tagged variant-map identity.
+
+M0.2 is now closed for its documented compiler composition/order subset, supported by the independent family suites listed above and [fresh repair qualification](../evidence/2026-09-14-direct-generic-references/qualification.json). The original audit result and retained diagnostics remain historical evidence. This promotion does not claim all native styling inputs, token domains, runtime provenance, device RTL/layout or native Android acceptance. M0 remains in progress with Android deferred until last. M1.1 is the next proposed slice and requires separate approval.
