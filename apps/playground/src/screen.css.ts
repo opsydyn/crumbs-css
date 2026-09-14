@@ -15,4 +15,5 @@ export const button = recipe({
   variants: { selected: { true: { backgroundColor: vars.playground.color.panel }, false: { opacity: 0.7 } } },
   defaultVariants: { selected: false },
 })
-export const overlay = viewStyle({ position: "absolute", top: 100, left: 16, right: 16, padding: 24, backgroundColor: vars.playground.color.panel, borderWidth: 2, borderColor: vars.playground.color.accent, borderRadius: 12 })
+const overlayPositionBase = viewStyle({ insetInline: 0 })
+export const overlay = viewStyle([overlayPositionBase, { position: "absolute", insetBlockStart: 100, insetInline: vars.playground.space.gap, padding: 24, backgroundColor: vars.playground.color.panel, borderWidth: 2, borderColor: vars.playground.color.accent, borderRadius: 12 }])

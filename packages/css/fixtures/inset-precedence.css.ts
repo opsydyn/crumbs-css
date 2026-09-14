@@ -1,0 +1,10 @@
+import { style, viewStyle, textStyle, imageStyle, styleVariants, recipe, createThemeContract } from "@opsydyn/crumbs-css/style"
+const vars = createThemeContract({ insetRegression: { value: null } })
+const base = style({ inset: 1, start: 3 })
+const inline = style({ insetInline: vars.insetRegression.value })
+export const broad = viewStyle([base, inline])
+export const reverse = viewStyle([inline, base])
+export const text = textStyle({ insetInlineStart: vars.insetRegression.value })
+export const image = imageStyle({ insetBlockEnd: vars.insetRegression.value })
+export const states = styleVariants({ logical: { insetInlineEnd: vars.insetRegression.value }, physical: { left: 3 } })
+export const button = recipe({ base: { insetInlineStart: vars.insetRegression.value, left: 2 }, variants: { selected: { true: { insetBlock: -2 }, false: {} } } })

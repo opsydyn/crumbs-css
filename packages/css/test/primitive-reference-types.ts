@@ -104,3 +104,10 @@ viewStyle({ borderStartStartRadius: flexVars.packedFlex.value, borderEndEndRadiu
 style({ paddingInline: "1px 2px" })
 // @ts-expect-error nested variant aliases require a single value
 styleVariants({ invalid: [{ marginBlock: "1px 2px" }] })
+
+style({ inset: 3, insetInline: "25%", insetInlineStart: flexVars.packedFlex.value })
+viewStyle({ insetBlockEnd: "auto", insetBlockStart: -2 })
+// @ts-expect-error native inset accepts one dimension
+style({ inset: "1px 2px" })
+// @ts-expect-error nested variant inset aliases accept one dimension
+styleVariants({ invalid: [{ insetInline: "1px 2px" }] })

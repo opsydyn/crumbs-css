@@ -37,14 +37,22 @@ const CANONICAL_LONGHANDS = new Map<string, ReadonlyArray<string>>([
   ["marginInlineEnd", ["marginEnd"]],
   ["marginBlockStart", ["marginTop"]],
   ["marginBlockEnd", ["marginBottom"]],
+  ["inset", ["top", "right", "bottom", "left"]],
+  ["insetInline", ["left", "right"]],
+  ["insetBlock", ["top", "bottom"]],
+  ["insetInlineStart", ["start"]],
+  ["insetInlineEnd", ["end"]],
+  ["insetBlockStart", ["top"]],
+  ["insetBlockEnd", ["bottom"]],
   ["gap", ["rowGap", "columnGap"]],
   ["borderWidth", ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"]],
   ["borderColor", ["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"]],
   ["borderRadius", ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"]],
 ])
-const NATIVE_SPACING_ALIASES = new Set([
+const NATIVE_DIMENSION_ALIASES = new Set([
   "paddingInline", "paddingBlock", "paddingInlineStart", "paddingInlineEnd", "paddingBlockStart", "paddingBlockEnd",
   "marginInline", "marginBlock", "marginInlineStart", "marginInlineEnd", "marginBlockStart", "marginBlockEnd",
+  "inset", "insetInline", "insetBlock", "insetInlineStart", "insetInlineEnd", "insetBlockStart", "insetBlockEnd",
 ])
 const NATIVE_STYLE_PROPS = new Set([
   "alignContent",
@@ -274,14 +282,14 @@ export function cssDeclarationsToRN(
       continue
     }
 
-    if (NATIVE_SPACING_ALIASES.has(toReactNativePropName(prop))) {
+    if (NATIVE_DIMENSION_ALIASES.has(toReactNativePropName(prop))) {
       const literal = value.trim()
       const dimension = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(?:px|%)?$/i.exec(literal)
       if (literal !== "auto" && (dimension === null || !Number.isFinite(Number(dimension[1])))) {
         dropped.push({
           code: NativeStylesDiagnosticCode.DroppedDeclaration,
           prop,
-          reason: "native spacing aliases require one finite dimension, auto or a Crumbs token; use separate side properties for multiple CSS values",
+          reason: "native spacing/inset aliases require one finite dimension, auto or a Crumbs token; use separate side properties for multiple CSS values",
           value,
         })
         continue
