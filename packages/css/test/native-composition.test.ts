@@ -12,7 +12,7 @@ const root = path.resolve(import.meta.dir, "..")
 const theme = { contract: {}, values: {}, tokens: { "--crumbs-composition-accent": "purple" } }
 
 // Reference semantics walk authored nodes and expand only this fixture's
-// literal padding family. No production converter or class-list parser is used.
+// physical spacing families. No production converter or class-list parser is used.
 function reference(node: Node, bases: ReadonlyArray<Node>, result: Rule = {}): Rule {
   if (Array.isArray(node)) {
     for (const child of node) reference(child, bases, result)
@@ -20,9 +20,17 @@ function reference(node: Node, bases: ReadonlyArray<Node>, result: Rule = {}): R
     reference(bases[Number(node.ref)]!, bases, result)
   } else {
     for (const [key, value] of Object.entries(node)) {
-      const resolved = value === "var(--crumbs-composition-accent)" ? "purple" : value
-      if (key === "padding") {
-        for (const side of ["Top", "Right", "Bottom", "Left"]) result[`padding${side}`] = resolved
+      const resolved = value === "var(--crumbs-composition-accent)" ? "purple"
+        : value === "var(--crumbs-spacing-regression-wide)" ? 24 : value
+      if (key === "gap") {
+        result.rowGap = resolved
+        result.columnGap = resolved
+      } else if (key === "padding" || key === "margin") {
+        for (const side of ["Top", "Right", "Bottom", "Left"]) result[`${key}${side}`] = resolved
+      } else if (key === "paddingHorizontal" || key === "marginHorizontal") {
+        for (const side of ["Left", "Right"]) result[`${key.slice(0, -10)}${side}`] = resolved
+      } else if (key === "paddingVertical" || key === "marginVertical") {
+        for (const side of ["Top", "Bottom"]) result[`${key.slice(0, -8)}${side}`] = resolved
       } else result[key] = resolved
     }
   }
@@ -66,6 +74,39 @@ const cases: Record<string, Node> = {
 }
 
 describe("native composition compilation", () => {
+  it("preserves token spacing precedence inside rules and across nested compositions", async () => {
+    const exports = await compile(`
+      const vars = createThemeContract({ spacingRegression: { wide: null } });
+      const base = viewStyle({ padding: vars.spacingRegression.wide });
+      export const literalWins = viewStyle([base, { paddingLeft: 3 }]);
+      export const tokenWins = viewStyle([{ paddingLeft: 3 }, base]);
+      export const sameRule = viewStyle({ paddingLeft: 3, padding: vars.spacingRegression.wide });
+      export const sameRuleLiteralWins = viewStyle({ padding: vars.spacingRegression.wide, paddingLeft: 3 });
+      export const axes = viewStyle([{ marginVertical: vars.spacingRegression.wide }, [{ marginTop: -5 }]]);
+      export const gaps = viewStyle([{ gap: vars.spacingRegression.wide }, { rowGap: 3 }]);
+    `)
+    const spacingTheme = { contract: {}, values: {}, tokens: { "--crumbs-spacing-regression-wide": 24 } }
+    expect(resolveThemeTokens(exports.literalWins, spacingTheme)).toEqual({ paddingTop: 24, paddingRight: 24, paddingBottom: 24, paddingLeft: 3 })
+    expect(resolveThemeTokens(exports.tokenWins, spacingTheme)).toEqual({ paddingTop: 24, paddingRight: 24, paddingBottom: 24, paddingLeft: 24 })
+    expect(resolveThemeTokens(exports.sameRule, spacingTheme)).toEqual({ paddingTop: 24, paddingRight: 24, paddingBottom: 24, paddingLeft: 24 })
+    expect(resolveThemeTokens(exports.sameRuleLiteralWins, spacingTheme)).toEqual({ paddingTop: 24, paddingRight: 24, paddingBottom: 24, paddingLeft: 3 })
+    expect(resolveThemeTokens(exports.axes, spacingTheme)).toEqual({ marginTop: -5, marginBottom: 24 })
+    expect(resolveThemeTokens(exports.gaps, spacingTheme)).toEqual({ rowGap: 3, columnGap: 24 })
+  })
+
+  it("matches generated compiled token and literal spacing compositions", async () => {
+    const value = fc.oneof(fc.integer({ min: 0, max: 30 }), fc.constant("var(--crumbs-spacing-regression-wide)"))
+    const rule = fc.tuple(fc.constantFrom("padding", "paddingLeft", "paddingHorizontal", "paddingVertical", "margin", "marginTop", "marginHorizontal", "marginVertical", "gap", "rowGap", "columnGap"), value)
+      .map(([key, value]) => ({ [key]: value }))
+    const nodes = fc.array(fc.oneof(rule, fc.array(rule, { minLength: 1, maxLength: 3 })), { minLength: 2, maxLength: 8 })
+    await fc.assert(fc.asyncProperty(nodes, async (node) => {
+      const authored = author(node).replaceAll(JSON.stringify("var(--crumbs-spacing-regression-wide)"), "vars.spacingRegression.wide")
+      const exports = await compile(`const vars = createThemeContract({ spacingRegression: { wide: null } }); export const result = viewStyle(${authored});`)
+      const spacingTheme = { contract: {}, values: {}, tokens: { "--crumbs-spacing-regression-wide": 24 } }
+      expect(resolveThemeTokens(exports.result, spacingTheme)).toEqual(reference(node, []))
+    }), { seed: 20260916, numRuns: 100 })
+  })
+
   it("matches independent ordered evaluation for bases, overrides, repeats and padding", async () => {
     const exports = await compile([
       ...bases.map((node, index) => `const base${index} = style(${author(node)});`),

@@ -145,7 +145,7 @@ const copy = textStyle({ color: "black", fontSize: 16 })
 export const title = textStyle([copy, { fontSize: 24, fontWeight: "700" }])
 ```
 
-Later authored entries override the same native property. Compositions accept multiple bases, repeated bases and nested readonly arrays, and `styleVariants` accepts composed values. Inline properties retain each primitive helper's type checks. Crumbs preserves this sequence explicitly; importing `style` directly from vanilla-extract does not provide this native ordering guarantee. Token shorthand/longhand normalization is still incomplete; see [compatibility](./COMPATIBILITY.md).
+Later authored entries override the same canonical native property. Compositions accept multiple bases, repeated bases and nested readonly arrays, and `styleVariants` accepts composed values. Inline properties retain each primitive helper's type checks. Crumbs preserves this sequence explicitly; importing `style` directly from vanilla-extract does not provide this native ordering guarantee. Token and literal physical padding/margin, horizontal/vertical aliases and gap normalize before merging. Compiled artifacts expose longhands; other shorthand families remain unqualified. See the migration notes in [compatibility](./COMPATIBILITY.md).
 
 ## Minimal recipe example
 

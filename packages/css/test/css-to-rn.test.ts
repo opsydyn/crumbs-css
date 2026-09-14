@@ -135,9 +135,9 @@ describe("cssDeclarationsToRN", () => {
     ).toEqual({ color: "red" })
   })
 
-  it("converts gap to gap number", () => {
+  it("converts gap to canonical row and column numbers", () => {
     const result = cssDeclarationsToRN([["gap", "8px"]])
-    expect(result).toMatchObject({ gap: 8 })
+    expect(result).toEqual({ rowGap: 8, columnGap: 8 })
   })
 
   it("converts letter-spacing", () => {
@@ -190,10 +190,10 @@ describe("cssDeclarationsToRN", () => {
         $$type: "crumbs.css.theme-token",
         varName: "--crumbs-color-canvas",
       },
-      padding: {
+      ...Object.fromEntries(["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"].map((side) => [side, {
         $$type: "crumbs.css.theme-token",
         varName: "--crumbs-space-md",
-      },
+      }])),
     })
   })
 })

@@ -39,7 +39,7 @@ export const heading = textStyle([copy, [{ fontSize: 24, fontWeight: "700" }]])
 
 Later authored entries override the same native property. Crumbs helpers accept multiple bases, repeated bases and nested readonly arrays, with the same primitive inline property checks. `styleVariants` also accepts composed values. Use the Crumbs authoring entrypoint for this ordered native contract; direct vanilla-extract composition retains upstream class-list processing.
 
-Literal padding shorthand/longhand ordering is covered. Token-backed shorthand normalization remains incomplete and is a separate correctness repair.
+Physical padding/margin, their horizontal/vertical aliases, and gap normalize identically for tokens and literals before merging. Later declarations replace overlapping longhands both within a rule and across compositions. Compiled artifacts now expose physical side keys and `rowGap`/`columnGap`, rather than their shorthand keys. Regenerate dependent compiled modules together and pass complete style objects to React Native; raw runtime style objects do not receive this normalization. Logical/RTL declarations, border/flex families and mixed multi-value token expressions remain outside this coverage.
 
 ## Why use them
 

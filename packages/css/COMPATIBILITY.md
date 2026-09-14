@@ -25,7 +25,7 @@ unless they are exercised explicitly in a future compatibility pass.
 | Feature | Status | Native behavior |
 | --- | --- | --- |
 | `style({...})` | Supported | Compiles flat declarations to `StyleSheet.create`. |
-| Crumbs `style([base, extra])` composition | Supported subset | Later authored entries win for the same converted native property; multiple/repeated bases and nested arrays preserve order. Primitive helpers and `styleVariants` accept compositions. Token shorthand/longhand normalization remains incomplete. |
+| Crumbs `style([base, extra])` composition | Supported subset | Later authored entries win for the same canonical native property; multiple/repeated bases and nested arrays preserve order. Primitive helpers and `styleVariants` accept compositions. Physical padding/margin and gap normalize identically for tokens and literals. Other shorthand families remain unqualified. |
 | `styleVariants({...})` | Supported | Exports a nested map of explicit native state styles. |
 | `recipe({...})` | Supported | Exports native-first base, variants, defaults, and compound variants for explicit runtime selection. |
 | `createRecipeResolver(recipe)` | Supported | Creates a typed component-facing selector that delegates to `resolveRecipeStyle` so ordering, fallback behavior, and diagnostics stay centralized. |
@@ -37,7 +37,9 @@ unless they are exercised explicitly in a future compatibility pass.
 | `ThemeProvider` / `useThemedStyles` | Supported | Resolves token references against the active native theme. |
 | Metro dependency imports | Supported | Side-effect imports keep hot reload aware of dependent `.css.ts` files. |
 
-Crumbs composition is ordered native authoring, not a browser cascade. It captures inline declarations separately and retains repeated bases: `style([a, b, a])` applies `a` again after `b`. Literal padding shorthands normalize to sides before merging. Token/literal conflicts on identical native properties are covered, but token-backed shorthands can still overlap literal longhands incorrectly. Direct `@vanilla-extract/css` compositions retain upstream class-list processing and do not carry the same authored-order guarantee. Use Crumbs helpers for ordered native composition.
+Crumbs composition is ordered native authoring, not a browser cascade. It captures inline declarations separately and retains repeated bases: `style([a, b, a])` applies `a` again after `b`. Physical padding/margin, their horizontal/vertical aliases, and gap normalize before merging, so later token or literal declarations replace overlapping longhands. Direct `@vanilla-extract/css` compositions retain upstream class-list processing and do not carry the same authored-order guarantee. Use Crumbs helpers for ordered native composition.
+
+**Alpha artifact migration:** compiled spacing styles now expose canonical physical sides (`paddingTop`/`Right`/`Bottom`/`Left`, and margin equivalents); horizontal/vertical aliases expand to two sides, and `gap` expands to `rowGap`/`columnGap`. This also applies to token-backed values. Pass the complete style to React Native rather than inspecting a shorthand field on the compiled artifact. Regenerate dependent compiled modules together; composing older shorthand artifacts with newer longhands is not qualified. Raw runtime styles are not normalized by the theme resolver. Multi-value literal CSS padding/margin remains supported. Logical/RTL declarations, border/flex families and mixed multi-value token expressions are outside this normalization contract.
 
 ## Warn and drop
 
