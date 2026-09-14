@@ -30,6 +30,17 @@ export const crest = imageStyle({
 })
 ```
 
+## Compose native styles
+
+```ts
+const copy = textStyle({ color: "black", fontSize: 16 })
+export const heading = textStyle([copy, [{ fontSize: 24, fontWeight: "700" }]])
+```
+
+Later authored entries override the same native property. Crumbs helpers accept multiple bases, repeated bases and nested readonly arrays, with the same primitive inline property checks. `styleVariants` also accepts composed values. Use the Crumbs authoring entrypoint for this ordered native contract; direct vanilla-extract composition retains upstream class-list processing.
+
+Literal padding shorthand/longhand ordering is covered. Token-backed shorthand normalization remains incomplete and is a separate correctness repair.
+
 ## Why use them
 
 They improve type safety for native styles:

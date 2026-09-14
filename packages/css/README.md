@@ -136,6 +136,17 @@ export function App() {
 }
 ```
 
+## Ordered native composition
+
+```ts
+import { textStyle } from "@opsydyn/crumbs-css/style"
+
+const copy = textStyle({ color: "black", fontSize: 16 })
+export const title = textStyle([copy, { fontSize: 24, fontWeight: "700" }])
+```
+
+Later authored entries override the same native property. Compositions accept multiple bases, repeated bases and nested readonly arrays, and `styleVariants` accepts composed values. Inline properties retain each primitive helper's type checks. Crumbs preserves this sequence explicitly; importing `style` directly from vanilla-extract does not provide this native ordering guarantee. Token shorthand/longhand normalization is still incomplete; see [compatibility](./COMPATIBILITY.md).
+
 ## Minimal recipe example
 
 ```ts

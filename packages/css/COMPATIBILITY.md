@@ -25,7 +25,7 @@ unless they are exercised explicitly in a future compatibility pass.
 | Feature | Status | Native behavior |
 | --- | --- | --- |
 | `style({...})` | Supported | Compiles flat declarations to `StyleSheet.create`. |
-| `style([base, extra])` composition | Supported | Merges composed classes in export order. |
+| Crumbs `style([base, extra])` composition | Supported subset | Later authored entries win for the same converted native property; multiple/repeated bases and nested arrays preserve order. Primitive helpers and `styleVariants` accept compositions. Token shorthand/longhand normalization remains incomplete. |
 | `styleVariants({...})` | Supported | Exports a nested map of explicit native state styles. |
 | `recipe({...})` | Supported | Exports native-first base, variants, defaults, and compound variants for explicit runtime selection. |
 | `createRecipeResolver(recipe)` | Supported | Creates a typed component-facing selector that delegates to `resolveRecipeStyle` so ordering, fallback behavior, and diagnostics stay centralized. |
@@ -36,6 +36,8 @@ unless they are exercised explicitly in a future compatibility pass.
 | `var(--crumbs-...)` native theme tokens | Supported | Serialized as `crumbs.css.theme-token` references. |
 | `ThemeProvider` / `useThemedStyles` | Supported | Resolves token references against the active native theme. |
 | Metro dependency imports | Supported | Side-effect imports keep hot reload aware of dependent `.css.ts` files. |
+
+Crumbs composition is ordered native authoring, not a browser cascade. It captures inline declarations separately and retains repeated bases: `style([a, b, a])` applies `a` again after `b`. Literal padding shorthands normalize to sides before merging. Token/literal conflicts on identical native properties are covered, but token-backed shorthands can still overlap literal longhands incorrectly. Direct `@vanilla-extract/css` compositions retain upstream class-list processing and do not carry the same authored-order guarantee. Use Crumbs helpers for ordered native composition.
 
 ## Warn and drop
 

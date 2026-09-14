@@ -22,12 +22,13 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 - Each behavioral slice ships matching documentation and migration notes. Proposed APIs stay outside the consumer site's shipped-API reference until implemented.
 - Commit, publication, and deployment require explicit authorization. Finishing a milestone does not authorize starting the next one.
 - Existing `bun run check` remains a regression gate. Device rendering, accessibility, performance, packaging, and editor evidence are separate named gates.
+- On 2026-09-14 the user deferred Android SDK setup, native acceptance and Android-specific measurement until last. Continue the compiler/design-system roadmap meanwhile; Android and cross-platform qualification gates remain open until exercised.
 
 ## Delivery map
 
 | Milestone | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
-| M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; token property validation/order slice |
+| M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; token validation/order, consumer setup, iOS scroll and native composition slices |
 | M1 | Select Effect 4 boundary implementation and establish budgets | M0 | Not started |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
 | M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | Not started |
@@ -327,3 +328,15 @@ The user selected Maestro. The [completed native scroll evidence](acceptance/202
 - M0.9 remains unchecked because Android native acceptance has not run. Probe-enabled development runs do not qualify release performance, standalone apps, physical devices or screen-reader behavior. Pending release-version changes are excluded from this slice.
 
 Next recommended slice: install the Android SDK/emulator prerequisites and qualify the playground's native Android journeys, reusing the Maestro scroll assertions. This would resolve the remaining platform gap in M0.9 before returning to native composition precedence/type repairs. Begin only after user approval.
+
+### 2026-09-14 — Ordered native composition, first M0.2 slice
+
+The user parked Android until last and authorized moving to the next roadmap item. [Implementation plan](superpowers/plans/2026-09-14-native-composition-order.md). Crumbs `style`, primitive helpers and `styleVariants` now accept typed compositions. Inline rules are captured separately and their authored sequence is registered explicitly, preserving nested arrays and repeated bases through the legacy native emitter. This implements ADR D2 without introducing the M2 IR or a runtime composition evaluator.
+
+- Baseline package check passed 130 tests / 5,263 assertions. Four new regression tests failed with wrong color/opacity/token winners and a generated graph mismatch; positive composition type fixtures also failed typechecking before the repair.
+- Green package build/typechecking and all 134 tests / 5,378 assertions passed. The independent reference evaluator checks multiple bases, interleaved overrides, nested compositions, repeated bases and literal padding shorthand/longhand order. A shrinking asynchronous property test compiles 100 authored graphs with seed `20260914`. Winning same-property token/literal values resolve correctly; overridden missing tokens are not resolved.
+- Primitive inline negative type fixtures remain rejected, including arbitrary browser class strings. The new composition types are exported from the authoring and root entrypoints. Recipe composition and broader API completeness remain later roadmap work.
+- The playground heading now composes the body-text base and overrides its font size. `bun run playground:check` passed typechecking and iOS/Android/web production exports; the public CommonJS compiler independently produced heading size 24, body size 16, weight 700 and the shared theme reference. Storybook typechecking and the 20-page docs build passed. Existing local Bun benchmark budgets passed; this is not a new composition/device performance baseline.
+- M0.2 remains unchecked: token-backed shorthand/longhand normalization is still incomplete. Direct vanilla-extract compositions retain upstream processing and do not acquire this native authored-order contract. Structured native values, identity and runtime isolation remain separate repairs. No native/device acceptance was rerun for this compiler slice, and Android remains deferred and unqualified.
+
+Next recommended slice: normalize token-backed spacing shorthands alongside literals, with independent same-rule and cross-composition precedence tests, to close the remaining composition conflict gap before M0.3 structured-style resolution. Begin only after user approval.

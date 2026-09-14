@@ -308,9 +308,10 @@ export async function transformCssTsToStyleSheet(
   }
 
   // Resolve composed class names (space-separated) by merging their styles.
-  // VE composition: style([base, extra]) → export = "extra__x base__y"
-  // Each name is looked up individually; later entries override earlier ones,
-  // matching CSS cascade order (rightmost class wins on equal specificity).
+  // Crumbs captures each inline rule and base in authored native order.
+  // Later entries override earlier ones, including repeated and nested bases.
+  // Raw vanilla-extract compositions retain upstream class-list semantics;
+  // browser class-list order itself does not describe a CSS cascade.
   const resolvedClassStyles = new Map<string, Record<string, unknown>>()
   for (const compositeName of collectExportClassNames(exportMap)) {
     if (resolvedClassStyles.has(compositeName)) continue

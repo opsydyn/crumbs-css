@@ -5,6 +5,8 @@ import {
   type NativeRecipeVariants,
   type NativeStyle,
   recipe,
+  style,
+  styleVariants,
   textStyle,
   viewStyle,
 } from "../src/native-style"
@@ -26,6 +28,24 @@ const vars = createThemeContract({
     md: null,
   },
 })
+
+const baseStyle = style({ color: "red" })
+const composedStyle: NativeStyle = style([baseStyle, [{ color: "blue" }]])
+const composedView = viewStyle([viewStyle({ opacity: 0.5 }), [{ opacity: 1 }]] as const)
+const composedText = textStyle([textStyle({ color: "red" }), { color: "blue" }])
+const composedImage = imageStyle([imageStyle({ resizeMode: "contain" }), { resizeMode: "cover" }])
+styleVariants({ active: [baseStyle, { color: "blue" }] })
+void [composedStyle, composedView, composedText, composedImage]
+
+// @ts-expect-error Arbitrary browser class names are not native style inputs.
+style(["unknown-browser-class"])
+
+// @ts-expect-error Composition must retain view-only inline property checking.
+viewStyle([composedView, { fontWeight: "700" }])
+// @ts-expect-error Composition must retain text-only inline property checking.
+textStyle([composedText, { resizeMode: "cover" }])
+// @ts-expect-error Composition must retain image-only inline property checking.
+imageStyle([composedImage, { fontWeight: "700" }])
 
 viewStyle({
   backgroundColor: vars.color.canvas,

@@ -1,4 +1,6 @@
 import { type StyleRule, style as vanillaStyle } from "@vanilla-extract/css"
+import { markCompositionUsed, registerComposition } from "@vanilla-extract/css/adapter"
+import { getFileScope } from "@vanilla-extract/css/fileScope"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 
 export type { NativeThemeTokenReference } from "./theme-token"
@@ -9,6 +11,10 @@ export {
 } from "./theme-token"
 
 export type NativeStyle = ImageStyle & TextStyle & ViewStyle
+export type NativeStyleComposition<TInput, TStyle = NativeStyle> = ReadonlyArray<
+  TInput | TStyle | NativeStyleComposition<TInput, TStyle>
+>
+export type NativeStyleRule = StyleRule | NativeStyleComposition<StyleRule>
 export type NativeStyleInput<TStyle> = {
   readonly [K in keyof TStyle]?: NativeStyleValueInput<TStyle[K]>
 }
@@ -60,7 +66,7 @@ type NativeRecipeClassRef = {
   readonly $$type: typeof NativeRecipeClassType
   readonly className: string
 }
-export type NativeStyleVariants<TVariants extends Readonly<Record<string, StyleRule>>> = {
+export type NativeStyleVariants<TVariants extends Readonly<Record<string, NativeStyleRule>>> = {
   readonly [K in keyof TVariants]: NativeStyle
 }
 export type ThemeContractInput = {
@@ -104,28 +110,52 @@ type ThemeContractBuildState = {
 
 const themeTokenRegistry = new Map<NativeThemeVar, ThemeTokenMetadata>()
 
-export function style(rule: StyleRule, debugId?: string): NativeStyle {
-  return vanillaStyle(rule, debugId) as unknown as NativeStyle
+export function style(rule: NativeStyleRule, debugId?: string): NativeStyle {
+  return authorStyle(rule, debugId) as unknown as NativeStyle
 }
 
-export function viewStyle(rule: NativeViewStyleInput, debugId?: string): ViewStyle {
-  return vanillaStyle(rule as StyleRule, debugId) as unknown as ViewStyle
+export function viewStyle(
+  rule: NativeViewStyleInput | NativeStyleComposition<NativeViewStyleInput, ViewStyle>,
+  debugId?: string,
+): ViewStyle {
+  return authorStyle(rule, debugId) as unknown as ViewStyle
 }
 
-export function textStyle(rule: NativeTextStyleInput, debugId?: string): TextStyle {
-  return vanillaStyle(rule as StyleRule, debugId) as unknown as TextStyle
+export function textStyle(
+  rule: NativeTextStyleInput | NativeStyleComposition<NativeTextStyleInput, TextStyle>,
+  debugId?: string,
+): TextStyle {
+  return authorStyle(rule, debugId) as unknown as TextStyle
 }
 
-export function imageStyle(rule: NativeImageStyleInput, debugId?: string): ImageStyle {
-  return vanillaStyle(rule as StyleRule, debugId) as unknown as ImageStyle
+export function imageStyle(
+  rule: NativeImageStyleInput | NativeStyleComposition<NativeImageStyleInput, ImageStyle>,
+  debugId?: string,
+): ImageStyle {
+  return authorStyle(rule, debugId) as unknown as ImageStyle
 }
 
-export function styleVariants<TVariants extends Readonly<Record<string, StyleRule>>>(
+function authorStyle(rule: unknown, debugId?: string): string {
+  if (!Array.isArray(rule)) return vanillaStyle(rule as StyleRule, debugId)
+
+  // ADR D2: native order includes inline rules, nested sequences and repeats.
+  const identifier = vanillaStyle({}, debugId)
+  const classList = [identifier, ...rule.map((entry, index) =>
+    typeof entry === "string"
+      ? entry
+      : authorStyle(entry, debugId === undefined ? undefined : `${debugId}_${index}`),
+  )].join(" ")
+  registerComposition({ identifier, classList }, getFileScope())
+  markCompositionUsed(identifier)
+  return classList
+}
+
+export function styleVariants<TVariants extends Readonly<Record<string, NativeStyleRule>>>(
   variants: TVariants,
   debugId?: string,
 ): NativeStyleVariants<TVariants> {
   const result: Partial<Record<keyof TVariants, NativeStyle>> = {}
-  for (const [name, rule] of Object.entries(variants) as Array<[keyof TVariants, StyleRule]>) {
+  for (const [name, rule] of Object.entries(variants) as Array<[keyof TVariants, NativeStyleRule]>) {
     result[name] = style(rule, debugId === undefined ? undefined : `${debugId}_${String(name)}`)
   }
   return result as NativeStyleVariants<TVariants>
