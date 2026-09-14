@@ -59,9 +59,9 @@ describe("cssDeclarationsToRN", () => {
     expect(cssDeclarationsToRN([["font-weight", "700"]])).toEqual({ fontWeight: "700" })
   })
 
-  it("converts flex shorthand", () => {
+  it("preserves native numeric flex", () => {
     const result = cssDeclarationsToRN([["flex", "1"]])
-    expect(result).toMatchObject({ flexGrow: 1 })
+    expect(result).toEqual({ flex: 1 })
   })
 
   it("converts background-color", () => {

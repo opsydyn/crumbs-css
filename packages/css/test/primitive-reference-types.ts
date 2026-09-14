@@ -1,6 +1,6 @@
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import { Animated } from "react-native"
-import { imageStyle, textStyle, viewStyle, style, styleVariants, type NativeStyle, type NativeStyleRule, type NativeStyleComposition } from "../src/native-style"
+import { createThemeContract, imageStyle, textStyle, viewStyle, style, styleVariants, type NativeStyle, type NativeStyleRule, type NativeStyleComposition } from "../src/native-style"
 import { resolveThemeStyles, resolveThemeTokens, useThemedStyles } from "../src/theme-runtime"
 
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false
@@ -82,3 +82,18 @@ void genericVariants
 style([view, { transform: [{ scale: new Animated.Value(1) }] }])
 // @ts-expect-error Nested variant inline transforms remain static.
 styleVariants({ invalid: [image, [{ transform: [{ scale: new Animated.Value(1) }] }]] })
+
+// Native flex is numeric, including through generic inline authoring.
+style({ flex: -1 }); styleVariants({ zero: { flex: 0 } })
+// @ts-expect-error CSS multi-part flex has no native numeric semantics
+style({ flex: "1 0 auto" })
+// @ts-expect-error CSS keyword flex has no native numeric semantics
+styleVariants({ none: { flex: "none" } })
+// @ts-expect-error nested generic compositions must retain the native flex boundary
+style([{ flex: 1 }, [{ flex: "auto" }]])
+// @ts-expect-error primitive authoring already requires numeric flex
+viewStyle({ flex: "1 2" })
+
+const flexVars = createThemeContract({ packedFlex: { value: null } })
+style({ flex: flexVars.packedFlex.value })
+styleVariants({ token: { flex: flexVars.packedFlex.value } })

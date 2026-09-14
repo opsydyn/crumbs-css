@@ -1,0 +1,233 @@
+{
+  "slice": "M0.2 native numeric flex semantics and precedence",
+  "sourceRevision": "369933c plus approved flex working changes",
+  "nativeSemanticsSources": {
+    "installedReactNative": "0.85.3",
+    "source": "react-native/ReactCommon/yoga/yoga/node/Node.cpp",
+    "methods": [
+      "processFlexBasis",
+      "resolveFlexGrow",
+      "resolveFlexShrink"
+    ],
+    "reference": "https://reactnative.dev/docs/flexbox",
+    "contract": "Preserve native flex independently; explicit sibling fields survive and Yoga determines layout. No browser shorthand expansion or cross-platform visual parity claim."
+  },
+  "redEvidence": {
+    "command": "bun test packages/css/test/flex-precedence.test.ts before repair",
+    "passing": 0,
+    "failing": 7,
+    "assertions": 35,
+    "typecheck": "Three unused expect-error directives proved generic CSS flex strings were accepted after fixing fixture-only issues.",
+    "shrunkDeclarationCounterexample": [
+      {
+        "flex": 0
+      }
+    ],
+    "shrunkCompositionCounterexample": [
+      {
+        "flex": 0
+      },
+      {
+        "flex": "var(--crumbs-flex-regression-value)"
+      },
+      {
+        "flex": "var(--crumbs-flex-regression-value)"
+      }
+    ]
+  },
+  "packageCheck": {
+    "command": "bun run check",
+    "tests": 211,
+    "assertions": 7534,
+    "files": 32,
+    "exitCode": 0,
+    "migration": "Updated one old CSS-expansion assertion to the native flex contract."
+  },
+  "properties": [
+    {
+      "domain": "native flex and explicit sibling declaration merging",
+      "runs": 100,
+      "seed": 20260926
+    },
+    {
+      "domain": "compiled nested/repeated-base merging",
+      "runs": 100,
+      "seed": 20260927
+    }
+  ],
+  "publicFormatProbes": [
+    {
+      "format": "mjs",
+      "useStyleSheet": true,
+      "status": "passed",
+      "playgroundRootFlex": 1,
+      "cssExpandedDefaults": "absent"
+    },
+    {
+      "format": "mjs",
+      "useStyleSheet": false,
+      "status": "passed",
+      "playgroundRootFlex": 1,
+      "cssExpandedDefaults": "absent"
+    },
+    {
+      "format": "cjs",
+      "useStyleSheet": true,
+      "status": "passed",
+      "playgroundRootFlex": 1,
+      "cssExpandedDefaults": "absent"
+    },
+    {
+      "format": "cjs",
+      "useStyleSheet": false,
+      "status": "passed",
+      "playgroundRootFlex": 1,
+      "cssExpandedDefaults": "absent"
+    }
+  ],
+  "workspaceBundleMaps": [
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/web/index-e106899ec2cdfb9c37078ce0010f8103.js.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/ios/index-b5efb5ddaaf93e0e53d235f378086c2d.hbc.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/android/index-320066a9fbe15d72503c4424ed804141.hbc.map",
+      "crumbs": 1
+    }
+  ],
+  "benchmark": {
+    "metrics": [
+      {
+        "budget": {
+          "maxP95Ms": 0.0025,
+          "minHz": 400000
+        },
+        "hz": 37771287.55142709,
+        "iterations": 300000,
+        "maxMs": 7.985336000000018e-05,
+        "meanMs": 2.6475136666666732e-05,
+        "minMs": 1.8216639999999984e-05,
+        "name": "raw style array selection",
+        "p50Ms": 1.977164000000016e-05,
+        "p95Ms": 7.985336000000018e-05,
+        "samples": 12,
+        "totalMs": 7.94254100000002,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 3145854.9538768907,
+        "iterations": 300000,
+        "maxMs": 0.00034839000000000056,
+        "meanMs": 0.00031787860999999996,
+        "minMs": 0.0002858216399999992,
+        "name": "resolveRecipeStyle selection",
+        "p50Ms": 0.00031752000000000066,
+        "p95Ms": 0.00034839000000000056,
+        "samples": 12,
+        "totalMs": 95.36358299999999,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 3168415.8786640335,
+        "iterations": 300000,
+        "maxMs": 0.00033230831999999966,
+        "meanMs": 0.0003156151333333335,
+        "minMs": 0.00030651500000000167,
+        "name": "createRecipeResolver selection",
+        "p50Ms": 0.0003131466399999999,
+        "p95Ms": 0.00033230831999999966,
+        "samples": 12,
+        "totalMs": 94.68454000000006,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.0075,
+          "minHz": 125000
+        },
+        "hz": 3158825.759171127,
+        "iterations": 300000,
+        "maxMs": 0.0003791383199999996,
+        "meanMs": 0.00031657333333333306,
+        "minMs": 0.00029855999999999996,
+        "name": "themed recipe resolver selection",
+        "p50Ms": 0.0003085666399999991,
+        "p95Ms": 0.0003791383199999996,
+        "samples": 12,
+        "totalMs": 94.97199999999992,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 1.5
+        },
+        "hz": 7434.790613217491,
+        "iterations": 240,
+        "maxMs": 0.17585415000000068,
+        "meanMs": 0.1345027791666669,
+        "minMs": 0.10401459999999929,
+        "name": "resolveThemeStyles 240 exports",
+        "p50Ms": 0.13133334999999988,
+        "p95Ms": 0.17585415000000068,
+        "samples": 12,
+        "totalMs": 32.28066700000005,
+        "warmupIterations": 20
+      },
+      {
+        "budget": {
+          "maxP95Ms": 100
+        },
+        "hz": 160.77349629620755,
+        "iterations": 6,
+        "maxMs": 7.9856660000000375,
+        "meanMs": 6.21993066666666,
+        "minMs": 4.832332999999949,
+        "name": "transform README recipe fixture",
+        "p50Ms": 5.575833999999986,
+        "p95Ms": 7.9856660000000375,
+        "samples": 6,
+        "totalMs": 37.31958399999996,
+        "warmupIterations": 1
+      },
+      {
+        "budget": {
+          "maxP95Ms": 150
+        },
+        "hz": 172.06027351676158,
+        "iterations": 6,
+        "maxMs": 9.256500000000074,
+        "meanMs": 5.811916833333309,
+        "minMs": 4.779874999999947,
+        "name": "transform package-owned consumer button fixture",
+        "p50Ms": 5.024084000000016,
+        "p95Ms": 9.256500000000074,
+        "samples": 6,
+        "totalMs": 34.87150099999985,
+        "warmupIterations": 1
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "native-device performance",
+        "status": "not-run",
+        "reason": "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate."
+      }
+    ]
+  },
+  "storybookTypecheck": "passed",
+  "docsPages": 20,
+  "nativeAcceptance": "Not rerun; Android remains deferred until last",
+  "publication": "None; original release-version edits excluded"
+}

@@ -1,0 +1,11 @@
+import { style, viewStyle, textStyle, imageStyle, styleVariants, recipe, createThemeContract } from "@opsydyn/crumbs-css/style"
+const vars = createThemeContract({ flexRegression: { value: null } })
+const base = style({ flex: vars.flexRegression.value })
+const siblings = viewStyle({ flexGrow: 3, flexShrink: 0, flexBasis: "25%" })
+export const broad = viewStyle([siblings, base])
+export const reverse = viewStyle([base, siblings])
+export const repeated = viewStyle([base, [{ flex: 0 }, base]])
+export const text = textStyle([base, { flex: -1 }])
+export const image = imageStyle([base, { flex: 0 }])
+export const states = styleVariants({ positive: [base], zero: [base, { flex: 0 }] })
+export const button = recipe({ base: { flex: vars.flexRegression.value, flexShrink: 0 }, variants: { selected: { true: { flex: -1, flexBasis: "auto" }, false: {} } } })

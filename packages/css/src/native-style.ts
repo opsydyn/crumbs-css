@@ -19,8 +19,9 @@ export type NativeStyleComposition<TInput, TStyle = NativePrimitiveReference> = 
   TInput | TStyle | NativeStyleComposition<TInput, TStyle>
 >
 type NativePrimitiveReference = ImageStyle | TextStyle | ViewStyle
-export type NativeStyleRule = StyleRule | StaticNativeStyleInput<NativeStyle> |
-  NativeStyleComposition<StyleRule | StaticNativeStyleInput<NativeStyle>, NativePrimitiveReference>
+type NativeFlatStyleRule = Omit<StyleRule, "flex"> & { readonly flex?: number | NativeThemeVar }
+export type NativeStyleRule = NativeFlatStyleRule | StaticNativeStyleInput<NativeStyle> |
+  NativeStyleComposition<NativeFlatStyleRule | StaticNativeStyleInput<NativeStyle>, NativePrimitiveReference>
 
 // Complete primitive types identify existing references without treating narrow
 // inline rules as references or adding runtime/phantom branding to native styles.

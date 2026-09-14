@@ -59,6 +59,13 @@ Compiled `borderRadius` expands to top-left, top-right, bottom-right and bottom-
 Regenerate dependent artifacts together and pass complete styles to React Native; mixed old shorthand/new corner artifacts remain unqualified. Raw runtime styles keep native behavior. Logical/RTL corner conflicts remain outside this contract. Elliptical CSS radii and embedded multi-value token expressions retain existing strict rejection.
 
 
+## Native numeric flex
+
+Compiled finite numeric `flex` remains a native field, including negative values and zero. Tokens retain the same field. Later declarations replace only the same property, while explicit grow/shrink/basis siblings survive in either authored order. Yoga determines their combined layout semantics; Crumbs does not expand numeric flex into browser defaults. See [React Native flexbox](https://reactnative.dev/docs/flexbox).
+
+Generic inline authoring now matches primitive helpers: `flex` accepts a number or branded Crumbs token. CSS keyword/multi-part/length/percentage flex forms and nonfinite literals fail strict compilation with `CRUMBS_CSS_DROPPED_DECLARATION`. Use explicit native grow/shrink/basis properties to migrate CSS shorthand intent. Permissive conversion drops unsupported forms. Token value-domain validation remains future work. Regenerate dependent compiled artifacts together; mixed old/new flex artifacts remain unqualified. Raw runtime styles retain platform behavior, and compiler parity does not establish visual parity between native and web.
+
+
 ## Required coverage and optional native capabilities
 
 Package tests use durable consumer fixtures for themed styles, variant maps, recipes, web object emission, relative filenames and local theme imports. Tests and benchmarks admit the same required files; missing files/projects and directory impostors fail with the fixture path. An absent app cannot silently remove these checks.

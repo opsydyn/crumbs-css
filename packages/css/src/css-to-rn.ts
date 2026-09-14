@@ -254,6 +254,23 @@ export function cssDeclarationsToRN(
       continue
     }
 
+    // Native numeric flex is an independent Yoga field, not a CSS shorthand.
+    // Explicit grow/shrink/basis siblings must survive in either authored order.
+    if (prop === "flex") {
+      const numeric = value.trim()
+      if (/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?$/i.test(numeric) && Number.isFinite(Number(numeric))) {
+        converted.flex = Number(numeric)
+      } else {
+        dropped.push({
+          code: NativeStylesDiagnosticCode.DroppedDeclaration,
+          prop,
+          reason: "native flex requires one finite number or a Crumbs token; use explicit flexGrow/flexShrink/flexBasis for CSS shorthand migration",
+          value,
+        })
+      }
+      continue
+    }
+
     assignCanonicalDeclarations(converted, transformDeclaration(normalizeNativeDeclaration(prop, value), dropped))
   }
 

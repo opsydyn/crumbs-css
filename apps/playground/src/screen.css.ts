@@ -2,7 +2,8 @@ import { style, recipe, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme.css"
 
 export const screenTitle = "Crumbs playground"
-export const root = viewStyle({ flex: 1, backgroundColor: vars.playground.color.canvas, padding: vars.playground.space.gap, paddingTop: 60 })
+const rootFlexBase = viewStyle({ flex: 0 })
+export const root = viewStyle([rootFlexBase, { flex: vars.playground.layout.rootFlex, backgroundColor: vars.playground.color.canvas, padding: vars.playground.space.gap, paddingTop: 60 }])
 const panelCornerBase = viewStyle({ borderTopLeftRadius: 3 })
 export const panel = viewStyle([panelCornerBase, { backgroundColor: vars.playground.color.panel, padding: vars.playground.space.gap, borderRadius: vars.playground.radius.panel, marginBottom: 12, transform: [{ translateX: 0 }, { scale: 1 }], shadowOffset: { width: 0, height: 2 } }])
 export const copy = textStyle({ color: vars.playground.color.text, fontSize: 16 })
