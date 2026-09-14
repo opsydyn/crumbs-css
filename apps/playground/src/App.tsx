@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { FlatList, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native"
 import { Portal, PortalHost } from "@rn-primitives/portal"
 import { ThemeProvider, resolveRecipeStyle, useThemedStyles } from "@opsydyn/crumbs-css/theme"
@@ -7,6 +7,7 @@ import { dark, light } from "./theme"
 
 const rows = Array.from({ length: 1000 }, (_, id) => ({ id: String(id), label: `Design system component ${id + 1}` }))
 type Journey = "List" | "Form" | "Scopes"
+const scrollProbeEnabled = __DEV__ && process.env.EXPO_PUBLIC_CRUMBS_SCROLL_PROBE === "true"
 
 function ScopeCard() {
   const s = useThemedStyles(styles)
@@ -19,6 +20,12 @@ function Playground({ isDark, toggle }: { isDark: boolean; toggle: () => void })
   const [name, setName] = useState("")
   const [enabled, setEnabled] = useState(false)
   const [portal, setPortal] = useState(false)
+  const [scrollProbe, setScrollProbe] = useState({ y: 0, first: 1, viewport: 0, content: 0, starts: 0, moves: 0, ends: 0, drags: 0 })
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+    const index = viewableItems[0]?.index
+    if (index !== null && index !== undefined) setScrollProbe(previous => ({ ...previous, first: index + 1 }))
+  }).current
   return <View style={s.root}>
     <Text style={s.title}>Crumbs playground</Text>
     <Text style={s.copy}>{process.env.EXPO_PUBLIC_CRUMBS_MODE ?? "unverified"} · Crumbs {process.env.EXPO_PUBLIC_CRUMBS_VERSION ?? "unrecorded"}</Text>
@@ -27,7 +34,26 @@ function Playground({ isDark, toggle }: { isDark: boolean; toggle: () => void })
     <View style={{ flexDirection: "row", gap: 8 }}>{(["List", "Form", "Scopes"] as const).map(item =>
       <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: journey === item }} onPress={() => setJourney(item)} style={[...resolveRecipeStyle(s.button, { selected: journey === item })]}><Text style={s.copy}>{item}</Text></Pressable>
     )}</View>
-    {journey === "List" && <FlatList data={rows} keyExtractor={row => row.id} renderItem={({ item }) => <View style={s.panel}><Text style={s.copy}>{item.label}</Text></View>} />}
+    {journey === "List" && __DEV__ && scrollProbeEnabled && <Text testID="crumbs-scroll-probe" style={{ ...s.copy, fontSize: 12 }}>
+      Scroll probe: y={scrollProbe.y} first={scrollProbe.first} viewport={scrollProbe.viewport} content={scrollProbe.content}{"\n"}
+      Touch: starts={scrollProbe.starts} moves={scrollProbe.moves} ends={scrollProbe.ends} drags={scrollProbe.drags}
+    </Text>}
+    {journey === "List" && <FlatList
+      testID="crumbs-component-list"
+      data={rows}
+      keyExtractor={row => row.id}
+      renderItem={({ item }) => <View style={s.panel}><Text style={s.copy}>{item.label}</Text></View>}
+      onLayout={scrollProbeEnabled ? event => { const viewport = Math.round(event.nativeEvent.layout.height); setScrollProbe(previous => ({ ...previous, viewport })) } : undefined}
+      onContentSizeChange={scrollProbeEnabled ? (_width, height) => setScrollProbe(previous => ({ ...previous, content: Math.round(height) })) : undefined}
+      onTouchStart={scrollProbeEnabled ? () => setScrollProbe(previous => ({ ...previous, starts: previous.starts + 1 })) : undefined}
+      onTouchMove={scrollProbeEnabled ? () => setScrollProbe(previous => ({ ...previous, moves: previous.moves + 1 })) : undefined}
+      onTouchEnd={scrollProbeEnabled ? () => setScrollProbe(previous => ({ ...previous, ends: previous.ends + 1 })) : undefined}
+      onScrollBeginDrag={scrollProbeEnabled ? () => setScrollProbe(previous => ({ ...previous, drags: previous.drags + 1 })) : undefined}
+      onScroll={scrollProbeEnabled ? event => { const y = Math.round(event.nativeEvent.contentOffset.y); setScrollProbe(previous => ({ ...previous, y })) } : undefined}
+      scrollEventThrottle={scrollProbeEnabled ? 100 : undefined}
+      viewabilityConfig={scrollProbeEnabled ? viewabilityConfig : undefined}
+      onViewableItemsChanged={scrollProbeEnabled ? onViewableItemsChanged : undefined}
+    />}
     {journey === "Form" && <ScrollView><View style={s.panel}>
       <Text style={s.copy}>Component name</Text><TextInput accessibilityLabel="Component name" style={s.input} value={name} onChangeText={setName} />
       <Text style={s.copy}>Enabled</Text><Switch accessibilityLabel="Enabled" value={enabled} onValueChange={setEnabled} />

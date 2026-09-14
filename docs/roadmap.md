@@ -309,3 +309,9 @@ The next bounded candidate is native playground journey acceptance, followed by 
 Native list gestures remain unverified: the attempted automation gestures did not change visible rows, and the cause was not established. Android acceptance could not run because the configured Android SDK/emulator tools were absent. M0.9 remains unchecked. Physical-device rendering, release frame/startup performance and screen-reader journeys remain separate gates. The unrelated release-version edits are preserved.
 
 Next recommended slice: establish a reliable native gesture acceptance path for the list and resolve any demonstrated scrolling defect. Android toolchain setup follows as a separate prerequisite for Android acceptance. Wider compiler/API milestones remain gated on M0.
+
+### 2026-09-14 — Native scroll input delivery diagnosis
+
+[Native input evidence](acceptance/2026-09-14-scroll/README.md) records a development-only opt-in FlatList probe. Coordinate taps changed the theme correctly, but two automated drags (including an explicitly raised Simulator window) delivered touch starts/ends without move callbacks, native drag starts, offset changes or visible-row advancement. Reported content height exceeded the viewport height. No layout/compiler defect was demonstrated, so neither was changed.
+
+The probe is off by default and guarded out of production UI. It supplies stable test IDs and an acceptance contract for real swipes, theme position preservation and reverse movement. Native swipe acceptance remains pending the explicit Maestro/XCTest runner choice required by the computer-use tool instructions; M0.9 remains unchecked. No new package dependency was added.
