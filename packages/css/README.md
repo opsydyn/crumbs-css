@@ -72,10 +72,12 @@ module.exports = withNativeStyles(config)
 
 The package ships with a pre-built transformer. Metro cache invalidation is based on the transformer file, so package updates invalidate stale `.css.ts` output automatically.
 
+Runtime APIs belong in `@opsydyn/crumbs-css/theme`: its ESM/CommonJS artifacts import only React externally. The package root, `/style` and Metro tooling remain build-time entrypoints. See the [runtime dependency boundary](./COMPATIBILITY.md#runtime-dependency-boundary).
+
 ## Minimal theme example
 
 ```ts
-// theme.ts
+// theme.css.ts
 import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
 
 export const vars = createThemeContract({
@@ -96,7 +98,7 @@ export const darkTheme = createTheme(vars, {
 ```ts
 // screen.css.ts
 import { style } from "@opsydyn/crumbs-css/style"
-import { vars } from "./theme"
+import { vars } from "./theme.css"
 
 export const screen = style({
   backgroundColor: vars.color.canvas,
@@ -114,7 +116,7 @@ export const title = style({
 ```tsx
 import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import { Text, View } from "react-native"
-import { darkTheme } from "./theme"
+import { darkTheme } from "./theme.css"
 import * as s from "./screen.css"
 
 function Screen() {

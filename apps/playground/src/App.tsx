@@ -3,7 +3,7 @@ import { FlatList, Pressable, ScrollView, Switch, Text, TextInput, View } from "
 import { Portal, PortalHost } from "@rn-primitives/portal"
 import { ThemeProvider, resolveRecipeStyle, useThemedStyles } from "@opsydyn/crumbs-css/theme"
 import * as screen from "./screen.css"
-import { dark, light } from "./theme"
+import { dark, light } from "./theme.css"
 
 const rows = Array.from({ length: 1000 }, (_, id) => ({ id: String(id), label: `Design system component ${id + 1}` }))
 const { screenTitle, ...styles } = screen

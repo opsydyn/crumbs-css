@@ -15,7 +15,7 @@ import type {
   NativeStyle,
   NativeTheme,
 } from "./native-style"
-import { NativeRecipeType } from "./native-style"
+import { NativeRecipeType } from "./native-tags"
 import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
 import { type NativeThemeTokenReference, assertThemeTokenReference, isThemeTokenReferenceCandidate } from "./theme-token"
 

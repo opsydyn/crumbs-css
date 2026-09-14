@@ -1,5 +1,5 @@
 import { recipe, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
-import { vars } from "./theme"
+import { vars } from "./theme.css"
 
 export const screenTitle = "Crumbs playground"
 export const root = viewStyle({ flex: 1, backgroundColor: vars.playground.color.canvas, padding: vars.playground.space.gap, paddingTop: 60 })

@@ -4,6 +4,8 @@ import { getFileScope } from "@vanilla-extract/css/fileScope"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import { markNativeStyleMap, NativeRecipeClassSymbol } from "./native-style-map"
 import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diagnostics"
+import { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
+export { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -32,8 +34,6 @@ type StaticNativeStyleInput<TStyle> = Omit<NativeStyleInput<TStyle>, "transform"
 export type NativeImageStyleInput = NativeStyleInput<ImageStyle>
 export type NativeTextStyleInput = NativeStyleInput<TextStyle>
 export type NativeViewStyleInput = NativeStyleInput<ViewStyle>
-export const NativeRecipeType = "crumbs.css.recipe" as const
-export const NativeRecipeClassType = "crumbs.css.class" as const
 export type NativeRecipeVariantValue = string | boolean
 export type NativeRecipeVariantsConfig = Readonly<
   Record<string, Readonly<Record<string, NativeViewStyleInput>>>

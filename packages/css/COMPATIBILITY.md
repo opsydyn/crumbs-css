@@ -20,6 +20,12 @@ The package currently declares `react-native` peer compatibility as
 `>=0.85 <0.86`. Earlier React Native baselines should not be assumed supported
 unless they are exercised explicitly in a future compatibility pass.
 
+## Runtime dependency boundary
+
+Import application runtime APIs from `@opsydyn/crumbs-css/theme` (or its existing `dist/theme` alias). Both ESM and CommonJS runtime artifacts depend externally only on React; their emitted graph contains no Node built-ins, authoring entrypoints, esbuild, vanilla-extract integration or CSS conversion code. Shared tags are pure data. One declaration graph preserves nominal token types across authoring and runtime entries.
+
+The package root, `/style`, Metro plugin and transformer are build-time entrypoints and can require Node/compiler dependencies. Runtime isolation does not remove those installed package dependencies or make authoring modules safe to import into application bundles. Regenerate compiled styles and use the theme subpath in runtime code. Production Expo checks inspect retained iOS, Android and web source maps; native/device performance remains separate qualification.
+
 ## Supported
 
 | Feature | Status | Native behavior |

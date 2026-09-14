@@ -10,6 +10,12 @@ description: What the package guarantees today and how styles move from authorin
 - themed style exports contain token references until runtime resolution
 - `ThemeProvider` and `useThemedStyles` resolve those tokens against the active theme
 
+## Runtime imports
+
+Use `@opsydyn/crumbs-css/theme` for application runtime APIs. Its ESM and CommonJS emitted graphs depend externally only on React and exclude Node built-ins, authoring modules, esbuild, integration and CSS conversion code. The existing `dist/theme` alias shares this boundary. Runtime and tooling JavaScript build separately; declarations share one graph to preserve nominal token compatibility.
+
+The root, `/style`, Metro plugin and transformer remain build-time entrypoints. Installed compiler dependencies are still required for authoring. The playground qualification inspects fresh production source maps for iOS, Android and web in workspace and packed modes; this does not establish device performance or native platform acceptance.
+
 ## Current guarantees
 
 - React Native focused

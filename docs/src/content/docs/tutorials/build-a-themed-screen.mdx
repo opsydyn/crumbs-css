@@ -7,6 +7,8 @@ This tutorial adds a real theme contract and uses runtime token resolution in a 
 
 ## 1. Define a theme contract
 
+Save this module as `theme.css.ts` so Metro emits theme data without bundling authoring code.
+
 ```ts
 import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
 
@@ -35,7 +37,7 @@ export const darkTheme = createTheme(vars, {
 
 ```ts
 import { style } from "@opsydyn/crumbs-css/style"
-import { vars } from "./theme"
+import { vars } from "./theme.css"
 
 export const screen = style({
   backgroundColor: vars.color.canvas,
@@ -55,7 +57,7 @@ export const title = style({
 
 ```tsx
 import { ThemeProvider } from "@opsydyn/crumbs-css/theme"
-import { darkTheme } from "./theme"
+import { darkTheme } from "./theme.css"
 
 export function App({ children }) {
   return <ThemeProvider theme={darkTheme}>{children}</ThemeProvider>

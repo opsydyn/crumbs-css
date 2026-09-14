@@ -1,8 +1,9 @@
-import { cp, mkdtemp, readFile, realpath, writeFile } from "node:fs/promises"
+import { cp, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises"
 import { watch } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, join, resolve } from "node:path"
 import { createRequire } from "node:module"
+import { verifyRuntimeBundles } from "./runtime-bundle-contract"
 
 export const packageName = "@opsydyn/crumbs-css"
 const root = resolve(import.meta.dir, "..")
@@ -88,7 +89,11 @@ async function main() {
   const bin = (name: string) => join(directory, "node_modules/.bin", name)
   if (options.check) {
     await run([bin("tsc"), "--noEmit"], directory, env)
-    await run([bin("expo"), "export", "--platform", "all"], directory, { ...env, CI: "1" })
+    await rm(join(directory, "dist"), { recursive: true, force: true })
+    await run([bin("expo"), "export", "--platform", "all", "--source-maps"], directory, { ...env, CI: "1" })
+    const runtimeBundles = await verifyRuntimeBundles(join(directory, "dist"))
+    await writeFile(join(directory, ".expo-runtime-bundles.json"), JSON.stringify(runtimeBundles, null, 2) + "\n")
+    console.log(`Runtime bundle source qualification: ${runtimeBundles.length} source maps passed`)
     return
   }
   let stopped = false
