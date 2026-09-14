@@ -234,3 +234,6 @@ Required consumer regression fixtures and both compiler benchmark fixtures belon
 
 
 Compiled physical border widths/colors now normalize to four sides for tokens, literals and literal CSS `border` output. Later broad/side declarations preserve authored order across compositions. Regenerate compiled artifacts together; raw runtime styles retain native behavior. See [alpha border migration](./COMPATIBILITY.md#supported) for the physical-only boundary.
+
+
+Generic `style` compositions and `styleVariants` now preserve complete primitive references and enforce compatible native inline overrides. Literal-only rules keep the legacy generic result; mixed references return a union. See [primitive-reference types and migration](./COMPATIBILITY.md#primitive-references-and-generic-composition-types), including explicit legacy type selection for generic forwarding functions.

@@ -139,7 +139,7 @@ function writeConsumerTsconfig(
           strict: true,
           target: "ES2022",
         },
-        include: ["consumer-types.ts"],
+        include: ["consumer-types.ts", "primitive-reference-types.ts"],
       },
       null,
       2,
@@ -213,6 +213,10 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
     run(["node", "runtime.mjs"], consumerRoot)
 
     writeFileSync(resolve(consumerRoot, "consumer-types.ts"), consumerTypeSource)
+    const primitiveTypes = readFileSync(resolve(PACKAGE_ROOT, "test/primitive-reference-types.ts"), "utf8")
+      .replaceAll('"../src/native-style"', '"@opsydyn/crumbs-css/style"')
+      .replaceAll('"../src/theme-runtime"', '"@opsydyn/crumbs-css/theme"')
+    writeFileSync(resolve(consumerRoot, "primitive-reference-types.ts"), primitiveTypes)
     writeConsumerTsconfig(consumerRoot, "tsconfig.node16.json", "Node16", "Node16")
     writeConsumerTsconfig(consumerRoot, "tsconfig.bundler.json", "ESNext", "Bundler")
     run([resolve(resolveInstalledPackageRoot("typescript"), "bin", "tsc"), "-p", "tsconfig.node16.json"], consumerRoot)

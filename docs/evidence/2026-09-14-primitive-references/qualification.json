@@ -1,0 +1,211 @@
+{
+  "slice": "M0.2 primitive-reference compatibility",
+  "sourceRevision": "bc984a5 plus approved primitive-reference working changes",
+  "redEvidence": {
+    "positiveTypeFixtures": "Failed before repair on view/text references and exact primitive results",
+    "anchoredNegativeTypeFixtures": "Four unused ts-expect-error diagnostics before anchor checks, demonstrating accepted incompatible inline properties",
+    "compilerFixture": {
+      "emitters": 2,
+      "passing": 0,
+      "failing": 2,
+      "cause": "Direct class reference treated as declaration characters (dropped 0: p)"
+    }
+  },
+  "typeQualification": {
+    "exactChecks": 15,
+    "negativeFixtures": 16,
+    "covered": "direct/nested/repeated references, independent map entries, mixed union, recursive aliases, resolution/hooks, widened legacy rules and explicit generic forwarders",
+    "packedNode16": "passed",
+    "packedBundler": "passed"
+  },
+  "packageCheck": {
+    "command": "bun run check",
+    "tests": 196,
+    "assertions": 7024,
+    "files": 30,
+    "exitCode": 0
+  },
+  "publicCompilerProbes": [
+    {
+      "format": "mjs",
+      "useStyleSheet": true,
+      "status": "passed",
+      "direct": {
+        "overflow": "scroll",
+        "opacity": 0.5
+      }
+    },
+    {
+      "format": "mjs",
+      "useStyleSheet": false,
+      "status": "passed",
+      "direct": {
+        "overflow": "scroll",
+        "opacity": 0.5
+      }
+    },
+    {
+      "format": "cjs",
+      "useStyleSheet": true,
+      "status": "passed",
+      "direct": {
+        "overflow": "scroll",
+        "opacity": 0.5
+      }
+    },
+    {
+      "format": "cjs",
+      "useStyleSheet": false,
+      "status": "passed",
+      "direct": {
+        "overflow": "scroll",
+        "opacity": 0.5
+      }
+    }
+  ],
+  "workspaceBundleMaps": [
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/web/index-22a831ad1d20cf288ecc62097ac35e19.js.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/ios/index-310295414bcb3f4037ed00c98e97c742.hbc.map",
+      "crumbs": 1
+    },
+    {
+      "file": "/Users/alancurrie/Projects/crumbs-css/apps/playground/dist/_expo/static/js/android/index-e3a75c5a00797b611b6dca26807fa3b5.hbc.map",
+      "crumbs": 1
+    }
+  ],
+  "benchmark": {
+    "metrics": [
+      {
+        "budget": {
+          "maxP95Ms": 0.0025,
+          "minHz": 400000
+        },
+        "hz": 35350612.08406468,
+        "iterations": 300000,
+        "maxMs": 5.622667999999976e-05,
+        "meanMs": 2.8288053333333353e-05,
+        "minMs": 1.9226639999999976e-05,
+        "name": "raw style array selection",
+        "p50Ms": 2.212668000000008e-05,
+        "p95Ms": 5.622667999999976e-05,
+        "samples": 12,
+        "totalMs": 8.486416000000006,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 3125704.0974073606,
+        "iterations": 300000,
+        "maxMs": 0.0003476816399999996,
+        "meanMs": 0.00031992791666666647,
+        "minMs": 0.00030086831999999957,
+        "name": "resolveRecipeStyle selection",
+        "p50Ms": 0.00031899499999999987,
+        "p95Ms": 0.0003476816399999996,
+        "samples": 12,
+        "totalMs": 95.97837499999994,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.006,
+          "minHz": 150000
+        },
+        "hz": 3271115.48112755,
+        "iterations": 300000,
+        "maxMs": 0.00033036832,
+        "meanMs": 0.0003057061133333334,
+        "minMs": 0.00028903499999999896,
+        "name": "createRecipeResolver selection",
+        "p50Ms": 0.0003037633200000005,
+        "p95Ms": 0.00033036832,
+        "samples": 12,
+        "totalMs": 91.71183400000001,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 0.0075,
+          "minHz": 125000
+        },
+        "hz": 3281461.8798917597,
+        "iterations": 300000,
+        "maxMs": 0.0003874199999999996,
+        "meanMs": 0.00030474222666666644,
+        "minMs": 0.00028291500000000044,
+        "name": "themed recipe resolver selection",
+        "p50Ms": 0.0003001733599999989,
+        "p95Ms": 0.0003874199999999996,
+        "samples": 12,
+        "totalMs": 91.42266799999993,
+        "warmupIterations": 25000
+      },
+      {
+        "budget": {
+          "maxP95Ms": 1.5
+        },
+        "hz": 7503.194954201433,
+        "iterations": 240,
+        "maxMs": 0.1595416499999999,
+        "meanMs": 0.13327655833333338,
+        "minMs": 0.10569375000000036,
+        "name": "resolveThemeStyles 240 exports",
+        "p50Ms": 0.13790414999999995,
+        "p95Ms": 0.1595416499999999,
+        "samples": 12,
+        "totalMs": 31.986374000000012,
+        "warmupIterations": 20
+      },
+      {
+        "budget": {
+          "maxP95Ms": 100
+        },
+        "hz": 171.9080721584124,
+        "iterations": 6,
+        "maxMs": 7.006416999999999,
+        "meanMs": 5.81706250000003,
+        "minMs": 4.630208000000039,
+        "name": "transform README recipe fixture",
+        "p50Ms": 5.457750000000033,
+        "p95Ms": 7.006416999999999,
+        "samples": 6,
+        "totalMs": 34.90237500000018,
+        "warmupIterations": 1
+      },
+      {
+        "budget": {
+          "maxP95Ms": 150
+        },
+        "hz": 187.9532433728543,
+        "iterations": 6,
+        "maxMs": 5.8259160000000065,
+        "meanMs": 5.32047216666668,
+        "minMs": 4.7231669999999895,
+        "name": "transform package-owned consumer button fixture",
+        "p50Ms": 5.219500000000039,
+        "p95Ms": 5.8259160000000065,
+        "samples": 6,
+        "totalMs": 31.922833000000082,
+        "warmupIterations": 1
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "native-device performance",
+        "status": "not-run",
+        "reason": "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate."
+      }
+    ]
+  },
+  "storybookTypecheck": "passed",
+  "docsPages": 20,
+  "nativeAcceptance": "Not rerun; Android remains deferred until last",
+  "publication": "None; pre-existing release edits excluded"
+}

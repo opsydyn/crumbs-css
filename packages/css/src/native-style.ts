@@ -15,11 +15,42 @@ export {
 } from "./theme-token"
 
 export type NativeStyle = ImageStyle & TextStyle & ViewStyle
-export type NativeStyleComposition<TInput, TStyle = NativeStyle> = ReadonlyArray<
+export type NativeStyleComposition<TInput, TStyle = NativePrimitiveReference> = ReadonlyArray<
   TInput | TStyle | NativeStyleComposition<TInput, TStyle>
 >
+type NativePrimitiveReference = ImageStyle | TextStyle | ViewStyle
 export type NativeStyleRule = StyleRule | StaticNativeStyleInput<NativeStyle> |
-  NativeStyleComposition<StyleRule | StaticNativeStyleInput<NativeStyle>>
+  NativeStyleComposition<StyleRule | StaticNativeStyleInput<NativeStyle>, NativePrimitiveReference>
+
+// Complete primitive types identify existing references without treating narrow
+// inline rules as references or adding runtime/phantom branding to native styles.
+type CompletePrimitiveReference<T> = T extends NativePrimitiveReference
+  ? keyof ViewStyle extends keyof T ? T
+    : keyof ImageStyle extends keyof T ? T : never
+  : never
+type CompositionReferences<T, TSeen = never> = T extends ReadonlyArray<infer TEntry>
+  ? T extends TSeen ? CompletePrimitiveReference<TEntry>
+    : CompositionReferences<TEntry, TSeen | T>
+  : CompletePrimitiveReference<T>
+type NativeStyleResult<T> = NativeStyleRule extends T ? NativeStyle
+  : [CompositionReferences<T>] extends [never]
+  ? NativeStyle : CompositionReferences<T>
+type NativeAuthoringRule = NativeStyleRule | NativePrimitiveReference
+type PrimitiveInlineInput<T> = T extends NativePrimitiveReference ? StaticNativeStyleInput<T> : never
+type PrimitiveKeys<T> = T extends NativePrimitiveReference ? keyof T : never
+type CheckedComposition<T, TReference, TSeen = never> = T extends ReadonlyArray<unknown>
+  ? T extends TSeen ? unknown
+    : { readonly [K in keyof T]: CheckedComposition<T[K], TReference, TSeen | T> }
+  : [CompletePrimitiveReference<T>] extends [never]
+    ? Exclude<keyof T, PrimitiveKeys<TReference>> extends never
+      ? T extends PrimitiveInlineInput<TReference> ? unknown : never
+      : never
+    : unknown
+type CheckedNativeRule<T> = NativeStyleRule extends T ? NativeStyleRule
+  : [CompositionReferences<T>] extends [never] ? NativeStyleRule
+  // Legacy generic references retain the existing vanilla-extract inline subset.
+  : keyof NativeStyle extends keyof CompositionReferences<T> ? NativeStyleRule
+    : CheckedComposition<T, CompositionReferences<T>>
 type StaticTransformEntry<TEntry> = TEntry extends unknown ? {
   readonly [K in keyof TEntry]: TEntry[K] extends ReadonlyArray<unknown>
     ? number[] : Extract<TEntry[K], string | number>
@@ -77,8 +108,8 @@ type NativeRecipeClassRef = {
   readonly $$type: typeof NativeRecipeClassType
   readonly className: string
 }
-export type NativeStyleVariants<TVariants extends Readonly<Record<string, NativeStyleRule>>> = {
-  readonly [K in keyof TVariants]: NativeStyle
+export type NativeStyleVariants<TVariants extends Readonly<Record<string, NativeAuthoringRule>>> = {
+  readonly [K in keyof TVariants]: NativeStyleResult<TVariants[K]>
 }
 export type ThemeContractInput = {
   readonly [key: string]: ThemeContractInput | null
@@ -121,8 +152,11 @@ type ThemeContractBuildState = {
 
 const themeTokenRegistry = new Map<NativeThemeVar, ThemeTokenMetadata>()
 
-export function style(rule: NativeStyleRule, debugId?: string): NativeStyle {
-  return authorStyle(rule, debugId) as unknown as NativeStyle
+export function style<const TRule extends NativeAuthoringRule>(
+  rule: TRule & CheckedNativeRule<TRule>,
+  debugId?: string,
+): NativeStyleResult<TRule> {
+  return authorStyle(rule, debugId) as unknown as NativeStyleResult<TRule>
 }
 
 export function viewStyle(
@@ -147,6 +181,8 @@ export function imageStyle(
 }
 
 function authorStyle(rule: unknown, debugId?: string): string {
+  // A compiled reference is a build-time class handle, not a declaration object.
+  if (typeof rule === "string") return authorStyle([rule], debugId)
   if (!Array.isArray(rule)) return vanillaStyle(rule as StyleRule, debugId)
 
   // ADR D2: native order includes inline rules, nested sequences and repeats.
@@ -161,13 +197,13 @@ function authorStyle(rule: unknown, debugId?: string): string {
   return classList
 }
 
-export function styleVariants<TVariants extends Readonly<Record<string, NativeStyleRule>>>(
-  variants: TVariants,
+export function styleVariants<const TVariants extends Readonly<Record<string, NativeAuthoringRule>>>(
+  variants: TVariants & { readonly [K in keyof TVariants]: CheckedNativeRule<TVariants[K]> },
   debugId?: string,
 ): NativeStyleVariants<TVariants> {
   const result: Partial<Record<keyof TVariants, NativeStyle>> = {}
-  for (const [name, rule] of Object.entries(variants) as Array<[keyof TVariants, NativeStyleRule]>) {
-    result[name] = style(rule, debugId === undefined ? undefined : `${debugId}_${String(name)}`)
+  for (const [name, rule] of Object.entries(variants) as Array<[keyof TVariants, NativeAuthoringRule]>) {
+    result[name] = authorStyle(rule, debugId === undefined ? undefined : `${debugId}_${String(name)}`) as unknown as NativeStyle
   }
   return markNativeStyleMap(result) as NativeStyleVariants<TVariants>
 }

@@ -40,6 +40,12 @@ The compiler captures static transform arrays and numeric `shadowOffset` / `text
 
 Other structured authoring shapes, animated nodes and nested tokens fail with `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` even with permissive diagnostics. Direct primitive helpers also exclude animated transform nodes by type. Pass unsupported native values through React Native's runtime `style` prop. CSS strings retain the existing converter contract. Regenerate dependent artifacts together after upgrading; compiled-output checks do not establish native rendering or platform-specific shadow behavior. Nested token evaluation remains outside the current resolution contract.
 
+## Primitive reference typing
+
+Complete view/text/image references retain their primitive types through generic `style` calls, variant-map entries, theme resolution and hooks. Direct references use the existing authored composition path; nested and repeated references preserve order. Referenced primitives anchor native inline overrides to their property/value sets. Literal-only generic inputs retain `NativeStyle`; mixed primitive references return a conservative union. No runtime or phantom branding was introduced.
+
+Keep primitive reference annotations when you want their native result types. Widening to `NativeStyleRule` deliberately selects the legacy contract; generic forwarders can use `style<NativeStyleRule>(rule)` or the equivalent explicit variant type argument. The default composition reference type is the primitive union; use its second type parameter for target-specific aliases. Direct inline animated values, arbitrary browser class strings and incompatible inline fields remain rejected. Structural typing does not establish provenance; compiler admission remains independent. Recipe inputs are unchanged.
+
 ## Physical border precedence
 
 Compiled border width/color shorthands expand to physical top/right/bottom/left properties for both tokens and literals, including width/color output from a literal CSS `border` shorthand. Multi-value literals retain their per-side values. Later broad or side declarations win before class/composition merging; only surviving tokens are resolved. The literal border style field stays global. Typed border fixtures cover direct rules, nested/repeated bases, primitive helpers, variants and recipes in native and web emitters.

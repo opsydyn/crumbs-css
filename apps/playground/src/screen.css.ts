@@ -1,4 +1,4 @@
-import { recipe, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
+import { style, recipe, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
 import { vars } from "./theme.css"
 
 export const screenTitle = "Crumbs playground"
@@ -7,7 +7,7 @@ export const panel = viewStyle({ backgroundColor: vars.playground.color.panel, p
 export const copy = textStyle({ color: vars.playground.color.text, fontSize: 16 })
 export const title = textStyle([copy, { fontSize: 24, fontWeight: "700", marginBottom: 12 }])
 const inputBorderBase = textStyle({ borderLeftWidth: 3, borderTopColor: vars.playground.color.text })
-export const input = textStyle([inputBorderBase, { color: vars.playground.color.text, backgroundColor: vars.playground.color.panel, padding: 12, borderWidth: 1, borderColor: vars.playground.color.accent, borderRadius: 8 }])
+export const input = style([inputBorderBase, { color: vars.playground.color.text, backgroundColor: vars.playground.color.panel, padding: 12, borderWidth: 1, borderColor: vars.playground.color.accent, borderRadius: 8 }])
 export const button = recipe({
   base: { padding: 12, borderRadius: 8, marginBottom: 8, borderWidth: 2, borderColor: vars.playground.color.accent },
   variants: { selected: { true: { backgroundColor: vars.playground.color.panel }, false: { opacity: 0.7 } } },

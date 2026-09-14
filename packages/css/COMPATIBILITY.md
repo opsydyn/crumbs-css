@@ -73,6 +73,14 @@ Native token references require exactly two own enumerable data fields: `$$type:
 
 **Alpha token migration:** regenerate old or extended reference payloads into the exact data shape above. Metadata belongs outside the reference DTO; token names cannot contain whitespace, punctuation other than hyphen/underscore, or an empty suffix. Missing-token diagnostics now carry a stable code.
 
+### Primitive references and generic composition types
+
+`style` and `styleVariants` admit complete view/text/image style references, including valid view/text `overflow: "scroll"`, directly and through nested or repeated compositions. Results retain each referenced primitive type through theme resolution and hooks; variant entries infer independently. Literal-only generic rules retain the legacy `NativeStyle` return type. Mixed primitive references produce a conservative union, not an intersection claiming every primitive property.
+
+Primitive references anchor inline overrides to their native property/value set, including nested generic compositions. Incompatible text/image fields on a view composition, invalid values, arbitrary browser class strings and direct inline animated transforms remain type errors. Existing primitive helpers keep their own inline checks. Complete native interface types identify structural references; no nominal/phantom brand or runtime marker is added. This does not validate provenance or make raw animated declarations compilable; actual compiler admission still applies.
+
+**Alpha type migration:** keep references in their primitive types instead of widening them to `NativeStyleRule`. Intentional widening selects the legacy generic contract and erases the primitive distinction. Generic forwarders can explicitly select that contract with `style<NativeStyleRule>(rule)` or `styleVariants<Record<string, NativeStyleRule>>(rules)`. The default reference type in `NativeStyleComposition` is now the primitive union; use its second type parameter for a target-specific composition alias when needed. Regenerate declarations together and retain target-specific annotations when consuming native props. Recipe input/selection APIs remain unchanged.
+
 ### Legacy contract ownership
 
 Until M3 introduces explicit package/contract identities, a token's owner is its exact raw path (the array of unsanitized key segments). Identical paths may be reused across contract definitions and produce independent theme value maps. Different paths that sanitize to the same `--crumbs-…` name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`; registration validates the whole contract before publishing any metadata. Failed definitions cannot overwrite an existing owner or leave partially registered tokens. Exposed token paths are frozen.
