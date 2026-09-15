@@ -20,8 +20,15 @@
       "unit": "ms",
       "direction": "lower-is-better",
       "environmentClass": "release-hermes-device",
-      "baseline": { "status": "missing", "reason": "M1.6 release device sampling has not run" },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "baseline": {
+        "status": "missing",
+        "reason": "M1.6 release device sampling has not run"
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
     },
     {
       "id": "ui-frame-time",
@@ -31,8 +38,15 @@
       "unit": "ms",
       "direction": "lower-is-better",
       "environmentClass": "release-hermes-device",
-      "baseline": { "status": "missing", "reason": "M1.6 release device sampling has not run" },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "baseline": {
+        "status": "missing",
+        "reason": "M1.6 release device sampling has not run"
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
     },
     {
       "id": "allocation-bytes",
@@ -42,8 +56,15 @@
       "unit": "bytes",
       "direction": "lower-is-better",
       "environmentClass": "controlled-release-hermes-device",
-      "baseline": { "status": "missing", "reason": "No controlled allocation probe has been retained" },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "baseline": {
+        "status": "missing",
+        "reason": "No controlled allocation probe has been retained"
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
     },
     {
       "id": "retained-memory-bytes",
@@ -59,7 +80,11 @@
         "reason": "Web readings lack forced-GC and release-device provenance",
         "repetitions": 2
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
     },
     {
       "id": "runtime-emitted-bytes",
@@ -76,24 +101,110 @@
         "value": 11307,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 11307,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
-      "id": "runtime-initialization-ms",
+      "id": "runtime-initialization-node22-esm",
       "domain": "runtime-footprint",
-      "scenario": "ordinary runtime module load across ESM/CommonJS and supported Node hosts",
-      "measure": "maximum median module evaluation duration across the matrix",
+      "scenario": "ordinary runtime ESM module load on Node 22.0.0",
+      "measure": "median fresh-process module evaluation after excluded warmup",
       "unit": "ms",
       "direction": "lower-is-better",
-      "environmentClass": "node22-and-current-macos-arm64",
+      "environmentClass": "node22-macos-arm64",
       "baseline": {
         "status": "recorded",
-        "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
-        "selector": "effect.runtime.max-median-load-ms",
-        "value": 6.011833000000003,
-        "repetitions": 5
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.floor.esm.load-ms.median",
+        "value": 6.293542000000002,
+        "repetitions": 15
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 7.553,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "runtime-initialization-node22-cjs",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime CJS module load on Node 22.0.0",
+      "measure": "median fresh-process module evaluation after excluded warmup",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.floor.cjs.load-ms.median",
+        "value": 3.401791000000001,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 4.083,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "runtime-initialization-current-esm",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime ESM module load on current Node",
+      "measure": "median fresh-process module evaluation after excluded warmup",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "current-node-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.current.esm.load-ms.median",
+        "value": 2.555624999999999,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 3.067,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "runtime-initialization-current-cjs",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime CJS module load on current Node",
+      "measure": "median fresh-process module evaluation after excluded warmup",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "current-node-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.current.cjs.load-ms.median",
+        "value": 2.036500000000002,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 2.444,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "cold-transform-ms",
@@ -110,7 +221,14 @@
         "value": 66.404584,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 83.006,
+        "maxRegressionPercent": 25,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "warm-transform-ms",
@@ -127,7 +245,14 @@
         "value": 5.664125000000013,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 6.514,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "incremental-rebuild",
@@ -137,8 +262,15 @@
       "unit": "ms",
       "direction": "lower-is-better",
       "environmentClass": "release-hermes-device",
-      "baseline": { "status": "missing", "reason": "No actual-edit incremental rebuild baseline exists" },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "baseline": {
+        "status": "missing",
+        "reason": "No actual-edit incremental rebuild baseline exists"
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
     },
     {
       "id": "editor-tsc-wall-10000",
@@ -155,7 +287,14 @@
         "value": 882.1055000000006,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 1014.422,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "editor-tsgo-wall-10000",
@@ -172,7 +311,14 @@
         "value": 332.92241699999977,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 382.861,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "editor-tsc-memory-10000",
@@ -189,7 +335,14 @@
         "value": 285025,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 313528,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "editor-tsgo-memory-10000",
@@ -206,7 +359,14 @@
         "value": 140013,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 154015,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "editor-tsc-instantiations-10000",
@@ -223,7 +383,14 @@
         "value": 490410,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 490410,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "editor-tsgo-instantiations-10000",
@@ -240,7 +407,14 @@
         "value": 490508,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 490508,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "editor-first-completion-10000",
@@ -257,7 +431,14 @@
         "value": 39.28841699999998,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 43.218,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     },
     {
       "id": "editor-warm-completion-10000",
@@ -274,7 +455,14 @@
         "value": 30.386750000000006,
         "repetitions": 5
       },
-      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 34.945,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
     }
   ]
 }

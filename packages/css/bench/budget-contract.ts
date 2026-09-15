@@ -21,7 +21,10 @@ const PositiveInteger = Schema.Int.check(Schema.isGreaterThan(0))
 const Id = Schema.String.check(Schema.isPattern(/^[a-z][a-z0-9-]*$/))
 const BaselineSelectorSchema = Schema.Literals([
   "effect.runtime.cjs.graph-bytes",
-  "effect.runtime.max-median-load-ms",
+  "runtime-init.floor.esm.load-ms.median",
+  "runtime-init.floor.cjs.load-ms.median",
+  "runtime-init.current.esm.load-ms.median",
+  "runtime-init.current.cjs.load-ms.median",
   "benchmark.cold-transform.max-median-ms",
   "benchmark.warm-transform.max-median-ms",
   "editor.tsc.10000.wall-ms.median",
@@ -143,7 +146,7 @@ export function verifyRecordedBaselines(registry: BudgetRegistry, repoRoot: stri
 }
 
 type BaselineSelector = typeof BaselineSelectorSchema.Type
-type EvidenceBundle = { readonly effect: unknown; readonly benchmark: unknown; readonly editor: unknown }
+type EvidenceBundle = { readonly effect: unknown; readonly runtimeInit: unknown; readonly benchmark: unknown; readonly editor: unknown }
 
 export function summarizeBenchmarkReports(inputs: unknown[]) {
   if (inputs.length === 0) throw Error("At least one benchmark report is required")
@@ -175,32 +178,40 @@ export function summarizeBenchmarkReports(inputs: unknown[]) {
 }
 
 export function createThresholdReviewPacket(registry: BudgetRegistry, repoRoot: string) {
-  const candidates = registry.metrics.flatMap(metric => {
+  const recorded = registry.metrics.flatMap(metric => {
     if (metric.baseline.status !== "recorded") return []
     const evidence = JSON.parse(readFileSync(resolve(repoRoot, metric.baseline.evidence), "utf8")) as unknown
     const samples = extractBaselineSamples(metric.baseline.selector, evidence)
     const envelope = summarizeEnvelope(samples)
+    return [{ metric, baseline: metric.baseline, samples, envelope }]
+  })
+  const candidates = recorded.flatMap(({ metric, baseline, samples, envelope }) => {
+    if (metric.threshold.status !== "pending-review") return []
     const maxRegressionPercent = roundUpToFive(Math.max(10, envelope.maxDeviationPercent * 2))
     const unroundedAbsolute = Math.max(envelope.max, envelope.median * (1 + maxRegressionPercent / 100))
     const absoluteMax = metric.unit === "ms" ? Math.ceil(unroundedAbsolute * 1000) / 1000 : Math.ceil(unroundedAbsolute)
     return [{
-      id: metric.id, unit: metric.unit, samples: samples.length, baseline: metric.baseline.value, envelope,
+      id: metric.id, unit: metric.unit, samples: samples.length, baseline: baseline.value, envelope,
       proposal: { status: "candidate-not-approved" as const, absoluteMax, maxRegressionPercent,
         formula: "max(observed max, median plus twice observed deviation or 10 percent); rounded upward" },
     }]
   })
+  const approved = recorded.flatMap(({ metric, baseline, samples, envelope }) => metric.threshold.status === "approved" ? [{
+    id: metric.id, unit: metric.unit, samples: samples.length, baseline: baseline.value, envelope,
+    decision: metric.threshold,
+  }] : [])
   return {
-    status: "review-required" as const,
+    status: candidates.length === 0 ? "recorded-thresholds-approved" as const : "review-required" as const,
     registryStatus: registry.status,
     candidates,
+    approved,
     reviewAttention: {
-      highNoise: candidates.filter(candidate => candidate.envelope.maxDeviationPercent >= 20).map(candidate => candidate.id),
-      deterministicGrowthPolicy: candidates.filter(candidate => candidate.envelope.maxDeviationPercent === 0 &&
-        (candidate.unit === "bytes" || candidate.unit === "count")).map(candidate => candidate.id),
+      highNoise: recorded.filter(({ envelope }) => envelope.maxDeviationPercent >= 20).map(({ metric }) => metric.id),
+      zeroGrowthPolicy: approved.filter(entry => entry.decision.maxRegressionPercent === 0).map(entry => entry.id),
     },
     blockers: assessBudgetRegistry(registry),
     limits: [
-      "Candidates are mechanical review inputs, not approvals or performance qualification",
+      "Candidates are mechanical review inputs; approved entries preserve reviewer decisions; neither qualifies current performance",
       "High-noise metrics should be isolated or remeasured before approval",
       "Deterministic byte/count metrics need an explicit allowed-growth policy",
     ],
@@ -241,9 +252,12 @@ function extractBaselineSamples(selector: BaselineSelector, evidence: unknown): 
     const value = unique(entries.map(entry => entry.graph.bytes))
     return Array.from({ length: Math.max(...entries.map(entry => entry.samples.length)) }, () => value)
   }
-  if (selector === "effect.runtime.max-median-load-ms") {
-    const data = evidence as EffectBoundaryEvidence
-    return maximaByRepetition(data.results.filter(entry => entry.scenario === "runtime").map(entry => entry.samples.map(sample => sample.loadMs)))
+  const runtimeInit = selector.match(/^runtime-init\.(floor|current)\.(esm|cjs)\.load-ms\.median$/)
+  if (runtimeInit) {
+    const data = evidence as RuntimeInitializationEvidence
+    const scenario = data.scenarios.find(entry => entry.runtime === runtimeInit[1] && entry.format === runtimeInit[2])
+    if (!scenario) throw Error(`Missing runtime initialization scenario: ${selector}`)
+    return numbers(scenario.samples.map(sample => sample.loadMs))
   }
   if (selector === "benchmark.cold-transform.max-median-ms" || selector === "benchmark.warm-transform.max-median-ms") {
     const data = evidence as BenchmarkSummaryEvidence
@@ -268,6 +282,7 @@ function extractBaselineSamples(selector: BaselineSelector, evidence: unknown): 
 
 function evidenceForSelector(selector: BaselineSelector, evidence: EvidenceBundle): unknown {
   if (selector.startsWith("effect.")) return evidence.effect
+  if (selector.startsWith("runtime-init.")) return evidence.runtimeInit
   if (selector.startsWith("benchmark.")) return evidence.benchmark
   return evidence.editor
 }
@@ -277,6 +292,12 @@ function environmentFingerprint(selector: BaselineSelector, evidence: unknown): 
     const data = evidence as EffectBoundaryEvidence
     return { effect: data.effect, build: data.build, protocol: data.protocol, environment: { platform: data.environment.platform, architecture: data.environment.architecture },
       nodes: [...new Set(data.results.flatMap(entry => entry.samples.map(sample => sample.node)))].sort() }
+  }
+  if (selector.startsWith("runtime-init.")) {
+    const data = evidence as RuntimeInitializationEvidence
+    return { environment: { platform: data.environment.platform, architecture: data.environment.architecture,
+      osRelease: data.environment.osRelease, cpu: data.environment.cpu, repetitions: data.environment.repetitions },
+      protocol: data.protocol, nodes: data.scenarios.map(scenario => ({ runtime: scenario.runtime, format: scenario.format, node: scenario.node })) }
   }
   if (selector.startsWith("benchmark.")) {
     const data = evidence as BenchmarkSummaryEvidence
@@ -302,6 +323,11 @@ type BenchmarkSummaryEvidence = {
   protocol: unknown
   fixtures: unknown
   results: Array<{ name: string; sampleKind: string; iterationsPerSample: number; warmupIterations: number; samplesPerRun: number; runBatchMeanP50Ms: number[] }>
+}
+type RuntimeInitializationEvidence = {
+  environment: { platform: string; architecture: string; osRelease: string; cpu: string; repetitions: number }
+  protocol: string
+  scenarios: Array<{ runtime: string; format: string; node: string; samples: Array<{ loadMs: number }> }>
 }
 type BenchmarkRunEvidence = {
   sourceRevision: string

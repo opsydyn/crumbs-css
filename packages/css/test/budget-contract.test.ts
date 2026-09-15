@@ -114,40 +114,40 @@ describe("performance budget registry", () => {
     expect(JSON.parse(readiness.stdout.toString())).toMatchObject({ valid: true, registryReady: false, performanceQualification: "not-run" })
   })
 
-  it("adapts retained sample series into an explicit threshold review packet", () => {
+  it("separates approved decisions from pending threshold candidates", () => {
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
     const packet = createThresholdReviewPacket(decoded.value, resolve(import.meta.dir, "../../.."))
-    expect(packet.status).toBe("review-required")
-    expect(packet.candidates).toHaveLength(12)
-    expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-ms")
-    expect(packet.reviewAttention.deterministicGrowthPolicy).toEqual(expect.arrayContaining([
+    expect(packet.status).toBe("recorded-thresholds-approved")
+    expect(packet.candidates).toHaveLength(0)
+    expect(packet.approved).toHaveLength(15)
+    expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-node22-cjs")
+    expect(packet.reviewAttention.zeroGrowthPolicy).toEqual(expect.arrayContaining([
       "runtime-emitted-bytes", "editor-tsc-instantiations-10000", "editor-tsgo-instantiations-10000",
     ]))
-    for (const candidate of packet.candidates) {
-      expect(candidate.samples).toBeGreaterThanOrEqual(5)
-      expect(candidate.envelope.median).toBe(candidate.baseline)
-      expect(candidate.proposal.status).toBe("candidate-not-approved")
-      expect(candidate.proposal.absoluteMax).toBeGreaterThanOrEqual(candidate.envelope.max)
-      expect(candidate.proposal.maxRegressionPercent).toBeGreaterThanOrEqual(10)
+    for (const approved of packet.approved) {
+      expect(approved.samples).toBeGreaterThanOrEqual(5)
+      expect(approved.envelope.median).toBe(approved.baseline)
+      expect(approved.decision.status).toBe("approved")
     }
   })
 
-  it("compares current evidence without treating pending thresholds as a pass", () => {
+  it("passes approved recorded metrics without manufacturing whole-registry qualification", () => {
     const repoRoot = resolve(import.meta.dir, "../../..")
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
     const report = compareRecordedMetrics(decoded.value, repoRoot, {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
+      runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
     })
     expect(report.performanceQualified).toBe(false)
-    expect(report.metrics).toHaveLength(12)
+    expect(report.metrics).toHaveLength(15)
     for (const metric of report.metrics) {
       expect(metric.environment).toBe("exact")
       expect(metric.delta).toBe(0)
-      expect(metric.result).toBe("incomplete-threshold-pending")
+      expect(metric.result).toBe("pass")
     }
   })
 
@@ -169,6 +169,7 @@ describe("performance budget registry", () => {
     const editor = JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8"))
     const report = compareRecordedMetrics(decoded.value, repoRoot, {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
+      runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
       editor: { ...editor, manifest: { ...editor.manifest, scales: [] } },
     })
@@ -187,6 +188,7 @@ describe("performance budget registry", () => {
     if (!decoded.ok) throw Error("Approved recorded metrics must decode")
     const evidence = {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
+      runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
     }

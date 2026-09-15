@@ -85,6 +85,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [ ] M1.8: Commit a machine-readable budget file and measurement protocol before optimization work. Include absolute ceilings and baseline comparisons for JS/UI frames, allocations, retained memory, runtime bytes/initialization, cold/warm transform cost, incremental rebuild, and editor cost. Choose thresholds from the measured baseline and noise; reviewers approve the recorded values, not an invented universal timing target.
 - [x] M1.8a: Define the versioned fail-closed registry, closed evidence selectors, baseline-drift validation, activation-readiness semantics, and reviewer approval protocol. Keep all thresholds pending and performance qualification explicitly not run.
 - [x] M1.8b: Adapt recorded host/editor evidence into comparable sample series, current baseline comparisons and a threshold review packet. Enforce environment/scenario compatibility and keep candidates unapproved.
+- [x] M1.8c: Split and remeasure runtime initialization, approve the fifteen recorded host/editor thresholds metric by metric, and retain missing or diagnostic domains as explicit blockers.
 - [ ] M1.9: Extend the Expo playground with version/source identification and repeatable measurement scenarios. Install SDK-compatible dependencies with a committed lockfile; test the newest SDK in a separate upgrade configuration before broadening support. Published mode resolves npm tags to exact versions, while packed mode qualifies unreleased artifacts without publishing.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
@@ -683,3 +684,12 @@ Next recommended slice: **M1.8b** — add current-measurement adapters and compa
 - Mechanical threshold candidates remain unapproved. Runtime initialization needs isolation or remeasurement; deterministic byte/type counters need an explicit growth policy. Missing device/allocation/incremental and diagnostic memory gates keep registry readiness and performance qualification false.
 
 Next recommended slice: **M1.8c** — review the twelve host/editor candidates metric by metric, remeasure or redesign the noisy runtime-initialization gate, and commit only explicitly accepted thresholds. Keep the registry pending for missing device, allocation, retained-memory and incremental-rebuild evidence. Begin only after approval.
+
+### 2026-09-15 — M1.8c approved host/editor thresholds
+
+- Replaced the combined runtime-initialization maximum with four runtime/format gates. Each excludes one warmup process, retains 15 fresh-process samples and compares the median; individual min/max values and the noisy Node 22 CJS outlier remain visible.
+- Recorded explicit absolute and relative limits for all fifteen reproducible host/editor metrics. Runtime bytes and compiler instantiation counts permit zero growth; timing and process-memory margins reflect the retained noise envelopes and intended sensitivity. See [decision record and evidence](assessments/2026-09-15-performance-threshold-decisions.md).
+- Review output now separates approved decisions from future mechanical candidates. Exact environment/scenario matching, minimum repetitions and both-limit evaluation continue to fail closed.
+- Four baselines remain missing and retained memory remains diagnostic, so registry readiness and whole-registry performance qualification remain false. Parent M1.8 stays open. Native Android stays last; no dependency, runtime/public API, push/publication or unrelated release edit is included.
+
+Next recommended slice: **M1.8d** — add a reproducible actual-edit Metro incremental-rebuild baseline and propose its threshold from retained host/Expo evidence. Keep device frames, allocation and controlled retained-memory work pending, with Android last. Begin only after approval.
