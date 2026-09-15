@@ -1,0 +1,166 @@
+{
+  "slice": "M1.5e",
+  "baseRevision": "20d79a0",
+  "commands": {
+    "bun run check": {
+      "exitCode": 0,
+      "tests": 286,
+      "assertions": 11864,
+      "files": 44
+    },
+    "bun run playground:check": {
+      "exitCode": 0,
+      "typecheck": "passed",
+      "runtimeMaps": 3
+    },
+    "bun /tmp/crumbs-m15e-packed.ts": {
+      "exitCode": 0,
+      "typecheck": "passed",
+      "runtimeMaps": 3
+    },
+    "bun run app:typecheck": {
+      "exitCode": 0
+    },
+    "bun run docs:build": {
+      "exitCode": 0,
+      "pages": 20
+    }
+  },
+  "live": {
+    "platform": "Expo development web",
+    "finalRuns": 2,
+    "cycles": 50,
+    "orderedSteps": 112,
+    "containerMountsAndCleanups": 50,
+    "rowMountsAndCleanups": 27500,
+    "cases": [
+      {
+        "rows": 100,
+        "runId": "1789455683435",
+        "summary": {
+          "protocolComplete": true,
+          "lifecycleBalanced": true,
+          "readingsComplete": true,
+          "gcVerified": false,
+          "sourceConsistent": true,
+          "budgetApplied": false,
+          "withinBudget": null,
+          "memoryQualified": false,
+          "metrics": {
+            "retainedBytes": 5499037,
+            "slopeBytesPerCycle": 256154.33714285714,
+            "p95DeltaBytes": 10215941
+          },
+          "status": "completed",
+          "reason": null
+        },
+        "counts": {
+          "containerMounts": 25,
+          "containerUnmounts": 25,
+          "rowMounts": 2500,
+          "rowUnmounts": 2500
+        },
+        "memorySource": "performance.memory",
+        "samples": 6
+      },
+      {
+        "rows": 1000,
+        "runId": "1789455743803",
+        "summary": {
+          "protocolComplete": true,
+          "lifecycleBalanced": true,
+          "readingsComplete": true,
+          "gcVerified": false,
+          "sourceConsistent": true,
+          "budgetApplied": false,
+          "withinBudget": null,
+          "memoryQualified": false,
+          "metrics": {
+            "retainedBytes": 24135688,
+            "slopeBytesPerCycle": 708352.5257142857,
+            "p95DeltaBytes": 27393452
+          },
+          "status": "completed",
+          "reason": null
+        },
+        "counts": {
+          "containerMounts": 25,
+          "containerUnmounts": 25,
+          "rowMounts": 25000,
+          "rowUnmounts": 25000
+        },
+        "memorySource": "performance.memory",
+        "samples": 6
+      }
+    ],
+    "cancellation": [
+      {
+        "protocolComplete": false,
+        "lifecycleBalanced": false,
+        "readingsComplete": false,
+        "gcVerified": false,
+        "sourceConsistent": false,
+        "budgetApplied": false,
+        "withinBudget": null,
+        "memoryQualified": false,
+        "metrics": null,
+        "status": "cancelled",
+        "reason": "user"
+      },
+      {
+        "protocolComplete": false,
+        "lifecycleBalanced": false,
+        "readingsComplete": false,
+        "gcVerified": false,
+        "sourceConsistent": false,
+        "budgetApplied": false,
+        "withinBudget": null,
+        "memoryQualified": false,
+        "metrics": null,
+        "status": "cancelled",
+        "reason": "navigation"
+      }
+    ],
+    "runtimeErrorsSince": "2026-09-15T07:01:23.435Z",
+    "runtimeErrors": 0,
+    "screenshot": "web-complete.png visually reviewed; controls, completed/balanced/not-qualified status and JSON readable"
+  },
+  "diagnostic": "web-diagnostic-pre-terminal-barrier-100.json predates the final post-cancellation sample-admission barrier and is not final-source acceptance evidence",
+  "memoryAcceptance": {
+    "qualified": false,
+    "reasons": [
+      "forced GC provenance unavailable",
+      "M1.8 budget not approved/applied"
+    ],
+    "diagnosticMetricsOnly": [
+      {
+        "retainedBytes": 5499037,
+        "slopeBytesPerCycle": 256154.33714285714,
+        "p95DeltaBytes": 10215941
+      },
+      {
+        "retainedBytes": 24135688,
+        "slopeBytesPerCycle": 708352.5257142857,
+        "p95DeltaBytes": 27393452
+      }
+    ]
+  },
+  "propertyTesting": {
+    "runs": 200,
+    "purpose": "linear slope oracle over generated safe starting sizes and growth rates"
+  },
+  "limits": [
+    "balanced lifecycle cleanup is not leak proof",
+    "development performance.memory includes uncontrolled GC and unrelated runtime/page activity",
+    "no native/release Hermes device, forced-GC, frame, thermal or calibrated budget qualification",
+    "native iOS not rerun; Android stays last",
+    "parent M1.5 open; M1.3b absent/unqualified; ADR proposed"
+  ],
+  "excludedPreexistingEdits": [
+    ".release-please-manifest.json",
+    "bun.lock",
+    "packages/css/package.json"
+  ],
+  "push": false,
+  "publication": false
+}

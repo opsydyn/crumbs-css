@@ -78,7 +78,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.5b: Add repeatable recipe-selection and nested-scope switch workloads with the same explicit run/observation protocol. Scrolling, orientation/font scaling and retained-memory qualification remain further M1.5 work.
 - [x] M1.5c: Add repeatable static/themed list scrolling with actual offset/geometry/viewable-row callbacks and terminal completion/cancellation/deadline reports. Development web functional evidence remains separate from native frame/device qualification.
 - [x] M1.5d: Add orientation/font-scale context-change workloads with actual React Native dimensions/font-scale observations and hook reference behavior.
-- [ ] M1.5e: Establish retained-memory measurement protocol/workload with explicit GC/runtime/device provenance and leak-admission rules; balanced lifecycle counts alone are not leak proof.
+- [x] M1.5e: Establish retained-memory measurement protocol/workload with explicit GC/runtime/device provenance and leak-admission rules; balanced lifecycle counts alone are not leak proof.
 - [ ] M1.6: Establish a release-mode Hermes measurement run on at least one Android and one iOS device. Record device/OS, Expo/RN/Hermes versions, build mode, thermal conditions, scenario size, warmup, sample count, and artifact identity. Missing device access leaves this gate incomplete.
 - [ ] M1.7: Add editor/typechecker fixtures at 100, 1,000, and 10,000 tokens, including slot recipes and conditions. Record checking time, type-instantiation/memory statistics where supported, and completion latency on a reproducible editor/TypeScript setup.
 - [ ] M1.8: Commit a machine-readable budget file and measurement protocol before optimization work. Include absolute ceilings and baseline comparisons for JS/UI frames, allocations, retained memory, runtime bytes/initialization, cold/warm transform cost, incremental rebuild, and editor cost. Choose thresholds from the measured baseline and noise; reviewers approve the recorded values, not an invented universal timing target.
@@ -644,3 +644,12 @@ Next recommended slice: **M1.5d** — orientation/font-scale context-change work
 - Native rotation, OS font-scale/text appearance and release/device/frame/retained-memory gates remain open. The themed hook depends on module/theme identity; this workload does not implement responsive conditions. Native Android stays last; M1.3b remains absent/unqualified.
 
 Next recommended slice: **M1.5e** — retained-memory protocol and repeatable mount/unmount workload with explicit GC/runtime/device provenance and independent leak-admission rules. Balanced lifecycle counts remain distinct from leak proof. Begin only after approval.
+
+### 2026-09-15 — M1.5e retained-memory workload and fail-closed admission
+
+- Added 25-cycle public-themed tree mount/unmount workloads at 100/1,000 rows with six post-unmount memory checkpoints, exact lifecycle counts, memory source/GC provenance, cancellation-safe async sampling and raw Profiler/observation receipts.
+- Admission separates protocol/lifecycle/readings/GC/source/budget. Metrics are retained bytes, least-squares growth per cycle and p95 positive delta. No M1.8 budget is applied, so diagnostic browser readings cannot qualify memory. Property and negative tests fail closed.
+- Final web evidence covers fifty container and 27,500 row mount/cleanup pairs plus user/navigation cancellation. Package, workspace/packed Expo types and three maps each, Storybook and docs pass; see [assessment/evidence](assessments/2026-09-15-expo-memory-workloads.md).
+- Controlled forced-GC, native Hermes/device/build provenance, approved budgets and repeated release samples remain required. Balanced cleanup is not leak proof. Native Android stays last; M1.3b remains absent/unqualified. No push/publication or unrelated release edits.
+
+Next recommended slice: **M1.7a** — reproducible editor/typechecker scale fixtures for current token/theme/recipe APIs at 100, 1,000 and 10,000 tokens, with slot/condition coverage explicitly deferred until those APIs exist. Begin only after approval.

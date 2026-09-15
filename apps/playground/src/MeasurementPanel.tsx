@@ -1,3 +1,4 @@
+import { MemoryMeasurementPanel } from "./MemoryMeasurementPanel"
 import { ContextMeasurementPanel } from "./ContextMeasurementPanel"
 import { ScrollMeasurementPanel } from "./ScrollMeasurementPanel"
 import { RecipeScopePanel } from "./RecipeScopePanel"
@@ -98,5 +99,5 @@ export function ListMeasurementPanel() {
 
 export function MeasurementPanel() {
   const [scenario, setScenario] = useState("list")
-  return <View style={{flex:1}}><View style={{flexDirection:"row",gap:12}}>{["list","recipe/scopes","scroll","context"].map(value=><Pressable key={value} accessibilityRole="button" onPress={()=>setScenario(value)}><Text>{value === "list" ? "List workloads" : value === "scroll" ? "Scroll workloads" : value === "context" ? "Context workloads" : "Recipe/scope workloads"}</Text></Pressable>)}</View>{scenario === "list" ? <ListMeasurementPanel/> : scenario === "scroll" ? <ScrollMeasurementPanel/> : scenario === "context" ? <ContextMeasurementPanel/> : <RecipeScopePanel/>}</View>
+  return <View style={{flex:1}}><View style={{flexDirection:"row",gap:12}}>{["list","recipe/scopes","scroll","context","memory"].map(value=><Pressable key={value} accessibilityRole="button" onPress={()=>setScenario(value)}><Text>{value === "list" ? "List workloads" : value === "scroll" ? "Scroll workloads" : value === "context" ? "Context workloads" : value === "memory" ? "Memory workloads" : "Recipe/scope workloads"}</Text></Pressable>)}</View>{scenario === "list" ? <ListMeasurementPanel/> : scenario === "scroll" ? <ScrollMeasurementPanel/> : scenario === "context" ? <ContextMeasurementPanel/> : scenario === "memory" ? <MemoryMeasurementPanel/> : <RecipeScopePanel/>}</View>
 }
