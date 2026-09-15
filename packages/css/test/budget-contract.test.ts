@@ -118,10 +118,12 @@ describe("performance budget registry", () => {
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
     const packet = createThresholdReviewPacket(decoded.value, resolve(import.meta.dir, "../../.."))
-    expect(packet.status).toBe("review-required")
-    expect(packet.candidates).toHaveLength(1)
-    expect(packet.candidates[0]).toMatchObject({ id: "incremental-rebuild", proposal: { status: "candidate-not-approved", absoluteMax: 137.506, maxRegressionPercent: 10 } })
-    expect(packet.approved).toHaveLength(15)
+    expect(packet.status).toBe("recorded-thresholds-approved")
+    expect(packet.candidates).toHaveLength(0)
+    expect(packet.approved).toHaveLength(16)
+    expect(packet.approved.find(entry => entry.id === "incremental-rebuild")?.decision).toMatchObject({
+      status: "approved", absoluteMax: 137.506, maxRegressionPercent: 10,
+    })
     expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-node22-cjs")
     expect(packet.reviewAttention.zeroGrowthPolicy).toEqual(expect.arrayContaining([
       "runtime-emitted-bytes", "editor-tsc-instantiations-10000", "editor-tsgo-instantiations-10000",
@@ -149,7 +151,7 @@ describe("performance budget registry", () => {
     for (const metric of report.metrics) {
       expect(metric.environment).toBe("exact")
       expect(metric.delta).toBe(0)
-      expect(metric.result).toBe(metric.id === "incremental-rebuild" ? "incomplete-threshold-pending" : "pass")
+      expect(metric.result).toBe("pass")
     }
   })
 

@@ -62,7 +62,7 @@ await writeFile(join(output, "comparison.json"), JSON.stringify({
   formatVersion: 1,
   recordedAt: new Date().toISOString(),
   sourceRevision,
-  sourceState: "M1.8b working tree; retained reports carry detailed source and environment identity",
+  sourceState: "Working tree based on sourceRevision; retained reports carry detailed source and environment identity",
   ...comparison,
 }, null, 2) + "\n")
 await writeFile(join(output, "threshold-review.json"), JSON.stringify(review, null, 2) + "\n")

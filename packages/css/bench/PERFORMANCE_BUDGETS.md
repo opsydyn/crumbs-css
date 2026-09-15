@@ -19,7 +19,7 @@ Set the registry to `active` only after every required baseline is recorded and 
 
 ## Current state
 
-The registry contains 20 metrics across all nine required domains. Sixteen runtime-footprint, transform, incremental-rebuild, and 10,000-token editor/compiler metrics have reproducible recorded host baselines; fifteen have approved thresholds. The direct `.css.ts` Metro edit threshold remains a reviewer candidate. Retained-memory evidence is diagnostic because it lacks forced-GC release-device provenance. JS frames, UI frames, and allocations have no qualifying baseline or threshold. The registry therefore remains pending and cannot produce whole-registry performance qualification. Existing benchmark smoke ceilings remain historical local checks and are not M1.8 budgets.
+The registry contains 20 metrics across all nine required domains. Sixteen runtime-footprint, transform, incremental-rebuild, and 10,000-token editor/compiler metrics have reproducible recorded host baselines and approved thresholds. Retained-memory evidence is diagnostic because it lacks forced-GC release-device provenance. JS frames, UI frames, and allocations have no qualifying baseline or threshold. The registry therefore remains pending and cannot produce whole-registry performance qualification. Existing benchmark smoke ceilings remain historical local checks and are not M1.8 budgets.
 
 ## Host comparison and review packets
 

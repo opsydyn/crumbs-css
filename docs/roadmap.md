@@ -87,6 +87,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.8b: Adapt recorded host/editor evidence into comparable sample series, current baseline comparisons and a threshold review packet. Enforce environment/scenario compatibility and keep candidates unapproved.
 - [x] M1.8c: Split and remeasure runtime initialization, approve the fifteen recorded host/editor thresholds metric by metric, and retain missing or diagnostic domains as explicit blockers.
 - [x] M1.8d: Record a reproducible Expo/Metro direct `.css.ts` edit baseline and candidate threshold with exact output/restoration receipts. Retain dependency-only invalidation as a failing diagnostic rather than admitting stale output.
+- [x] M1.8e: Record reviewer approval of the direct `.css.ts` Metro threshold and re-evaluate the retained exact-environment comparison without activating the incomplete registry.
 - [ ] M1.9: Extend the Expo playground with version/source identification and repeatable measurement scenarios. Install SDK-compatible dependencies with a committed lockfile; test the newest SDK in a separate upgrade configuration before broadening support. Published mode resolves npm tags to exact versions, while packed mode qualifies unreleased artifacts without publishing.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
@@ -703,3 +704,12 @@ Next recommended slice: **M1.8d** — add a reproducible actual-edit Metro incre
 - Exact Expo 56, Metro 0.84, React Native 0.85, host, protocol and fixture identities guard comparison. Three device baselines remain missing and retained memory remains diagnostic, so registry readiness and whole-registry performance qualification stay false. Native Android remains last.
 
 Next recommended slice: **M1.8e** — review the stable direct-edit candidate (137.506 ms absolute and 10% relative) and, if accepted, record its approval without activating the registry. Then close the already-built M1.9 playground capabilities before starting M2 native IR specification work. Begin only after approval.
+
+### 2026-09-15 — M1.8e approved Metro direct-edit threshold
+
+- Recorded explicit reviewer approval of 137.506 ms absolute and 10% relative limits for the Expo/Metro direct `.css.ts` edit metric. The approval preserves the M1.8d baseline, protocol and dependency-only failing control.
+- Re-evaluated the retained exact-environment run under the approved policy. The 126.227 ms current median is 0.978% above baseline and passes both limits; all sixteen recorded host/editor metrics now pass and the review packet has no remaining candidates. See [approval record and evidence](assessments/2026-09-15-metro-incremental-threshold-approval.md).
+- Three device/allocation baselines remain missing and retained memory remains diagnostic, so registry status stays `thresholds-pending-review`, readiness remains false and whole-registry performance qualification cannot pass. Parent M1.8 remains open. No workload was remeasured to manufacture the policy outcome.
+- Dependency-only edits still leave the parent StyleSheet transform stale and remain a red M2.7 requirement. Native Android stays last; no dependency, public API, push or publication is included.
+
+Next recommended slice: **M1.9a** — audit the already-built playground workspace, packed and published modes plus source/version receipts against M1.9, close the satisfied contract, and isolate any newest-SDK upgrade work as a separate configuration. Begin only after approval.
