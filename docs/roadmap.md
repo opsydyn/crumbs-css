@@ -81,6 +81,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.5e: Establish retained-memory measurement protocol/workload with explicit GC/runtime/device provenance and leak-admission rules; balanced lifecycle counts alone are not leak proof.
 - [ ] M1.6: Establish a release-mode Hermes measurement run on at least one Android and one iOS device. Record device/OS, Expo/RN/Hermes versions, build mode, thermal conditions, scenario size, warmup, sample count, and artifact identity. Missing device access leaves this gate incomplete.
 - [ ] M1.7: Add editor/typechecker fixtures at 100, 1,000, and 10,000 tokens, including slot recipes and conditions. Record checking time, type-instantiation/memory statistics where supported, and completion latency on a reproducible editor/TypeScript setup.
+- [x] M1.7a: Add reproducible 100/1,000/10,000-token fixtures for current token/theme/recipe APIs and record fresh-process tsc, tsgo and language-service baselines. Keep conditions and slot recipes explicitly unsupported until those APIs exist.
 - [ ] M1.8: Commit a machine-readable budget file and measurement protocol before optimization work. Include absolute ceilings and baseline comparisons for JS/UI frames, allocations, retained memory, runtime bytes/initialization, cold/warm transform cost, incremental rebuild, and editor cost. Choose thresholds from the measured baseline and noise; reviewers approve the recorded values, not an invented universal timing target.
 - [ ] M1.9: Extend the Expo playground with version/source identification and repeatable measurement scenarios. Install SDK-compatible dependencies with a committed lockfile; test the newest SDK in a separate upgrade configuration before broadening support. Published mode resolves npm tags to exact versions, while packed mode qualifies unreleased artifacts without publishing.
 
@@ -653,3 +654,12 @@ Next recommended slice: **M1.5e** — retained-memory protocol and repeatable mo
 - Controlled forced-GC, native Hermes/device/build provenance, approved budgets and repeated release samples remain required. Balanced cleanup is not leak proof. Native Android stays last; M1.3b remains absent/unqualified. No push/publication or unrelated release edits.
 
 Next recommended slice: **M1.7a** — reproducible editor/typechecker scale fixtures for current token/theme/recipe APIs at 100, 1,000 and 10,000 tokens, with slot/condition coverage explicitly deferred until those APIs exist. Begin only after approval.
+
+### 2026-09-15 — M1.7a reproducible editor and typechecker scale baseline
+
+- Added deterministic public-API projects at exactly 100, 1,000 and 10,000 token leaves, each with a complete contract/theme, representative style variants and a two-axis recipe. Hashes and explicit unsupported condition/slot-recipe coverage make drift and omissions visible.
+- Five fresh processes per compiler/scale record wall/check time, memory, types and instantiations for TypeScript 6.0.3 and tsgo 7.0.0-dev.20260519.1. Five fresh language-service processes per scale record semantic analysis plus first/warm member completion; every run returns the exact token count. See [assessment and raw evidence](assessments/2026-09-15-editor-scale.md).
+- Package build, typecheck and all 292 tests pass. Dedicated scale fixtures are excluded from routine package typechecking. No dependency, runtime or public API change, push/publication or staging of unrelated release edits occurs.
+- This uncontrolled-host baseline has no approved budget and does not qualify editor UI, incremental edits, native/device performance, conditions or slot recipes. Parent M1.7 remains open. Native Android stays last.
+
+Next recommended slice: **M1.8a** — define a versioned machine-readable budget schema and measurement protocol around the recorded M1 baselines, while leaving threshold values pending explicit reviewer approval. Begin only after approval.
