@@ -257,14 +257,17 @@
     {
       "id": "incremental-rebuild",
       "domain": "incremental-rebuild",
-      "scenario": "consumer dependency edit through Metro invalidation",
-      "measure": "edit-to-updated-artifact duration",
+      "scenario": "direct consumer .css.ts edit through Expo Metro invalidation",
+      "measure": "median edit-to-updated-full-bundle receipt after the watcher-settle interval",
       "unit": "ms",
       "direction": "lower-is-better",
-      "environmentClass": "release-hermes-device",
+      "environmentClass": "expo56-metro084-ios-dev-macos-arm64",
       "baseline": {
-        "status": "missing",
-        "reason": "No actual-edit incremental rebuild baseline exists"
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-metro-incremental/baseline.json",
+        "selector": "metro-incremental.direct-css-edit-ms.median",
+        "value": 125.00500000000011,
+        "repetitions": 5
       },
       "threshold": {
         "status": "pending-review",

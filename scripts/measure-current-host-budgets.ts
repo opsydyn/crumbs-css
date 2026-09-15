@@ -8,6 +8,7 @@ import {
 } from "../packages/css/bench/budget-contract"
 import { runEffectBoundaryAudit } from "../packages/css/bench/effect-boundary-audit"
 import { measureRuntimeInitialization } from "../packages/css/bench/runtime-initialization"
+import { measureMetroIncremental } from "../packages/css/bench/metro-incremental"
 
 const repoRoot = resolve(import.meta.dir, "..")
 const output = resolve(process.argv[2] ?? "docs/evidence/current-host-budgets")
@@ -20,6 +21,7 @@ const effect = (await runEffectBoundaryAudit(floorNode, 5)).result
 await writeFile(join(output, "effect.json"), JSON.stringify(effect, null, 2) + "\n")
 const runtimeInit = measureRuntimeInitialization(floorNode, 15)
 await writeFile(join(output, "runtime-initialization.json"), JSON.stringify(runtimeInit, null, 2) + "\n")
+const incremental = await measureMetroIncremental(join(output, "metro-incremental.json"), 5, Number(process.env.CRUMBS_METRO_PORT ?? 8093))
 
 const benchmarkRuns: unknown[] = []
 for (let repetition = 1; repetition <= 5; repetition += 1) {
@@ -54,7 +56,7 @@ const editor = JSON.parse(await readFile(editorFile, "utf8")) as unknown
 
 const registryResult = budgetRegistryCodec.decodeJson(await readFile(join(repoRoot, "packages/css/bench/budgets.json"), "utf8"))
 if (!registryResult.ok) throw Error(`Budget registry invalid: ${JSON.stringify(registryResult.issues)}`)
-const comparison = compareRecordedMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, editor })
+const comparison = compareRecordedMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor })
 const review = createThresholdReviewPacket(registryResult.value, repoRoot)
 await writeFile(join(output, "comparison.json"), JSON.stringify({
   formatVersion: 1,

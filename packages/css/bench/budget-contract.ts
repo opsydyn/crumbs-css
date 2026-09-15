@@ -2,6 +2,7 @@ import * as Schema from "effect/Schema"
 import { readFileSync } from "node:fs"
 import { resolve, sep } from "node:path"
 import { makeDataCodec } from "../src/contracts/data-codec"
+import { admitMetroIncrementalReport } from "./metro-incremental"
 
 export const BudgetRegistryVersion = 1 as const
 export const requiredBudgetDomains = [
@@ -27,6 +28,7 @@ const BaselineSelectorSchema = Schema.Literals([
   "runtime-init.current.cjs.load-ms.median",
   "benchmark.cold-transform.max-median-ms",
   "benchmark.warm-transform.max-median-ms",
+  "metro-incremental.direct-css-edit-ms.median",
   "editor.tsc.10000.wall-ms.median",
   "editor.tsgo.10000.wall-ms.median",
   "editor.tsc.10000.memory-kib.median",
@@ -146,7 +148,7 @@ export function verifyRecordedBaselines(registry: BudgetRegistry, repoRoot: stri
 }
 
 type BaselineSelector = typeof BaselineSelectorSchema.Type
-type EvidenceBundle = { readonly effect: unknown; readonly runtimeInit: unknown; readonly benchmark: unknown; readonly editor: unknown }
+type EvidenceBundle = { readonly effect: unknown; readonly runtimeInit: unknown; readonly benchmark: unknown; readonly incremental: unknown; readonly editor: unknown }
 
 export function summarizeBenchmarkReports(inputs: unknown[]) {
   if (inputs.length === 0) throw Error("At least one benchmark report is required")
@@ -264,6 +266,7 @@ function extractBaselineSamples(selector: BaselineSelector, evidence: unknown): 
     const prefix = selector.includes(".cold-") ? "first transform " : "warm transform "
     return maximaByRepetition(data.results.filter(entry => entry.name.startsWith(prefix)).map(entry => entry.runBatchMeanP50Ms))
   }
+  if (selector === "metro-incremental.direct-css-edit-ms.median") return admitMetroIncrementalReport(evidence)
   const data = evidence as EditorScaleEvidence
   const compiler = selector.match(/^editor\.(tsc|tsgo)\.10000\.(wall-ms|memory-kib|instantiations)(?:\.median)?$/)
   if (compiler) {
@@ -284,6 +287,7 @@ function evidenceForSelector(selector: BaselineSelector, evidence: EvidenceBundl
   if (selector.startsWith("effect.")) return evidence.effect
   if (selector.startsWith("runtime-init.")) return evidence.runtimeInit
   if (selector.startsWith("benchmark.")) return evidence.benchmark
+  if (selector.startsWith("metro-incremental.")) return evidence.incremental
   return evidence.editor
 }
 
@@ -304,6 +308,10 @@ function environmentFingerprint(selector: BaselineSelector, evidence: unknown): 
     return { environment: data.environment, protocol: data.protocol, fixtures: data.fixtures,
       scenarios: data.results.map(({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun }) =>
         ({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun })) }
+  }
+  if (selector.startsWith("metro-incremental.")) {
+    const data = evidence as { environment: unknown; protocol: unknown; fixture: unknown }
+    return { environment: data.environment, protocol: data.protocol, fixture: data.fixture }
   }
   const identity = (evidence as EditorScaleEvidence).identity
   return { bun: identity.bun, node: identity.node, platform: identity.platform, arch: identity.arch, osRelease: identity.osRelease,

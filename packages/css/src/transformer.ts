@@ -48,9 +48,11 @@ const originalNodeEnv = process.env.NODE_ENV
  * file-level compile-time dependencies (other .css.ts files imported by this
  * one via esbuild).
  *
- * The dep side-effect imports let Metro track those files in its module graph,
- * so that when a shared token/theme file changes, Metro re-transforms every
- * .css.ts that depends on it rather than serving stale StyleSheet output.
+ * The dep side-effect imports let Metro track those files in its module graph.
+ * Metro 0.84 still caches an importing .css.ts transform by that file's own
+ * content, so a dependency-only edit does not by itself rebuild baked values.
+ * Direct .css.ts edits invalidate normally; dependency invalidation remains an
+ * explicit compiler/artifact requirement in M2.7.
  */
 export function buildStyleSheetCode(
   exportMap: ReadonlyMap<string, StyleExportValue>,

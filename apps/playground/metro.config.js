@@ -7,7 +7,9 @@ const config = getDefaultConfig(__dirname)
 // Only workspace mode can watch the repository. Staged consumers have no parent workspace.
 const workspace = path.resolve(__dirname, "../..")
 if (fs.existsSync(path.join(workspace, "packages/css/tsdown.config.ts"))) {
-  config.watchFolders = [path.join(workspace, "node_modules"), path.join(workspace, "packages/css")]
+  config.watchFolders = process.env.CRUMBS_INCREMENTAL_BENCH === "1"
+    ? [path.join(workspace, "packages/css")]
+    : [path.join(workspace, "node_modules"), path.join(workspace, "packages/css")]
   config.resolver.nodeModulesPaths = [path.join(__dirname, "node_modules"), path.join(workspace, "node_modules")]
 }
 config.resolver.useWatchman = false

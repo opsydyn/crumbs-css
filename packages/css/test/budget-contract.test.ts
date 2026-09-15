@@ -33,7 +33,7 @@ describe("performance budget registry", () => {
     expect(assessment.ready).toBe(false)
     expect(assessment.pendingThresholds.length).toBeGreaterThan(0)
     expect(assessment.missingBaselines).toEqual(expect.arrayContaining([
-      "js-frame-time", "ui-frame-time", "allocation-bytes", "incremental-rebuild",
+      "js-frame-time", "ui-frame-time", "allocation-bytes",
     ]))
   })
 
@@ -118,8 +118,9 @@ describe("performance budget registry", () => {
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
     const packet = createThresholdReviewPacket(decoded.value, resolve(import.meta.dir, "../../.."))
-    expect(packet.status).toBe("recorded-thresholds-approved")
-    expect(packet.candidates).toHaveLength(0)
+    expect(packet.status).toBe("review-required")
+    expect(packet.candidates).toHaveLength(1)
+    expect(packet.candidates[0]).toMatchObject({ id: "incremental-rebuild", proposal: { status: "candidate-not-approved", absoluteMax: 137.506, maxRegressionPercent: 10 } })
     expect(packet.approved).toHaveLength(15)
     expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-node22-cjs")
     expect(packet.reviewAttention.zeroGrowthPolicy).toEqual(expect.arrayContaining([
@@ -140,14 +141,15 @@ describe("performance budget registry", () => {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
       runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-metro-incremental/baseline.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
     })
     expect(report.performanceQualified).toBe(false)
-    expect(report.metrics).toHaveLength(15)
+    expect(report.metrics).toHaveLength(16)
     for (const metric of report.metrics) {
       expect(metric.environment).toBe("exact")
       expect(metric.delta).toBe(0)
-      expect(metric.result).toBe("pass")
+      expect(metric.result).toBe(metric.id === "incremental-rebuild" ? "incomplete-threshold-pending" : "pass")
     }
   })
 
@@ -171,6 +173,7 @@ describe("performance budget registry", () => {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
       runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-metro-incremental/baseline.json"), "utf8")),
       editor: { ...editor, manifest: { ...editor.manifest, scales: [] } },
     })
     expect(report.metrics.filter(metric => metric.id.startsWith("editor-")).every(metric => metric.environment === "mismatch")).toBe(true)
@@ -190,6 +193,7 @@ describe("performance budget registry", () => {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
       runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-metro-incremental/baseline.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
     }
     expect(compareRecordedMetrics(decoded.value, repoRoot, evidence).metrics.every(metric => metric.result === "pass")).toBe(true)
