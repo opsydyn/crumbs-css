@@ -1,0 +1,96 @@
+{
+  "slice": "M1.9a",
+  "baseRevision": "57d4ca70726d76be8398a4c21b1e13325e7e3cbb",
+  "supportedBaseline": {
+    "expoManifest": "^56.0.0",
+    "expoLocked": "56.0.4",
+    "react": "19.2.5",
+    "reactNative": "0.85.3",
+    "metroRuntimeLocked": "56.0.12",
+    "lockfile": "bun.lock"
+  },
+  "consumers": {
+    "workspace": {
+      "command": "bun run playground:check",
+      "version": "0.1.2-alpha.2",
+      "revision": "57d4ca7 (working tree)",
+      "typecheck": "passed",
+      "exports": ["web", "ios", "android"],
+      "runtimeMaps": 3,
+      "result": "passed"
+    },
+    "packed": {
+      "command": "bun run playground:packed --check",
+      "version": "0.1.2-alpha.2",
+      "revision": "57d4ca7 (working tree)",
+      "tarballSha256": "96773bf88e6505b8082cfc84d99f72a9b412682b446b0dc299d4b63a516767be",
+      "workspaceLink": false,
+      "typecheck": "passed",
+      "exports": ["web", "ios", "android"],
+      "runtimeMaps": 3,
+      "result": "passed"
+    },
+    "published": {
+      "command": "bun run playground:published --version=alpha --check",
+      "selector": "alpha",
+      "resolvedVersion": "0.1.2-alpha.1",
+      "registryIntegrity": "sha512-bbLygxqmGPy8bsneil9rBGacHUlM0N9h9QIUznc6oI+sWuoeDvtL23d+U/SULiSHcAmbUgVEpmjWIZDPF+qZwA==",
+      "workspaceLink": false,
+      "install": "passed",
+      "identity": "passed",
+      "typecheck": "failed-current-playground-uses-post-publication-composition-types",
+      "exports": [],
+      "result": "published-artifact-drift-detected"
+    }
+  },
+  "newestSdkCandidate": {
+    "configuration": "apps/playground/upgrade/expo-57.json",
+    "receipt": "docs/evidence/2026-09-15-expo-sdk-candidate/qualification.json",
+    "expo": "57.0.22",
+    "react": "19.2.3",
+    "reactNative": "0.86.3",
+    "crumbsMode": "packed",
+    "npmResolution": "peer-blocked",
+    "sdkSupported": false,
+    "supportBroadened": false,
+    "contractPassed": true
+  },
+  "repeatableScenarios": [
+    "list lifecycle and theme switching",
+    "recipe selection and nested scopes",
+    "scroll geometry and viewability",
+    "orientation and font-scale context changes",
+    "retained-memory protocol",
+    "direct css.ts Metro edits"
+  ],
+  "verification": {
+    "bun run check": {
+      "exitCode": 0,
+      "tests": 311,
+      "assertions": 12073,
+      "files": 48
+    },
+    "bun run app:typecheck": {
+      "exitCode": 0
+    },
+    "bun run docs:build": {
+      "exitCode": 0,
+      "pages": 20
+    },
+    "bun run playground:sdk-candidate": {
+      "exitCode": 0,
+      "expectedNpmResolution": "ERESOLVE"
+    }
+  },
+  "roadmap": {
+    "m1_9": "complete",
+    "m0_9": "open-android-native-acceptance-parked"
+  },
+  "excludedPreexistingEdits": [
+    ".release-please-manifest.json",
+    "bun.lock package-version metadata only",
+    "packages/css/package.json version only"
+  ],
+  "push": false,
+  "publication": false
+}

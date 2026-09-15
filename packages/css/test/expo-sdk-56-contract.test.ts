@@ -18,6 +18,7 @@ type AppConfig = {
 const repoRoot = resolve(import.meta.dir, "..", "..", "..")
 const packageRoot = resolve(repoRoot, "packages", "css")
 const storybookRoot = resolve(repoRoot, "apps", "storybook")
+const playgroundRoot = resolve(repoRoot, "apps", "playground")
 
 function readJson<T>(path: string): T {
   return JSON.parse(readFileSync(path, "utf8")) as T
@@ -41,6 +42,37 @@ describe("@opsydyn/crumbs-css Expo SDK 56 contract", () => {
       "EXPO_PUBLIC_STORYBOOK_ENABLED=true",
     )
     expect(packageJson.scripts?.storybook).toBeUndefined()
+  })
+
+  it("keeps the playground on the same supported stack with committed resolutions", () => {
+    const storybook = readJson<PackageJson>(resolve(storybookRoot, "package.json"))
+    const playground = readJson<PackageJson>(resolve(playgroundRoot, "package.json"))
+    const lockfile = readFileSync(resolve(repoRoot, "bun.lock"), "utf8")
+
+    for (const dependency of ["expo", "react", "react-dom", "react-native"] as const) {
+      expect(playground.dependencies?.[dependency]).toBe(storybook.dependencies?.[dependency])
+    }
+    expect(lockfile).toContain('"expo": ["expo@56.0.4"')
+    expect(lockfile).toContain('"react-native": ["react-native@0.85.3"')
+    expect(lockfile).toContain('"@expo/metro-runtime": ["@expo/metro-runtime@56.0.12"')
+  })
+
+  it("isolates the observed newest SDK candidate from supported workspaces", () => {
+    const root = readJson<{ readonly workspaces: readonly string[] }>(resolve(repoRoot, "package.json"))
+    const candidate = readJson<{
+      readonly schemaVersion: number
+      readonly observed: { readonly expoTag: string; readonly expoVersion: string; readonly templateVersion: string }
+      readonly dependencies: Readonly<Record<string, string>>
+      readonly expectedOutcome: { readonly kind: string; readonly packagePeer: string }
+    }>(resolve(playgroundRoot, "upgrade", "expo-57.json"))
+
+    expect(root.workspaces).not.toContain("apps/playground/upgrade/*")
+    expect(candidate.schemaVersion).toBe(1)
+    expect(candidate.observed).toEqual({ expoTag: "latest", expoVersion: "57.0.22", templateVersion: "57.0.24" })
+    expect(candidate.dependencies.expo).toBe("57.0.22")
+    expect(candidate.dependencies.react).toBe("19.2.3")
+    expect(candidate.dependencies["react-native"]).toBe("0.86.3")
+    expect(candidate.expectedOutcome).toEqual({ kind: "peer-blocked", packagePeer: ">=0.85 <0.86" })
   })
 
   it("declares React Native 0.85 package compatibility and tests against it locally", () => {

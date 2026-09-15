@@ -11,6 +11,7 @@ bun run playground --android
 bun run playground:check
 bun run playground:packed --check
 bun run playground:published --version=alpha --check
+bun run playground:sdk-candidate docs/evidence/YYYY-MM-DD-expo-sdk-candidate/qualification.json
 ```
 
 Workspace mode resolves Crumbs' exported `dist` files. The runner builds first, watches library source, and restarts Metro after build-output changes to reload the Node compiler. App edits use normal Expo refresh. Ctrl-C stops both processes. Use port 8091; Storybook remains on 8090.
@@ -19,7 +20,11 @@ The focused `bun run measure:metro-incremental <output.json>` workload uses a de
 
 Packed mode builds, runs `npm pack` against the working tree and installs the tarball into a new temporary app outside the monorepo. Published mode defaults to `alpha`, resolves the requested registry version or tag to one exact version and installs it into a separate temporary app. Neither mode links workspace Crumbs. `--prepare-only` installs and prints the directory without launching. Keep the printed directory and its npm lockfile for reproducing feedback; delete it when finished. The separate packed-artifact directory and temporary npm cache can also be removed after use.
 
+The [nested SDK upgrade configuration](upgrade/README.md) is excluded from the monorepo workspaces and never changes the supported app implicitly. Its runner verifies npm's live `latest` and official blank-template versions, packs the current Crumbs source, and exercises npm resolution without peer overrides. A recorded `peer-blocked` result means the newest SDK remains unsupported and the isolation contract passed; it is not a successful consumer qualification.
+
 On 2026-09-14, `alpha` resolved to `0.1.2-alpha.1` and bundled against this baseline. `latest` resolved to `0.1.0-alpha.1`, which requires React Native `>=0.83 <0.84`; `--version=latest` correctly failed dependency installation. No peer dependency override is applied. Registry tags can change; use an exact version to reproduce a previous run.
+
+On 2026-09-15, `alpha` still resolved and installed as `0.1.2-alpha.1`, but the current playground failed typechecking because it now dogfoods composition and primitive-reference behavior added after that artifact. This is expected distribution-drift evidence until a compatible alpha is published; it is not a failure of tag resolution or installation.
 
 The runner checks the installed package name, version and real entry path, records `.expo-consumer-identity.json`, and injects mode/version/revision into the app. A workspace revision explicitly represents a dirty working tree, not a release. Direct `expo start` without the runner can show an unrecorded identity. To reopen a staged app, run `EXPO_NO_METRO_WORKSPACE_ROOT=1 npm start` in its directory.
 
