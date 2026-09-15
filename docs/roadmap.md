@@ -83,6 +83,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [ ] M1.7: Add editor/typechecker fixtures at 100, 1,000, and 10,000 tokens, including slot recipes and conditions. Record checking time, type-instantiation/memory statistics where supported, and completion latency on a reproducible editor/TypeScript setup.
 - [x] M1.7a: Add reproducible 100/1,000/10,000-token fixtures for current token/theme/recipe APIs and record fresh-process tsc, tsgo and language-service baselines. Keep conditions and slot recipes explicitly unsupported until those APIs exist.
 - [ ] M1.8: Commit a machine-readable budget file and measurement protocol before optimization work. Include absolute ceilings and baseline comparisons for JS/UI frames, allocations, retained memory, runtime bytes/initialization, cold/warm transform cost, incremental rebuild, and editor cost. Choose thresholds from the measured baseline and noise; reviewers approve the recorded values, not an invented universal timing target.
+- [x] M1.8a: Define the versioned fail-closed registry, closed evidence selectors, baseline-drift validation, activation-readiness semantics, and reviewer approval protocol. Keep all thresholds pending and performance qualification explicitly not run.
 - [ ] M1.9: Extend the Expo playground with version/source identification and repeatable measurement scenarios. Install SDK-compatible dependencies with a committed lockfile; test the newest SDK in a separate upgrade configuration before broadening support. Published mode resolves npm tags to exact versions, while packed mode qualifies unreleased artifacts without publishing.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
@@ -663,3 +664,12 @@ Next recommended slice: **M1.7a** — reproducible editor/typechecker scale fixt
 - This uncontrolled-host baseline has no approved budget and does not qualify editor UI, incremental edits, native/device performance, conditions or slot recipes. Parent M1.7 remains open. Native Android stays last.
 
 Next recommended slice: **M1.8a** — define a versioned machine-readable budget schema and measurement protocol around the recorded M1 baselines, while leaving threshold values pending explicit reviewer approval. Begin only after approval.
+
+### 2026-09-15 — M1.8a fail-closed performance budget contract
+
+- Added a versioned Effect Schema registry spanning all nine required performance domains and 17 named metrics. Missing device/rebuild/allocation work, diagnostic retained-memory evidence and recorded host/editor baselines remain distinct states.
+- Closed evidence selectors re-derive all twelve recorded values from retained JSON. Unknown fields/versions, duplicate IDs, absent domains, insufficient repetitions, baseline drift and invalid active/approved states fail closed.
+- `budgets:validate` confirms registry/evidence integrity without claiming a performance run. `budgets:readiness` fails until all baselines and explicit threshold approvals are present. Both keep current-checkout performance qualification separate; see [assessment and protocol](assessments/2026-09-15-performance-budget-contract.md).
+- Every threshold remains pending. Existing local smoke ceilings are not promoted. No dependency, runtime/public API change, push/publication or staging of unrelated release edits occurs. Native Android stays last and parent M1.8 remains open.
+
+Next recommended slice: **M1.8b** — add current-measurement adapters and comparison reports for recorded host/editor domains, then prepare a threshold review packet from retained noise envelopes without activating the registry. Begin only after approval.

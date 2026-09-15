@@ -1,0 +1,280 @@
+{
+  "_tag": "CrumbsPerformanceBudgetRegistry",
+  "version": 1,
+  "status": "thresholds-pending-review",
+  "protocol": {
+    "minimumIndependentRepetitions": 5,
+    "comparisonStatistic": "median",
+    "noiseEnvelope": "min-median-max",
+    "environmentPolicy": "exact-or-explicit-equivalence",
+    "approvalPolicy": "reviewer-recorded",
+    "unapprovedBehavior": "incomplete",
+    "regressionRule": "absolute-and-relative-must-pass"
+  },
+  "metrics": [
+    {
+      "id": "js-frame-time",
+      "domain": "js-frames",
+      "scenario": "M1 release Hermes device scenarios",
+      "measure": "p95 JavaScript frame duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "release-hermes-device",
+      "baseline": { "status": "missing", "reason": "M1.6 release device sampling has not run" },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "ui-frame-time",
+      "domain": "ui-frames",
+      "scenario": "M1 release Hermes device scenarios",
+      "measure": "p95 UI frame duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "release-hermes-device",
+      "baseline": { "status": "missing", "reason": "M1.6 release device sampling has not run" },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "allocation-bytes",
+      "domain": "allocations",
+      "scenario": "M1 repeated theme and recipe workloads",
+      "measure": "allocated bytes per completed scenario",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "controlled-release-hermes-device",
+      "baseline": { "status": "missing", "reason": "No controlled allocation probe has been retained" },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "retained-memory-bytes",
+      "domain": "retained-memory",
+      "scenario": "25 themed tree mount and unmount cycles",
+      "measure": "last post-GC heap reading minus baseline",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "controlled-release-hermes-device",
+      "baseline": {
+        "status": "diagnostic",
+        "evidence": "docs/evidence/2026-09-15-expo-memory-workloads/qualification.json",
+        "reason": "Web readings lack forced-GC and release-device provenance",
+        "repetitions": 2
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "runtime-emitted-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime CommonJS emitted graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "node22-and-current-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
+        "selector": "effect.runtime.cjs.graph-bytes",
+        "value": 11307,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "runtime-initialization-ms",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime module load across ESM/CommonJS and supported Node hosts",
+      "measure": "maximum median module evaluation duration across the matrix",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "node22-and-current-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
+        "selector": "effect.runtime.max-median-load-ms",
+        "value": 6.011833000000003,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "cold-transform-ms",
+      "domain": "cold-transform",
+      "scenario": "README recipe and package-owned consumer fixtures",
+      "measure": "maximum median fresh-process first-transform duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "bun-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-benchmark-repair/summary.json",
+        "selector": "benchmark.cold-transform.max-median-ms",
+        "value": 66.404584,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "warm-transform-ms",
+      "domain": "warm-transform",
+      "scenario": "README recipe and package-owned consumer fixtures",
+      "measure": "maximum median same-process warm transform duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "bun-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-benchmark-repair/summary.json",
+        "selector": "benchmark.warm-transform.max-median-ms",
+        "value": 5.664125000000013,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "incremental-rebuild",
+      "domain": "incremental-rebuild",
+      "scenario": "consumer dependency edit through Metro invalidation",
+      "measure": "edit-to-updated-artifact duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "release-hermes-device",
+      "baseline": { "status": "missing", "reason": "No actual-edit incremental rebuild baseline exists" },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-tsc-wall-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsc",
+      "measure": "median fresh-process wall duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.wall-ms.median",
+        "value": 882.1055000000006,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-tsgo-wall-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsgo",
+      "measure": "median fresh-process wall duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.wall-ms.median",
+        "value": 332.92241699999977,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-tsc-memory-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsc",
+      "measure": "median compiler-reported memory",
+      "unit": "KiB",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.memory-kib.median",
+        "value": 285025,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-tsgo-memory-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsgo",
+      "measure": "median compiler-reported memory",
+      "unit": "KiB",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.memory-kib.median",
+        "value": 140013,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-tsc-instantiations-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsc",
+      "measure": "compiler-reported type instantiations",
+      "unit": "count",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.instantiations",
+        "value": 490410,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-tsgo-instantiations-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsgo",
+      "measure": "compiler-reported type instantiations",
+      "unit": "count",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.instantiations",
+        "value": 490508,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-first-completion-10000",
+      "domain": "editor",
+      "scenario": "10,000-token language-service member completion",
+      "measure": "median first completion duration after semantic analysis",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.10000.first-completion-ms.median",
+        "value": 39.28841699999998,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    },
+    {
+      "id": "editor-warm-completion-10000",
+      "domain": "editor",
+      "scenario": "10,000-token language-service member completion",
+      "measure": "median repeated completion duration in the same service",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.10000.warm-completion-ms.median",
+        "value": 30.386750000000006,
+        "repetitions": 5
+      },
+      "threshold": { "status": "pending-review", "absoluteMax": null, "maxRegressionPercent": null }
+    }
+  ]
+}
