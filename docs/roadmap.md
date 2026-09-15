@@ -84,6 +84,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.7a: Add reproducible 100/1,000/10,000-token fixtures for current token/theme/recipe APIs and record fresh-process tsc, tsgo and language-service baselines. Keep conditions and slot recipes explicitly unsupported until those APIs exist.
 - [ ] M1.8: Commit a machine-readable budget file and measurement protocol before optimization work. Include absolute ceilings and baseline comparisons for JS/UI frames, allocations, retained memory, runtime bytes/initialization, cold/warm transform cost, incremental rebuild, and editor cost. Choose thresholds from the measured baseline and noise; reviewers approve the recorded values, not an invented universal timing target.
 - [x] M1.8a: Define the versioned fail-closed registry, closed evidence selectors, baseline-drift validation, activation-readiness semantics, and reviewer approval protocol. Keep all thresholds pending and performance qualification explicitly not run.
+- [x] M1.8b: Adapt recorded host/editor evidence into comparable sample series, current baseline comparisons and a threshold review packet. Enforce environment/scenario compatibility and keep candidates unapproved.
 - [ ] M1.9: Extend the Expo playground with version/source identification and repeatable measurement scenarios. Install SDK-compatible dependencies with a committed lockfile; test the newest SDK in a separate upgrade configuration before broadening support. Published mode resolves npm tags to exact versions, while packed mode qualifies unreleased artifacts without publishing.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
@@ -673,3 +674,12 @@ Next recommended slice: **M1.8a** — define a versioned machine-readable budget
 - Every threshold remains pending. Existing local smoke ceilings are not promoted. No dependency, runtime/public API change, push/publication or staging of unrelated release edits occurs. Native Android stays last and parent M1.8 remains open.
 
 Next recommended slice: **M1.8b** — add current-measurement adapters and comparison reports for recorded host/editor domains, then prepare a threshold review packet from retained noise envelopes without activating the registry. Begin only after approval.
+
+### 2026-09-15 — M1.8b current host comparison and threshold review packet
+
+- Added sequential current-host measurement across the exact Node 22/current Node boundary matrix, five native-style benchmark processes and five editor processes at each scale. Raw reports, adapted sample series and comparison output are retained.
+- Environment and scenario fingerprints cover Effect/build/runtime identities, benchmark protocol/fixtures/sampling shape and the editor fixture manifest. Mismatches, insufficient repetitions and pending thresholds remain incomplete; approved gates require both absolute and relative limits.
+- All twelve recorded metrics compared under exact environments. Current medians were unchanged or lower, but uncontrolled host observations are not performance claims. Runtime initialization and current tsc memory show high noise; see [assessment and evidence](assessments/2026-09-15-performance-budget-comparison.md).
+- Mechanical threshold candidates remain unapproved. Runtime initialization needs isolation or remeasurement; deterministic byte/type counters need an explicit growth policy. Missing device/allocation/incremental and diagnostic memory gates keep registry readiness and performance qualification false.
+
+Next recommended slice: **M1.8c** — review the twelve host/editor candidates metric by metric, remeasure or redesign the noisy runtime-initialization gate, and commit only explicitly accepted thresholds. Keep the registry pending for missing device, allocation, retained-memory and incremental-rebuild evidence. Begin only after approval.

@@ -5,7 +5,10 @@ import {
   BudgetRegistryVersion,
   assessBudgetRegistry,
   budgetRegistryCodec,
+  compareRecordedMetrics,
+  createThresholdReviewPacket,
   requiredBudgetDomains,
+  summarizeBenchmarkReports,
   verifyRecordedBaselines,
 } from "../bench/budget-contract"
 
@@ -109,5 +112,88 @@ describe("performance budget registry", () => {
     const readiness = Bun.spawnSync([process.execPath, script, "readiness"], { cwd: repoRoot })
     expect(readiness.exitCode).toBe(1)
     expect(JSON.parse(readiness.stdout.toString())).toMatchObject({ valid: true, registryReady: false, performanceQualification: "not-run" })
+  })
+
+  it("adapts retained sample series into an explicit threshold review packet", () => {
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const packet = createThresholdReviewPacket(decoded.value, resolve(import.meta.dir, "../../.."))
+    expect(packet.status).toBe("review-required")
+    expect(packet.candidates).toHaveLength(12)
+    expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-ms")
+    expect(packet.reviewAttention.deterministicGrowthPolicy).toEqual(expect.arrayContaining([
+      "runtime-emitted-bytes", "editor-tsc-instantiations-10000", "editor-tsgo-instantiations-10000",
+    ]))
+    for (const candidate of packet.candidates) {
+      expect(candidate.samples).toBeGreaterThanOrEqual(5)
+      expect(candidate.envelope.median).toBe(candidate.baseline)
+      expect(candidate.proposal.status).toBe("candidate-not-approved")
+      expect(candidate.proposal.absoluteMax).toBeGreaterThanOrEqual(candidate.envelope.max)
+      expect(candidate.proposal.maxRegressionPercent).toBeGreaterThanOrEqual(10)
+    }
+  })
+
+  it("compares current evidence without treating pending thresholds as a pass", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const report = compareRecordedMetrics(decoded.value, repoRoot, {
+      effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
+      benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
+      editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
+    })
+    expect(report.performanceQualified).toBe(false)
+    expect(report.metrics).toHaveLength(12)
+    for (const metric of report.metrics) {
+      expect(metric.environment).toBe("exact")
+      expect(metric.delta).toBe(0)
+      expect(metric.result).toBe("incomplete-threshold-pending")
+    }
+  })
+
+  it("adapts independent benchmark reports only when their environments and scenarios agree", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const reports = [1, 2, 3, 4, 5].map(index => JSON.parse(readFileSync(resolve(repoRoot,
+      `docs/evidence/2026-09-14-benchmark-repair/run-${index}.json`), "utf8")))
+    const summary = summarizeBenchmarkReports(reports)
+    expect(summary.environment).toEqual(reports[0].environment)
+    expect(summary.results).toHaveLength(10)
+    expect(summary.results.every(result => result.runBatchMeanP50Ms.length === 5)).toBe(true)
+    expect(() => summarizeBenchmarkReports([reports[0], { ...reports[1], environment: { ...reports[1].environment, bun: "different" } }])).toThrow()
+  })
+
+  it("rejects editor comparisons when the generated scenario manifest changes", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const editor = JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8"))
+    const report = compareRecordedMetrics(decoded.value, repoRoot, {
+      effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
+      benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
+      editor: { ...editor, manifest: { ...editor.manifest, scales: [] } },
+    })
+    expect(report.metrics.filter(metric => metric.id.startsWith("editor-")).every(metric => metric.environment === "mismatch")).toBe(true)
+  })
+
+  it("requires both approved absolute and relative limits to pass", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const valid = JSON.parse(readFileSync(registryFile, "utf8"))
+    const approved = { ...valid, metrics: valid.metrics.map((metric: { baseline: { status: string; value?: number } }) =>
+      metric.baseline.status === "recorded" ? { ...metric, threshold: {
+        status: "approved", absoluteMax: metric.baseline.value, maxRegressionPercent: 0,
+        approvedBy: "test reviewer", approvedAt: "2026-09-15T09:00:00Z", evidence: "test/review.md",
+      } } : metric) }
+    const decoded = budgetRegistryCodec.decode(approved)
+    if (!decoded.ok) throw Error("Approved recorded metrics must decode")
+    const evidence = {
+      effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
+      benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
+      editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
+    }
+    expect(compareRecordedMetrics(decoded.value, repoRoot, evidence).metrics.every(metric => metric.result === "pass")).toBe(true)
+    approved.metrics.find((metric: { id: string }) => metric.id === "runtime-emitted-bytes").threshold.absoluteMax = 0
+    const failed = budgetRegistryCodec.decode(approved)
+    if (!failed.ok) throw Error("Tightened threshold must decode")
+    expect(compareRecordedMetrics(failed.value, repoRoot, evidence).metrics.find(metric => metric.id === "runtime-emitted-bytes")?.result).toBe("fail")
   })
 })

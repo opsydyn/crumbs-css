@@ -20,3 +20,11 @@ Set the registry to `active` only after every required baseline is recorded and 
 ## Current state
 
 The registry contains 17 metrics across all nine required domains. Runtime footprint, cold/warm transforms, and 10,000-token editor/compiler metrics have reproducible recorded host baselines. Retained-memory evidence is diagnostic because it lacks forced-GC release-device provenance. JS frames, UI frames, allocations, and incremental rebuilds have no qualifying baseline. Every threshold is pending reviewer approval. Existing benchmark smoke ceilings remain historical local checks and are not M1.8 budgets.
+
+## Host comparison and review packets
+
+Run `CRUMBS_AUDIT_NODE_FLOOR=/absolute/path/to/node-v22.0.0 bun run measure:host-budgets <output-directory>` after a complete package build. The command runs the Effect/runtime boundary matrix, five independent native-style benchmark processes, and five fresh editor measurements at every scale sequentially. It retains raw reports, an adapted benchmark summary, a baseline comparison, and a threshold review packet.
+
+Comparison adapters require matching runtime/compiler identities and scenario contracts. The benchmark fingerprint includes environment, protocol, fixture hashes and sampling shape; editor comparison includes its exact generated manifest; runtime comparison includes Effect/build/protocol and Node identities. A mismatch reports incomplete before evaluating thresholds. Current medians are compared with the recorded baseline and, once approved, must satisfy both the absolute ceiling and the relative regression ceiling.
+
+The review packet derives min/median/max envelopes and mechanical candidates using the larger of the observed maximum or the median plus twice the observed deviation, with a minimum ten-percent review margin and upward rounding. These values remain candidates. High-noise metrics are called out for isolation or remeasurement, and deterministic byte/count metrics require an explicit allowed-growth decision. The tool never edits or activates `budgets.json`.

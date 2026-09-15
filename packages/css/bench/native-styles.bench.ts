@@ -59,7 +59,7 @@ for (const [label, fixture, root, ceiling] of [
 }
 
 // Preserve measurements even if a legacy smoke ceiling fails. These are not M1.8 budgets.
-console.log(JSON.stringify({
+const report = {
   formatVersion: 2, recordedAt: new Date().toISOString(),
   sourceRevision: Bun.spawnSync(["git", "rev-parse", "HEAD"], { cwd: packageRoot, stdout: "pipe" }).stdout.toString().trim(),
   sourceState: "Working tree; source/fixture hashes identify this pre-commit benchmark",
@@ -73,5 +73,8 @@ console.log(JSON.stringify({
     { name: "React theme memo cache hits/invalidation", status: "not-run", reason: "useThemedStyles uses React useMemo; this host harness times pure resolution and pre-resolved selection, not render/provider lifecycle." },
     { name: "native-device performance", status: "not-run", reason: "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate." },
   ],
-}, null, 2))
+}
+const reportJson = JSON.stringify(report, null, 2) + "\n"
+console.log(reportJson.trimEnd())
+if (process.env.CRUMBS_BENCH_JSON_OUTPUT) await Bun.write(process.env.CRUMBS_BENCH_JSON_OUTPUT, reportJson)
 for (const metric of metrics) { console.log(formatMetric(metric)); assertBenchmarkBudget(metric) }

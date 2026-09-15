@@ -131,7 +131,7 @@ export function verifyRecordedBaselines(registry: BudgetRegistry, repoRoot: stri
     }
     try {
       const evidence: unknown = JSON.parse(readFileSync(file, "utf8"))
-      const actual = extractBaseline(metric.baseline.selector, evidence)
+      const actual = median(extractBaselineSamples(metric.baseline.selector, evidence))
       if (!Object.is(actual, metric.baseline.value)) {
         issues.push({ id: metric.id, code: "baseline-value-mismatch", message: `Recorded ${metric.baseline.value}; evidence resolves to ${actual}` })
       }
@@ -142,19 +142,113 @@ export function verifyRecordedBaselines(registry: BudgetRegistry, repoRoot: stri
   return issues
 }
 
-function extractBaseline(selector: typeof BaselineSelectorSchema.Type, evidence: unknown): number {
+type BaselineSelector = typeof BaselineSelectorSchema.Type
+type EvidenceBundle = { readonly effect: unknown; readonly benchmark: unknown; readonly editor: unknown }
+
+export function summarizeBenchmarkReports(inputs: unknown[]) {
+  if (inputs.length === 0) throw Error("At least one benchmark report is required")
+  const reports = inputs as BenchmarkRunEvidence[]
+  const environment = JSON.stringify(reports[0]!.environment)
+  const protocol = JSON.stringify(reports[0]!.protocol)
+  const fixtures = JSON.stringify(reports[0]!.fixtures)
+  const names = reports[0]!.metrics.map(metric => metric.name)
+  for (const report of reports) {
+    if (JSON.stringify(report.environment) !== environment) throw Error("Benchmark environments differ")
+    if (JSON.stringify(report.protocol) !== protocol || JSON.stringify(report.fixtures) !== fixtures) throw Error("Benchmark protocols or fixtures differ")
+    if (JSON.stringify(report.metrics.map(metric => metric.name)) !== JSON.stringify(names)) throw Error("Benchmark scenarios differ")
+  }
+  return {
+    formatVersion: 1,
+    environment: reports[0]!.environment,
+    protocol: reports[0]!.protocol,
+    fixtures: reports[0]!.fixtures,
+    sourceRevisions: [...new Set(reports.map(report => report.sourceRevision))],
+    results: names.map((name, index) => ({
+      name,
+      sampleKind: reports[0]!.metrics[index]!.sampleKind,
+      iterationsPerSample: reports[0]!.metrics[index]!.iterationsPerSample,
+      warmupIterations: reports[0]!.metrics[index]!.warmupIterations,
+      samplesPerRun: reports[0]!.metrics[index]!.samples,
+      runBatchMeanP50Ms: numbers(reports.map(report => report.metrics[index]!.batchMeanP50Ms)),
+    })),
+  }
+}
+
+export function createThresholdReviewPacket(registry: BudgetRegistry, repoRoot: string) {
+  const candidates = registry.metrics.flatMap(metric => {
+    if (metric.baseline.status !== "recorded") return []
+    const evidence = JSON.parse(readFileSync(resolve(repoRoot, metric.baseline.evidence), "utf8")) as unknown
+    const samples = extractBaselineSamples(metric.baseline.selector, evidence)
+    const envelope = summarizeEnvelope(samples)
+    const maxRegressionPercent = roundUpToFive(Math.max(10, envelope.maxDeviationPercent * 2))
+    const unroundedAbsolute = Math.max(envelope.max, envelope.median * (1 + maxRegressionPercent / 100))
+    const absoluteMax = metric.unit === "ms" ? Math.ceil(unroundedAbsolute * 1000) / 1000 : Math.ceil(unroundedAbsolute)
+    return [{
+      id: metric.id, unit: metric.unit, samples: samples.length, baseline: metric.baseline.value, envelope,
+      proposal: { status: "candidate-not-approved" as const, absoluteMax, maxRegressionPercent,
+        formula: "max(observed max, median plus twice observed deviation or 10 percent); rounded upward" },
+    }]
+  })
+  return {
+    status: "review-required" as const,
+    registryStatus: registry.status,
+    candidates,
+    reviewAttention: {
+      highNoise: candidates.filter(candidate => candidate.envelope.maxDeviationPercent >= 20).map(candidate => candidate.id),
+      deterministicGrowthPolicy: candidates.filter(candidate => candidate.envelope.maxDeviationPercent === 0 &&
+        (candidate.unit === "bytes" || candidate.unit === "count")).map(candidate => candidate.id),
+    },
+    blockers: assessBudgetRegistry(registry),
+    limits: [
+      "Candidates are mechanical review inputs, not approvals or performance qualification",
+      "High-noise metrics should be isolated or remeasured before approval",
+      "Deterministic byte/count metrics need an explicit allowed-growth policy",
+    ],
+  }
+}
+
+export function compareRecordedMetrics(registry: BudgetRegistry, repoRoot: string, current: EvidenceBundle) {
+  const metrics = registry.metrics.flatMap(metric => {
+    if (metric.baseline.status !== "recorded") return []
+    const baselineEvidence = JSON.parse(readFileSync(resolve(repoRoot, metric.baseline.evidence), "utf8")) as unknown
+    const currentEvidence = evidenceForSelector(metric.baseline.selector, current)
+    const samples = extractBaselineSamples(metric.baseline.selector, currentEvidence)
+    const currentEnvelope = summarizeEnvelope(samples)
+    const delta = currentEnvelope.median - metric.baseline.value
+    const deltaPercent = metric.baseline.value === 0 ? (delta === 0 ? 0 : null) : delta / metric.baseline.value * 100
+    const environment = JSON.stringify(environmentFingerprint(metric.baseline.selector, baselineEvidence)) ===
+      JSON.stringify(environmentFingerprint(metric.baseline.selector, currentEvidence)) ? "exact" as const : "mismatch" as const
+    let result: "incomplete-environment-mismatch" | "incomplete-insufficient-repetitions" | "incomplete-threshold-pending" | "pass" | "fail"
+    if (environment === "mismatch") result = "incomplete-environment-mismatch"
+    else if (samples.length < registry.protocol.minimumIndependentRepetitions) result = "incomplete-insufficient-repetitions"
+    else if (metric.threshold.status === "pending-review") result = "incomplete-threshold-pending"
+    else result = currentEnvelope.median <= metric.threshold.absoluteMax && deltaPercent !== null && deltaPercent <= metric.threshold.maxRegressionPercent ? "pass" : "fail"
+    return [{ id: metric.id, unit: metric.unit, baseline: metric.baseline.value, current: currentEnvelope,
+      delta, deltaPercent, environment, thresholdStatus: metric.threshold.status, result }]
+  })
+  return {
+    performanceQualified: assessBudgetRegistry(registry).ready && metrics.length > 0 && metrics.every(metric => metric.result === "pass"),
+    metrics,
+    reviewAttention: { highNoise: metrics.filter(metric => metric.current.maxDeviationPercent >= 20).map(metric => metric.id) },
+    limits: ["Only recorded host/editor metrics are adapted; missing and diagnostic domains remain blockers"],
+  }
+}
+
+function extractBaselineSamples(selector: BaselineSelector, evidence: unknown): number[] {
   if (selector === "effect.runtime.cjs.graph-bytes") {
     const data = evidence as EffectBoundaryEvidence
-    return unique(data.results.filter(entry => entry.scenario === "runtime" && entry.format === "cjs").map(entry => entry.graph.bytes))
+    const entries = data.results.filter(entry => entry.scenario === "runtime" && entry.format === "cjs")
+    const value = unique(entries.map(entry => entry.graph.bytes))
+    return Array.from({ length: Math.max(...entries.map(entry => entry.samples.length)) }, () => value)
   }
   if (selector === "effect.runtime.max-median-load-ms") {
     const data = evidence as EffectBoundaryEvidence
-    return maximum(data.results.filter(entry => entry.scenario === "runtime").map(entry => entry.summary.loadMs.median))
+    return maximaByRepetition(data.results.filter(entry => entry.scenario === "runtime").map(entry => entry.samples.map(sample => sample.loadMs)))
   }
   if (selector === "benchmark.cold-transform.max-median-ms" || selector === "benchmark.warm-transform.max-median-ms") {
     const data = evidence as BenchmarkSummaryEvidence
     const prefix = selector.includes(".cold-") ? "first transform " : "warm transform "
-    return maximum(data.results.filter(entry => entry.name.startsWith(prefix)).map(entry => entry.medianOfRunBatchMeanP50Ms))
+    return maximaByRepetition(data.results.filter(entry => entry.name.startsWith(prefix)).map(entry => entry.runBatchMeanP50Ms))
   }
   const data = evidence as EditorScaleEvidence
   const compiler = selector.match(/^editor\.(tsc|tsgo)\.10000\.(wall-ms|memory-kib|instantiations)(?:\.median)?$/)
@@ -162,19 +256,63 @@ function extractBaseline(selector: typeof BaselineSelectorSchema.Type, evidence:
     const runs = data.compilerRuns.filter(entry => entry.engine === compiler[1] && entry.scale === 10000)
     const values = runs.map(entry => compiler[2] === "wall-ms" ? entry.wallMs
       : compiler[2] === "memory-kib" ? entry.diagnostics.memoryKiB : entry.diagnostics.instantiations)
-    return compiler[2] === "instantiations" ? unique(values) : median(values)
+    return numbers(values)
   }
   const completion = selector.match(/^editor\.10000\.(first|warm)-completion-ms\.median$/)
   if (completion) {
     const key = completion[1] === "first" ? "firstCompletionMs" : "warmCompletionMs"
-    return median(data.completionRuns.filter(entry => entry.scale === 10000).map(entry => entry[key]))
+    return numbers(data.completionRuns.filter(entry => entry.scale === 10000).map(entry => entry[key]))
   }
   throw Error(`Unsupported baseline selector: ${selector}`)
 }
 
-type EffectBoundaryEvidence = { results: Array<{ scenario: string; format: string; graph: { bytes: number }; summary: { loadMs: { median: number } } }> }
-type BenchmarkSummaryEvidence = { results: Array<{ name: string; medianOfRunBatchMeanP50Ms: number }> }
+function evidenceForSelector(selector: BaselineSelector, evidence: EvidenceBundle): unknown {
+  if (selector.startsWith("effect.")) return evidence.effect
+  if (selector.startsWith("benchmark.")) return evidence.benchmark
+  return evidence.editor
+}
+
+function environmentFingerprint(selector: BaselineSelector, evidence: unknown): unknown {
+  if (selector.startsWith("effect.")) {
+    const data = evidence as EffectBoundaryEvidence
+    return { effect: data.effect, build: data.build, protocol: data.protocol, environment: { platform: data.environment.platform, architecture: data.environment.architecture },
+      nodes: [...new Set(data.results.flatMap(entry => entry.samples.map(sample => sample.node)))].sort() }
+  }
+  if (selector.startsWith("benchmark.")) {
+    const data = evidence as BenchmarkSummaryEvidence
+    return { environment: data.environment, protocol: data.protocol, fixtures: data.fixtures,
+      scenarios: data.results.map(({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun }) =>
+        ({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun })) }
+  }
+  const identity = (evidence as EditorScaleEvidence).identity
+  return { bun: identity.bun, node: identity.node, platform: identity.platform, arch: identity.arch, osRelease: identity.osRelease,
+    cpuModel: identity.cpuModel, logicalCpus: identity.logicalCpus, totalMemoryBytes: identity.totalMemoryBytes,
+    typescript: identity.typescript, tsgo: identity.tsgo, manifest: (evidence as EditorScaleEvidence).manifest }
+}
+
+type EffectBoundaryEvidence = {
+  effect: string
+  build: unknown
+  protocol: unknown
+  environment: { platform: string; architecture: string }
+  results: Array<{ scenario: string; format: string; graph: { bytes: number }; samples: Array<{ loadMs: number; node: string }> }>
+}
+type BenchmarkSummaryEvidence = {
+  environment: unknown
+  protocol: unknown
+  fixtures: unknown
+  results: Array<{ name: string; sampleKind: string; iterationsPerSample: number; warmupIterations: number; samplesPerRun: number; runBatchMeanP50Ms: number[] }>
+}
+type BenchmarkRunEvidence = {
+  sourceRevision: string
+  environment: unknown
+  protocol: unknown
+  fixtures: unknown
+  metrics: Array<{ name: string; sampleKind: string; iterationsPerSample: number; warmupIterations: number; samples: number; batchMeanP50Ms: number }>
+}
 type EditorScaleEvidence = {
+  identity: { bun: string; node: string; platform: string; arch: string; osRelease: string; cpuModel: string; logicalCpus: number; totalMemoryBytes: number; typescript: string; tsgo: string }
+  manifest: unknown
   compilerRuns: Array<{ engine: string; scale: number; wallMs: number; diagnostics: { memoryKiB: number; instantiations: number } }>
   completionRuns: Array<{ scale: number; firstCompletionMs: number; warmCompletionMs: number }>
 }
@@ -183,11 +321,20 @@ function numbers(values: unknown[]): number[] {
   if (values.length === 0 || values.some(value => typeof value !== "number" || !Number.isFinite(value))) throw Error("Evidence selector did not produce finite numbers")
   return values as number[]
 }
-function maximum(values: unknown[]): number { return Math.max(...numbers(values)) }
 function median(values: unknown[]): number {
   const sorted = numbers(values).sort((left, right) => left - right)
   return sorted[Math.floor(sorted.length / 2)]!
 }
+function maximaByRepetition(series: number[][]): number[] {
+  if (series.length === 0 || new Set(series.map(values => values.length)).size !== 1) throw Error("Evidence series are absent or have unequal repetition counts")
+  return series[0]!.map((_, index) => Math.max(...series.map(values => values[index]!)))
+}
+function summarizeEnvelope(values: number[]) {
+  const valid = numbers(values), middle = median(valid), min = Math.min(...valid), max = Math.max(...valid)
+  const maxDeviationPercent = middle === 0 ? 0 : Math.max(Math.abs(min - middle), Math.abs(max - middle)) / Math.abs(middle) * 100
+  return { min, median: middle, max, maxDeviationPercent }
+}
+function roundUpToFive(value: number): number { return Math.ceil(value / 5) * 5 }
 function unique(values: unknown[]): number {
   const valid = numbers(values)
   if (new Set(valid).size !== 1) throw Error("Evidence selector did not produce one stable value")
