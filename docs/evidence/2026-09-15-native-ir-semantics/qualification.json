@@ -1,0 +1,64 @@
+{
+  "slice": "M2.1a",
+  "baseRevision": "19ad62d",
+  "specification": "docs/specifications/native-ir-v1.md",
+  "productionCompilerChanged": false,
+  "red": {
+    "command": "bun test packages/css/test/native-ir-semantics.property.test.ts",
+    "result": "failed",
+    "reason": "test-only reference module missing"
+  },
+  "focused": {
+    "command": "bun test packages/css/test/native-ir-semantics.property.test.ts",
+    "tests": 5,
+    "assertions": 620,
+    "seed": 2191,
+    "result": "passed"
+  },
+  "verification": {
+    "bun run check": {
+      "exitCode": 0,
+      "tests": 316,
+      "assertions": 12693,
+      "files": 49
+    },
+    "bun run app:typecheck": {
+      "exitCode": 0
+    },
+    "bun run docs:build": {
+      "exitCode": 0,
+      "pages": 20
+    }
+  },
+  "laws": [
+    "ordered composition associativity",
+    "empty composition identity",
+    "ordered composition noncommutativity counterexample",
+    "last canonical property wins",
+    "dead dependencies removed before token resolution",
+    "provenance excluded from semantic equality",
+    "record key order ignored",
+    "array order preserved",
+    "signed zero preserved",
+    "token identity preserved before runtime resolution",
+    "qualified references and cycle detection",
+    "deterministic independent error accumulation",
+    "base variant compound recipe ordering",
+    "selection omission differs from explicit undefined"
+  ],
+  "boundaries": {
+    "irVersion": 1,
+    "m1PrototypeArtifactVersion": 1,
+    "sameAbi": false,
+    "publicApiChanged": false,
+    "runtimeChanged": false,
+    "artifactEncodingDefined": false
+  },
+  "excludedPreexistingEdits": [
+    ".release-please-manifest.json",
+    "bun.lock",
+    "packages/css/package.json"
+  ],
+  "push": false,
+  "publication": false
+}

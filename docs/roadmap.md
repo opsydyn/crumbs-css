@@ -98,7 +98,8 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Decisions:** D1–D3, D8, D11.\
 **Affected paths:** new `packages/css/src/compiler/` and artifact contract modules; `native-style.ts`, `transformer.ts`, `css-to-rn.ts`, `parse-virtual-css.ts`, new `test/compiler/` and `test/oracles/` fixtures.
 
-- [ ] M2.1: Specify tagged IR nodes and semantic equality for native declarations, ordered composition, style maps, recipes, token references, and export metadata. Define primitive kind and source/property provenance.
+- [x] M2.1: Specify tagged IR nodes and semantic equality for native declarations, ordered composition, style maps, recipes, token references, and export metadata. Define primitive kind and source/property provenance.
+- [x] M2.1a: Accept the internal native IR v1 semantic contract and independent executable laws without adding production nodes or treating the M1.2 prototype envelope as the artifact ABI.
 - [ ] M2.2: Introduce native capture before CSS serialization. Migrate one exact property family per reviewable slice, with independent differential tests against reference native evaluation. Preserve the qualified legacy subset throughout.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
@@ -723,3 +724,11 @@ Next recommended slice: **M1.9a** — audit the already-built playground workspa
 - M0.9 remains open solely on the parked Android native acceptance. Device performance, missing budget domains, future slot/condition editor fixtures and the eventual published-artifact refresh remain separate gates. No dependency, public runtime API, push, publication or unrelated release-version edit is included.
 
 Next recommended slice: **M2.1a** — write the native IR semantic contract for ordered declarations/composition, style maps, primitive provenance, token references and export metadata, including equality and diagnostic rules, before introducing implementation nodes. Begin only after approval.
+
+### 2026-09-15 — M2.1a native IR semantic contract
+
+- Accepted the internal [native IR v1 semantic contract](specifications/native-ir-v1.md), separating it from both the M1.2 prototype envelope and the future external artifact ABI. It defines immutable tagged modules/definitions/exports, qualified ownership, primitive domains, native values/token references, ordered normalization, style maps, recipes, provenance, equality and deterministic diagnostics.
+- Added an independent test-only evaluator and seeded property laws. Composition is associative with an empty identity, explicitly noncommutative, last-winner and dead-dependency aware. Semantic equality ignores provenance/grouping/record key order while preserving primitive domains, array order and signed zero. Reference failures accumulate, and recipes retain base/variant-definition/compound-array order.
+- M2.1 is complete as a specification gate. No production node, compiler route, public API, runtime dependency, artifact encoding, performance claim, push/publication or unrelated release-version edit is included. Android remains parked until last. See the [assessment and evidence](assessments/2026-09-15-native-ir-semantics.md).
+
+Next recommended slice: **M2.2a** — introduce the production IR types/schema and route the scalar `opacity` family through native capture, normalization and both emitters, with literal/token/order/provenance diagnostics checked against the independent oracle. Preserve the legacy path for every unmigrated property and reject malformed opacity IR without fallback. Begin only after approval.
