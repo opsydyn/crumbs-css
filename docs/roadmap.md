@@ -107,6 +107,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2d: Generalize production scalar IR beyond numeric-only values and migrate `flexBasis` with finite point numbers, `auto`, finite percentages and legacy tokens across all FlexStyle primitives.
 - [x] M2.2e: Migrate the six width/height/min/max `DimensionValue` properties through production scalar IR with exact static value domains, primitive coverage and per-property last-winner order.
 - [x] M2.2f: Migrate exact physical and logical position-edge longhands through production scalar IR, retaining independent field identity before inset-alias expansion.
+- [x] M2.2g: Migrate the seven Crumbs inset aliases into canonical position-edge declarations, retaining authored alias provenance and ordered alias/longhand precedence without layout-direction inference.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -792,3 +793,12 @@ Next recommended slice: **M2.2f** — migrate the exact position-edge longhands 
 - Full package qualification passed 363 tests with 14,234 assertions. No alias expansion, direction-aware conflict policy, qualified token identity, public API or external artifact ABI is included. See the [assessment and evidence](assessments/2026-09-19-native-ir-position-edges.md).
 
 Next recommended slice: **M2.2g** — migrate the seven Crumbs inset aliases (`inset`, inline/block pairs and inline/block start/end) into canonical edge declarations in IR, proving alias/longhand precedence without resolving physical/logical fields against layout direction. Begin only after approval.
+
+### 2026-09-19 — M2.2g inset-alias IR expansion
+
+- Migrated all seven Crumbs inset aliases before CSS serialization. `inset` expands to physical edges; inline/block pairs expand to their documented canonical fields; inline start/end remain native `start`/`end`; block start/end become `top`/`bottom`.
+- Each canonical declaration retains both the authored alias and canonical property in immutable provenance. Effect Schema accepts only declared alias-to-canonical expansion pairs, so forged paths fail at the IR boundary. Exact longhands and expanded aliases then share canonical last-winner normalization.
+- Focused tests cover every expansion, mixed alias/longhand ordering, invalid provenance and the unmarked vanilla-extract route. The established generated inset oracle and both emitter fixtures remain green. Full package qualification passed 367 tests across 56 files with 14,288 assertions.
+- This slice adds no layout-direction inference, Animated/null admission, qualified token identity, public API or external artifact ABI. React Native retains responsibility for resolving physical and logical fields. See the [assessment and evidence](assessments/2026-09-19-native-ir-inset-aliases.md).
+
+Next recommended slice: **M2.2h** — migrate the native `gap`, `rowGap` and `columnGap` family through scalar IR, expanding broad `gap` into canonical row/column declarations and proving broad/axis precedence against the existing independent spacing oracle. Keep padding/margin aliases and layout-direction behavior separate. Begin only after approval.

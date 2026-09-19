@@ -275,3 +275,7 @@ Approved M2.2e migrates `width`, `height`, `minWidth`, `minHeight`, `maxWidth` a
 ### Position-edge DimensionValue IR — 2026-09-19
 
 Approved M2.2f migrates exact `top`, `right`, `bottom`, `left`, `start` and `end` declarations through scalar IR across view, text and image. Physical and logical fields remain independent and retain deterministic per-property order; the compiler does not assume layout direction or expand inset aliases in this slice. The shared DimensionValue schema and capture domain reject malformed Crumbs values before CSS fallback. [Implementation evidence](../assessments/2026-09-19-native-ir-position-edges.md) records direct ownership, generated order and consumer qualification.
+
+### Inset-alias IR expansion — 2026-09-19
+
+Approved M2.2g migrates the seven Crumbs inset aliases through scalar IR by expanding them into ordered canonical position-edge declarations at capture. Provenance retains the authored alias alongside each canonical property and an explicit expansion path; Effect Schema rejects alias/property pairs outside the declared expansion table. Expanded aliases and exact longhands use one canonical last-winner normalization law while physical and logical fields remain independent for React Native to resolve by layout direction. [Implementation evidence](../assessments/2026-09-19-native-ir-inset-aliases.md) records the alias matrix, precedence oracle and consumer qualification.

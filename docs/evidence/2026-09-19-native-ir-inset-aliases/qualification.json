@@ -1,0 +1,37 @@
+{
+  "slice": "M2.2g",
+  "recordedAt": "2026-09-19",
+  "sourceRevision": "505ac747d1f9e1cbc67f31750d58abdba5eabf85",
+  "sourceState": "Working tree; implementation and documentation are committed after qualification",
+  "migratedAliases": ["inset", "insetInline", "insetBlock", "insetInlineStart", "insetInlineEnd", "insetBlockStart", "insetBlockEnd"],
+  "contract": {
+    "primitiveDomain": ["view", "text", "image"],
+    "valueDomain": "finite point number, auto, finite percentage or legacy token",
+    "normalization": "authored-order expansion followed by canonical last-winner selection",
+    "physicalLogicalPolicy": "independent canonical fields; no layout-direction inference"
+  },
+  "verification": [
+    { "command": "bun test packages/css/test/native-ir-inset-aliases.test.ts packages/css/test/inset-precedence.test.ts packages/css/test/native-ir-position-edges.test.ts packages/css/test/native-ir-dimensions.test.ts", "status": "passed", "tests": 29, "assertions": 914 },
+    { "command": "bun run check", "status": "passed", "tests": 367, "assertions": 14288, "files": 56 },
+    { "command": "bun run app:typecheck", "status": "passed" },
+    { "command": "bun run playground:check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run playground:packed --check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run docs:build", "status": "passed", "pages": 20 },
+    { "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles", "status": "passed", "claim": "declared host smoke ceilings only" },
+    { "command": "bun run budgets:validate", "status": "passed", "registryReady": false, "performanceQualification": "not-run" }
+  ],
+  "boundaries": {
+    "layoutDirectionInference": false,
+    "physicalLogicalCollapse": false,
+    "animatedNodes": "runtime only",
+    "null": "not admitted to static IR",
+    "unmarkedVanillaExtract": "legacy converter",
+    "qualifiedTokenIdentity": false,
+    "publicApiChanged": false,
+    "externalArtifactAbi": false,
+    "effectInOrdinaryRuntime": false,
+    "androidNativeAcceptance": false,
+    "published": false,
+    "pushed": false
+  }
+}

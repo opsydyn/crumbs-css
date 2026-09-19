@@ -16,7 +16,7 @@ export type NativeIrDiagnosticCode =
 export type NativeIrDiagnostic = {
   readonly code: NativeIrDiagnosticCode
   readonly phase: "admission"
-  readonly property: MigratedScalarProperty
+  readonly property: AuthoredScalarProperty
   readonly sourceId: string
   readonly detail: string
 }
@@ -41,10 +41,12 @@ export type SourceProvenance = {
   readonly origin: "crumbs-native"
 }
 export type PropertyProvenance = SourceProvenance & {
-  readonly authoredProperty: MigratedScalarProperty
+  readonly authoredProperty: AuthoredScalarProperty
   readonly canonicalProperty: MigratedScalarProperty
   readonly shorthandExpansionPath: ReadonlyArray<string>
 }
+export type InsetAliasProperty = "inset" | "insetInline" | "insetBlock" | "insetInlineStart" | "insetInlineEnd" | "insetBlockStart" | "insetBlockEnd"
+export type AuthoredScalarProperty = MigratedScalarProperty | InsetAliasProperty
 export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
   | "flex" | "flexBasis" | "flexGrow" | "flexShrink"
@@ -84,6 +86,15 @@ const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "flexBasis", "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
 ])
+const insetAliasExpansions: Readonly<Record<InsetAliasProperty, readonly MigratedScalarProperty[]>> = {
+  inset: ["top", "right", "bottom", "left"],
+  insetInline: ["left", "right"],
+  insetBlock: ["top", "bottom"],
+  insetInlineStart: ["start"],
+  insetInlineEnd: ["end"],
+  insetBlockStart: ["top"],
+  insetBlockEnd: ["bottom"],
+}
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
   ? undefined : { path: [], issue: "Expected a non-negative safe integer" }))
@@ -113,6 +124,12 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
 ])
+const AuthoredScalarPropertySchema = Schema.Literals([
+  "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
+  "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
+  "top", "right", "bottom", "left", "start", "end",
+  "inset", "insetInline", "insetBlock", "insetInlineStart", "insetInlineEnd", "insetBlockStart", "insetBlockEnd",
+])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
   return match?.[1] !== undefined && Number.isFinite(Number(match[1]))
@@ -125,7 +142,7 @@ const PropertyProvenanceSchema = Schema.Struct({
   exportPath: Schema.Array(PathSegment),
   logicalPath: Schema.Array(PathSegment),
   origin: Schema.Literal("crumbs-native"),
-  authoredProperty: MigratedScalarPropertySchema,
+  authoredProperty: AuthoredScalarPropertySchema,
   canonicalProperty: MigratedScalarPropertySchema,
   shorthandExpansionPath: Schema.Array(Schema.String),
 })
@@ -135,10 +152,18 @@ const ScalarDeclarationSchema = Schema.Struct({
   value: Schema.Union([Schema.Finite, Schema.Literal("auto"), PercentageValueSchema, LegacyTokenReferenceSchema]),
   provenance: PropertyProvenanceSchema,
 }).check(
-  Schema.makeFilter(declaration => declaration.property === declaration.provenance.authoredProperty &&
-    declaration.property === declaration.provenance.canonicalProperty
+  Schema.makeFilter(declaration => {
+    const authoredProperty = declaration.provenance.authoredProperty
+    const expectedPath = authoredProperty === declaration.property ? [] : [authoredProperty, declaration.property]
+    const validPropertyPair = authoredProperty === declaration.property ||
+      (authoredProperty in insetAliasExpansions &&
+        insetAliasExpansions[authoredProperty as InsetAliasProperty].includes(declaration.property))
+    const validExpansionPath = declaration.provenance.shorthandExpansionPath.length === expectedPath.length &&
+      declaration.provenance.shorthandExpansionPath.every((property, index) => property === expectedPath[index])
+    return declaration.property === declaration.provenance.canonicalProperty && validPropertyPair && validExpansionPath
       ? undefined
-      : { path: ["provenance"], issue: "Declaration property and provenance property names must match" }),
+      : { path: ["provenance"], issue: "Declaration property, provenance names and expansion path must match" }
+  }),
   Schema.makeFilter(declaration => dimensionValueProperties.has(declaration.property) ||
     typeof declaration.value === "number" || typeof declaration.value === "object"
       ? undefined
@@ -184,7 +209,7 @@ const migratedScalarProperties = [
   "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
 ] as const
-const migratedScalarPropertySet = new Set<string>(migratedScalarProperties)
+const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(insetAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
 const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiveDomain>> = {
   opacity: ["view", "text", "image"],
@@ -226,7 +251,7 @@ export function captureScalarIntoNativeIr(
   rule: Readonly<Record<string, unknown>>,
   context: ScalarCaptureContext,
 ): { readonly cssRule: Record<string, unknown>; readonly block?: ScalarDeclarationBlock } {
-  return captureSelectedScalar(rule, context, migratedScalarPropertySet)
+  return captureSelectedScalar(rule, context, capturedScalarPropertySet)
 }
 
 export function captureOpacityIntoNativeIr(
@@ -249,40 +274,32 @@ function captureSelectedScalar(
   const descriptors = Object.getOwnPropertyDescriptors(rule)
   const selected = Object.keys(descriptors).filter(property =>
     selectedProperties.has(property) && descriptors[property]?.enumerable === true,
-  ) as MigratedScalarProperty[]
+  ) as AuthoredScalarProperty[]
   const cssRule = withoutSelectedProperties(rule, selectedProperties)
   const declarations: ScalarDeclaration[] = []
   let primitiveDomain = [...metadata.primitiveDomain]
-  for (const property of selected) {
-    const descriptor = descriptors[property]!
+  for (const authoredProperty of selected) {
+    const descriptor = descriptors[authoredProperty]!
     if (!("value" in descriptor)) {
-      throw admissionError("CRUMBS_IR_INVALID_VALUE", property, context.sourceId,
-        `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: accessors cannot enter native IR.`)
+      throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
+        `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}: accessors cannot enter native IR.`)
     }
     if (descriptor.value === undefined) continue
-    primitiveDomain = primitiveDomain.filter(kind => propertyPrimitives[property].includes(kind))
-    if (primitiveDomain.length === 0) {
-      throw admissionError("CRUMBS_IR_INVALID_PROPERTY", property, context.sourceId,
-        `Invalid ${property} primitive domain in ${context.sourceId} at ${context.className}.${property}. ` +
-        `${property} supports ${propertyPrimitives[property].join(", ")}; the authored helper provides ${metadata.primitiveDomain.join(", ")}.`)
+    const canonicalProperties = authoredProperty in insetAliasExpansions
+      ? insetAliasExpansions[authoredProperty as InsetAliasProperty]
+      : [authoredProperty as MigratedScalarProperty]
+    for (const property of canonicalProperties) {
+      primitiveDomain = primitiveDomain.filter(kind => propertyPrimitives[property].includes(kind))
+      if (primitiveDomain.length === 0) throw admissionError("CRUMBS_IR_INVALID_PROPERTY", authoredProperty, context.sourceId,
+        `Invalid ${authoredProperty} primitive domain in ${context.sourceId} at ${context.className}.${authoredProperty}.`)
+      const value = admitScalarValue(property, descriptor.value, context, authoredProperty)
+      declarations.push(Object.freeze({ _tag: "NativeDeclaration", property, value, provenance: Object.freeze({
+        packageOwner: context.packageOwner, sourceId: context.sourceId, exportPath: Object.freeze([]),
+        logicalPath: Object.freeze([context.className, authoredProperty]), origin: "crumbs-native",
+        authoredProperty, canonicalProperty: property,
+        shorthandExpansionPath: Object.freeze(authoredProperty === property ? [] : [authoredProperty, property]),
+      }) }))
     }
-    const value = admitScalarValue(property, descriptor.value, context)
-    const propertyProvenance: PropertyProvenance = Object.freeze({
-      packageOwner: context.packageOwner,
-      sourceId: context.sourceId,
-      exportPath: Object.freeze([]),
-      logicalPath: Object.freeze([context.className, property]),
-      origin: "crumbs-native",
-      authoredProperty: property,
-      canonicalProperty: property,
-      shorthandExpansionPath: Object.freeze([]),
-    })
-    declarations.push(Object.freeze({
-      _tag: "NativeDeclaration",
-      property,
-      value,
-      provenance: propertyProvenance,
-    }))
   }
   if (declarations.length === 0) return { cssRule }
   const provenance: SourceProvenance = Object.freeze({
@@ -351,6 +368,7 @@ function admitScalarValue(
   property: MigratedScalarProperty,
   value: unknown,
   context: ScalarCaptureContext,
+  authoredProperty: AuthoredScalarProperty = property,
 ): ScalarDeclarationValue {
   if (typeof value === "number" && Number.isFinite(value)) return value
   if (typeof value === "string") {
@@ -362,8 +380,8 @@ function admitScalarValue(
       if (percentage?.[1] !== undefined && Number.isFinite(Number(percentage[1]))) return value as PercentageValue
     }
   }
-  throw admissionError("CRUMBS_IR_INVALID_VALUE", property, context.sourceId,
-    `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}. Expected ${dimensionValueProperties.has(property) ? "a finite number, auto, a finite percentage or" : "a finite number or"} a legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
+  throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
+    `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected ${dimensionValueProperties.has(property) ? "a finite number, auto, a finite percentage or" : "a finite number or"} a legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
 }
 
 function withoutSelectedProperties(
@@ -378,7 +396,7 @@ function withoutSelectedProperties(
 
 function admissionError(
   code: NativeIrDiagnosticCode,
-  property: MigratedScalarProperty,
+  property: AuthoredScalarProperty,
   sourceId: string,
   detail: string,
 ): NativeIrAdmissionError {

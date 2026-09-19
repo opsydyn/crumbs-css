@@ -90,7 +90,7 @@ describe("canonical inset authoring", () => {
     }
   })
   it("rejects unsupported JavaScript inset forms during compilation", async () => {
-    for (const prop of ["inset", "insetInline"]) await expect(compile(`export const invalid = viewStyle({ ${prop}: "1px 2px" });`)).rejects.toThrow("CRUMBS_CSS_DROPPED_DECLARATION")
+    for (const prop of ["inset", "insetInline"]) await expect(compile(`export const invalid = viewStyle({ ${prop}: "1px 2px" });`)).rejects.toThrow("CRUMBS_IR_INVALID_VALUE")
   })
   it("matches independent generated declaration evaluation", () => {
     fc.assert(fc.property(fc.array(generatedRule, { minLength: 1, maxLength: 40 }), rules => {
