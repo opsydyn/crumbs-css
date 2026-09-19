@@ -1,0 +1,35 @@
+{
+  "slice": "M2.2h",
+  "recordedAt": "2026-09-19",
+  "sourceRevision": "f7ff1d32002ff4daa507cbb60b511a323942f461",
+  "sourceState": "Working tree; implementation and documentation are committed after qualification",
+  "migratedProperties": ["gap", "rowGap", "columnGap"],
+  "contract": {
+    "primitiveDomain": ["view", "text", "image"],
+    "valueDomain": "finite point number, finite percentage or legacy token",
+    "normalization": "gap expands to rowGap and columnGap before canonical last-winner selection"
+  },
+  "verification": [
+    { "command": "bun test packages/css/test/native-ir-gap.test.ts packages/css/test/spacing-precedence.test.ts packages/css/test/native-ir-inset-aliases.test.ts", "status": "passed", "tests": 22, "assertions": 347 },
+    { "command": "bun run check", "status": "passed", "tests": 375, "assertions": 14450, "files": 57 },
+    { "command": "bun run app:typecheck", "status": "passed" },
+    { "command": "bun run playground:check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run playground:packed --check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run docs:build", "status": "passed", "pages": 20 },
+    { "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles", "status": "passed", "claim": "declared host smoke ceilings only" },
+    { "command": "bun run budgets:validate", "status": "passed", "registryReady": false, "performanceQualification": "not-run" }
+  ],
+  "boundaries": {
+    "paddingMargin": "legacy converter",
+    "animatedValues": "runtime only",
+    "null": "not admitted to static IR",
+    "unmarkedVanillaExtract": "legacy converter",
+    "qualifiedTokenIdentity": false,
+    "publicApiChanged": false,
+    "externalArtifactAbi": false,
+    "effectInOrdinaryRuntime": false,
+    "androidNativeAcceptance": false,
+    "published": false,
+    "pushed": false
+  }
+}

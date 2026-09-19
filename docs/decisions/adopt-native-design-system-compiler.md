@@ -279,3 +279,7 @@ Approved M2.2f migrates exact `top`, `right`, `bottom`, `left`, `start` and `end
 ### Inset-alias IR expansion — 2026-09-19
 
 Approved M2.2g migrates the seven Crumbs inset aliases through scalar IR by expanding them into ordered canonical position-edge declarations at capture. Provenance retains the authored alias alongside each canonical property and an explicit expansion path; Effect Schema rejects alias/property pairs outside the declared expansion table. Expanded aliases and exact longhands use one canonical last-winner normalization law while physical and logical fields remain independent for React Native to resolve by layout direction. [Implementation evidence](../assessments/2026-09-19-native-ir-inset-aliases.md) records the alias matrix, precedence oracle and consumer qualification.
+
+### Gap-family scalar IR — 2026-09-19
+
+Approved M2.2h migrates `gap`, `rowGap` and `columnGap` through production scalar IR across view, text and image. Broad gap expands into canonical row and column declarations using the same provenance-validated alias mechanism as inset; exact axis fields and expanded declarations then share canonical last-winner normalization. Static values are finite point numbers, finite percentages or legacy tokens. [Implementation evidence](../assessments/2026-09-19-native-ir-gap.md) records direct ownership, generated broad/axis order and consumer qualification.

@@ -46,12 +46,14 @@ export type PropertyProvenance = SourceProvenance & {
   readonly shorthandExpansionPath: ReadonlyArray<string>
 }
 export type InsetAliasProperty = "inset" | "insetInline" | "insetBlock" | "insetInlineStart" | "insetInlineEnd" | "insetBlockStart" | "insetBlockEnd"
-export type AuthoredScalarProperty = MigratedScalarProperty | InsetAliasProperty
+export type ScalarAliasProperty = InsetAliasProperty | "gap"
+export type AuthoredScalarProperty = MigratedScalarProperty | ScalarAliasProperty
 export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
   | "flex" | "flexBasis" | "flexGrow" | "flexShrink"
   | "width" | "height" | "minWidth" | "minHeight" | "maxWidth" | "maxHeight"
   | "top" | "right" | "bottom" | "left" | "start" | "end"
+  | "rowGap" | "columnGap"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -86,7 +88,10 @@ const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "flexBasis", "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
 ])
-const insetAliasExpansions: Readonly<Record<InsetAliasProperty, readonly MigratedScalarProperty[]>> = {
+const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
+  ...dimensionValueProperties, "rowGap", "columnGap",
+])
+const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
   insetInline: ["left", "right"],
   insetBlock: ["top", "bottom"],
@@ -94,6 +99,7 @@ const insetAliasExpansions: Readonly<Record<InsetAliasProperty, readonly Migrate
   insetInlineEnd: ["end"],
   insetBlockStart: ["top"],
   insetBlockEnd: ["bottom"],
+  gap: ["rowGap", "columnGap"],
 }
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
@@ -123,12 +129,14 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
   "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
+  "rowGap", "columnGap",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
   "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
   "inset", "insetInline", "insetBlock", "insetInlineStart", "insetInlineEnd", "insetBlockStart", "insetBlockEnd",
+  "gap", "rowGap", "columnGap",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -156,8 +164,8 @@ const ScalarDeclarationSchema = Schema.Struct({
     const authoredProperty = declaration.provenance.authoredProperty
     const expectedPath = authoredProperty === declaration.property ? [] : [authoredProperty, declaration.property]
     const validPropertyPair = authoredProperty === declaration.property ||
-      (authoredProperty in insetAliasExpansions &&
-        insetAliasExpansions[authoredProperty as InsetAliasProperty].includes(declaration.property))
+      (authoredProperty in scalarAliasExpansions &&
+        scalarAliasExpansions[authoredProperty as ScalarAliasProperty].includes(declaration.property))
     const validExpansionPath = declaration.provenance.shorthandExpansionPath.length === expectedPath.length &&
       declaration.provenance.shorthandExpansionPath.every((property, index) => property === expectedPath[index])
     return declaration.property === declaration.provenance.canonicalProperty && validPropertyPair && validExpansionPath
@@ -165,6 +173,7 @@ const ScalarDeclarationSchema = Schema.Struct({
       : { path: ["provenance"], issue: "Declaration property, provenance names and expansion path must match" }
   }),
   Schema.makeFilter(declaration => dimensionValueProperties.has(declaration.property) ||
+    (percentageValueProperties.has(declaration.property) && declaration.value !== "auto") ||
     typeof declaration.value === "number" || typeof declaration.value === "object"
       ? undefined
       : { path: ["value"], issue: `${declaration.property} requires a finite number or token reference` }),
@@ -208,8 +217,9 @@ const migratedScalarProperties = [
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
   "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
+  "rowGap", "columnGap",
 ] as const
-const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(insetAliasExpansions)])
+const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
 const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiveDomain>> = {
   opacity: ["view", "text", "image"],
@@ -231,6 +241,8 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   left: ["view", "text", "image"],
   start: ["view", "text", "image"],
   end: ["view", "text", "image"],
+  rowGap: ["view", "text", "image"],
+  columnGap: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
@@ -285,8 +297,8 @@ function captureSelectedScalar(
         `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}: accessors cannot enter native IR.`)
     }
     if (descriptor.value === undefined) continue
-    const canonicalProperties = authoredProperty in insetAliasExpansions
-      ? insetAliasExpansions[authoredProperty as InsetAliasProperty]
+    const canonicalProperties = authoredProperty in scalarAliasExpansions
+      ? scalarAliasExpansions[authoredProperty as ScalarAliasProperty]
       : [authoredProperty as MigratedScalarProperty]
     for (const property of canonicalProperties) {
       primitiveDomain = primitiveDomain.filter(kind => propertyPrimitives[property].includes(kind))
@@ -374,14 +386,14 @@ function admitScalarValue(
   if (typeof value === "string") {
     const match = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)
     if (match?.[1] !== undefined) return Object.freeze({ _tag: "LegacyTokenReference", varName: match[1] })
-    if (dimensionValueProperties.has(property)) {
-      if (value === "auto") return value
+    if (percentageValueProperties.has(property)) {
+      if (dimensionValueProperties.has(property) && value === "auto") return value
       const percentage = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
       if (percentage?.[1] !== undefined && Number.isFinite(Number(percentage[1]))) return value as PercentageValue
     }
   }
   throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
-    `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected ${dimensionValueProperties.has(property) ? "a finite number, auto, a finite percentage or" : "a finite number or"} a legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
+    `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected ${dimensionValueProperties.has(property) ? "a finite number, auto, a finite percentage or" : percentageValueProperties.has(property) ? "a finite number, a finite percentage or" : "a finite number or"} a legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
 }
 
 function withoutSelectedProperties(

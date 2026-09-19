@@ -108,6 +108,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2e: Migrate the six width/height/min/max `DimensionValue` properties through production scalar IR with exact static value domains, primitive coverage and per-property last-winner order.
 - [x] M2.2f: Migrate exact physical and logical position-edge longhands through production scalar IR, retaining independent field identity before inset-alias expansion.
 - [x] M2.2g: Migrate the seven Crumbs inset aliases into canonical position-edge declarations, retaining authored alias provenance and ordered alias/longhand precedence without layout-direction inference.
+- [x] M2.2h: Migrate `gap`, `rowGap` and `columnGap` through production scalar IR, expanding broad gap into canonical axes with validated provenance and ordered broad/axis precedence.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -802,3 +803,12 @@ Next recommended slice: **M2.2g** — migrate the seven Crumbs inset aliases (`i
 - This slice adds no layout-direction inference, Animated/null admission, qualified token identity, public API or external artifact ABI. React Native retains responsibility for resolving physical and logical fields. See the [assessment and evidence](assessments/2026-09-19-native-ir-inset-aliases.md).
 
 Next recommended slice: **M2.2h** — migrate the native `gap`, `rowGap` and `columnGap` family through scalar IR, expanding broad `gap` into canonical row/column declarations and proving broad/axis precedence against the existing independent spacing oracle. Keep padding/margin aliases and layout-direction behavior separate. Begin only after approval.
+
+### 2026-09-19 — M2.2h gap-family scalar IR
+
+- Migrated `gap`, `rowGap` and `columnGap` before CSS serialization for view, text and image helpers. Static admission accepts finite point numbers, finite percentages and legacy token references; `auto`, CSS unit strings, arbitrary strings, nonfinite values and structured values fail without fallback.
+- Generalized the provenance-validated alias expansion table shared with inset. Broad `gap` emits ordered `rowGap` and `columnGap` declarations, while exact axis fields retain empty expansion paths. Schema decoding rejects undeclared property pairs and forged expansion paths.
+- A seeded 100-case independent evaluator proves broad/axis last-winner order. Direct ownership, primitive-domain, rejected-value, schema mutation, helper/composition, variant, recipe, token and compatibility cases cover both emitters; the established spacing oracle remains green.
+- Full package qualification passed 375 tests across 57 files with 14,450 assertions. No padding/margin migration, qualified token identity, public API or external artifact ABI is included. See the [assessment and evidence](assessments/2026-09-19-native-ir-gap.md).
+
+Next recommended slice: **M2.2i** — migrate physical padding longhands plus `padding`, `paddingHorizontal` and `paddingVertical` into canonical scalar IR declarations, proving broad/pair/side order against the spacing oracle. Keep logical padding aliases and margin migration separate. Begin only after approval.
