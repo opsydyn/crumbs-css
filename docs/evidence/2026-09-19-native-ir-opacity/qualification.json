@@ -1,0 +1,32 @@
+{
+  "slice": "M2.2a",
+  "recordedAt": "2026-09-19",
+  "sourceRevision": "bdb78d3a14d3fa74b13aac0cec758916c2cfb5b0",
+  "sourceState": "Working tree; implementation and documentation are committed after qualification",
+  "scope": {
+    "migratedPropertyFamily": ["opacity"],
+    "captureOrigin": "crumbs-native",
+    "legacyTokenIdentity": "raw --crumbs-* variable name; qualified identity deferred to M3",
+    "unmigratedProperties": "legacy converter",
+    "unmarkedVanillaExtract": "legacy converter"
+  },
+  "verification": [
+    { "command": "bun test packages/css/test/native-ir-opacity.test.ts", "status": "passed", "tests": 10, "assertions": 264 },
+    { "command": "bun run check", "status": "passed", "tests": 326, "assertions": 12953, "files": 50 },
+    { "command": "bun run test", "status": "passed", "tests": 326, "assertions": 12957, "files": 50, "reason": "final suite after helper-family coverage expansion" },
+    { "command": "bun run app:typecheck", "status": "passed" },
+    { "command": "bun run playground:check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run playground:packed --check", "status": "passed", "install": "fresh npm tarball consumer", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run docs:build", "status": "passed", "pages": 20 },
+    { "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles", "status": "passed", "claim": "declared host smoke ceilings only" },
+    { "command": "bun run budgets:validate", "status": "passed", "registryReady": false, "performanceQualification": "not-run" }
+  ],
+  "boundaries": {
+    "publicApiChanged": false,
+    "externalArtifactAbi": false,
+    "effectInOrdinaryRuntime": false,
+    "androidNativeAcceptance": false,
+    "published": false,
+    "pushed": false
+  }
+}

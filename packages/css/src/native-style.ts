@@ -5,6 +5,7 @@ import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import { markNativeStyleMap, NativeRecipeClassSymbol } from "./native-style-map"
 import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diagnostics"
 import { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
+import { markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/native-capture"
 export { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
 
 export type { NativeThemeTokenReference } from "./theme-token"
@@ -173,41 +174,43 @@ export function style<const TRule extends NativeAuthoringRule>(
   rule: TRule & CheckedNativeRule<TRule>,
   debugId?: string,
 ): NativeStyleResult<TRule> {
-  return authorStyle(rule, debugId) as unknown as NativeStyleResult<TRule>
+  return authorStyle(rule, ["view", "text", "image"], debugId) as unknown as NativeStyleResult<TRule>
 }
 
 export function viewStyle(
   rule: StaticNativeStyleInput<ViewStyle> | NativeStyleComposition<StaticNativeStyleInput<ViewStyle>, ViewStyle>,
   debugId?: string,
 ): ViewStyle {
-  return authorStyle(rule, debugId) as unknown as ViewStyle
+  return authorStyle(rule, ["view"], debugId) as unknown as ViewStyle
 }
 
 export function textStyle(
   rule: StaticNativeStyleInput<TextStyle> | NativeStyleComposition<StaticNativeStyleInput<TextStyle>, TextStyle>,
   debugId?: string,
 ): TextStyle {
-  return authorStyle(rule, debugId) as unknown as TextStyle
+  return authorStyle(rule, ["text"], debugId) as unknown as TextStyle
 }
 
 export function imageStyle(
   rule: StaticNativeStyleInput<ImageStyle> | NativeStyleComposition<StaticNativeStyleInput<ImageStyle>, ImageStyle>,
   debugId?: string,
 ): ImageStyle {
-  return authorStyle(rule, debugId) as unknown as ImageStyle
+  return authorStyle(rule, ["image"], debugId) as unknown as ImageStyle
 }
 
-function authorStyle(rule: unknown, debugId?: string): string {
+function authorStyle(rule: unknown, primitiveDomain: NativePrimitiveDomain, debugId?: string): string {
   // A compiled reference is a build-time class handle, not a declaration object.
-  if (typeof rule === "string") return authorStyle([rule], debugId)
-  if (!Array.isArray(rule)) return vanillaStyle(rule as StyleRule, debugId)
+  if (typeof rule === "string") return authorStyle([rule], primitiveDomain, debugId)
+  if (!Array.isArray(rule)) {
+    return vanillaStyle(markNativeCaptureRule(rule as Record<string, unknown>, primitiveDomain) as StyleRule, debugId)
+  }
 
   // ADR D2: native order includes inline rules, nested sequences and repeats.
   const identifier = vanillaStyle({}, debugId)
   const classList = [identifier, ...rule.map((entry, index) =>
     typeof entry === "string"
       ? entry
-      : authorStyle(entry, debugId === undefined ? undefined : `${debugId}_${index}`),
+      : authorStyle(entry, primitiveDomain, debugId === undefined ? undefined : `${debugId}_${index}`),
   )].join(" ")
   registerComposition({ identifier, classList }, getFileScope())
   markCompositionUsed(identifier)
@@ -220,7 +223,7 @@ export function styleVariants<const TVariants extends Readonly<Record<string, Na
 ): NativeStyleVariants<TVariants> {
   const result: Partial<Record<keyof TVariants, NativeStyle>> = {}
   for (const [name, rule] of Object.entries(variants) as Array<[keyof TVariants, NativeAuthoringRule]>) {
-    result[name] = authorStyle(rule, debugId === undefined ? undefined : `${debugId}_${String(name)}`) as unknown as NativeStyle
+    result[name] = authorStyle(rule, ["view", "text", "image"], debugId === undefined ? undefined : `${debugId}_${String(name)}`) as unknown as NativeStyle
   }
   return markNativeStyleMap(result) as NativeStyleVariants<TVariants>
 }
@@ -289,7 +292,7 @@ export function createTheme<TContract extends Record<string, unknown>>(
 function recipeClass(rule: NativeViewStyleInput, debugId?: string): NativeRecipeClassRef {
   return Object.defineProperty({
     $$type: NativeRecipeClassType,
-    className: vanillaStyle(rule as StyleRule, debugId),
+    className: vanillaStyle(markNativeCaptureRule(rule as Record<string, unknown>, ["view"]) as StyleRule, debugId),
   }, NativeRecipeClassSymbol, { value: true, enumerable: true }) as NativeRecipeClassRef
 }
 

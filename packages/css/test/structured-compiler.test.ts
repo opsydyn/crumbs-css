@@ -77,10 +77,12 @@ describe("structured native compilation", () => {
       `{transform: [{rotate: '20px'}]}`, `{transform: [{matrix: [1,2]}]}`, `{shadowOffset: {width: 2}}`,
       `{shadowOffset: {width: 'var(--crumbs-x)', height: 2}}`, `{transform: [{scale: {__getValue() {throw new Error('EXECUTED')}}}]}`,
       `{filter: [{brightness: 2}]}`, `{boxShadow: [{offsetX: 2, offsetY: 3}]}`,
-      `{transform: Array(2)}`, `{transform: [{matrix: Array(16)}]}`, `{opacity: {__getValue() {throw new Error('EXECUTED')}}}`,
+      `{transform: Array(2)}`, `{transform: [{matrix: Array(16)}]}`,
     ]) {
       await expect(compile(`export const invalid = viewStyle(${rule});`)).rejects.toThrow(/CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE.*case\.css\.ts.*runtime style/)
     }
+    await expect(compile(`export const invalid = viewStyle({opacity: {__getValue() {throw new Error('EXECUTED')}}} as any);`))
+      .rejects.toThrow(/CRUMBS_IR_INVALID_VALUE.*case\.css\.ts.*not sent to the CSS fallback/)
   })
   it("matches independent ordered whole-value replacement for generated compositions", async () => {
     const rule = fc.record({ opacity: fc.integer({min: 0, max: 1}), transform: fc.array(fc.integer({min: -20, max: 20}).map(translateX => ({translateX})), {maxLength: 4}), shadowOffset: fc.record({width: fc.integer({min: -10,max: 10}), height: fc.integer({min: -10,max: 10})}) })

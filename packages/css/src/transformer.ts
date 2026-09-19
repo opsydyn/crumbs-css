@@ -21,6 +21,11 @@ import { NativeStyleMapType } from "./native-style-map"
 import {captureNativeExports, ExportRecordType, ExportStringType, ExportUndefinedType, ExportNegativeZeroType} from "./export-values"
 import { parseCssClassRules } from "./parse-virtual-css"
 import { splitStructuredNativeValues } from "./structured-native-values"
+import {
+  captureOpacityIntoNativeIr,
+  lowerOpacityBlock,
+  type OpacityDeclarationBlock,
+} from "./compiler/native-ir"
 
 // Minimal esbuild plugin shape. `setup` receives `build: unknown` so it doesn't
 // conflict with esbuild's PluginBuild, which is pulled in transitively and has
@@ -62,7 +67,7 @@ export function buildStyleSheetCode(
 ): string {
   const useStyleSheet = options.useStyleSheet ?? true
   const createEntries = [...classStyles.entries()]
-    .map(([cls, styles]) => `  "${cls}": ${JSON.stringify(styles)}`)
+    .map(([cls, styles]) => `  ${JSON.stringify(cls)}: ${serializeRuntimeValue(styles)}`)
     .join(",\n")
 
   const exports = [...exportMap.entries()]
@@ -82,6 +87,52 @@ export function buildStyleSheetCode(
   ].filter(Boolean)
 
   return parts.join("\n")
+}
+
+function serializeRuntimeValue(value: unknown): string {
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) throw new TypeError("Native style output contains a non-finite number")
+    return Object.is(value, -0) ? "-0" : JSON.stringify(value)
+  }
+  if (typeof value === "string" || typeof value === "boolean" || value === null) return JSON.stringify(value)
+  if (Array.isArray(value)) return `[${value.map(serializeRuntimeValue).join(",")}]`
+  if (typeof value === "object" && value !== null) {
+    const entries = Object.entries(value).map(([key, entry]) => {
+      const property = key === "__proto__" ? `[${JSON.stringify(key)}]` : JSON.stringify(key)
+      return `${property}:${serializeRuntimeValue(entry)}`
+    })
+    return `{${entries.join(",")}}`
+  }
+  throw new TypeError(`Native style output contains unsupported ${typeof value}`)
+}
+
+function sourceIdentity(filePath: string, projectRoot: string): { readonly packageOwner: string; readonly sourceId: string } {
+  let directory = path.dirname(path.resolve(filePath))
+  const resolvedProjectRoot = path.resolve(projectRoot)
+  while (true) {
+    const manifestPath = path.join(directory, "package.json")
+    try {
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as { name?: unknown }
+      if (typeof manifest.name === "string" && manifest.name.length > 0) {
+        return {
+          packageOwner: manifest.name,
+          sourceId: toPosixPath(path.relative(directory, path.resolve(filePath))),
+        }
+      }
+    } catch {
+      // Continue toward the project root when this directory is not a package.
+    }
+    if (directory === resolvedProjectRoot || path.dirname(directory) === directory) break
+    directory = path.dirname(directory)
+  }
+  return {
+    packageOwner: path.basename(resolvedProjectRoot) || "project",
+    sourceId: toPosixPath(path.relative(resolvedProjectRoot, path.resolve(filePath))),
+  }
+}
+
+function toPosixPath(value: string): string {
+  return value.split(path.sep).join("/")
 }
 
 function serializeStyleExport(
@@ -149,6 +200,8 @@ async function processVanillaFileForNative({
   identOption = process.env.NODE_ENV === "production" ? "short" : "debug",
   serializeVirtualCssPath,
   nativeValuesByClass,
+  nativeIrByClass,
+  projectRoot,
 }: {
   source: string
   filePath: string
@@ -160,6 +213,8 @@ async function processVanillaFileForNative({
     source: string
   }) => string | Promise<string>
   nativeValuesByClass: Map<string, Record<string, unknown>>
+  nativeIrByClass: Map<string, OpacityDeclarationBlock>
+  projectRoot: string
 }): Promise<string> {
   const cssByFileScope = new Map<string, CssBlock[]>()
   const localClassNames = new Set<string>()
@@ -169,8 +224,15 @@ async function processVanillaFileForNative({
     appendCss: (css, fileScope) => {
       if (!outputCss) return
       if (css.type === "local") {
+        const source = sourceIdentity(fileScope.filePath, projectRoot)
+        const opacity = captureOpacityIntoNativeIr(css.rule as Record<string, unknown>, {
+          packageOwner: source.packageOwner,
+          sourceId: source.sourceId,
+          className: css.selector,
+        })
+        if (opacity.block !== undefined) nativeIrByClass.set(css.selector, opacity.block)
         const { cssRule, nativeValues } = splitStructuredNativeValues(
-          css.rule as Record<string, unknown>, `${fileScope.filePath} (class ${css.selector})`,
+          opacity.cssRule, `${fileScope.filePath} (class ${css.selector})`,
         )
         if (Object.keys(nativeValues).length > 0) nativeValuesByClass.set(css.selector, nativeValues)
         css = { ...css, rule: cssRule }
@@ -273,11 +335,14 @@ export async function transformCssTsToStyleSheet(
   })
 
   const nativeValuesByClass = new Map<string, Record<string, unknown>>()
+  const nativeIrByClass = new Map<string, OpacityDeclarationBlock>()
   const vanillaFile = await processVanillaFileForNative({
     source,
     filePath: absoluteFilePath,
     identOption,
     nativeValuesByClass,
+    nativeIrByClass,
+    projectRoot: cwd,
   })
 
   const lines = vanillaFile.split("\n")
@@ -326,6 +391,9 @@ export async function transformCssTsToStyleSheet(
 
   for (const [cls, nativeValues] of nativeValuesByClass) {
     classStyles.set(cls, { ...classStyles.get(cls), ...nativeValues })
+  }
+  for (const [cls, block] of nativeIrByClass) {
+    classStyles.set(cls, { ...classStyles.get(cls), ...lowerOpacityBlock(block) })
   }
 
   // Resolve composed class names (space-separated) by merging their styles.
