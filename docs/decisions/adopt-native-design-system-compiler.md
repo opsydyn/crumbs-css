@@ -299,3 +299,7 @@ Approved M2.2k migrates physical margin sides and broad/horizontal/vertical alia
 ### Logical margin scalar IR — 2026-09-19
 
 Approved M2.2l migrates native start/end margin and six inline/block aliases while preserving logical fields independently from physical sides. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-margin.md) records generated ordering and qualification.
+
+### Physical border-width scalar IR — 2026-09-19
+
+Approved M2.2m migrates broad and physical side border widths with finite-number/token admission and provenance-validated broad expansion. [Implementation evidence](../assessments/2026-09-19-native-ir-border-width.md) records generated precedence and qualification.

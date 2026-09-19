@@ -50,6 +50,7 @@ export type ScalarAliasProperty = InsetAliasProperty | "gap" | "padding" | "padd
   | "paddingInline" | "paddingBlock" | "paddingInlineStart" | "paddingInlineEnd" | "paddingBlockStart" | "paddingBlockEnd"
   | "margin" | "marginHorizontal" | "marginVertical"
   | "marginInline" | "marginBlock" | "marginInlineStart" | "marginInlineEnd" | "marginBlockStart" | "marginBlockEnd"
+  | "borderWidth"
 export type AuthoredScalarProperty = MigratedScalarProperty | ScalarAliasProperty
 export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
@@ -61,6 +62,7 @@ export type MigratedScalarProperty =
   | "paddingStart" | "paddingEnd"
   | "marginTop" | "marginRight" | "marginBottom" | "marginLeft"
   | "marginStart" | "marginEnd"
+  | "borderTopWidth" | "borderRightWidth" | "borderBottomWidth" | "borderLeftWidth"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -122,6 +124,7 @@ const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly Migra
   marginInline: ["marginLeft", "marginRight"], marginBlock: ["marginTop", "marginBottom"],
   marginInlineStart: ["marginStart"], marginInlineEnd: ["marginEnd"],
   marginBlockStart: ["marginTop"], marginBlockEnd: ["marginBottom"],
+  borderWidth: ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"],
 }
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
@@ -156,6 +159,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "paddingStart", "paddingEnd",
   "marginTop", "marginRight", "marginBottom", "marginLeft",
   "marginStart", "marginEnd",
+  "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -167,6 +171,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "paddingInline", "paddingBlock", "paddingInlineStart", "paddingInlineEnd", "paddingBlockStart", "paddingBlockEnd", "paddingStart", "paddingEnd",
   "margin", "marginHorizontal", "marginVertical", "marginTop", "marginRight", "marginBottom", "marginLeft",
   "marginInline", "marginBlock", "marginInlineStart", "marginInlineEnd", "marginBlockStart", "marginBlockEnd", "marginStart", "marginEnd",
+  "borderWidth", "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -252,6 +257,7 @@ const migratedScalarProperties = [
   "paddingStart", "paddingEnd",
   "marginTop", "marginRight", "marginBottom", "marginLeft",
   "marginStart", "marginEnd",
+  "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
@@ -283,6 +289,8 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   marginTop: ["view", "text", "image"], marginRight: ["view", "text", "image"],
   marginBottom: ["view", "text", "image"], marginLeft: ["view", "text", "image"],
   marginStart: ["view", "text", "image"], marginEnd: ["view", "text", "image"],
+  borderTopWidth: ["view", "text", "image"], borderRightWidth: ["view", "text", "image"],
+  borderBottomWidth: ["view", "text", "image"], borderLeftWidth: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
