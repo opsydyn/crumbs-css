@@ -66,6 +66,7 @@ export type MigratedScalarProperty =
   | "borderTopWidth" | "borderRightWidth" | "borderBottomWidth" | "borderLeftWidth"
   | "borderStartWidth" | "borderEndWidth"
   | "borderTopColor" | "borderRightColor" | "borderBottomColor" | "borderLeftColor"
+  | "borderStartColor" | "borderEndColor"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | string | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -109,6 +110,7 @@ const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
 ])
 const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
+  "borderStartColor", "borderEndColor",
 ])
 const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
@@ -169,6 +171,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
   "borderStartWidth", "borderEndWidth",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
+  "borderStartColor", "borderEndColor",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -183,6 +186,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "borderWidth", "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
   "borderStartWidth", "borderEndWidth",
   "borderColor", "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
+  "borderStartColor", "borderEndColor",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -276,6 +280,7 @@ const migratedScalarProperties = [
   "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
   "borderStartWidth", "borderEndWidth",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
+  "borderStartColor", "borderEndColor",
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
@@ -312,6 +317,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   borderStartWidth: ["view", "text", "image"], borderEndWidth: ["view", "text", "image"],
   borderTopColor: ["view", "text", "image"], borderRightColor: ["view", "text", "image"],
   borderBottomColor: ["view", "text", "image"], borderLeftColor: ["view", "text", "image"],
+  borderStartColor: ["view", "text", "image"], borderEndColor: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {

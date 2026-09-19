@@ -116,6 +116,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2m: Migrate physical border-width longhands and broad `borderWidth` expansion with finite numeric/token admission.
 - [x] M2.2n: Migrate exact logical `borderStartWidth` and `borderEndWidth` fields independently from physical sides.
 - [x] M2.2o: Introduce a property-specific color scalar domain and migrate broad plus physical border colors.
+- [x] M2.2p: Migrate exact logical `borderStartColor` and `borderEndColor` fields independently from physical colors.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -869,3 +870,10 @@ Next recommended slice: **M2.2o** — migrate physical border colors plus broad 
 - Focused qualification passed 19 tests with 583 assertions; full qualification passed 410 tests across 64 files with 15,487 assertions. See [evidence](assessments/2026-09-19-native-ir-border-color.md).
 
 Next recommended slice: **M2.2p** — migrate exact logical border color fields (`borderStartColor`, `borderEndColor`) independently from physical sides. Begin only after approval.
+
+### 2026-09-19 — M2.2p logical border-color scalar IR
+
+- Migrated exact `borderStartColor` and `borderEndColor` through the hardened color domain without aliases or direction inference.
+- Focused qualification passed 20 tests with 573 assertions; full qualification passed 415 tests across 65 files with 15,609 assertions. See [evidence](assessments/2026-09-19-native-ir-logical-border-color.md).
+
+Next recommended slice: **M2.2q** — migrate physical border radii plus broad `borderRadius`, preserving finite numeric/token admission and canonical corner precedence. Begin only after approval.
