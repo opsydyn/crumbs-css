@@ -111,6 +111,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2h: Migrate `gap`, `rowGap` and `columnGap` through production scalar IR, expanding broad gap into canonical axes with validated provenance and ordered broad/axis precedence.
 - [x] M2.2i: Migrate physical padding longhands plus broad and horizontal/vertical aliases through scalar IR with canonical broad/pair/side precedence.
 - [x] M2.2j: Migrate logical padding fields and inline/block aliases through scalar IR while retaining native start/end independently from physical sides.
+- [x] M2.2k: Migrate physical margin longhands plus broad and horizontal/vertical aliases through scalar IR with negative DimensionValue support.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -829,3 +830,10 @@ Next recommended slice: **M2.2j** — migrate logical padding fields and aliases
 - Focused qualification passed 20 tests with 598 assertions; full qualification passed 385 tests across 59 files with 14,748 assertions. See [evidence](assessments/2026-09-19-native-ir-logical-padding.md).
 
 Next recommended slice: **M2.2k** — migrate physical margin longhands plus broad and horizontal/vertical aliases, retaining negative DimensionValue support. Begin only after approval.
+
+### 2026-09-19 — M2.2k physical margin scalar IR
+
+- Migrated physical margin sides plus `margin`, `marginHorizontal` and `marginVertical`, retaining signed finite points, percentages, `auto` and tokens. Alias provenance is schema validated before canonical last-winner normalization.
+- Focused qualification passed 20 tests with 493 assertions; full qualification passed 390 tests across 60 files with 14,929 assertions. See [evidence](assessments/2026-09-19-native-ir-margin.md).
+
+Next recommended slice: **M2.2l** — migrate logical margin fields and inline/block aliases without collapsing native start/end into physical sides. Begin only after approval.

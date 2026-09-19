@@ -291,3 +291,7 @@ Approved M2.2i migrates physical padding longhands plus broad and horizontal/ver
 ### Logical padding scalar IR — 2026-09-19
 
 Approved M2.2j migrates native start/end padding and six inline/block aliases. Canonical expansion preserves authored provenance; logical fields remain independent from physical sides without compiler direction inference. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-padding.md) records generated ordering and qualification.
+
+### Physical margin scalar IR — 2026-09-19
+
+Approved M2.2k migrates physical margin sides and broad/horizontal/vertical aliases through scalar IR, including negative finite DimensionValues. [Implementation evidence](../assessments/2026-09-19-native-ir-margin.md) records generated precedence and qualification.

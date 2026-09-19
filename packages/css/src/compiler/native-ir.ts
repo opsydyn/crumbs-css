@@ -48,6 +48,7 @@ export type PropertyProvenance = SourceProvenance & {
 export type InsetAliasProperty = "inset" | "insetInline" | "insetBlock" | "insetInlineStart" | "insetInlineEnd" | "insetBlockStart" | "insetBlockEnd"
 export type ScalarAliasProperty = InsetAliasProperty | "gap" | "padding" | "paddingHorizontal" | "paddingVertical"
   | "paddingInline" | "paddingBlock" | "paddingInlineStart" | "paddingInlineEnd" | "paddingBlockStart" | "paddingBlockEnd"
+  | "margin" | "marginHorizontal" | "marginVertical"
 export type AuthoredScalarProperty = MigratedScalarProperty | ScalarAliasProperty
 export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
@@ -57,6 +58,7 @@ export type MigratedScalarProperty =
   | "rowGap" | "columnGap"
   | "paddingTop" | "paddingRight" | "paddingBottom" | "paddingLeft"
   | "paddingStart" | "paddingEnd"
+  | "marginTop" | "marginRight" | "marginBottom" | "marginLeft"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -92,6 +94,7 @@ const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "top", "right", "bottom", "left", "start", "end",
   "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
   "paddingStart", "paddingEnd",
+  "marginTop", "marginRight", "marginBottom", "marginLeft",
 ])
 const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   ...dimensionValueProperties, "rowGap", "columnGap",
@@ -111,6 +114,8 @@ const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly Migra
   paddingInline: ["paddingLeft", "paddingRight"], paddingBlock: ["paddingTop", "paddingBottom"],
   paddingInlineStart: ["paddingStart"], paddingInlineEnd: ["paddingEnd"],
   paddingBlockStart: ["paddingTop"], paddingBlockEnd: ["paddingBottom"],
+  margin: ["marginTop", "marginRight", "marginBottom", "marginLeft"],
+  marginHorizontal: ["marginLeft", "marginRight"], marginVertical: ["marginTop", "marginBottom"],
 }
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
@@ -143,6 +148,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "rowGap", "columnGap",
   "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
   "paddingStart", "paddingEnd",
+  "marginTop", "marginRight", "marginBottom", "marginLeft",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -152,6 +158,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "gap", "rowGap", "columnGap",
   "padding", "paddingHorizontal", "paddingVertical", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
   "paddingInline", "paddingBlock", "paddingInlineStart", "paddingInlineEnd", "paddingBlockStart", "paddingBlockEnd", "paddingStart", "paddingEnd",
+  "margin", "marginHorizontal", "marginVertical", "marginTop", "marginRight", "marginBottom", "marginLeft",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -235,6 +242,7 @@ const migratedScalarProperties = [
   "rowGap", "columnGap",
   "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
   "paddingStart", "paddingEnd",
+  "marginTop", "marginRight", "marginBottom", "marginLeft",
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
@@ -263,6 +271,8 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   paddingTop: ["view", "text", "image"], paddingRight: ["view", "text", "image"],
   paddingBottom: ["view", "text", "image"], paddingLeft: ["view", "text", "image"],
   paddingStart: ["view", "text", "image"], paddingEnd: ["view", "text", "image"],
+  marginTop: ["view", "text", "image"], marginRight: ["view", "text", "image"],
+  marginBottom: ["view", "text", "image"], marginLeft: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
