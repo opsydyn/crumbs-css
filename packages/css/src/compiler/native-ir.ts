@@ -86,6 +86,7 @@ export type MigratedScalarProperty =
   | "overflow"
   | "flexDirection" | "flexWrap" | "alignContent" | "alignItems" | "alignSelf" | "justifyContent"
   | "boxSizing"
+  | "aspectRatio"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -136,6 +137,7 @@ const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "borderStartColor", "borderEndColor",
 ])
 const stringValueProperties: ReadonlySet<MigratedScalarProperty> = new Set(["fontFamily"])
+const numberOrStringValueProperties: ReadonlySet<MigratedScalarProperty> = new Set(["aspectRatio"])
 const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, ReadonlySet<unknown>>>> = {
   fontStyle: new Set(["normal", "italic"]),
   fontWeight: new Set([
@@ -252,6 +254,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "overflow",
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
+  "aspectRatio",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -287,6 +290,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "overflow",
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
+  "aspectRatio",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -331,6 +335,8 @@ const ScalarDeclarationSchema = Schema.Struct({
     const literalValues = literalValueProperties[declaration.property]
     const valid = typeof value === "object" || (literalValues !== undefined
       ? literalValues.has(value)
+      : numberOrStringValueProperties.has(declaration.property)
+      ? typeof value === "number" || typeof value === "string" && value.length > 0
       : (colorValueProperties.has(declaration.property) || stringValueProperties.has(declaration.property))
       ? typeof value === "string" && value.length > 0
       : typeof value === "number" || (dimensionValueProperties.has(declaration.property)
@@ -408,6 +414,7 @@ const migratedScalarProperties = [
   "overflow",
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
+  "aspectRatio",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -468,6 +475,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   alignContent: ["view", "text", "image"], alignItems: ["view", "text", "image"],
   alignSelf: ["view", "text", "image"], justifyContent: ["view", "text", "image"],
   boxSizing: ["view", "text", "image"],
+  aspectRatio: ["view", "text", "image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
@@ -622,6 +630,16 @@ function admitScalarValue(
     if (literalValues.has(value)) return value as boolean | number | string
     throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
       `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected a supported native literal or legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
+  }
+  if (numberOrStringValueProperties.has(property)) {
+    if (typeof value === "number" && Number.isFinite(value)) return value
+    if (typeof value === "string") {
+      const token = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)
+      if (token?.[1] !== undefined) return Object.freeze({ _tag: "LegacyTokenReference", varName: token[1] })
+      if (value.length > 0) return value
+    }
+    throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
+      `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected a finite number, non-empty native string or legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
   }
   if (colorValueProperties.has(property) || stringValueProperties.has(property)) {
     if (typeof value === "string") {

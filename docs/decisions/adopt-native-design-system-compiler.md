@@ -403,3 +403,7 @@ Approved M2.2ak migrates `flexDirection`, `flexWrap`, `alignContent`, `alignItem
 ### Box-sizing scalar IR and FlexStyle audit — 2026-09-19
 
 Approved M2.2al migrates `boxSizing` through its exact `border-box | content-box` literal/token domain across view, text and image. The accompanying installed-type audit establishes `aspectRatio` as the sole remaining FlexStyle field outside scalar IR; it requires an isolated finite-number/non-empty-string/token domain so arbitrary strings do not leak into existing numeric families. [Implementation evidence](../assessments/2026-09-19-native-ir-box-sizing.md) records exact admission, generated ordering, the remaining-surface audit and consumer qualification.
+
+### Aspect-ratio scalar IR and FlexStyle completion — 2026-09-19
+
+Approved M2.2am migrates `aspectRatio` through an isolated finite-number/non-empty-string/token domain across view, text and image. The domain is checked independently at capture and Effect Schema decoding, so its installed string representation does not widen existing numeric property families. This migration completes scalar-IR coverage of the installed React Native FlexStyle surface. [Implementation evidence](../assessments/2026-09-19-native-ir-aspect-ratio.md) records mixed-representation generation, domain isolation and consumer qualification.
