@@ -323,3 +323,7 @@ Approved M2.2q migrates broad and four physical corner radii with finite-number/
 ### Logical corner-radius scalar IR — 2026-09-19
 
 Approved M2.2r migrates the four fully logical corner-radius fields as exact scalar declarations across view, text and image. They retain their authored identities independently from physical corners; no alias expansion or layout-direction inference is introduced. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-border-radius.md) records property-based ordering, schema rejection and consumer qualification.
+
+### Semi-logical corner-radius scalar IR — 2026-09-19
+
+Approved M2.2s migrates the four top/bottom start/end corner-radius fields as exact scalar declarations across view, text and image. Physical, fully logical and semi-logical property identities coexist without compiler remapping. [Implementation evidence](../assessments/2026-09-19-native-ir-semi-logical-border-radius.md) records generated ordering, cross-family independence and consumer qualification.
