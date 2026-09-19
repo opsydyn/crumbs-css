@@ -343,3 +343,7 @@ Approved M2.2v migrates `tintColor` through the existing colour domain with the 
 ### Image overlay-colour scalar IR — 2026-09-19
 
 Approved M2.2w migrates `overlayColor` through the existing colour domain with the installed ImageStyle-only primitive contract. Capture and Effect Schema decoding share the same primitive table, so marked view/text usage and forged cross-primitive artifacts fail deterministically. [Implementation evidence](../assessments/2026-09-19-native-ir-overlay-color.md) records generated ordering, primitive rejection and consumer qualification.
+
+### Shadow-colour scalar IR — 2026-09-19
+
+Approved M2.2x migrates `shadowColor` through the existing colour domain across view, text and image, following the installed ShadowStyleIOS inheritance. Exact provenance, literal/token identity and deterministic last-winner order are retained. [Implementation evidence](../assessments/2026-09-19-native-ir-shadow-color.md) records primitive coverage, generated ordering and consumer qualification.

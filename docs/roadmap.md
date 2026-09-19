@@ -124,6 +124,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2u: Migrate text-only `color` through scalar IR and derive decoded primitive admission from the shared per-property contract.
 - [x] M2.2v: Migrate image-only `tintColor` through the colour scalar domain and hardened primitive decoder contract.
 - [x] M2.2w: Migrate image-only `overlayColor` through the colour scalar domain and hardened primitive decoder contract.
+- [x] M2.2x: Migrate inherited `shadowColor` through the colour scalar domain across view, text and image.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -933,3 +934,10 @@ Next recommended slice: **M2.2w** — migrate image-only `overlayColor` through 
 - Focused qualification passed 61 tests with 1,024 assertions; full qualification passed 450 tests across 72 files with 16,528 assertions. See [evidence](assessments/2026-09-19-native-ir-overlay-color.md).
 
 Next recommended slice: **M2.2x** — migrate `shadowColor` through the established colour domain with the exact installed primitive coverage inherited from React Native ShadowStyleIOS. Begin only after approval.
+
+### 2026-09-19 — M2.2x shadow-colour scalar IR
+
+- Migrated `shadowColor` through the non-empty colour string/token domain across view, text and image, matching ShadowStyleIOS inheritance in the installed React Native types.
+- Focused qualification passed 66 tests with 1,138 assertions; full qualification passed 455 tests across 73 files with 16,642 assertions. See [evidence](assessments/2026-09-19-native-ir-shadow-color.md).
+
+Next recommended slice: **M2.2y** — migrate finite numeric/token `shadowOpacity` and `shadowRadius` through scalar IR with their inherited view, text and image primitive coverage. Begin only after approval.
