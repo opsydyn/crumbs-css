@@ -371,3 +371,7 @@ Approved M2.2ac migrates text-only `fontFamily` through a dedicated non-empty st
 ### Font-variant scalar IR — 2026-09-19
 
 Approved M2.2ad migrates text-only `fontStyle` and `fontWeight` through property-specific literal/token domains derived from the installed React Native contract. Both string and numeric weight forms retain exact identity, while unsupported literals and forged cross-property values fail consistently at capture and Effect Schema decoding. [Implementation evidence](../assessments/2026-09-19-native-ir-font-variants.md) records exhaustive literal coverage, generated ordering and consumer qualification.
+
+### Text-alignment scalar IR — 2026-09-19
+
+Approved M2.2ae migrates text-only `textAlign`, `textAlignVertical` and `verticalAlign` through property-specific literal/token domains derived from the installed React Native contract. Shared capture and Effect Schema admission preserve exact-field ordering and reject forged primitive domains, provenance and cross-property literals. [Implementation evidence](../assessments/2026-09-19-native-ir-text-alignment.md) records exhaustive literal coverage, generated ordering and consumer qualification.

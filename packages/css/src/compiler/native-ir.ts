@@ -77,6 +77,7 @@ export type MigratedScalarProperty =
   | "textShadowColor" | "textShadowRadius"
   | "textDecorationColor"
   | "fontSize" | "letterSpacing" | "lineHeight" | "fontFamily" | "fontStyle" | "fontWeight"
+  | "textAlign" | "textAlignVertical" | "verticalAlign"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -134,6 +135,9 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
     100, 200, 300, 400, 500, 600, 700, 800, 900,
     "ultralight", "thin", "light", "medium", "regular", "semibold", "condensedBold", "condensed", "heavy", "black",
   ]),
+  textAlign: new Set(["auto", "left", "right", "center", "justify"]),
+  textAlignVertical: new Set(["auto", "top", "bottom", "center"]),
+  verticalAlign: new Set(["auto", "top", "bottom", "middle"]),
 }
 const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
@@ -205,6 +209,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
   "fontSize", "letterSpacing", "lineHeight", "fontFamily", "fontStyle", "fontWeight",
+  "textAlign", "textAlignVertical", "verticalAlign",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -232,6 +237,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
   "fontSize", "letterSpacing", "lineHeight", "fontFamily", "fontStyle", "fontWeight",
+  "textAlign", "textAlignVertical", "verticalAlign",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -341,6 +347,7 @@ const migratedScalarProperties = [
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
   "fontSize", "letterSpacing", "lineHeight", "fontFamily", "fontStyle", "fontWeight",
+  "textAlign", "textAlignVertical", "verticalAlign",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -391,6 +398,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   textDecorationColor: ["text"],
   fontSize: ["text"], letterSpacing: ["text"], lineHeight: ["text"], fontFamily: ["text"],
   fontStyle: ["text"], fontWeight: ["text"],
+  textAlign: ["text"], textAlignVertical: ["text"], verticalAlign: ["text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],

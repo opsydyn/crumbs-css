@@ -131,6 +131,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2ab: Migrate text-only `fontSize`, `letterSpacing` and `lineHeight` through finite numeric/token scalar IR.
 - [x] M2.2ac: Migrate text-only `fontFamily` through a property-specific non-empty string/token scalar domain.
 - [x] M2.2ad: Migrate text-only `fontStyle` and `fontWeight` through explicit installed React Native literal/token domains.
+- [x] M2.2ae: Migrate text-only `textAlign`, `textAlignVertical` and `verticalAlign` through explicit installed React Native literal/token domains.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -989,3 +990,10 @@ Next recommended slice: **M2.2ad** — migrate text-only `fontStyle` and `fontWe
 - Focused qualification passed 34 tests with 636 assertions; full qualification passed 485 tests across 79 files with 17,419 assertions. See [evidence](assessments/2026-09-19-native-ir-font-variants.md).
 
 Next recommended slice: **M2.2ae** — migrate text alignment fields (`textAlign`, `textAlignVertical`, `verticalAlign`) through explicit property-specific literal/token domains matching the installed React Native contracts. Begin only after approval.
+
+### 2026-09-19 — M2.2ae text-alignment scalar IR
+
+- Migrated text-only `textAlign`, `textAlignVertical` and `verticalAlign` through property-specific literal/token domains. Capture and Effect Schema decoding share exact installed React Native value sets and reject cross-property literals even where domains overlap.
+- Focused qualification passed 29 tests with 528 assertions; full qualification passed 490 tests across 80 files with 17,565 assertions. See [evidence](assessments/2026-09-19-native-ir-text-alignment.md).
+
+Next recommended slice: **M2.2af** — migrate text-only `textDecorationLine` and `textDecorationStyle` through explicit property-specific literal/token domains, retaining `textDecorationColor` as its independently qualified colour field. Begin only after approval.
