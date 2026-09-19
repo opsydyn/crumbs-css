@@ -130,6 +130,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2aa: Migrate text-only `textDecorationColor` through the colour scalar domain and hardened primitive decoder contract.
 - [x] M2.2ab: Migrate text-only `fontSize`, `letterSpacing` and `lineHeight` through finite numeric/token scalar IR.
 - [x] M2.2ac: Migrate text-only `fontFamily` through a property-specific non-empty string/token scalar domain.
+- [x] M2.2ad: Migrate text-only `fontStyle` and `fontWeight` through explicit installed React Native literal/token domains.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -981,3 +982,10 @@ Next recommended slice: **M2.2ac** — introduce a property-specific non-empty s
 - Focused qualification passed 29 tests with 478 assertions; full qualification passed 480 tests across 78 files with 17,261 assertions. See [evidence](assessments/2026-09-19-native-ir-font-family.md).
 
 Next recommended slice: **M2.2ad** — migrate text-only `fontStyle` and `fontWeight` through explicit literal/token domains matching the installed React Native contracts, without widening unrestricted string admission. Begin only after approval.
+
+### 2026-09-19 — M2.2ad font-variant scalar IR
+
+- Migrated text-only `fontStyle` and `fontWeight` through a shared property-specific literal/token table. All installed React Native string and numeric weight forms retain exact identity; unsupported literals and forged cross-property values fail at capture and Effect Schema decoding.
+- Focused qualification passed 34 tests with 636 assertions; full qualification passed 485 tests across 79 files with 17,419 assertions. See [evidence](assessments/2026-09-19-native-ir-font-variants.md).
+
+Next recommended slice: **M2.2ae** — migrate text alignment fields (`textAlign`, `textAlignVertical`, `verticalAlign`) through explicit property-specific literal/token domains matching the installed React Native contracts. Begin only after approval.

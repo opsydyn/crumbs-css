@@ -367,3 +367,7 @@ Approved M2.2ab migrates text-only `fontSize`, `letterSpacing` and `lineHeight` 
 ### Font-family scalar IR — 2026-09-19
 
 Approved M2.2ac migrates text-only `fontFamily` through a dedicated non-empty string/token domain. This domain permits platform font names while keeping arbitrary strings out of numeric scalar properties; shared primitive admission rejects view/image use and forged artifacts deterministically. [Implementation evidence](../assessments/2026-09-19-native-ir-font-family.md) records generated ordering, string-domain isolation and consumer qualification.
+
+### Font-variant scalar IR — 2026-09-19
+
+Approved M2.2ad migrates text-only `fontStyle` and `fontWeight` through property-specific literal/token domains derived from the installed React Native contract. Both string and numeric weight forms retain exact identity, while unsupported literals and forged cross-property values fail consistently at capture and Effect Schema decoding. [Implementation evidence](../assessments/2026-09-19-native-ir-font-variants.md) records exhaustive literal coverage, generated ordering and consumer qualification.

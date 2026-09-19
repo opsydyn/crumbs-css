@@ -76,7 +76,7 @@ export type MigratedScalarProperty =
   | "shadowOpacity" | "shadowRadius"
   | "textShadowColor" | "textShadowRadius"
   | "textDecorationColor"
-  | "fontSize" | "letterSpacing" | "lineHeight" | "fontFamily"
+  | "fontSize" | "letterSpacing" | "lineHeight" | "fontFamily" | "fontStyle" | "fontWeight"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -127,6 +127,14 @@ const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "borderStartColor", "borderEndColor",
 ])
 const stringValueProperties: ReadonlySet<MigratedScalarProperty> = new Set(["fontFamily"])
+const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, ReadonlySet<unknown>>>> = {
+  fontStyle: new Set(["normal", "italic"]),
+  fontWeight: new Set([
+    "normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900",
+    100, 200, 300, 400, 500, 600, 700, 800, 900,
+    "ultralight", "thin", "light", "medium", "regular", "semibold", "condensedBold", "condensed", "heavy", "black",
+  ]),
+}
 const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
   insetInline: ["left", "right"],
@@ -196,7 +204,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "shadowOpacity", "shadowRadius",
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
-  "fontSize", "letterSpacing", "lineHeight", "fontFamily",
+  "fontSize", "letterSpacing", "lineHeight", "fontFamily", "fontStyle", "fontWeight",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -223,7 +231,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "shadowOpacity", "shadowRadius",
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
-  "fontSize", "letterSpacing", "lineHeight", "fontFamily",
+  "fontSize", "letterSpacing", "lineHeight", "fontFamily", "fontStyle", "fontWeight",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -265,7 +273,10 @@ const ScalarDeclarationSchema = Schema.Struct({
   Schema.makeFilter(declaration => {
     const value = declaration.value
     const finitePercentage = typeof value === "string" && PercentageValueSchema.pipe(Schema.is)(value)
-    const valid = typeof value === "object" || ((colorValueProperties.has(declaration.property) || stringValueProperties.has(declaration.property))
+    const literalValues = literalValueProperties[declaration.property]
+    const valid = typeof value === "object" || (literalValues !== undefined
+      ? literalValues.has(value)
+      : (colorValueProperties.has(declaration.property) || stringValueProperties.has(declaration.property))
       ? typeof value === "string" && value.length > 0
       : typeof value === "number" || (dimensionValueProperties.has(declaration.property)
         ? value === "auto" || finitePercentage
@@ -329,7 +340,7 @@ const migratedScalarProperties = [
   "shadowOpacity", "shadowRadius",
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
-  "fontSize", "letterSpacing", "lineHeight", "fontFamily",
+  "fontSize", "letterSpacing", "lineHeight", "fontFamily", "fontStyle", "fontWeight",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -379,6 +390,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   textShadowColor: ["text"], textShadowRadius: ["text"],
   textDecorationColor: ["text"],
   fontSize: ["text"], letterSpacing: ["text"], lineHeight: ["text"], fontFamily: ["text"],
+  fontStyle: ["text"], fontWeight: ["text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
@@ -524,6 +536,16 @@ function admitScalarValue(
   context: ScalarCaptureContext,
   authoredProperty: AuthoredScalarProperty = property,
 ): ScalarDeclarationValue {
+  const literalValues = literalValueProperties[property]
+  if (literalValues !== undefined) {
+    if (typeof value === "string") {
+      const token = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)
+      if (token?.[1] !== undefined) return Object.freeze({ _tag: "LegacyTokenReference", varName: token[1] })
+    }
+    if (literalValues.has(value)) return value as number | string
+    throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
+      `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected a supported native literal or legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
+  }
   if (colorValueProperties.has(property) || stringValueProperties.has(property)) {
     if (typeof value === "string") {
       const token = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)
