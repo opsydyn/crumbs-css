@@ -84,6 +84,7 @@ export type MigratedScalarProperty =
   | "includeFontPadding"
   | "display" | "position" | "direction"
   | "overflow"
+  | "flexDirection" | "flexWrap" | "alignContent" | "alignItems" | "alignSelf" | "justifyContent"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -154,6 +155,12 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   position: new Set(["absolute", "relative", "static"]),
   direction: new Set(["inherit", "ltr", "rtl"]),
   overflow: new Set(["visible", "hidden", "scroll"]),
+  flexDirection: new Set(["row", "column", "row-reverse", "column-reverse"]),
+  flexWrap: new Set(["wrap", "nowrap", "wrap-reverse"]),
+  alignContent: new Set(["flex-start", "flex-end", "center", "stretch", "space-between", "space-around", "space-evenly"]),
+  alignItems: new Set(["flex-start", "flex-end", "center", "stretch", "baseline"]),
+  alignSelf: new Set(["auto", "flex-start", "flex-end", "center", "stretch", "baseline"]),
+  justifyContent: new Set(["flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly"]),
 }
 const primitiveLiteralValueProperties: Readonly<Partial<Record<
   MigratedScalarProperty,
@@ -241,6 +248,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "includeFontPadding",
   "display", "position", "direction",
   "overflow",
+  "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -274,6 +282,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "includeFontPadding",
   "display", "position", "direction",
   "overflow",
+  "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -393,6 +402,7 @@ const migratedScalarProperties = [
   "includeFontPadding",
   "display", "position", "direction",
   "overflow",
+  "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -449,6 +459,9 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   includeFontPadding: ["text"],
   display: ["view", "text", "image"], position: ["view", "text", "image"], direction: ["view", "text", "image"],
   overflow: ["view", "text", "image"],
+  flexDirection: ["view", "text", "image"], flexWrap: ["view", "text", "image"],
+  alignContent: ["view", "text", "image"], alignItems: ["view", "text", "image"],
+  alignSelf: ["view", "text", "image"], justifyContent: ["view", "text", "image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],

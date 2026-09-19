@@ -395,3 +395,7 @@ Approved M2.2ai migrates `display`, `position` and `direction` through property-
 ### Primitive-aware overflow scalar IR — 2026-09-19
 
 Approved M2.2aj introduces primitive-specific literal admission at the declaration-block boundary and migrates `overflow`. The property-wide domain remains `visible`, `hidden` and `scroll`, while image blocks reject `scroll` according to the installed React Native contract; view and text retain the full domain. Token references remain portable across all three primitives because their resolved theme value is a runtime concern. [Implementation evidence](../assessments/2026-09-19-native-ir-overflow.md) records per-primitive admission, forged-node rejection, generated ordering and consumer qualification.
+
+### Flex-layout scalar IR — 2026-09-19
+
+Approved M2.2ak migrates `flexDirection`, `flexWrap`, `alignContent`, `alignItems`, `alignSelf` and `justifyContent` through property-specific literal/token domains derived from the installed React Native contract. All six fields apply to view, text and image, retain exact provenance and independent last-winner ordering, and reject unsupported or cross-property literals consistently at capture and Effect Schema decoding. [Implementation evidence](../assessments/2026-09-19-native-ir-flex-layout.md) records exhaustive literal coverage, generated ordering and consumer qualification.
