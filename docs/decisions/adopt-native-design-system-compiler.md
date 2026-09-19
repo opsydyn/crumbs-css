@@ -303,3 +303,7 @@ Approved M2.2l migrates native start/end margin and six inline/block aliases whi
 ### Physical border-width scalar IR — 2026-09-19
 
 Approved M2.2m migrates broad and physical side border widths with finite-number/token admission and provenance-validated broad expansion. [Implementation evidence](../assessments/2026-09-19-native-ir-border-width.md) records generated precedence and qualification.
+
+### Logical border-width scalar IR — 2026-09-19
+
+Approved M2.2n migrates exact `borderStartWidth` and `borderEndWidth` fields while keeping physical and logical widths independent. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-border-width.md) records ordering and qualification.

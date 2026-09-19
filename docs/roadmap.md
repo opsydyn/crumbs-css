@@ -114,6 +114,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2k: Migrate physical margin longhands plus broad and horizontal/vertical aliases through scalar IR with negative DimensionValue support.
 - [x] M2.2l: Migrate logical margin fields and inline/block aliases through scalar IR without collapsing native start/end into physical sides.
 - [x] M2.2m: Migrate physical border-width longhands and broad `borderWidth` expansion with finite numeric/token admission.
+- [x] M2.2n: Migrate exact logical `borderStartWidth` and `borderEndWidth` fields independently from physical sides.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -853,3 +854,10 @@ Next recommended slice: **M2.2m** — migrate physical border-width longhands an
 - Focused qualification passed 19 tests with 549 assertions; full qualification passed 400 tests across 62 files with 15,210 assertions. See [evidence](assessments/2026-09-19-native-ir-border-width.md).
 
 Next recommended slice: **M2.2n** — migrate logical `borderStartWidth` and `borderEndWidth` as independent exact fields before considering logical width aliases. Begin only after approval.
+
+### 2026-09-19 — M2.2n logical border-width scalar IR
+
+- Migrated exact `borderStartWidth` and `borderEndWidth` with finite-number/token admission and no direction inference or alias expansion.
+- Focused qualification passed 20 tests with 590 assertions; full qualification passed 405 tests across 63 files with 15,336 assertions. See [evidence](assessments/2026-09-19-native-ir-logical-border-width.md).
+
+Next recommended slice: **M2.2o** — migrate physical border colors plus broad `borderColor`, introducing the first color-valued scalar IR domain. Begin only after approval.

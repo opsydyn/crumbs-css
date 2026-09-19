@@ -63,6 +63,7 @@ export type MigratedScalarProperty =
   | "marginTop" | "marginRight" | "marginBottom" | "marginLeft"
   | "marginStart" | "marginEnd"
   | "borderTopWidth" | "borderRightWidth" | "borderBottomWidth" | "borderLeftWidth"
+  | "borderStartWidth" | "borderEndWidth"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -160,6 +161,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "marginTop", "marginRight", "marginBottom", "marginLeft",
   "marginStart", "marginEnd",
   "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
+  "borderStartWidth", "borderEndWidth",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -172,6 +174,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "margin", "marginHorizontal", "marginVertical", "marginTop", "marginRight", "marginBottom", "marginLeft",
   "marginInline", "marginBlock", "marginInlineStart", "marginInlineEnd", "marginBlockStart", "marginBlockEnd", "marginStart", "marginEnd",
   "borderWidth", "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
+  "borderStartWidth", "borderEndWidth",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -258,6 +261,7 @@ const migratedScalarProperties = [
   "marginTop", "marginRight", "marginBottom", "marginLeft",
   "marginStart", "marginEnd",
   "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
+  "borderStartWidth", "borderEndWidth",
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
@@ -291,6 +295,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   marginStart: ["view", "text", "image"], marginEnd: ["view", "text", "image"],
   borderTopWidth: ["view", "text", "image"], borderRightWidth: ["view", "text", "image"],
   borderBottomWidth: ["view", "text", "image"], borderLeftWidth: ["view", "text", "image"],
+  borderStartWidth: ["view", "text", "image"], borderEndWidth: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
