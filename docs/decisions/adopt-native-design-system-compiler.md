@@ -335,3 +335,7 @@ Approved M2.2t migrates `backgroundColor` through the existing property-specific
 ### Text-colour scalar IR — 2026-09-19
 
 Approved M2.2u migrates `color` through the existing colour domain with the installed TextStyle-only primitive contract. Effect Schema decoding now derives primitive validity for every declaration from the same per-property table as capture, replacing the earlier elevation-only decoder exception and rejecting forged cross-primitive artifacts. [Implementation evidence](../assessments/2026-09-19-native-ir-text-color.md) records generated ordering, primitive rejection and consumer qualification.
+
+### Image tint-colour scalar IR — 2026-09-19
+
+Approved M2.2v migrates `tintColor` through the existing colour domain with the installed ImageStyle-only primitive contract. Capture and Effect Schema decoding share the same primitive table, so marked view/text usage and forged cross-primitive artifacts fail deterministically. [Implementation evidence](../assessments/2026-09-19-native-ir-tint-color.md) records generated ordering, primitive rejection and consumer qualification.

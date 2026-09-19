@@ -70,6 +70,7 @@ export type MigratedScalarProperty =
   | "borderStartColor" | "borderEndColor"
   | "backgroundColor"
   | "color"
+  | "tintColor"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -115,7 +116,7 @@ const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   ...dimensionValueProperties, "rowGap", "columnGap",
 ])
 const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
-  "backgroundColor", "color",
+  "backgroundColor", "color", "tintColor",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
 ])
@@ -182,6 +183,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "borderStartColor", "borderEndColor",
   "backgroundColor",
   "color",
+  "tintColor",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -202,6 +204,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "borderStartColor", "borderEndColor",
   "backgroundColor",
   "color",
+  "tintColor",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -301,6 +304,7 @@ const migratedScalarProperties = [
   "borderStartColor", "borderEndColor",
   "backgroundColor",
   "color",
+  "tintColor",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -343,6 +347,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   borderStartColor: ["view", "text", "image"], borderEndColor: ["view", "text", "image"],
   backgroundColor: ["view", "text", "image"],
   color: ["text"],
+  tintColor: ["image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
