@@ -363,3 +363,7 @@ Approved M2.2aa migrates `textDecorationColor` through the existing colour domai
 ### Typography-metric scalar IR — 2026-09-19
 
 Approved M2.2ab migrates text-only `fontSize`, `letterSpacing` and `lineHeight` through the finite numeric/token domain. Exact numeric identity, provenance and independent last-winner order are retained; marked native capture does not parse CSS units or apply native range policy. [Implementation evidence](../assessments/2026-09-19-native-ir-typography-metrics.md) records generated ordering, primitive rejection and consumer qualification.
+
+### Font-family scalar IR — 2026-09-19
+
+Approved M2.2ac migrates text-only `fontFamily` through a dedicated non-empty string/token domain. This domain permits platform font names while keeping arbitrary strings out of numeric scalar properties; shared primitive admission rejects view/image use and forged artifacts deterministically. [Implementation evidence](../assessments/2026-09-19-native-ir-font-family.md) records generated ordering, string-domain isolation and consumer qualification.
