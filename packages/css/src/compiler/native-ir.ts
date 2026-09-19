@@ -80,11 +80,12 @@ export type MigratedScalarProperty =
   | "textAlign" | "textAlignVertical" | "verticalAlign"
   | "textDecorationLine" | "textDecorationStyle"
   | "textTransform" | "writingDirection" | "userSelect"
+  | "includeFontPadding"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
 export type PercentageValue = `${number}%`
-export type ScalarDeclarationValue = number | string | LegacyTokenReference
+export type ScalarDeclarationValue = boolean | number | string | LegacyTokenReference
 export type ScalarDeclaration = {
   readonly _tag: "NativeDeclaration"
   readonly property: MigratedScalarProperty
@@ -145,6 +146,7 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   textTransform: new Set(["none", "capitalize", "uppercase", "lowercase"]),
   writingDirection: new Set(["auto", "ltr", "rtl"]),
   userSelect: new Set(["auto", "none", "text", "contain", "all"]),
+  includeFontPadding: new Set([false, true]),
 }
 const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
@@ -219,6 +221,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "textAlign", "textAlignVertical", "verticalAlign",
   "textDecorationLine", "textDecorationStyle",
   "textTransform", "writingDirection", "userSelect",
+  "includeFontPadding",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -249,6 +252,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "textAlign", "textAlignVertical", "verticalAlign",
   "textDecorationLine", "textDecorationStyle",
   "textTransform", "writingDirection", "userSelect",
+  "includeFontPadding",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -272,7 +276,7 @@ const PropertyProvenanceSchema = Schema.Struct({
 const ScalarDeclarationSchema = Schema.Struct({
   _tag: Schema.Literal("NativeDeclaration"),
   property: MigratedScalarPropertySchema,
-  value: Schema.Union([Schema.Finite, Schema.NonEmptyString, LegacyTokenReferenceSchema]),
+  value: Schema.Union([Schema.Boolean, Schema.Finite, Schema.NonEmptyString, LegacyTokenReferenceSchema]),
   provenance: PropertyProvenanceSchema,
 }).check(
   Schema.makeFilter(declaration => {
@@ -361,6 +365,7 @@ const migratedScalarProperties = [
   "textAlign", "textAlignVertical", "verticalAlign",
   "textDecorationLine", "textDecorationStyle",
   "textTransform", "writingDirection", "userSelect",
+  "includeFontPadding",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -414,6 +419,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   textAlign: ["text"], textAlignVertical: ["text"], verticalAlign: ["text"],
   textDecorationLine: ["text"], textDecorationStyle: ["text"],
   textTransform: ["text"], writingDirection: ["text"], userSelect: ["text"],
+  includeFontPadding: ["text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
@@ -539,7 +545,7 @@ export function composeOpacityBlocks(blocks: ReadonlyArray<OpacityDeclarationBlo
 
 export function lowerScalarBlock(
   block: ScalarDeclarationBlock,
-): Readonly<Partial<Record<MigratedScalarProperty, number | string | ReturnType<typeof createThemeTokenReference>>>> {
+): Readonly<Partial<Record<MigratedScalarProperty, boolean | number | string | ReturnType<typeof createThemeTokenReference>>>> {
   const admitted = decodeScalarBlock(block, block.provenance.sourceId)
   return Object.freeze(Object.fromEntries(admitted.declarations.map(declaration => [
     declaration.property,
@@ -565,7 +571,7 @@ function admitScalarValue(
       const token = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)
       if (token?.[1] !== undefined) return Object.freeze({ _tag: "LegacyTokenReference", varName: token[1] })
     }
-    if (literalValues.has(value)) return value as number | string
+    if (literalValues.has(value)) return value as boolean | number | string
     throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
       `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected a supported native literal or legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
   }

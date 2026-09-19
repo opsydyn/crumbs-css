@@ -134,6 +134,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2ae: Migrate text-only `textAlign`, `textAlignVertical` and `verticalAlign` through explicit installed React Native literal/token domains.
 - [x] M2.2af: Migrate text-only `textDecorationLine` and `textDecorationStyle` through explicit installed React Native literal/token domains.
 - [x] M2.2ag: Migrate text-only `textTransform`, `writingDirection` and `userSelect` through explicit installed React Native literal/token domains.
+- [x] M2.2ah: Introduce a property-specific boolean/token domain and migrate text-only Android `includeFontPadding`.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -1013,3 +1014,10 @@ Next recommended slice: **M2.2ag** — migrate text-only `textTransform`, `writi
 - Focused qualification passed 29 tests with 515 assertions; full qualification passed 500 tests across 82 files with 17,842 assertions. See [evidence](assessments/2026-09-19-native-ir-text-controls.md).
 
 Next recommended slice: **M2.2ah** — introduce a property-specific boolean/token domain and migrate text-only Android `includeFontPadding`, without admitting booleans to numeric or string scalar families. Begin only after approval.
+
+### 2026-09-19 — M2.2ah boolean scalar IR
+
+- Added boolean values to the IR carrier and admitted them only for text-only Android `includeFontPadding`, alongside token references. Effect Schema decoding rejects forged boolean values on every numeric and string scalar family.
+- Focused qualification passed 29 tests with 487 assertions; full qualification passed 505 tests across 83 files with 17,960 assertions. See [evidence](assessments/2026-09-19-native-ir-include-font-padding.md).
+
+Next recommended slice: **M2.2ai** — migrate shared layout mode fields (`display`, `position`, `direction`) through exact installed React Native literal/token domains across their supported primitives. Begin only after approval.
