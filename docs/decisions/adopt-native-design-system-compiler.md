@@ -259,3 +259,7 @@ Approved M2.2a routes Crumbs-authored `opacity` through an immutable Effect Sche
 ### Unitless numeric IR family — 2026-09-19
 
 Approved M2.2b generalizes production numeric blocks to a non-empty ordered declaration family and migrates `zIndex`, `elevation`, `flexGrow` and `flexShrink`. Admission follows the installed React Native 0.85 types: the FlexStyle properties admit view, text and image, while elevation admits view and text. Schema decoding independently verifies property provenance and primitive compatibility; capture accepts only finite numbers or legacy symbolic tokens and fails malformed Crumbs values without fallback. [Implementation evidence](../assessments/2026-09-19-native-ir-unitless-numeric.md) records oracle comparison and compatibility qualification. Lengths, colours, structured properties, native `flex`, qualified token identity and the vanilla-extract adapter remain separate migrations.
+
+### Scalar native flex IR — 2026-09-19
+
+Approved M2.2c migrates finite numeric and token-backed `flex` through production IR for view, text and image. The declaration remains an independent React Native Yoga scalar: it does not synthesize browser shorthand defaults, and explicit `flexGrow`, `flexShrink` and legacy-routed `flexBasis` survive independently. Invalid Crumbs-authored flex now fails at IR admission with `CRUMBS_IR_INVALID_VALUE`; unmarked vanilla-extract remains on the compatibility route. [Implementation evidence](../assessments/2026-09-19-native-ir-flex.md) records the schema, generated ordering and consumer qualification.

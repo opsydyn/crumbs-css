@@ -45,7 +45,7 @@ export type PropertyProvenance = SourceProvenance & {
   readonly canonicalProperty: MigratedNumericProperty
   readonly shorthandExpansionPath: ReadonlyArray<string>
 }
-export type MigratedNumericProperty = "opacity" | "zIndex" | "elevation" | "flexGrow" | "flexShrink"
+export type MigratedNumericProperty = "opacity" | "zIndex" | "elevation" | "flex" | "flexGrow" | "flexShrink"
 export type NumericDeclaration = {
   readonly _tag: "NativeDeclaration"
   readonly property: MigratedNumericProperty
@@ -97,7 +97,7 @@ const SourceProvenanceSchema = Schema.Struct({
   logicalPath: Schema.Array(PathSegment),
   origin: Schema.Literal("crumbs-native"),
 })
-const MigratedNumericPropertySchema = Schema.Literals(["opacity", "zIndex", "elevation", "flexGrow", "flexShrink"])
+const MigratedNumericPropertySchema = Schema.Literals(["opacity", "zIndex", "elevation", "flex", "flexGrow", "flexShrink"])
 const PropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
   sourceId: Schema.NonEmptyString,
@@ -154,13 +154,14 @@ export const OpacityDeclarationBlockSchema = Schema.Struct({
 const schemaOptions = { onExcessProperty: "error", errors: "all" } as const
 const formatIssues = SchemaIssue.makeFormatterStandardSchemaV1()
 
-const migratedNumericProperties = ["opacity", "zIndex", "elevation", "flexGrow", "flexShrink"] as const
+const migratedNumericProperties = ["opacity", "zIndex", "elevation", "flex", "flexGrow", "flexShrink"] as const
 const migratedNumericPropertySet = new Set<string>(migratedNumericProperties)
 const allPrimitives = ["view", "text", "image"] as const
 const propertyPrimitives: Readonly<Record<MigratedNumericProperty, NativePrimitiveDomain>> = {
   opacity: ["view", "text", "image"],
   zIndex: ["view", "text", "image"],
   elevation: ["view", "text"],
+  flex: ["view", "text", "image"],
   flexGrow: ["view", "text", "image"],
   flexShrink: ["view", "text", "image"],
 }

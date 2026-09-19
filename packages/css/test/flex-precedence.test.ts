@@ -71,7 +71,7 @@ describe("native numeric flex semantics", () => {
   })
   it("rejects unsupported JavaScript/CSS flex during compilation", async () => {
     for (const value of ["auto", "1 0 auto"]) {
-      await expect(compile(`export const invalid = viewStyle({ flex: ${JSON.stringify(value)} });`)).rejects.toThrow("CRUMBS_CSS_DROPPED_DECLARATION")
+      await expect(compile(`export const invalid = viewStyle({ flex: ${JSON.stringify(value)} });`)).rejects.toThrow("CRUMBS_IR_INVALID_VALUE")
     }
   })
   it("matches independent native declaration merging", () => {
