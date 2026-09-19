@@ -411,3 +411,7 @@ Approved M2.2am migrates `aspectRatio` through an isolated finite-number/non-emp
 ### Visibility and cursor scalar IR — 2026-09-19
 
 Approved M2.2an migrates `backfaceVisibility` and `cursor` through their exact installed literal/token domains across view, text and image. Both fields retain exact provenance and independent last-winner ordering, and unsupported or cross-property literals fail consistently at capture and Effect Schema decoding. [Implementation evidence](../assessments/2026-09-19-native-ir-visibility-cursor.md) records exhaustive literal coverage, generated ordering and consumer qualification.
+
+### View-interaction scalar IR — 2026-09-19
+
+Approved M2.2ao migrates view/text-only `borderCurve` and `pointerEvents` through exact installed literal/token domains. The shared primitive matrix rejects image use during capture and Effect Schema decoding, while both fields retain exact provenance and independent last-winner ordering. [Implementation evidence](../assessments/2026-09-19-native-ir-view-interaction.md) records exhaustive literal coverage, primitive rejection, generated ordering and consumer qualification.

@@ -88,6 +88,7 @@ export type MigratedScalarProperty =
   | "boxSizing"
   | "aspectRatio"
   | "backfaceVisibility" | "cursor"
+  | "borderCurve" | "pointerEvents"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -168,6 +169,8 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   boxSizing: new Set(["border-box", "content-box"]),
   backfaceVisibility: new Set(["visible", "hidden"]),
   cursor: new Set(["auto", "pointer"]),
+  borderCurve: new Set(["circular", "continuous"]),
+  pointerEvents: new Set(["box-none", "none", "box-only", "auto"]),
 }
 const primitiveLiteralValueProperties: Readonly<Partial<Record<
   MigratedScalarProperty,
@@ -259,6 +262,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "boxSizing",
   "aspectRatio",
   "backfaceVisibility", "cursor",
+  "borderCurve", "pointerEvents",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -296,6 +300,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "boxSizing",
   "aspectRatio",
   "backfaceVisibility", "cursor",
+  "borderCurve", "pointerEvents",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -421,6 +426,7 @@ const migratedScalarProperties = [
   "boxSizing",
   "aspectRatio",
   "backfaceVisibility", "cursor",
+  "borderCurve", "pointerEvents",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -483,6 +489,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   boxSizing: ["view", "text", "image"],
   aspectRatio: ["view", "text", "image"],
   backfaceVisibility: ["view", "text", "image"], cursor: ["view", "text", "image"],
+  borderCurve: ["view", "text"], pointerEvents: ["view", "text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
