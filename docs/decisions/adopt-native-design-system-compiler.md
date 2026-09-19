@@ -327,3 +327,7 @@ Approved M2.2r migrates the four fully logical corner-radius fields as exact sca
 ### Semi-logical corner-radius scalar IR — 2026-09-19
 
 Approved M2.2s migrates the four top/bottom start/end corner-radius fields as exact scalar declarations across view, text and image. Physical, fully logical and semi-logical property identities coexist without compiler remapping. [Implementation evidence](../assessments/2026-09-19-native-ir-semi-logical-border-radius.md) records generated ordering, cross-family independence and consumer qualification.
+
+### Background-colour scalar IR — 2026-09-19
+
+Approved M2.2t migrates `backgroundColor` through the existing property-specific colour domain across view, text and image. The compiler retains exact property provenance, literal/token identity and deterministic last-winner order while leaving other scalar value families closed to arbitrary strings. [Implementation evidence](../assessments/2026-09-19-native-ir-background-color.md) records generated ordering, malformed-value rejection and consumer qualification.

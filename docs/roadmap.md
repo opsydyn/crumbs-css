@@ -120,6 +120,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2q: Migrate broad and physical border radii with finite numeric/token admission and canonical corner precedence.
 - [x] M2.2r: Migrate the four exact logical corner radii through scalar IR while keeping them independent from physical corners.
 - [x] M2.2s: Migrate the four exact semi-logical top/bottom start/end corner radii through scalar IR without collapsing corner naming systems.
+- [x] M2.2t: Migrate `backgroundColor` through the colour scalar domain with exact view, text and image primitive coverage.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -901,3 +902,10 @@ Next recommended slice: **M2.2s** — migrate the four semi-logical corner-radiu
 - Focused qualification passed 25 tests with 760 assertions; full qualification passed 430 tests across 68 files with 16,069 assertions. See [evidence](assessments/2026-09-19-native-ir-semi-logical-border-radius.md).
 
 Next recommended slice: **M2.2t** — migrate `backgroundColor` through the established color scalar domain, with its exact primitive coverage and no widening of numeric families. Begin only after approval.
+
+### 2026-09-19 — M2.2t background-colour scalar IR
+
+- Migrated `backgroundColor` across view, text and image through the existing non-empty colour string/token domain. Exact provenance and deterministic last-winner ordering are retained without widening numeric or DimensionValue declarations.
+- Focused qualification passed 38 tests with 416 assertions; full qualification passed 435 tests across 69 files with 16,183 assertions. See [evidence](assessments/2026-09-19-native-ir-background-color.md).
+
+Next recommended slice: **M2.2u** — migrate text `color` through the established colour scalar domain with a text-only primitive contract. Begin only after approval.
