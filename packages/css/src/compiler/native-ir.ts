@@ -69,6 +69,7 @@ export type MigratedScalarProperty =
   | "borderTopColor" | "borderRightColor" | "borderBottomColor" | "borderLeftColor"
   | "borderStartColor" | "borderEndColor"
   | "backgroundColor"
+  | "color"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -114,7 +115,7 @@ const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   ...dimensionValueProperties, "rowGap", "columnGap",
 ])
 const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
-  "backgroundColor",
+  "backgroundColor", "color",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
 ])
@@ -180,6 +181,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
   "backgroundColor",
+  "color",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -199,6 +201,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "borderColor", "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
   "backgroundColor",
+  "color",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -254,7 +257,7 @@ export const ScalarDeclarationBlockSchema = Schema.Struct({
   declarations: Schema.Array(ScalarDeclarationSchema).check(Schema.isMinLength(1)),
   provenance: SourceProvenanceSchema,
 }).check(Schema.makeFilter(block => block.declarations.flatMap((declaration, index) => {
-  const allowed = declaration.property === "elevation" ? ["view", "text"] : ["view", "text", "image"]
+  const allowed = propertyPrimitives[declaration.property]
   return block.primitiveDomain.every(kind => allowed.includes(kind))
     ? []
     : [{ path: ["declarations", index, "property"], issue: `${declaration.property} is invalid for this primitive domain` }]
@@ -297,6 +300,7 @@ const migratedScalarProperties = [
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
   "backgroundColor",
+  "color",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -338,6 +342,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   borderBottomColor: ["view", "text", "image"], borderLeftColor: ["view", "text", "image"],
   borderStartColor: ["view", "text", "image"], borderEndColor: ["view", "text", "image"],
   backgroundColor: ["view", "text", "image"],
+  color: ["text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],

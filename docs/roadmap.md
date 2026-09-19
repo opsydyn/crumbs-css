@@ -121,6 +121,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2r: Migrate the four exact logical corner radii through scalar IR while keeping them independent from physical corners.
 - [x] M2.2s: Migrate the four exact semi-logical top/bottom start/end corner radii through scalar IR without collapsing corner naming systems.
 - [x] M2.2t: Migrate `backgroundColor` through the colour scalar domain with exact view, text and image primitive coverage.
+- [x] M2.2u: Migrate text-only `color` through scalar IR and derive decoded primitive admission from the shared per-property contract.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -909,3 +910,10 @@ Next recommended slice: **M2.2t** — migrate `backgroundColor` through the esta
 - Focused qualification passed 38 tests with 416 assertions; full qualification passed 435 tests across 69 files with 16,183 assertions. See [evidence](assessments/2026-09-19-native-ir-background-color.md).
 
 Next recommended slice: **M2.2u** — migrate text `color` through the established colour scalar domain with a text-only primitive contract. Begin only after approval.
+
+### 2026-09-19 — M2.2u text-colour scalar IR
+
+- Migrated `color` through the non-empty colour string/token domain with a text-only primitive contract. Effect Schema decoding now validates every declaration against the shared per-property primitive table instead of a property-specific exception.
+- Focused qualification passed 51 tests with 794 assertions; full qualification passed 440 tests across 70 files with 16,298 assertions. See [evidence](assessments/2026-09-19-native-ir-text-color.md).
+
+Next recommended slice: **M2.2v** — migrate image-only `tintColor` through the established colour scalar domain and reuse the hardened primitive decoder contract. Begin only after approval.

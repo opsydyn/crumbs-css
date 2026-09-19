@@ -331,3 +331,7 @@ Approved M2.2s migrates the four top/bottom start/end corner-radius fields as ex
 ### Background-colour scalar IR — 2026-09-19
 
 Approved M2.2t migrates `backgroundColor` through the existing property-specific colour domain across view, text and image. The compiler retains exact property provenance, literal/token identity and deterministic last-winner order while leaving other scalar value families closed to arbitrary strings. [Implementation evidence](../assessments/2026-09-19-native-ir-background-color.md) records generated ordering, malformed-value rejection and consumer qualification.
+
+### Text-colour scalar IR — 2026-09-19
+
+Approved M2.2u migrates `color` through the existing colour domain with the installed TextStyle-only primitive contract. Effect Schema decoding now derives primitive validity for every declaration from the same per-property table as capture, replacing the earlier elevation-only decoder exception and rejecting forged cross-primitive artifacts. [Implementation evidence](../assessments/2026-09-19-native-ir-text-color.md) records generated ordering, primitive rejection and consumer qualification.
