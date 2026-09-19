@@ -355,3 +355,7 @@ Approved M2.2y migrates `shadowOpacity` and `shadowRadius` through the finite nu
 ### Text-shadow scalar IR — 2026-09-19
 
 Approved M2.2z migrates text-only `textShadowColor` and `textShadowRadius` through the existing colour and finite numeric/token domains. Both fields retain exact provenance and independent ordering while structured `textShadowOffset` remains on its existing structured-value path. [Implementation evidence](../assessments/2026-09-19-native-ir-text-shadow.md) records primitive rejection, property-specific admission and consumer qualification.
+
+### Text-decoration colour scalar IR — 2026-09-19
+
+Approved M2.2aa migrates `textDecorationColor` through the existing colour domain with the installed text-only primitive contract. Capture and Effect Schema decoding share the same primitive table, so view/image use and forged cross-primitive artifacts fail deterministically. [Implementation evidence](../assessments/2026-09-19-native-ir-text-decoration-color.md) records generated ordering, primitive rejection and consumer qualification.
