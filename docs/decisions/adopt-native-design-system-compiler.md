@@ -271,3 +271,7 @@ Approved M2.2d generalizes the production declaration block from numeric-only to
 ### Size DimensionValue IR — 2026-09-19
 
 Approved M2.2e migrates `width`, `height`, `minWidth`, `minHeight`, `maxWidth` and `maxHeight` through production scalar IR for view, text and image. A shared property classification makes schema decoding and capture enforce the same static DimensionValue subset without widening numeric-only declarations. The properties normalize independently with deterministic last-winner order; unmarked vanilla-extract continues through the compatibility adapter. [Implementation evidence](../assessments/2026-09-19-native-ir-dimensions.md) records direct ownership, generated order and consumer qualification.
+
+### Position-edge DimensionValue IR — 2026-09-19
+
+Approved M2.2f migrates exact `top`, `right`, `bottom`, `left`, `start` and `end` declarations through scalar IR across view, text and image. Physical and logical fields remain independent and retain deterministic per-property order; the compiler does not assume layout direction or expand inset aliases in this slice. The shared DimensionValue schema and capture domain reject malformed Crumbs values before CSS fallback. [Implementation evidence](../assessments/2026-09-19-native-ir-position-edges.md) records direct ownership, generated order and consumer qualification.

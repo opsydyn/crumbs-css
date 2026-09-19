@@ -1,0 +1,36 @@
+{
+  "slice": "M2.2f",
+  "recordedAt": "2026-09-19",
+  "sourceRevision": "f8ff41cb385e59c2e452a04e27fce6e14ef76b71",
+  "sourceState": "Working tree; implementation and documentation are committed after qualification",
+  "migratedProperties": ["top", "right", "bottom", "left", "start", "end"],
+  "contract": {
+    "primitiveDomain": ["view", "text", "image"],
+    "valueDomain": "finite point number, auto, finite percentage or legacy token",
+    "physicalLogicalPolicy": "independent exact fields; no layout-direction inference"
+  },
+  "verification": [
+    { "command": "bun test packages/css/test/native-ir-position-edges.test.ts packages/css/test/native-ir-dimensions.test.ts packages/css/test/native-ir-flex-basis.test.ts packages/css/test/native-ir-unitless-numeric.test.ts packages/css/test/inset-precedence.test.ts", "status": "passed", "tests": 40, "assertions": 1388 },
+    { "command": "bun run check", "status": "passed", "tests": 363, "assertions": 14234, "files": 55 },
+    { "command": "bun run app:typecheck", "status": "passed" },
+    { "command": "bun run playground:check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run playground:packed --check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run docs:build", "status": "passed", "pages": 20 },
+    { "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles", "status": "passed", "claim": "declared host smoke ceilings only" },
+    { "command": "bun run budgets:validate", "status": "passed", "registryReady": false, "performanceQualification": "not-run" }
+  ],
+  "boundaries": {
+    "insetAliases": "legacy converter",
+    "layoutDirectionInference": false,
+    "animatedNodes": "runtime only",
+    "null": "not admitted to static IR",
+    "unmarkedVanillaExtract": "legacy converter",
+    "qualifiedTokenIdentity": false,
+    "publicApiChanged": false,
+    "externalArtifactAbi": false,
+    "effectInOrdinaryRuntime": false,
+    "androidNativeAcceptance": false,
+    "published": false,
+    "pushed": false
+  }
+}

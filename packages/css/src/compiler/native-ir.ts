@@ -49,6 +49,7 @@ export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
   | "flex" | "flexBasis" | "flexGrow" | "flexShrink"
   | "width" | "height" | "minWidth" | "minHeight" | "maxWidth" | "maxHeight"
+  | "top" | "right" | "bottom" | "left" | "start" | "end"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -81,6 +82,7 @@ export type OpacityCaptureContext = ScalarCaptureContext
 
 const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "flexBasis", "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
+  "top", "right", "bottom", "left", "start", "end",
 ])
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
@@ -109,6 +111,7 @@ const SourceProvenanceSchema = Schema.Struct({
 const MigratedScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
   "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
+  "top", "right", "bottom", "left", "start", "end",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -179,6 +182,7 @@ const formatIssues = SchemaIssue.makeFormatterStandardSchemaV1()
 const migratedScalarProperties = [
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
   "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
+  "top", "right", "bottom", "left", "start", "end",
 ] as const
 const migratedScalarPropertySet = new Set<string>(migratedScalarProperties)
 const allPrimitives = ["view", "text", "image"] as const
@@ -196,6 +200,12 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   minHeight: ["view", "text", "image"],
   maxWidth: ["view", "text", "image"],
   maxHeight: ["view", "text", "image"],
+  top: ["view", "text", "image"],
+  right: ["view", "text", "image"],
+  bottom: ["view", "text", "image"],
+  left: ["view", "text", "image"],
+  start: ["view", "text", "image"],
+  end: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
