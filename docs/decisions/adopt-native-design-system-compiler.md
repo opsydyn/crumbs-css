@@ -295,3 +295,7 @@ Approved M2.2j migrates native start/end padding and six inline/block aliases. C
 ### Physical margin scalar IR — 2026-09-19
 
 Approved M2.2k migrates physical margin sides and broad/horizontal/vertical aliases through scalar IR, including negative finite DimensionValues. [Implementation evidence](../assessments/2026-09-19-native-ir-margin.md) records generated precedence and qualification.
+
+### Logical margin scalar IR — 2026-09-19
+
+Approved M2.2l migrates native start/end margin and six inline/block aliases while preserving logical fields independently from physical sides. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-margin.md) records generated ordering and qualification.
