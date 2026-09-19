@@ -105,6 +105,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2b: Generalize production numeric blocks and migrate `zIndex`, `elevation`, `flexGrow` and `flexShrink`, preserving the installed React Native primitive domains, finite-number/token values, provenance and authored last-winner order through both emitters.
 - [x] M2.2c: Migrate scalar React Native `flex` through production numeric IR without CSS shorthand expansion, retaining independent `flexGrow`, `flexShrink` and legacy `flexBasis` fields.
 - [x] M2.2d: Generalize production scalar IR beyond numeric-only values and migrate `flexBasis` with finite point numbers, `auto`, finite percentages and legacy tokens across all FlexStyle primitives.
+- [x] M2.2e: Migrate the six width/height/min/max `DimensionValue` properties through production scalar IR with exact static value domains, primitive coverage and per-property last-winner order.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -772,3 +773,12 @@ Next recommended slice: **M2.2d** — migrate `flexBasis` as the first scalar le
 - Dedicated schema, seeded 100-case ordering, helper/composition and compatibility tests join the established flex and earlier IR suites. Full package qualification passed 347 tests with 13,808 assertions. See the [assessment and evidence](assessments/2026-09-19-native-ir-flex-basis.md).
 
 Next recommended slice: **M2.2e** — migrate the `width`, `height`, `minWidth`, `minHeight`, `maxWidth` and `maxHeight` DimensionValue family through scalar IR, reusing the qualified points/auto/percentage domain while proving min/max and composition order independently. Keep spacing, inset aliases and the vanilla-extract adapter separate. Begin only after approval.
+
+### 2026-09-19 — M2.2e size DimensionValue IR
+
+- Migrated `width`, `height`, `minWidth`, `minHeight`, `maxWidth` and `maxHeight` before CSS serialization for view, text and image helpers. Each property uses the M2.2d static DimensionValue domain: finite point numbers, exact `auto`, finite percentages or legacy token references.
+- Centralized DimensionValue property classification so Effect Schema and capture apply the same domain while numeric-only scalar properties remain closed to strings. Invalid Crumbs values fail with `CRUMBS_IR_INVALID_VALUE`; unmarked vanilla-extract sizes stay on the compatibility route.
+- Direct tests prove capture ownership rather than relying on unchanged end output. A seeded 100-case independent last-winner evaluator covers mixed size properties, while both emitters cover generic and primitive helpers, composition, variants, recipes and tokens. Earlier flex-basis and unitless tests now record that width travels through IR.
+- Full package qualification passed 355 tests with 14,025 assertions. No animated-node/null admission, shorthand/inset migration, qualified token identity, public API or external artifact ABI is included. See the [assessment and evidence](assessments/2026-09-19-native-ir-dimensions.md).
+
+Next recommended slice: **M2.2f** — migrate the exact position-edge longhands (`top`, `right`, `bottom`, `left`, `start`, `end`) through scalar IR, preserving independent physical/logical fields before tackling Crumbs inset aliases and their canonical expansion. Begin only after approval.

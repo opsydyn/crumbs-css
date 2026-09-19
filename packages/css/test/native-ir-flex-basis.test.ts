@@ -43,7 +43,7 @@ describe("production native IR flexBasis scalar family", () => {
         markNativeCaptureRule({ flexBasis: value, width: 40 }, ["view", "text", "image"]),
         context,
       )
-      expect(captured.cssRule).toEqual({ width: 40 })
+      expect(captured.cssRule).toEqual({})
       expect(captured.block?.declarations[0].property).toBe("flexBasis")
       expect(captured.block?.declarations[0].value).toEqual(value === "var(--crumbs-basis)"
         ? { _tag: "LegacyTokenReference", varName: "--crumbs-basis" }
@@ -54,6 +54,7 @@ describe("production native IR flexBasis scalar family", () => {
       } else {
         expect(Object.is(lowered.flexBasis, value)).toBe(true)
       }
+      expect(lowered.width).toBe(40)
     }
   })
 

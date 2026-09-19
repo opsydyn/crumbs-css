@@ -267,3 +267,7 @@ Approved M2.2c migrates finite numeric and token-backed `flex` through productio
 ### Flex-basis scalar IR — 2026-09-19
 
 Approved M2.2d generalizes the production declaration block from numeric-only to property-specific scalar values and migrates `flexBasis`. Static admission follows React Native's `DimensionValue` subset: finite point numbers, exact `auto`, finite percentages and legacy tokens across view, text and image. Animated nodes and null remain runtime concerns; CSS `px` strings and malformed values fail before serialization. Scalar freezing and lowering distinguish token records from strings, while per-property last-winner order keeps every flex field independent. [Implementation evidence](../assessments/2026-09-19-native-ir-flex-basis.md) records generated ordering and consumer qualification.
+
+### Size DimensionValue IR — 2026-09-19
+
+Approved M2.2e migrates `width`, `height`, `minWidth`, `minHeight`, `maxWidth` and `maxHeight` through production scalar IR for view, text and image. A shared property classification makes schema decoding and capture enforce the same static DimensionValue subset without widening numeric-only declarations. The properties normalize independently with deterministic last-winner order; unmarked vanilla-extract continues through the compatibility adapter. [Implementation evidence](../assessments/2026-09-19-native-ir-dimensions.md) records direct ownership, generated order and consumer qualification.

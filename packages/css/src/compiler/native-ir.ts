@@ -45,7 +45,10 @@ export type PropertyProvenance = SourceProvenance & {
   readonly canonicalProperty: MigratedScalarProperty
   readonly shorthandExpansionPath: ReadonlyArray<string>
 }
-export type MigratedScalarProperty = "opacity" | "zIndex" | "elevation" | "flex" | "flexBasis" | "flexGrow" | "flexShrink"
+export type MigratedScalarProperty =
+  | "opacity" | "zIndex" | "elevation"
+  | "flex" | "flexBasis" | "flexGrow" | "flexShrink"
+  | "width" | "height" | "minWidth" | "minHeight" | "maxWidth" | "maxHeight"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -76,6 +79,10 @@ export type ScalarCaptureContext = {
 }
 export type OpacityCaptureContext = ScalarCaptureContext
 
+const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
+  "flexBasis", "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
+])
+
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
   ? undefined : { path: [], issue: "Expected a non-negative safe integer" }))
 const PathSegment = Schema.Union([Schema.String, Index])
@@ -99,7 +106,10 @@ const SourceProvenanceSchema = Schema.Struct({
   logicalPath: Schema.Array(PathSegment),
   origin: Schema.Literal("crumbs-native"),
 })
-const MigratedScalarPropertySchema = Schema.Literals(["opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink"])
+const MigratedScalarPropertySchema = Schema.Literals([
+  "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
+  "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
+])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
   return match?.[1] !== undefined && Number.isFinite(Number(match[1]))
@@ -126,7 +136,7 @@ const ScalarDeclarationSchema = Schema.Struct({
     declaration.property === declaration.provenance.canonicalProperty
       ? undefined
       : { path: ["provenance"], issue: "Declaration property and provenance property names must match" }),
-  Schema.makeFilter(declaration => declaration.property === "flexBasis" ||
+  Schema.makeFilter(declaration => dimensionValueProperties.has(declaration.property) ||
     typeof declaration.value === "number" || typeof declaration.value === "object"
       ? undefined
       : { path: ["value"], issue: `${declaration.property} requires a finite number or token reference` }),
@@ -166,7 +176,10 @@ export const OpacityDeclarationBlockSchema = Schema.Struct({
 const schemaOptions = { onExcessProperty: "error", errors: "all" } as const
 const formatIssues = SchemaIssue.makeFormatterStandardSchemaV1()
 
-const migratedScalarProperties = ["opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink"] as const
+const migratedScalarProperties = [
+  "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
+  "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
+] as const
 const migratedScalarPropertySet = new Set<string>(migratedScalarProperties)
 const allPrimitives = ["view", "text", "image"] as const
 const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiveDomain>> = {
@@ -177,6 +190,12 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   flexBasis: ["view", "text", "image"],
   flexGrow: ["view", "text", "image"],
   flexShrink: ["view", "text", "image"],
+  width: ["view", "text", "image"],
+  height: ["view", "text", "image"],
+  minWidth: ["view", "text", "image"],
+  minHeight: ["view", "text", "image"],
+  maxWidth: ["view", "text", "image"],
+  maxHeight: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
@@ -327,14 +346,14 @@ function admitScalarValue(
   if (typeof value === "string") {
     const match = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)
     if (match?.[1] !== undefined) return Object.freeze({ _tag: "LegacyTokenReference", varName: match[1] })
-    if (property === "flexBasis") {
+    if (dimensionValueProperties.has(property)) {
       if (value === "auto") return value
       const percentage = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
       if (percentage?.[1] !== undefined && Number.isFinite(Number(percentage[1]))) return value as PercentageValue
     }
   }
   throw admissionError("CRUMBS_IR_INVALID_VALUE", property, context.sourceId,
-    `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}. Expected ${property === "flexBasis" ? "a finite number, auto, a finite percentage or" : "a finite number or"} a legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
+    `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}. Expected ${dimensionValueProperties.has(property) ? "a finite number, auto, a finite percentage or" : "a finite number or"} a legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
 }
 
 function withoutSelectedProperties(

@@ -74,17 +74,19 @@ describe("production native IR unitless numeric layout family", () => {
       flexShrink: "var(--crumbs-layout-shrink)",
       width: 40,
     }, ["view", "text", "image"]), context)
-    expect(captured.cssRule).toEqual({ width: 40 })
+    expect(captured.cssRule).toEqual({})
     expect(captured.block?.primitiveDomain).toEqual(["view", "text"])
     expect(captured.block?.declarations.map(declaration => [declaration.property, declaration.value])).toEqual([
       ["zIndex", -3],
       ["elevation", 2.5],
       ["flexGrow", -0],
       ["flexShrink", { _tag: "LegacyTokenReference", varName: "--crumbs-layout-shrink" }],
+      ["width", 40],
     ])
     const lowered = lowerScalarBlock(captured.block!)
     expect(Object.is(lowered.flexGrow, -0)).toBe(true)
     expect(lowered.flexShrink).toEqual({ $$type: "crumbs.css.theme-token", varName: "--crumbs-layout-shrink" })
+    expect(lowered.width).toBe(40)
   })
 
   it("uses the installed React Native primitive domains", () => {
