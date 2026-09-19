@@ -117,6 +117,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2n: Migrate exact logical `borderStartWidth` and `borderEndWidth` fields independently from physical sides.
 - [x] M2.2o: Introduce a property-specific color scalar domain and migrate broad plus physical border colors.
 - [x] M2.2p: Migrate exact logical `borderStartColor` and `borderEndColor` fields independently from physical colors.
+- [x] M2.2q: Migrate broad and physical border radii with finite numeric/token admission and canonical corner precedence.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -877,3 +878,10 @@ Next recommended slice: **M2.2p** — migrate exact logical border color fields 
 - Focused qualification passed 20 tests with 573 assertions; full qualification passed 415 tests across 65 files with 15,609 assertions. See [evidence](assessments/2026-09-19-native-ir-logical-border-color.md).
 
 Next recommended slice: **M2.2q** — migrate physical border radii plus broad `borderRadius`, preserving finite numeric/token admission and canonical corner precedence. Begin only after approval.
+
+### 2026-09-19 — M2.2q physical border-radius scalar IR
+
+- Migrated `borderRadius` and four physical corners across every primitive. Broad radius expands with validated provenance; finite numbers and legacy tokens are admitted.
+- Focused qualification passed 17 tests with 573 assertions; full qualification passed 420 tests across 66 files with 15,773 assertions. See [evidence](assessments/2026-09-19-native-ir-border-radius.md).
+
+Next recommended slice: **M2.2r** — migrate the four exact logical corner-radius fields while keeping them independent from physical corners. Begin only after approval.

@@ -52,6 +52,7 @@ export type ScalarAliasProperty = InsetAliasProperty | "gap" | "padding" | "padd
   | "marginInline" | "marginBlock" | "marginInlineStart" | "marginInlineEnd" | "marginBlockStart" | "marginBlockEnd"
   | "borderWidth"
   | "borderColor"
+  | "borderRadius"
 export type AuthoredScalarProperty = MigratedScalarProperty | ScalarAliasProperty
 export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
@@ -67,6 +68,7 @@ export type MigratedScalarProperty =
   | "borderStartWidth" | "borderEndWidth"
   | "borderTopColor" | "borderRightColor" | "borderBottomColor" | "borderLeftColor"
   | "borderStartColor" | "borderEndColor"
+  | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | string | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -134,6 +136,7 @@ const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly Migra
   marginBlockStart: ["marginTop"], marginBlockEnd: ["marginBottom"],
   borderWidth: ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"],
   borderColor: ["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"],
+  borderRadius: ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"],
 }
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
@@ -172,6 +175,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "borderStartWidth", "borderEndWidth",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
+  "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -187,6 +191,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "borderStartWidth", "borderEndWidth",
   "borderColor", "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
+  "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -281,6 +286,7 @@ const migratedScalarProperties = [
   "borderStartWidth", "borderEndWidth",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
+  "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
@@ -318,6 +324,8 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   borderTopColor: ["view", "text", "image"], borderRightColor: ["view", "text", "image"],
   borderBottomColor: ["view", "text", "image"], borderLeftColor: ["view", "text", "image"],
   borderStartColor: ["view", "text", "image"], borderEndColor: ["view", "text", "image"],
+  borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
+  borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {

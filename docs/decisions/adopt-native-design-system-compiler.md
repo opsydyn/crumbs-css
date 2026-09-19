@@ -315,3 +315,7 @@ Approved M2.2o introduces a property-specific non-empty string domain for native
 ### Logical border-color scalar IR — 2026-09-19
 
 Approved M2.2p migrates exact `borderStartColor` and `borderEndColor` through the color domain while retaining logical/physical independence. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-border-color.md) records ordering and qualification.
+
+### Physical border-radius scalar IR — 2026-09-19
+
+Approved M2.2q migrates broad and four physical corner radii with finite-number/token admission and provenance-validated expansion. [Implementation evidence](../assessments/2026-09-19-native-ir-border-radius.md) records precedence and qualification.
