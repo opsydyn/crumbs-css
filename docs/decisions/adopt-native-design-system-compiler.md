@@ -379,3 +379,7 @@ Approved M2.2ae migrates text-only `textAlign`, `textAlignVertical` and `vertica
 ### Text-decoration literal scalar IR — 2026-09-19
 
 Approved M2.2af migrates text-only `textDecorationLine` and `textDecorationStyle` through property-specific literal/token domains derived from the installed React Native contract. The fields retain independent provenance and last-winner ordering while `textDecorationColor` remains on its separately qualified colour domain. [Implementation evidence](../assessments/2026-09-19-native-ir-text-decoration.md) records exhaustive literal coverage, generated ordering and consumer qualification.
+
+### Text-control scalar IR — 2026-09-19
+
+Approved M2.2ag migrates text-only `textTransform`, `writingDirection` and `userSelect` through property-specific literal/token domains derived from the installed React Native contract. Shared capture and Effect Schema admission retain exact provenance and ordering while rejecting cross-property literals and invalid primitive domains. [Implementation evidence](../assessments/2026-09-19-native-ir-text-controls.md) records exhaustive literal coverage, generated ordering and consumer qualification.
