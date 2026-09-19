@@ -319,3 +319,7 @@ Approved M2.2p migrates exact `borderStartColor` and `borderEndColor` through th
 ### Physical border-radius scalar IR — 2026-09-19
 
 Approved M2.2q migrates broad and four physical corner radii with finite-number/token admission and provenance-validated expansion. [Implementation evidence](../assessments/2026-09-19-native-ir-border-radius.md) records precedence and qualification.
+
+### Logical corner-radius scalar IR — 2026-09-19
+
+Approved M2.2r migrates the four fully logical corner-radius fields as exact scalar declarations across view, text and image. They retain their authored identities independently from physical corners; no alias expansion or layout-direction inference is introduced. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-border-radius.md) records property-based ordering, schema rejection and consumer qualification.

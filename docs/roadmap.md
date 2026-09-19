@@ -118,6 +118,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2o: Introduce a property-specific color scalar domain and migrate broad plus physical border colors.
 - [x] M2.2p: Migrate exact logical `borderStartColor` and `borderEndColor` fields independently from physical colors.
 - [x] M2.2q: Migrate broad and physical border radii with finite numeric/token admission and canonical corner precedence.
+- [x] M2.2r: Migrate the four exact logical corner radii through scalar IR while keeping them independent from physical corners.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -885,3 +886,10 @@ Next recommended slice: **M2.2q** — migrate physical border radii plus broad `
 - Focused qualification passed 17 tests with 573 assertions; full qualification passed 420 tests across 66 files with 15,773 assertions. See [evidence](assessments/2026-09-19-native-ir-border-radius.md).
 
 Next recommended slice: **M2.2r** — migrate the four exact logical corner-radius fields while keeping them independent from physical corners. Begin only after approval.
+
+### 2026-09-19 — M2.2r logical corner-radius scalar IR
+
+- Migrated `borderStartStartRadius`, `borderStartEndRadius`, `borderEndStartRadius` and `borderEndEndRadius` across every primitive with finite-number/token admission. Exact logical fields remain independent from physical corners, with no aliases or direction inference.
+- Focused qualification passed 20 tests with 612 assertions; full qualification passed 425 tests across 67 files with 15,921 assertions. See [evidence](assessments/2026-09-19-native-ir-logical-border-radius.md).
+
+Next recommended slice: **M2.2s** — migrate the four semi-logical corner-radius fields (`borderTopStartRadius`, `borderTopEndRadius`, `borderBottomStartRadius`, `borderBottomEndRadius`) as independent exact fields. Begin only after approval.
