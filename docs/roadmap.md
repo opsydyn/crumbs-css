@@ -136,6 +136,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2ag: Migrate text-only `textTransform`, `writingDirection` and `userSelect` through explicit installed React Native literal/token domains.
 - [x] M2.2ah: Introduce a property-specific boolean/token domain and migrate text-only Android `includeFontPadding`.
 - [x] M2.2ai: Migrate shared `display`, `position` and `direction` layout modes through exact literal/token domains.
+- [x] M2.2aj: Introduce primitive-aware literal admission and migrate `overflow` without widening the image domain.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -1029,3 +1030,10 @@ Next recommended slice: **M2.2ai** — migrate shared layout mode fields (`displ
 - Focused qualification passed 29 tests with 500 assertions; full qualification passed 510 tests across 84 files with 18,118 assertions. See [evidence](assessments/2026-09-19-native-ir-layout-modes.md).
 
 Next recommended slice: **M2.2aj** — migrate `overflow` with primitive-aware literal admission so `scroll` remains valid for view/text while image retains its narrower installed domain. Begin only after approval.
+
+### 2026-09-19 — M2.2aj primitive-aware overflow scalar IR
+
+- Added a reusable primitive-specific literal-domain table and migrated `overflow`. View/text admit `visible`, `hidden` and `scroll`; image admits only `visible` and `hidden`; token references remain valid across all supported primitives.
+- Focused qualification passed 29 tests with 704 assertions; full qualification passed 515 tests across 85 files with 18,440 assertions. See [evidence](assessments/2026-09-19-native-ir-overflow.md).
+
+Next recommended slice: **M2.2ak** — migrate the shared flex layout controls (`flexDirection`, `flexWrap`, `alignContent`, `alignItems`, `alignSelf`, `justifyContent`) through exact installed literal/token domains. Begin only after approval.

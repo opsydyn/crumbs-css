@@ -5,6 +5,7 @@ import {
   getNativeCaptureMetadata,
   NativeCaptureMetadataSymbol,
   type NativePrimitiveDomain,
+  type NativePrimitiveKind,
 } from "./native-capture"
 import { createThemeTokenReference } from "../theme-token"
 
@@ -82,6 +83,7 @@ export type MigratedScalarProperty =
   | "textTransform" | "writingDirection" | "userSelect"
   | "includeFontPadding"
   | "display" | "position" | "direction"
+  | "overflow"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -151,6 +153,17 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   display: new Set(["none", "flex", "contents"]),
   position: new Set(["absolute", "relative", "static"]),
   direction: new Set(["inherit", "ltr", "rtl"]),
+  overflow: new Set(["visible", "hidden", "scroll"]),
+}
+const primitiveLiteralValueProperties: Readonly<Partial<Record<
+  MigratedScalarProperty,
+  Readonly<Partial<Record<NativePrimitiveKind, ReadonlySet<unknown>>>>
+>>> = {
+  overflow: {
+    view: new Set(["visible", "hidden", "scroll"]),
+    text: new Set(["visible", "hidden", "scroll"]),
+    image: new Set(["visible", "hidden"]),
+  },
 }
 const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
@@ -227,6 +240,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "textTransform", "writingDirection", "userSelect",
   "includeFontPadding",
   "display", "position", "direction",
+  "overflow",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -259,6 +273,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "textTransform", "writingDirection", "userSelect",
   "includeFontPadding",
   "display", "position", "direction",
+  "overflow",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -318,9 +333,13 @@ export const ScalarDeclarationBlockSchema = Schema.Struct({
   provenance: SourceProvenanceSchema,
 }).check(Schema.makeFilter(block => block.declarations.flatMap((declaration, index) => {
   const allowed = propertyPrimitives[declaration.property]
-  return block.primitiveDomain.every(kind => allowed.includes(kind))
+  const primitiveLiterals = primitiveLiteralValueProperties[declaration.property]
+  const validLiteralForPrimitives = typeof declaration.value === "object" || block.primitiveDomain.every(kind =>
+    primitiveLiterals?.[kind]?.has(declaration.value) ?? true,
+  )
+  return block.primitiveDomain.every(kind => allowed.includes(kind)) && validLiteralForPrimitives
     ? []
-    : [{ path: ["declarations", index, "property"], issue: `${declaration.property} is invalid for this primitive domain` }]
+    : [{ path: ["declarations", index], issue: `${declaration.property} is invalid for this primitive domain` }]
 })))
 export const OpacityDeclarationBlockSchema = Schema.Struct({
   _tag: Schema.Literal("DeclarationBlock"),
@@ -373,6 +392,7 @@ const migratedScalarProperties = [
   "textTransform", "writingDirection", "userSelect",
   "includeFontPadding",
   "display", "position", "direction",
+  "overflow",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -428,6 +448,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   textTransform: ["text"], writingDirection: ["text"], userSelect: ["text"],
   includeFontPadding: ["text"],
   display: ["view", "text", "image"], position: ["view", "text", "image"], direction: ["view", "text", "image"],
+  overflow: ["view", "text", "image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
