@@ -4,12 +4,12 @@ import * as path from "node:path"
 import { runInNewContext } from "node:vm"
 import fc from "fast-check"
 import {
-  captureNumericIntoNativeIr,
-  decodeNumericBlock,
-  lowerNumericBlock,
+  captureScalarIntoNativeIr,
+  decodeScalarBlock,
+  lowerScalarBlock,
   NativeIrAdmissionError,
-  normalizeNumericBlocks,
-  type NumericCaptureContext,
+  normalizeScalarBlocks,
+  type ScalarCaptureContext,
 } from "../src/compiler/native-ir"
 import { markNativeCaptureRule } from "../src/compiler/native-capture"
 import { transformCssTsToStyleSheet } from "../src/transformer"
@@ -21,7 +21,7 @@ import {
 } from "./oracles/native-ir-v1"
 
 const root = path.resolve(import.meta.dir, "..")
-const context: NumericCaptureContext = {
+const context: ScalarCaptureContext = {
   packageOwner: "@fixture/app",
   sourceId: "styles/layout.css.ts",
   className: "layout_class",
@@ -67,7 +67,7 @@ function oracleBlock(property: string, value: DeclarationValue): StyleExpression
 
 describe("production native IR unitless numeric layout family", () => {
   it("captures the exact family before CSS and retains unmigrated properties", () => {
-    const captured = captureNumericIntoNativeIr(markNativeCaptureRule({
+    const captured = captureScalarIntoNativeIr(markNativeCaptureRule({
       zIndex: -3,
       elevation: 2.5,
       flexGrow: -0,
@@ -82,47 +82,47 @@ describe("production native IR unitless numeric layout family", () => {
       ["flexGrow", -0],
       ["flexShrink", { _tag: "LegacyTokenReference", varName: "--crumbs-layout-shrink" }],
     ])
-    const lowered = lowerNumericBlock(captured.block!)
+    const lowered = lowerScalarBlock(captured.block!)
     expect(Object.is(lowered.flexGrow, -0)).toBe(true)
     expect(lowered.flexShrink).toEqual({ $$type: "crumbs.css.theme-token", varName: "--crumbs-layout-shrink" })
   })
 
   it("uses the installed React Native primitive domains", () => {
     for (const property of ["zIndex", "flexGrow", "flexShrink"] as const) {
-      const block = captureNumericIntoNativeIr(markNativeCaptureRule({ [property]: 1 }, ["image"]), context).block!
+      const block = captureScalarIntoNativeIr(markNativeCaptureRule({ [property]: 1 }, ["image"]), context).block!
       expect(block.primitiveDomain).toEqual(["image"])
     }
-    expect(captureNumericIntoNativeIr(markNativeCaptureRule({ elevation: 1 }, ["text"]), context).block?.primitiveDomain)
+    expect(captureScalarIntoNativeIr(markNativeCaptureRule({ elevation: 1 }, ["text"]), context).block?.primitiveDomain)
       .toEqual(["text"])
-    expect(() => captureNumericIntoNativeIr(markNativeCaptureRule({ elevation: 1 }, ["image"]), context))
+    expect(() => captureScalarIntoNativeIr(markNativeCaptureRule({ elevation: 1 }, ["image"]), context))
       .toThrow("CRUMBS_IR_INVALID_PROPERTY")
   })
 
   it("rejects non-finite, non-numeric and accessor values without fallback", () => {
     for (const property of properties) {
       for (const value of [NaN, Infinity, -Infinity, "1", "var(--other-value)", {}, []]) {
-        expect(() => captureNumericIntoNativeIr(markNativeCaptureRule({ [property]: value }, ["view"]), context))
+        expect(() => captureScalarIntoNativeIr(markNativeCaptureRule({ [property]: value }, ["view"]), context))
           .toThrow(NativeIrAdmissionError)
       }
       const accessor = Object.defineProperty({}, property, { enumerable: true, get: () => { throw new Error("EXECUTED") } })
-      expect(() => captureNumericIntoNativeIr(markNativeCaptureRule(accessor, ["view"]), context))
+      expect(() => captureScalarIntoNativeIr(markNativeCaptureRule(accessor, ["view"]), context))
         .toThrow("CRUMBS_IR_INVALID_VALUE")
     }
   })
 
   it("enforces exact Effect Schema fields and property names", () => {
-    const block = captureNumericIntoNativeIr(markNativeCaptureRule({ zIndex: 1 }, ["view"]), context).block!
-    expect(() => decodeNumericBlock({ ...block, unexpected: true }, context.sourceId)).toThrow("CRUMBS_IR_INVALID_NODE")
-    expect(() => decodeNumericBlock({
+    const block = captureScalarIntoNativeIr(markNativeCaptureRule({ zIndex: 1 }, ["view"]), context).block!
+    expect(() => decodeScalarBlock({ ...block, unexpected: true }, context.sourceId)).toThrow("CRUMBS_IR_INVALID_NODE")
+    expect(() => decodeScalarBlock({
       ...block,
       declarations: [{ ...block.declarations[0], property: "width" }],
     }, context.sourceId)).toThrow("CRUMBS_IR_INVALID_NODE")
-    expect(() => decodeNumericBlock({
+    expect(() => decodeScalarBlock({
       ...block,
       declarations: [{ ...block.declarations[0], provenance: { ...block.declarations[0].provenance, canonicalProperty: "opacity" } }],
     }, context.sourceId)).toThrow("CRUMBS_IR_INVALID_NODE")
-    const elevation = captureNumericIntoNativeIr(markNativeCaptureRule({ elevation: 1 }, ["view"]), context).block!
-    expect(() => decodeNumericBlock({ ...elevation, primitiveDomain: ["image"] }, context.sourceId))
+    const elevation = captureScalarIntoNativeIr(markNativeCaptureRule({ elevation: 1 }, ["view"]), context).block!
+    expect(() => decodeScalarBlock({ ...elevation, primitiveDomain: ["image"] }, context.sourceId))
       .toThrow("CRUMBS_IR_INVALID_NODE")
   })
 
@@ -132,11 +132,11 @@ describe("production native IR unitless numeric layout family", () => {
       fc.oneof(fc.double({ noNaN: true, noDefaultInfinity: true }), fc.constant("var(--crumbs-layout-value)")),
     )
     fc.assert(fc.property(fc.array(entry, { minLength: 1, maxLength: 24 }), entries => {
-      const blocks = entries.map(([property, value], index) => captureNumericIntoNativeIr(
+      const blocks = entries.map(([property, value], index) => captureScalarIntoNativeIr(
         markNativeCaptureRule({ [property]: value }, ["view"]),
         { ...context, className: `class_${index}` },
       ).block!)
-      const actual = lowerNumericBlock(normalizeNumericBlocks(blocks))
+      const actual = lowerScalarBlock(normalizeScalarBlocks(blocks))
       const oracleItems = entries.map(([property, value]) => oracleBlock(property, value === "var(--crumbs-layout-value)"
         ? { _tag: "TokenReference", contract: { owner: "legacy", name: "unqualified", version: 1 }, path: ["--crumbs-layout-value"] }
         : value))

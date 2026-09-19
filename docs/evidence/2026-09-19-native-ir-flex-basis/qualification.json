@@ -1,0 +1,34 @@
+{
+  "slice": "M2.2d",
+  "recordedAt": "2026-09-19",
+  "sourceRevision": "f603bf3272cda7c1f7b732d8e456742458786e0f",
+  "sourceState": "Working tree; implementation and documentation are committed after qualification",
+  "migratedProperty": {
+    "flexBasis": {
+      "primitiveDomain": ["view", "text", "image"],
+      "valueDomain": "finite point number, auto, finite percentage or legacy token"
+    }
+  },
+  "verification": [
+    { "command": "bun test packages/css/test/native-ir-flex-basis.test.ts packages/css/test/native-ir-flex.test.ts packages/css/test/native-ir-unitless-numeric.test.ts packages/css/test/native-ir-opacity.test.ts packages/css/test/flex-precedence.test.ts", "status": "passed", "tests": 39, "assertions": 1380 },
+    { "command": "bun run check", "status": "passed", "tests": 347, "assertions": 13808, "files": 53 },
+    { "command": "bun run app:typecheck", "status": "passed" },
+    { "command": "bun run playground:check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run playground:packed --check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run docs:build", "status": "passed", "pages": 20 },
+    { "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles", "status": "passed", "claim": "declared host smoke ceilings only" },
+    { "command": "bun run budgets:validate", "status": "passed", "registryReady": false, "performanceQualification": "not-run" }
+  ],
+  "boundaries": {
+    "animatedNodes": "runtime only",
+    "null": "not admitted to static IR",
+    "unmarkedVanillaExtract": "legacy converter",
+    "qualifiedTokenIdentity": false,
+    "publicApiChanged": false,
+    "externalArtifactAbi": false,
+    "effectInOrdinaryRuntime": false,
+    "androidNativeAcceptance": false,
+    "published": false,
+    "pushed": false
+  }
+}

@@ -104,6 +104,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2a: Introduce immutable production IR admission for `opacity`, retaining primitive domain, package-relative source/property provenance, literal/token identity and authored order through StyleSheet and plain-object emission. Keep unmarked vanilla-extract and every unmigrated property on the legacy path; malformed Crumbs opacity fails without fallback.
 - [x] M2.2b: Generalize production numeric blocks and migrate `zIndex`, `elevation`, `flexGrow` and `flexShrink`, preserving the installed React Native primitive domains, finite-number/token values, provenance and authored last-winner order through both emitters.
 - [x] M2.2c: Migrate scalar React Native `flex` through production numeric IR without CSS shorthand expansion, retaining independent `flexGrow`, `flexShrink` and legacy `flexBasis` fields.
+- [x] M2.2d: Generalize production scalar IR beyond numeric-only values and migrate `flexBasis` with finite point numbers, `auto`, finite percentages and legacy tokens across all FlexStyle primitives.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -762,3 +763,12 @@ Next recommended slice: **M2.2c** — migrate native numeric `flex` as its own I
 - Full package qualification passed 340 tests with 13,550 assertions. No public API, external artifact ABI, qualified token identity, flex-basis migration, push, publication or native-device acceptance is included. See the [assessment and evidence](assessments/2026-09-19-native-ir-flex.md).
 
 Next recommended slice: **M2.2d** — migrate `flexBasis` as the first scalar length-or-auto IR property, defining literal unit normalization and token-domain admission without changing scalar `flex` semantics. Keep the broader spacing/size length family and vanilla-extract adapter separate. Begin only after approval.
+
+### 2026-09-19 — M2.2d flex-basis scalar IR
+
+- Renamed the production declaration path from numeric to scalar before admitting nonnumeric values. Its Effect Schema now assigns property-specific value domains: numeric properties still admit only finite numbers or legacy tokens, while `flexBasis` admits finite point numbers, exact `auto`, finite percentage strings and legacy tokens.
+- Migrated `flexBasis` for view, text and image helpers before CSS serialization. Numeric values retain React Native point semantics rather than acquiring a `px` string; percentages retain their exact string representation. CSS `px` strings, bare numeric strings, other keywords, malformed/nonfinite percentages, animated objects, arrays and null fail without fallback.
+- Fixed scalar freezing and lowering to distinguish immutable token records from string literals. Normalization remains last-winner per property, so `flexBasis`, `flex`, `flexGrow` and `flexShrink` survive independently through both emitters.
+- Dedicated schema, seeded 100-case ordering, helper/composition and compatibility tests join the established flex and earlier IR suites. Full package qualification passed 347 tests with 13,808 assertions. See the [assessment and evidence](assessments/2026-09-19-native-ir-flex-basis.md).
+
+Next recommended slice: **M2.2e** — migrate the `width`, `height`, `minWidth`, `minHeight`, `maxWidth` and `maxHeight` DimensionValue family through scalar IR, reusing the qualified points/auto/percentage domain while proving min/max and composition order independently. Keep spacing, inset aliases and the vanilla-extract adapter separate. Begin only after approval.

@@ -22,9 +22,9 @@ import {captureNativeExports, ExportRecordType, ExportStringType, ExportUndefine
 import { parseCssClassRules } from "./parse-virtual-css"
 import { splitStructuredNativeValues } from "./structured-native-values"
 import {
-  captureNumericIntoNativeIr,
-  lowerNumericBlock,
-  type NumericDeclarationBlock,
+  captureScalarIntoNativeIr,
+  lowerScalarBlock,
+  type ScalarDeclarationBlock,
 } from "./compiler/native-ir"
 
 // Minimal esbuild plugin shape. `setup` receives `build: unknown` so it doesn't
@@ -213,7 +213,7 @@ async function processVanillaFileForNative({
     source: string
   }) => string | Promise<string>
   nativeValuesByClass: Map<string, Record<string, unknown>>
-  nativeIrByClass: Map<string, NumericDeclarationBlock>
+  nativeIrByClass: Map<string, ScalarDeclarationBlock>
   projectRoot: string
 }): Promise<string> {
   const cssByFileScope = new Map<string, CssBlock[]>()
@@ -225,14 +225,14 @@ async function processVanillaFileForNative({
       if (!outputCss) return
       if (css.type === "local") {
         const source = sourceIdentity(fileScope.filePath, projectRoot)
-        const numeric = captureNumericIntoNativeIr(css.rule as Record<string, unknown>, {
+        const scalar = captureScalarIntoNativeIr(css.rule as Record<string, unknown>, {
           packageOwner: source.packageOwner,
           sourceId: source.sourceId,
           className: css.selector,
         })
-        if (numeric.block !== undefined) nativeIrByClass.set(css.selector, numeric.block)
+        if (scalar.block !== undefined) nativeIrByClass.set(css.selector, scalar.block)
         const { cssRule, nativeValues } = splitStructuredNativeValues(
-          numeric.cssRule, `${fileScope.filePath} (class ${css.selector})`,
+          scalar.cssRule, `${fileScope.filePath} (class ${css.selector})`,
         )
         if (Object.keys(nativeValues).length > 0) nativeValuesByClass.set(css.selector, nativeValues)
         css = { ...css, rule: cssRule }
@@ -335,7 +335,7 @@ export async function transformCssTsToStyleSheet(
   })
 
   const nativeValuesByClass = new Map<string, Record<string, unknown>>()
-  const nativeIrByClass = new Map<string, NumericDeclarationBlock>()
+  const nativeIrByClass = new Map<string, ScalarDeclarationBlock>()
   const vanillaFile = await processVanillaFileForNative({
     source,
     filePath: absoluteFilePath,
@@ -393,7 +393,7 @@ export async function transformCssTsToStyleSheet(
     classStyles.set(cls, { ...classStyles.get(cls), ...nativeValues })
   }
   for (const [cls, block] of nativeIrByClass) {
-    classStyles.set(cls, { ...classStyles.get(cls), ...lowerNumericBlock(block) })
+    classStyles.set(cls, { ...classStyles.get(cls), ...lowerScalarBlock(block) })
   }
 
   // Resolve composed class names (space-separated) by merging their styles.

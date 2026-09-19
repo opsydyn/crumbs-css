@@ -4,18 +4,18 @@ import * as path from "node:path"
 import { runInNewContext } from "node:vm"
 import fc from "fast-check"
 import {
-  captureNumericIntoNativeIr,
-  decodeNumericBlock,
-  lowerNumericBlock,
+  captureScalarIntoNativeIr,
+  decodeScalarBlock,
+  lowerScalarBlock,
   NativeIrAdmissionError,
-  normalizeNumericBlocks,
-  type NumericCaptureContext,
+  normalizeScalarBlocks,
+  type ScalarCaptureContext,
 } from "../src/compiler/native-ir"
 import { markNativeCaptureRule } from "../src/compiler/native-capture"
 import { transformCssTsToStyleSheet } from "../src/transformer"
 
 const root = path.resolve(import.meta.dir, "..")
-const context: NumericCaptureContext = {
+const context: ScalarCaptureContext = {
   packageOwner: "@fixture/app",
   sourceId: "styles/flex.css.ts",
   className: "flex_class",
@@ -38,38 +38,39 @@ async function compile(source: string, useStyleSheet = false): Promise<Record<st
 
 describe("production native IR scalar flex family", () => {
   it("captures scalar flex before CSS without expanding browser shorthand fields", () => {
-    const captured = captureNumericIntoNativeIr(markNativeCaptureRule({
+    const captured = captureScalarIntoNativeIr(markNativeCaptureRule({
       flex: -0,
       flexGrow: 2,
       flexShrink: 3,
       flexBasis: "25%",
     }, ["view", "text", "image"]), context)
-    expect(captured.cssRule).toEqual({ flexBasis: "25%" })
+    expect(captured.cssRule).toEqual({})
     expect(captured.block?.declarations.map(({ property, value }) => [property, value])).toEqual([
       ["flex", -0],
       ["flexGrow", 2],
       ["flexShrink", 3],
+      ["flexBasis", "25%"],
     ])
-    const lowered = lowerNumericBlock(captured.block!)
+    const lowered = lowerScalarBlock(captured.block!)
     expect(Object.is(lowered.flex, -0)).toBe(true)
-    expect(lowered).toEqual({ flex: -0, flexGrow: 2, flexShrink: 3 })
+    expect(lowered).toEqual({ flex: -0, flexGrow: 2, flexShrink: 3, flexBasis: "25%" })
   })
 
   it("admits flex on every React Native style primitive and rejects non-scalar values", () => {
     for (const primitive of ["view", "text", "image"] as const) {
-      expect(captureNumericIntoNativeIr(markNativeCaptureRule({ flex: -1.5 }, [primitive]), context).block?.primitiveDomain)
+      expect(captureScalarIntoNativeIr(markNativeCaptureRule({ flex: -1.5 }, [primitive]), context).block?.primitiveDomain)
         .toEqual([primitive])
     }
     for (const value of [NaN, Infinity, -Infinity, "1", "auto", "1 0 auto", {}, []]) {
-      expect(() => captureNumericIntoNativeIr(markNativeCaptureRule({ flex: value }, ["view"]), context))
+      expect(() => captureScalarIntoNativeIr(markNativeCaptureRule({ flex: value }, ["view"]), context))
         .toThrow(NativeIrAdmissionError)
     }
   })
 
   it("enforces flex provenance at the Effect Schema boundary", () => {
-    const block = captureNumericIntoNativeIr(markNativeCaptureRule({ flex: 1 }, ["view"]), context).block!
-    expect(decodeNumericBlock(block, context.sourceId).declarations[0].property).toBe("flex")
-    expect(() => decodeNumericBlock({
+    const block = captureScalarIntoNativeIr(markNativeCaptureRule({ flex: 1 }, ["view"]), context).block!
+    expect(decodeScalarBlock(block, context.sourceId).declarations[0].property).toBe("flex")
+    expect(() => decodeScalarBlock({
       ...block,
       declarations: [{
         ...block.declarations[0],
@@ -82,11 +83,11 @@ describe("production native IR scalar flex family", () => {
     fc.assert(fc.property(
       fc.array(fc.double({ noNaN: true, noDefaultInfinity: true }), { minLength: 1, maxLength: 20 }),
       values => {
-        const blocks = values.map((flex, index) => captureNumericIntoNativeIr(
+        const blocks = values.map((flex, index) => captureScalarIntoNativeIr(
           markNativeCaptureRule({ flex, flexGrow: index + 1, flexShrink: index }, ["view"]),
           { ...context, className: `flex_${index}` },
         ).block!)
-        const lowered = lowerNumericBlock(normalizeNumericBlocks(blocks))
+        const lowered = lowerScalarBlock(normalizeScalarBlocks(blocks))
         expect(Object.is(lowered.flex, values.at(-1))).toBe(true)
         expect(lowered.flexGrow).toBe(values.length)
         expect(lowered.flexShrink).toBe(values.length - 1)

@@ -263,3 +263,7 @@ Approved M2.2b generalizes production numeric blocks to a non-empty ordered decl
 ### Scalar native flex IR — 2026-09-19
 
 Approved M2.2c migrates finite numeric and token-backed `flex` through production IR for view, text and image. The declaration remains an independent React Native Yoga scalar: it does not synthesize browser shorthand defaults, and explicit `flexGrow`, `flexShrink` and legacy-routed `flexBasis` survive independently. Invalid Crumbs-authored flex now fails at IR admission with `CRUMBS_IR_INVALID_VALUE`; unmarked vanilla-extract remains on the compatibility route. [Implementation evidence](../assessments/2026-09-19-native-ir-flex.md) records the schema, generated ordering and consumer qualification.
+
+### Flex-basis scalar IR — 2026-09-19
+
+Approved M2.2d generalizes the production declaration block from numeric-only to property-specific scalar values and migrates `flexBasis`. Static admission follows React Native's `DimensionValue` subset: finite point numbers, exact `auto`, finite percentages and legacy tokens across view, text and image. Animated nodes and null remain runtime concerns; CSS `px` strings and malformed values fail before serialization. Scalar freezing and lowering distinguish token records from strings, while per-property last-winner order keeps every flex field independent. [Implementation evidence](../assessments/2026-09-19-native-ir-flex-basis.md) records generated ordering and consumer qualification.
