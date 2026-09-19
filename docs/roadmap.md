@@ -110,6 +110,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2g: Migrate the seven Crumbs inset aliases into canonical position-edge declarations, retaining authored alias provenance and ordered alias/longhand precedence without layout-direction inference.
 - [x] M2.2h: Migrate `gap`, `rowGap` and `columnGap` through production scalar IR, expanding broad gap into canonical axes with validated provenance and ordered broad/axis precedence.
 - [x] M2.2i: Migrate physical padding longhands plus broad and horizontal/vertical aliases through scalar IR with canonical broad/pair/side precedence.
+- [x] M2.2j: Migrate logical padding fields and inline/block aliases through scalar IR while retaining native start/end independently from physical sides.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -821,3 +822,10 @@ Next recommended slice: **M2.2i** — migrate physical padding longhands plus `p
 - Full qualification passed 380 tests across 58 files with 14,631 assertions. Logical padding, margin, qualified tokens and the public artifact ABI remain separate. See [evidence](assessments/2026-09-19-native-ir-padding.md).
 
 Next recommended slice: **M2.2j** — migrate logical padding fields and aliases while retaining native `paddingStart`/`paddingEnd` independently from physical sides. Begin only after approval.
+
+### 2026-09-19 — M2.2j logical padding scalar IR
+
+- Migrated `paddingStart`, `paddingEnd` and six inline/block aliases with schema-validated expansion provenance. Logical start/end remain independent from physical sides; no direction inference was added.
+- Focused qualification passed 20 tests with 598 assertions; full qualification passed 385 tests across 59 files with 14,748 assertions. See [evidence](assessments/2026-09-19-native-ir-logical-padding.md).
+
+Next recommended slice: **M2.2k** — migrate physical margin longhands plus broad and horizontal/vertical aliases, retaining negative DimensionValue support. Begin only after approval.

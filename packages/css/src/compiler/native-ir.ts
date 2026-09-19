@@ -47,6 +47,7 @@ export type PropertyProvenance = SourceProvenance & {
 }
 export type InsetAliasProperty = "inset" | "insetInline" | "insetBlock" | "insetInlineStart" | "insetInlineEnd" | "insetBlockStart" | "insetBlockEnd"
 export type ScalarAliasProperty = InsetAliasProperty | "gap" | "padding" | "paddingHorizontal" | "paddingVertical"
+  | "paddingInline" | "paddingBlock" | "paddingInlineStart" | "paddingInlineEnd" | "paddingBlockStart" | "paddingBlockEnd"
 export type AuthoredScalarProperty = MigratedScalarProperty | ScalarAliasProperty
 export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
@@ -55,6 +56,7 @@ export type MigratedScalarProperty =
   | "top" | "right" | "bottom" | "left" | "start" | "end"
   | "rowGap" | "columnGap"
   | "paddingTop" | "paddingRight" | "paddingBottom" | "paddingLeft"
+  | "paddingStart" | "paddingEnd"
 export type PercentageValue = `${number}%`
 export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
 export type ScalarDeclaration = {
@@ -89,6 +91,7 @@ const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "flexBasis", "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
   "top", "right", "bottom", "left", "start", "end",
   "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
+  "paddingStart", "paddingEnd",
 ])
 const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   ...dimensionValueProperties, "rowGap", "columnGap",
@@ -105,6 +108,9 @@ const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly Migra
   padding: ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"],
   paddingHorizontal: ["paddingLeft", "paddingRight"],
   paddingVertical: ["paddingTop", "paddingBottom"],
+  paddingInline: ["paddingLeft", "paddingRight"], paddingBlock: ["paddingTop", "paddingBottom"],
+  paddingInlineStart: ["paddingStart"], paddingInlineEnd: ["paddingEnd"],
+  paddingBlockStart: ["paddingTop"], paddingBlockEnd: ["paddingBottom"],
 }
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
@@ -136,6 +142,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "top", "right", "bottom", "left", "start", "end",
   "rowGap", "columnGap",
   "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
+  "paddingStart", "paddingEnd",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -144,6 +151,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "inset", "insetInline", "insetBlock", "insetInlineStart", "insetInlineEnd", "insetBlockStart", "insetBlockEnd",
   "gap", "rowGap", "columnGap",
   "padding", "paddingHorizontal", "paddingVertical", "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
+  "paddingInline", "paddingBlock", "paddingInlineStart", "paddingInlineEnd", "paddingBlockStart", "paddingBlockEnd", "paddingStart", "paddingEnd",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -226,6 +234,7 @@ const migratedScalarProperties = [
   "top", "right", "bottom", "left", "start", "end",
   "rowGap", "columnGap",
   "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
+  "paddingStart", "paddingEnd",
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
@@ -253,6 +262,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   columnGap: ["view", "text", "image"],
   paddingTop: ["view", "text", "image"], paddingRight: ["view", "text", "image"],
   paddingBottom: ["view", "text", "image"], paddingLeft: ["view", "text", "image"],
+  paddingStart: ["view", "text", "image"], paddingEnd: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {

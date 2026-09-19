@@ -287,3 +287,7 @@ Approved M2.2h migrates `gap`, `rowGap` and `columnGap` through production scala
 ### Physical padding scalar IR — 2026-09-19
 
 Approved M2.2i migrates physical padding longhands plus broad and horizontal/vertical aliases through scalar IR. Alias expansion retains authored provenance and canonical fields; normalization applies one broad/pair/side last-winner law. [Implementation evidence](../assessments/2026-09-19-native-ir-padding.md) records generated precedence and consumer qualification.
+
+### Logical padding scalar IR — 2026-09-19
+
+Approved M2.2j migrates native start/end padding and six inline/block aliases. Canonical expansion preserves authored provenance; logical fields remain independent from physical sides without compiler direction inference. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-padding.md) records generated ordering and qualification.
