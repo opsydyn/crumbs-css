@@ -87,6 +87,7 @@ export type MigratedScalarProperty =
   | "flexDirection" | "flexWrap" | "alignContent" | "alignItems" | "alignSelf" | "justifyContent"
   | "boxSizing"
   | "aspectRatio"
+  | "backfaceVisibility" | "cursor"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -165,6 +166,8 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   alignSelf: new Set(["auto", "flex-start", "flex-end", "center", "stretch", "baseline"]),
   justifyContent: new Set(["flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly"]),
   boxSizing: new Set(["border-box", "content-box"]),
+  backfaceVisibility: new Set(["visible", "hidden"]),
+  cursor: new Set(["auto", "pointer"]),
 }
 const primitiveLiteralValueProperties: Readonly<Partial<Record<
   MigratedScalarProperty,
@@ -255,6 +258,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
   "aspectRatio",
+  "backfaceVisibility", "cursor",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -291,6 +295,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
   "aspectRatio",
+  "backfaceVisibility", "cursor",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -415,6 +420,7 @@ const migratedScalarProperties = [
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
   "aspectRatio",
+  "backfaceVisibility", "cursor",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -476,6 +482,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   alignSelf: ["view", "text", "image"], justifyContent: ["view", "text", "image"],
   boxSizing: ["view", "text", "image"],
   aspectRatio: ["view", "text", "image"],
+  backfaceVisibility: ["view", "text", "image"], cursor: ["view", "text", "image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],

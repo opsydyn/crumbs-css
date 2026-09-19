@@ -407,3 +407,7 @@ Approved M2.2al migrates `boxSizing` through its exact `border-box | content-box
 ### Aspect-ratio scalar IR and FlexStyle completion — 2026-09-19
 
 Approved M2.2am migrates `aspectRatio` through an isolated finite-number/non-empty-string/token domain across view, text and image. The domain is checked independently at capture and Effect Schema decoding, so its installed string representation does not widen existing numeric property families. This migration completes scalar-IR coverage of the installed React Native FlexStyle surface. [Implementation evidence](../assessments/2026-09-19-native-ir-aspect-ratio.md) records mixed-representation generation, domain isolation and consumer qualification.
+
+### Visibility and cursor scalar IR — 2026-09-19
+
+Approved M2.2an migrates `backfaceVisibility` and `cursor` through their exact installed literal/token domains across view, text and image. Both fields retain exact provenance and independent last-winner ordering, and unsupported or cross-property literals fail consistently at capture and Effect Schema decoding. [Implementation evidence](../assessments/2026-09-19-native-ir-visibility-cursor.md) records exhaustive literal coverage, generated ordering and consumer qualification.

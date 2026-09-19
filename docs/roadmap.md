@@ -140,6 +140,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2ak: Migrate the six shared flex layout controls through exact installed literal/token domains.
 - [x] M2.2al: Migrate shared `boxSizing` and audit the remaining installed FlexStyle surface.
 - [x] M2.2am: Migrate `aspectRatio` through an isolated mixed scalar domain and complete installed FlexStyle coverage.
+- [x] M2.2an: Migrate shared `backfaceVisibility` and `cursor` literal/token domains.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -1063,3 +1064,10 @@ Next recommended slice: **M2.2am** — migrate `aspectRatio` through an isolated
 - Focused qualification passed 30 tests with 476 assertions; full qualification passed 531 tests across 88 files with 18,937 assertions. See [evidence](assessments/2026-09-19-native-ir-aspect-ratio.md).
 
 Next recommended slice: **M2.2an** — begin the shared ViewStyle/ImageStyle literal surface with `backfaceVisibility` and `cursor`, using their exact installed domains across supported primitives. Begin only after approval.
+
+### 2026-09-19 — M2.2an visibility and cursor scalar IR
+
+- Migrated `backfaceVisibility` and `cursor` across view, text and image through exact installed React Native literal/token domains.
+- Focused qualification passed 30 tests with 491 assertions; full qualification passed 536 tests across 89 files with 19,070 assertions. See [evidence](assessments/2026-09-19-native-ir-visibility-cursor.md).
+
+Next recommended slice: **M2.2ao** — migrate view/text-only `borderCurve` and `pointerEvents` through exact literal/token domains, preserving their narrower primitive contracts. Begin only after approval.
