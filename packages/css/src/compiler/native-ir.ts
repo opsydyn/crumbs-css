@@ -51,6 +51,7 @@ export type ScalarAliasProperty = InsetAliasProperty | "gap" | "padding" | "padd
   | "margin" | "marginHorizontal" | "marginVertical"
   | "marginInline" | "marginBlock" | "marginInlineStart" | "marginInlineEnd" | "marginBlockStart" | "marginBlockEnd"
   | "borderWidth"
+  | "borderColor"
 export type AuthoredScalarProperty = MigratedScalarProperty | ScalarAliasProperty
 export type MigratedScalarProperty =
   | "opacity" | "zIndex" | "elevation"
@@ -64,8 +65,9 @@ export type MigratedScalarProperty =
   | "marginStart" | "marginEnd"
   | "borderTopWidth" | "borderRightWidth" | "borderBottomWidth" | "borderLeftWidth"
   | "borderStartWidth" | "borderEndWidth"
+  | "borderTopColor" | "borderRightColor" | "borderBottomColor" | "borderLeftColor"
 export type PercentageValue = `${number}%`
-export type ScalarDeclarationValue = number | "auto" | PercentageValue | LegacyTokenReference
+export type ScalarDeclarationValue = number | string | LegacyTokenReference
 export type ScalarDeclaration = {
   readonly _tag: "NativeDeclaration"
   readonly property: MigratedScalarProperty
@@ -105,6 +107,9 @@ const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
 const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   ...dimensionValueProperties, "rowGap", "columnGap",
 ])
+const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
+  "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
+])
 const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
   insetInline: ["left", "right"],
@@ -126,6 +131,7 @@ const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly Migra
   marginInlineStart: ["marginStart"], marginInlineEnd: ["marginEnd"],
   marginBlockStart: ["marginTop"], marginBlockEnd: ["marginBottom"],
   borderWidth: ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"],
+  borderColor: ["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"],
 }
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
@@ -162,6 +168,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "marginStart", "marginEnd",
   "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
   "borderStartWidth", "borderEndWidth",
+  "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
 ])
 const AuthoredScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -175,6 +182,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "marginInline", "marginBlock", "marginInlineStart", "marginInlineEnd", "marginBlockStart", "marginBlockEnd", "marginStart", "marginEnd",
   "borderWidth", "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
   "borderStartWidth", "borderEndWidth",
+  "borderColor", "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
 ])
 const PercentageValueSchema = Schema.String.check(Schema.makeFilter<string>(value => {
   const match = /^([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)%$/i.exec(value)
@@ -195,7 +203,7 @@ const PropertyProvenanceSchema = Schema.Struct({
 const ScalarDeclarationSchema = Schema.Struct({
   _tag: Schema.Literal("NativeDeclaration"),
   property: MigratedScalarPropertySchema,
-  value: Schema.Union([Schema.Finite, Schema.Literal("auto"), PercentageValueSchema, LegacyTokenReferenceSchema]),
+  value: Schema.Union([Schema.Finite, Schema.NonEmptyString, LegacyTokenReferenceSchema]),
   provenance: PropertyProvenanceSchema,
 }).check(
   Schema.makeFilter(declaration => {
@@ -210,11 +218,16 @@ const ScalarDeclarationSchema = Schema.Struct({
       ? undefined
       : { path: ["provenance"], issue: "Declaration property, provenance names and expansion path must match" }
   }),
-  Schema.makeFilter(declaration => dimensionValueProperties.has(declaration.property) ||
-    (percentageValueProperties.has(declaration.property) && declaration.value !== "auto") ||
-    typeof declaration.value === "number" || typeof declaration.value === "object"
-      ? undefined
-      : { path: ["value"], issue: `${declaration.property} requires a finite number or token reference` }),
+  Schema.makeFilter(declaration => {
+    const value = declaration.value
+    const finitePercentage = typeof value === "string" && PercentageValueSchema.pipe(Schema.is)(value)
+    const valid = typeof value === "object" || (colorValueProperties.has(declaration.property)
+      ? typeof value === "string" && value.length > 0
+      : typeof value === "number" || (dimensionValueProperties.has(declaration.property)
+        ? value === "auto" || finitePercentage
+        : percentageValueProperties.has(declaration.property) && finitePercentage))
+    return valid ? undefined : { path: ["value"], issue: `${declaration.property} has an invalid scalar value` }
+  }),
 )
 export const ScalarDeclarationBlockSchema = Schema.Struct({
   _tag: Schema.Literal("DeclarationBlock"),
@@ -262,6 +275,7 @@ const migratedScalarProperties = [
   "marginStart", "marginEnd",
   "borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth",
   "borderStartWidth", "borderEndWidth",
+  "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
@@ -296,6 +310,8 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   borderTopWidth: ["view", "text", "image"], borderRightWidth: ["view", "text", "image"],
   borderBottomWidth: ["view", "text", "image"], borderLeftWidth: ["view", "text", "image"],
   borderStartWidth: ["view", "text", "image"], borderEndWidth: ["view", "text", "image"],
+  borderTopColor: ["view", "text", "image"], borderRightColor: ["view", "text", "image"],
+  borderBottomColor: ["view", "text", "image"], borderLeftColor: ["view", "text", "image"],
 }
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
@@ -435,6 +451,15 @@ function admitScalarValue(
   context: ScalarCaptureContext,
   authoredProperty: AuthoredScalarProperty = property,
 ): ScalarDeclarationValue {
+  if (colorValueProperties.has(property)) {
+    if (typeof value === "string") {
+      const token = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)
+      if (token?.[1] !== undefined) return Object.freeze({ _tag: "LegacyTokenReference", varName: token[1] })
+      if (value.length > 0) return value
+    }
+    throw admissionError("CRUMBS_IR_INVALID_VALUE", authoredProperty, context.sourceId,
+      `Invalid ${authoredProperty} in ${context.sourceId} at ${context.className}.${authoredProperty}. Expected a non-empty native color string or legacy var(--crumbs-*) token reference; the declaration was not sent to the CSS fallback.`)
+  }
   if (typeof value === "number" && Number.isFinite(value)) return value
   if (typeof value === "string") {
     const match = /^var\((--crumbs-[A-Za-z0-9_-]+)\)$/.exec(value)

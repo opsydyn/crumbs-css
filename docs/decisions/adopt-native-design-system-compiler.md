@@ -307,3 +307,7 @@ Approved M2.2m migrates broad and physical side border widths with finite-number
 ### Logical border-width scalar IR — 2026-09-19
 
 Approved M2.2n migrates exact `borderStartWidth` and `borderEndWidth` fields while keeping physical and logical widths independent. [Implementation evidence](../assessments/2026-09-19-native-ir-logical-border-width.md) records ordering and qualification.
+
+### Physical border-color scalar IR — 2026-09-19
+
+Approved M2.2o introduces a property-specific non-empty string domain for native colors and migrates broad plus physical border colors. Schema semantic checks keep arbitrary strings out of numeric and DimensionValue families. [Implementation evidence](../assessments/2026-09-19-native-ir-border-color.md) records precedence and qualification.
