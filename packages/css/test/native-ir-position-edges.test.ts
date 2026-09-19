@@ -48,7 +48,7 @@ describe("production native IR position-edge DimensionValue family", () => {
       end: "var(--crumbs-edge-end)",
       position: "absolute",
     }, ["view", "text", "image"]), context)
-    expect(captured.cssRule).toEqual({ position: "absolute" })
+    expect(captured.cssRule).toEqual({})
     expect(captured.block?.declarations.map(({ property, value }) => [property, value])).toEqual([
       ["top", 10],
       ["right", "25%"],
@@ -56,6 +56,7 @@ describe("production native IR position-edge DimensionValue family", () => {
       ["left", "auto"],
       ["start", "1e2%"],
       ["end", { _tag: "LegacyTokenReference", varName: "--crumbs-edge-end" }],
+      ["position", "absolute"],
     ])
     expect(lowerScalarBlock(captured.block!)).toEqual({
       top: 10,
@@ -64,6 +65,7 @@ describe("production native IR position-edge DimensionValue family", () => {
       left: "auto",
       start: "1e2%",
       end: { $$type: "crumbs.css.theme-token", varName: "--crumbs-edge-end" },
+      position: "absolute",
     })
   })
 

@@ -387,3 +387,7 @@ Approved M2.2ag migrates text-only `textTransform`, `writingDirection` and `user
 ### Boolean scalar IR — 2026-09-19
 
 Approved M2.2ah adds booleans to the internal scalar value carrier and admits them only for text-only Android `includeFontPadding`, alongside token references. Property-specific semantic validation prevents the wider carrier from admitting booleans to numeric, colour, string or literal-valued properties. [Implementation evidence](../assessments/2026-09-19-native-ir-include-font-padding.md) records boolean isolation, generated ordering and consumer qualification.
+
+### Layout-mode scalar IR — 2026-09-19
+
+Approved M2.2ai migrates `display`, `position` and `direction` through property-specific literal/token domains derived from the installed React Native contract. All three fields apply to view, text and image, retain exact provenance and independent last-winner ordering, and fail invalid or cross-property literals consistently at capture and Effect Schema decoding. [Implementation evidence](../assessments/2026-09-19-native-ir-layout-modes.md) records exhaustive literal coverage, generated ordering and consumer qualification.

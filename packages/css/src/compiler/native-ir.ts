@@ -81,6 +81,7 @@ export type MigratedScalarProperty =
   | "textDecorationLine" | "textDecorationStyle"
   | "textTransform" | "writingDirection" | "userSelect"
   | "includeFontPadding"
+  | "display" | "position" | "direction"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -147,6 +148,9 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   writingDirection: new Set(["auto", "ltr", "rtl"]),
   userSelect: new Set(["auto", "none", "text", "contain", "all"]),
   includeFontPadding: new Set([false, true]),
+  display: new Set(["none", "flex", "contents"]),
+  position: new Set(["absolute", "relative", "static"]),
+  direction: new Set(["inherit", "ltr", "rtl"]),
 }
 const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
   inset: ["top", "right", "bottom", "left"],
@@ -222,6 +226,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "textDecorationLine", "textDecorationStyle",
   "textTransform", "writingDirection", "userSelect",
   "includeFontPadding",
+  "display", "position", "direction",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -253,6 +258,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "textDecorationLine", "textDecorationStyle",
   "textTransform", "writingDirection", "userSelect",
   "includeFontPadding",
+  "display", "position", "direction",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -366,6 +372,7 @@ const migratedScalarProperties = [
   "textDecorationLine", "textDecorationStyle",
   "textTransform", "writingDirection", "userSelect",
   "includeFontPadding",
+  "display", "position", "direction",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -420,6 +427,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   textDecorationLine: ["text"], textDecorationStyle: ["text"],
   textTransform: ["text"], writingDirection: ["text"], userSelect: ["text"],
   includeFontPadding: ["text"],
+  display: ["view", "text", "image"], position: ["view", "text", "image"], direction: ["view", "text", "image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],

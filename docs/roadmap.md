@@ -135,6 +135,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2af: Migrate text-only `textDecorationLine` and `textDecorationStyle` through explicit installed React Native literal/token domains.
 - [x] M2.2ag: Migrate text-only `textTransform`, `writingDirection` and `userSelect` through explicit installed React Native literal/token domains.
 - [x] M2.2ah: Introduce a property-specific boolean/token domain and migrate text-only Android `includeFontPadding`.
+- [x] M2.2ai: Migrate shared `display`, `position` and `direction` layout modes through exact literal/token domains.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -1021,3 +1022,10 @@ Next recommended slice: **M2.2ah** — introduce a property-specific boolean/tok
 - Focused qualification passed 29 tests with 487 assertions; full qualification passed 505 tests across 83 files with 17,960 assertions. See [evidence](assessments/2026-09-19-native-ir-include-font-padding.md).
 
 Next recommended slice: **M2.2ai** — migrate shared layout mode fields (`display`, `position`, `direction`) through exact installed React Native literal/token domains across their supported primitives. Begin only after approval.
+
+### 2026-09-19 — M2.2ai layout-mode scalar IR
+
+- Migrated `display`, `position` and `direction` across view, text and image through exact installed React Native literal/token domains. Capture and Effect Schema decoding share the same property-specific value sets, provenance rules and primitive matrix.
+- Focused qualification passed 29 tests with 500 assertions; full qualification passed 510 tests across 84 files with 18,118 assertions. See [evidence](assessments/2026-09-19-native-ir-layout-modes.md).
+
+Next recommended slice: **M2.2aj** — migrate `overflow` with primitive-aware literal admission so `scroll` remains valid for view/text while image retains its narrower installed domain. Begin only after approval.
