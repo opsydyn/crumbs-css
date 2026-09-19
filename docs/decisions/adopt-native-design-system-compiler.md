@@ -399,3 +399,7 @@ Approved M2.2aj introduces primitive-specific literal admission at the declarati
 ### Flex-layout scalar IR — 2026-09-19
 
 Approved M2.2ak migrates `flexDirection`, `flexWrap`, `alignContent`, `alignItems`, `alignSelf` and `justifyContent` through property-specific literal/token domains derived from the installed React Native contract. All six fields apply to view, text and image, retain exact provenance and independent last-winner ordering, and reject unsupported or cross-property literals consistently at capture and Effect Schema decoding. [Implementation evidence](../assessments/2026-09-19-native-ir-flex-layout.md) records exhaustive literal coverage, generated ordering and consumer qualification.
+
+### Box-sizing scalar IR and FlexStyle audit — 2026-09-19
+
+Approved M2.2al migrates `boxSizing` through its exact `border-box | content-box` literal/token domain across view, text and image. The accompanying installed-type audit establishes `aspectRatio` as the sole remaining FlexStyle field outside scalar IR; it requires an isolated finite-number/non-empty-string/token domain so arbitrary strings do not leak into existing numeric families. [Implementation evidence](../assessments/2026-09-19-native-ir-box-sizing.md) records exact admission, generated ordering, the remaining-surface audit and consumer qualification.

@@ -138,6 +138,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2ai: Migrate shared `display`, `position` and `direction` layout modes through exact literal/token domains.
 - [x] M2.2aj: Introduce primitive-aware literal admission and migrate `overflow` without widening the image domain.
 - [x] M2.2ak: Migrate the six shared flex layout controls through exact installed literal/token domains.
+- [x] M2.2al: Migrate shared `boxSizing` and audit the remaining installed FlexStyle surface.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -1045,3 +1046,11 @@ Next recommended slice: **M2.2ak** — migrate the shared flex layout controls (
 - Focused qualification passed 29 tests with 791 assertions; full qualification passed 520 tests across 86 files with 18,685 assertions. See [evidence](assessments/2026-09-19-native-ir-flex-layout.md).
 
 Next recommended slice: **M2.2al** — migrate shared `boxSizing` through its exact literal/token domain, then use that small boundary to audit the remaining FlexStyle fields before opening a new value carrier. Begin only after approval.
+
+### 2026-09-19 — M2.2al box-sizing scalar IR and FlexStyle audit
+
+- Migrated `boxSizing` across view, text and image through the installed `border-box | content-box` literal/token domain.
+- Audited the installed React Native FlexStyle contract against scalar IR. `aspectRatio` is the sole remaining field and needs a property-specific finite-number/non-empty-string/token domain; every other FlexStyle field is represented.
+- Focused qualification passed 29 tests with 587 assertions; full qualification passed 525 tests across 87 files with 18,803 assertions. See [evidence](assessments/2026-09-19-native-ir-box-sizing.md).
+
+Next recommended slice: **M2.2am** — migrate `aspectRatio` through an isolated finite-number/non-empty-string/token domain, completing the installed FlexStyle surface without widening arbitrary strings into other numeric properties. Begin only after approval.

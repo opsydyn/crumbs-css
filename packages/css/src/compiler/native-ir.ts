@@ -85,6 +85,7 @@ export type MigratedScalarProperty =
   | "display" | "position" | "direction"
   | "overflow"
   | "flexDirection" | "flexWrap" | "alignContent" | "alignItems" | "alignSelf" | "justifyContent"
+  | "boxSizing"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -161,6 +162,7 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   alignItems: new Set(["flex-start", "flex-end", "center", "stretch", "baseline"]),
   alignSelf: new Set(["auto", "flex-start", "flex-end", "center", "stretch", "baseline"]),
   justifyContent: new Set(["flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly"]),
+  boxSizing: new Set(["border-box", "content-box"]),
 }
 const primitiveLiteralValueProperties: Readonly<Partial<Record<
   MigratedScalarProperty,
@@ -249,6 +251,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "display", "position", "direction",
   "overflow",
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
+  "boxSizing",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -283,6 +286,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "display", "position", "direction",
   "overflow",
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
+  "boxSizing",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -403,6 +407,7 @@ const migratedScalarProperties = [
   "display", "position", "direction",
   "overflow",
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
+  "boxSizing",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -462,6 +467,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   flexDirection: ["view", "text", "image"], flexWrap: ["view", "text", "image"],
   alignContent: ["view", "text", "image"], alignItems: ["view", "text", "image"],
   alignSelf: ["view", "text", "image"], justifyContent: ["view", "text", "image"],
+  boxSizing: ["view", "text", "image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
