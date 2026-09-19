@@ -283,3 +283,7 @@ Approved M2.2g migrates the seven Crumbs inset aliases through scalar IR by expa
 ### Gap-family scalar IR — 2026-09-19
 
 Approved M2.2h migrates `gap`, `rowGap` and `columnGap` through production scalar IR across view, text and image. Broad gap expands into canonical row and column declarations using the same provenance-validated alias mechanism as inset; exact axis fields and expanded declarations then share canonical last-winner normalization. Static values are finite point numbers, finite percentages or legacy tokens. [Implementation evidence](../assessments/2026-09-19-native-ir-gap.md) records direct ownership, generated broad/axis order and consumer qualification.
+
+### Physical padding scalar IR — 2026-09-19
+
+Approved M2.2i migrates physical padding longhands plus broad and horizontal/vertical aliases through scalar IR. Alias expansion retains authored provenance and canonical fields; normalization applies one broad/pair/side last-winner law. [Implementation evidence](../assessments/2026-09-19-native-ir-padding.md) records generated precedence and consumer qualification.

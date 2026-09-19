@@ -109,6 +109,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2f: Migrate exact physical and logical position-edge longhands through production scalar IR, retaining independent field identity before inset-alias expansion.
 - [x] M2.2g: Migrate the seven Crumbs inset aliases into canonical position-edge declarations, retaining authored alias provenance and ordered alias/longhand precedence without layout-direction inference.
 - [x] M2.2h: Migrate `gap`, `rowGap` and `columnGap` through production scalar IR, expanding broad gap into canonical axes with validated provenance and ordered broad/axis precedence.
+- [x] M2.2i: Migrate physical padding longhands plus broad and horizontal/vertical aliases through scalar IR with canonical broad/pair/side precedence.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -812,3 +813,11 @@ Next recommended slice: **M2.2h** — migrate the native `gap`, `rowGap` and `co
 - Full package qualification passed 375 tests across 57 files with 14,450 assertions. No padding/margin migration, qualified token identity, public API or external artifact ABI is included. See the [assessment and evidence](assessments/2026-09-19-native-ir-gap.md).
 
 Next recommended slice: **M2.2i** — migrate physical padding longhands plus `padding`, `paddingHorizontal` and `paddingVertical` into canonical scalar IR declarations, proving broad/pair/side order against the spacing oracle. Keep logical padding aliases and margin migration separate. Begin only after approval.
+
+### 2026-09-19 — M2.2i physical padding scalar IR
+
+- Migrated four physical padding longhands plus `padding`, `paddingHorizontal` and `paddingVertical` for view, text and image. Finite points, `auto`, percentages and legacy tokens retain native DimensionValue semantics.
+- Broad and pair aliases expand with schema-validated provenance before canonical last-winner normalization. A seeded 100-case evaluator covers broad/pair/side order; the established spacing oracle remains green.
+- Full qualification passed 380 tests across 58 files with 14,631 assertions. Logical padding, margin, qualified tokens and the public artifact ABI remain separate. See [evidence](assessments/2026-09-19-native-ir-padding.md).
+
+Next recommended slice: **M2.2j** — migrate logical padding fields and aliases while retaining native `paddingStart`/`paddingEnd` independently from physical sides. Begin only after approval.

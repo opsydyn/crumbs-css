@@ -48,7 +48,7 @@ describe("production native IR DimensionValue size family", () => {
       maxHeight: "var(--crumbs-max-height)",
       padding: 8,
     }, ["view", "text", "image"]), context)
-    expect(captured.cssRule).toEqual({ padding: 8 })
+    expect(captured.cssRule).toEqual({})
     expect(captured.block?.declarations.map(({ property, value }) => [property, value])).toEqual([
       ["width", 120],
       ["height", "50%"],
@@ -56,6 +56,7 @@ describe("production native IR DimensionValue size family", () => {
       ["minHeight", "auto"],
       ["maxWidth", "1e2%"],
       ["maxHeight", { _tag: "LegacyTokenReference", varName: "--crumbs-max-height" }],
+      ["paddingTop", 8], ["paddingRight", 8], ["paddingBottom", 8], ["paddingLeft", 8],
     ])
     expect(lowerScalarBlock(captured.block!)).toEqual({
       width: 120,
@@ -64,6 +65,7 @@ describe("production native IR DimensionValue size family", () => {
       minHeight: "auto",
       maxWidth: "1e2%",
       maxHeight: { $$type: "crumbs.css.theme-token", varName: "--crumbs-max-height" },
+      paddingTop: 8, paddingRight: 8, paddingBottom: 8, paddingLeft: 8,
     })
   })
 
