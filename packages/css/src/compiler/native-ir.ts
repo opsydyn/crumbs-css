@@ -73,6 +73,7 @@ export type MigratedScalarProperty =
   | "tintColor"
   | "overlayColor"
   | "shadowColor"
+  | "shadowOpacity" | "shadowRadius"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -188,6 +189,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "tintColor",
   "overlayColor",
   "shadowColor",
+  "shadowOpacity", "shadowRadius",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -211,6 +213,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "tintColor",
   "overlayColor",
   "shadowColor",
+  "shadowOpacity", "shadowRadius",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -313,6 +316,7 @@ const migratedScalarProperties = [
   "tintColor",
   "overlayColor",
   "shadowColor",
+  "shadowOpacity", "shadowRadius",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -358,6 +362,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   tintColor: ["image"],
   overlayColor: ["image"],
   shadowColor: ["view", "text", "image"],
+  shadowOpacity: ["view", "text", "image"], shadowRadius: ["view", "text", "image"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
