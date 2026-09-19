@@ -1,0 +1,33 @@
+{
+  "slice": "M2.2b",
+  "recordedAt": "2026-09-19",
+  "sourceRevision": "646b41207ac2bc093b284f41fb4a22d405e8aeea",
+  "sourceState": "Working tree; implementation and documentation are committed after qualification",
+  "migratedProperties": {
+    "zIndex": { "primitiveDomain": ["view", "text", "image"], "valueDomain": "finite number or legacy token" },
+    "elevation": { "primitiveDomain": ["view", "text"], "valueDomain": "finite number or legacy token" },
+    "flexGrow": { "primitiveDomain": ["view", "text", "image"], "valueDomain": "finite number or legacy token" },
+    "flexShrink": { "primitiveDomain": ["view", "text", "image"], "valueDomain": "finite number or legacy token" }
+  },
+  "verification": [
+    { "command": "bun test packages/css/test/native-ir-unitless-numeric.test.ts", "status": "passed", "tests": 8, "assertions": 262 },
+    { "command": "bun run check", "status": "passed", "tests": 334, "assertions": 13219, "files": 51 },
+    { "command": "bun run app:typecheck", "status": "passed" },
+    { "command": "bun run playground:check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run playground:packed --check", "status": "passed", "platforms": ["web", "ios", "android"], "runtimeSourceMaps": 3 },
+    { "command": "bun run docs:build", "status": "passed", "pages": 20 },
+    { "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles", "status": "passed", "claim": "declared host smoke ceilings only" },
+    { "command": "bun run budgets:validate", "status": "passed", "registryReady": false, "performanceQualification": "not-run" }
+  ],
+  "boundaries": {
+    "unmarkedVanillaExtract": "legacy converter",
+    "unmigratedProperties": "legacy converter",
+    "qualifiedTokenIdentity": false,
+    "publicApiChanged": false,
+    "externalArtifactAbi": false,
+    "effectInOrdinaryRuntime": false,
+    "androidNativeAcceptance": false,
+    "published": false,
+    "pushed": false
+  }
+}
