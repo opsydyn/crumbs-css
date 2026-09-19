@@ -359,3 +359,7 @@ Approved M2.2z migrates text-only `textShadowColor` and `textShadowRadius` throu
 ### Text-decoration colour scalar IR — 2026-09-19
 
 Approved M2.2aa migrates `textDecorationColor` through the existing colour domain with the installed text-only primitive contract. Capture and Effect Schema decoding share the same primitive table, so view/image use and forged cross-primitive artifacts fail deterministically. [Implementation evidence](../assessments/2026-09-19-native-ir-text-decoration-color.md) records generated ordering, primitive rejection and consumer qualification.
+
+### Typography-metric scalar IR — 2026-09-19
+
+Approved M2.2ab migrates text-only `fontSize`, `letterSpacing` and `lineHeight` through the finite numeric/token domain. Exact numeric identity, provenance and independent last-winner order are retained; marked native capture does not parse CSS units or apply native range policy. [Implementation evidence](../assessments/2026-09-19-native-ir-typography-metrics.md) records generated ordering, primitive rejection and consumer qualification.

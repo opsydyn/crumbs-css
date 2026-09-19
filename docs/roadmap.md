@@ -128,6 +128,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2y: Migrate inherited `shadowOpacity` and `shadowRadius` through finite numeric/token scalar IR across view, text and image.
 - [x] M2.2z: Migrate text-only `textShadowColor` and `textShadowRadius` through property-specific scalar domains while retaining structured offset ownership.
 - [x] M2.2aa: Migrate text-only `textDecorationColor` through the colour scalar domain and hardened primitive decoder contract.
+- [x] M2.2ab: Migrate text-only `fontSize`, `letterSpacing` and `lineHeight` through finite numeric/token scalar IR.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -965,3 +966,10 @@ Next recommended slice: **M2.2aa** — migrate text-only `textDecorationColor` t
 - Focused qualification passed 38 tests with 383 assertions; full qualification passed 470 tests across 76 files with 17,007 assertions. See [evidence](assessments/2026-09-19-native-ir-text-decoration-color.md).
 
 Next recommended slice: **M2.2ab** — migrate text-only typography metrics (`fontSize`, `letterSpacing`, `lineHeight`) through the finite numeric/token domain. Begin only after approval.
+
+### 2026-09-19 — M2.2ab typography-metric scalar IR
+
+- Migrated text-only `fontSize`, `letterSpacing` and `lineHeight` as independent finite-number/token declarations. Signed finite values retain exact identity; CSS unit parsing and native range policy remain outside marked native capture.
+- Focused qualification passed 43 tests with 521 assertions; full qualification passed 475 tests across 77 files with 17,145 assertions. See [evidence](assessments/2026-09-19-native-ir-typography-metrics.md).
+
+Next recommended slice: **M2.2ac** — introduce a property-specific non-empty string/token domain for text-only `fontFamily`, without admitting arbitrary strings to numeric scalar families. Begin only after approval.

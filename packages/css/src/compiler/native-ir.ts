@@ -76,6 +76,7 @@ export type MigratedScalarProperty =
   | "shadowOpacity" | "shadowRadius"
   | "textShadowColor" | "textShadowRadius"
   | "textDecorationColor"
+  | "fontSize" | "letterSpacing" | "lineHeight"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -194,6 +195,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "shadowOpacity", "shadowRadius",
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
+  "fontSize", "letterSpacing", "lineHeight",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -220,6 +222,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "shadowOpacity", "shadowRadius",
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
+  "fontSize", "letterSpacing", "lineHeight",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -325,6 +328,7 @@ const migratedScalarProperties = [
   "shadowOpacity", "shadowRadius",
   "textShadowColor", "textShadowRadius",
   "textDecorationColor",
+  "fontSize", "letterSpacing", "lineHeight",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -373,6 +377,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   shadowOpacity: ["view", "text", "image"], shadowRadius: ["view", "text", "image"],
   textShadowColor: ["text"], textShadowRadius: ["text"],
   textDecorationColor: ["text"],
+  fontSize: ["text"], letterSpacing: ["text"], lineHeight: ["text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
