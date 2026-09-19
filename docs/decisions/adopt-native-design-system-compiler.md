@@ -351,3 +351,7 @@ Approved M2.2x migrates `shadowColor` through the existing colour domain across 
 ### Numeric shadow scalar IR — 2026-09-19
 
 Approved M2.2y migrates `shadowOpacity` and `shadowRadius` through the finite numeric/token domain across view, text and image, following the installed ShadowStyleIOS inheritance. The compiler preserves signed finite values without applying platform clamping, and leaves structured `shadowOffset` on its existing structured-value path. [Implementation evidence](../assessments/2026-09-19-native-ir-shadow-numeric.md) records generated ordering, value rejection and consumer qualification.
+
+### Text-shadow scalar IR — 2026-09-19
+
+Approved M2.2z migrates text-only `textShadowColor` and `textShadowRadius` through the existing colour and finite numeric/token domains. Both fields retain exact provenance and independent ordering while structured `textShadowOffset` remains on its existing structured-value path. [Implementation evidence](../assessments/2026-09-19-native-ir-text-shadow.md) records primitive rejection, property-specific admission and consumer qualification.

@@ -126,6 +126,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2w: Migrate image-only `overlayColor` through the colour scalar domain and hardened primitive decoder contract.
 - [x] M2.2x: Migrate inherited `shadowColor` through the colour scalar domain across view, text and image.
 - [x] M2.2y: Migrate inherited `shadowOpacity` and `shadowRadius` through finite numeric/token scalar IR across view, text and image.
+- [x] M2.2z: Migrate text-only `textShadowColor` and `textShadowRadius` through property-specific scalar domains while retaining structured offset ownership.
 - [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
@@ -949,3 +950,10 @@ Next recommended slice: **M2.2y** — migrate finite numeric/token `shadowOpacit
 - Focused qualification passed 31 tests with 944 assertions; full qualification passed 460 tests across 74 files with 16,768 assertions. See [evidence](assessments/2026-09-19-native-ir-shadow-numeric.md).
 
 Next recommended slice: **M2.2z** — migrate text-only `textShadowColor` and `textShadowRadius` through their established colour and finite numeric/token domains while retaining structured `textShadowOffset` independently. Begin only after approval.
+
+### 2026-09-19 — M2.2z text-shadow scalar IR
+
+- Migrated text-only `textShadowColor` and `textShadowRadius` through the colour and finite numeric/token domains respectively. Structured `textShadowOffset` remains independently owned by the structured-value pipeline.
+- Focused qualification passed 28 tests with 805 assertions; full qualification passed 465 tests across 75 files with 16,892 assertions. See [evidence](assessments/2026-09-19-native-ir-text-shadow.md).
+
+Next recommended slice: **M2.2aa** — migrate text-only `textDecorationColor` through the established colour and primitive-domain contracts. Begin only after approval.

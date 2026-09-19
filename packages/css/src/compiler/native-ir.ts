@@ -74,6 +74,7 @@ export type MigratedScalarProperty =
   | "overlayColor"
   | "shadowColor"
   | "shadowOpacity" | "shadowRadius"
+  | "textShadowColor" | "textShadowRadius"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -119,7 +120,7 @@ const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   ...dimensionValueProperties, "rowGap", "columnGap",
 ])
 const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
-  "backgroundColor", "color", "tintColor", "overlayColor", "shadowColor",
+  "backgroundColor", "color", "tintColor", "overlayColor", "shadowColor", "textShadowColor",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
   "borderStartColor", "borderEndColor",
 ])
@@ -190,6 +191,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "overlayColor",
   "shadowColor",
   "shadowOpacity", "shadowRadius",
+  "textShadowColor", "textShadowRadius",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -214,6 +216,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "overlayColor",
   "shadowColor",
   "shadowOpacity", "shadowRadius",
+  "textShadowColor", "textShadowRadius",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -317,6 +320,7 @@ const migratedScalarProperties = [
   "overlayColor",
   "shadowColor",
   "shadowOpacity", "shadowRadius",
+  "textShadowColor", "textShadowRadius",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -363,6 +367,7 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   overlayColor: ["image"],
   shadowColor: ["view", "text", "image"],
   shadowOpacity: ["view", "text", "image"], shadowRadius: ["view", "text", "image"],
+  textShadowColor: ["text"], textShadowRadius: ["text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
