@@ -56,7 +56,7 @@ describe("production native IR structured arrays", () => {
     Object.defineProperty(accessorVariants, "0", { get: () => "small-caps", enumerable: true })
     const invalid: Array<[string, unknown]> = [
       ["transformOrigin", []], ["transformOrigin", [1]], ["transformOrigin", [1, 2, 3, 4]],
-      ["transformOrigin", ["50px", 0]], ["transformOrigin", ["var(--crumbs-origin)", 0]], ["transformOrigin", decoratedOrigin],
+      ["transformOrigin", ["50px", 0]], ["transformOrigin", ["var(--crumbs-origin)", 0]], ["transformOrigin", ["9".repeat(400) + "%", 0]], ["transformOrigin", decoratedOrigin],
       ["transformMatrix", [1, 2]], ["transformMatrix", sparseMatrix], ["transformMatrix", [1, ...new Array(15).fill(0), Infinity]],
       ["fontVariant", ["unsupported"]], ["fontVariant", ["small-caps", "var(--crumbs-variant)"]], ["fontVariant", accessorVariants],
     ]

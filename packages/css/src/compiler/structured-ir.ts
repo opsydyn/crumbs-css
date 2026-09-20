@@ -7,6 +7,7 @@ import {
 } from "./native-capture"
 
 export type StructuredNativeProperty =
+  | "transform"
   | "shadowOffset"
   | "textShadowOffset"
   | "transformOrigin"
@@ -51,6 +52,23 @@ export type TransformOriginValue =
   | readonly [TransformOriginEntry, TransformOriginEntry]
   | readonly [TransformOriginEntry, TransformOriginEntry, TransformOriginEntry]
 export type TransformMatrixValue = ReadonlyArray<number>
+export type TransformAngle = `${number}deg` | `${number}rad`
+export type TransformTranslation = number | `${number}%`
+export type TransformOperation =
+  | { readonly perspective: number }
+  | { readonly rotate: TransformAngle }
+  | { readonly rotateX: TransformAngle }
+  | { readonly rotateY: TransformAngle }
+  | { readonly rotateZ: TransformAngle }
+  | { readonly scale: number }
+  | { readonly scaleX: number }
+  | { readonly scaleY: number }
+  | { readonly translateX: TransformTranslation }
+  | { readonly translateY: TransformTranslation }
+  | { readonly skewX: TransformAngle }
+  | { readonly skewY: TransformAngle }
+  | { readonly matrix: TransformMatrixValue }
+export type TransformValue = ReadonlyArray<TransformOperation>
 export type FontVariant =
   | "small-caps"
   | "oldstyle-nums"
@@ -86,7 +104,7 @@ export type FontVariant =
   | "stylistic-nineteen"
   | "stylistic-twenty"
 export type FontVariantValue = ReadonlyArray<FontVariant>
-export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | FontVariantValue
+export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | FontVariantValue
 export type StructuredDeclaration = {
   readonly _tag: "NativeStructuredDeclaration"
   readonly property: StructuredNativeProperty
@@ -106,10 +124,11 @@ export type StructuredCaptureContext = {
 }
 
 const structuredProperties = [
-  "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ] as const satisfies ReadonlyArray<StructuredNativeProperty>
 const allPrimitives = ["view", "text", "image"] as const
 const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
+  transform: ["view", "text", "image"],
   shadowOffset: ["view", "text", "image"],
   textShadowOffset: ["text"],
   transformOrigin: ["view", "text", "image"],
@@ -139,7 +158,16 @@ const ShadowOffsetValueSchema = Schema.Struct({
   width: Schema.Finite,
   height: Schema.Finite,
 })
-const PercentageValueSchema = Schema.String.check(Schema.isPattern(/^-?(?:\d+(?:\.\d+)?|\.\d+)%$/))
+const AngleValueSchema = Schema.String.check(
+  Schema.isPattern(/^-?(?:\d+(?:\.\d+)?|\.\d+)(?:deg|rad)$/),
+  Schema.makeFilter<string>(value => Number.isFinite(Number.parseFloat(value.slice(0, -3)))
+    ? undefined : { path: [], issue: "Expected a finite angle" }),
+)
+const PercentageValueSchema = Schema.String.check(
+  Schema.isPattern(/^-?(?:\d+(?:\.\d+)?|\.\d+)%$/),
+  Schema.makeFilter<string>(value => Number.isFinite(Number.parseFloat(value.slice(0, -1)))
+    ? undefined : { path: [], issue: "Expected a finite percentage" }),
+)
 const TransformOriginEntrySchema = Schema.Union([Schema.Finite, PercentageValueSchema])
 const TransformOriginValueSchema = Schema.Union([
   Schema.Tuple([TransformOriginEntrySchema, TransformOriginEntrySchema]),
@@ -148,6 +176,23 @@ const TransformOriginValueSchema = Schema.Union([
 const TransformMatrixValueSchema = Schema.Array(Schema.Finite).check(Schema.makeFilter<ReadonlyArray<number>>(value =>
   value.length === 16 ? undefined : { path: [], issue: "Expected exactly 16 finite matrix entries" },
 ))
+const TransformTranslationSchema = Schema.Union([Schema.Finite, PercentageValueSchema])
+const TransformOperationSchema = Schema.Union([
+  Schema.Struct({ perspective: Schema.Finite }),
+  Schema.Struct({ rotate: AngleValueSchema }),
+  Schema.Struct({ rotateX: AngleValueSchema }),
+  Schema.Struct({ rotateY: AngleValueSchema }),
+  Schema.Struct({ rotateZ: AngleValueSchema }),
+  Schema.Struct({ scale: Schema.Finite }),
+  Schema.Struct({ scaleX: Schema.Finite }),
+  Schema.Struct({ scaleY: Schema.Finite }),
+  Schema.Struct({ translateX: TransformTranslationSchema }),
+  Schema.Struct({ translateY: TransformTranslationSchema }),
+  Schema.Struct({ skewX: AngleValueSchema }),
+  Schema.Struct({ skewY: AngleValueSchema }),
+  Schema.Struct({ matrix: TransformMatrixValueSchema }),
+])
+const TransformValueSchema = Schema.Array(TransformOperationSchema)
 const fontVariantValues = [
   "small-caps", "oldstyle-nums", "lining-nums", "tabular-nums", "common-ligatures",
   "no-common-ligatures", "discretionary-ligatures", "no-discretionary-ligatures", "historical-ligatures",
@@ -162,10 +207,11 @@ const StructuredValueSchema = Schema.Union([
   ShadowOffsetValueSchema,
   TransformOriginValueSchema,
   TransformMatrixValueSchema,
+  TransformValueSchema,
   FontVariantValueSchema,
 ])
 const StructuredNativePropertySchema = Schema.Literals([
-  "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ])
 const StructuredPropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
@@ -218,9 +264,13 @@ export function captureStructuredIntoNativeIr(
   const metadata = getNativeCaptureMetadata(rule)
   if (metadata === undefined) return { cssRule: rule as Record<string, unknown> }
   const descriptors = Object.getOwnPropertyDescriptors(rule)
-  const selectedProperties = structuredProperties.filter(property =>
-    descriptors[property]?.enumerable === true,
-  )
+  const selectedProperties = structuredProperties.filter(property => {
+    const descriptor = descriptors[property]
+    if (descriptor?.enumerable !== true) return false
+    // React Native also exposes a string transform form. Leave that form on
+    // the compatibility route while taking only ordered static arrays into IR.
+    return property !== "transform" || !("value" in descriptor) || Array.isArray(descriptor.value)
+  })
   if (selectedProperties.length === 0) return { cssRule: rule as Record<string, unknown> }
   let primitiveDomain = [...metadata.primitiveDomain]
   const declarations: StructuredDeclaration[] = []
@@ -301,6 +351,9 @@ function admitStructuredValue(
   context: StructuredCaptureContext,
   property: StructuredNativeProperty,
 ): StructuredValue {
+  if (property === "transform") {
+    return admitTransform(value, context, property)
+  }
   if (property === "shadowOffset" || property === "textShadowOffset") {
     return admitOffsetValue(value, context, property)
   }
@@ -313,6 +366,55 @@ function admitStructuredValue(
   return admitFontVariant(value, context, property)
 }
 
+function admitTransform(
+  value: unknown,
+  context: StructuredCaptureContext,
+  property: "transform",
+): TransformValue {
+  const operations = admitDenseArray(value, context, property)
+  return Object.freeze(operations.map((operation, index) => admitTransformOperation(operation, context, index)))
+}
+
+function admitTransformOperation(
+  value: unknown,
+  context: StructuredCaptureContext,
+  index: number,
+): TransformOperation {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid transform in ${context.sourceId} at ${context.className}.transform[${index}]: ${detail}.`, "transform")
+  }
+  if (!isPlainStructuredObject(value)) return invalid("expected one plain operation object")
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 1) {
+    return invalid("expected exactly one operation key")
+  }
+  const key = names[0]!
+  const descriptor = Object.getOwnPropertyDescriptor(value, key)
+  if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) {
+    return invalid("operation values must be enumerable data properties")
+  }
+  const entry = descriptor.value
+  if (numericTransformKeys.has(key)) {
+    if (!isFiniteNumber(entry)) return invalid(`${key} must be a finite number`)
+    return Object.freeze({ [key]: entry }) as TransformOperation
+  }
+  if (angularTransformKeys.has(key)) {
+    if (!isAngle(entry)) return invalid(`${key} must be a finite deg or rad angle`)
+    return Object.freeze({ [key]: entry }) as TransformOperation
+  }
+  if (key === "translateX" || key === "translateY") {
+    if (!isFiniteNumber(entry) && !isPercentage(entry)) return invalid(`${key} must be a finite number or percentage`)
+    return Object.freeze({ [key]: entry }) as TransformOperation
+  }
+  if (key === "matrix") {
+    const matrix = admitDenseArray(entry, context, "transform", [16])
+    if (!matrix.every(isFiniteNumber)) return invalid("matrix must contain exactly 16 finite numbers")
+    return Object.freeze({ matrix: Object.freeze([...matrix]) as TransformMatrixValue })
+  }
+  return invalid(`unsupported operation ${JSON.stringify(key)}`)
+}
+
 function admitOffsetValue(
   value: unknown,
   context: StructuredCaptureContext,
@@ -322,8 +424,7 @@ function admitOffsetValue(
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
       `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected a fixed finite width/height object.`, property)
   }
-  const prototype = Object.getPrototypeOf(value)
-  if (prototype !== Object.prototype && prototype !== null && Object.getPrototypeOf(prototype) !== null) {
+  if (!isPlainStructuredObject(value)) {
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
       `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected a plain object.`, property)
   }
@@ -388,48 +489,73 @@ function admitDenseArray(
   property: StructuredNativeProperty,
   expectedLengths?: ReadonlyArray<number>,
 ): ReadonlyArray<unknown> {
-  if (!Array.isArray(value)) {
+  const entries = inspectDenseArray(value, expectedLengths)
+  if (entries === undefined) {
+    const expected = expectedLengths === undefined ? "a dense array" : `an array of length ${expectedLengths.join(" or ")}`
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected a dense array.`, property)
+      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected ${expected}.`, property)
   }
+  return entries
+}
+
+function inspectDenseArray(
+  value: unknown,
+  expectedLengths?: ReadonlyArray<number>,
+): ReadonlyArray<unknown> | undefined {
+  if (!Array.isArray(value)) return undefined
   const prototype = Object.getPrototypeOf(value)
   const prototypeParent = prototype === null ? null : Object.getPrototypeOf(prototype)
   if (prototype !== Array.prototype && prototype !== null && prototypeParent !== null && Object.getPrototypeOf(prototypeParent) !== null) {
-    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected a plain array.`, property)
+    return undefined
   }
   const descriptors = Object.getOwnPropertyDescriptors(value)
   const lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length")
   const length = lengthDescriptor?.value
   if (typeof length !== "number" || !Number.isSafeInteger(length) || length < 0 ||
     (expectedLengths !== undefined && !expectedLengths.includes(length))) {
-    const expected = expectedLengths === undefined ? "a dense array" : `an array of length ${expectedLengths.join(" or ")}`
-    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected ${expected}.`, property)
+    return undefined
   }
   const names = Object.getOwnPropertyNames(value)
   const symbols = Object.getOwnPropertySymbols(value)
   if (symbols.length > 0 || names.length !== length + 1 || !names.every(name =>
     name === "length" || (Number.isSafeInteger(Number(name)) && Number(name) >= 0 && String(Number(name)) === name && Number(name) < length),
   )) {
-    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected a dense, undecorated array.`, property)
+    return undefined
   }
   const entries: unknown[] = []
   for (let index = 0; index < length; index += 1) {
     const descriptor = descriptors[String(index)]
-    if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) {
-      throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-        `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: array entries must be enumerable data values.`, property)
-    }
+    if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) return undefined
     entries.push(descriptor.value)
   }
   return entries
 }
 
+function isPlainStructuredObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false
+  const prototype = Object.getPrototypeOf(value)
+  return prototype === null || Object.getPrototypeOf(prototype) === null
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value)
+}
+
+function isPercentage(value: unknown): value is `${number}%` {
+  return typeof value === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)%$/.test(value) &&
+    Number.isFinite(Number.parseFloat(value.slice(0, -1)))
+}
+
+function isAngle(value: unknown): value is TransformAngle {
+  return typeof value === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:deg|rad)$/.test(value) &&
+    Number.isFinite(Number.parseFloat(value.slice(0, -3)))
+}
+
+const numericTransformKeys = new Set(["perspective", "scale", "scaleX", "scaleY"])
+const angularTransformKeys = new Set(["rotate", "rotateX", "rotateY", "rotateZ", "skewX", "skewY"])
+
 function isTransformOriginEntry(value: unknown): value is TransformOriginEntry {
-  return typeof value === "number" && Number.isFinite(value) ||
-    typeof value === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)%$/.test(value)
+  return isFiniteNumber(value) || isPercentage(value)
 }
 
 const fontVariantSet: ReadonlySet<string> = new Set(fontVariantValues)
@@ -438,6 +564,7 @@ function isFontVariant(value: unknown): value is FontVariant {
 }
 
 function isStructuredValueForProperty(property: StructuredNativeProperty, value: unknown): boolean {
+  if (property === "transform") return isTransformValue(value)
   if (property === "shadowOffset" || property === "textShadowOffset") {
     return typeof value === "object" && value !== null && !Array.isArray(value) &&
       Object.keys(value).length === 2 && "width" in value && "height" in value &&
@@ -445,17 +572,48 @@ function isStructuredValueForProperty(property: StructuredNativeProperty, value:
       typeof value.height === "number" && Number.isFinite(value.height)
   }
   if (property === "transformOrigin") {
-    return Array.isArray(value) && (value.length === 2 || value.length === 3) && value.every(isTransformOriginEntry)
+    return inspectDenseArray(value, [2, 3])?.every(isTransformOriginEntry) === true
   }
   if (property === "transformMatrix") {
-    return Array.isArray(value) && value.length === 16 && value.every(entry => typeof entry === "number" && Number.isFinite(entry))
+    return inspectDenseArray(value, [16])?.every(isFiniteNumber) === true
   }
-  return Array.isArray(value) && value.every(isFontVariant)
+  return inspectDenseArray(value)?.every(isFontVariant) === true
+}
+
+function isTransformValue(value: unknown): value is TransformValue {
+  const operations = inspectDenseArray(value)
+  return operations !== undefined && operations.every(isTransformOperation)
+}
+
+function isTransformOperation(value: unknown): value is TransformOperation {
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 1) return false
+  const key = names[0]!
+  const descriptor = Object.getOwnPropertyDescriptor(value, key)
+  if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) return false
+  const entry = descriptor.value
+  if (numericTransformKeys.has(key)) return isFiniteNumber(entry)
+  if (angularTransformKeys.has(key)) return isAngle(entry)
+  if (key === "translateX" || key === "translateY") return isFiniteNumber(entry) || isPercentage(entry)
+  if (key === "matrix") return inspectDenseArray(entry, [16])?.every(isFiniteNumber) === true
+  return false
 }
 
 function freezeStructuredValue(value: StructuredValue): StructuredValue {
-  if (Array.isArray(value)) return Object.freeze([...value]) as StructuredValue
+  if (Array.isArray(value)) return freezeStructuredArray(value) as StructuredValue
   return Object.freeze({ ...value })
+}
+
+function freezeStructuredArray(value: ReadonlyArray<unknown>): ReadonlyArray<unknown> {
+  return Object.freeze(value.map(entry => {
+    if (Array.isArray(entry)) return freezeStructuredArray(entry)
+    if (typeof entry === "object" && entry !== null) {
+      return Object.freeze(Object.fromEntries(Object.entries(entry).map(([key, nested]) => [key,
+        Array.isArray(nested) ? freezeStructuredArray(nested) : nested])))
+    }
+    return entry
+  }))
 }
 
 function withoutSelectedProperties(

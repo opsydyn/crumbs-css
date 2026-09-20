@@ -1122,3 +1122,11 @@ The approved M2.2au batch below closes the static `transformOrigin`, `transformM
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2av** — migrate the ordered `transform` array through an explicit operation union that preserves authored order, separates percentage translations from direct scalar companions and rejects unsupported dynamic entries. Begin only after approval.
+
+### 2026-09-20 — M2.2av ordered transform structured IR
+
+- Migrated marked static `transform` arrays through an explicit thirteen-form operation union: finite numeric operations, finite `deg`/`rad` angles, finite numeric/percentage translations and an exact sixteen-number matrix.
+- Descriptor-safe capture validates one operation key per entry, preserves authored order, deep-freezes nested matrix values and rejects dynamic, accessor-backed, sparse, decorated, malformed or non-finite inputs. String transforms and unmarked arrays remain on the compatibility route.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2aw** — migrate the closed `boxShadow` item union as its own structured contract, separating finite/percentage offsets, optional blur/spread and colour admission from the ordered transform family. Keep `filter` and experimental background arrays deferred until their item semantics are independently specified. Begin only after approval.
