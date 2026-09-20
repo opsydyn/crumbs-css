@@ -1,4 +1,9 @@
 import {
+  assertThemeContractIdentityAvailable,
+  getThemeContractIdentity,
+  getThemeContractIdentityKey,
+  getThemeTokenPublicId,
+  registerThemeTokenReference,
   registerThemeTokenContract,
   type DomainThemeVar,
   type NativeThemeVar,
@@ -12,6 +17,14 @@ import {
   type NativeTheme,
   type ThemeContractInput,
 } from "../native-style"
+import {
+  normalizeTokenContractIdentity,
+  tokenContractShapeSignature,
+  tokenPublicId,
+  tokenVariableName,
+  type TokenContractIdentity,
+  type TokenContractIdentityInput,
+} from "./identity"
 
 export type TokenDomainDefinition =
   | "color"
@@ -43,6 +56,8 @@ export type TokenDefinition<TDomain extends TokenDomain = TokenDomain> = {
 export type TokenContractInput = {
   readonly [key: string]: TokenContractInput | TokenDefinition
 }
+
+export type TokenContractOptions = TokenContractIdentityInput
 
 export type TokenDefinitionInput<TDefinition extends TokenDomainDefinition = TokenDomainDefinition> = TokenDefinition<NormalizedDomain<TDefinition>>
 
@@ -103,12 +118,30 @@ export function isTokenDefinition(value: unknown): value is TokenDefinition {
 
 export function createTokenContract<const TShape extends TokenContractInput>(
   shape: TShape,
+  identityOrOptions?: TokenContractIdentityInput,
 ): TokenContract<TShape> {
+  const identity = normalizeTokenContractIdentity(identityOrOptions)
+  const domainEntries = collectDomainEntries(shape, [])
+  const signature = tokenContractShapeSignature(domainEntries)
+  if (identity !== undefined) assertThemeContractIdentityAvailable(identity, signature)
   const legacyContract = createThemeContract(toLegacyShape(shape))
   const domains = new Map<string, ThemeTokenDomainMetadata>()
-  const contract = mapContract(shape, legacyContract, [], domains) as TokenContract<TShape>
-  registerThemeTokenContract(contract as object, domains)
+  const contract = mapContract(shape, legacyContract, [], domains, identity) as TokenContract<TShape>
+  registerThemeTokenContract(contract as object, domains,
+    identity === undefined ? undefined : {identity, signature})
   return contract
+}
+
+export function getTokenContractIdentity(contract: object): TokenContractIdentity | undefined {
+  return getThemeContractIdentity(contract)
+}
+
+export function getTokenContractKey(contract: object): string | undefined {
+  return getThemeContractIdentityKey(contract)
+}
+
+export function getTokenId(token: DomainThemeVar): string {
+  return getThemeTokenPublicId(token)
 }
 
 export function createTokenTheme<TContract extends Readonly<Record<string, unknown>>>(
@@ -182,23 +215,44 @@ function mapContract(
   legacyContract: unknown,
   path: ReadonlyArray<string>,
   domains: Map<string, ThemeTokenDomainMetadata>,
+  identity: TokenContractIdentity | undefined,
 ): unknown {
   const result: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(shape)) {
     const nextPath = [...path, key]
     const legacyValue = getPath(legacyContract, nextPath)
     if (isTokenDefinitionInput(value)) {
-      const reference = legacyValue as NativeThemeVar
+      const legacyReference = legacyValue as NativeThemeVar
+      const reference = identity === undefined
+        ? legacyReference
+        : registerThemeTokenReference(
+          tokenVariableName(identity, nextPath),
+          nextPath,
+          {publicId: tokenPublicId(identity, nextPath)},
+        )
       domains.set(String(reference), {
         domain: value.domain,
         validate: candidate => isTokenDomainValue(value.domain, candidate),
       })
       result[key] = reference as unknown as DomainThemeVar<TokenDomain>
     } else {
-      result[key] = mapContract(value, legacyContract, nextPath, domains)
+      result[key] = mapContract(value, legacyContract, nextPath, domains, identity)
     }
   }
   return result
+}
+
+function collectDomainEntries(
+  shape: TokenContractInput,
+  path: ReadonlyArray<string>,
+): ReadonlyArray<{ readonly path: ReadonlyArray<string>; readonly domain: TokenDomain }> {
+  const entries: Array<{ readonly path: ReadonlyArray<string>; readonly domain: TokenDomain }> = []
+  for (const [key, value] of Object.entries(shape)) {
+    const nextPath = [...path, key]
+    if (isTokenDefinitionInput(value)) entries.push({path: nextPath, domain: value.domain})
+    else entries.push(...collectDomainEntries(value, nextPath))
+  }
+  return entries
 }
 
 function isTokenDefinitionInput(value: unknown): value is TokenDefinition {

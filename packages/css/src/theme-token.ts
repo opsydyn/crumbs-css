@@ -1,4 +1,8 @@
 import {formatNativeStylesDiagnostic, NativeStylesDiagnosticCode} from "./diagnostics"
+import {
+  tokenContractIdentityKey,
+  type TokenContractIdentity,
+} from "./tokens/identity"
 
 export const NativeThemeTokenReferenceType = "crumbs.css.theme-token" as const
 export type NativeThemeTokenReference = {
@@ -50,19 +54,154 @@ export type ThemeTokenDomainMetadata = {
   readonly domain: TokenDomain
   readonly validate: ThemeTokenDomainValidator
 }
-const domainContracts = new WeakMap<object, ReadonlyMap<string, ThemeTokenDomainMetadata>>()
+export type ThemeTokenReferenceMetadata = {
+  readonly path: ReadonlyArray<string>
+  readonly varName: string
+  readonly publicId?: string
+}
+export type ThemeContractIdentityMetadata = {
+  readonly identity: TokenContractIdentity
+  readonly key: string
+  readonly signature: string
+}
+
+const domainContracts = sharedRegistry(
+  Symbol.for("crumbs.css.theme-token-domain-contracts.v1"),
+  () => new WeakMap<object, ReadonlyMap<string, ThemeTokenDomainMetadata>>(),
+)
+const contractIdentities = sharedRegistry(
+  Symbol.for("crumbs.css.theme-contract-identities.v1"),
+  () => new Map<string, { readonly identity: TokenContractIdentity; readonly signature: string }>(),
+)
+const contractIdentitySymbol = Symbol.for("crumbs.css.theme-contract-identity.v1")
+const themeTokenRegistry = sharedRegistry(
+  Symbol.for("crumbs.css.theme-token-registry.v1"),
+  () => new Map<ThemeVar, ThemeTokenReferenceMetadata>(),
+)
 
 export function createThemeTokenReference(varName: string): NativeThemeTokenReference {
   if (typeof varName !== "string" || !NATIVE_TOKEN_NAME.test(varName)) invalidReference("constructor")
   return {$$type: NativeThemeTokenReferenceType, varName}
 }
 
+/** @internal Publish a native token string to the shared cross-copy registry. */
+export function registerThemeTokenReference(
+  varName: string,
+  path: ReadonlyArray<string>,
+  metadata: { readonly publicId?: string } = {},
+): NativeThemeVar {
+  if (!NATIVE_TOKEN_NAME.test(varName)) invalidReference("registry")
+  const token = `var(${varName})` as NativeThemeVar
+  const existing = themeTokenRegistry.get(token)
+  if (existing !== undefined && (!samePath(existing.path, path) ||
+    (metadata.publicId !== undefined && existing.publicId !== metadata.publicId))) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.ThemeTokenCollision,
+      `Native theme token "${varName}" is already owned by ${JSON.stringify(existing.path)} and cannot be rebound to ${JSON.stringify(path)}.`,
+    ))
+  }
+  if (existing === undefined) {
+    themeTokenRegistry.set(token, Object.freeze({
+      path: Object.freeze([...path]),
+      varName,
+      ...(metadata.publicId === undefined ? {} : {publicId: metadata.publicId}),
+    }))
+  }
+  return token
+}
+
+/** @internal Used by native-style without exposing registry machinery publicly. */
+export function isRegisteredThemeVar(value: unknown): value is ThemeVar {
+  return typeof value === "string" && themeTokenRegistry.has(value as ThemeVar)
+}
+
+/** @internal Used by native-style and token ID helpers. */
+export function getThemeTokenMetadata(value: ThemeVar): ThemeTokenReferenceMetadata {
+  const metadata = themeTokenRegistry.get(value)
+  if (metadata === undefined) throw new Error(`Unknown native theme token "${value}"`)
+  return metadata
+}
+
+export function getThemeTokenPublicId(value: ThemeVar): string {
+  const metadata = getThemeTokenMetadata(value)
+  return metadata.publicId ?? metadata.varName
+}
+
 /** @internal Domain validation is owned by the contract object, not a global path. */
 export function registerThemeTokenContract(
   contract: object,
   entries: ReadonlyMap<string, ThemeTokenDomainMetadata>,
+  identityMetadata?: { readonly identity: TokenContractIdentity; readonly signature: string },
 ): void {
+  if (identityMetadata !== undefined) {
+    registerThemeContractIdentity(contract, identityMetadata.identity, identityMetadata.signature)
+  }
   domainContracts.set(contract, new Map(entries))
+}
+
+/** Reserve a stable identity before publishing any contract-local metadata. */
+export function assertThemeContractIdentityAvailable(
+  identity: TokenContractIdentity,
+  signature: string,
+): void {
+  const key = tokenContractIdentityKey(identity)
+  const previous = contractIdentities.get(key)
+  if (previous !== undefined && previous.signature !== signature) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenContractIdentityCollision,
+      `Token contract identity ${JSON.stringify(key)} is already registered with a different shape. Increment the contract version or keep the public token paths and domains unchanged.`,
+    ))
+  }
+}
+
+export function registerThemeContractIdentity(
+  contract: object,
+  identity: TokenContractIdentity,
+  signature: string,
+): void {
+  assertThemeContractIdentityAvailable(identity, signature)
+  const key = tokenContractIdentityKey(identity)
+  if (!contractIdentities.has(key)) contractIdentities.set(key, {identity, signature})
+  Object.defineProperty(contract, contractIdentitySymbol, {
+    value: Object.freeze({identity, key, signature} satisfies ThemeContractIdentityMetadata),
+    enumerable: false,
+    configurable: false,
+    writable: false,
+  })
+}
+
+export function getThemeContractIdentity(contract: unknown): TokenContractIdentity | undefined {
+  return getThemeContractIdentityMetadata(contract)?.identity
+}
+
+export function getThemeContractIdentityKey(contract: unknown): string | undefined {
+  return getThemeContractIdentityMetadata(contract)?.key
+}
+
+export function getThemeContractShapeSignature(contract: unknown): string | undefined {
+  return getThemeContractIdentityMetadata(contract)?.signature
+}
+
+function getThemeContractIdentityMetadata(contract: unknown): ThemeContractIdentityMetadata | undefined {
+  if (typeof contract !== "object" || contract === null) return undefined
+  const descriptor = Object.getOwnPropertyDescriptor(contract, contractIdentitySymbol)
+  if (descriptor === undefined || !("value" in descriptor)) return undefined
+  const value = descriptor.value
+  if (typeof value !== "object" || value === null) return undefined
+  const metadata = value as Partial<ThemeContractIdentityMetadata>
+  return typeof metadata.key === "string" && typeof metadata.signature === "string" &&
+    typeof metadata.identity === "object" && metadata.identity !== null
+    ? metadata as ThemeContractIdentityMetadata
+    : undefined
+}
+
+function sharedRegistry<T>(key: symbol, create: () => T): T {
+  const root = globalThis as unknown as Record<PropertyKey, unknown>
+  const descriptor = Object.getOwnPropertyDescriptor(root, key)
+  if (descriptor !== undefined && "value" in descriptor) return descriptor.value as T
+  const value = create()
+  Object.defineProperty(root, key, {value, enumerable: false, configurable: false, writable: false})
+  return value
 }
 
 /** @internal Runtime theme construction uses this without importing Effect. */
@@ -113,4 +252,8 @@ function invalidReference(location: string): never {
     NativeStylesDiagnosticCode.InvalidThemeTokenReference,
     `Invalid native theme token reference at ${location}. Expected exactly own enumerable data fields $$type="${NativeThemeTokenReferenceType}" and varName matching --crumbs-[A-Za-z0-9_-]+. Regenerate artifacts or use createThemeTokenReference with a valid native token name.`,
   ))
+}
+
+function samePath(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
+  return left.length === right.length && left.every((segment, index) => segment === right[index])
 }

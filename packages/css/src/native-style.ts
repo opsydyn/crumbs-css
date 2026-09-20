@@ -8,6 +8,9 @@ import { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
 import { markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/native-capture"
 import {
   getThemeTokenDomainForContract,
+  getThemeTokenMetadata,
+  isRegisteredThemeVar,
+  registerThemeTokenReference,
   validateThemeTokenValueForContract,
   type DomainThemeVar,
   type LegacyNativeThemeVar,
@@ -215,15 +218,9 @@ export type NativeTheme<TContract> = {
   readonly values: ThemeValues<TContract>
 }
 
-type ThemeTokenMetadata = {
-  readonly path: ReadonlyArray<string>
-  readonly varName: string
-}
 type ThemeContractBuildState = {
   readonly tokenPathsByVarName: Map<string, ReadonlyArray<string>>
 }
-
-const themeTokenRegistry = new Map<ThemeVar, ThemeTokenMetadata>()
 
 export function style<const TRule extends NativeAuthoringRule>(
   rule: TRule & CheckedNativeRule<TRule>,
@@ -320,17 +317,18 @@ export function createThemeContract<T extends ThemeContractInput>(shape: T): The
   }
   const contract = createThemeContractNode(shape, [], state)
   // ADR D5 / M0.6: legacy identity is the exact raw path; validate the entire
-  // transaction before publishing metadata. Explicit package identities await M3.
+  // transaction before publishing metadata. Identified domain contracts use
+  // the package-scoped registry in tokens/domains.ts.
   for (const [varName, path] of state.tokenPathsByVarName) {
-    const previous = themeTokenRegistry.get(`var(${varName})` as NativeThemeVar)
+    const token = `var(${varName})` as NativeThemeVar
+    const previous = isRegisteredThemeVar(token) ? getThemeTokenMetadata(token) : undefined
     if (previous !== undefined && !samePath(previous.path, path)) {
       throw new Error(formatNativeStylesDiagnostic(NativeStylesDiagnosticCode.ThemeTokenCollision,
         `Native theme token "${varName}" for raw path ${JSON.stringify(path)} is already owned by ${JSON.stringify(previous.path)}. Namespace contract roots or rename the colliding path; existing metadata was not changed.`))
     }
   }
   for (const [varName, path] of state.tokenPathsByVarName) {
-    const token = `var(${varName})` as NativeThemeVar
-    if (!themeTokenRegistry.has(token)) themeTokenRegistry.set(token, Object.freeze({path: Object.freeze([...path]), varName}))
+    registerThemeTokenReference(varName, path)
   }
   return contract as ThemeContract<T>
 }
@@ -359,7 +357,7 @@ function recipeDebugId(
 }
 
 export function isThemeVar(value: unknown): value is ThemeVar {
-  return typeof value === "string" && themeTokenRegistry.has(value as ThemeVar)
+  return isRegisteredThemeVar(value)
 }
 
 export function getThemeVarName(value: ThemeVar): string {
@@ -400,8 +398,7 @@ function createThemeVar(
     ))
   }
   state.tokenPathsByVarName.set(varName, path)
-  const token = `var(${varName})` as LegacyNativeThemeVar
-  return token
+  return `var(${varName})` as NativeThemeVar
 }
 
 function sanitizeTokenSegment(segment: string): string {
@@ -466,12 +463,4 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function formatPath(path: ReadonlyArray<string>): string {
   return path.length > 0 ? path.join(".") : "<root>"
-}
-
-function getThemeTokenMetadata(value: ThemeVar): ThemeTokenMetadata {
-  const metadata = themeTokenRegistry.get(value)
-  if (metadata === undefined) {
-    throw new Error(`Unknown native theme token "${value}"`)
-  }
-  return metadata
 }

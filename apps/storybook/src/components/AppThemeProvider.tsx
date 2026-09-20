@@ -1,9 +1,10 @@
-import { ThemeProvider } from "@opsydyn/crumbs-css/theme"
+import { TokenThemeProvider } from "@opsydyn/crumbs-css/theme"
 import { StatusBar } from "expo-status-bar"
 import { createContext, useContext, useState, type ReactNode } from "react"
 import {
   darkTheme,
   lightTheme,
+  vars,
   type ShowcaseThemeMode,
 } from "../styles/theme"
 
@@ -35,10 +36,10 @@ export function AppThemeProvider({
         toggleMode: () => setMode((current) => (current === "dark" ? "light" : "dark")),
       }}
     >
-      <ThemeProvider theme={theme}>
+      <TokenThemeProvider contract={vars} theme={theme}>
         {children}
         <StatusBar style={mode === "dark" ? "light" : "dark"} />
-      </ThemeProvider>
+      </TokenThemeProvider>
     </AppThemeContext.Provider>
   )
 }

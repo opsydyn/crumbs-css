@@ -2,6 +2,9 @@ export {
   createTokenContract,
   createTokenTheme,
   defineToken,
+  getTokenContractIdentity,
+  getTokenContractKey,
+  getTokenId,
   isTokenDefinition,
   isTokenDomainValue,
   token,
@@ -10,11 +13,13 @@ export {
 export type {
   TokenContract,
   TokenContractInput,
+  TokenContractOptions,
   TokenDefinition,
   TokenDefinitionInput,
   TokenDomainDefinition,
   TokenThemeValues,
 } from "./domains"
+export type {TokenContractIdentity, TokenContractIdentityInput} from "./identity"
 export type {
   DomainThemeVar,
   LegacyNativeThemeVar,

@@ -1,6 +1,7 @@
 import {
   createContext,
   createElement,
+  type Context,
   type ReactElement,
   type ReactNode,
   use,
@@ -17,7 +18,13 @@ import type {
 } from "./native-style"
 import { NativeRecipeType } from "./native-tags"
 import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
-import { type NativeThemeTokenReference, assertThemeTokenReference, isThemeTokenReferenceCandidate } from "./theme-token"
+import {
+  getThemeContractIdentityKey,
+  getThemeContractShapeSignature,
+  type NativeThemeTokenReference,
+  assertThemeTokenReference,
+  isThemeTokenReferenceCandidate,
+} from "./theme-token"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -40,6 +47,11 @@ export type NativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> =
 ) => ReadonlyArray<NativeStyle>
 
 const NativeThemeContext = createContext<NativeThemeContextValue | null>(null)
+type TokenThemeContextValue = ReadonlyMap<string, NativeTheme<Record<string, unknown>>>
+const TokenThemeContext: Context<TokenThemeContextValue | null> = sharedRegistry(
+  Symbol.for("crumbs.css.token-theme-context.v1"),
+  () => createContext<TokenThemeContextValue | null>(null),
+)
 const recipeDiagnosticWarnings = new Set<string>()
 
 export function ThemeProvider<TContract extends Record<string, unknown>>({
@@ -59,6 +71,66 @@ export function useTheme<TContract extends Record<string, unknown>>(): NativeThe
     throw new Error("useTheme must be used within a ThemeProvider from @opsydyn/crumbs-css/theme")
   }
   return theme as NativeTheme<TContract>
+}
+
+export type TokenThemeProviderProps<TContract extends Record<string, unknown>> = {
+  readonly children?: ReactNode
+  readonly contract: TContract
+  readonly theme: NativeTheme<TContract>
+}
+
+/**
+ * A provider keyed by the contract's stable public identity. The context map
+ * is shared through a global symbol so duplicate package copies in one app
+ * observe the same provider rather than creating isolated React contexts.
+ */
+export function TokenThemeProvider<TContract extends Record<string, unknown>>({
+  children,
+  contract,
+  theme,
+}: TokenThemeProviderProps<TContract>): ReactElement {
+  const key = requireTokenContractKey(contract)
+  assertTokenThemeCompatibility(contract, theme)
+  const parent = use(TokenThemeContext)
+  const value = useMemo(() => {
+    const next = new Map(parent ?? [])
+    next.set(key, theme as NativeTheme<Record<string, unknown>>)
+    return next
+  }, [key, parent, theme])
+  return createElement(
+    NativeThemeContext.Provider,
+    {value: theme as NativeThemeContextValue},
+    createElement(TokenThemeContext.Provider, {value}, children),
+  )
+}
+
+/** Read a theme only when its contract identity and shape are both compatible. */
+export function useTokenTheme<TContract extends Record<string, unknown>>(
+  contract: TContract,
+): NativeTheme<TContract> {
+  const key = requireTokenContractKey(contract)
+  const themes = use(TokenThemeContext)
+  const theme = themes?.get(key)
+  if (theme === undefined) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemeProviderMismatch,
+      `No TokenThemeProvider is active for contract ${JSON.stringify(key)}. Mount TokenThemeProvider with the same identified contract before calling useTokenTheme.`,
+    ))
+  }
+  assertTokenThemeCompatibility(contract, theme)
+  return theme as NativeTheme<TContract>
+}
+
+export function isTokenThemeCompatible<TContract extends object>(
+  contract: TContract,
+  theme: NativeTheme<Record<string, unknown>>,
+): boolean {
+  const contractKey = getThemeContractIdentityKey(contract)
+  const themeKey = getThemeContractIdentityKey(theme.contract)
+  const contractSignature = getThemeContractShapeSignature(contract)
+  const themeSignature = getThemeContractShapeSignature(theme.contract)
+  return contractKey !== undefined && contractKey === themeKey &&
+    contractSignature !== undefined && contractSignature === themeSignature
 }
 
 type NativePrimitiveStyle = ImageStyle | TextStyle | ViewStyle
@@ -322,4 +394,37 @@ function resolveTokenValue(varName: string, theme: NativeTheme<Record<string, un
       `Theme token "${varName}" is missing from the active native theme`))
   }
   return theme.tokens[varName]
+}
+
+function requireTokenContractKey(contract: object): string {
+  const key = getThemeContractIdentityKey(contract)
+  if (key === undefined) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemeProviderMismatch,
+      "TokenThemeProvider and useTokenTheme require a contract created with an explicit stable identity. Use the legacy ThemeProvider for unscoped contracts.",
+    ))
+  }
+  return key
+}
+
+function assertTokenThemeCompatibility(
+  contract: object,
+  theme: NativeTheme<Record<string, unknown>>,
+): void {
+  if (isTokenThemeCompatible(contract, theme)) return
+  const expected = getThemeContractIdentityKey(contract) ?? "<unidentified>"
+  const actual = getThemeContractIdentityKey(theme.contract) ?? "<unidentified>"
+  throw new Error(formatNativeStylesDiagnostic(
+    NativeStylesDiagnosticCode.TokenThemeProviderMismatch,
+    `Theme contract ${JSON.stringify(actual)} is incompatible with requested contract ${JSON.stringify(expected)}. Use the theme created from the same stable contract identity and shape.`,
+  ))
+}
+
+function sharedRegistry<T>(key: symbol, create: () => T): T {
+  const root = globalThis as unknown as Record<PropertyKey, unknown>
+  const descriptor = Object.getOwnPropertyDescriptor(root, key)
+  if (descriptor !== undefined && "value" in descriptor) return descriptor.value as T
+  const value = create()
+  Object.defineProperty(root, key, {value, enumerable: false, configurable: false, writable: false})
+  return value
 }

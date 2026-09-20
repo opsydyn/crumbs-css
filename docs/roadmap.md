@@ -31,7 +31,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; M0.1 and M0.2 closed for documented compiler contracts; native Android acceptance deferred |
 | M1 | Select Effect 4 boundary implementation and establish budgets | M0 | In progress; M1.1/M1.2 artifact/API and initial shape contracts complete; native Android remains deferred |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
-| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | Not started |
+| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 and M3.2 closed |
 | M4 | Shared resolution, compiled selection, and bounded caches | M2, M3 | Not started |
 | M5 | Native Sprinkles and composition API completeness | M2, M3, M4 | Not started |
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
@@ -156,7 +156,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Affected paths:** new `packages/css/src/tokens/`, `native-style.ts`, `theme-token.ts`, `theme-runtime.ts`, theme contract type/property tests, `examples/theme.ts`, and Storybook theme providers.
 
 - [x] M3.1: Define colour, length, duration, opacity, and property-enum domains; generate or reconcile runtime schemas and static authoring types. Verify both positive native cases and rejected colour-to-spacing/enum mismatches.
-- [ ] M3.2: Implement stable contract/package identity, a contract-bound provider/hook interface, and deterministic public token IDs. Test duplicate package copies, evaluation order, hot reload, and identical paths across distinct contracts.
+- [x] M3.2: Implement stable contract/package identity, a contract-bound provider/hook interface, and deterministic public token IDs. Test duplicate package copies, evaluation order, hot reload, and identical paths across distinct contracts.
 - [ ] M3.3: Add foundation → semantic → component aliases with missing-target/domain/cycle diagnostics and traceable origin. Required tokens stay required; optional fallbacks are explicit.
 - [ ] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
 - [ ] M3.5: Add immutable theme patches and external-theme decoding. Update canonical values and derived token/index data atomically. Invalid patches leave the current snapshot untouched and return structured context.
@@ -1255,3 +1255,13 @@ Next recommended slice: **M3.1** — define domain-safe colour, length, duration
 - [Assessment](assessments/2026-09-20-domain-safe-token-contracts.md) records the domain boundary and remaining M3 work. No publication or push occurred; protected release/version edits remain outside the slice.
 
 Next recommended slice: **M3.2** — add stable contract/package identity, a contract-bound provider/hook interface and deterministic public token IDs, with duplicate-copy, evaluation-order and hot-reload qualification. Begin only after approval.
+
+### 2026-09-20 — M3.2 stable token identity and provider boundary
+
+- Added explicit `{ owner, name, version }` identities for distributed domain token contracts. Canonical path/domain signatures reject identity reuse with a changed shape; stable public IDs and package-scoped native variables do not depend on evaluation order, counters or random values.
+- Added `getTokenId`, contract identity/key introspection and a contract-bound `TokenThemeProvider`/`useTokenTheme` pair. Provider lookup checks both identity and shape signature, while unidentified legacy contracts retain the ordinary `ThemeProvider`/`useTheme` migration route.
+- Shared registry and context metadata use global symbols so duplicate Crumbs package copies in one JavaScript realm can recognise the same identity during hot reload or re-evaluation. Distinct identities with identical paths remain isolated.
+- Focused identity, type, domain, ownership, runtime and public API tests pass. The ordinary token bundle remains Effect-free; `tokens/schema` remains the dedicated Effect 4 ingress boundary. Full duplicate-package distribution and native-device provider acceptance remain later gates.
+- [Assessment](assessments/2026-09-20-stable-token-identity.md) records the identity format, provider boundary and qualification limits. No publication or push occurred; protected release/version edits remain outside the slice.
+
+Next recommended slice: **M3.3** — add foundation → semantic → component aliases with missing-target, domain, cycle and traceable-origin diagnostics. Begin only after approval.

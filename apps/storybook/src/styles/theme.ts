@@ -1,33 +1,35 @@
-import { createTheme, createThemeContract } from "@opsydyn/crumbs-css/style"
+import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens"
 
 export type ShowcaseThemeMode = "dark" | "light"
 
-export const vars = createThemeContract({
+export const vars = createTokenContract({
   color: {
-    accent: null,
-    accentMuted: null,
-    accentText: null,
-    canvas: null,
-    copy: null,
-    edge: null,
-    muted: null,
-    panel: null,
-    panelRaised: null,
+    accent: defineToken("color"),
+    accentMuted: defineToken("color"),
+    accentText: defineToken("color"),
+    canvas: defineToken("color"),
+    copy: defineToken("color"),
+    edge: defineToken("color"),
+    muted: defineToken("color"),
+    panel: defineToken("color"),
+    panelRaised: defineToken("color"),
   },
   radius: {
-    lg: null,
-    pill: null,
+    lg: defineToken("length"),
+    pill: defineToken("length"),
   },
   space: {
-    lg: null,
-    md: null,
-    sm: null,
-    xl: null,
-    xs: null,
+    lg: defineToken("length"),
+    md: defineToken("length"),
+    sm: defineToken("length"),
+    xl: defineToken("length"),
+    xs: defineToken("length"),
   },
+}, {
+  identity: { owner: "@opsydyn/crumbs", name: "storybook", version: 1 },
 })
 
-export const darkTheme = createTheme(vars, {
+export const darkTheme = createTokenTheme(vars, {
   color: {
     accent: "#d1a85f",
     accentMuted: "#2f2416",
@@ -52,7 +54,7 @@ export const darkTheme = createTheme(vars, {
   },
 })
 
-export const lightTheme = createTheme(vars, {
+export const lightTheme = createTokenTheme(vars, {
   color: {
     accent: "#8f231c",
     accentMuted: "#f2dfd2",

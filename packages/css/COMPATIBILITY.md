@@ -113,18 +113,18 @@ Primitive references anchor inline overrides to their native property/value set,
 
 ### Legacy contract ownership
 
-Until M3 introduces explicit package/contract identities, a token's owner is its exact raw path (the array of unsanitized key segments). Identical paths may be reused across contract definitions and produce independent theme value maps. Different paths that sanitize to the same `--crumbs-…` name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`; registration validates the whole contract before publishing any metadata. Failed definitions cannot overwrite an existing owner or leave partially registered tokens. Exposed token paths are frozen.
+The pre-M3 `createThemeContract` API remains path-scoped for migration. A token's owner is its exact raw path (the array of unsanitized key segments). Identical paths may be reused across contract definitions and produce independent theme value maps. Different paths that sanitize to the same `--crumbs-…` name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`; registration validates the whole contract before publishing any metadata. Failed definitions cannot overwrite an existing owner or leave partially registered tokens. Exposed token paths are frozen.
 
 `createTheme` requires registered leaves at their owning paths. Relocated, unregistered or invalid leaves fail with `CRUMBS_CSS_INVALID_THEME_CONTRACT`; they are never silently skipped. Generated contracts preserve own prototype-like keys. Clones at identical paths can reuse already registered tokens, but decoded contracts must be rebuilt in the owning authoring module when that registry is absent.
 
-The registry is local to an authoring module instance (or a bundled compilation graph), not a cross-package manifest. Exact-path reuse deliberately shares legacy token identity; it does not establish distinct provider compatibility or prevent independently compiled graphs from choosing the same names. Namespace contract roots by design system/package now, avoid sanitizer collisions, and regenerate dependent artifacts after changing paths. Wrong-provider detection, scoped identity and alias semantics remain later M3 work. No counter/random suffix or evaluation-order-dependent naming is introduced; existing non-colliding token strings remain unchanged.
+The legacy registry is shared across Crumbs package copies in one JavaScript realm, but exact-path reuse still deliberately shares legacy token identity. It does not establish provider compatibility or make unscoped tokens safe to exchange across independently versioned packages. Namespace legacy contract roots by design system/package, avoid sanitizer collisions, and regenerate dependent artifacts after changing paths. Use the identified domain contract API below for distributed design-system packages.
 
-### Domain token contracts (M3.1)
+### Domain token contracts (M3.1–M3.2)
 
 Use `@opsydyn/crumbs-css/tokens` for new domain-aware contracts:
 
 ```ts
-import { createTokenContract, defineToken } from "@opsydyn/crumbs-css/tokens"
+import { createTokenContract, defineToken, getTokenId } from "@opsydyn/crumbs-css/tokens"
 
 export const vars = createTokenContract({
   color: { accent: defineToken("color") },
@@ -132,6 +132,49 @@ export const vars = createTokenContract({
   display: { mode: defineToken({ kind: "enum", values: ["flex", "none"] as const }) },
 })
 ```
+
+Packages that distribute a contract should provide an explicit stable identity:
+
+```ts
+export const vars = createTokenContract({
+  color: { accent: defineToken("color") },
+  space: { md: defineToken({ kind: "length" }) },
+}, {
+  identity: { owner: "@acme/tokens", name: "foundation", version: 1 },
+})
+```
+
+`getTokenId(vars.color.accent)` then returns the deterministic public ID
+`@acme/tokens/foundation@1#5:color/6:accent`. The generated native variable
+name is package-scoped and contains no evaluation-order counter or random
+suffix. Re-evaluating the same contract during hot reload, or loading a
+duplicate package copy with the same identity and shape, produces the same
+IDs. The same path under a different identity produces different IDs. Reusing
+an identity for a different path/domain shape fails with
+`CRUMBS_CSS_TOKEN_CONTRACT_IDENTITY_COLLISION`.
+
+Bind identified themes through the contract-aware runtime entrypoint:
+
+```tsx
+import { TokenThemeProvider, useTokenTheme } from "@opsydyn/crumbs-css/theme"
+import { createTokenTheme } from "@opsydyn/crumbs-css/tokens"
+
+const theme = createTokenTheme(vars, { color: { accent: "#224466" }, space: { md: 8 } })
+
+function Screen() {
+  const active = useTokenTheme(vars)
+  return <View style={{ backgroundColor: active.values.color.accent }} />
+}
+
+export function App() {
+  return <TokenThemeProvider contract={vars} theme={theme}><Screen /></TokenThemeProvider>
+}
+```
+
+`TokenThemeProvider` and `useTokenTheme` compare both the stable identity and
+the contract-shape signature. A generic hook assertion cannot make an
+incompatible provider valid. Unidentified legacy contracts continue to use
+the ordinary `ThemeProvider`/`useTheme` migration path.
 
 Colour, length, duration, opacity and property-enum references keep the native
 `var(--crumbs-…)` representation but carry a domain-aware authoring type.
@@ -146,8 +189,8 @@ token contract for migrations.
 External or persisted token data should use the dedicated
 `@opsydyn/crumbs-css/tokens/schema` entrypoint. It is the Effect 4 Schema
 boundary; ordinary token authoring does not import Effect. Contract identity,
-provider compatibility, aliases, scopes and atomic updates remain later M3
-slices, so do not treat variable spelling as package identity yet.
+provider compatibility now use the identified API above; aliases, scopes and
+atomic updates remain later M3 slices.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 

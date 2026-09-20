@@ -37,15 +37,18 @@ describe("@opsydyn/crumbs-css public API contract", () => {
     expect(namedApiKeys(themeApi)).toEqual([
       "NativeThemeTokenReferenceType",
       "ThemeProvider",
+      "TokenThemeProvider",
       "createRecipeResolver",
       "createThemeTokenReference",
       "isThemeTokenReference",
+      "isTokenThemeCompatible",
       "resolveRecipeStyle",
       "resolveThemeStyles",
       "resolveThemeTokens",
       "useTheme",
       "useThemedStyle",
       "useThemedStyles",
+      "useTokenTheme",
     ])
   })
 
@@ -55,6 +58,9 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "createTokenContract",
       "createTokenTheme",
       "defineToken",
+      "getTokenContractIdentity",
+      "getTokenContractKey",
+      "getTokenId",
       "isTokenDefinition",
       "isTokenDomainValue",
       "token",
