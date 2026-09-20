@@ -1130,3 +1130,12 @@ Next recommended slice: **M2.2av** — migrate the ordered `transform` array thr
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2aw** — migrate the closed `boxShadow` item union as its own structured contract, separating finite/percentage offsets, optional blur/spread and colour admission from the ordered transform family. Keep `filter` and experimental background arrays deferred until their item semantics are independently specified. Begin only after approval.
+
+### 2026-09-20 — M2.2aw closed box-shadow structured IR
+
+- Migrated marked static view-only `boxShadow` arrays through a closed item union with required finite-number/percentage offsets, optional non-empty colour, non-negative finite blur, finite spread and boolean inset.
+- Descriptor-safe dense-array and item admission rejects accessors, symbols, sparse/decorated arrays, extra keys, nested tokens, unsupported unit strings and non-finite values. Effect Schema, provenance and primitive matrices remain property-specific; whole-list last-winner composition is independent of ordered transform composition.
+- CSS string shadows remain on the compatibility route. `filter` and experimental background arrays remain deferred as separate contracts.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2ax** — audit and migrate the remaining `filter` function union with property-specific numeric/string domains and the `dropShadow` nested item contract; keep experimental background arrays deferred until their gradient and position semantics are separately qualified. Begin only after approval.

@@ -37,7 +37,12 @@ describe("structured native compilation", () => {
     expect(result.panel).toEqual({transform: transforms, shadowOffset: {width: 2, height: 3}, opacity: 1})
   })
   it("preserves static transforms, offsets and scalar siblings in both emission modes", async () => {
-    const rule = { opacity: 0.5, transform: [{ translateX: 4 }, { scale: 2 }, { rotate: "45deg" }, { translateY: "10%" }], shadowOffset: { width: 2, height: -3 } }
+    const rule = {
+      opacity: 0.5,
+      transform: [{ translateX: 4 }, { scale: 2 }, { rotate: "45deg" }, { translateY: "10%" }],
+      shadowOffset: { width: 2, height: -3 },
+      boxShadow: [{ offsetX: 2, offsetY: "10%", color: "black", blurRadius: 4, spreadDistance: -1, inset: true }],
+    }
     for (const mode of [false, true]) {
       const result = await compile(`export const panel = viewStyle(${JSON.stringify(rule)});`, mode)
       expect(result.panel).toEqual(rule)
@@ -79,7 +84,7 @@ describe("structured native compilation", () => {
       `{transformOrigin: [1, 2, 3, 4]}`, `{transformMatrix: [1, 2]}`, `{fontVariant: ['unsupported']}`,
       `{fontVariant: ['small-caps']}`,
       `{shadowOffset: {width: 'var(--crumbs-x)', height: 2}}`, `{transform: [{scale: {__getValue() {throw new Error('EXECUTED')}}}]}`,
-      `{filter: [{brightness: 2}]}`, `{boxShadow: [{offsetX: 2, offsetY: 3}]}`,
+      `{filter: [{brightness: 2}]}`, `{boxShadow: [{offsetX: 2}]}`,
       `{transform: Array(2)}`, `{transform: [{matrix: Array(16)}]}`,
     ]) {
       await expect(compile(`export const invalid = viewStyle(${rule});`)).rejects.toThrow(/CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE.*case\.css\.ts.*runtime style/)

@@ -7,6 +7,7 @@ import {
 } from "./native-capture"
 
 export type StructuredNativeProperty =
+  | "boxShadow"
   | "transform"
   | "shadowOffset"
   | "textShadowOffset"
@@ -69,6 +70,16 @@ export type TransformOperation =
   | { readonly skewY: TransformAngle }
   | { readonly matrix: TransformMatrixValue }
 export type TransformValue = ReadonlyArray<TransformOperation>
+export type BoxShadowOffset = number | `${number}%`
+export type BoxShadowItem = {
+  readonly offsetX: BoxShadowOffset
+  readonly offsetY: BoxShadowOffset
+  readonly color?: string
+  readonly blurRadius?: number
+  readonly spreadDistance?: number
+  readonly inset?: boolean
+}
+export type BoxShadowValue = ReadonlyArray<BoxShadowItem>
 export type FontVariant =
   | "small-caps"
   | "oldstyle-nums"
@@ -104,7 +115,7 @@ export type FontVariant =
   | "stylistic-nineteen"
   | "stylistic-twenty"
 export type FontVariantValue = ReadonlyArray<FontVariant>
-export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | FontVariantValue
+export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FontVariantValue
 export type StructuredDeclaration = {
   readonly _tag: "NativeStructuredDeclaration"
   readonly property: StructuredNativeProperty
@@ -124,10 +135,11 @@ export type StructuredCaptureContext = {
 }
 
 const structuredProperties = [
-  "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ] as const satisfies ReadonlyArray<StructuredNativeProperty>
 const allPrimitives = ["view", "text", "image"] as const
 const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
+  boxShadow: ["view"],
   transform: ["view", "text", "image"],
   shadowOffset: ["view", "text", "image"],
   textShadowOffset: ["text"],
@@ -193,6 +205,21 @@ const TransformOperationSchema = Schema.Union([
   Schema.Struct({ matrix: TransformMatrixValueSchema }),
 ])
 const TransformValueSchema = Schema.Array(TransformOperationSchema)
+const BoxShadowOffsetSchema = Schema.Union([Schema.Finite, PercentageValueSchema])
+const BoxShadowColorSchema = Schema.NonEmptyString.check(Schema.makeFilter<string>(value => /^var\s*\(/i.test(value)
+  ? { path: [], issue: "Nested colour tokens are not static box-shadow values" }
+  : undefined))
+const BoxShadowBlurSchema = Schema.Finite.check(Schema.makeFilter<number>(value => value >= 0
+  ? undefined : { path: [], issue: "Expected a non-negative blur radius" }))
+const BoxShadowItemSchema = Schema.Struct({
+  offsetX: BoxShadowOffsetSchema,
+  offsetY: BoxShadowOffsetSchema,
+  color: Schema.optional(BoxShadowColorSchema),
+  blurRadius: Schema.optional(BoxShadowBlurSchema),
+  spreadDistance: Schema.optional(Schema.Finite),
+  inset: Schema.optional(Schema.Boolean),
+})
+const BoxShadowValueSchema = Schema.Array(BoxShadowItemSchema)
 const fontVariantValues = [
   "small-caps", "oldstyle-nums", "lining-nums", "tabular-nums", "common-ligatures",
   "no-common-ligatures", "discretionary-ligatures", "no-discretionary-ligatures", "historical-ligatures",
@@ -208,10 +235,11 @@ const StructuredValueSchema = Schema.Union([
   TransformOriginValueSchema,
   TransformMatrixValueSchema,
   TransformValueSchema,
+  BoxShadowValueSchema,
   FontVariantValueSchema,
 ])
 const StructuredNativePropertySchema = Schema.Literals([
-  "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ])
 const StructuredPropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
@@ -267,9 +295,10 @@ export function captureStructuredIntoNativeIr(
   const selectedProperties = structuredProperties.filter(property => {
     const descriptor = descriptors[property]
     if (descriptor?.enumerable !== true) return false
-    // React Native also exposes a string transform form. Leave that form on
-    // the compatibility route while taking only ordered static arrays into IR.
-    return property !== "transform" || !("value" in descriptor) || Array.isArray(descriptor.value)
+    // React Native also exposes string forms for transform and boxShadow.
+    // Leave those forms on the compatibility route while taking only ordered
+    // static arrays into IR.
+    return (property !== "transform" && property !== "boxShadow") || !("value" in descriptor) || Array.isArray(descriptor.value)
   })
   if (selectedProperties.length === 0) return { cssRule: rule as Record<string, unknown> }
   let primitiveDomain = [...metadata.primitiveDomain]
@@ -351,6 +380,9 @@ function admitStructuredValue(
   context: StructuredCaptureContext,
   property: StructuredNativeProperty,
 ): StructuredValue {
+  if (property === "boxShadow") {
+    return admitBoxShadow(value, context, property)
+  }
   if (property === "transform") {
     return admitTransform(value, context, property)
   }
@@ -364,6 +396,57 @@ function admitStructuredValue(
     return admitTransformMatrix(value, context, property)
   }
   return admitFontVariant(value, context, property)
+}
+
+function admitBoxShadow(
+  value: unknown,
+  context: StructuredCaptureContext,
+  property: "boxShadow",
+): BoxShadowValue {
+  const items = admitDenseArray(value, context, property)
+  return Object.freeze(items.map((item, index) => admitBoxShadowItem(item, context, index)))
+}
+
+function admitBoxShadowItem(
+  value: unknown,
+  context: StructuredCaptureContext,
+  index: number,
+): BoxShadowItem {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid boxShadow in ${context.sourceId} at ${context.className}.boxShadow[${index}]: ${detail}.`, "boxShadow")
+  }
+  if (!isPlainStructuredObject(value)) return invalid("expected one plain item object")
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length < 2 || names.length > 6 ||
+    !names.includes("offsetX") || !names.includes("offsetY") || names.some(name => !boxShadowKeys.has(name))) {
+    return invalid("expected offsetX and offsetY plus only supported optional fields")
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const entries: Record<string, unknown> = {}
+  for (const name of names) {
+    const descriptor = descriptors[name]
+    if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) {
+      return invalid(`${name} must be an enumerable data property`)
+    }
+    entries[name] = descriptor.value
+  }
+  if (!isBoxShadowOffset(entries.offsetX) || !isBoxShadowOffset(entries.offsetY)) {
+    return invalid("offsetX and offsetY must be finite numbers or finite percentages")
+  }
+  if ("color" in entries && !isBoxShadowColor(entries.color)) {
+    return invalid("color must be a non-empty native colour string")
+  }
+  if ("blurRadius" in entries && (!isFiniteNumber(entries.blurRadius) || entries.blurRadius < 0)) {
+    return invalid("blurRadius must be a non-negative finite number")
+  }
+  if ("spreadDistance" in entries && !isFiniteNumber(entries.spreadDistance)) {
+    return invalid("spreadDistance must be a finite number")
+  }
+  if ("inset" in entries && typeof entries.inset !== "boolean") {
+    return invalid("inset must be a boolean")
+  }
+  return Object.freeze(entries) as BoxShadowItem
 }
 
 function admitTransform(
@@ -541,6 +624,14 @@ function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value)
 }
 
+function isBoxShadowOffset(value: unknown): value is BoxShadowOffset {
+  return isFiniteNumber(value) || isPercentage(value)
+}
+
+function isBoxShadowColor(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && !/^var\s*\(/i.test(value)
+}
+
 function isPercentage(value: unknown): value is `${number}%` {
   return typeof value === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)%$/.test(value) &&
     Number.isFinite(Number.parseFloat(value.slice(0, -1)))
@@ -553,6 +644,7 @@ function isAngle(value: unknown): value is TransformAngle {
 
 const numericTransformKeys = new Set(["perspective", "scale", "scaleX", "scaleY"])
 const angularTransformKeys = new Set(["rotate", "rotateX", "rotateY", "rotateZ", "skewX", "skewY"])
+const boxShadowKeys = new Set(["offsetX", "offsetY", "color", "blurRadius", "spreadDistance", "inset"])
 
 function isTransformOriginEntry(value: unknown): value is TransformOriginEntry {
   return isFiniteNumber(value) || isPercentage(value)
@@ -564,6 +656,7 @@ function isFontVariant(value: unknown): value is FontVariant {
 }
 
 function isStructuredValueForProperty(property: StructuredNativeProperty, value: unknown): boolean {
+  if (property === "boxShadow") return isBoxShadowValue(value)
   if (property === "transform") return isTransformValue(value)
   if (property === "shadowOffset" || property === "textShadowOffset") {
     return typeof value === "object" && value !== null && !Array.isArray(value) &&
@@ -578,6 +671,33 @@ function isStructuredValueForProperty(property: StructuredNativeProperty, value:
     return inspectDenseArray(value, [16])?.every(isFiniteNumber) === true
   }
   return inspectDenseArray(value)?.every(isFontVariant) === true
+}
+
+function isBoxShadowValue(value: unknown): value is BoxShadowValue {
+  const items = inspectDenseArray(value)
+  return items !== undefined && items.every(isBoxShadowItem)
+}
+
+function isBoxShadowItem(value: unknown): value is BoxShadowItem {
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length < 2 || names.length > 6 ||
+    !names.includes("offsetX") || !names.includes("offsetY") || names.some(name => !boxShadowKeys.has(name))) return false
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  if (!names.every(name => descriptors[name]?.enumerable === true && "value" in descriptors[name]!)) return false
+  const entry = (name: string): unknown => {
+    const descriptor = descriptors[name]
+    return descriptor !== undefined && "value" in descriptor ? descriptor.value : undefined
+  }
+  const color = entry("color")
+  const blurRadius = entry("blurRadius")
+  const spreadDistance = entry("spreadDistance")
+  const inset = entry("inset")
+  return isBoxShadowOffset(entry("offsetX")) && isBoxShadowOffset(entry("offsetY")) &&
+    (!names.includes("color") || isBoxShadowColor(color)) &&
+    (!names.includes("blurRadius") || (isFiniteNumber(blurRadius) && blurRadius >= 0)) &&
+    (!names.includes("spreadDistance") || isFiniteNumber(spreadDistance)) &&
+    (!names.includes("inset") || typeof inset === "boolean")
 }
 
 function isTransformValue(value: unknown): value is TransformValue {
