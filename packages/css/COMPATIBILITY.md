@@ -117,7 +117,37 @@ Until M3 introduces explicit package/contract identities, a token's owner is its
 
 `createTheme` requires registered leaves at their owning paths. Relocated, unregistered or invalid leaves fail with `CRUMBS_CSS_INVALID_THEME_CONTRACT`; they are never silently skipped. Generated contracts preserve own prototype-like keys. Clones at identical paths can reuse already registered tokens, but decoded contracts must be rebuilt in the owning authoring module when that registry is absent.
 
-The registry is local to an authoring module instance (or a bundled compilation graph), not a cross-package manifest. Exact-path reuse deliberately shares legacy token identity; it does not establish distinct provider compatibility or prevent independently compiled graphs from choosing the same names. Namespace contract roots by design system/package now, avoid sanitizer collisions, and regenerate dependent artifacts after changing paths. Wrong-provider detection, semantic domains and stable package identity remain M3 work. No counter/random suffix or evaluation-order-dependent naming is introduced; existing non-colliding token strings remain unchanged.
+The registry is local to an authoring module instance (or a bundled compilation graph), not a cross-package manifest. Exact-path reuse deliberately shares legacy token identity; it does not establish distinct provider compatibility or prevent independently compiled graphs from choosing the same names. Namespace contract roots by design system/package now, avoid sanitizer collisions, and regenerate dependent artifacts after changing paths. Wrong-provider detection, scoped identity and alias semantics remain later M3 work. No counter/random suffix or evaluation-order-dependent naming is introduced; existing non-colliding token strings remain unchanged.
+
+### Domain token contracts (M3.1)
+
+Use `@opsydyn/crumbs-css/tokens` for new domain-aware contracts:
+
+```ts
+import { createTokenContract, defineToken } from "@opsydyn/crumbs-css/tokens"
+
+export const vars = createTokenContract({
+  color: { accent: defineToken("color") },
+  space: { md: defineToken({ kind: "length" }) },
+  display: { mode: defineToken({ kind: "enum", values: ["flex", "none"] as const }) },
+})
+```
+
+Colour, length, duration, opacity and property-enum references keep the native
+`var(--crumbs-…)` representation but carry a domain-aware authoring type.
+`createTokenTheme` and `createTheme` validate the associated values before
+publishing the flat token map. Length values are finite numbers, `auto`, or
+finite percentages; negative values require `allowNegative: true`. Durations
+are finite non-negative numbers, opacity is bounded to `[0, 1]`, and enum
+values must belong to their declared non-empty set. Static style types reject
+colour tokens in length and enum properties while preserving the legacy broad
+token contract for migrations.
+
+External or persisted token data should use the dedicated
+`@opsydyn/crumbs-css/tokens/schema` entrypoint. It is the Effect 4 Schema
+boundary; ordinary token authoring does not import Effect. Contract identity,
+provider compatibility, aliases, scopes and atomic updates remain later M3
+slices, so do not treat variable spelling as package identity yet.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 

@@ -155,7 +155,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Decisions:** D3–D5, D8.\
 **Affected paths:** new `packages/css/src/tokens/`, `native-style.ts`, `theme-token.ts`, `theme-runtime.ts`, theme contract type/property tests, `examples/theme.ts`, and Storybook theme providers.
 
-- [ ] M3.1: Define colour, length, duration, opacity, and property-enum domains; generate or reconcile runtime schemas and static authoring types. Verify both positive native cases and rejected colour-to-spacing/enum mismatches.
+- [x] M3.1: Define colour, length, duration, opacity, and property-enum domains; generate or reconcile runtime schemas and static authoring types. Verify both positive native cases and rejected colour-to-spacing/enum mismatches.
 - [ ] M3.2: Implement stable contract/package identity, a contract-bound provider/hook interface, and deterministic public token IDs. Test duplicate package copies, evaluation order, hot reload, and identical paths across distinct contracts.
 - [ ] M3.3: Add foundation → semantic → component aliases with missing-target/domain/cycle diagnostics and traceable origin. Required tokens stay required; optional fallbacks are explicit.
 - [ ] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
@@ -1245,3 +1245,13 @@ Next recommended slice: **M2.7** — demonstrate that real dependency changes in
 - The cleared Expo/Metro measurement passed with Expo 56.0.4, Metro 0.84.4 and React Native 0.85.3. Plain-token, nested `.css.ts` and workspace-source controls plus five retained direct edits all prove new baked values and absence of old values; fixture hashes were restored. The workspace run used a canonical disposable package copy to avoid symlinked watcher topology. No persistent cache, public API or userland Effect requirement was added. [Assessment](assessments/2026-09-20-dependency-invalidation.md) and [qualification evidence](evidence/2026-09-20-m2-7-dependency-invalidation/qualification.json) record the receipts.
 
 Next recommended slice: **M3.1** — define domain-safe colour, length, duration, opacity and property-enum token contracts with generated or reconciled runtime schemas and static authoring types. Begin only after approval.
+
+### 2026-09-20 — M3.1 domain-safe token contracts
+
+- Added immutable `defineToken`/`token.*` definitions and `createTokenContract`/`createTokenTheme` for colour, length, duration, opacity and closed property-enum domains. Domain references retain the existing native variable spelling while carrying a static domain brand.
+- Native style authoring narrows length and property-enum token positions, so colour tokens cannot be used for spacing or enum properties. Legacy unscoped tokens retain the documented migration path.
+- Runtime theme construction rejects invalid domain values before token maps are published. A dedicated `tokens/schema` entrypoint uses Effect 4 Schema for external ingress; the ordinary token entrypoint contains no Effect import.
+- Focused property tests pass generated valid values, adversarial cross-domain/range values, schema/predicate agreement and static `@ts-expect-error` mismatch fixtures. Public API tests qualify both token entrypoints. No identity, alias, scope, provider, patch or optic behavior is claimed.
+- [Assessment](assessments/2026-09-20-domain-safe-token-contracts.md) records the domain boundary and remaining M3 work. No publication or push occurred; protected release/version edits remain outside the slice.
+
+Next recommended slice: **M3.2** — add stable contract/package identity, a contract-bound provider/hook interface and deterministic public token IDs, with duplicate-copy, evaluation-order and hot-reload qualification. Begin only after approval.

@@ -6,9 +6,27 @@ import { markNativeStyleMap, NativeRecipeClassSymbol } from "./native-style-map"
 import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diagnostics"
 import { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
 import { markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/native-capture"
+import {
+  getThemeTokenDomainForContract,
+  validateThemeTokenValueForContract,
+  type DomainThemeVar,
+  type LegacyNativeThemeVar,
+  type NativeThemeVar,
+  type ThemeVar,
+  type TokenDomain,
+  type TokenDomainValue,
+} from "./theme-token"
 export { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
 
-export type { NativeThemeTokenReference } from "./theme-token"
+export type {
+  DomainThemeVar,
+  LegacyNativeThemeVar,
+  NativeThemeTokenReference,
+  NativeThemeVar,
+  ThemeVar,
+  TokenDomain,
+  TokenDomainValue,
+} from "./theme-token"
 export {
   createThemeTokenReference,
   isThemeTokenReference,
@@ -75,7 +93,7 @@ type StaticTransformEntry<TEntry> = TEntry extends unknown ? {
 } : never
 type NativeStaticTransform = StaticTransformEntry<Extract<NonNullable<ViewStyle["transform"]>, ReadonlyArray<unknown>>[number]>
 export type NativeStyleInput<TStyle> = {
-  readonly [K in keyof TStyle]?: NativeStyleValueInput<TStyle[K]>
+  readonly [K in keyof TStyle]?: NativeStyleValueInput<TStyle[K], K>
 } & UnsupportedSideBorderInput
 type StaticNativeStyleInput<TStyle> = Omit<NativeStyleInput<TStyle>, "transform"> & {
   readonly transform?: string | ReadonlyArray<NativeStaticTransform> | undefined
@@ -85,7 +103,7 @@ export type NativeTextStyleInput = NativeStyleInput<TextStyle>
 export type NativeViewStyleInput = NativeStyleInput<ViewStyle>
 export type NativeRecipeVariantValue = string | boolean
 export type NativeRecipeVariantsConfig = Readonly<
-  Record<string, Readonly<Record<string, NativeViewStyleInput>>>
+  Record<string, Readonly<Record<string, NativeViewStyleInput | NativeStyle>>>
 >
 export type NativeRecipeVariantSelection<TValues> = keyof TValues extends "false" | "true"
   ? boolean | keyof TValues
@@ -94,11 +112,11 @@ export type NativeRecipeSelection<TVariants extends NativeRecipeVariantsConfig> 
   readonly [K in keyof TVariants]?: NativeRecipeVariantSelection<TVariants[K]>
 }
 export type NativeRecipeCompoundVariant<TVariants extends NativeRecipeVariantsConfig> = {
-  readonly style: NativeViewStyleInput
+  readonly style: NativeViewStyleInput | NativeStyle
   readonly variants: NativeRecipeSelection<TVariants>
 }
 export type NativeRecipeConfig<TVariants extends NativeRecipeVariantsConfig> = {
-  readonly base?: NativeViewStyleInput
+  readonly base?: NativeViewStyleInput | NativeStyle
   readonly compoundVariants?: ReadonlyArray<NativeRecipeCompoundVariant<TVariants>>
   readonly defaultVariants?: NativeRecipeSelection<TVariants>
   readonly variants: TVariants
@@ -133,26 +151,63 @@ export type ThemeContractInput = {
   readonly [key: string]: ThemeContractInput | null
 }
 export type NativeThemeValue = string | number
-export type NativeThemeVar = `var(--crumbs-${string})` & {
-  readonly __nativeThemeVarBrand: unique symbol
-}
-type NativeStyleValueInput<TValue> =
-  Extract<Exclude<TValue, undefined>, string | number> extends never
-    ? TValue
-    : TValue | NativeThemeVar
+type ColorStyleProperty = "color" | `${string}Color`
+type LengthStyleProperty =
+  | "width" | "height" | "minWidth" | "minHeight" | "maxWidth" | "maxHeight"
+  | "top" | "right" | "bottom" | "left" | "start" | "end"
+  | "inset" | "insetInline" | "insetBlock" | "insetInlineStart" | "insetInlineEnd" | "insetBlockStart" | "insetBlockEnd"
+  | "padding" | "paddingHorizontal" | "paddingVertical" | "paddingLeft" | "paddingRight" | "paddingTop" | "paddingBottom"
+  | "paddingStart" | "paddingEnd" | "paddingInline" | "paddingBlock" | "paddingInlineStart" | "paddingInlineEnd" | "paddingBlockStart" | "paddingBlockEnd"
+  | "margin" | "marginHorizontal" | "marginVertical" | "marginLeft" | "marginRight" | "marginTop" | "marginBottom"
+  | "marginStart" | "marginEnd" | "marginInline" | "marginBlock" | "marginInlineStart" | "marginInlineEnd" | "marginBlockStart" | "marginBlockEnd"
+  | "borderWidth" | "borderTopWidth" | "borderRightWidth" | "borderBottomWidth" | "borderLeftWidth" | "borderStartWidth" | "borderEndWidth"
+  | "borderInlineWidth" | "borderBlockWidth" | "borderInlineStartWidth" | "borderInlineEndWidth" | "borderBlockStartWidth" | "borderBlockEndWidth"
+  | "borderRadius" | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomLeftRadius" | "borderBottomRightRadius"
+  | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
+  | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
+  | "gap" | "rowGap" | "columnGap" | "outlineOffset" | "outlineWidth"
+type OpacityStyleProperty = "opacity" | "shadowOpacity"
+type EnumStyleProperty =
+  | "display" | "position" | "direction" | "overflow" | "flexDirection" | "flexWrap"
+  | "alignContent" | "alignItems" | "alignSelf" | "justifyContent" | "boxSizing"
+  | "backfaceVisibility" | "cursor" | "borderCurve" | "pointerEvents"
+  | "borderStyle" | "outlineStyle" | "isolation" | "mixBlendMode" | "resizeMode" | "objectFit"
+  | "fontStyle" | "fontWeight" | "textAlign" | "textAlignVertical" | "verticalAlign"
+  | "textDecorationLine" | "textDecorationStyle" | "textTransform" | "writingDirection" | "userSelect"
+
+type TokenDomainForProperty<K extends PropertyKey> =
+  K extends ColorStyleProperty ? Extract<TokenDomain, { readonly kind: "color" }>
+    : K extends LengthStyleProperty ? Extract<TokenDomain, { readonly kind: "length" }>
+      : K extends OpacityStyleProperty ? Extract<TokenDomain, { readonly kind: "opacity" }>
+        : K extends EnumStyleProperty ? Extract<TokenDomain, { readonly kind: "enum" }>
+          : never
+
+type NativeStyleTokenForProperty<K extends PropertyKey> =
+  LegacyNativeThemeVar |
+  ([TokenDomainForProperty<K>] extends [never] ? never : DomainThemeVar<TokenDomainForProperty<K>>)
+
+type LengthStyleLiteral = number | `${number}%` | "auto"
+type NativeStyleValueInput<TValue, TProperty extends PropertyKey = never> =
+  TProperty extends LengthStyleProperty
+    ? Exclude<TValue, string | number> | LengthStyleLiteral | NativeStyleTokenForProperty<TProperty>
+    : Extract<Exclude<TValue, undefined>, string | number> extends never
+      ? TValue
+      : TValue | NativeStyleTokenForProperty<TProperty>
 export type ThemeContract<T extends ThemeContractInput> = {
   readonly [K in keyof T]: T[K] extends null
-    ? NativeThemeVar
+    ? LegacyNativeThemeVar
     : T[K] extends ThemeContractInput
       ? ThemeContract<T[K]>
       : never
 }
 export type ThemeValues<T> = {
-  readonly [K in keyof T]: T[K] extends NativeThemeVar
-    ? NativeThemeValue
-    : T[K] extends Record<string, unknown>
-      ? ThemeValues<T[K]>
-      : never
+  readonly [K in keyof T]: T[K] extends DomainThemeVar<infer TDomain>
+    ? TokenDomainValue<TDomain>
+    : T[K] extends NativeThemeVar
+      ? NativeThemeValue
+      : T[K] extends Record<string, unknown>
+        ? ThemeValues<T[K]>
+        : never
 }
 export type NativeTheme<TContract> = {
   readonly contract: TContract
@@ -168,7 +223,7 @@ type ThemeContractBuildState = {
   readonly tokenPathsByVarName: Map<string, ReadonlyArray<string>>
 }
 
-const themeTokenRegistry = new Map<NativeThemeVar, ThemeTokenMetadata>()
+const themeTokenRegistry = new Map<ThemeVar, ThemeTokenMetadata>()
 
 export function style<const TRule extends NativeAuthoringRule>(
   rule: TRule & CheckedNativeRule<TRule>,
@@ -285,11 +340,11 @@ export function createTheme<TContract extends Record<string, unknown>>(
   values: ThemeValues<TContract>,
 ): NativeTheme<TContract> {
   const tokens: Record<string, NativeThemeValue> = {}
-  collectThemeValues(contract, values, [], tokens)
+  collectThemeValues(contract, values, [], tokens, contract)
   return { contract, tokens, values }
 }
 
-function recipeClass(rule: NativeViewStyleInput, debugId?: string): NativeRecipeClassRef {
+function recipeClass(rule: NativeViewStyleInput | NativeStyle, debugId?: string): NativeRecipeClassRef {
   return Object.defineProperty({
     $$type: NativeRecipeClassType,
     className: vanillaStyle(markNativeCaptureRule(rule as Record<string, unknown>, ["view"]) as StyleRule, debugId),
@@ -303,15 +358,15 @@ function recipeDebugId(
   return debugId === undefined ? undefined : [debugId, ...segments].join("_")
 }
 
-export function isThemeVar(value: unknown): value is NativeThemeVar {
-  return typeof value === "string" && themeTokenRegistry.has(value as NativeThemeVar)
+export function isThemeVar(value: unknown): value is ThemeVar {
+  return typeof value === "string" && themeTokenRegistry.has(value as ThemeVar)
 }
 
-export function getThemeVarName(value: NativeThemeVar): string {
+export function getThemeVarName(value: ThemeVar): string {
   return getThemeTokenMetadata(value).varName
 }
 
-export function getThemeTokenPath(value: NativeThemeVar): ReadonlyArray<string> {
+export function getThemeTokenPath(value: ThemeVar): ReadonlyArray<string> {
   return getThemeTokenMetadata(value).path
 }
 
@@ -345,7 +400,7 @@ function createThemeVar(
     ))
   }
   state.tokenPathsByVarName.set(varName, path)
-  const token = `var(${varName})` as NativeThemeVar
+  const token = `var(${varName})` as LegacyNativeThemeVar
   return token
 }
 
@@ -360,6 +415,7 @@ function collectThemeValues(
   values: unknown,
   path: ReadonlyArray<string>,
   tokens: Record<string, NativeThemeValue>,
+  ownerContract: object,
 ): void {
   if (!isRecord(values)) {
     throw new Error(`Theme values for "${formatPath(path)}" must be an object`)
@@ -384,9 +440,13 @@ function collectThemeValues(
       if (typeof themeValue !== "string" && typeof themeValue !== "number") {
         throw new Error(`Theme value for "${formatPath(nextPath)}" must be a string or number`)
       }
+      if (!validateThemeTokenValueForContract(ownerContract, contractValue, themeValue)) {
+        const domain = getThemeTokenDomainForContract(ownerContract, contractValue)
+        throw new Error(`Theme value for "${formatPath(nextPath)}" does not satisfy the ${domain?.kind ?? "native"} token domain`)
+      }
       tokens[getThemeVarName(contractValue)] = themeValue
     } else if (isRecord(contractValue)) {
-      collectThemeValues(contractValue, themeValue, nextPath, tokens)
+      collectThemeValues(contractValue, themeValue, nextPath, tokens, ownerContract)
     } else invalidThemeContract(nextPath, "expected a registered native token leaf")
   }
 }
@@ -408,7 +468,7 @@ function formatPath(path: ReadonlyArray<string>): string {
   return path.length > 0 ? path.join(".") : "<root>"
 }
 
-function getThemeTokenMetadata(value: NativeThemeVar): ThemeTokenMetadata {
+function getThemeTokenMetadata(value: ThemeVar): ThemeTokenMetadata {
   const metadata = themeTokenRegistry.get(value)
   if (metadata === undefined) {
     throw new Error(`Unknown native theme token "${value}"`)

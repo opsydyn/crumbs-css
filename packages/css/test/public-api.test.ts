@@ -2,6 +2,8 @@ import { describe, expect, it } from "bun:test"
 import * as rootApi from "@opsydyn/crumbs-css"
 import * as styleApi from "@opsydyn/crumbs-css/style"
 import * as themeApi from "@opsydyn/crumbs-css/theme"
+import * as tokenApi from "@opsydyn/crumbs-css/tokens"
+import * as tokenSchemaApi from "@opsydyn/crumbs-css/tokens/schema"
 
 function namedApiKeys(api: object): ReadonlyArray<string> {
   return Object.keys(api)
@@ -45,6 +47,19 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "useThemedStyle",
       "useThemedStyles",
     ])
+  })
+
+  it("exposes domain contracts separately from the Effect-backed schema entrypoint", () => {
+    expect(namedApiKeys(tokenApi)).toEqual([
+      "TokenDefinitionType",
+      "createTokenContract",
+      "createTokenTheme",
+      "defineToken",
+      "isTokenDefinition",
+      "isTokenDomainValue",
+      "token",
+    ])
+    expect(namedApiKeys(tokenSchemaApi)).toEqual(["decodeTokenValue"])
   })
 
   it("keeps diagnostics and Metro integration available from the package root", () => {
