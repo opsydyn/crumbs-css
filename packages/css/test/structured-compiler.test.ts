@@ -75,6 +75,7 @@ describe("structured native compilation", () => {
     for (const rule of [
       `{transform: [{scale: 2, rotate: '1rad'}]}`, `{transform: [{unknown: 2}]}`, `{transform: [{scale: NaN}]}`,
       `{transform: [{rotate: '20px'}]}`, `{transform: [{matrix: [1,2]}]}`, `{shadowOffset: {width: 2}}`,
+      `{textShadowOffset: {width: 2, height: 3}}`,
       `{shadowOffset: {width: 'var(--crumbs-x)', height: 2}}`, `{transform: [{scale: {__getValue() {throw new Error('EXECUTED')}}}]}`,
       `{filter: [{brightness: 2}]}`, `{boxShadow: [{offsetX: 2, offsetY: 3}]}`,
       `{transform: Array(2)}`, `{transform: [{matrix: Array(16)}]}`,

@@ -22,6 +22,14 @@ describe("production native IR structured values", () => {
     expect(lowerStructuredBlock(captured.block!)).toEqual({ shadowOffset: value })
   })
 
+  it("captures and lowers a complete text shadow offset for text primitives", () => {
+    const value = { width: -1, height: 4 }
+    const captured = captureStructuredIntoNativeIr(markNativeCaptureRule({ textShadowOffset: value }, ["text"]), context)
+    expect(captured.cssRule).toEqual({})
+    expect(captured.block?.primitiveDomain).toEqual(["text"])
+    expect(lowerStructuredBlock(captured.block!)).toEqual({ textShadowOffset: value })
+  })
+
   it("rejects malformed, tokenised and decorated shadow offsets", () => {
     for (const value of [
       { width: 2 }, { height: 3 }, { width: 2, height: Infinity },
@@ -29,6 +37,35 @@ describe("production native IR structured values", () => {
     ]) {
       expect(() => captureStructuredIntoNativeIr(markNativeCaptureRule({ shadowOffset: value }, primitives), context)).toThrow(StructuredIrAdmissionError)
     }
+  })
+
+  it("keeps text shadow offsets text-only and reports property-specific admission", () => {
+    for (const primitive of ["view", "image"] as const) {
+      expect(() => captureStructuredIntoNativeIr(
+        markNativeCaptureRule({ textShadowOffset: { width: 1, height: 2 } }, [primitive]),
+        context,
+      )).toThrow("CRUMBS_STRUCTURED_IR_PRIMITIVE_MISMATCH")
+    }
+    expect(() => captureStructuredIntoNativeIr(
+      markNativeCaptureRule({ textShadowOffset: { width: 1, height: Infinity } }, ["text"]),
+      context,
+    )).toThrow("textShadowOffset")
+  })
+
+  it("composes both fixed offset properties when their primitive domain is shared", () => {
+    const captured = captureStructuredIntoNativeIr(markNativeCaptureRule({
+      shadowOffset: { width: 1, height: 2 },
+      textShadowOffset: { width: -3, height: 4 },
+    }, ["text"]), context)
+    expect(captured.block?.primitiveDomain).toEqual(["text"])
+    expect(lowerStructuredBlock(captured.block!)).toEqual({
+      shadowOffset: { width: 1, height: 2 },
+      textShadowOffset: { width: -3, height: 4 },
+    })
+    expect(() => captureStructuredIntoNativeIr(markNativeCaptureRule({
+      shadowOffset: { width: 1, height: 2 },
+      textShadowOffset: { width: -3, height: 4 },
+    }, ["view"]), context)).toThrow("CRUMBS_STRUCTURED_IR_PRIMITIVE_MISMATCH")
   })
 
   it("rejects forged structured nodes at the Effect Schema boundary", () => {
@@ -47,6 +84,26 @@ describe("production native IR structured values", () => {
       ).block!)
       expect(lowerStructuredBlock(normalizeStructuredBlocks(blocks))).toEqual({ shadowOffset: values.at(-1)! })
     }), { seed: 20261028, numRuns: 100 })
+  })
+
+  it("retains the last complete text shadow offset as a whole value", () => {
+    const offsets = fc.record({ width: fc.integer({ min: -100, max: 100 }), height: fc.integer({ min: -100, max: 100 }) })
+    fc.assert(fc.property(fc.array(offsets, { minLength: 1, maxLength: 30 }), values => {
+      const blocks = values.map((textShadowOffset, index) => captureStructuredIntoNativeIr(
+        markNativeCaptureRule({ textShadowOffset }, ["text"]),
+        { ...context, className: `text_structured_${index}` },
+      ).block!)
+      expect(lowerStructuredBlock(normalizeStructuredBlocks(blocks))).toEqual({ textShadowOffset: values.at(-1)! })
+    }), { seed: 20261029, numRuns: 100 })
+  })
+
+  it("rejects forged text shadow nodes outside the text primitive domain", () => {
+    const block = captureStructuredIntoNativeIr(
+      markNativeCaptureRule({ textShadowOffset: { width: 2, height: 3 } }, ["text"]),
+      context,
+    ).block!
+    expect(() => decodeStructuredBlock({ ...block, primitiveDomain: ["view"] }, context.sourceId))
+      .toThrow("CRUMBS_STRUCTURED_IR_INVALID_NODE")
   })
 
   it("keeps unmarked records on the compatibility route", () => {

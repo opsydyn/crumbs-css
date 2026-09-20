@@ -6,7 +6,7 @@ import {
   type NativePrimitiveDomain,
 } from "./native-capture"
 
-export type StructuredNativeProperty = "shadowOffset"
+export type StructuredNativeProperty = "shadowOffset" | "textShadowOffset"
 export type StructuredIrDiagnosticCode =
   | "CRUMBS_STRUCTURED_IR_INVALID_NODE"
   | "CRUMBS_STRUCTURED_IR_INVALID_VALUE"
@@ -59,6 +59,13 @@ export type StructuredCaptureContext = {
   readonly className: string
 }
 
+const structuredProperties = ["shadowOffset", "textShadowOffset"] as const satisfies ReadonlyArray<StructuredNativeProperty>
+const allPrimitives = ["view", "text", "image"] as const
+const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
+  shadowOffset: ["view", "text", "image"],
+  textShadowOffset: ["text"],
+}
+
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
   ? undefined : { path: [], issue: "Expected a non-negative safe integer" }))
 const PathSegment = Schema.Union([Schema.String, Index])
@@ -81,17 +88,18 @@ const ShadowOffsetValueSchema = Schema.Struct({
   width: Schema.Finite,
   height: Schema.Finite,
 })
+const StructuredNativePropertySchema = Schema.Literals(["shadowOffset", "textShadowOffset"])
 const StructuredPropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
   sourceId: Schema.NonEmptyString,
   exportPath: Schema.Array(PathSegment),
   logicalPath: Schema.Array(PathSegment),
   origin: Schema.Literal("crumbs-native"),
-  property: Schema.Literal("shadowOffset"),
+  property: StructuredNativePropertySchema,
 })
 const StructuredDeclarationSchema = Schema.Struct({
   _tag: Schema.Literal("NativeStructuredDeclaration"),
-  property: Schema.Literal("shadowOffset"),
+  property: StructuredNativePropertySchema,
   value: ShadowOffsetValueSchema,
   provenance: StructuredPropertyProvenanceSchema,
 }).check(Schema.makeFilter(declaration => declaration.property === declaration.provenance.property
@@ -101,7 +109,12 @@ export const StructuredDeclarationBlockSchema = Schema.Struct({
   primitiveDomain: PrimitiveDomainSchema,
   declarations: Schema.Array(StructuredDeclarationSchema).check(Schema.isMinLength(1)),
   provenance: SourceProvenanceSchema,
-})
+}).check(Schema.makeFilter(block => block.declarations.flatMap((declaration, index) => {
+  const allowed = structuredPropertyPrimitives[declaration.property]
+  return block.primitiveDomain.every(kind => allowed.includes(kind))
+    ? []
+    : [{ path: ["declarations", index], issue: `${declaration.property} is invalid for this primitive domain` }]
+})))
 
 const schemaOptions = { onExcessProperty: "error", errors: "all" } as const
 const formatIssues = SchemaIssue.makeFormatterStandardSchemaV1()
@@ -121,30 +134,43 @@ export function captureStructuredIntoNativeIr(
   const metadata = getNativeCaptureMetadata(rule)
   if (metadata === undefined) return { cssRule: rule as Record<string, unknown> }
   const descriptors = Object.getOwnPropertyDescriptors(rule)
-  const descriptor = descriptors.shadowOffset
-  if (descriptor === undefined || descriptor.enumerable !== true) return { cssRule: rule as Record<string, unknown> }
-  if (!("value" in descriptor)) {
-    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid shadowOffset in ${context.sourceId} at ${context.className}.shadowOffset: accessors cannot enter native IR.`)
-  }
-  const value = admitShadowOffset(descriptor.value, context)
-  const cssRule = withoutSelectedProperties(rule)
-  const block = decodeStructuredBlock({
-    _tag: "StructuredDeclarationBlock",
-    primitiveDomain: metadata.primitiveDomain,
-    declarations: [{
+  const selectedProperties = structuredProperties.filter(property =>
+    descriptors[property]?.enumerable === true,
+  )
+  if (selectedProperties.length === 0) return { cssRule: rule as Record<string, unknown> }
+  let primitiveDomain = [...metadata.primitiveDomain]
+  const declarations: StructuredDeclaration[] = []
+  for (const property of selectedProperties) {
+    const descriptor = descriptors[property]!
+    if (!("value" in descriptor)) {
+      throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+        `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: accessors cannot enter native IR.`, property)
+    }
+    primitiveDomain = primitiveDomain.filter(kind => structuredPropertyPrimitives[property].includes(kind))
+    if (primitiveDomain.length === 0) {
+      throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_PRIMITIVE_MISMATCH", context.sourceId,
+        `Invalid ${property} primitive domain in ${context.sourceId} at ${context.className}.${property}.`, property)
+    }
+    const value = admitShadowOffset(descriptor.value, context, property)
+    declarations.push({
       _tag: "NativeStructuredDeclaration",
-      property: "shadowOffset",
+      property,
       value,
       provenance: {
         packageOwner: context.packageOwner,
         sourceId: context.sourceId,
         exportPath: [],
-        logicalPath: [context.className, "shadowOffset"],
+        logicalPath: [context.className, property],
         origin: "crumbs-native",
-        property: "shadowOffset",
+        property,
       },
-    }],
+    })
+  }
+  const cssRule = withoutSelectedProperties(rule, selectedProperties)
+  const block = decodeStructuredBlock({
+    _tag: "StructuredDeclarationBlock",
+    primitiveDomain,
+    declarations,
     provenance: {
       packageOwner: context.packageOwner,
       sourceId: context.sourceId,
@@ -160,52 +186,71 @@ export function normalizeStructuredBlocks(blocks: ReadonlyArray<StructuredDeclar
   if (blocks.length === 0) throw new TypeError("Structured composition requires at least one block")
   const admitted = blocks.map(block => decodeStructuredBlock(block, block.provenance.sourceId))
   const last = admitted[admitted.length - 1]!
-  const primitiveDomain = (["view", "text", "image"] as const).filter(kind => admitted.every(block => block.primitiveDomain.includes(kind)))
+  const primitiveDomain = allPrimitives.filter(kind => admitted.every(block => block.primitiveDomain.includes(kind)))
   if (primitiveDomain.length === 0) {
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_PRIMITIVE_MISMATCH", last.provenance.sourceId,
       `Structured composition in ${last.provenance.sourceId} has no shared primitive domain.`)
   }
-  const winner = admitted.flatMap(block => block.declarations).at(-1)!
-  return decodeStructuredBlock({ ...last, primitiveDomain, declarations: [winner] }, last.provenance.sourceId)
+  const winners = new Map<StructuredNativeProperty, StructuredDeclaration>()
+  for (const block of admitted) {
+    for (const declaration of block.declarations) {
+      winners.delete(declaration.property)
+      winners.set(declaration.property, declaration)
+    }
+  }
+  return decodeStructuredBlock({ ...last, primitiveDomain, declarations: [...winners.values()] }, last.provenance.sourceId)
 }
 
 export function lowerStructuredBlock(
   block: StructuredDeclarationBlock,
-): Readonly<{ shadowOffset: ShadowOffsetValue }> {
+): Readonly<Partial<Record<StructuredNativeProperty, ShadowOffsetValue>>> {
   const admitted = decodeStructuredBlock(block, block.provenance.sourceId)
-  const value = admitted.declarations.at(-1)!.value
-  return Object.freeze({ shadowOffset: Object.freeze({ width: value.width, height: value.height }) })
+  const lowered: Partial<Record<StructuredNativeProperty, ShadowOffsetValue>> = {}
+  for (const declaration of admitted.declarations) {
+    lowered[declaration.property] = Object.freeze({
+      width: declaration.value.width,
+      height: declaration.value.height,
+    })
+  }
+  return Object.freeze(lowered)
 }
 
-function admitShadowOffset(value: unknown, context: StructuredCaptureContext): ShadowOffsetValue {
+function admitShadowOffset(
+  value: unknown,
+  context: StructuredCaptureContext,
+  property: StructuredNativeProperty,
+): ShadowOffsetValue {
   if (typeof value !== "object" || value === null || Array.isArray(value)) {
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid shadowOffset in ${context.sourceId} at ${context.className}.shadowOffset: expected a fixed finite width/height object.`)
+      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected a fixed finite width/height object.`, property)
   }
   const prototype = Object.getPrototypeOf(value)
   if (prototype !== Object.prototype && prototype !== null && Object.getPrototypeOf(prototype) !== null) {
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid shadowOffset in ${context.sourceId} at ${context.className}.shadowOffset: expected a plain object.`)
+      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected a plain object.`, property)
   }
   const descriptors = Object.getOwnPropertyDescriptors(value)
   const keys = Object.keys(descriptors)
   if (keys.length !== 2 || !keys.includes("width") || !keys.includes("height")) {
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid shadowOffset in ${context.sourceId} at ${context.className}.shadowOffset: expected exactly width and height.`)
+      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: expected exactly width and height.`, property)
   }
   const width = descriptors.width
   const height = descriptors.height
   if (width === undefined || height === undefined || !width.enumerable || !height.enumerable || !("value" in width) || !("value" in height) ||
     typeof width.value !== "number" || !Number.isFinite(width.value) || typeof height.value !== "number" || !Number.isFinite(height.value)) {
     throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
-      `Invalid shadowOffset in ${context.sourceId} at ${context.className}.shadowOffset: width and height must be finite numbers.`)
+      `Invalid ${property} in ${context.sourceId} at ${context.className}.${property}: width and height must be finite numbers.`, property)
   }
   return Object.freeze({ width: width.value, height: height.value })
 }
 
-function withoutSelectedProperties(rule: Readonly<Record<string, unknown>>): Record<string, unknown> {
+function withoutSelectedProperties(
+  rule: Readonly<Record<string, unknown>>,
+  selectedProperties: ReadonlyArray<StructuredNativeProperty>,
+): Record<string, unknown> {
   const descriptors = Object.getOwnPropertyDescriptors(rule)
-  delete descriptors.shadowOffset
+  for (const property of selectedProperties) delete descriptors[property]
   return Object.create(Object.getPrototypeOf(rule), descriptors) as Record<string, unknown>
 }
 
@@ -213,8 +258,9 @@ function structuredAdmissionError(
   code: StructuredIrDiagnosticCode,
   sourceId: string,
   detail: string,
+  property: StructuredNativeProperty = "shadowOffset",
 ): StructuredIrAdmissionError {
-  return new StructuredIrAdmissionError([{ code, phase: "admission", property: "shadowOffset", sourceId, detail }])
+  return new StructuredIrAdmissionError([{ code, phase: "admission", property, sourceId, detail }])
 }
 
 function freezeStructuredBlock(block: StructuredDeclarationBlock): StructuredDeclarationBlock {

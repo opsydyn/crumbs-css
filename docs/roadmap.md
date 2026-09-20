@@ -1105,3 +1105,11 @@ Next recommended slice: **M2.2aq** — batch the remaining outline and logical b
 - Focused qualification passed 5 tests with 200 assertions; full qualification, consumer, documentation and performance gates are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2at** — migrate text-only `textShadowOffset` through the fixed finite `{ width, height }` structured contract, reusing the `shadowOffset` boundary while preserving its narrower primitive domain. Begin only after approval.
+
+### 2026-09-20 — M2.2at text-shadow offset structured IR
+
+- Migrated text-only `textShadowOffset` through the shared fixed finite `{ width, height }` structured IR. Property-specific primitive admission keeps the declaration text-only, while `shadowOffset` retains its view/text/image contract.
+- A marked text rule may carry both offset properties when their shared domain is text; each property keeps its own provenance and whole-value last-winner ordering. Malformed, decorated and forged values fail at the Effect Schema boundary; unmarked records remain on the compatibility route.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2au** — audit and migrate the ordered `transform` array through an explicit operation union that preserves authored order and keeps percentage translations separate from direct scalar companions. Begin only after approval.
