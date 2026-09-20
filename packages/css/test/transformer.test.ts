@@ -132,11 +132,12 @@ describe("Metro transformer", () => {
       FIXTURE,
       Buffer.from(""),
       { dev: true, platform: "ios" },
-    )) as { readonly code: string }
+    )) as { readonly code: string; readonly unstable_transformResultKey?: unknown }
 
     expect(result.code).toContain("StyleSheet.create")
     expect(result.code).toContain("export const container")
     expect(result.code).not.toContain("@vanilla-extract/css")
+    expect(result.unstable_transformResultKey).toMatch(/^crumbs:crumbs:[a-f0-9]{40}$/)
   })
 
   it("transforms package-owned button recipes for web without React Native StyleSheet compilation", async () => {

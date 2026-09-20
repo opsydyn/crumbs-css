@@ -9,6 +9,7 @@ import {
 } from "../src/compiler/dependency-analysis"
 import { buildStyleSheetCode, transformCssTsToStyleSheet } from "../src/transformer"
 import { createNativeStylesCacheStore } from "../src/metro-plugin"
+import { createNativeTransformResultKey } from "../src/transform-cache"
 import {
   admitDependencyControls,
   createIncrementalBaseStyleSource,
@@ -97,6 +98,21 @@ describe("M2.7 dependency invalidation", () => {
     expect(first).toMatch(/^[a-f0-9]{64}$/)
     expect(new Set([changedContent, changedTarget, changedConfig, changedCompiler]).size).toBe(4)
     expect(first).not.toBe(changedContent)
+  })
+
+  it("changes Metro's graph result key when baked dependency metadata changes", () => {
+    const base = { unstable_transformResultKey: "metro-key", __crumbsNativeStyles: {
+      $$type: "crumbs.css.transform-cache",
+      dependencies: [{ sourcePath: "/workspace/token.ts", sourceHash: "a".repeat(64) }],
+    } }
+    const changed = { ...base, __crumbsNativeStyles: {
+      $$type: "crumbs.css.transform-cache",
+      dependencies: [{ sourcePath: "/workspace/token.ts", sourceHash: "b".repeat(64) }],
+    } }
+
+    expect(createNativeTransformResultKey(base, base.unstable_transformResultKey)).toMatch(/^metro-key:crumbs:[a-f0-9]{40}$/)
+    expect(createNativeTransformResultKey(base, base.unstable_transformResultKey)).not.toBe(createNativeTransformResultKey(changed, changed.unstable_transformResultKey))
+    expect(createNativeTransformResultKey(base, undefined)).toBeUndefined()
   })
 
   it("emits a private cache marker that changes the generated parent source", () => {

@@ -4,8 +4,8 @@ import { cpus, release } from "node:os"
 import { join, resolve } from "node:path"
 import { createRequire } from "node:module"
 
-const repoRoot = resolve(import.meta.dir, "../../..")
-const appRoot = join(repoRoot, "apps/playground")
+const repoRoot = resolve(process.env.CRUMBS_INCREMENTAL_REPO_ROOT ?? resolve(import.meta.dir, "../../.."))
+const appRoot = resolve(process.env.CRUMBS_INCREMENTAL_APP_ROOT ?? join(repoRoot, "apps/playground"))
 const tokenFile = join(appRoot, "src/incremental-token.ts")
 const baseStyleFile = join(appRoot, "src/incremental-base.css.ts")
 const workspaceTokenFile = join(repoRoot, "packages/css/fixtures/m2-7-workspace-token.ts")
@@ -252,7 +252,7 @@ function hasMarginValue(bundle: string, value: number) {
   return ["Top", "Right", "Bottom", "Left"].every(side => new RegExp(`margin${side}["']?\\s*:\\s*${value}\\b`).test(bundle))
 }
 function hasBorderWidthValue(bundle: string, value: number) {
-  return new RegExp(`borderWidth["']?\\s*:\\s*${value}\\b`).test(bundle)
+  return new RegExp(`borderWidth["']?\\s*:\\s*${value}\\b`).test(bundle) || ["Top", "Right", "Bottom", "Left"].every(side => new RegExp(`border${side}Width["']?\\s*:\\s*${value}\\b`).test(bundle))
 }
 function hasDependencyExpression(bundle: string, addend: number) {
   return new RegExp(`incrementalPadding\\s*=\\s*30000\\s*\\+\\s*${addend}\\b`).test(bundle)

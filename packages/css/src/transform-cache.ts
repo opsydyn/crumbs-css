@@ -35,6 +35,17 @@ export function createNativeStylesCacheStore<T>(inner: CacheStore<T>): CacheStor
   }
 }
 
+export function hasChangedNativeTransformDependencies(value: unknown): boolean {
+  const metadata = readMetadata(value)
+  return metadata !== undefined && dependenciesChanged(metadata)
+}
+
+export function createNativeTransformResultKey(value: unknown, baseKey: unknown): string | undefined {
+  const metadata = readMetadata(value)
+  if (metadata === undefined || typeof baseKey !== "string") return undefined
+  return `${baseKey}:crumbs:${createHash("sha1").update(JSON.stringify(metadata.dependencies)).digest("hex")}`
+}
+
 function readMetadata(value: unknown): NativeTransformCacheMetadata | undefined {
   if (value === null || typeof value !== "object") return undefined
   const metadata = (value as CachedTransformResult).__crumbsNativeStyles

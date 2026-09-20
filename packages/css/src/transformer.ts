@@ -489,7 +489,9 @@ export async function transform(
     dev: options.dev,
   })
   const result = await defaultTransform(config, projectRoot, filename, Buffer.from(transformed.code), options) as Record<string, unknown>
-  return { ...result, __crumbsNativeStyles: transformed.cacheMetadata }
+  const upstreamKey = typeof result.unstable_transformResultKey === "string" ? result.unstable_transformResultKey : "crumbs"
+  const dependencyAwareKey = `${upstreamKey}:crumbs:${createHash("sha1").update(transformed.code).digest("hex")}`
+  return { ...result, unstable_transformResultKey: dependencyAwareKey, __crumbsNativeStyles: transformed.cacheMetadata }
 }
 
 function getMetroTransformWorker(): TransformFn {
