@@ -1139,3 +1139,12 @@ Next recommended slice: **M2.2aw** — migrate the closed `boxShadow` item union
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2ax** — audit and migrate the remaining `filter` function union with property-specific numeric/string domains and the `dropShadow` nested item contract; keep experimental background arrays deferred until their gradient and position semantics are separately qualified. Begin only after approval.
+
+### 2026-09-20 — M2.2ax closed filter structured IR
+
+- Migrated marked static view/text `filter` arrays through a closed function union: property-specific non-negative amount, blur and hue-angle domains plus a nested `dropShadow` item contract with finite numeric/zero/pixel lengths and validated colour payloads.
+- Descriptor-safe dense-array, function and nested-item admission rejects accessors, symbols, sparse/decorated arrays, extra keys, nested tokens, animated values, unsupported units and image primitive use. Effect Schema, provenance and primitive matrices remain property-specific; whole-list last-winner composition is independent of the other structured families.
+- CSS filter strings remain on the compatibility route. Experimental background arrays remain deferred as a separate contract.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2ay** — audit the experimental background family (`experimental_backgroundImage`, `experimental_backgroundSize`, `experimental_backgroundPosition` and `experimental_backgroundRepeat`) as independent gradient, size, position and repeat contracts before choosing any static IR migration. Begin only after approval.

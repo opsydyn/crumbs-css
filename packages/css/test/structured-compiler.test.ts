@@ -42,6 +42,7 @@ describe("structured native compilation", () => {
       transform: [{ translateX: 4 }, { scale: 2 }, { rotate: "45deg" }, { translateY: "10%" }],
       shadowOffset: { width: 2, height: -3 },
       boxShadow: [{ offsetX: 2, offsetY: "10%", color: "black", blurRadius: 4, spreadDistance: -1, inset: true }],
+      filter: [{ brightness: "50%" }, { blur: "2px" }, { dropShadow: { offsetX: -1, offsetY: "3px", standardDeviation: 2, color: "black" } }],
     }
     for (const mode of [false, true]) {
       const result = await compile(`export const panel = viewStyle(${JSON.stringify(rule)});`, mode)
@@ -84,7 +85,7 @@ describe("structured native compilation", () => {
       `{transformOrigin: [1, 2, 3, 4]}`, `{transformMatrix: [1, 2]}`, `{fontVariant: ['unsupported']}`,
       `{fontVariant: ['small-caps']}`,
       `{shadowOffset: {width: 'var(--crumbs-x)', height: 2}}`, `{transform: [{scale: {__getValue() {throw new Error('EXECUTED')}}}]}`,
-      `{filter: [{brightness: 2}]}`, `{boxShadow: [{offsetX: 2}]}`,
+      `{filter: [{brightness: -1}]}`, `{filter: [{blur: "2%"}]}`, `{filter: [{dropShadow: "0 1px 2px black"}]}`, `{boxShadow: [{offsetX: 2}]}`,
       `{transform: Array(2)}`, `{transform: [{matrix: Array(16)}]}`,
     ]) {
       await expect(compile(`export const invalid = viewStyle(${rule});`)).rejects.toThrow(/CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE.*case\.css\.ts.*runtime style/)

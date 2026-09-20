@@ -1,0 +1,93 @@
+{
+  "slice": "M2.2ax",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "50ead74",
+  "sourceState": "Working tree before commit; unrelated pre-existing changes preserved",
+  "installedBoundary": {
+    "reactNative": "0.83 style declarations",
+    "property": "filter",
+    "primitiveDomain": ["view", "text"],
+    "functions": ["brightness", "blur", "contrast", "grayscale", "hueRotate", "invert", "opacity", "saturate", "sepia", "dropShadow"],
+    "staticDomains": {
+      "amounts": "finite non-negative numbers or finite bare, percentage or pixel strings",
+      "blur": "finite non-negative numbers or finite bare or pixel strings",
+      "hueRotate": "zero or finite deg/rad strings",
+      "dropShadow": "required finite numeric, zero or pixel offsets; optional non-negative standard deviation; optional finite numeric or non-empty colour string"
+    }
+  },
+  "verification": [
+    {
+      "command": "bun test packages/css/test/native-ir-filter.test.ts packages/css/test/structured-compiler.test.ts",
+      "status": "passed",
+      "receipt": "12 tests, 373 assertions"
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "receipt": "593 tests, 21,189 assertions, 98 files"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed",
+      "receipt": "storybook typecheck completed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "receipt": "workspace Expo web/iOS/Android bundles and 3 source maps"
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "receipt": "isolated npm install; packed Expo web/iOS/Android bundles and 3 source maps"
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "receipt": "20 pages built"
+    },
+    {
+      "command": "bunx biome check packages/css/src/compiler/structured-ir.ts packages/css/src/structured-native-values.ts packages/css/test/native-ir-filter.test.ts packages/css/test/structured-compiler.test.ts",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "claim": "declared host smoke ceilings only; native-device performance not run",
+      "receipt": "sourceRevision 50ead74; sourceState working tree"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "claim": "configuration valid; registryReady false; thresholds and baselines pending"
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "claim": "thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "claim": "CRUMBS_AUDIT_NODE_FLOOR is unset"
+    }
+  ],
+  "boundaries": [
+    "marked static arrays only",
+    "view/text primitive domain; image rejected",
+    "authored function order preserved",
+    "whole filter list is the composition unit; last complete list wins",
+    "filter strings remain on the compatibility route",
+    "nested tokens, animated values, accessors, sparse/decorated arrays and unsupported units remain runtime concerns or fail closed",
+    "experimental background arrays remain deferred",
+    "public package API and native ABI unchanged",
+    "no native-device rendering acceptance claimed",
+    "no publish or push performed"
+  ]
+}

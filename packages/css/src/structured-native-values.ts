@@ -48,7 +48,7 @@ function reject(prop: string, location: string): never {
   throw new NativeStylesCompatibilityError(
     NativeStylesDiagnosticCode.UnsupportedStructuredValue,
     `Unsupported structured native property "${prop}" in ${location}. ` +
-    "Compile static transform arrays (one operation per entry, finite numbers, deg/rad angles, percentage translations, or a 16-number matrix), closed static boxShadow arrays, and numeric width/height shadow offsets. " +
+    "Compile static transform arrays (one operation per entry, finite numbers, deg/rad angles, percentage translations, or a 16-number matrix), closed static boxShadow arrays, property-specific filter arrays with closed dropShadow items, and numeric width/height shadow offsets. " +
     "Pass animated values, nested tokens and other structured shapes through the React Native runtime style prop instead.",
   )
 }

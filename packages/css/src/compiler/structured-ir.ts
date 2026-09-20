@@ -8,6 +8,7 @@ import {
 
 export type StructuredNativeProperty =
   | "boxShadow"
+  | "filter"
   | "transform"
   | "shadowOffset"
   | "textShadowOffset"
@@ -80,6 +81,29 @@ export type BoxShadowItem = {
   readonly inset?: boolean
 }
 export type BoxShadowValue = ReadonlyArray<BoxShadowItem>
+export type FilterAmount = number | `${number}` | `${number}%` | `${number}px`
+export type FilterBlur = number | `${number}` | `${number}px`
+export type FilterHueRotate = 0 | "0" | `${number}deg` | `${number}rad`
+export type DropShadowOffset = number | "0" | `${number}px`
+export type DropShadowStandardDeviation = number | "0" | `${number}px`
+export type DropShadowItem = {
+  readonly offsetX: DropShadowOffset
+  readonly offsetY: DropShadowOffset
+  readonly standardDeviation?: DropShadowStandardDeviation
+  readonly color?: string | number
+}
+export type FilterFunction =
+  | { readonly brightness: FilterAmount }
+  | { readonly blur: FilterBlur }
+  | { readonly contrast: FilterAmount }
+  | { readonly grayscale: FilterAmount }
+  | { readonly hueRotate: FilterHueRotate }
+  | { readonly invert: FilterAmount }
+  | { readonly opacity: FilterAmount }
+  | { readonly saturate: FilterAmount }
+  | { readonly sepia: FilterAmount }
+  | { readonly dropShadow: DropShadowItem }
+export type FilterValue = ReadonlyArray<FilterFunction>
 export type FontVariant =
   | "small-caps"
   | "oldstyle-nums"
@@ -115,7 +139,7 @@ export type FontVariant =
   | "stylistic-nineteen"
   | "stylistic-twenty"
 export type FontVariantValue = ReadonlyArray<FontVariant>
-export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FontVariantValue
+export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FilterValue | FontVariantValue
 export type StructuredDeclaration = {
   readonly _tag: "NativeStructuredDeclaration"
   readonly property: StructuredNativeProperty
@@ -135,11 +159,12 @@ export type StructuredCaptureContext = {
 }
 
 const structuredProperties = [
-  "boxShadow", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ] as const satisfies ReadonlyArray<StructuredNativeProperty>
 const allPrimitives = ["view", "text", "image"] as const
 const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
   boxShadow: ["view"],
+  filter: ["view", "text"],
   transform: ["view", "text", "image"],
   shadowOffset: ["view", "text", "image"],
   textShadowOffset: ["text"],
@@ -220,6 +245,64 @@ const BoxShadowItemSchema = Schema.Struct({
   inset: Schema.optional(Schema.Boolean),
 })
 const BoxShadowValueSchema = Schema.Array(BoxShadowItemSchema)
+const FilterAmountStringSchema = Schema.String.check(
+  Schema.isPattern(/^-?(?:\d+(?:\.\d+)?|\.\d+)(?:%|px)?$/),
+  Schema.makeFilter<string>(value => Number.isFinite(Number.parseFloat(value)) && Number.parseFloat(value) >= 0
+    ? undefined : { path: [], issue: "Expected a non-negative finite filter amount" }),
+)
+const FilterAmountSchema = Schema.Union([
+  Schema.Finite.check(Schema.makeFilter<number>(value => value >= 0
+    ? undefined : { path: [], issue: "Expected a non-negative filter amount" })),
+  FilterAmountStringSchema,
+])
+const FilterBlurStringSchema = Schema.String.check(
+  Schema.isPattern(/^-?(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/),
+  Schema.makeFilter<string>(value => Number.isFinite(Number.parseFloat(value)) && Number.parseFloat(value) >= 0
+    ? undefined : { path: [], issue: "Expected a non-negative finite blur amount" }),
+)
+const FilterBlurSchema = Schema.Union([
+  Schema.Finite.check(Schema.makeFilter<number>(value => value >= 0
+    ? undefined : { path: [], issue: "Expected a non-negative blur amount" })),
+  FilterBlurStringSchema,
+])
+const FilterHueRotateSchema = Schema.Union([Schema.Literal(0), Schema.Literal("0"), AngleValueSchema])
+const DropShadowLengthStringSchema = Schema.String.check(
+  Schema.isPattern(/^(?:0|-?(?:\d+(?:\.\d+)?|\.\d+)px)$/),
+  Schema.makeFilter<string>(value => value === "0" || Number.isFinite(Number.parseFloat(value))
+    ? undefined : { path: [], issue: "Expected a finite zero or pixel length" }),
+)
+const DropShadowOffsetSchema = Schema.Union([Schema.Finite, DropShadowLengthStringSchema])
+const DropShadowStandardDeviationSchema = Schema.Union([
+  Schema.Finite.check(Schema.makeFilter<number>(value => value >= 0
+    ? undefined : { path: [], issue: "Expected a non-negative standard deviation" })),
+  DropShadowLengthStringSchema.check(Schema.makeFilter<string>(value => value === "0" || !value.startsWith("-")
+    ? undefined : { path: [], issue: "Expected a non-negative standard deviation" })),
+])
+const DropShadowColorSchema = Schema.Union([
+  Schema.NonEmptyString.check(Schema.makeFilter<string>(value => /^var\s*\(/i.test(value)
+    ? { path: [], issue: "Nested colour tokens are not static filter values" }
+    : undefined)),
+  Schema.Finite,
+])
+const DropShadowItemSchema = Schema.Struct({
+  offsetX: DropShadowOffsetSchema,
+  offsetY: DropShadowOffsetSchema,
+  standardDeviation: Schema.optional(DropShadowStandardDeviationSchema),
+  color: Schema.optional(DropShadowColorSchema),
+})
+const FilterFunctionSchema = Schema.Union([
+  Schema.Struct({ brightness: FilterAmountSchema }),
+  Schema.Struct({ blur: FilterBlurSchema }),
+  Schema.Struct({ contrast: FilterAmountSchema }),
+  Schema.Struct({ grayscale: FilterAmountSchema }),
+  Schema.Struct({ hueRotate: FilterHueRotateSchema }),
+  Schema.Struct({ invert: FilterAmountSchema }),
+  Schema.Struct({ opacity: FilterAmountSchema }),
+  Schema.Struct({ saturate: FilterAmountSchema }),
+  Schema.Struct({ sepia: FilterAmountSchema }),
+  Schema.Struct({ dropShadow: DropShadowItemSchema }),
+])
+const FilterValueSchema = Schema.Array(FilterFunctionSchema)
 const fontVariantValues = [
   "small-caps", "oldstyle-nums", "lining-nums", "tabular-nums", "common-ligatures",
   "no-common-ligatures", "discretionary-ligatures", "no-discretionary-ligatures", "historical-ligatures",
@@ -236,10 +319,11 @@ const StructuredValueSchema = Schema.Union([
   TransformMatrixValueSchema,
   TransformValueSchema,
   BoxShadowValueSchema,
+  FilterValueSchema,
   FontVariantValueSchema,
 ])
 const StructuredNativePropertySchema = Schema.Literals([
-  "boxShadow", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ])
 const StructuredPropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
@@ -295,10 +379,10 @@ export function captureStructuredIntoNativeIr(
   const selectedProperties = structuredProperties.filter(property => {
     const descriptor = descriptors[property]
     if (descriptor?.enumerable !== true) return false
-    // React Native also exposes string forms for transform and boxShadow.
+    // React Native also exposes string forms for transform, boxShadow and filter.
     // Leave those forms on the compatibility route while taking only ordered
     // static arrays into IR.
-    return (property !== "transform" && property !== "boxShadow") || !("value" in descriptor) || Array.isArray(descriptor.value)
+    return (property !== "transform" && property !== "boxShadow" && property !== "filter") || !("value" in descriptor) || Array.isArray(descriptor.value)
   })
   if (selectedProperties.length === 0) return { cssRule: rule as Record<string, unknown> }
   let primitiveDomain = [...metadata.primitiveDomain]
@@ -383,6 +467,9 @@ function admitStructuredValue(
   if (property === "boxShadow") {
     return admitBoxShadow(value, context, property)
   }
+  if (property === "filter") {
+    return admitFilter(value, context, property)
+  }
   if (property === "transform") {
     return admitTransform(value, context, property)
   }
@@ -447,6 +534,89 @@ function admitBoxShadowItem(
     return invalid("inset must be a boolean")
   }
   return Object.freeze(entries) as BoxShadowItem
+}
+
+function admitFilter(
+  value: unknown,
+  context: StructuredCaptureContext,
+  property: "filter",
+): FilterValue {
+  const entries = admitDenseArray(value, context, property)
+  return Object.freeze(entries.map((entry, index) => admitFilterFunction(entry, context, index)))
+}
+
+function admitFilterFunction(
+  value: unknown,
+  context: StructuredCaptureContext,
+  index: number,
+): FilterFunction {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid filter in ${context.sourceId} at ${context.className}.filter[${index}]: ${detail}.`, "filter")
+  }
+  if (!isPlainStructuredObject(value)) return invalid("expected one plain filter function object")
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 1) {
+    return invalid("expected exactly one filter function key")
+  }
+  const key = names[0]!
+  const descriptor = Object.getOwnPropertyDescriptor(value, key)
+  if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) {
+    return invalid("filter function values must be enumerable data properties")
+  }
+  const entry = descriptor.value
+  if (filterAmountKeys.has(key)) {
+    if (!isFilterAmount(entry)) return invalid(`${key} must be a non-negative finite number or supported string amount`)
+    return Object.freeze({ [key]: entry }) as FilterFunction
+  }
+  if (key === "blur") {
+    if (!isFilterBlur(entry)) return invalid("blur must be a non-negative finite number or pixel string")
+    return Object.freeze({ blur: entry })
+  }
+  if (key === "hueRotate") {
+    if (!isFilterHueRotate(entry)) return invalid("hueRotate must be zero or a finite deg/rad angle")
+    return Object.freeze({ hueRotate: entry })
+  }
+  if (key === "dropShadow") {
+    return Object.freeze({ dropShadow: admitDropShadow(entry, context, index) })
+  }
+  return invalid(`unsupported filter function ${JSON.stringify(key)}`)
+}
+
+function admitDropShadow(
+  value: unknown,
+  context: StructuredCaptureContext,
+  index: number,
+): DropShadowItem {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid filter in ${context.sourceId} at ${context.className}.filter[${index}].dropShadow: ${detail}.`, "filter")
+  }
+  if (!isPlainStructuredObject(value)) return invalid("expected one plain dropShadow item object")
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length < 2 || names.length > 4 ||
+    !names.includes("offsetX") || !names.includes("offsetY") || names.some(name => !dropShadowKeys.has(name))) {
+    return invalid("expected offsetX and offsetY plus only supported optional fields")
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const entries: Record<string, unknown> = {}
+  for (const name of names) {
+    const descriptor = descriptors[name]
+    if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) {
+      return invalid(`${name} must be an enumerable data property`)
+    }
+    entries[name] = descriptor.value
+  }
+  if (!isDropShadowOffset(entries.offsetX) || !isDropShadowOffset(entries.offsetY)) {
+    return invalid("offsetX and offsetY must be finite numbers, zero or pixel lengths")
+  }
+  if ("standardDeviation" in entries && !isDropShadowStandardDeviation(entries.standardDeviation)) {
+    return invalid("standardDeviation must be a non-negative finite number, zero or pixel length")
+  }
+  if ("color" in entries && !isDropShadowColor(entries.color)) {
+    return invalid("color must be a finite numeric colour or non-empty native colour string")
+  }
+  return Object.freeze(entries) as DropShadowItem
 }
 
 function admitTransform(
@@ -632,6 +802,43 @@ function isBoxShadowColor(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && !/^var\s*\(/i.test(value)
 }
 
+const filterAmountKeys = new Set(["brightness", "contrast", "grayscale", "invert", "opacity", "saturate", "sepia"])
+const dropShadowKeys = new Set(["offsetX", "offsetY", "standardDeviation", "color"])
+const filterAmountPattern = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:%|px)?$/
+const filterBlurPattern = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/
+const dropShadowLengthPattern = /^(?:0|-?(?:\d+(?:\.\d+)?|\.\d+)px)$/
+
+function isFilterAmount(value: unknown): value is FilterAmount {
+  if (isFiniteNumber(value)) return value >= 0
+  return typeof value === "string" && filterAmountPattern.test(value) &&
+    Number.isFinite(Number.parseFloat(value)) && Number.parseFloat(value) >= 0
+}
+
+function isFilterBlur(value: unknown): value is FilterBlur {
+  if (isFiniteNumber(value)) return value >= 0
+  return typeof value === "string" && filterBlurPattern.test(value) &&
+    Number.isFinite(Number.parseFloat(value)) && Number.parseFloat(value) >= 0
+}
+
+function isFilterHueRotate(value: unknown): value is FilterHueRotate {
+  return value === 0 || value === "0" || isAngle(value)
+}
+
+function isDropShadowOffset(value: unknown): value is DropShadowOffset {
+  return isFiniteNumber(value) || (typeof value === "string" && dropShadowLengthPattern.test(value) &&
+    (value === "0" || Number.isFinite(Number.parseFloat(value))))
+}
+
+function isDropShadowStandardDeviation(value: unknown): value is DropShadowStandardDeviation {
+  if (isFiniteNumber(value)) return value >= 0
+  return typeof value === "string" && dropShadowLengthPattern.test(value) &&
+    (value === "0" || (!value.startsWith("-") && Number.isFinite(Number.parseFloat(value))))
+}
+
+function isDropShadowColor(value: unknown): value is string | number {
+  return (isFiniteNumber(value) || (typeof value === "string" && value.length > 0 && !/^var\s*\(/i.test(value)))
+}
+
 function isPercentage(value: unknown): value is `${number}%` {
   return typeof value === "string" && /^-?(?:\d+(?:\.\d+)?|\.\d+)%$/.test(value) &&
     Number.isFinite(Number.parseFloat(value.slice(0, -1)))
@@ -657,6 +864,7 @@ function isFontVariant(value: unknown): value is FontVariant {
 
 function isStructuredValueForProperty(property: StructuredNativeProperty, value: unknown): boolean {
   if (property === "boxShadow") return isBoxShadowValue(value)
+  if (property === "filter") return isFilterValue(value)
   if (property === "transform") return isTransformValue(value)
   if (property === "shadowOffset" || property === "textShadowOffset") {
     return typeof value === "object" && value !== null && !Array.isArray(value) &&
@@ -676,6 +884,42 @@ function isStructuredValueForProperty(property: StructuredNativeProperty, value:
 function isBoxShadowValue(value: unknown): value is BoxShadowValue {
   const items = inspectDenseArray(value)
   return items !== undefined && items.every(isBoxShadowItem)
+}
+
+function isFilterValue(value: unknown): value is FilterValue {
+  const operations = inspectDenseArray(value)
+  return operations !== undefined && operations.every(isFilterFunction)
+}
+
+function isFilterFunction(value: unknown): value is FilterFunction {
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 1) return false
+  const key = names[0]!
+  const descriptor = Object.getOwnPropertyDescriptor(value, key)
+  if (descriptor === undefined || descriptor.enumerable !== true || !("value" in descriptor)) return false
+  const entry = descriptor.value
+  if (filterAmountKeys.has(key)) return isFilterAmount(entry)
+  if (key === "blur") return isFilterBlur(entry)
+  if (key === "hueRotate") return isFilterHueRotate(entry)
+  if (key === "dropShadow") return isDropShadowItem(entry)
+  return false
+}
+
+function isDropShadowItem(value: unknown): value is DropShadowItem {
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length < 2 || names.length > 4 ||
+    !names.includes("offsetX") || !names.includes("offsetY") || names.some(name => !dropShadowKeys.has(name))) return false
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  if (!names.every(name => descriptors[name]?.enumerable === true && "value" in descriptors[name]!)) return false
+  const entry = (name: string): unknown => {
+    const descriptor = descriptors[name]
+    return descriptor !== undefined && "value" in descriptor ? descriptor.value : undefined
+  }
+  return isDropShadowOffset(entry("offsetX")) && isDropShadowOffset(entry("offsetY")) &&
+    (!names.includes("standardDeviation") || isDropShadowStandardDeviation(entry("standardDeviation"))) &&
+    (!names.includes("color") || isDropShadowColor(entry("color")))
 }
 
 function isBoxShadowItem(value: unknown): value is BoxShadowItem {
@@ -726,14 +970,15 @@ function freezeStructuredValue(value: StructuredValue): StructuredValue {
 }
 
 function freezeStructuredArray(value: ReadonlyArray<unknown>): ReadonlyArray<unknown> {
-  return Object.freeze(value.map(entry => {
-    if (Array.isArray(entry)) return freezeStructuredArray(entry)
-    if (typeof entry === "object" && entry !== null) {
-      return Object.freeze(Object.fromEntries(Object.entries(entry).map(([key, nested]) => [key,
-        Array.isArray(nested) ? freezeStructuredArray(nested) : nested])))
-    }
-    return entry
-  }))
+  return Object.freeze(value.map(freezeStructuredEntry))
+}
+
+function freezeStructuredEntry(entry: unknown): unknown {
+  if (Array.isArray(entry)) return freezeStructuredArray(entry)
+  if (typeof entry === "object" && entry !== null) {
+    return Object.freeze(Object.fromEntries(Object.entries(entry).map(([key, nested]) => [key, freezeStructuredEntry(nested)])))
+  }
+  return entry
 }
 
 function withoutSelectedProperties(
