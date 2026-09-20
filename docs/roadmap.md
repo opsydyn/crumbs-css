@@ -1092,4 +1092,10 @@ Next recommended slice: **M2.2aq** — batch the remaining outline and logical b
 - Migrated view/text-only `outlineColor`, `outlineOffset`, `outlineWidth`, `borderBlockColor`, `borderBlockStartColor` and `borderBlockEndColor` through the established colour and finite-number/token domains.
 - Focused qualification passed 5 tests with 190 assertions; full qualification and consumer evidence are recorded in the matching evidence file.
 
-Next recommended slice: **M2.2ar** — audit the remaining installed structured and union-valued style fields, define their native IR ownership and exact compatibility boundaries, then migrate the first structured family. Begin only after approval.
+### 2026-09-20 — M2.2ar structured boundary audit and shadow-offset IR
+
+- Audited the installed React Native style surface against the native compiler: scalar transform companions remain a finite-number follow-up; `shadowOffset` and `textShadowOffset` are fixed objects; `transform` is an ordered array; `transformOrigin` and `transformMatrix` are exact unions/arrays; `fontVariant` is a text-only array; and `boxShadow`, `filter` and experimental background fields require separate union contracts.
+- Migrated view/text/image `shadowOffset` through a strict Effect Schema structured IR with descriptor-safe admission, fixed finite `width`/`height`, provenance, primitive-domain composition and whole-value last-winner lowering. Malformed marked values retain the established compatibility diagnostic at the transformer boundary; unmarked records remain on the compatibility route.
+- Focused structured qualification passed 12 tests with 244 assertions; full qualification, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2as** — batch the remaining scalar transform companions (`rotation`, `scaleX`, `scaleY`, `translateX`, `translateY`) through finite-number/token scalar IR before opening the ordered `transform` structured contract. Begin only after approval.

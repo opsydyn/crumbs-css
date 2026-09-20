@@ -16,7 +16,8 @@ import {
   stringifyFileScope,
 } from "@vanilla-extract/integration"
 import { cssDeclarationsToRN } from "./css-to-rn"
-import { assertNativeCssCompatibility } from "./native-compatibility"
+import { assertNativeCssCompatibility, NativeStylesCompatibilityError } from "./native-compatibility"
+import { NativeStylesDiagnosticCode } from "./diagnostics"
 import { NativeStyleMapType } from "./native-style-map"
 import {captureNativeExports, ExportRecordType, ExportStringType, ExportUndefinedType, ExportNegativeZeroType} from "./export-values"
 import { parseCssClassRules } from "./parse-virtual-css"
@@ -26,6 +27,12 @@ import {
   lowerScalarBlock,
   type ScalarDeclarationBlock,
 } from "./compiler/native-ir"
+import {
+  captureStructuredIntoNativeIr,
+  lowerStructuredBlock,
+  StructuredIrAdmissionError,
+  type StructuredDeclarationBlock,
+} from "./compiler/structured-ir"
 
 // Minimal esbuild plugin shape. `setup` receives `build: unknown` so it doesn't
 // conflict with esbuild's PluginBuild, which is pulled in transitively and has
@@ -201,6 +208,7 @@ async function processVanillaFileForNative({
   serializeVirtualCssPath,
   nativeValuesByClass,
   nativeIrByClass,
+  nativeStructuredIrByClass,
   projectRoot,
 }: {
   source: string
@@ -214,6 +222,7 @@ async function processVanillaFileForNative({
   }) => string | Promise<string>
   nativeValuesByClass: Map<string, Record<string, unknown>>
   nativeIrByClass: Map<string, ScalarDeclarationBlock>
+  nativeStructuredIrByClass: Map<string, StructuredDeclarationBlock>
   projectRoot: string
 }): Promise<string> {
   const cssByFileScope = new Map<string, CssBlock[]>()
@@ -225,11 +234,25 @@ async function processVanillaFileForNative({
       if (!outputCss) return
       if (css.type === "local") {
         const source = sourceIdentity(fileScope.filePath, projectRoot)
-        const scalar = captureScalarIntoNativeIr(css.rule as Record<string, unknown>, {
+        const captureContext = {
           packageOwner: source.packageOwner,
           sourceId: source.sourceId,
           className: css.selector,
-        })
+        }
+        let structured: ReturnType<typeof captureStructuredIntoNativeIr>
+        try {
+          structured = captureStructuredIntoNativeIr(css.rule as Record<string, unknown>, captureContext)
+        } catch (error) {
+          if (!(error instanceof StructuredIrAdmissionError)) throw error
+          throw new NativeStylesCompatibilityError(
+            NativeStylesDiagnosticCode.UnsupportedStructuredValue,
+            `${error.diagnostics[0].detail} Pass this value through the React Native runtime style prop instead.`,
+          )
+        }
+        if (structured.block !== undefined) {
+          nativeStructuredIrByClass.set(css.selector, structured.block)
+        }
+        const scalar = captureScalarIntoNativeIr(structured.cssRule, captureContext)
         if (scalar.block !== undefined) nativeIrByClass.set(css.selector, scalar.block)
         const { cssRule, nativeValues } = splitStructuredNativeValues(
           scalar.cssRule, `${fileScope.filePath} (class ${css.selector})`,
@@ -336,12 +359,14 @@ export async function transformCssTsToStyleSheet(
 
   const nativeValuesByClass = new Map<string, Record<string, unknown>>()
   const nativeIrByClass = new Map<string, ScalarDeclarationBlock>()
+  const nativeStructuredIrByClass = new Map<string, StructuredDeclarationBlock>()
   const vanillaFile = await processVanillaFileForNative({
     source,
     filePath: absoluteFilePath,
     identOption,
     nativeValuesByClass,
     nativeIrByClass,
+    nativeStructuredIrByClass,
     projectRoot: cwd,
   })
 
@@ -394,6 +419,9 @@ export async function transformCssTsToStyleSheet(
   }
   for (const [cls, block] of nativeIrByClass) {
     classStyles.set(cls, { ...classStyles.get(cls), ...lowerScalarBlock(block) })
+  }
+  for (const [cls, block] of nativeStructuredIrByClass) {
+    classStyles.set(cls, { ...classStyles.get(cls), ...lowerStructuredBlock(block) })
   }
 
   // Resolve composed class names (space-separated) by merging their styles.
