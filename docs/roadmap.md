@@ -142,7 +142,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2am: Migrate `aspectRatio` through an isolated mixed scalar domain and complete installed FlexStyle coverage.
 - [x] M2.2an: Migrate shared `backfaceVisibility` and `cursor` literal/token domains.
 - [x] M2.2ao: Migrate view/text-only `borderCurve` and `pointerEvents` literal/token domains.
-- [ ] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
+- [x] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
 - [ ] M2.6: Emit direct native modules and minimal token/condition metadata. Confirm structured values, ordinary exports, empty styles, and theme descriptors retain their specified meaning.
@@ -1199,3 +1199,13 @@ Next recommended slice: **M2.2bc** — migrate `experimental_backgroundImage` on
 - Retained the exact tarball hash, source/runtime/device identity and screenshot hashes in the matching acceptance and qualification records. Android remains parked and no native frame/memory budget is claimed.
 
 Next recommended slice: **M2.3** — route the supported vanilla-extract compatibility adapter into the same native IR, preserving the now-qualified structured property boundary and failing unsupported syntax with source/property context. Begin only after approval.
+
+### 2026-09-20 — M2.3 vanilla-extract compatibility adapter IR
+
+- Routed unmarked vanilla-extract rules through the same scalar and structured native IR used by Crumbs-authored rules. Lossless static scalars, Crumbs token references, static structured arrays and fixed shadow-offset records retain `vanilla-extract-adapter` provenance through schema validation, normalization and lowering.
+- Browser-only strings and shorthand values remain on the established CSS converter path; the adapter does not guess at partial payloads. Malformed static structured values fail with `CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE` and file/class/property context.
+- Removed regex reconstruction of compiled export maps. VM reconstruction now fails with `CRUMBS_CSS_UNSUPPORTED_EXPORT`, the source file and the underlying error, so unsupported generated modules cannot appear valid through partial parsing.
+- Focused adapter/structured/transformer tests, the full package check, Storybook typechecking, workspace Expo checks, documentation build and host smoke budgets passed. The isolated packed Expo install remains incomplete because the npm registry timed out; no peer override or legacy install mode was used. The performance registry remains fail-closed; exact floor-host measurement, native-device acceptance and Android remain incomplete. [Qualification evidence](evidence/2026-09-20-native-ir-compatibility-adapter/qualification.json).
+- No public authoring API, Effect consumer requirement, external artifact ABI, publication or push changed.
+
+Next recommended slice: **M2.4** — separate validation, shorthand normalization, dependency analysis and code emission, then index export/class ownership for deterministic diagnostics and serialization. Begin only after approval.

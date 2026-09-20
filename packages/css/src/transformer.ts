@@ -22,6 +22,9 @@ import { NativeStyleMapType } from "./native-style-map"
 import {captureNativeExports, ExportRecordType, ExportStringType, ExportUndefinedType, ExportNegativeZeroType} from "./export-values"
 import { parseCssClassRules } from "./parse-virtual-css"
 import { splitStructuredNativeValues } from "./structured-native-values"
+import { getNativeCaptureMetadata } from "./compiler/native-capture"
+import { captureCompatibilityIntoNativeIr } from "./compiler/compatibility-adapter"
+import { collectStyleExports } from "./compiler/export-admission"
 import {
   captureScalarIntoNativeIr,
   lowerScalarBlock,
@@ -239,26 +242,38 @@ async function processVanillaFileForNative({
           sourceId: source.sourceId,
           className: css.selector,
         }
-        let structured: ReturnType<typeof captureStructuredIntoNativeIr>
-        try {
-          structured = captureStructuredIntoNativeIr(css.rule as Record<string, unknown>, captureContext)
-        } catch (error) {
-          if (!(error instanceof StructuredIrAdmissionError)) throw error
-          throw new NativeStylesCompatibilityError(
-            NativeStylesDiagnosticCode.UnsupportedStructuredValue,
-            `${error.diagnostics[0].detail} Pass this value through the React Native runtime style prop instead.`,
+        const rule = css.rule as Record<string, unknown>
+        if (getNativeCaptureMetadata(rule) === undefined) {
+          const compatibility = captureCompatibilityIntoNativeIr(rule, captureContext)
+          if (compatibility.structuredBlock !== undefined) {
+            nativeStructuredIrByClass.set(css.selector, compatibility.structuredBlock)
+          }
+          if (compatibility.scalarBlock !== undefined) {
+            nativeIrByClass.set(css.selector, compatibility.scalarBlock)
+          }
+          css = { ...css, rule: compatibility.cssRule }
+        } else {
+          let structured: ReturnType<typeof captureStructuredIntoNativeIr>
+          try {
+            structured = captureStructuredIntoNativeIr(rule, captureContext)
+          } catch (error) {
+            if (!(error instanceof StructuredIrAdmissionError)) throw error
+            throw new NativeStylesCompatibilityError(
+              NativeStylesDiagnosticCode.UnsupportedStructuredValue,
+              `${error.diagnostics[0].detail} Pass this value through the React Native runtime style prop instead.`,
+            )
+          }
+          if (structured.block !== undefined) {
+            nativeStructuredIrByClass.set(css.selector, structured.block)
+          }
+          const scalar = captureScalarIntoNativeIr(structured.cssRule, captureContext)
+          if (scalar.block !== undefined) nativeIrByClass.set(css.selector, scalar.block)
+          const { cssRule, nativeValues } = splitStructuredNativeValues(
+            scalar.cssRule, `${fileScope.filePath} (class ${css.selector})`,
           )
+          if (Object.keys(nativeValues).length > 0) nativeValuesByClass.set(css.selector, nativeValues)
+          css = { ...css, rule: cssRule }
         }
-        if (structured.block !== undefined) {
-          nativeStructuredIrByClass.set(css.selector, structured.block)
-        }
-        const scalar = captureScalarIntoNativeIr(structured.cssRule, captureContext)
-        if (scalar.block !== undefined) nativeIrByClass.set(css.selector, scalar.block)
-        const { cssRule, nativeValues } = splitStructuredNativeValues(
-          scalar.cssRule, `${fileScope.filePath} (class ${css.selector})`,
-        )
-        if (Object.keys(nativeValues).length > 0) nativeValuesByClass.set(css.selector, nativeValues)
-        css = { ...css, rule: cssRule }
       }
       const serialisedFileScope = stringifyFileScope(fileScope)
       const fileScopeCss = cssByFileScope.get(serialisedFileScope) ?? []
@@ -390,7 +405,7 @@ export async function transformCssTsToStyleSheet(
 
   const exportMap = new Map<string, StyleExportValue>()
   const remaining = lines.slice(firstNonImportIdx).join("\n")
-  collectStyleExports(remaining, exportMap)
+  collectStyleExports(remaining, exportMap, absoluteFilePath)
 
   const classStyles = new Map<string, Record<string, unknown>>()
   for (const vp of virtualPaths) {
@@ -487,58 +502,6 @@ function isInsidePath(parentPath: string, childPath: string): boolean {
 function toRelativeImport(fromDir: string, absoluteDependencyPath: string): string {
   const rel = path.relative(fromDir, absoluteDependencyPath)
   return rel.startsWith(".") ? rel : `./${rel}`
-}
-
-function collectStyleExports(source: string, exportMap: Map<string, StyleExportValue>): void {
-  const exports: Record<string, unknown> = Object.create(null)
-  const cjsSource = source.replace(
-    /export\s+(?:var|const|let)\s+(\w+)\s*=/g,
-    (_, name: string) => `exports.${name} =`,
-  )
-
-  try {
-    new vm.Script(cjsSource).runInNewContext({ exports })
-  } catch {
-    collectStyleExportsWithRegex(source, exportMap)
-    return
-  }
-
-  for (const [name, value] of Object.entries(exports)) {
-    exportMap.set(name, value)
-  }
-}
-
-function collectStyleExportsWithRegex(
-  source: string,
-  exportMap: Map<string, StyleExportValue>,
-): void {
-  const objectExportRe = /export\s+(?:var|const|let)\s+(\w+)\s*=\s*\{([\s\S]*?)\};/g
-  const objectRanges: Array<readonly [number, number]> = []
-  for (let m = objectExportRe.exec(source); m !== null; m = objectExportRe.exec(source)) {
-    const name = m[1]
-    const body = m[2]
-    if (name !== undefined && body !== undefined) exportMap.set(name, parseExportObject(body))
-    objectRanges.push([m.index, objectExportRe.lastIndex])
-  }
-
-  const flatExportRe = /export\s+(?:var|const|let)\s+(\w+)\s*=\s*["']([^"']+)["']/g
-  for (let m = flatExportRe.exec(source); m !== null; m = flatExportRe.exec(source)) {
-    if (objectRanges.some(([start, end]) => m.index >= start && m.index < end)) continue
-    const name = m[1]
-    const cls = m[2]
-    if (name !== undefined && cls !== undefined) exportMap.set(name, cls)
-  }
-}
-
-function parseExportObject(body: string): Record<string, string> {
-  const result: Record<string, string> = {}
-  const entryRe = /(?:["']?)([\w-]+)(?:["']?)\s*:\s*["']([^"']+)["']/g
-  for (let m = entryRe.exec(body); m !== null; m = entryRe.exec(body)) {
-    const key = m[1]
-    const value = m[2]
-    if (key !== undefined && value !== undefined) result[key] = value
-  }
-  return result
 }
 
 function collectExportClassNames(

@@ -7,7 +7,7 @@ import { transformCssTsToStyleSheet } from "../src/transformer"
 
 const root = path.resolve(import.meta.dir, "..")
 type CompiledStyle = Record<string, unknown>
-type FixtureExports = Record<"panel" | "label" | "image" | "replaced" | "cssWinner" | "nativeWinner", CompiledStyle> & {
+type FixtureExports = Record<"panel" | "label" | "image" | "legacy" | "replaced" | "cssWinner" | "nativeWinner", CompiledStyle> & {
   variants: Record<string, CompiledStyle>
   button: {
     base: CompiledStyle
@@ -48,6 +48,28 @@ describe("structured native compilation", () => {
       const result = await compile(`export const panel = viewStyle(${JSON.stringify(rule)});`, mode)
       expect(result.panel).toEqual(rule)
     }
+  })
+  it("routes unmarked vanilla-extract static values through the compatibility IR", async () => {
+    const result = await compile(`
+      import { style as vanillaStyle } from '@vanilla-extract/css'
+      export const legacy = vanillaStyle({
+        opacity: 0.5,
+        fontSize: '24px',
+        transform: [{ scale: 2 }],
+        shadowOffset: { width: 1, height: -2 },
+        padding: '1px 2px',
+      })
+    `)
+    expect(result.legacy).toEqual({
+      opacity: 0.5,
+      fontSize: 24,
+      transform: [{ scale: 2 }],
+      shadowOffset: { width: 1, height: -2 },
+      paddingTop: 1,
+      paddingRight: 2,
+      paddingBottom: 1,
+      paddingLeft: 2,
+    })
   })
   it("replaces structured values as whole values through nested and repeated bases", async () => {
     const result = await compile(`

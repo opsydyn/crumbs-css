@@ -4,6 +4,7 @@ import * as SchemaIssue from "effect/SchemaIssue"
 import {
   getNativeCaptureMetadata,
   NativeCaptureMetadataSymbol,
+  type NativeCaptureOrigin,
   type NativePrimitiveDomain,
   type NativePrimitiveKind,
 } from "./native-capture"
@@ -39,7 +40,7 @@ export type SourceProvenance = {
   readonly sourceId: string
   readonly exportPath: ReadonlyArray<string | number>
   readonly logicalPath: ReadonlyArray<string | number>
-  readonly origin: "crumbs-native"
+  readonly origin: NativeCaptureOrigin
 }
 export type PropertyProvenance = SourceProvenance & {
   readonly authoredProperty: AuthoredScalarProperty
@@ -242,7 +243,7 @@ const SourceProvenanceSchema = Schema.Struct({
   sourceId: Schema.NonEmptyString,
   exportPath: Schema.Array(PathSegment),
   logicalPath: Schema.Array(PathSegment),
-  origin: Schema.Literal("crumbs-native"),
+  origin: Schema.Literals(["crumbs-native", "vanilla-extract-adapter"]),
 })
 const MigratedScalarPropertySchema = Schema.Literals([
   "opacity", "zIndex", "elevation", "flex", "flexBasis", "flexGrow", "flexShrink",
@@ -336,7 +337,7 @@ const PropertyProvenanceSchema = Schema.Struct({
   sourceId: Schema.NonEmptyString,
   exportPath: Schema.Array(PathSegment),
   logicalPath: Schema.Array(PathSegment),
-  origin: Schema.Literal("crumbs-native"),
+  origin: Schema.Literals(["crumbs-native", "vanilla-extract-adapter"]),
   authoredProperty: AuthoredScalarPropertySchema,
   canonicalProperty: MigratedScalarPropertySchema,
   shorthandExpansionPath: Schema.Array(Schema.String),
@@ -402,7 +403,7 @@ export const OpacityDeclarationBlockSchema = Schema.Struct({
       sourceId: Schema.NonEmptyString,
       exportPath: Schema.Array(PathSegment),
       logicalPath: Schema.Array(PathSegment),
-      origin: Schema.Literal("crumbs-native"),
+      origin: Schema.Literals(["crumbs-native", "vanilla-extract-adapter"]),
       authoredProperty: Schema.Literal("opacity"),
       canonicalProperty: Schema.Literal("opacity"),
       shorthandExpansionPath: Schema.Array(Schema.String),
@@ -456,6 +457,11 @@ const migratedScalarProperties = [
 ] as const
 const capturedScalarPropertySet = new Set<string>([...migratedScalarProperties, ...Object.keys(scalarAliasExpansions)])
 const allPrimitives = ["view", "text", "image"] as const
+
+export function isAuthoredScalarProperty(value: string): value is AuthoredScalarProperty {
+  return capturedScalarPropertySet.has(value)
+}
+
 const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiveDomain>> = {
   opacity: ["view", "text", "image"],
   zIndex: ["view", "text", "image"],
@@ -592,7 +598,7 @@ function captureSelectedScalar(
       const value = admitScalarValue(property, descriptor.value, context, authoredProperty)
       declarations.push(Object.freeze({ _tag: "NativeDeclaration", property, value, provenance: Object.freeze({
         packageOwner: context.packageOwner, sourceId: context.sourceId, exportPath: Object.freeze([]),
-        logicalPath: Object.freeze([context.className, authoredProperty]), origin: "crumbs-native",
+        logicalPath: Object.freeze([context.className, authoredProperty]), origin: metadata.origin,
         authoredProperty, canonicalProperty: property,
         shorthandExpansionPath: Object.freeze(authoredProperty === property ? [] : [authoredProperty, property]),
       }) }))
@@ -604,7 +610,7 @@ function captureSelectedScalar(
     sourceId: context.sourceId,
     exportPath: Object.freeze([]),
     logicalPath: Object.freeze([context.className]),
-    origin: "crumbs-native",
+    origin: metadata.origin,
   })
   return {
     cssRule,

@@ -1,0 +1,91 @@
+{
+  "slice": "M2.3",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "working tree before commit",
+  "sourceState": "Implementation and documentation are committed after qualification",
+  "adapter": {
+    "scalarOrigin": "vanilla-extract-adapter",
+    "structuredOrigin": "vanilla-extract-adapter",
+    "staticStructuredValues": true,
+    "cssConverterFallback": true,
+    "regexExportRecovery": false,
+    "diagnostics": [
+      "CRUMBS_CSS_UNSUPPORTED_STRUCTURED_VALUE",
+      "CRUMBS_CSS_UNSUPPORTED_EXPORT"
+    ]
+  },
+  "verification": [
+    {
+      "command": "focused adapter, structured compiler and transformer suites",
+      "status": "passed",
+      "tests": 47,
+      "assertions": 472
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "tests": 623,
+      "assertions": 22342,
+      "files": 103
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "The isolated npm install could not resolve the registry dependencies: the sandbox attempt returned ENOTFOUND and the escalated retry reached the registry but ended with EIDLETIMEOUT; no peer override or legacy install mode was used"
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "pages": 20
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "claim": "declared host smoke ceilings only",
+      "rerunAfterTransientTimingFailure": true
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run"
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Performance registry thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Exact Node v22.0.0 floor environment is unavailable; the host provides Node v22.16.0/v24.15.0"
+    }
+  ],
+  "boundaries": {
+    "unmarkedCompatibilityStaticScalars": "admitted when lossless",
+    "unmarkedCompatibilityStaticStructuredArrays": "admitted when valid",
+    "browserOnlyStringsAndShorthands": "CSS converter route",
+    "unsupportedStructuredValues": "fail with contextual diagnostic",
+    "unsupportedExports": "fail with file-context diagnostic",
+    "publicApiChanged": false,
+    "artifactAbiChanged": false,
+    "effectConsumerRequirementChanged": false,
+    "published": false,
+    "pushed": false,
+    "nativeDeviceAccepted": false,
+    "androidAccepted": false
+  }
+}

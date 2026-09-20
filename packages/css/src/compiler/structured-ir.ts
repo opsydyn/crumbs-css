@@ -3,6 +3,7 @@ import * as Schema from "effect/Schema"
 import * as SchemaIssue from "effect/SchemaIssue"
 import {
   getNativeCaptureMetadata,
+  type NativeCaptureOrigin,
   type NativePrimitiveDomain,
 } from "./native-capture"
 
@@ -44,7 +45,7 @@ export type StructuredSourceProvenance = {
   readonly sourceId: string
   readonly exportPath: ReadonlyArray<string | number>
   readonly logicalPath: ReadonlyArray<string | number>
-  readonly origin: "crumbs-native"
+  readonly origin: NativeCaptureOrigin
 }
 export type StructuredPropertyProvenance = StructuredSourceProvenance & {
   readonly property: StructuredNativeProperty
@@ -244,6 +245,11 @@ export type StructuredCaptureContext = {
 const structuredProperties = [
   "boxShadow", "filter", "experimental_backgroundRepeat", "experimental_backgroundSize", "experimental_backgroundPosition", "experimental_backgroundImage", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ] as const satisfies ReadonlyArray<StructuredNativeProperty>
+
+export function isStructuredNativeProperty(value: string): value is StructuredNativeProperty {
+  return (structuredProperties as readonly string[]).includes(value)
+}
+
 const allPrimitives = ["view", "text", "image"] as const
 const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
   boxShadow: ["view"],
@@ -276,7 +282,7 @@ const SourceProvenanceSchema = Schema.Struct({
   sourceId: Schema.NonEmptyString,
   exportPath: Schema.Array(PathSegment),
   logicalPath: Schema.Array(PathSegment),
-  origin: Schema.Literal("crumbs-native"),
+  origin: Schema.Literals(["crumbs-native", "vanilla-extract-adapter"]),
 })
 const ShadowOffsetValueSchema = Schema.Struct({
   width: Schema.Finite,
@@ -520,7 +526,7 @@ const StructuredPropertyProvenanceSchema = Schema.Struct({
   sourceId: Schema.NonEmptyString,
   exportPath: Schema.Array(PathSegment),
   logicalPath: Schema.Array(PathSegment),
-  origin: Schema.Literal("crumbs-native"),
+  origin: Schema.Literals(["crumbs-native", "vanilla-extract-adapter"]),
   property: StructuredNativePropertySchema,
 })
 const StructuredDeclarationSchema = Schema.Struct({
@@ -599,7 +605,7 @@ export function captureStructuredIntoNativeIr(
         sourceId: context.sourceId,
         exportPath: [],
         logicalPath: [context.className, property],
-        origin: "crumbs-native",
+        origin: metadata.origin,
         property,
       },
     })
@@ -614,7 +620,7 @@ export function captureStructuredIntoNativeIr(
       sourceId: context.sourceId,
       exportPath: [],
       logicalPath: [context.className],
-      origin: "crumbs-native",
+      origin: metadata.origin,
     },
   }, context.sourceId)
   return { cssRule, block }
