@@ -1,0 +1,108 @@
+{
+  "slice": "M2.2ay",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "02f58be89b344395e62743f0dc8f598035108974",
+  "sourceState": "Working tree before audit commit; unrelated pre-existing changes preserved",
+  "audit": {
+    "reactNative": "0.83",
+    "primitiveDomain": ["view", "text"],
+    "imagePrimitive": "excluded",
+    "fields": {
+      "experimental_backgroundRepeat": {
+        "contract": "closed {x, y} repeat-keyword record or compatibility string",
+        "decision": "first candidate: M2.2az"
+      },
+      "experimental_backgroundSize": {
+        "contract": "cover/contain or {x, y} string/number size record",
+        "decision": "separate M2.2ba contract"
+      },
+      "experimental_backgroundPosition": {
+        "contract": "four-shape position union with string/number values or compatibility string",
+        "decision": "separate M2.2bb contract"
+      },
+      "experimental_backgroundImage": {
+        "contract": "nested linear/radial gradient array or compatibility string",
+        "decision": "last: M2.2bc behind native-device qualification"
+      }
+    },
+    "processorFindings": [
+      "backgroundRepeat, backgroundSize and backgroundPosition arrays pass through React Native JavaScript processors without validation",
+      "backgroundImage validates colour stops and applies gradient defaults unless native CSS parsing bypasses the processor",
+      "the CSS-to-React-Native allowlist excludes all four experimental background properties",
+      "runtime NATIVE_ARRAY_VALUE_PROPS preserves authored arrays"
+    ],
+    "migrationOrder": ["repeat", "size", "position", "image"]
+  },
+  "verification": [
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "receipt": "593 tests, 21189 assertions, 98 files"
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "receipt": "20 pages built"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed",
+      "receipt": "storybook application typecheck completed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "receipt": "workspace Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "receipt": "packed Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "receipt": "host Bun benchmark completed; warm README transform p95 13.016625 ms; warm consumer transform p95 7.456833 ms",
+      "claimBoundary": "host smoke only; native-device performance not run"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run",
+      "pendingThresholds": [
+        "js-frame-time",
+        "ui-frame-time",
+        "allocation-bytes",
+        "retained-memory-bytes"
+      ],
+      "missingBaselines": ["js-frame-time", "ui-frame-time", "allocation-bytes"]
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "performance thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "CRUMBS_AUDIT_NODE_FLOOR is unset"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "boundaries": [
+    "audit-only; no structured IR change",
+    "view/text only; ImageStyle remains unsupported",
+    "repeat first; size and position separate; gradient image last",
+    "no generic background carrier",
+    "compatibility strings remain runtime-only because the CSS-to-React-Native allowlist excludes these fields",
+    "gradient image acceptance requires a native-device gate",
+    "public API and native ABI unchanged",
+    "no publish or push"
+  ]
+}

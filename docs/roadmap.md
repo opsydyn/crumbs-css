@@ -1148,3 +1148,12 @@ Next recommended slice: **M2.2ax** — audit and migrate the remaining `filter` 
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2ay** — audit the experimental background family (`experimental_backgroundImage`, `experimental_backgroundSize`, `experimental_backgroundPosition` and `experimental_backgroundRepeat`) as independent gradient, size, position and repeat contracts before choosing any static IR migration. Begin only after approval.
+
+### 2026-09-20 — M2.2ay experimental background audit
+
+- Audited the installed ViewStyle/TextStyle experimental background surface and its separate React Native processors: closed repeat records, size records with keyword/length semantics, four-shape position unions and nested linear/radial gradient images.
+- Confirmed that size, position and repeat arrays pass through the JavaScript processors without validation, while image arrays apply colour-stop validation, parser defaults and gradient-unit handling unless native CSS parsing bypasses them. The CSS-to-React-Native allowlist currently excludes all four experimental fields, so compatibility strings remain runtime-only.
+- Chose a staged migration order of repeat → size → position → image. Gradient-image work remains behind a native-device gate because of opaque platform colours, transition hints, parser defaults, native CSS parsing and experimental platform support.
+- Audit evidence is recorded in the matching assessment and qualification file; no public API, structured IR or native ABI changed.
+
+Next recommended slice: **M2.2az** — migrate `experimental_backgroundRepeat` as a view/text-only closed `{ x, y }` literal record, preserving compatibility strings and whole-value composition. Begin only after approval.
