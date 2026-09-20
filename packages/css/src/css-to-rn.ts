@@ -193,6 +193,7 @@ const NATIVE_STYLE_PROPS = new Set([
   "translateX",
   "translateY",
   "transform",
+  "transformMatrix",
   "transformOrigin",
   "userSelect",
   "verticalAlign",

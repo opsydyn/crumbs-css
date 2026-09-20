@@ -1,0 +1,94 @@
+{
+  "slice": "M2.2au",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "63cca84",
+  "sourceState": "Working tree; implementation and documentation are committed after qualification",
+  "migratedProperties": {
+    "transformOrigin": {
+      "primitiveDomain": ["view", "text", "image"],
+      "valueDomain": "dense two- or three-entry tuple of finite numbers or exact percentage strings"
+    },
+    "transformMatrix": {
+      "primitiveDomain": ["view", "text", "image"],
+      "valueDomain": "dense array of exactly sixteen finite numbers"
+    },
+    "fontVariant": {
+      "primitiveDomain": ["text"],
+      "valueDomain": "dense array of installed React Native font-variant literals"
+    }
+  },
+  "verification": [
+    {
+      "command": "focused structured-array, structured-value and structured-compiler suites",
+      "status": "passed",
+      "tests": 24,
+      "assertions": 687
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "tests": 575,
+      "assertions": 20476,
+      "files": 95
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "pages": 20
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "claim": "declared host smoke ceilings only"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run"
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Performance registry thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Exact Node v22.0.0 floor environment is unavailable; CRUMBS_AUDIT_NODE_FLOOR is unset and the host provides Node v22.16.0/v24.15.0"
+    }
+  ],
+  "boundaries": {
+    "primitiveDomains": {
+      "transformOrigin": "view-text-image",
+      "transformMatrix": "view-text-image",
+      "fontVariant": "text"
+    },
+    "orderedTransformArray": "deferred",
+    "broadStructuredArrays": "deferred",
+    "publicApiChanged": false,
+    "artifactAbiChanged": false,
+    "unmarkedCompatibilityChanged": false,
+    "published": false,
+    "pushed": false,
+    "nativeDeviceAccepted": false
+  }
+}

@@ -57,13 +57,13 @@ describe("structured native compilation", () => {
   })
   it("captures primitive helpers, variant maps, recipe base, variants and compounds", async () => {
     const result = await compile(`
-      export const label = textStyle({textShadowOffset: {width: 2, height: 3}, color: 'red'});
-      export const image = imageStyle({transform: [{rotateZ: '1rad'}], resizeMode: 'contain'});
+      export const label = textStyle({textShadowOffset: {width: 2, height: 3}, fontVariant: ['small-caps', 'tabular-nums'], color: 'red'});
+      export const image = imageStyle({transform: [{rotateZ: '1rad'}], transformOrigin: [10, '50%', 0], transformMatrix: [1,0,0,0,0,1,0,0,0,0,1,0,2,3,0,1], resizeMode: 'contain'});
       export const variants = styleVariants({active: {transform: [{scaleX: 2}]}});
       export const button = recipe({base: {shadowOffset: {width: 1, height: 2}}, variants: {size: {large: {transform: [{scale: 2}]}}}, compoundVariants: [{variants: {size: 'large'}, style: {shadowOffset: {width: 3, height: 4}}}]});
     `)
-    expect(result.label).toEqual({textShadowOffset: {width: 2, height: 3}, color: 'red'})
-    expect(result.image).toEqual({transform: [{rotateZ: '1rad'}], resizeMode: 'contain'})
+    expect(result.label).toEqual({textShadowOffset: {width: 2, height: 3}, fontVariant: ['small-caps', 'tabular-nums'], color: 'red'})
+    expect(result.image).toEqual({transform: [{rotateZ: '1rad'}], transformOrigin: [10, '50%', 0], transformMatrix: [1,0,0,0,0,1,0,0,0,0,1,0,2,3,0,1], resizeMode: 'contain'})
     expect(result.variants.active).toEqual({transform: [{scaleX: 2}]})
     expect(result.button.base.shadowOffset).toEqual({width: 1, height: 2})
     expect(result.button.variants.size?.large?.transform).toEqual([{scale: 2}])
@@ -76,6 +76,8 @@ describe("structured native compilation", () => {
       `{transform: [{scale: 2, rotate: '1rad'}]}`, `{transform: [{unknown: 2}]}`, `{transform: [{scale: NaN}]}`,
       `{transform: [{rotate: '20px'}]}`, `{transform: [{matrix: [1,2]}]}`, `{shadowOffset: {width: 2}}`,
       `{textShadowOffset: {width: 2, height: 3}}`,
+      `{transformOrigin: [1, 2, 3, 4]}`, `{transformMatrix: [1, 2]}`, `{fontVariant: ['unsupported']}`,
+      `{fontVariant: ['small-caps']}`,
       `{shadowOffset: {width: 'var(--crumbs-x)', height: 2}}`, `{transform: [{scale: {__getValue() {throw new Error('EXECUTED')}}}]}`,
       `{filter: [{brightness: 2}]}`, `{boxShadow: [{offsetX: 2, offsetY: 3}]}`,
       `{transform: Array(2)}`, `{transform: [{matrix: Array(16)}]}`,

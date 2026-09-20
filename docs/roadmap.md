@@ -1112,4 +1112,13 @@ Next recommended slice: **M2.2at** — migrate text-only `textShadowOffset` thro
 - A marked text rule may carry both offset properties when their shared domain is text; each property keeps its own provenance and whole-value last-winner ordering. Malformed, decorated and forged values fail at the Effect Schema boundary; unmarked records remain on the compatibility route.
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
 
-Next recommended slice: **M2.2au** — audit and migrate the ordered `transform` array through an explicit operation union that preserves authored order and keeps percentage translations separate from direct scalar companions. Begin only after approval.
+The approved M2.2au batch below closes the static `transformOrigin`, `transformMatrix` and `fontVariant` families. The ordered `transform` array remains the next structured-array contract and is now tracked as M2.2av.
+
+### 2026-09-20 — M2.2au batched structured array IR
+
+- Migrated `transformOrigin` as a dense two- or three-entry finite-number/percentage tuple, `transformMatrix` as a dense sixteen-entry finite-number matrix, and text-only `fontVariant` as a dense array of installed React Native literals.
+- Shared descriptor-safe array admission rejects sparse, accessor-backed, decorated, wrong-length, non-finite and unsupported values. Effect Schema, provenance and primitive matrices remain property-specific; whole-value last-winner composition is independent per property.
+- Added `transformMatrix` to the native CSS conversion allowlist. Ordered `transform` and broad structured unions remain separate contracts; unmarked arrays remain on the compatibility route.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2av** — migrate the ordered `transform` array through an explicit operation union that preserves authored order, separates percentage translations from direct scalar companions and rejects unsupported dynamic entries. Begin only after approval.
