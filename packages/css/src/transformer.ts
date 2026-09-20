@@ -15,6 +15,7 @@ import {
   stringifyFileScope,
 } from "@vanilla-extract/integration"
 import { cssDeclarationsToRN } from "./css-to-rn"
+import { NativeTransformCacheMetadataType, type NativeTransformCacheMetadata } from "./transform-cache"
 import { assertNativeCssCompatibility, NativeStylesCompatibilityError } from "./native-compatibility"
 import { NativeStylesDiagnosticCode } from "./diagnostics"
 import { captureNativeExports } from "./export-values"
@@ -23,7 +24,10 @@ import { splitStructuredNativeValues } from "./structured-native-values"
 import { getNativeCaptureMetadata } from "./compiler/native-capture"
 import { captureCompatibilityIntoNativeIr } from "./compiler/compatibility-adapter"
 import { emitStyleSheetModule, type BuildStyleSheetCodeOptions } from "./compiler/code-emission"
-import { analyseDependencyImports } from "./compiler/dependency-analysis"
+import {
+  analyseDependencyInputs,
+  createDependencyCacheIdentity,
+} from "./compiler/dependency-analysis"
 import { indexStyleExportOwnership } from "./compiler/export-ownership"
 import {
   captureScalarIntoNativeIr,
@@ -53,6 +57,12 @@ type CapturedNativeModule = {
 export type TransformCssTsOptions = {
   readonly strictDiagnostics?: boolean
   readonly useStyleSheet?: boolean
+  readonly platform?: string | null
+  readonly dev?: boolean
+}
+type NativeTransformResult = {
+  readonly code: string
+  readonly cacheMetadata: NativeTransformCacheMetadata
 }
 const originalNodeEnv = process.env.NODE_ENV
 
@@ -66,8 +76,9 @@ const originalNodeEnv = process.env.NODE_ENV
  * The dep side-effect imports let Metro track those files in its module graph.
  * Metro 0.84 still caches an importing .css.ts transform by that file's own
  * content, so a dependency-only edit does not by itself rebuild baked values.
- * Direct .css.ts edits invalidate normally; dependency invalidation remains an
- * explicit compiler/artifact requirement in M2.7.
+ * Direct .css.ts edits invalidate normally. Dependency-aware Metro cache stores
+ * inspect the metadata attached to transformed results and miss when any
+ * project-authored input hash changes.
  */
 export function buildStyleSheetCode(
   exportMap: ReadonlyMap<string, StyleExportValue>,
@@ -287,6 +298,14 @@ export async function transformCssTsToStyleSheet(
   cwd: string,
   options: TransformCssTsOptions = {},
 ): Promise<string> {
+  return (await transformCssTsToStyleSheetWithMetadata(filePath, cwd, options)).code
+}
+
+async function transformCssTsToStyleSheetWithMetadata(
+  filePath: string,
+  cwd: string,
+  options: TransformCssTsOptions = {},
+): Promise<NativeTransformResult> {
   const identOption = process.env.NODE_ENV === "production" ? "short" : "debug"
   const absoluteFilePath = path.isAbsolute(filePath) ? filePath : path.resolve(cwd, filePath)
 
@@ -383,18 +402,37 @@ export async function transformCssTsToStyleSheet(
   // Exclude the entry file itself, third-party packages, and this package's
   // compiled internals. Only user-authored project files should be emitted as
   // Metro-visible side-effect imports.
-  const depRelativePaths = analyseDependencyImports(capturedInputs, {
+  const dependencyInputs = analyseDependencyInputs(capturedInputs, {
     cwd,
     absoluteEntryPath: absoluteFilePath,
     nativeStylesDistRoot: nativeStylesDistRoot(),
   })
+  const depRelativePaths = dependencyInputs.map(({ importPath }) => importPath)
+  const cacheIdentity = createDependencyCacheIdentity(dependencyInputs, {
+    compilerKey: getCacheKey(),
+    platform: options.platform ?? null,
+    dev: options.dev ?? process.env.NODE_ENV !== "production",
+    strictDiagnostics: options.strictDiagnostics === true,
+    useStyleSheet: options.useStyleSheet ?? true,
+    identOption: String(identOption),
+  })
 
-  return buildStyleSheetCode(
+  const code = buildStyleSheetCode(
     exportMap,
     resolvedClassStyles,
     depRelativePaths,
-    options.useStyleSheet === undefined ? {} : { useStyleSheet: options.useStyleSheet },
+    {
+      ...(options.useStyleSheet === undefined ? {} : { useStyleSheet: options.useStyleSheet }),
+      cacheIdentity,
+    },
   )
+  return {
+    code,
+    cacheMetadata: {
+      $$type: NativeTransformCacheMetadataType,
+      dependencies: Object.freeze(dependencyInputs.map(({ sourcePath, sourceHash }) => ({ sourcePath, sourceHash }))),
+    },
+  }
 }
 
 function nativeStylesDistRoot(): string {
@@ -442,13 +480,16 @@ export async function transform(
   }
 
   const nativeStylesConfig = config.nativeStyles as { strictDiagnostics?: boolean } | undefined
-  const code = await transformCssTsToStyleSheet(filename, projectRoot, {
+  const transformed = await transformCssTsToStyleSheetWithMetadata(filename, projectRoot, {
     strictDiagnostics:
       nativeStylesConfig?.strictDiagnostics === true ||
       process.env.CRUMBS_CSS_STRICT === "1",
     useStyleSheet: options.platform !== "web",
+    platform: options.platform ?? null,
+    dev: options.dev,
   })
-  return defaultTransform(config, projectRoot, filename, Buffer.from(code), options)
+  const result = await defaultTransform(config, projectRoot, filename, Buffer.from(transformed.code), options) as Record<string, unknown>
+  return { ...result, __crumbsNativeStyles: transformed.cacheMetadata }
 }
 
 function getMetroTransformWorker(): TransformFn {

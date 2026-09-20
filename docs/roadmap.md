@@ -1237,3 +1237,11 @@ Next recommended slice: **M2.6** — emit direct native modules and minimal toke
 - Focused and full compiler checks are recorded with the consumer, documentation and host qualification results in the matching evidence file.
 
 Next recommended slice: **M2.7** — demonstrate that real dependency changes invalidate baked importer values across nested CSS modules, plain token modules, monorepo dependencies, compiler versions, targets and configuration before persistent caching is added. Begin only after approval.
+
+### 2026-09-20 — M2.7 dependency-aware Metro invalidation
+
+- Added deterministic dependency-input analysis for plain modules, nested `.css.ts` imports and workspace sources. Project-authored source hashes feed a private compiler/platform/configuration identity and are emitted as non-public transform metadata.
+- Wrapped Metro cache stores so unchanged Crumbs transform results remain hits while changed or missing dependency files return misses. Direct compiler and cache-store tests cover plain edits, nested/workspace discovery, context changes and fail-closed evidence admission.
+- The real cleared Expo/Metro measurement was attempted with all three dependency families. The host's live Metro graph did not observe the dependency-only edit within the measurement window, so stale baked output was rejected and no live qualification was claimed. All fixture files were restored; no persistent cache or public API was added. [Assessment](assessments/2026-09-20-dependency-invalidation.md) and [qualification evidence](evidence/2026-09-20-m2-7-dependency-invalidation/qualification.json) record the boundary.
+
+Next recommended slice: **finish the M2.7 live Expo/Metro gate** on a watcher-capable host and admit only receipts proving new baked values and absence of the old values. Once M2.7 closes, begin **M3.1** — domain-safe colour, length, duration, opacity and property-enum token contracts with generated or reconciled runtime schemas and static authoring types.

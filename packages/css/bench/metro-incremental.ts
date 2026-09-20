@@ -7,6 +7,8 @@ import { createRequire } from "node:module"
 const repoRoot = resolve(import.meta.dir, "../../..")
 const appRoot = join(repoRoot, "apps/playground")
 const tokenFile = join(appRoot, "src/incremental-token.ts")
+const baseStyleFile = join(appRoot, "src/incremental-base.css.ts")
+const workspaceTokenFile = join(repoRoot, "packages/css/fixtures/m2-7-workspace-token.ts")
 const entryFile = join(appRoot, "src/incremental-entry.ts")
 const styleFile = join(appRoot, "src/incremental.css.ts")
 const requireFromApp = createRequire(join(appRoot, "package.json"))
@@ -22,15 +24,26 @@ type IncrementalRun = {
   receipt: { compiledValuePresent: boolean; previousCompiledValueAbsent: boolean }
 }
 
+export type DependencyControl = {
+  kind: "plain-token" | "nested-css" | "workspace-source"
+  previousCompiledValue: number
+  compiledValue: number
+  editToReceiptMs: number
+  attempts: number
+  bundleSha256: string
+  receipt: { compiledValuePresent: boolean; previousCompiledValueAbsent: boolean }
+}
+
 type MetroIncrementalEvidence = {
   formatVersion: number
   status: string
   environment: { platform: string; architecture: string; osRelease: string; cpu: string; expo: string; metro: string; reactNative: string }
   protocol: { requestUrl: string; repetitions: number; editKind: string; cacheState: string }
-  fixture: { entrySha256: string; originalStyleSha256: string; restoredStyleSha256: string; originalTokenSha256: string; restoredTokenSha256: string }
+  fixture: { entrySha256: string; originalStyleSha256: string; restoredStyleSha256: string; originalTokenSha256: string; restoredTokenSha256: string; originalBaseStyleSha256?: string; restoredBaseStyleSha256?: string; originalWorkspaceTokenSha256?: string; restoredWorkspaceTokenSha256?: string }
   initial: { compiledValue: number; bundleSha256: string; bytes: number }
   warmup: IncrementalRun & { excluded: boolean }
   runs: IncrementalRun[]
+  dependencyControls?: DependencyControl[]
 }
 
 export function incrementalCompiledValue(addend: number): number {
@@ -43,14 +56,51 @@ export function createIncrementalTokenSource(addend: number): string {
   return `// Rewritten by the Metro incremental measurement and restored after the run.\nexport const incrementalPadding = 30000 + ${addend}\n`
 }
 
+export function createIncrementalBaseStyleSource(addend: number): string {
+  incrementalCompiledValue(addend)
+  return `import { viewStyle } from "@opsydyn/crumbs-css/style"\n\nexport const incrementalBase = viewStyle({ margin: 31000 + ${addend} })\n`
+}
+
+export function createWorkspaceTokenSource(addend: number): string {
+  incrementalCompiledValue(addend)
+  return `// Rewritten by the Metro incremental measurement and restored after the run.\nexport const workspaceBorderWidth = 32000 + ${addend}\n`
+}
+
 export function createIncrementalStyleSource(addend: number): string {
   incrementalCompiledValue(addend)
-  return `import { viewStyle } from "@opsydyn/crumbs-css/style"\n\nconst directIncrementalPadding = 30000 + ${addend}\nexport const incrementalProbe = viewStyle({ padding: directIncrementalPadding })\n`
+  return `import { viewStyle } from "@opsydyn/crumbs-css/style"\nimport { incrementalPadding } from "./incremental-token"\nimport { incrementalBase } from "./incremental-base.css"\nimport { workspaceBorderWidth } from "../../../packages/css/fixtures/m2-7-workspace-token"\n\nconst directIncrementalPadding = incrementalPadding + ${addend} - 1\nexport const incrementalProbe = viewStyle([incrementalBase, { padding: directIncrementalPadding, borderWidth: workspaceBorderWidth }])\n`
+}
+
+export function admitDependencyControls(input: unknown): DependencyControl[] {
+  if (!Array.isArray(input) || input.length !== 3) throw Error("Dependency invalidation evidence requires three control receipts")
+  const controls = input as DependencyControl[]
+  const kinds = controls.map(control => control.kind)
+  const requiredKinds: ReadonlyArray<DependencyControl["kind"]> = [
+    "plain-token",
+    "nested-css",
+    "workspace-source",
+  ]
+  if (new Set(kinds).size !== 3 || !requiredKinds.every(kind => kinds.includes(kind))) {
+    throw Error("Dependency invalidation evidence is missing a dependency family")
+  }
+  for (const control of controls) {
+    if (!Number.isFinite(control.previousCompiledValue) || !Number.isFinite(control.compiledValue) || control.previousCompiledValue === control.compiledValue) {
+      throw Error("Dependency invalidation values did not change")
+    }
+    if (!Number.isFinite(control.editToReceiptMs) || control.editToReceiptMs < 0 || !Number.isSafeInteger(control.attempts) || control.attempts < 1 || !control.bundleSha256) {
+      throw Error("Dependency invalidation timing receipt is invalid")
+    }
+    if (!control.receipt?.compiledValuePresent || !control.receipt.previousCompiledValueAbsent) {
+      throw Error(`Dependency invalidation output does not prove the ${control.kind} parent rebuilt (new=${control.receipt?.compiledValuePresent}, oldAbsent=${control.receipt?.previousCompiledValueAbsent})`)
+    }
+  }
+  return controls
 }
 
 export function admitMetroIncrementalReport(input: unknown, minimumRepetitions = 5): number[] {
   const report = input as MetroIncrementalEvidence
   if (report?.formatVersion !== 1 || report.status !== "complete") throw Error("Metro incremental evidence is incomplete or has an unsupported version")
+  if (report.dependencyControls !== undefined) admitDependencyControls(report.dependencyControls)
   if (!Number.isSafeInteger(minimumRepetitions) || minimumRepetitions < 1 || report.protocol?.editKind !== "direct-css-source" || report.protocol.repetitions !== report.runs?.length || report.runs.length < minimumRepetitions) {
     throw Error("Metro incremental evidence has insufficient repetitions")
   }
@@ -82,14 +132,20 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
   if (!Number.isSafeInteger(repetitions) || repetitions < 5) throw Error("At least five actual edit repetitions are required")
   if (!Number.isSafeInteger(port) || port < 1024 || port > 65535) throw Error("Metro measurement port is invalid")
   const originalToken = await readFile(tokenFile, "utf8")
+  const originalBaseStyle = await readFile(baseStyleFile, "utf8")
+  const originalWorkspaceToken = await readFile(workspaceTokenFile, "utf8")
   const originalStyle = await readFile(styleFile, "utf8")
   const originalTokenSha256 = sha256(originalToken)
+  const originalBaseStyleSha256 = sha256(originalBaseStyle)
+  const originalWorkspaceTokenSha256 = sha256(originalWorkspaceToken)
   const originalStyleSha256 = sha256(originalStyle)
   const requestPath = "/src/incremental-entry.bundle?platform=ios&dev=true&minify=false&modulesOnly=false&runModule=true"
   const requestUrl = `http://127.0.0.1:${port}${requestPath}`
   const expoBin = join(appRoot, "node_modules/.bin/expo")
   const logs: string[] = []
   let restoredTokenSha256 = "not-restored"
+  let restoredBaseStyleSha256 = "not-restored"
+  let restoredWorkspaceTokenSha256 = "not-restored"
   let child: ReturnType<typeof Bun.spawn> | undefined
   try {
     await assertPortUnused(port)
@@ -110,19 +166,27 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     const initialValue = incrementalCompiledValue(1)
     if (!hasCompiledValue(initialBundle, initialValue)) throw Error("Initial Metro bundle lacks the compiled fixture value")
     const initial = { compiledValue: initialValue, bundleSha256: sha256(initialBundle), bytes: Buffer.byteLength(initialBundle) }
+    const dependencyControls: DependencyControl[] = []
     const dependencyStarted = performance.now()
     await writeFile(tokenFile, createIncrementalTokenSource(2))
-    const dependencyReceipt = await waitForBundle(requestUrl, bundle => hasDependencyExpression(bundle, 2), dependencyStarted)
-    const dependencyControl = {
-      editToDependencyReceiptMs: performance.now() - dependencyStarted,
-      attempts: dependencyReceipt.attempts,
-      dependencyModuleUpdated: hasDependencyExpression(dependencyReceipt.bundle, 2),
-      dependentCompiledValueUpdated: hasCompiledValue(dependencyReceipt.bundle, incrementalCompiledValue(2)),
-      previousCompiledValuePresent: hasCompiledValue(dependencyReceipt.bundle, initialValue),
-      conclusion: hasCompiledValue(dependencyReceipt.bundle, incrementalCompiledValue(2)) ? "dependent-transform-updated" : "dependency-module-updated-parent-transform-stale",
-    }
+    const dependencyReceipt = await waitForBundle(requestUrl, bundle => hasDependencyExpression(bundle, 2) && hasCompiledValue(bundle, incrementalCompiledValue(2)) && !hasCompiledValue(bundle, initialValue), dependencyStarted)
+    dependencyControls.push(makeDependencyControl("plain-token", initialValue, incrementalCompiledValue(2), dependencyStarted, dependencyReceipt))
     await writeFile(tokenFile, originalToken)
-    await waitForBundle(requestUrl, bundle => hasDependencyExpression(bundle, 1), performance.now())
+    await waitForBundle(requestUrl, bundle => hasDependencyExpression(bundle, 1) && hasCompiledValue(bundle, initialValue) && !hasCompiledValue(bundle, incrementalCompiledValue(2)), performance.now())
+
+    const nestedStarted = performance.now()
+    await writeFile(baseStyleFile, createIncrementalBaseStyleSource(3))
+    const nestedReceipt = await waitForBundle(requestUrl, bundle => hasMarginValue(bundle, 31003) && !hasMarginValue(bundle, 31001), nestedStarted)
+    dependencyControls.push(makeDependencyControl("nested-css", 31001, 31003, nestedStarted, nestedReceipt, hasMarginValue))
+    await writeFile(baseStyleFile, originalBaseStyle)
+    await waitForBundle(requestUrl, bundle => hasMarginValue(bundle, 31001) && !hasMarginValue(bundle, 31003), performance.now())
+
+    const workspaceStarted = performance.now()
+    await writeFile(workspaceTokenFile, createWorkspaceTokenSource(4))
+    const workspaceReceipt = await waitForBundle(requestUrl, bundle => hasBorderWidthValue(bundle, 32004) && !hasBorderWidthValue(bundle, 32001), workspaceStarted)
+    dependencyControls.push(makeDependencyControl("workspace-source", 32001, 32004, workspaceStarted, workspaceReceipt, hasBorderWidthValue))
+    await writeFile(workspaceTokenFile, originalWorkspaceToken)
+    await waitForBundle(requestUrl, bundle => hasBorderWidthValue(bundle, 32001) && !hasBorderWidthValue(bundle, 32004), performance.now())
     const warmupStarted = performance.now()
     await writeFile(styleFile, createIncrementalStyleSource(100))
     await delay(75)
@@ -147,7 +211,11 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     }
     await writeFile(styleFile, originalStyle)
     await writeFile(tokenFile, originalToken)
+    await writeFile(baseStyleFile, originalBaseStyle)
+    await writeFile(workspaceTokenFile, originalWorkspaceToken)
     restoredTokenSha256 = sha256(await readFile(tokenFile, "utf8"))
+    restoredBaseStyleSha256 = sha256(await readFile(baseStyleFile, "utf8"))
+    restoredWorkspaceTokenSha256 = sha256(await readFile(workspaceTokenFile, "utf8"))
     const restoredStyleSha256 = sha256(await readFile(styleFile, "utf8"))
     const report = {
       formatVersion: 1,
@@ -157,11 +225,11 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
       environment: { platform: process.platform, architecture: process.arch, osRelease: release(), cpu: cpus()[0]?.model ?? "unknown",
         expo: requireFromApp("expo/package.json").version as string, metro: requireFromApp("metro/package.json").version as string,
         reactNative: requireFromApp("react-native/package.json").version as string },
-      protocol: { requestUrl: requestPath, repetitions, editKind: "direct-css-source", cacheState: "One cleared Metro server and warm initial graph; one excluded direct-edit warmup; five retained sequential direct .css.ts edits; timing begins before write, includes a fixed 75 ms watcher-settle interval, and ends on the first full bundle containing only the new compiled value" },
-      fixture: { entrySha256: sha256(await readFile(entryFile)), originalStyleSha256, restoredStyleSha256, originalTokenSha256, restoredTokenSha256 },
+      protocol: { requestUrl: requestPath, repetitions, editKind: "direct-css-source", cacheState: "One cleared Metro server and warm initial graph; three dependency-only controls (plain token, nested .css.ts and workspace source) prove parent rebuilds before one excluded direct-edit warmup and five retained direct .css.ts edits; dependency receipts require the new baked value and absence of the old value" },
+      fixture: { entrySha256: sha256(await readFile(entryFile)), originalStyleSha256, restoredStyleSha256, originalTokenSha256, restoredTokenSha256, originalBaseStyleSha256, restoredBaseStyleSha256, originalWorkspaceTokenSha256, restoredWorkspaceTokenSha256 },
       server: { startupMs, logs },
       initial,
-      dependencyControl,
+      dependencyControls,
       warmup: { ...warmup, excluded: true },
       runs,
     }
@@ -170,6 +238,8 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     return report
   } finally {
     if (sha256(await readFile(tokenFile)) !== originalTokenSha256) await writeFile(tokenFile, originalToken)
+    if (sha256(await readFile(baseStyleFile)) !== originalBaseStyleSha256) await writeFile(baseStyleFile, originalBaseStyle)
+    if (sha256(await readFile(workspaceTokenFile)) !== originalWorkspaceTokenSha256) await writeFile(workspaceTokenFile, originalWorkspaceToken)
     if (sha256(await readFile(styleFile)) !== originalStyleSha256) await writeFile(styleFile, originalStyle)
     if (child) await stop(child)
   }
@@ -177,6 +247,12 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
 
 function hasCompiledValue(bundle: string, value: number) {
   return ["Top", "Right", "Bottom", "Left"].every(side => new RegExp(`padding${side}["']?\\s*:\\s*${value}\\b`).test(bundle))
+}
+function hasMarginValue(bundle: string, value: number) {
+  return ["Top", "Right", "Bottom", "Left"].every(side => new RegExp(`margin${side}["']?\\s*:\\s*${value}\\b`).test(bundle))
+}
+function hasBorderWidthValue(bundle: string, value: number) {
+  return new RegExp(`borderWidth["']?\\s*:\\s*${value}\\b`).test(bundle)
 }
 function hasDependencyExpression(bundle: string, addend: number) {
   return new RegExp(`incrementalPadding\\s*=\\s*30000\\s*\\+\\s*${addend}\\b`).test(bundle)
@@ -196,6 +272,27 @@ function makeRun(repetition: number, previousCompiledValue: number, compiledValu
   return { repetition, previousCompiledValue, compiledValue, editToReceiptMs: performance.now() - started,
     attempts: update.attempts, bundleSha256: sha256(update.bundle), bytes: Buffer.byteLength(update.bundle),
     receipt: { compiledValuePresent: hasCompiledValue(update.bundle, compiledValue), previousCompiledValueAbsent: !hasCompiledValue(update.bundle, previousCompiledValue) } }
+}
+function makeDependencyControl(
+  kind: DependencyControl["kind"],
+  previousCompiledValue: number,
+  compiledValue: number,
+  started: number,
+  update: { attempts: number; bundle: string },
+  receiptPredicate: (bundle: string, value: number) => boolean = hasCompiledValue,
+): DependencyControl {
+  return {
+    kind,
+    previousCompiledValue,
+    compiledValue,
+    editToReceiptMs: performance.now() - started,
+    attempts: update.attempts,
+    bundleSha256: sha256(update.bundle),
+    receipt: {
+      compiledValuePresent: receiptPredicate(update.bundle, compiledValue),
+      previousCompiledValueAbsent: !receiptPredicate(update.bundle, previousCompiledValue),
+    },
+  }
 }
 function sha256(value: string | Buffer) { return createHash("sha256").update(value).digest("hex") }
 function delay(ms: number) { return new Promise(resolveDelay => setTimeout(resolveDelay, ms)) }

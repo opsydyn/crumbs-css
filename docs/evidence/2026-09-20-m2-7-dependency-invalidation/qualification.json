@@ -1,0 +1,57 @@
+{
+  "slice": "M2.7",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "working tree before commit",
+  "sourceState": "Implementation and documentation are committed separately from protected release/version edits",
+  "dependencyAnalysis": {
+    "plainModules": true,
+    "nestedCssTs": true,
+    "workspaceSources": true,
+    "excludesNodeModulesAndDist": true,
+    "stableOrdering": true,
+    "sourceHashes": "sha256"
+  },
+  "cacheIdentity": {
+    "compilerKey": true,
+    "platform": true,
+    "dev": true,
+    "strictDiagnostics": true,
+    "useStyleSheet": true,
+    "identOption": true,
+    "dependencyContent": true
+  },
+  "verification": [
+    {
+      "command": "bun test packages/css/test/m2-7-dependency-invalidation.test.ts packages/css/test/metro-incremental.test.ts",
+      "status": "passed",
+      "tests": 10,
+      "assertions": 42
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run build",
+      "status": "passed",
+      "runtimeBundleImport": "metro-cache is type-only and absent from runtime bundle"
+    },
+    {
+      "command": "bun run measure:metro-incremental docs/evidence/2026-09-20-m2-7-dependency-invalidation/metro-incremental.json",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "The cleared Expo/Metro server did not observe the dependency-only edit within the evidence window; the stale baked value was rejected by the admission gate"
+    }
+  ],
+  "boundaries": {
+    "publicApiChanged": false,
+    "persistentCacheAdded": false,
+    "effectConsumerRequirementChanged": false,
+    "nativeDeviceAccepted": false,
+    "androidAccepted": false,
+    "published": false,
+    "pushed": false,
+    "roadmapItemClosed": false
+  },
+  "next": "Rerun and admit the real Expo/Metro dependency-only invalidation gate on a watcher-capable host; then begin M3.1 domain-safe token contracts."
+}

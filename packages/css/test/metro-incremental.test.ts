@@ -35,7 +35,7 @@ describe("Metro actual-edit evidence", () => {
     expect(source).toContain("30000 + 17")
     expect(source).not.toContain("30017")
     const styleSource = createIncrementalStyleSource(117)
-    expect(styleSource).toContain("30000 + 117")
+    expect(styleSource).toContain("incrementalPadding + 117 - 1")
     expect(styleSource).not.toContain("30117")
     for (const invalid of [0, -1, 1000, 1.5, Number.NaN]) expect(() => createIncrementalTokenSource(invalid)).toThrow()
   })

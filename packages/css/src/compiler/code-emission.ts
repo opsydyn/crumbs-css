@@ -5,6 +5,7 @@ import { sortedOwnEnumerableDataEntries } from "./record-admission"
 
 export type BuildStyleSheetCodeOptions = {
   readonly useStyleSheet?: boolean
+  readonly cacheIdentity?: string
 }
 
 /**
@@ -37,8 +38,12 @@ export function emitStyleSheetModule(
     .sort((left, right) => left.localeCompare(right))
     .map((dependency) => `import ${JSON.stringify(dependency)};`)
     .join("\n")
+  const cacheMarker = options.cacheIdentity === undefined
+    ? ""
+    : `/* @crumbs-native-cache ${options.cacheIdentity} */`
 
   const parts = [
+    cacheMarker,
     useStyleSheet ? `import { StyleSheet } from "react-native";` : "",
     depImports,
     useStyleSheet
