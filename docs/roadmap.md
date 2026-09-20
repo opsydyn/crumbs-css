@@ -1078,4 +1078,11 @@ Next recommended slice: **M2.2ao** — migrate view/text-only `borderCurve` and 
 - Migrated view/text-only `borderCurve` and `pointerEvents` through exact installed React Native literal/token domains. Capture and Effect Schema decoding reject image use consistently.
 - Focused qualification passed 29 tests with 493 assertions; full qualification passed 541 tests across 90 files with 19,206 assertions. See [evidence](assessments/2026-09-19-native-ir-view-interaction.md).
 
-Next recommended slice: **M2.2ap** — migrate view/text-only `borderStyle`, `outlineStyle` and `isolation` through exact installed literal/token domains. Begin only after approval.
+Next recommended slice: **M2.2ap** — batch the remaining exact literal surface: view/text-only `borderStyle`, `outlineStyle`, `isolation` and `mixBlendMode`, plus image-only `resizeMode` and `objectFit`. Begin only after approval.
+
+### 2026-09-20 — M2.2ap batched literal surface scalar IR
+
+- Migrated view/text-only `borderStyle`, `outlineStyle`, `isolation` and `mixBlendMode`, plus image-only `resizeMode` and `objectFit`, through exact installed React Native literal/token domains.
+- Focused qualification passed 6 tests with 319 assertions; full qualification and consumer evidence are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2aq** — batch the remaining outline and logical border-colour scalars: `outlineColor`, `outlineOffset`, `outlineWidth`, `borderBlockColor`, `borderBlockStartColor` and `borderBlockEndColor`. Begin only after approval.

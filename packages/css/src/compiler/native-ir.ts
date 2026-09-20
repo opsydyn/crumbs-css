@@ -89,6 +89,7 @@ export type MigratedScalarProperty =
   | "aspectRatio"
   | "backfaceVisibility" | "cursor"
   | "borderCurve" | "pointerEvents"
+  | "borderStyle" | "outlineStyle" | "isolation" | "resizeMode" | "objectFit" | "mixBlendMode"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -171,6 +172,15 @@ const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, Re
   cursor: new Set(["auto", "pointer"]),
   borderCurve: new Set(["circular", "continuous"]),
   pointerEvents: new Set(["box-none", "none", "box-only", "auto"]),
+  borderStyle: new Set(["solid", "dotted", "dashed"]),
+  outlineStyle: new Set(["solid", "dotted", "dashed"]),
+  isolation: new Set(["auto", "isolate"]),
+  resizeMode: new Set(["cover", "contain", "stretch", "repeat", "center", "none"]),
+  objectFit: new Set(["cover", "contain", "fill", "scale-down", "none"]),
+  mixBlendMode: new Set([
+    "normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn",
+    "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity",
+  ]),
 }
 const primitiveLiteralValueProperties: Readonly<Partial<Record<
   MigratedScalarProperty,
@@ -263,6 +273,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "aspectRatio",
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
+  "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -301,6 +312,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "aspectRatio",
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
+  "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -427,6 +439,7 @@ const migratedScalarProperties = [
   "aspectRatio",
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
+  "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -490,6 +503,8 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   aspectRatio: ["view", "text", "image"],
   backfaceVisibility: ["view", "text", "image"], cursor: ["view", "text", "image"],
   borderCurve: ["view", "text"], pointerEvents: ["view", "text"],
+  borderStyle: ["view", "text"], outlineStyle: ["view", "text"], isolation: ["view", "text"],
+  resizeMode: ["image"], objectFit: ["image"], mixBlendMode: ["view", "text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],

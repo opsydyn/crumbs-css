@@ -415,3 +415,7 @@ Approved M2.2an migrates `backfaceVisibility` and `cursor` through their exact i
 ### View-interaction scalar IR — 2026-09-19
 
 Approved M2.2ao migrates view/text-only `borderCurve` and `pointerEvents` through exact installed literal/token domains. The shared primitive matrix rejects image use during capture and Effect Schema decoding, while both fields retain exact provenance and independent last-winner ordering. [Implementation evidence](../assessments/2026-09-19-native-ir-view-interaction.md) records exhaustive literal coverage, primitive rejection, generated ordering and consumer qualification.
+
+### Batched literal-surface scalar IR — 2026-09-20
+
+Approved M2.2ap batches view/text-only `borderStyle`, `outlineStyle`, `isolation` and `mixBlendMode` with image-only `resizeMode` and `objectFit`. Each field retains its exact installed literal/token domain and primitive contract; capture and Effect Schema decoding reject unsupported values, forged provenance and cross-property literals. [Implementation evidence](../assessments/2026-09-20-native-ir-literal-surface.md) records exhaustive literal coverage, primitive rejection, generated ordering and consumer qualification.
