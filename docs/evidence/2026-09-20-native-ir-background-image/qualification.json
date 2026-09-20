@@ -1,5 +1,6 @@
 {
   "slice": "M2.2bc",
+  "nativeAcceptanceSlice": "M2.2bd",
   "recordedAt": "2026-09-20",
   "sourceRevision": "1c10855119ee4d255a67a266373ad3d4965e5778",
   "sourceState": "Working tree before implementation commit; unrelated pre-existing changes preserved",
@@ -14,7 +15,54 @@
     "composition": "whole-list last winner, including empty-list replacement",
     "schema": "Effect Schema validates gradient shape, nested stops, provenance and primitive domain",
     "safety": "descriptor-safe capture clones and deeply freezes admitted lists, records, positions and stops",
-    "nativeGate": "dedicated packed iOS simulator rendering gate pending; Android remains parked"
+    "nativeGate": "dedicated packed iOS simulator gate passed; Android remains parked"
+  },
+  "nativeAcceptance": {
+    "status": "passed-ios-partial-cross-platform",
+    "artifact": {
+      "file": "opsydyn-crumbs-css-0.1.2-alpha.2.tgz",
+      "sha256": "004965fffd13fd59290f60fb99c4b82f0f653b2cc61511c66451ba8a673a101a",
+      "sourceRevision": "584cdd78aaddd8da244506971f6869ebe970aad7",
+      "consumerMode": "packed"
+    },
+    "runtime": {
+      "expoSdk": "56.0.22",
+      "expoGo": "56.0.4",
+      "reactNative": "0.85.3",
+      "react": "19.2.5",
+      "nativeCssParsing": "default React Native style processor; no native CSS parser override; Crumbs nativeStyles.strictDiagnostics=true"
+    },
+    "device": {
+      "name": "Crumbs Acceptance",
+      "model": "iPhone 17",
+      "udid": "BA031750-0722-4DCC-87AE-EC8EE894FB1B",
+      "os": "iOS 26.5"
+    },
+    "cases": {
+      "linearKeyword": "passed; full-card direction keyword rendered",
+      "linearAngle": "passed; 180deg rendered",
+      "radialCircleExtent": "passed; full-card farthest-corner circle rendered",
+      "radialEllipseExplicitSize": "passed; x/y size and bottom-right position rendered as a confined footprint",
+      "mixedStopsAndTransitionHint": "passed; transparent region exposed the surface and the opaque stop rendered after the hint",
+      "multipleLayers": "passed; layered background rendered",
+      "emptyListReplacement": "passed; gradient cleared while layout/text remained",
+      "lightTheme": "passed",
+      "darkTheme": "passed",
+      "runtimeErrors": "none observed"
+    },
+    "screenshots": [
+      { "path": "docs/acceptance/2026-09-20-background-image/light-top.png", "sha256": "49388099bbdd975d0a2344ffabeb872f18d1d07326df3d02c3b7665a400c8832" },
+      { "path": "docs/acceptance/2026-09-20-background-image/light-lower-layered.png", "sha256": "68d480994213af747061664da2551035fcec908131e57fdebbe8ada8c262361f" },
+      { "path": "docs/acceptance/2026-09-20-background-image/light-lower-empty.png", "sha256": "846639e7794820e298d6ec7af0472a2c116cfcc6f42f91f2cda9da373fe93be2" },
+      { "path": "docs/acceptance/2026-09-20-background-image/dark-top.png", "sha256": "92a6f7fe20e66bf0d5a156bbdb5402f5b0652198ff794e898eac3258488281d1" },
+      { "path": "docs/acceptance/2026-09-20-background-image/dark-lower-layered.png", "sha256": "33e8e1a1dbd83a7b6d35d8be508edfe3cdf53451b5a322eec204399dc3b67b9c" },
+      { "path": "docs/acceptance/2026-09-20-background-image/dark-lower-empty.png", "sha256": "9569c9e81b626af3f847f16ee471fb17e7c402a0f501ab60e86a9a74cb752d68" }
+    ],
+    "boundaries": [
+      "iOS native evidence does not qualify Android rendering",
+      "explicit radial size and transparent stop regions are recorded as observed rendering semantics, not widened defaults",
+      "no native-device frame or memory budget was measured"
+    ]
   },
   "verification": [
     {
@@ -86,7 +134,7 @@
   "boundaries": [
     "no public API or native ABI change",
     "experimental_backgroundImage remains outside the CSS-to-React-Native allowlist",
-    "native iOS rendering gate is pending and Android remains parked",
+    "native iOS rendering gate passed and Android remains parked",
     "no native-device performance acceptance claim",
     "no publish or push"
   ]

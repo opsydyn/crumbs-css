@@ -1192,4 +1192,10 @@ Next recommended slice: **M2.2bc** — migrate `experimental_backgroundImage` on
 - Effect Schema, provenance and primitive checks share the capture contract. Admitted values are cloned and frozen, and whole-list last-winner composition includes empty-list replacement. Compatibility strings remain outside the CSS-to-React-Native allowlist.
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file. Native rendering remains pending the dedicated packed iOS simulator gate; Android stays parked.
 
-Next recommended slice: **M2.2bd** — execute the dedicated packed iOS native acceptance gate for canonical linear/radial gradients, retain direct light/dark screenshots and record parser/rendering differences; keep Android parked until a separate decision and evidence exist. Begin only after approval.
+### 2026-09-20 — M2.2bd packed iOS background image acceptance
+
+- Added a durable Expo playground gradient matrix covering linear direction keywords and angles, radial extent and explicit x/y sizes, mixed positions and transition hints, transparent/opaque colours, multiple layers and empty-list replacement.
+- Ran the packed `@opsydyn/crumbs-css@0.1.2-alpha.2` consumer on the dedicated Crumbs Acceptance iPhone 17 / iOS 26.5 simulator with Expo Go 56.0.4 and React Native 0.85.3. Direct light/dark screenshots show the canonical gradients render without runtime errors; the explicit radial footprint and transparent regions match the installed semantics, and an empty list clears the layered value.
+- Retained the exact tarball hash, source/runtime/device identity and screenshot hashes in the matching acceptance and qualification records. Android remains parked and no native frame/memory budget is claimed.
+
+Next recommended slice: **M2.3** — route the supported vanilla-extract compatibility adapter into the same native IR, preserving the now-qualified structured property boundary and failing unsupported syntax with source/property context. Begin only after approval.

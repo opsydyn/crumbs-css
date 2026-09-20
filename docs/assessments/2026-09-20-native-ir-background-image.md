@@ -2,7 +2,7 @@
 
 **Slice:** M2.2bc
 **Date:** 2026-09-20
-**Status:** implementation complete; native rendering gate pending
+**Status:** implementation complete; iOS native rendering gate passed; Android qualification parked
 
 ## Decision
 
@@ -28,3 +28,9 @@ The CSS-to-React-Native allowlist remains unchanged, so the experimental propert
 
 - [qualification record](../evidence/2026-09-20-native-ir-background-image/qualification.json)
 - [native acceptance gate](../acceptance/2026-09-20-background-image/README.md)
+
+## M2.2bd acceptance result
+
+The packed Expo consumer rendered the canonical subset on the dedicated Crumbs Acceptance iPhone 17 simulator running iOS 26.5. Direct light and dark captures cover the linear keyword and angle cases, radial extent and explicit x/y sizes, mixed positions with a transition hint, transparent/opaque literals, multiple layers and empty-list replacement. The exact tarball hash and screenshot hashes are in the qualification record.
+
+The explicit radial x/y size appears as a bottom-right positioned footprint, and transparent stop regions reveal the underlying surface. Both match the authored values observed on the installed React Native processor; no implicit defaults were introduced by Crumbs. No runtime error overlay or native crash occurred. This is an iOS gate result only: Android remains parked, and no frame-time or memory budget claim is made.
