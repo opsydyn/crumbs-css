@@ -243,11 +243,65 @@ values must belong to their declared non-empty set. Static style types reject
 colour tokens in length and enum properties while preserving the legacy broad
 token contract for migrations.
 
+### Independent theme contexts (M3.4)
+
+Create one complete base theme, then add sparse brand, colour-mode and density
+layers with `createTokenThemeSnapshot`:
+
+```ts
+import {
+  createTokenThemeSnapshot,
+  type TokenThemeLayer,
+} from "@opsydyn/crumbs-css/tokens"
+
+const theme = createTokenThemeSnapshot(vars, {
+  base: { color: { accent: "#2463eb" }, space: { md: 8 } },
+  contexts: {
+    brand: { color: { accent: "#7c3aed" } },
+    mode: { color: { accent: "#a78bfa" } },
+    density: { space: { md: 6 } },
+  },
+})
+```
+
+Context precedence is fixed and independent of object or provider order:
+
+```text
+base < brand < mode < density
+```
+
+Each layer is sparse and domain-checked. The base remains complete, aliases
+remain derived, and the function publishes one complete values/token snapshot;
+an invalid layer or missing base value fails before a replacement exists. Use
+`createTokenThemeScopedSnapshot` when rebasing layers on an existing complete
+theme.
+
+For React trees, mount a complete `TokenThemeProvider` and compose independent
+layers with `TokenThemeScopeProvider`:
+
+```tsx
+<TokenThemeProvider contract={vars} theme={baseTheme}>
+  <TokenThemeScopeProvider contract={vars} context="brand" values={brand}>
+    <TokenThemeScopeProvider contract={vars} context="mode" values={dark}>
+      <Screen />
+    </TokenThemeScopeProvider>
+  </TokenThemeScopeProvider>
+</TokenThemeProvider>
+```
+
+Nested providers replace the nearest layer for the same context while retaining
+other contexts. The fixed precedence still decides collisions across contexts.
+React portal children retain the provider chain of the tree that owns the
+portal; a portal rendered into an independent React root must mount its own
+complete provider chain. Missing providers and malformed layers report
+`CRUMBS_CSS_TOKEN_THEME_SCOPE_PROVIDER_MISMATCH` or
+`CRUMBS_CSS_TOKEN_THEME_SCOPE_INVALID`.
+
 External or persisted token data should use the dedicated
 `@opsydyn/crumbs-css/tokens/schema` entrypoint. It is the Effect 4 Schema
 boundary; ordinary token authoring does not import Effect. Contract identity,
-provider compatibility and layered aliases use the identified APIs above;
-scopes and atomic updates remain later M3 slices.
+provider compatibility, layered aliases and independent context scopes use the
+identified APIs above; atomic updates remain the next M3 slice.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
@@ -327,6 +381,8 @@ full message text.
 | `CRUMBS_CSS_TOKEN_ALIAS_CYCLE` | Alias traversal found a cycle instead of an acyclic foundation target. |
 | `CRUMBS_CSS_TOKEN_ALIAS_OVERRIDE` | A derived alias leaf was supplied as a theme value. |
 | `CRUMBS_CSS_TOKEN_THEME_PROVIDER_MISMATCH` | Identified provider and consumer contracts differ by identity or canonical shape. |
+| `CRUMBS_CSS_TOKEN_THEME_SCOPE_PROVIDER_MISMATCH` | A scope provider has no complete identified provider for its contract. |
+| `CRUMBS_CSS_TOKEN_THEME_SCOPE_INVALID` | A context layer is unknown, incomplete at its base, or violates a token domain. |
 | `CRUMBS_CSS_INVALID_THEME_CONTRACT` | A contract contains an invalid or misplaced/unregistered native token leaf. |
 | `CRUMBS_CSS_UNSUPPORTED_EXPORT` | `.css.ts` export contains an unsupported value or export name; error includes file and data path. Always fatal. |
 | `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE` | Constructor or resolver rejected a malformed native token reference/name. |

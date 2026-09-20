@@ -21,10 +21,18 @@ import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
 import {
   getThemeContractIdentityKey,
   getThemeContractShapeSignature,
+  getThemeTokenAliasForContract,
+  getThemeTokenDomainForContract,
+  getThemeTokenMetadata,
   type NativeThemeTokenReference,
   assertThemeTokenReference,
+  isRegisteredThemeVar,
   isThemeTokenReferenceCandidate,
 } from "./theme-token"
+import type {
+  TokenThemeContextName,
+  TokenThemeLayer,
+} from "./tokens/domains"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export {
@@ -47,9 +55,14 @@ export type NativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> =
 ) => ReadonlyArray<NativeStyle>
 
 const NativeThemeContext = createContext<NativeThemeContextValue | null>(null)
-type TokenThemeContextValue = ReadonlyMap<string, NativeTheme<Record<string, unknown>>>
+type TokenThemeScopeState = {
+  readonly baseTheme: NativeTheme<Record<string, unknown>>
+  readonly layers: ReadonlyMap<TokenThemeContextName, unknown>
+  readonly theme: NativeTheme<Record<string, unknown>>
+}
+type TokenThemeContextValue = ReadonlyMap<string, TokenThemeScopeState>
 const TokenThemeContext: Context<TokenThemeContextValue | null> = sharedRegistry(
-  Symbol.for("crumbs.css.token-theme-context.v1"),
+  Symbol.for("crumbs.css.token-theme-context.v2"),
   () => createContext<TokenThemeContextValue | null>(null),
 )
 const recipeDiagnosticWarnings = new Set<string>()
@@ -94,7 +107,8 @@ export function TokenThemeProvider<TContract extends Record<string, unknown>>({
   const parent = use(TokenThemeContext)
   const value = useMemo(() => {
     const next = new Map(parent ?? [])
-    next.set(key, theme as NativeTheme<Record<string, unknown>>)
+    const baseTheme = theme as NativeTheme<Record<string, unknown>>
+    next.set(key, {baseTheme, layers: new Map(), theme: baseTheme})
     return next
   }, [key, parent, theme])
   return createElement(
@@ -110,15 +124,76 @@ export function useTokenTheme<TContract extends Record<string, unknown>>(
 ): NativeTheme<TContract> {
   const key = requireTokenContractKey(contract)
   const themes = use(TokenThemeContext)
-  const theme = themes?.get(key)
-  if (theme === undefined) {
+  const state = themes?.get(key)
+  if (state === undefined) {
     throw new Error(formatNativeStylesDiagnostic(
       NativeStylesDiagnosticCode.TokenThemeProviderMismatch,
       `No TokenThemeProvider is active for contract ${JSON.stringify(key)}. Mount TokenThemeProvider with the same identified contract before calling useTokenTheme.`,
     ))
   }
+  const theme = state.theme
   assertTokenThemeCompatibility(contract, theme)
   return theme as NativeTheme<TContract>
+}
+
+export type TokenThemeScopeProviderProps<TContract extends Record<string, unknown>> = {
+  readonly children?: ReactNode
+  readonly contract: TContract
+  readonly context: TokenThemeContextName
+  readonly values: TokenThemeLayer<TContract>
+}
+
+/**
+ * Add one independent brand, mode, or density layer to the nearest complete
+ * token theme. Layers compose by fixed axis precedence, so provider nesting
+ * order cannot change which axis wins when the same token is overridden.
+ */
+export function TokenThemeScopeProvider<TContract extends Record<string, unknown>>({
+  children,
+  contract,
+  context,
+  values,
+}: TokenThemeScopeProviderProps<TContract>): ReactElement {
+  const key = requireTokenContractKey(contract)
+  if (!(TOKEN_THEME_SCOPE_PRECEDENCE as ReadonlyArray<string>).includes(context)) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+      `Unknown token theme context "${String(context)}". Supported contexts: ${TOKEN_THEME_SCOPE_PRECEDENCE.join(", ")}.`,
+    ))
+  }
+  const parent = use(TokenThemeContext)
+  const parentState = parent?.get(key)
+  if (parentState === undefined) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemeScopeProviderMismatch,
+      `No TokenThemeProvider is active for contract ${JSON.stringify(key)}. Mount a complete TokenThemeProvider before adding a ${context} scope.`,
+    ))
+  }
+  assertTokenThemeCompatibility(contract, parentState.theme)
+  const state = useMemo(() => {
+    const layers = new Map(parentState.layers)
+    layers.set(context, values)
+    const theme = materializeTokenThemeScope(
+      contract as Record<string, unknown>,
+      parentState.baseTheme,
+      layers,
+    )
+    return {
+      baseTheme: parentState.baseTheme,
+      layers,
+      theme,
+    } satisfies TokenThemeScopeState
+  }, [contract, context, parentState, values])
+  const nextContext = useMemo(() => {
+    const next = new Map(parent ?? [])
+    next.set(key, state)
+    return next
+  }, [key, parent, state])
+  return createElement(
+    NativeThemeContext.Provider,
+    {value: state.theme},
+    createElement(TokenThemeContext.Provider, {value: nextContext}, children),
+  )
 }
 
 export function isTokenThemeCompatible<TContract extends object>(
@@ -394,6 +469,185 @@ function resolveTokenValue(varName: string, theme: NativeTheme<Record<string, un
       `Theme token "${varName}" is missing from the active native theme`))
   }
   return theme.tokens[varName]
+}
+
+const TOKEN_THEME_SCOPE_PRECEDENCE: ReadonlyArray<TokenThemeContextName> = [
+  "brand",
+  "mode",
+  "density",
+]
+
+function materializeTokenThemeScope(
+  contract: Record<string, unknown>,
+  baseTheme: NativeTheme<Record<string, unknown>>,
+  layers: ReadonlyMap<TokenThemeContextName, unknown>,
+): NativeTheme<Record<string, unknown>> {
+  const tokens: Record<string, string | number> = {...baseTheme.tokens}
+  for (const context of TOKEN_THEME_SCOPE_PRECEDENCE) {
+    const layer = layers.get(context)
+    if (layer !== undefined) applyTokenThemeLayer(contract, contract, layer, [], context, tokens)
+  }
+
+  const resolving = new Set<string>()
+  const resolvePath = (path: ReadonlyArray<string>): string | number => {
+    const reference = getThemeTokenAtPath(contract, path)
+    if (!isRegisteredThemeVar(reference)) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+        `Token theme scope target "${path.join(".")}" is not a registered token.`,
+      ))
+    }
+    const metadata = getThemeTokenMetadata(reference)
+    const alias = getThemeTokenAliasForContract(contract, reference)
+    if (alias === undefined) {
+      const value = tokens[metadata.varName]
+      if (value === undefined) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+          `Complete token theme snapshot is missing "${path.join(".")}".`,
+        ))
+      }
+      return value
+    }
+    const key = pathKey(path)
+    if (resolving.has(key)) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenAliasCycle,
+        `Token alias cycle detected while resolving scoped snapshot at "${path.join(".")}".`,
+      ))
+    }
+    resolving.add(key)
+    const targetReference = getThemeTokenAtPath(contract, alias.targetPath)
+    const target = isRegisteredThemeVar(targetReference)
+      ? resolvePath(alias.targetPath)
+      : alias.fallback
+    if (target === undefined) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+        `Complete token theme snapshot is missing alias target "${alias.targetPath.join(".")}" for "${path.join(".")}".`,
+      ))
+    }
+    resolving.delete(key)
+    tokens[metadata.varName] = target
+    return target
+  }
+
+  const values: Record<string, unknown> = {}
+  collectTokenThemeSnapshot(contract, contract, [], values, resolvePath)
+  return {contract, tokens, values: values as NativeTheme<Record<string, unknown>>["values"]}
+}
+
+function applyTokenThemeLayer(
+  rootContract: Record<string, unknown>,
+  contract: Record<string, unknown>,
+  layer: unknown,
+  path: ReadonlyArray<string>,
+  context: TokenThemeContextName,
+  tokens: Record<string, string | number>,
+): void {
+  if (!isRecord(layer)) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+      `Token theme ${context} scope at "${path.join(".") || "<root>"}" must be a nested record.`,
+    ))
+  }
+  for (const key of Object.keys(layer)) {
+    const contractValue = contract[key]
+    const nextPath = [...path, key]
+    if (contractValue === undefined) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+        `Unknown token theme ${context} scope value "${nextPath.join(".")}".`,
+      ))
+    }
+    const value = layer[key]
+    if (isRegisteredThemeVar(contractValue)) {
+      const alias = getThemeTokenAliasForContract(rootContract, contractValue)
+      if (alias !== undefined) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenAliasOverride,
+          `Token theme ${context} scope value "${nextPath.join(".")}" is derived from an alias and cannot be overridden.`,
+        ))
+      }
+      if (typeof value !== "string" && typeof value !== "number") {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+          `Token theme ${context} scope value "${nextPath.join(".")}" must be a string or number.`,
+        ))
+      }
+      const domain = getThemeTokenDomainForContract(rootContract, contractValue)
+      if (domain !== undefined && !isValidScopedTokenValue(domain, value)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+          `Token theme ${context} scope value "${nextPath.join(".")}" does not satisfy the ${domain.kind} token domain.`,
+        ))
+      }
+      tokens[getThemeTokenMetadata(contractValue).varName] = value
+    } else if (isRecord(contractValue)) {
+      applyTokenThemeLayer(rootContract, contractValue, value, nextPath, context, tokens)
+    } else {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+        `Invalid token contract at "${nextPath.join(".")}".`,
+      ))
+    }
+  }
+}
+
+function collectTokenThemeSnapshot(
+  rootContract: Record<string, unknown>,
+  contract: Record<string, unknown>,
+  path: ReadonlyArray<string>,
+  output: Record<string, unknown>,
+  resolvePath: (path: ReadonlyArray<string>) => string | number,
+): void {
+  for (const [key, contractValue] of Object.entries(contract)) {
+    const nextPath = [...path, key]
+    if (isRegisteredThemeVar(contractValue)) {
+      output[key] = resolvePath(nextPath)
+    } else if (isRecord(contractValue)) {
+      const nested: Record<string, unknown> = {}
+      output[key] = nested
+      collectTokenThemeSnapshot(rootContract, contractValue, nextPath, nested, resolvePath)
+    }
+  }
+}
+
+function getThemeTokenAtPath(root: Record<string, unknown>, path: ReadonlyArray<string>): unknown {
+  let cursor: unknown = root
+  for (const segment of path) {
+    if (!isRecord(cursor) || !Object.prototype.hasOwnProperty.call(cursor, segment)) return undefined
+    cursor = cursor[segment]
+  }
+  return cursor
+}
+
+function pathKey(path: ReadonlyArray<string>): string {
+  return path.map(segment => `${segment.length}:${segment}`).join("/")
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+function isValidScopedTokenValue(
+  domain: { readonly kind: string; readonly [key: string]: unknown },
+  value: string | number,
+): boolean {
+  switch (domain.kind) {
+    case "color": return typeof value === "string" && value.length > 0
+    case "length": {
+      const allowNegative = domain.allowNegative === true
+      if (value === "auto") return true
+      if (typeof value === "number") return Number.isFinite(value) && (allowNegative || value >= 0)
+      const pattern = new RegExp(`^${allowNegative ? "[+-]?" : "\\+?"}(?:\\d+(?:\\.\\d*)?|\\.\\d+)%$`)
+      return pattern.test(value) && Number.isFinite(Number.parseFloat(value))
+    }
+    case "duration": return typeof value === "number" && Number.isFinite(value) && value >= 0
+    case "opacity": return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 1
+    case "enum": return typeof value === "string" && Array.isArray(domain.values) && domain.values.includes(value)
+    default: return false
+  }
 }
 
 function requireTokenContractKey(contract: object): string {

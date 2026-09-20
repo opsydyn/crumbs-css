@@ -31,7 +31,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; M0.1 and M0.2 closed for documented compiler contracts; native Android acceptance deferred |
 | M1 | Select Effect 4 boundary implementation and establish budgets | M0 | In progress; M1.1/M1.2 artifact/API and initial shape contracts complete; native Android remains deferred |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
-| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 through M3.3 closed |
+| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 through M3.4 closed |
 | M4 | Shared resolution, compiled selection, and bounded caches | M2, M3 | Not started |
 | M5 | Native Sprinkles and composition API completeness | M2, M3, M4 | Not started |
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
@@ -158,7 +158,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M3.1: Define colour, length, duration, opacity, and property-enum domains; generate or reconcile runtime schemas and static authoring types. Verify both positive native cases and rejected colour-to-spacing/enum mismatches.
 - [x] M3.2: Implement stable contract/package identity, a contract-bound provider/hook interface, and deterministic public token IDs. Test duplicate package copies, evaluation order, hot reload, and identical paths across distinct contracts.
 - [x] M3.3: Add foundation → semantic → component aliases with missing-target/domain/cycle diagnostics and traceable origin. Required tokens stay required; optional fallbacks are explicit.
-- [ ] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
+- [x] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
 - [ ] M3.5: Add immutable theme patches and external-theme decoding. Update canonical values and derived token/index data atomically. Invalid patches leave the current snapshot untouched and return structured context.
 - [ ] M3.6: Use reusable Optic focuses for useful nested transformations. Validate domain-changing results; test semantic lens laws, old-snapshot preservation, and promised structural sharing separately.
 - [ ] M3.7: Add migration notes for legacy unscoped tokens and the permissive `string | number` contract. Preserve a bounded compatibility path without allowing old tokens to bind silently to unrelated contracts.
@@ -1270,6 +1270,14 @@ Next recommended slice: **M3.2** — add stable contract/package identity, a con
 - Added explicit fallback handling for structurally missing targets. Missing targets, declared/target domain mismatches, invalid fallback values, cycles and alias overrides return stable diagnostics before a contract or theme snapshot is published.
 - Alias references retain immutable target metadata and a complete origin chain. `getTokenOrigin` exposes the public ID, target and foundation-to-component path for diagnostics and future impact tooling.
 - Identity shape signatures include alias targets and fallbacks, so duplicate copies and hot reload cannot silently reuse a changed alias graph. Focused alias, identity, domain, ownership, runtime and public API tests pass.
-- [Assessment](assessments/2026-09-20-layered-token-aliases.md) records the semantics and limits. Scope axes, atomic patches and external alias manifests remain later M3 work; no publication or push occurred.
+- [Assessment](assessments/2026-09-20-layered-token-aliases.md) records the semantics and limits. Atomic patches and external alias manifests remain later M3 work; no publication or push occurred.
 
-Next recommended slice: **M3.4** — add independent brand/mode/density contexts with documented merge and override precedence, complete-snapshot validation, nested scopes and portal ownership. Begin only after approval.
+### 2026-09-20 — M3.4 independent theme contexts and nested scopes
+
+- Added sparse `brand`, `mode` and `density` context layers with a fixed `brand → mode → density` precedence. `createTokenThemeSnapshot` validates the complete base and every context layer before publishing one coherent values/token map; `createTokenThemeScopedSnapshot` rebases layers on an existing complete theme.
+- Added `TokenThemeScopeProvider`. Nested providers replace only the nearest layer for the same context, preserve other axes and use fixed precedence regardless of nesting order. React portals retain the provider chain of their owning tree; independent roots require an explicit complete provider chain.
+- Alias leaves remain derived and cannot be overridden by a context. Malformed or domain-invalid layers fail with structured scope diagnostics before a partial snapshot can escape.
+- Focused context properties, type fixtures, alias regression coverage, package typechecking and public API tests pass. The ordinary runtime remains Effect-free; external decoding and atomic patches remain later M3 work. No publication or push occurred; protected release/version edits remain outside the slice.
+- [Assessment](assessments/2026-09-20-independent-theme-contexts.md) records the precedence, nested-scope and portal ownership contract.
+
+Next recommended slice: **M3.5** — add immutable theme patches and external-theme decoding, publishing canonical values and all derived token/index data atomically. Begin only after approval.

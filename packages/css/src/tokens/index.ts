@@ -1,6 +1,9 @@
 export {
   createTokenContract,
   createTokenTheme,
+  createTokenThemeScope,
+  createTokenThemeScopedSnapshot,
+  createTokenThemeSnapshot,
   alias,
   defineAlias,
   defineToken,
@@ -25,7 +28,12 @@ export type {
   TokenDefinitionInput,
   TokenDomainDefinition,
   TokenThemeValues,
+  TokenThemeContextName,
+  TokenThemeContexts,
+  TokenThemeLayer,
+  TokenThemeSnapshotInput,
 } from "./domains"
+export { TOKEN_THEME_CONTEXT_PRECEDENCE } from "./domains"
 export type {TokenContractIdentity, TokenContractIdentityInput} from "./identity"
 export type {
   DomainThemeVar,

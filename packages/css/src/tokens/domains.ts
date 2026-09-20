@@ -172,6 +172,30 @@ export type TokenThemeValues<TContract> = TContract extends { readonly [tokenCon
       : never
 }
 
+/** Independent theme axes are merged after the canonical base snapshot. */
+export const TOKEN_THEME_CONTEXT_PRECEDENCE = Object.freeze([
+  "brand",
+  "mode",
+  "density",
+] as const)
+export type TokenThemeContextName = (typeof TOKEN_THEME_CONTEXT_PRECEDENCE)[number]
+
+type TokenThemeLayerNode<TValue> = TValue extends ReadonlyArray<unknown>
+  ? TValue
+  : TValue extends Readonly<Record<string, unknown>>
+    ? { readonly [K in keyof TValue]?: TokenThemeLayerNode<TValue[K]> }
+    : TValue
+
+/** A sparse, domain-checked override for one independent theme context. */
+export type TokenThemeLayer<TContract> = TokenThemeLayerNode<TokenThemeValues<TContract>>
+export type TokenThemeContexts<TContract> = {
+  readonly [K in TokenThemeContextName]?: TokenThemeLayer<TContract>
+}
+export type TokenThemeSnapshotInput<TContract> = {
+  readonly base: TokenThemeValues<TContract>
+  readonly contexts?: TokenThemeContexts<TContract>
+}
+
 export function defineToken<const TDefinition extends TokenDomainDefinition>(
   definition: TDefinition,
 ): TokenDefinition<NormalizedDomain<TDefinition>>
@@ -332,6 +356,162 @@ export function createTokenTheme<TContract extends Readonly<Record<string, unkno
 ): NativeTheme<TContract> {
   const resolvedValues = resolveTokenThemeValues(contract, values as unknown)
   return createTheme(contract, resolvedValues as never)
+}
+
+/**
+ * Build one complete theme snapshot from a required base and sparse context
+ * layers. The layers are always applied in the documented brand → mode →
+ * density order, regardless of object insertion order or provider nesting.
+ */
+export function createTokenThemeSnapshot<TContract extends Readonly<Record<string, unknown>>>(
+  contract: TContract,
+  input: TokenThemeSnapshotInput<TContract>,
+): NativeTheme<TContract> {
+  // Validate the base before accepting any context data. A context must never
+  // be able to hide an incomplete or malformed foundation snapshot.
+  createTokenTheme(contract, input.base)
+  const merged = cloneThemeValue(input.base as unknown)
+  for (const context of Object.keys(input.contexts ?? {})) {
+    if (!(TOKEN_THEME_CONTEXT_PRECEDENCE as ReadonlyArray<string>).includes(context)) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+        `Unknown token theme context "${context}". Supported contexts: ${TOKEN_THEME_CONTEXT_PRECEDENCE.join(", ")}.`,
+      ))
+    }
+  }
+  for (const context of TOKEN_THEME_CONTEXT_PRECEDENCE) {
+    const layer = input.contexts?.[context]
+    if (layer === undefined) continue
+    validateTokenThemeLayer(contract, contract, layer, [], context)
+    mergeThemeLayer(merged, layer)
+  }
+  return createTokenTheme(contract, merged as TokenThemeValues<TContract>)
+}
+
+/**
+ * Rebase independent context layers on an already validated theme. This is
+ * used by nested providers so every emitted value/token map is one complete
+ * immutable snapshot rather than a partially resolved overlay.
+ */
+export function createTokenThemeScopedSnapshot<TContract extends Readonly<Record<string, unknown>>>(
+  contract: TContract,
+  baseTheme: NativeTheme<TContract>,
+  contexts: TokenThemeContexts<TContract>,
+): NativeTheme<TContract> {
+  const baseValues = extractBaseThemeValues(contract, baseTheme)
+  return createTokenThemeSnapshot(contract, {base: baseValues, contexts})
+}
+
+/** Concise alias for callers that model a scope as a resolved snapshot. */
+export const createTokenThemeScope = createTokenThemeScopedSnapshot
+
+function validateTokenThemeLayer(
+  rootContract: Readonly<Record<string, unknown>>,
+  contract: Readonly<Record<string, unknown>>,
+  layer: unknown,
+  path: ReadonlyArray<string>,
+  context: TokenThemeContextName,
+): void {
+  if (!isRecord(layer)) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+      `Token theme ${context} scope at "${formatPath(path)}" must be a nested record of token overrides.`,
+    ))
+  }
+  const contractKeys = new Set(Object.keys(contract))
+  for (const key of Object.keys(layer)) {
+    if (!contractKeys.has(key)) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+        `Unknown token theme ${context} scope value "${formatPath([...path, key])}".`,
+      ))
+    }
+  }
+  for (const [key, value] of Object.entries(layer)) {
+    const contractValue = contract[key]
+    const nextPath = [...path, key]
+    if (isThemeVar(contractValue)) {
+      const alias = getThemeTokenAliasForContract(rootContract, contractValue)
+      if (alias !== undefined) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenAliasOverride,
+          `Token theme ${context} scope value "${formatPath(nextPath)}" is derived from an alias and cannot be overridden.`,
+        ))
+      }
+      if (typeof value !== "string" && typeof value !== "number") {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+          `Token theme ${context} scope value "${formatPath(nextPath)}" must be a string or number.`,
+        ))
+      }
+      const domain = getThemeTokenDomainForContract(rootContract, contractValue)
+      if (domain !== undefined && !isTokenDomainValue(domain, value)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+          `Token theme ${context} scope value "${formatPath(nextPath)}" does not satisfy the ${domain.kind} token domain.`,
+        ))
+      }
+    } else if (isRecord(contractValue)) {
+      validateTokenThemeLayer(rootContract, contractValue, value, nextPath, context)
+    } else {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.InvalidThemeContract,
+        `Invalid token contract at "${formatPath(nextPath)}".`,
+      ))
+    }
+  }
+}
+
+function mergeThemeLayer(target: unknown, layer: unknown): void {
+  if (!isRecord(target) || !isRecord(layer)) return
+  for (const [key, value] of Object.entries(layer)) {
+    if (isRecord(value)) {
+      const existing = target[key]
+      if (isRecord(existing)) mergeThemeLayer(existing, value)
+      else target[key] = cloneThemeValue(value)
+    } else target[key] = value
+  }
+}
+
+function cloneThemeValue(value: unknown): unknown {
+  if (!isRecord(value)) return value
+  const result: Record<string, unknown> = {}
+  for (const [key, nested] of Object.entries(value)) result[key] = cloneThemeValue(nested)
+  return result
+}
+
+function extractBaseThemeValues<TContract extends Readonly<Record<string, unknown>>>(
+  contract: TContract,
+  theme: NativeTheme<TContract>,
+): TokenThemeValues<TContract> {
+  const output: Record<string, unknown> = {}
+  collectBaseThemeValues(contract, contract, theme, [], output)
+  return output as TokenThemeValues<TContract>
+}
+
+function collectBaseThemeValues(
+  rootContract: Readonly<Record<string, unknown>>,
+  contract: Readonly<Record<string, unknown>>,
+  theme: NativeTheme<Record<string, unknown>>,
+  path: ReadonlyArray<string>,
+  output: Record<string, unknown>,
+): void {
+  for (const [key, contractValue] of Object.entries(contract)) {
+    const nextPath = [...path, key]
+    if (isThemeVar(contractValue)) {
+      if (getThemeTokenAliasForContract(rootContract, contractValue) !== undefined) continue
+      const varName = getThemeVarName(contractValue)
+      if (!Object.prototype.hasOwnProperty.call(theme.tokens, varName)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenThemeScopeInvalid,
+          `Base theme is missing token "${formatPath(nextPath)}" while creating a scoped snapshot.`,
+        ))
+      }
+      setPathValue(output, nextPath, theme.tokens[varName] as string | number)
+    } else if (isRecord(contractValue)) {
+      collectBaseThemeValues(rootContract, contractValue, theme, nextPath, output)
+    }
+  }
 }
 
 export function isTokenDomainValue(domain: TokenDomain, value: unknown): boolean {

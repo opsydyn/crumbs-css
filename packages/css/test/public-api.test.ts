@@ -38,6 +38,7 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "NativeThemeTokenReferenceType",
       "ThemeProvider",
       "TokenThemeProvider",
+      "TokenThemeScopeProvider",
       "createRecipeResolver",
       "createThemeTokenReference",
       "isThemeTokenReference",
@@ -54,11 +55,15 @@ describe("@opsydyn/crumbs-css public API contract", () => {
 
   it("exposes domain contracts separately from the Effect-backed schema entrypoint", () => {
     expect(namedApiKeys(tokenApi)).toEqual([
+      "TOKEN_THEME_CONTEXT_PRECEDENCE",
       "TokenAliasDefinitionType",
       "TokenDefinitionType",
       "alias",
       "createTokenContract",
       "createTokenTheme",
+      "createTokenThemeScope",
+      "createTokenThemeScopedSnapshot",
+      "createTokenThemeSnapshot",
       "defineAlias",
       "defineToken",
       "getTokenContractIdentity",

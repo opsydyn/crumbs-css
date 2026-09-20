@@ -12,6 +12,8 @@ export const NativeStylesDiagnosticCode = {
   TokenAliasFallbackDomainMismatch: "CRUMBS_CSS_TOKEN_ALIAS_FALLBACK_DOMAIN_MISMATCH",
   TokenAliasOverride: "CRUMBS_CSS_TOKEN_ALIAS_OVERRIDE",
   TokenThemeProviderMismatch: "CRUMBS_CSS_TOKEN_THEME_PROVIDER_MISMATCH",
+  TokenThemeScopeProviderMismatch: "CRUMBS_CSS_TOKEN_THEME_SCOPE_PROVIDER_MISMATCH",
+  TokenThemeScopeInvalid: "CRUMBS_CSS_TOKEN_THEME_SCOPE_INVALID",
   InvalidThemeContract: "CRUMBS_CSS_INVALID_THEME_CONTRACT",
   PartialRecipePayload: "CRUMBS_CSS_PARTIAL_RECIPE_PAYLOAD",
   UnsupportedAtRule: "CRUMBS_CSS_UNSUPPORTED_AT_RULE",
