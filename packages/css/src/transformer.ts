@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs"
 import { createRequire } from "node:module"
 import * as path from "node:path"
 import * as vm from "node:vm"
-import type { Adapter, FileScope } from "@vanilla-extract/css"
+import type { Adapter } from "@vanilla-extract/css"
 import * as vanillaAdapter from "@vanilla-extract/css/adapter"
 import { transformCss } from "@vanilla-extract/css/transformCss"
 import {
@@ -12,7 +12,6 @@ import {
   getSourceFromVirtualCssFile,
   parseFileScope,
   serializeCss,
-  serializeVanillaModule,
   stringifyFileScope,
 } from "@vanilla-extract/integration"
 import { cssDeclarationsToRN } from "./css-to-rn"
@@ -25,7 +24,6 @@ import { getNativeCaptureMetadata } from "./compiler/native-capture"
 import { captureCompatibilityIntoNativeIr } from "./compiler/compatibility-adapter"
 import { emitStyleSheetModule, type BuildStyleSheetCodeOptions } from "./compiler/code-emission"
 import { analyseDependencyImports } from "./compiler/dependency-analysis"
-import { collectStyleExports } from "./compiler/export-admission"
 import { indexStyleExportOwnership } from "./compiler/export-ownership"
 import {
   captureScalarIntoNativeIr,
@@ -48,6 +46,10 @@ type EsbuildPlugin = { name: string; setup: (build: unknown) => void }
 type Composition = { identifier: string; classList: string }
 type CssBlock = Parameters<typeof transformCss>[0]["cssObjs"][number]
 type StyleExportValue = unknown
+type CapturedNativeModule = {
+  readonly exports: Record<string, unknown>
+  readonly virtualCssPaths: ReadonlyArray<string>
+}
 export type TransformCssTsOptions = {
   readonly strictDiagnostics?: boolean
   readonly useStyleSheet?: boolean
@@ -154,7 +156,6 @@ async function processVanillaFileForNative({
   filePath,
   outputCss = true,
   identOption = process.env.NODE_ENV === "production" ? "short" : "debug",
-  serializeVirtualCssPath,
   nativeValuesByClass,
   nativeIrByClass,
   nativeStructuredIrByClass,
@@ -164,16 +165,11 @@ async function processVanillaFileForNative({
   filePath: string
   outputCss?: boolean
   identOption?: ReturnType<Adapter["getIdentOption"]>
-  serializeVirtualCssPath?: (file: {
-    fileName: string
-    fileScope: FileScope
-    source: string
-  }) => string | Promise<string>
   nativeValuesByClass: Map<string, Record<string, unknown>>
   nativeIrByClass: Map<string, ScalarDeclarationBlock>
   nativeStructuredIrByClass: Map<string, StructuredDeclarationBlock>
   projectRoot: string
-}): Promise<string> {
+}): Promise<CapturedNativeModule> {
   const cssByFileScope = new Map<string, CssBlock[]>()
   const localClassNames = new Set<string>()
   const composedClassLists: Composition[] = []
@@ -248,7 +244,7 @@ async function processVanillaFileForNative({
     restoreNodeEnv(currentNodeEnv)
   }
 
-  const cssImports: string[] = []
+  const virtualCssPaths: string[] = []
   for (const [serialisedFileScope, fileScopeCss] of cssByFileScope) {
     const fileScope = parseFileScope(serialisedFileScope)
     vanillaAdapter.setAdapter(cssAdapter)
@@ -264,11 +260,7 @@ async function processVanillaFileForNative({
     }
 
     const fileName = `${fileScope.filePath}.vanilla.css`
-    const virtualCssFilePath =
-      serializeVirtualCssPath !== undefined
-        ? await serializeVirtualCssPath({ fileName, fileScope, source: css })
-        : `import '${fileName}?source=${await serializeCss(css)}';`
-    cssImports.push(virtualCssFilePath)
+    virtualCssPaths.push(`${fileName}?source=${await serializeCss(css)}`)
   }
 
   const unusedCompositions = composedClassLists
@@ -277,12 +269,11 @@ async function processVanillaFileForNative({
   const unusedCompositionRegex =
     unusedCompositions.length > 0 ? RegExp(`(${unusedCompositions.join("|")})\\s`, "g") : null
 
-  return serializeVanillaModule(
-    cssImports,
-    captureNativeExports(evalResult as Record<string, unknown>, filePath,
+  return {
+    exports: captureNativeExports(evalResult as Record<string, unknown>, filePath,
       new Set([...localClassNames, ...composedClassLists.map(entry => entry.classList)]), unusedCompositionRegex),
-    null,
-  )
+    virtualCssPaths: Object.freeze(virtualCssPaths),
+  }
 }
 
 /**
@@ -321,7 +312,7 @@ export async function transformCssTsToStyleSheet(
   const nativeValuesByClass = new Map<string, Record<string, unknown>>()
   const nativeIrByClass = new Map<string, ScalarDeclarationBlock>()
   const nativeStructuredIrByClass = new Map<string, StructuredDeclarationBlock>()
-  const vanillaFile = await processVanillaFileForNative({
+  const nativeModule = await processVanillaFileForNative({
     source,
     filePath: absoluteFilePath,
     identOption,
@@ -331,27 +322,11 @@ export async function transformCssTsToStyleSheet(
     projectRoot: cwd,
   })
 
-  const lines = vanillaFile.split("\n")
-
-  // The vanilla file can have multiple virtual CSS import lines (one per file in
-  // the import graph). Collect all of them so classes from transitive deps are
-  // available for composition resolution, but only the entry file's classes end
-  // up in the final StyleSheet.
-  const virtualImportRe = /^import\s+'([^']+\.vanilla\.css[^']*)';$/
-  const virtualPaths: string[] = []
-  let firstNonImportIdx = 0
-  for (let i = 0; i < lines.length; i++) {
-    const m = virtualImportRe.exec(lines[i] ?? "")
-    if (m !== null) {
-      const vp = m[1]
-      if (vp !== undefined) virtualPaths.push(vp)
-      firstNonImportIdx = i + 1
-    }
-  }
-
-  const exportMap = new Map<string, StyleExportValue>()
-  const remaining = lines.slice(firstNonImportIdx).join("\n")
-  collectStyleExports(remaining, exportMap, absoluteFilePath)
+  // Virtual CSS paths and safe named exports come from one compiler pass. The
+  // final native module never serializes this data into a vanilla module and
+  // evaluates it again merely to recover the same values.
+  const virtualPaths = nativeModule.virtualCssPaths
+  const exportMap = new Map<string, StyleExportValue>(Object.entries(nativeModule.exports))
   const exportOwnership = indexStyleExportOwnership(exportMap)
 
   const classStyles = new Map<string, Record<string, unknown>>()

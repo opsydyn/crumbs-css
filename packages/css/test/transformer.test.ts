@@ -3,7 +3,6 @@ import { consumerFixtures } from "../test-support/consumer-fixtures"
 import * as path from "node:path"
 import { runInNewContext } from "node:vm"
 import { buildStyleSheetCode, transform } from "../src/transformer"
-import { collectStyleExports } from "../src/compiler/export-admission"
 
 const PKG_ROOT = path.resolve(__dirname, "..")
 const FIXTURE = path.resolve(PKG_ROOT, "fixtures/simple.css.ts")
@@ -108,16 +107,6 @@ describe("buildStyleSheetCode", () => {
     expect(code).not.toContain(`from "react-native"`)
     expect(code).toContain("const _s = {")
     expect(code).toContain("export const title = _s[")
-  })
-})
-
-describe("compatibility export admission", () => {
-  it("fails with file context instead of reconstructing exports through regex", () => {
-    expect(() => collectStyleExports(
-      "export const broken = (() => { throw new Error('unsupported'); })();",
-      new Map(),
-      "styles/broken.css.ts",
-    )).toThrow(/CRUMBS_CSS_UNSUPPORTED_EXPORT.*styles\/broken\.css\.ts/)
   })
 })
 

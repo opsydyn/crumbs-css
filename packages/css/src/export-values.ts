@@ -1,6 +1,7 @@
 import {NativeStylesDiagnosticCode} from "./diagnostics"
 import {NativeStylesCompatibilityError} from "./native-compatibility"
 import {isNativeStyleMap, NativeRecipeClassSymbol, NativeStyleMapSymbol, NativeStyleMapType} from "./native-style-map"
+import {NativeModuleMetadataExportName} from "./compiler/native-module-metadata"
 
 export const ExportRecordType = "crumbs.css.export-record"
 export const ExportStringType = "crumbs.css.export-string"
@@ -57,6 +58,7 @@ export function captureNativeExports(exports: Record<string, unknown>, filePath:
   // esbuild emits getters for module exports; evaluate those bindings once here.
   return Object.fromEntries(Object.keys(exports).map(name => {
     if (reservedBindings.has(name) || !/^[A-Za-z_$][\w$]*$/.test(name)) reject(name, "only named ASCII binding identifiers are supported")
+    if (name === NativeModuleMetadataExportName) reject(name, `"${NativeModuleMetadataExportName}" is reserved for generated native module metadata`)
     return [name, capture(exports[name], name)]
   }))
 }

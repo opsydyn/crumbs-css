@@ -145,7 +145,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [x] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [x] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
-- [ ] M2.6: Emit direct native modules and minimal token/condition metadata. Confirm structured values, ordinary exports, empty styles, and theme descriptors retain their specified meaning.
+- [x] M2.6: Emit direct native modules and minimal token/condition metadata. Confirm structured values, ordinary exports, empty styles, and theme descriptors retain their specified meaning.
 - [ ] M2.7: Verify real dependency changes rebuild baked importer values. Include nested `.css.ts` imports, plain token modules, monorepo dependencies, target/config changes, and compiler updates before adding persistent caching.
 
 **Exit:** native input no longer depends on the CSS round-trip for supported semantics; independent preservation and ordering properties pass; malformed artifacts fail deterministically; cold/warm compiler and emitted-size budgets pass; actual Metro invalidation is demonstrated.
@@ -1228,3 +1228,12 @@ Next recommended slice: **M2.5** — version encoded artifacts and test compatib
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file. No public authoring API, external artifact publication, native-device acceptance or Android qualification changed.
 
 Next recommended slice: **M2.6** — emit direct native modules and minimal token/condition metadata. Confirm structured values, ordinary exports, empty styles and theme descriptors retain their specified meaning. Begin only after approval.
+
+### 2026-09-20 — M2.6 direct native module emission
+
+- The transformer now carries captured named exports and virtual CSS paths directly from the required vanilla-extract authoring evaluation into native lowering. It no longer serialises a vanilla module and re-evaluates that generated text merely to recover the same data.
+- Every emitted native module has a frozen internal `__crumbsModule` descriptor with the `crumbs.css.native-module` tag, version `1`, sorted unique token variable names from surviving final styles, and a frozen empty `conditions` list. Source export admission and the final emitter both reserve that name, preventing user data from shadowing generated metadata.
+- The direct path retains structured style values, ordinary tag-shaped data, empty styles and theme descriptors. It does not introduce condition programs, a public metadata API, an external artifact ABI, publication, native-device acceptance or Android qualification.
+- Focused and full compiler checks are recorded with the consumer, documentation and host qualification results in the matching evidence file.
+
+Next recommended slice: **M2.7** — demonstrate that real dependency changes invalidate baked importer values across nested CSS modules, plain token modules, monorepo dependencies, compiler versions, targets and configuration before persistent caching is added. Begin only after approval.

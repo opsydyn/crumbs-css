@@ -517,3 +517,22 @@ The stage contracts are independently tested alongside the existing transformer 
 Approved M2.5 keeps the existing version-1 native artifact schema and adds an explicit reader registry around it. A reader probes the plain-data envelope's own `_tag` and positive integer `version`, selects a registered lossless codec, and reports `CRUMBS_CONTRACT_UNSUPPORTED_VERSION` when the reader cannot handle that wire version. Malformed envelopes continue through the canonical payload codec so descriptor-safe admission and structured issue paths remain one authority; version probes never execute accessors.
 
 Codec laws are scoped to the admitted version-1 domain. JSON encode/decode preserves authored declaration order and values, while the reader contains no native lowering or generated-module emission. An empty reader registry provides an explicit incompatible-reader test without changing the artifact codec or public authoring API. [Implementation assessment](../assessments/2026-09-20-versioned-artifact-reader.md) and the [qualification record](../evidence/2026-09-20-versioned-artifact-reader/qualification.json) record the boundary.
+
+### Direct native module emission — 2026-09-20
+
+Approved M2.6 removes the intermediate vanilla-module serialisation and second data-reconstruction evaluation after the required vanilla-extract authoring evaluation. The transformer carries descriptor-safe captured named exports and virtual CSS paths directly into the existing native lowering and deterministic emission stages.
+
+Each generated native module declares a frozen, reserved internal `__crumbsModule` descriptor:
+
+```ts
+{
+  $$type: "crumbs.css.native-module",
+  version: 1,
+  tokens: readonly string[],
+  conditions: readonly [],
+}
+```
+
+`tokens` is sorted and deduplicated from theme-token references in the final lowered style table, after composition has removed dead declarations. `conditions` is deliberately empty until M6 defines condition-program semantics. Source export admission and the final emitter both reject the reserved name rather than allowing generated metadata to be overwritten. Structured styles, ordinary data, empty styles and theme descriptors retain their existing emitted meanings.
+
+This descriptor is compiler-internal metadata, not the M2.5 artifact wire envelope or a public consumer API. It carries no source/provenance identity and does not qualify cache invalidation, condition programs, native-device behaviour or Android. [Implementation assessment](../assessments/2026-09-20-direct-native-module-emission.md) and the [qualification record](../evidence/2026-09-20-direct-native-module-emission/qualification.json) record the boundary.

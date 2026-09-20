@@ -1,0 +1,93 @@
+{
+  "slice": "M2.6",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "cd1f78f3ba65f0f18005c3cd07fa7a6b56224698",
+  "sourceState": "Working tree qualified before commit; unrelated release-version edits were preserved",
+  "emission": {
+    "capture": "One required vanilla-extract authoring evaluation returns descriptor-safe named exports and virtual CSS paths directly to native lowering",
+    "removedRoundTrip": "No serialized vanilla module is parsed or re-evaluated to reconstruct exports",
+    "descriptor": {
+      "binding": "__crumbsModule",
+      "type": "crumbs.css.native-module",
+      "version": 1,
+      "tokens": "sorted unique theme-token variable names from surviving final styles",
+      "conditions": "frozen empty list pending M6 condition-program semantics"
+    },
+    "reservedBindingDiagnostic": "CRUMBS_CSS_UNSUPPORTED_EXPORT",
+    "directEmitterCollision": "Rejected before code generation"
+  },
+  "verification": [
+    {
+      "command": "bun test packages/css/test/m2-6-native-module-emission.test.ts",
+      "status": "passed",
+      "tests": 6,
+      "assertions": 15
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "tests": 639,
+      "assertions": 22685,
+      "files": 106
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "pages": 20
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "claim": "declared host smoke ceilings only; not Hermes, native rendering or device-frame performance"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run"
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "The valid registry remains thresholds-pending-review; JS/UI frame-time and allocation baselines are missing, and retained-memory remains diagnostic"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "CRUMBS_AUDIT_NODE_FLOOR is unset and the exact Node v22.0.0 floor binary is unavailable; current Node is v24.15.0"
+    }
+  ],
+  "boundaries": {
+    "publicApiChanged": false,
+    "effectConsumerRequirementChanged": false,
+    "externalArtifactAbiChanged": false,
+    "conditionProgramsAdded": false,
+    "metroDependencyInvalidationQualified": false,
+    "published": false,
+    "pushed": false,
+    "nativeDeviceAccepted": false,
+    "androidAccepted": false
+  }
+}

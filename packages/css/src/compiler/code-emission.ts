@@ -1,5 +1,6 @@
 import { ExportNegativeZeroType, ExportRecordType, ExportStringType, ExportUndefinedType } from "../export-values"
 import { NativeStyleMapType } from "../native-style-map"
+import { emitNativeModuleMetadata, NativeModuleMetadataExportName } from "./native-module-metadata"
 import { sortedOwnEnumerableDataEntries } from "./record-admission"
 
 export type BuildStyleSheetCodeOptions = {
@@ -17,6 +18,10 @@ export function emitStyleSheetModule(
   depRelativePaths: ReadonlyArray<string> = [],
   options: BuildStyleSheetCodeOptions = {},
 ): string {
+  if (exportMap.has(NativeModuleMetadataExportName)) {
+    throw new TypeError(`Native module export "${NativeModuleMetadataExportName}" is reserved for generated metadata`)
+  }
+
   const useStyleSheet = options.useStyleSheet ?? true
   const createEntries = [...classStyles.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
@@ -39,6 +44,7 @@ export function emitStyleSheetModule(
     useStyleSheet
       ? `const _s = StyleSheet.create({\n${createEntries}\n});`
       : `const _s = {\n${createEntries}\n};`,
+    emitNativeModuleMetadata(classStyles),
     exports,
   ].filter(Boolean)
 
