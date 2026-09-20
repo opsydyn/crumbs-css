@@ -119,7 +119,7 @@ The pre-M3 `createThemeContract` API remains path-scoped for migration. A token'
 
 The legacy registry is shared across Crumbs package copies in one JavaScript realm, but exact-path reuse still deliberately shares legacy token identity. It does not establish provider compatibility or make unscoped tokens safe to exchange across independently versioned packages. Namespace legacy contract roots by design system/package, avoid sanitizer collisions, and regenerate dependent artifacts after changing paths. Use the identified domain contract API below for distributed design-system packages.
 
-### Domain token contracts (M3.1–M3.2)
+### Domain token contracts and layered aliases (M3.1–M3.3)
 
 Use `@opsydyn/crumbs-css/tokens` for new domain-aware contracts:
 
@@ -176,6 +176,63 @@ the contract-shape signature. A generic hook assertion cannot make an
 incompatible provider valid. Unidentified legacy contracts continue to use
 the ordinary `ThemeProvider`/`useTheme` migration path.
 
+### Layered aliases (M3.3)
+
+Use `defineAlias` (or its concise `alias` spelling) to connect foundation,
+semantic and component tokens by exact contract paths:
+
+```ts
+import {
+  createTokenContract,
+  createTokenTheme,
+  defineAlias,
+  defineToken,
+  getTokenOrigin,
+} from "@opsydyn/crumbs-css/tokens"
+
+export const vars = createTokenContract({
+  foundation: {
+    color: { blue500: defineToken("color") },
+    space: { md: defineToken("length") },
+  },
+  semantic: {
+    accent: defineAlias("foundation.color.blue500"),
+    controlGap: defineAlias(["foundation", "space", "md"]),
+  },
+  component: {
+    button: { background: defineAlias("semantic.accent") },
+  },
+}, {
+  identity: { owner: "@acme/tokens", name: "layers", version: 1 },
+})
+
+const theme = createTokenTheme(vars, {
+  foundation: { color: { blue500: "#2463eb" }, space: { md: 8 } },
+})
+
+getTokenOrigin(vars.component.button.background)
+```
+
+Alias leaves are derived and are omitted from `createTokenTheme` values. Every
+`defineToken` leaf remains required. A target must exist in the contract unless
+the alias explicitly declares both a domain and a fallback:
+
+```ts
+const vars = createTokenContract({
+  semantic: {
+    accent: defineAlias("foundation.color.missing", {
+      domain: "color",
+      fallback: "#7c3aed",
+    }),
+  },
+})
+```
+
+Aliases are domain-checked, cycle-checked and immutable at the contract
+boundary. `getTokenOrigin` returns the alias path, target and complete
+foundation-to-component chain for diagnostics and impact tooling. Supplying an
+alias value directly is rejected with `CRUMBS_CSS_TOKEN_ALIAS_OVERRIDE`.
+
 Colour, length, duration, opacity and property-enum references keep the native
 `var(--crumbs-…)` representation but carry a domain-aware authoring type.
 `createTokenTheme` and `createTheme` validate the associated values before
@@ -189,8 +246,8 @@ token contract for migrations.
 External or persisted token data should use the dedicated
 `@opsydyn/crumbs-css/tokens/schema` entrypoint. It is the Effect 4 Schema
 boundary; ordinary token authoring does not import Effect. Contract identity,
-provider compatibility now use the identified API above; aliases, scopes and
-atomic updates remain later M3 slices.
+provider compatibility and layered aliases use the identified APIs above;
+scopes and atomic updates remain later M3 slices.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
@@ -263,6 +320,13 @@ full message text.
 | Code | Meaning |
 | --- | --- |
 | `CRUMBS_CSS_THEME_TOKEN_COLLISION` | Different raw paths claim the same legacy native token name; the contract is not registered. |
+| `CRUMBS_CSS_TOKEN_CONTRACT_IDENTITY_COLLISION` | A stable contract identity is reused with a different path/domain/alias shape. |
+| `CRUMBS_CSS_TOKEN_ALIAS_MISSING_TARGET` | An alias target is absent and no explicit domain-checked fallback was declared. |
+| `CRUMBS_CSS_TOKEN_ALIAS_DOMAIN_MISMATCH` | An alias's declared domain differs from its target domain. |
+| `CRUMBS_CSS_TOKEN_ALIAS_FALLBACK_DOMAIN_MISMATCH` | An alias fallback does not satisfy its target or declared domain. |
+| `CRUMBS_CSS_TOKEN_ALIAS_CYCLE` | Alias traversal found a cycle instead of an acyclic foundation target. |
+| `CRUMBS_CSS_TOKEN_ALIAS_OVERRIDE` | A derived alias leaf was supplied as a theme value. |
+| `CRUMBS_CSS_TOKEN_THEME_PROVIDER_MISMATCH` | Identified provider and consumer contracts differ by identity or canonical shape. |
 | `CRUMBS_CSS_INVALID_THEME_CONTRACT` | A contract contains an invalid or misplaced/unregistered native token leaf. |
 | `CRUMBS_CSS_UNSUPPORTED_EXPORT` | `.css.ts` export contains an unsupported value or export name; error includes file and data path. Always fatal. |
 | `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE` | Constructor or resolver rejected a malformed native token reference/name. |

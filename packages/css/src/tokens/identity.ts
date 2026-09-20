@@ -88,10 +88,18 @@ export function tokenContractShapeSignature(
   entries: ReadonlyArray<{
     readonly path: ReadonlyArray<string>
     readonly domain: { readonly kind: string; readonly allowNegative?: boolean; readonly values?: ReadonlyArray<string> }
+    readonly alias?: { readonly target: ReadonlyArray<string>; readonly fallback?: string | number }
   }>,
 ): string {
   return entries
-    .map(entry => `${entry.path.map(segment => `${segment.length}:${segment}`).join("/")}=${domainSignature(entry.domain)}`)
+    .map(entry => {
+      const path = entry.path.map(segment => segment.length + ":" + segment).join("/")
+      const alias = entry.alias === undefined
+        ? ""
+        : "|alias:" + entry.alias.target.map(segment => segment.length + ":" + segment).join("/") +
+          (entry.alias.fallback === undefined ? "" : "|fallback:" + JSON.stringify(entry.alias.fallback))
+      return path + "=" + domainSignature(entry.domain) + alias
+    })
     .sort()
     .join(";")
 }

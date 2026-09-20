@@ -31,7 +31,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; M0.1 and M0.2 closed for documented compiler contracts; native Android acceptance deferred |
 | M1 | Select Effect 4 boundary implementation and establish budgets | M0 | In progress; M1.1/M1.2 artifact/API and initial shape contracts complete; native Android remains deferred |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
-| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 and M3.2 closed |
+| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 through M3.3 closed |
 | M4 | Shared resolution, compiled selection, and bounded caches | M2, M3 | Not started |
 | M5 | Native Sprinkles and composition API completeness | M2, M3, M4 | Not started |
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
@@ -157,7 +157,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 
 - [x] M3.1: Define colour, length, duration, opacity, and property-enum domains; generate or reconcile runtime schemas and static authoring types. Verify both positive native cases and rejected colour-to-spacing/enum mismatches.
 - [x] M3.2: Implement stable contract/package identity, a contract-bound provider/hook interface, and deterministic public token IDs. Test duplicate package copies, evaluation order, hot reload, and identical paths across distinct contracts.
-- [ ] M3.3: Add foundation → semantic → component aliases with missing-target/domain/cycle diagnostics and traceable origin. Required tokens stay required; optional fallbacks are explicit.
+- [x] M3.3: Add foundation → semantic → component aliases with missing-target/domain/cycle diagnostics and traceable origin. Required tokens stay required; optional fallbacks are explicit.
 - [ ] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
 - [ ] M3.5: Add immutable theme patches and external-theme decoding. Update canonical values and derived token/index data atomically. Invalid patches leave the current snapshot untouched and return structured context.
 - [ ] M3.6: Use reusable Optic focuses for useful nested transformations. Validate domain-changing results; test semantic lens laws, old-snapshot preservation, and promised structural sharing separately.
@@ -1264,4 +1264,12 @@ Next recommended slice: **M3.2** — add stable contract/package identity, a con
 - Focused identity, type, domain, ownership, runtime and public API tests pass. The ordinary token bundle remains Effect-free; `tokens/schema` remains the dedicated Effect 4 ingress boundary. Full duplicate-package distribution and native-device provider acceptance remain later gates.
 - [Assessment](assessments/2026-09-20-stable-token-identity.md) records the identity format, provider boundary and qualification limits. No publication or push occurred; protected release/version edits remain outside the slice.
 
-Next recommended slice: **M3.3** — add foundation → semantic → component aliases with missing-target, domain, cycle and traceable-origin diagnostics. Begin only after approval.
+### 2026-09-20 — M3.3 layered token aliases and origin tracing
+
+- Added `defineAlias`/`alias` to connect foundation, semantic and component token layers by exact path. Alias leaves are derived and omitted from theme input; every `defineToken` leaf remains required.
+- Added explicit fallback handling for structurally missing targets. Missing targets, declared/target domain mismatches, invalid fallback values, cycles and alias overrides return stable diagnostics before a contract or theme snapshot is published.
+- Alias references retain immutable target metadata and a complete origin chain. `getTokenOrigin` exposes the public ID, target and foundation-to-component path for diagnostics and future impact tooling.
+- Identity shape signatures include alias targets and fallbacks, so duplicate copies and hot reload cannot silently reuse a changed alias graph. Focused alias, identity, domain, ownership, runtime and public API tests pass.
+- [Assessment](assessments/2026-09-20-layered-token-aliases.md) records the semantics and limits. Scope axes, atomic patches and external alias manifests remain later M3 work; no publication or push occurred.
+
+Next recommended slice: **M3.4** — add independent brand/mode/density contexts with documented merge and override precedence, complete-snapshot validation, nested scopes and portal ownership. Begin only after approval.

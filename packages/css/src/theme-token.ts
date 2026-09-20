@@ -53,11 +53,31 @@ export type ThemeTokenDomainValidator = (value: unknown) => boolean
 export type ThemeTokenDomainMetadata = {
   readonly domain: TokenDomain
   readonly validate: ThemeTokenDomainValidator
+  readonly alias?: ThemeTokenAliasMetadata
 }
 export type ThemeTokenReferenceMetadata = {
   readonly path: ReadonlyArray<string>
   readonly varName: string
   readonly publicId?: string
+  readonly origin?: ThemeTokenOrigin
+}
+export type ThemeTokenOriginStep = {
+  readonly path: ReadonlyArray<string>
+  readonly publicId: string
+}
+export type ThemeTokenOrigin = {
+  readonly kind: "definition" | "alias"
+  readonly path: ReadonlyArray<string>
+  readonly publicId: string
+  readonly targetPath?: ReadonlyArray<string>
+  readonly targetPublicId?: string
+  readonly chain: ReadonlyArray<ThemeTokenOriginStep>
+  readonly fallback?: string | number
+}
+export type ThemeTokenAliasMetadata = {
+  readonly targetPath: ReadonlyArray<string>
+  readonly fallback?: string | number
+  readonly origin: ThemeTokenOrigin
 }
 export type ThemeContractIdentityMetadata = {
   readonly identity: TokenContractIdentity
@@ -88,7 +108,7 @@ export function createThemeTokenReference(varName: string): NativeThemeTokenRefe
 export function registerThemeTokenReference(
   varName: string,
   path: ReadonlyArray<string>,
-  metadata: { readonly publicId?: string } = {},
+  metadata: { readonly publicId?: string; readonly origin?: ThemeTokenOrigin } = {},
 ): NativeThemeVar {
   if (!NATIVE_TOKEN_NAME.test(varName)) invalidReference("registry")
   const token = `var(${varName})` as NativeThemeVar
@@ -105,6 +125,14 @@ export function registerThemeTokenReference(
       path: Object.freeze([...path]),
       varName,
       ...(metadata.publicId === undefined ? {} : {publicId: metadata.publicId}),
+      ...(metadata.origin === undefined ? {} : {origin: freezeOrigin(metadata.origin)}),
+    }))
+  } else if ((metadata.publicId !== undefined && existing.publicId === undefined) ||
+    (metadata.origin !== undefined && existing.origin === undefined)) {
+    themeTokenRegistry.set(token, Object.freeze({
+      ...existing,
+      ...(metadata.publicId === undefined ? {} : {publicId: metadata.publicId}),
+      ...(metadata.origin === undefined ? {} : {origin: freezeOrigin(metadata.origin)}),
     }))
   }
   return token
@@ -125,6 +153,10 @@ export function getThemeTokenMetadata(value: ThemeVar): ThemeTokenReferenceMetad
 export function getThemeTokenPublicId(value: ThemeVar): string {
   const metadata = getThemeTokenMetadata(value)
   return metadata.publicId ?? metadata.varName
+}
+
+export function getThemeTokenOrigin(value: ThemeVar): ThemeTokenOrigin | undefined {
+  return getThemeTokenMetadata(value).origin
 }
 
 /** @internal Domain validation is owned by the contract object, not a global path. */
@@ -221,6 +253,13 @@ export function getThemeTokenDomainForContract(
   return domainContracts.get(contract)?.get(String(token))?.domain
 }
 
+export function getThemeTokenAliasForContract(
+  contract: object,
+  token: ThemeVar,
+): ThemeTokenAliasMetadata | undefined {
+  return domainContracts.get(contract)?.get(String(token))?.alias
+}
+
 // ADR D2: validate data descriptors without evaluating user-provided accessors.
 export function isThemeTokenReference(value: unknown): value is NativeThemeTokenReference {
   if (typeof value !== "object" || value === null || Array.isArray(value)) return false
@@ -256,4 +295,16 @@ function invalidReference(location: string): never {
 
 function samePath(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {
   return left.length === right.length && left.every((segment, index) => segment === right[index])
+}
+
+function freezeOrigin(origin: ThemeTokenOrigin): ThemeTokenOrigin {
+  return Object.freeze({
+    ...origin,
+    path: Object.freeze([...origin.path]),
+    ...(origin.targetPath === undefined ? {} : {targetPath: Object.freeze([...origin.targetPath])}),
+    chain: Object.freeze(origin.chain.map(step => Object.freeze({
+      path: Object.freeze([...step.path]),
+      publicId: step.publicId,
+    }))),
+  })
 }

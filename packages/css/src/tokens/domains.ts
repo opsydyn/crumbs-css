@@ -1,7 +1,14 @@
 import {
+  formatNativeStylesDiagnostic,
+  NativeStylesDiagnosticCode,
+} from "../diagnostics"
+import {
   assertThemeContractIdentityAvailable,
   getThemeContractIdentity,
   getThemeContractIdentityKey,
+  getThemeTokenAliasForContract,
+  getThemeTokenDomainForContract,
+  getThemeTokenOrigin,
   getThemeTokenPublicId,
   registerThemeTokenReference,
   registerThemeTokenContract,
@@ -9,11 +16,18 @@ import {
   type NativeThemeVar,
   type TokenDomain,
   type TokenDomainValue,
+  type ThemeTokenAliasMetadata,
   type ThemeTokenDomainMetadata,
+  type ThemeTokenOrigin,
+  type ThemeTokenOriginStep,
+  type ThemeVar,
 } from "../theme-token"
 import {
   createTheme,
   createThemeContract,
+  getThemeTokenPath,
+  getThemeVarName,
+  isThemeVar,
   type NativeTheme,
   type ThemeContractInput,
 } from "../native-style"
@@ -47,31 +61,110 @@ type NormalizedDomain<TDefinition extends TokenDomainDefinition> =
             ? TValues extends ReadonlyArray<string> ? { readonly kind: "enum"; readonly values: TValues } : never
             : never
 
+export type TokenAliasTarget = string | ReadonlyArray<string>
+
+export type TokenAliasDefinition<
+  TTarget extends TokenAliasTarget = TokenAliasTarget,
+  TDomain extends TokenDomain | undefined = undefined,
+> = {
+  readonly $$type: typeof TokenAliasDefinitionType
+  readonly target: TTarget
+  readonly domain?: TDomain
+  readonly fallback?: TDomain extends TokenDomain ? TokenDomainValue<TDomain> : string | number
+}
+
+type AnyTokenAliasDefinition = TokenAliasDefinition<TokenAliasTarget, TokenDomain | undefined>
+
 export const TokenDefinitionType = "crumbs.css.token-definition" as const
+export const TokenAliasDefinitionType = "crumbs.css.token-alias" as const
 export type TokenDefinition<TDomain extends TokenDomain = TokenDomain> = {
   readonly $$type: typeof TokenDefinitionType
   readonly domain: TDomain
 }
 
 export type TokenContractInput = {
-  readonly [key: string]: TokenContractInput | TokenDefinition
+  readonly [key: string]: TokenContractInput | TokenDefinition | AnyTokenAliasDefinition
 }
 
 export type TokenContractOptions = TokenContractIdentityInput
 
 export type TokenDefinitionInput<TDefinition extends TokenDomainDefinition = TokenDomainDefinition> = TokenDefinition<NormalizedDomain<TDefinition>>
 
-export type TokenContract<TShape extends TokenContractInput> = {
-  readonly [K in keyof TShape]: TShape[K] extends TokenDefinitionInput<infer TDefinition>
-    ? TShape[K] extends { readonly domain: infer TDomain extends TokenDomain }
-      ? DomainThemeVar<TDomain>
+declare const tokenContractShapeBrand: unique symbol
+
+type SplitTokenPath<TPath extends string> =
+  TPath extends `${infer THead}.${infer TTail}`
+    ? THead extends "" ? SplitTokenPath<TTail> : [THead, ...SplitTokenPath<TTail>]
+    : TPath extends "" ? [] : [TPath]
+
+type LookupTokenShape<TShape, TPath extends ReadonlyArray<string>> =
+  TPath extends readonly [infer THead extends string, ...infer TRest extends string[]]
+    ? THead extends keyof TShape
+      ? TRest extends [] ? TShape[THead] : LookupTokenShape<TShape[THead], TRest>
       : never
-    : TShape[K] extends TokenContractInput
-      ? TokenContract<TShape[K]>
+    : never
+
+type AliasTargetPath<TTarget> =
+  TTarget extends ReadonlyArray<string> ? TTarget
+    : TTarget extends string ? SplitTokenPath<TTarget>
       : never
+
+type AliasTargetValue<TShape, TTarget> = LookupTokenShape<TShape, AliasTargetPath<TTarget>>
+type AliasTargetDomain<TShape, TTarget, TDeclaredDomain, TDepth extends ReadonlyArray<unknown> = []> =
+  TDepth["length"] extends 8 ? TokenDomain
+    : [TDeclaredDomain] extends [TokenDomain] ? TDeclaredDomain
+    : AliasTargetValue<TShape, TTarget> extends TokenDefinition<infer TDomain>
+      ? TDomain
+      : AliasTargetValue<TShape, TTarget> extends TokenAliasDefinition<infer TNestedTarget, infer TNestedDomain>
+        ? AliasTargetDomain<TShape, TNestedTarget, TNestedDomain, [...TDepth, unknown]>
+      : TokenDomain
+
+type TokenContractValue<TRootShape, TShape, TValue> =
+  TValue extends TokenDefinition<infer TDomain>
+    ? DomainThemeVar<TDomain>
+    : TValue extends TokenAliasDefinition<infer TTarget, infer TDeclaredDomain>
+      ? DomainThemeVar<AliasTargetDomain<TRootShape, TTarget, TDeclaredDomain>>
+      : TValue extends TokenContractInput
+        ? TokenContractNode<TRootShape, TValue>
+        : never
+
+type TokenContractNode<TRootShape, TShape extends TokenContractInput> = {
+  readonly [K in keyof TShape]: TokenContractValue<TRootShape, TShape, TShape[K]>
 }
 
-export type TokenThemeValues<TContract> = {
+export type TokenContract<TShape extends TokenContractInput> = TokenContractNode<TShape, TShape> & {
+  readonly [tokenContractShapeBrand]?: TShape
+}
+
+type HasRequiredToken<TValue> =
+  TValue extends AnyTokenAliasDefinition ? false
+    : TValue extends TokenDefinition ? true
+      : TValue extends TokenContractInput
+        ? true extends {[K in keyof TValue]: HasRequiredToken<TValue[K]>}[keyof TValue] ? true : false
+        : false
+
+type TokenThemeValuesForShape<TShape extends TokenContractInput> = {
+  readonly [K in keyof TShape as TShape[K] extends AnyTokenAliasDefinition
+    ? never
+    : TShape[K] extends TokenContractInput
+      ? HasRequiredToken<TShape[K]> extends true ? K : never
+      : K]:
+    TShape[K] extends TokenDefinition<infer TDomain>
+      ? TokenDomainValue<TDomain>
+      : TShape[K] extends TokenContractInput
+        ? TokenThemeValuesForShape<TShape[K]>
+        : never
+} & {
+  readonly [K in keyof TShape as TShape[K] extends AnyTokenAliasDefinition
+    ? K
+    : TShape[K] extends TokenContractInput
+      ? HasRequiredToken<TShape[K]> extends true ? never : K
+      : never]?: TShape[K] extends TokenContractInput ? TokenThemeValuesForShape<TShape[K]> : never
+}
+
+export type TokenThemeValues<TContract> = TContract extends { readonly [tokenContractShapeBrand]?: infer TShape }
+  ? TShape extends TokenContractInput ? TokenThemeValuesForShape<TShape> : never
+  : {
   readonly [K in keyof TContract]: TContract[K] extends DomainThemeVar<infer TDomain>
     ? TokenDomainValue<TDomain>
     : TContract[K] extends Readonly<Record<string, unknown>>
@@ -95,6 +188,41 @@ export function defineToken(
   }) as TokenDefinition
 }
 
+export function defineAlias<const TDomain extends TokenDomain>(
+  target: DomainThemeVar<TDomain>,
+  options?: { readonly fallback?: TokenDomainValue<TDomain> },
+): TokenAliasDefinition<ReadonlyArray<string>, TDomain>
+export function defineAlias<const TTarget extends TokenAliasTarget>(
+  target: TTarget,
+): TokenAliasDefinition<TTarget>
+export function defineAlias<
+  const TTarget extends TokenAliasTarget,
+  const TDefinition extends TokenDomainDefinition,
+>(
+  target: TTarget,
+  options: {
+    readonly domain: TDefinition
+    readonly fallback?: TokenDomainValue<NormalizedDomain<TDefinition>>
+  },
+): TokenAliasDefinition<TTarget, NormalizedDomain<TDefinition>>
+export function defineAlias<const TTarget extends TokenAliasTarget>(
+  target: TTarget,
+  options: { readonly domain?: TokenDomainDefinition; readonly fallback?: string | number } = {},
+): TokenAliasDefinition<TTarget, TokenDomain | undefined> {
+  const normalizedTarget = normalizeAliasTargetInput(target)
+  const domain = options.domain === undefined ? undefined : normalizeDomain(options.domain)
+  const result = {
+    $$type: TokenAliasDefinitionType,
+    target: normalizedTarget,
+    ...(domain === undefined ? {} : {domain: Object.freeze(domain)}),
+    ...(options.fallback === undefined ? {} : {fallback: options.fallback}),
+  }
+  return Object.freeze(result) as unknown as TokenAliasDefinition<TTarget, TokenDomain | undefined>
+}
+
+/** Concise alias spelling for design-system layer definitions. */
+export const alias: typeof defineAlias = defineAlias
+
 /** Concise factories for the common native design-token domains. */
 export const token = Object.freeze({
   color: (): TokenDefinition<{ readonly kind: "color" }> => defineToken("color"),
@@ -116,17 +244,67 @@ export function isTokenDefinition(value: unknown): value is TokenDefinition {
     domain !== undefined && "value" in domain && domain.enumerable === true && isTokenDomain(domain.value)
 }
 
+export function isTokenAliasDefinition(value: unknown): value is AnyTokenAliasDefinition {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false
+  const keys = Object.keys(value)
+  if (!keys.includes("$$type") || !keys.includes("target") ||
+    keys.some(key => !["$$type", "target", "domain", "fallback"].includes(key))) return false
+  const tag = Object.getOwnPropertyDescriptor(value, "$$type")
+  const target = Object.getOwnPropertyDescriptor(value, "target")
+  const domain = Object.getOwnPropertyDescriptor(value, "domain")
+  const fallback = Object.getOwnPropertyDescriptor(value, "fallback")
+  if (tag === undefined || !("value" in tag) || tag.enumerable !== true || tag.value !== TokenAliasDefinitionType ||
+    target === undefined || !("value" in target) || target.enumerable !== true || !isTokenAliasTarget(target.value)) return false
+  if (domain !== undefined && (!("value" in domain) || domain.enumerable !== true || !isTokenDomain(domain.value))) return false
+  if (fallback !== undefined && (!("value" in fallback) || fallback.enumerable !== true ||
+    (typeof fallback.value !== "string" && typeof fallback.value !== "number"))) return false
+  return true
+}
+
+type TokenEntry =
+  | {
+      readonly path: ReadonlyArray<string>
+      readonly kind: "token"
+      readonly definition: TokenDefinition
+    }
+  | {
+      readonly path: ReadonlyArray<string>
+      readonly kind: "alias"
+      readonly definition: AnyTokenAliasDefinition
+    }
+
+type ResolvedTokenEntry = {
+  readonly entry: TokenEntry
+  readonly domain: TokenDomain
+  readonly targetPath?: ReadonlyArray<string>
+  readonly fallback?: string | number
+  readonly chainPaths: ReadonlyArray<ReadonlyArray<string>>
+}
+
 export function createTokenContract<const TShape extends TokenContractInput>(
   shape: TShape,
   identityOrOptions?: TokenContractIdentityInput,
 ): TokenContract<TShape> {
   const identity = normalizeTokenContractIdentity(identityOrOptions)
-  const domainEntries = collectDomainEntries(shape, [])
+  const entries = collectTokenEntries(shape, [])
+  const resolvedEntries = resolveTokenEntries(entries)
+  const domainEntries = [...resolvedEntries.values()].map(resolved => ({
+    path: resolved.entry.path,
+    domain: resolved.domain,
+    ...(resolved.entry.kind === "alias"
+      ? {
+          alias: {
+            target: resolved.targetPath ?? [],
+            ...(resolved.fallback === undefined ? {} : {fallback: resolved.fallback}),
+          },
+        }
+      : {}),
+  }))
   const signature = tokenContractShapeSignature(domainEntries)
   if (identity !== undefined) assertThemeContractIdentityAvailable(identity, signature)
   const legacyContract = createThemeContract(toLegacyShape(shape))
   const domains = new Map<string, ThemeTokenDomainMetadata>()
-  const contract = mapContract(shape, legacyContract, [], domains, identity) as TokenContract<TShape>
+  const contract = mapContract(shape, legacyContract, [], domains, identity, resolvedEntries) as TokenContract<TShape>
   registerThemeTokenContract(contract as object, domains,
     identity === undefined ? undefined : {identity, signature})
   return contract
@@ -144,11 +322,16 @@ export function getTokenId(token: DomainThemeVar): string {
   return getThemeTokenPublicId(token)
 }
 
+export function getTokenOrigin(token: DomainThemeVar): ThemeTokenOrigin | undefined {
+  return getThemeTokenOrigin(token)
+}
+
 export function createTokenTheme<TContract extends Readonly<Record<string, unknown>>>(
   contract: TContract,
   values: TokenThemeValues<TContract>,
 ): NativeTheme<TContract> {
-  return createTheme(contract, values as never)
+  const resolvedValues = resolveTokenThemeValues(contract, values as unknown)
+  return createTheme(contract, resolvedValues as never)
 }
 
 export function isTokenDomainValue(domain: TokenDomain, value: unknown): boolean {
@@ -200,14 +383,195 @@ function isTokenDomain(value: unknown): value is TokenDomain {
   return false
 }
 
+function normalizeAliasTargetInput(target: TokenAliasTarget): TokenAliasTarget {
+  if (Array.isArray(target)) {
+    const path = readTokenPath(target)
+    if (path === undefined) throw new Error("Token alias targets must contain non-empty string path segments")
+    return Object.freeze(path)
+  }
+  if (typeof target !== "string" || target.length === 0) {
+    throw new Error("Token alias targets must be a non-empty dot path or path array")
+  }
+  if (isThemeVar(target)) return Object.freeze([...getThemeTokenPath(target)])
+  if (target.startsWith("var(")) throw new Error("Token alias targets must use a registered token reference or a path")
+  const path = splitTokenPath(target)
+  if (path.length === 0) throw new Error("Token alias targets must contain at least one path segment")
+  return target
+}
 
-function toLegacyShape(shape: TokenContractInput): ThemeContractInput {
-  if (!isRecord(shape)) throw new Error("Token contracts must be nested records of token definitions")
-  const result: Record<string, ThemeContractInput | null> = {}
-  for (const [key, value] of Object.entries(shape)) {
-    result[key] = isTokenDefinitionInput(value) ? null : toLegacyShape(value)
+function normalizeAliasTarget(target: TokenAliasTarget): ReadonlyArray<string> {
+  if (Array.isArray(target)) {
+    const path = readTokenPath(target)
+    if (path === undefined) throw new Error("Token alias target contains an invalid path")
+    return path
+  }
+  if (isThemeVar(target)) return getThemeTokenPath(target)
+  if (typeof target !== "string") throw new Error("Token alias target contains an invalid path")
+  const path = splitTokenPath(target)
+  if (path.length === 0) throw new Error("Token alias target contains an empty path")
+  return path
+}
+
+function isTokenAliasTarget(value: unknown): value is TokenAliasTarget {
+  if (typeof value === "string") return value.length > 0
+  return Array.isArray(value) && readTokenPath(value) !== undefined
+}
+
+function readTokenPath(value: ReadonlyArray<unknown>): ReadonlyArray<string> | undefined {
+  const lengthDescriptor = Object.getOwnPropertyDescriptor(value, "length")
+  if (lengthDescriptor === undefined || !("value" in lengthDescriptor) ||
+    typeof lengthDescriptor.value !== "number" || !Number.isSafeInteger(lengthDescriptor.value) ||
+    lengthDescriptor.value === 0) return undefined
+  const result: string[] = []
+  for (let index = 0; index < lengthDescriptor.value; index += 1) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, String(index))
+    if (descriptor === undefined || !("value" in descriptor) || typeof descriptor.value !== "string" || descriptor.value.length === 0) return undefined
+    result.push(descriptor.value)
   }
   return result
+}
+
+function splitTokenPath(value: string): ReadonlyArray<string> {
+  const segments = value.split(".")
+  return segments.length === 0 || segments.some(segment => segment.length === 0) ? [] : segments
+}
+
+function sameDomain(left: TokenDomain, right: TokenDomain): boolean {
+  if (left.kind !== right.kind) return false
+  if (left.kind === "length" && right.kind === "length") return left.allowNegative === right.allowNegative
+  if (left.kind === "enum" && right.kind === "enum") {
+    return left.values.length === right.values.length &&
+      [...left.values].sort().every((value, index) => value === [...right.values].sort()[index])
+  }
+  return true
+}
+
+function describeDomain(domain: TokenDomain): string {
+  return domain.kind === "length"
+    ? domain.kind + (domain.allowNegative ? "(negative)" : "")
+    : domain.kind === "enum"
+      ? domain.kind + "(" + domain.values.join("|") + ")"
+      : domain.kind
+}
+
+function pathKey(path: ReadonlyArray<string>): string {
+  return path.map(segment => segment.length + ":" + segment).join("/")
+}
+
+function formatPath(path: ReadonlyArray<string>): string {
+  return path.length === 0 ? "<root>" : path.join(".")
+}
+
+function setPathValue(root: Record<string, unknown>, path: ReadonlyArray<string>, value: string | number): void {
+  let cursor = root
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const key = path[index]
+    if (key === undefined) return
+    const next = cursor[key]
+    if (!isRecord(next)) cursor[key] = {}
+    cursor = cursor[key] as Record<string, unknown>
+  }
+  const key = path[path.length - 1]
+  if (key !== undefined) cursor[key] = value
+}
+
+
+function toLegacyShape(shape: TokenContractInput): ThemeContractInput {
+  if (!isRecord(shape)) throw new Error("Token contracts must be nested records of token definitions or aliases")
+  const result: Record<string, ThemeContractInput | null> = {}
+  for (const [key, value] of Object.entries(shape)) {
+    result[key] = isTokenDefinitionInput(value) || isTokenAliasDefinition(value) ? null : toLegacyShape(value)
+  }
+  return result
+}
+
+function collectTokenEntries(
+  shape: TokenContractInput,
+  path: ReadonlyArray<string>,
+): ReadonlyArray<TokenEntry> {
+  if (!isRecord(shape)) throw new Error("Token contract at \"" + formatPath(path) + "\" must be a nested record")
+  const entries: Array<TokenEntry> = []
+  for (const [key, value] of Object.entries(shape)) {
+    const nextPath = [...path, key]
+    if (isTokenDefinitionInput(value)) entries.push({path: nextPath, kind: "token", definition: value})
+    else if (isTokenAliasDefinition(value)) entries.push({path: nextPath, kind: "alias", definition: value})
+    else entries.push(...collectTokenEntries(value, nextPath))
+  }
+  return entries
+}
+
+function resolveTokenEntries(entries: ReadonlyArray<TokenEntry>): ReadonlyMap<string, ResolvedTokenEntry> {
+  const byPath = new Map(entries.map(entry => [pathKey(entry.path), entry]))
+  const resolved = new Map<string, ResolvedTokenEntry>()
+  const visiting = new Map<string, number>()
+
+  const resolve = (entry: TokenEntry, stack: ReadonlyArray<TokenEntry>): ResolvedTokenEntry => {
+    const key = pathKey(entry.path)
+    const known = resolved.get(key)
+    if (known !== undefined) return known
+    const cycleStart = visiting.get(key)
+    if (cycleStart !== undefined) {
+      const cycle = [...stack.slice(cycleStart), entry].map(item => formatPath(item.path)).join(" -> ")
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenAliasCycle,
+        "Token alias cycle detected: " + cycle + ". Aliases must resolve to a foundation token or an acyclic alias.",
+      ))
+    }
+    if (entry.kind === "token") {
+      const value: ResolvedTokenEntry = {entry, domain: entry.definition.domain, chainPaths: [entry.path]}
+      resolved.set(key, value)
+      return value
+    }
+
+    visiting.set(key, stack.length)
+    const definition = entry.definition
+    const targetPath = normalizeAliasTarget(definition.target)
+    const targetEntry = byPath.get(pathKey(targetPath))
+    const fallback = definition.fallback
+    let value: ResolvedTokenEntry
+    if (targetEntry === undefined) {
+      if (definition.domain === undefined || fallback === undefined) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenAliasMissingTarget,
+          "Token alias \"" + formatPath(entry.path) + "\" targets missing token \"" + formatPath(targetPath) + "\". Add the target to this contract or provide an explicit fallback together with its domain.",
+        ))
+      }
+      if (!isTokenDomainValue(definition.domain, fallback)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenAliasFallbackDomainMismatch,
+          "Fallback for token alias \"" + formatPath(entry.path) + "\" does not satisfy its " + definition.domain.kind + " domain.",
+        ))
+      }
+      value = {entry, domain: definition.domain, targetPath, fallback, chainPaths: [entry.path]}
+    } else {
+      const target = resolve(targetEntry, [...stack, entry])
+      if (definition.domain !== undefined && !sameDomain(definition.domain, target.domain)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenAliasDomainMismatch,
+          "Token alias \"" + formatPath(entry.path) + "\" declares " + describeDomain(definition.domain) + " but target \"" + formatPath(targetPath) + "\" is " + describeDomain(target.domain) + ".",
+        ))
+      }
+      if (fallback !== undefined && !isTokenDomainValue(target.domain, fallback)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenAliasFallbackDomainMismatch,
+          "Fallback for token alias \"" + formatPath(entry.path) + "\" does not satisfy the target " + target.domain.kind + " domain.",
+        ))
+      }
+      value = {
+        entry,
+        domain: target.domain,
+        targetPath,
+        ...(fallback === undefined ? {} : {fallback}),
+        chainPaths: [entry.path, ...target.chainPaths],
+      }
+    }
+    visiting.delete(key)
+    resolved.set(key, value)
+    return value
+  }
+
+  for (const entry of entries) resolve(entry, [])
+  return resolved
 }
 
 function mapContract(
@@ -216,48 +580,216 @@ function mapContract(
   path: ReadonlyArray<string>,
   domains: Map<string, ThemeTokenDomainMetadata>,
   identity: TokenContractIdentity | undefined,
+  resolvedEntries: ReadonlyMap<string, ResolvedTokenEntry>,
 ): unknown {
   const result: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(shape)) {
     const nextPath = [...path, key]
-    const legacyValue = getPath(legacyContract, nextPath)
-    if (isTokenDefinitionInput(value)) {
-      const legacyReference = legacyValue as NativeThemeVar
+    if (isTokenDefinitionInput(value) || isTokenAliasDefinition(value)) {
+      const legacyValue = getPath(legacyContract, nextPath)
+      const resolved = resolvedEntries.get(pathKey(nextPath))
+      if (resolved === undefined) throw new Error("Token contract path not found: " + formatPath(nextPath))
+      const publicId = identity === undefined
+        ? getThemeTokenPublicId(legacyValue as NativeThemeVar)
+        : tokenPublicId(identity, nextPath)
+      const origin = createTokenOrigin(resolved, publicId, identity, resolvedEntries, legacyContract)
       const reference = identity === undefined
-        ? legacyReference
-        : registerThemeTokenReference(
-          tokenVariableName(identity, nextPath),
-          nextPath,
-          {publicId: tokenPublicId(identity, nextPath)},
-        )
+        ? registerThemeTokenReference(getThemeVarName(legacyValue as NativeThemeVar), nextPath, {origin})
+        : registerThemeTokenReference(tokenVariableName(identity, nextPath), nextPath, {publicId, origin})
+      const alias = resolved.entry.kind === "alias"
+        ? {
+            targetPath: Object.freeze([...(resolved.targetPath ?? [])]),
+            ...(resolved.fallback === undefined ? {} : {fallback: resolved.fallback}),
+            origin,
+          } satisfies ThemeTokenAliasMetadata
+        : undefined
       domains.set(String(reference), {
-        domain: value.domain,
-        validate: candidate => isTokenDomainValue(value.domain, candidate),
+        domain: resolved.domain,
+        validate: candidate => isTokenDomainValue(resolved.domain, candidate),
+        ...(alias === undefined ? {} : {alias}),
       })
       result[key] = reference as unknown as DomainThemeVar<TokenDomain>
     } else {
-      result[key] = mapContract(value, legacyContract, nextPath, domains, identity)
+      result[key] = mapContract(value, legacyContract, nextPath, domains, identity, resolvedEntries)
     }
   }
   return result
 }
 
-function collectDomainEntries(
-  shape: TokenContractInput,
-  path: ReadonlyArray<string>,
-): ReadonlyArray<{ readonly path: ReadonlyArray<string>; readonly domain: TokenDomain }> {
-  const entries: Array<{ readonly path: ReadonlyArray<string>; readonly domain: TokenDomain }> = []
-  for (const [key, value] of Object.entries(shape)) {
-    const nextPath = [...path, key]
-    if (isTokenDefinitionInput(value)) entries.push({path: nextPath, domain: value.domain})
-    else entries.push(...collectDomainEntries(value, nextPath))
+function createTokenOrigin(
+  resolved: ResolvedTokenEntry,
+  publicId: string,
+  identity: TokenContractIdentity | undefined,
+  resolvedEntries: ReadonlyMap<string, ResolvedTokenEntry>,
+  legacyContract: unknown,
+): ThemeTokenOrigin {
+  const chain: ThemeTokenOriginStep[] = resolved.chainPaths.map(path => {
+    const entry = resolvedEntries.get(pathKey(path))
+    const reference = entry === undefined ? undefined : getPath(legacyContract, path) as NativeThemeVar
+    const stepPublicId = identity === undefined
+      ? reference === undefined ? "#" + formatPath(path) : getThemeTokenPublicId(reference)
+      : tokenPublicId(identity, path)
+    return {path: Object.freeze([...path]), publicId: stepPublicId}
+  })
+  const targetPublicId = resolved.targetPath === undefined
+    ? undefined
+    : resolvedEntries.has(pathKey(resolved.targetPath))
+      ? identity === undefined
+        ? getThemeTokenPublicId(getPath(legacyContract, resolved.targetPath) as NativeThemeVar)
+        : tokenPublicId(identity, resolved.targetPath)
+      : undefined
+  return Object.freeze({
+    kind: resolved.entry.kind === "alias" ? "alias" : "definition",
+    path: Object.freeze([...resolved.entry.path]),
+    publicId,
+    ...(resolved.targetPath === undefined ? {} : {targetPath: Object.freeze([...resolved.targetPath])}),
+    ...(targetPublicId === undefined ? {} : {targetPublicId}),
+    chain: Object.freeze(chain.map(step => Object.freeze(step))),
+    ...(resolved.fallback === undefined ? {} : {fallback: resolved.fallback}),
+  })
+}
+
+function resolveTokenThemeValues(
+  contract: Readonly<Record<string, unknown>>,
+  values: unknown,
+): Readonly<Record<string, unknown>> {
+  const output: Record<string, unknown> = {}
+  const baseValues = new Map<string, string | number>()
+  const aliasValues = new Map<string, ThemeTokenAliasMetadata>()
+  collectThemeContractRefs(contract, contract, [], aliasValues)
+  collectThemeInput(contract, contract, values, [], output, baseValues, aliasValues)
+  const resolving = new Set<string>()
+  const resolved = new Map<string, string | number>()
+  const resolveAlias = (path: ReadonlyArray<string>, aliasMetadata: ThemeTokenAliasMetadata): string | number => {
+    const key = pathKey(path)
+    const existing = resolved.get(key)
+    if (existing !== undefined) return existing
+    if (resolving.has(key)) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenAliasCycle,
+        "Token alias cycle detected while resolving \"" + formatPath(path) + "\".",
+      ))
+    }
+    resolving.add(key)
+    const targetKey = pathKey(aliasMetadata.targetPath)
+    const targetAlias = aliasValues.get(targetKey)
+    const value = targetAlias === undefined
+      ? baseValues.get(targetKey) ?? aliasMetadata.fallback
+      : resolveAlias(aliasMetadata.targetPath, targetAlias)
+    resolving.delete(key)
+    if (value === undefined) {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.TokenAliasMissingTarget,
+        "Token alias \"" + formatPath(path) + "\" has no resolved value for target \"" + formatPath(aliasMetadata.targetPath) + "\".",
+      ))
+    }
+    resolved.set(key, value)
+    return value
   }
-  return entries
+  for (const aliasMetadata of aliasValues.values()) {
+    const path = aliasMetadata.origin.path
+    setPathValue(output, path, resolveAlias(path, aliasMetadata))
+  }
+  return output
+}
+
+function collectThemeContractRefs(
+  rootContract: Readonly<Record<string, unknown>>,
+  contract: Readonly<Record<string, unknown>>,
+  path: ReadonlyArray<string>,
+  aliases: Map<string, ThemeTokenAliasMetadata>,
+): void {
+  for (const [key, value] of Object.entries(contract)) {
+    const nextPath = [...path, key]
+    if (isThemeVar(value)) {
+      const aliasMetadata = getThemeTokenAliasForContract(rootContract, value)
+      if (aliasMetadata !== undefined) aliases.set(pathKey(nextPath), aliasMetadata)
+    } else if (isRecord(value)) {
+      collectThemeContractRefs(rootContract, value, nextPath, aliases)
+    }
+  }
+}
+
+function collectThemeInput(
+  rootContract: Readonly<Record<string, unknown>>,
+  contract: Readonly<Record<string, unknown>>,
+  values: unknown,
+  path: ReadonlyArray<string>,
+  output: Record<string, unknown>,
+  baseValues: Map<string, string | number>,
+  aliases: Map<string, ThemeTokenAliasMetadata>,
+): void {
+  const valueRecord = values === undefined ? undefined : isRecord(values) ? values : undefined
+  if (values !== undefined && valueRecord === undefined) {
+    throw new Error("Theme values for \"" + formatPath(path) + "\" must be an object")
+  }
+  const valueKeys = new Set(valueRecord === undefined ? [] : Object.keys(valueRecord))
+  const contractKeys = new Set(Object.keys(contract))
+  for (const key of valueKeys) {
+    if (!contractKeys.has(key)) throw new Error("Unknown theme value \"" + formatPath([...path, key]) + "\"")
+  }
+  for (const [key, contractValue] of Object.entries(contract)) {
+    const nextPath = [...path, key]
+    const aliasMetadata = isThemeVar(contractValue) ? aliases.get(pathKey(nextPath)) : undefined
+    if (aliasMetadata !== undefined) {
+      if (valueKeys.has(key)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenAliasOverride,
+          "Theme value \"" + formatPath(nextPath) + "\" is derived from an alias and cannot be overridden. Change its target or declare an explicit fallback.",
+        ))
+      }
+      continue
+    }
+    const hasValue = valueKeys.has(key)
+    if (isThemeVar(contractValue)) {
+      if (!hasValue) throw new Error("Missing theme value for \"" + formatPath(nextPath) + "\"")
+      const themeValue = valueRecord?.[key]
+      if (typeof themeValue !== "string" && typeof themeValue !== "number") {
+        throw new Error("Theme value for \"" + formatPath(nextPath) + "\" must be a string or number")
+      }
+      const domain = getThemeTokenDomainForContractForAlias(rootContract, contractValue)
+      if (domain !== undefined && !isTokenDomainValue(domain, themeValue)) {
+        throw new Error("Theme value for \"" + formatPath(nextPath) + "\" does not satisfy the " + domain.kind + " token domain")
+      }
+      baseValues.set(pathKey(nextPath), themeValue)
+      output[key] = themeValue
+    } else if (isRecord(contractValue)) {
+      if (!hasValue && !containsRequiredToken(contractValue, aliases, nextPath)) {
+        output[key] = {}
+        continue
+      }
+      const nested: Record<string, unknown> = {}
+      output[key] = nested
+      collectThemeInput(rootContract, contractValue, hasValue ? valueRecord?.[key] : undefined, nextPath, nested, baseValues, aliases)
+    } else {
+      throw new Error(formatNativeStylesDiagnostic(
+        NativeStylesDiagnosticCode.InvalidThemeContract,
+        "Invalid token contract at \"" + formatPath(nextPath) + "\".",
+      ))
+    }
+  }
+}
+
+function containsRequiredToken(
+  contract: Readonly<Record<string, unknown>>,
+  aliases: Map<string, ThemeTokenAliasMetadata>,
+  path: ReadonlyArray<string> = [],
+): boolean {
+  return Object.entries(contract).some(([key, value]) => {
+    const nextPath = [...path, key]
+    if (isThemeVar(value)) return !aliases.has(pathKey(nextPath))
+    return isRecord(value) && containsRequiredToken(value, aliases, nextPath)
+  })
+}
+
+function getThemeTokenDomainForContractForAlias(contract: object, token: ThemeVar): TokenDomain | undefined {
+  return getThemeTokenDomainForContract(contract, token)
 }
 
 function isTokenDefinitionInput(value: unknown): value is TokenDefinition {
   return isTokenDefinition(value)
 }
+
 
 function getPath(root: unknown, path: ReadonlyArray<string>): unknown {
   let cursor = root

@@ -54,13 +54,18 @@ describe("@opsydyn/crumbs-css public API contract", () => {
 
   it("exposes domain contracts separately from the Effect-backed schema entrypoint", () => {
     expect(namedApiKeys(tokenApi)).toEqual([
+      "TokenAliasDefinitionType",
       "TokenDefinitionType",
+      "alias",
       "createTokenContract",
       "createTokenTheme",
+      "defineAlias",
       "defineToken",
       "getTokenContractIdentity",
       "getTokenContractKey",
       "getTokenId",
+      "getTokenOrigin",
+      "isTokenAliasDefinition",
       "isTokenDefinition",
       "isTokenDomainValue",
       "token",
