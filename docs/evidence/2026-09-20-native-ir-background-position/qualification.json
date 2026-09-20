@@ -1,0 +1,90 @@
+{
+  "slice": "M2.2bb",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "af27978bdda067dff076549d0777ae3450f86bbf",
+  "sourceState": "Working tree before implementation commit; unrelated pre-existing changes preserved",
+  "implementation": {
+    "property": "experimental_backgroundPosition",
+    "primitiveDomain": ["view", "text"],
+    "value": "dense list of exact top/left, top/right, bottom/left and bottom/right records",
+    "lengthDomain": ["finite number", "0", "finite signed px", "finite signed percentage"],
+    "compatibility": "broad string forms remain on the runtime route",
+    "composition": "whole-list last winner, including empty-list replacement",
+    "schema": "Effect Schema validates the four-shape union, item shape, provenance and primitive domain",
+    "safety": "descriptor-safe capture clones and deeply freezes admitted arrays and records"
+  },
+  "verification": [
+    {
+      "command": "bun test packages/css/test/native-ir-background-position.test.ts",
+      "status": "passed",
+      "receipt": "6 tests, 235 expect() calls"
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "receipt": "611 tests, 21891 assertions, 101 files"
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "receipt": "20 pages built"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed",
+      "receipt": "storybook application typecheck completed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "receipt": "workspace Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "receipt": "packed Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "receipt": "host Bun benchmark completed; warm README transform p95 7.328375 ms; warm consumer transform p95 6.923208 ms; 240-export p95 0.150794 ms",
+      "claimBoundary": "host smoke only; native-device performance not run"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run",
+      "pendingThresholds": [
+        "js-frame-time",
+        "ui-frame-time",
+        "allocation-bytes",
+        "retained-memory-bytes"
+      ],
+      "missingBaselines": ["js-frame-time", "ui-frame-time", "allocation-bytes"]
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "performance thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "CRUMBS_AUDIT_NODE_FLOOR is unset"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "boundaries": [
+    "no public API or native ABI change",
+    "experimental_backgroundImage remains a separate gradient contract",
+    "experimental background fields remain outside the CSS-to-React-Native allowlist",
+    "no native-device rendering or performance acceptance claim",
+    "no publish or push"
+  ]
+}

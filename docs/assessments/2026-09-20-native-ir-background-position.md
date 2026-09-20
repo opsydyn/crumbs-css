@@ -1,0 +1,9 @@
+# M2.2bb experimental background position structured IR
+
+The installed React Native 0.85.3 contract exposes `experimental_backgroundPosition` as a ViewStyle field inherited by TextStyle and absent from ImageStyle. Its object form is a readonly array whose entries use one of four records: `{ top, left }`, `{ top, right }`, `{ bottom, left }` or `{ bottom, right }`. Each coordinate accepts the installed numeric or string representation, while the processor canonicalises CSS strings separately at runtime.
+
+Crumbs now captures marked static position arrays into the Effect-backed structured IR. The static boundary is deliberately finite and explicit: numbers must be finite, and strings are limited to `"0"` plus finite signed `px` and percentage lengths. Descriptor-safe admission requires a dense array, exactly one of the four positional record shapes, enumerable data fields and no decorated, accessor-backed or dynamic values. Cross-realm plain arrays and records are accepted; sparse or subclassed arrays, extra keys, unsupported units, `auto`, arbitrary strings and non-finite values fail before CSS serialisation.
+
+Effect Schema repeats the four-shape union, property/provenance match and view/text primitive matrix. Admitted lists and records are cloned and deeply frozen. Composition treats the list as one complete property, so an authored empty list replaces an earlier position list. Broad position strings remain on the compatibility route, and the experimental field stays outside the CSS-to-React-Native allowlist.
+
+Focused property-based tests cover all four record shapes, whole-value capture, cross-realm admission, malformed descriptor boundaries and last-winner composition. This slice changes no public package export or native ABI and does not establish native-device rendering acceptance. Gradient-image work remains a separate contract with a native-device acceptance gate.
