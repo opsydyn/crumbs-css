@@ -1166,3 +1166,12 @@ Next recommended slice: **M2.2az** — migrate `experimental_backgroundRepeat` a
 - Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2ba** — migrate `experimental_backgroundSize` as a separate view/text-only keyword or `{ x, y }` length record, with an explicit finite non-negative length-percentage domain. Begin only after approval.
+
+### 2026-09-20 — M2.2ba experimental background size structured IR
+
+- Migrated marked static `experimental_backgroundSize` arrays through a view/text-only union of `cover`/`contain` and exact `{ x, y }` records.
+- The static length domain admits finite non-negative numbers, `auto`, and finite non-negative `px` or percentage strings. Descriptor-safe dense-array and record admission rejects accessors, symbols, sparse/decorated or subclassed arrays, extra keys, unsupported units, negative values and image primitive use.
+- Effect Schema, provenance and primitive matrices remain property-specific; whole-list last-winner composition is preserved, including empty-list replacement. Broad size strings remain on the compatibility route and the experimental field remains outside the CSS-to-React-Native allowlist.
+- No public API, native ABI or native-device acceptance claim changed. Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2bb** — migrate `experimental_backgroundPosition` as its own canonical four-shape view/text-only positional union with finite zero/`px`/`%` values. Begin only after approval.

@@ -10,6 +10,7 @@ export type StructuredNativeProperty =
   | "boxShadow"
   | "filter"
   | "experimental_backgroundRepeat"
+  | "experimental_backgroundSize"
   | "transform"
   | "shadowOffset"
   | "textShadowOffset"
@@ -111,6 +112,13 @@ export type BackgroundRepeatValue = {
   readonly y: BackgroundRepeatKeyword
 }
 export type BackgroundRepeatList = ReadonlyArray<BackgroundRepeatValue>
+export type BackgroundSizeLength = number | "auto" | `${number}px` | `${number}%`
+export type BackgroundSizeRecord = {
+  readonly x: BackgroundSizeLength
+  readonly y: BackgroundSizeLength
+}
+export type BackgroundSizeValue = BackgroundSizeRecord | "cover" | "contain"
+export type BackgroundSizeList = ReadonlyArray<BackgroundSizeValue>
 export type FontVariant =
   | "small-caps"
   | "oldstyle-nums"
@@ -146,7 +154,7 @@ export type FontVariant =
   | "stylistic-nineteen"
   | "stylistic-twenty"
 export type FontVariantValue = ReadonlyArray<FontVariant>
-export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FilterValue | BackgroundRepeatList | FontVariantValue
+export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FilterValue | BackgroundRepeatList | BackgroundSizeList | FontVariantValue
 export type StructuredDeclaration = {
   readonly _tag: "NativeStructuredDeclaration"
   readonly property: StructuredNativeProperty
@@ -166,13 +174,14 @@ export type StructuredCaptureContext = {
 }
 
 const structuredProperties = [
-  "boxShadow", "filter", "experimental_backgroundRepeat", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "experimental_backgroundRepeat", "experimental_backgroundSize", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ] as const satisfies ReadonlyArray<StructuredNativeProperty>
 const allPrimitives = ["view", "text", "image"] as const
 const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
   boxShadow: ["view"],
   filter: ["view", "text"],
   experimental_backgroundRepeat: ["view", "text"],
+  experimental_backgroundSize: ["view", "text"],
   transform: ["view", "text", "image"],
   shadowOffset: ["view", "text", "image"],
   textShadowOffset: ["text"],
@@ -317,6 +326,26 @@ const BackgroundRepeatValueSchema = Schema.Struct({
   y: BackgroundRepeatKeywordSchema,
 })
 const BackgroundRepeatListSchema = Schema.Array(BackgroundRepeatValueSchema)
+const BackgroundSizeLengthStringSchema = Schema.String.check(
+  Schema.isPattern(/^(?:auto|(?:\d+(?:\.\d+)?|\.\d+)(?:px|%))$/),
+  Schema.makeFilter<string>(value => value === "auto" ||
+    (Number.isFinite(Number.parseFloat(value)) && Number.parseFloat(value) >= 0)
+    ? undefined : { path: [], issue: "Expected a finite non-negative px or percentage size" }),
+)
+const BackgroundSizeLengthSchema = Schema.Union([
+  Schema.Finite.check(Schema.makeFilter<number>(value => value >= 0
+    ? undefined : { path: [], issue: "Expected a non-negative size" })),
+  BackgroundSizeLengthStringSchema,
+])
+const BackgroundSizeRecordSchema = Schema.Struct({
+  x: BackgroundSizeLengthSchema,
+  y: BackgroundSizeLengthSchema,
+})
+const BackgroundSizeValueSchema = Schema.Union([
+  Schema.Literals(["cover", "contain"]),
+  BackgroundSizeRecordSchema,
+])
+const BackgroundSizeListSchema = Schema.Array(BackgroundSizeValueSchema)
 const fontVariantValues = [
   "small-caps", "oldstyle-nums", "lining-nums", "tabular-nums", "common-ligatures",
   "no-common-ligatures", "discretionary-ligatures", "no-discretionary-ligatures", "historical-ligatures",
@@ -335,10 +364,11 @@ const StructuredValueSchema = Schema.Union([
   BoxShadowValueSchema,
   FilterValueSchema,
   BackgroundRepeatListSchema,
+  BackgroundSizeListSchema,
   FontVariantValueSchema,
 ])
 const StructuredNativePropertySchema = Schema.Literals([
-  "boxShadow", "filter", "experimental_backgroundRepeat", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "experimental_backgroundRepeat", "experimental_backgroundSize", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ])
 const StructuredPropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
@@ -395,10 +425,10 @@ export function captureStructuredIntoNativeIr(
     const descriptor = descriptors[property]
     if (descriptor?.enumerable !== true) return false
     // React Native also exposes string forms for transform, boxShadow, filter and
-    // experimental_backgroundRepeat.
+    // experimental background properties.
     // Leave those forms on the compatibility route while taking only ordered
     // static arrays into IR.
-    return (property !== "transform" && property !== "boxShadow" && property !== "filter" && property !== "experimental_backgroundRepeat") || !("value" in descriptor) || Array.isArray(descriptor.value)
+    return (property !== "transform" && property !== "boxShadow" && property !== "filter" && property !== "experimental_backgroundRepeat" && property !== "experimental_backgroundSize") || !("value" in descriptor) || Array.isArray(descriptor.value)
   })
   if (selectedProperties.length === 0) return { cssRule: rule as Record<string, unknown> }
   let primitiveDomain = [...metadata.primitiveDomain]
@@ -488,6 +518,9 @@ function admitStructuredValue(
   }
   if (property === "experimental_backgroundRepeat") {
     return admitBackgroundRepeat(value, context, property)
+  }
+  if (property === "experimental_backgroundSize") {
+    return admitBackgroundSize(value, context, property)
   }
   if (property === "transform") {
     return admitTransform(value, context, property)
@@ -635,6 +668,44 @@ function admitBackgroundRepeatValue(
   }
   if (!isBackgroundRepeatKeyword(x.value) || !isBackgroundRepeatKeyword(y.value)) {
     return invalid("x and y must be repeat, space, round or no-repeat")
+  }
+  return Object.freeze({ x: x.value, y: y.value })
+}
+
+function admitBackgroundSize(
+  value: unknown,
+  context: StructuredCaptureContext,
+  property: "experimental_backgroundSize",
+): BackgroundSizeList {
+  const entries = admitDenseArray(value, context, property)
+  return Object.freeze(entries.map((entry, index) => admitBackgroundSizeValue(entry, context, index)))
+}
+
+function admitBackgroundSizeValue(
+  value: unknown,
+  context: StructuredCaptureContext,
+  index: number,
+): BackgroundSizeValue {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid experimental_backgroundSize in ${context.sourceId} at ${context.className}.experimental_backgroundSize[${index}]: ${detail}.`, "experimental_backgroundSize")
+  }
+  if (value === "cover" || value === "contain") return value
+  if (!isPlainStructuredObject(value)) return invalid("expected cover, contain or one plain { x, y } record")
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 2 ||
+    !names.includes("x") || !names.includes("y")) {
+    return invalid("expected exactly x and y size fields")
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const x = descriptors.x
+  const y = descriptors.y
+  if (x === undefined || y === undefined || x.enumerable !== true || y.enumerable !== true ||
+    !("value" in x) || !("value" in y)) {
+    return invalid("x and y must be enumerable data properties")
+  }
+  if (!isBackgroundSizeLength(x.value) || !isBackgroundSizeLength(y.value)) {
+    return invalid("x and y must be finite non-negative numbers, auto, px or percentage lengths")
   }
   return Object.freeze({ x: x.value, y: y.value })
 }
@@ -862,9 +933,16 @@ function isBackgroundRepeatKeyword(value: unknown): value is BackgroundRepeatKey
   return typeof value === "string" && backgroundRepeatKeywords.has(value)
 }
 
+function isBackgroundSizeLength(value: unknown): value is BackgroundSizeLength {
+  if (isFiniteNumber(value)) return value >= 0
+  return typeof value === "string" && (value === "auto" || backgroundSizeLengthPattern.test(value)) &&
+    (value === "auto" || Number.isFinite(Number.parseFloat(value)))
+}
+
 const filterAmountKeys = new Set(["brightness", "contrast", "grayscale", "invert", "opacity", "saturate", "sepia"])
 const dropShadowKeys = new Set(["offsetX", "offsetY", "standardDeviation", "color"])
 const backgroundRepeatKeywords: ReadonlySet<string> = new Set(["repeat", "space", "round", "no-repeat"])
+const backgroundSizeLengthPattern = /^(?:\d+(?:\.\d+)?|\.\d+)(?:px|%)$/
 const filterAmountPattern = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:%|px)?$/
 const filterBlurPattern = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/
 const dropShadowLengthPattern = /^(?:0|-?(?:\d+(?:\.\d+)?|\.\d+)px)$/
@@ -927,6 +1005,7 @@ function isStructuredValueForProperty(property: StructuredNativeProperty, value:
   if (property === "boxShadow") return isBoxShadowValue(value)
   if (property === "filter") return isFilterValue(value)
   if (property === "experimental_backgroundRepeat") return isBackgroundRepeatList(value)
+  if (property === "experimental_backgroundSize") return isBackgroundSizeList(value)
   if (property === "transform") return isTransformValue(value)
   if (property === "shadowOffset" || property === "textShadowOffset") {
     return typeof value === "object" && value !== null && !Array.isArray(value) &&
@@ -968,6 +1047,24 @@ function isBackgroundRepeatValue(value: unknown): value is BackgroundRepeatValue
   const y = descriptors.y
   return x !== undefined && y !== undefined && x.enumerable === true && y.enumerable === true &&
     "value" in x && "value" in y && isBackgroundRepeatKeyword(x.value) && isBackgroundRepeatKeyword(y.value)
+}
+
+function isBackgroundSizeList(value: unknown): value is BackgroundSizeList {
+  const entries = inspectDenseArray(value)
+  return entries !== undefined && entries.every(isBackgroundSizeValue)
+}
+
+function isBackgroundSizeValue(value: unknown): value is BackgroundSizeValue {
+  if (value === "cover" || value === "contain") return true
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 2 ||
+    !names.includes("x") || !names.includes("y")) return false
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const x = descriptors.x
+  const y = descriptors.y
+  return x !== undefined && y !== undefined && x.enumerable === true && y.enumerable === true &&
+    "value" in x && "value" in y && isBackgroundSizeLength(x.value) && isBackgroundSizeLength(y.value)
 }
 
 function isFilterFunction(value: unknown): value is FilterFunction {

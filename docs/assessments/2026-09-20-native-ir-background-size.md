@@ -1,0 +1,9 @@
+# M2.2ba experimental background size structured IR
+
+React Native 0.83 exposes `experimental_backgroundSize` as a ViewStyle field inherited by TextStyle and absent from ImageStyle. Its object form is a readonly array whose entries are either the `cover`/`contain` keywords or records with `x` and `y` dimensions. The processor's CSS grammar accepts non-negative `px` and percentage lengths, `auto`, one-value `y: auto` expansion and the two keywords; authored arrays otherwise pass through unchanged.
+
+Crumbs now captures marked static size arrays into the Effect-backed structured IR. The static boundary is deliberately narrower than the installed `string | number` object declaration: dimensions admit finite non-negative numbers, `auto`, and finite non-negative `px` or percentage strings. Descriptor-safe admission requires a dense array, exact enumerable data fields on each record and no decorated, accessor-backed or dynamic values. Cross-realm plain arrays and records are accepted; sparse or subclassed arrays, extra keys, unsupported units, negative values and image primitive domains fail before CSS serialisation.
+
+Effect Schema repeats the keyword/record union, property/provenance match and view/text primitive matrix. Admitted lists and records are cloned and deeply frozen. Composition treats the list as one complete property, so an authored empty list replaces an earlier size list. Broad CSS strings remain on the compatibility route, and the experimental field stays outside the CSS-to-React-Native allowlist.
+
+Focused property-based tests cover keyword and dimension generation, whole-value capture, cross-realm admission, malformed descriptor boundaries and last-winner composition. This slice changes no public package export or native ABI and does not establish native-device rendering acceptance. Position and gradient image contracts remain separate follow-up slices.
