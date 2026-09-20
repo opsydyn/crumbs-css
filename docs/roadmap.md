@@ -144,7 +144,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2ao: Migrate view/text-only `borderCurve` and `pointerEvents` literal/token domains.
 - [x] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
 - [x] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
-- [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
+- [x] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
 - [ ] M2.6: Emit direct native modules and minimal token/condition metadata. Confirm structured values, ordinary exports, empty styles, and theme descriptors retain their specified meaning.
 - [ ] M2.7: Verify real dependency changes rebuild baked importer values. Include nested `.css.ts` imports, plain token modules, monorepo dependencies, target/config changes, and compiler updates before adding persistent caching.
 
@@ -1219,3 +1219,12 @@ Next recommended slice: **M2.4** — separate validation, shorthand normalizatio
 - No public API, Effect consumer requirement, external artifact ABI, publication or push changed. M2.7 still owns actual Metro dependency invalidation.
 
 Next recommended slice: **M2.5** — version encoded artifacts and test compatible/incompatible readers, keeping codec laws separate from lossy lowering and code generation. Begin only after approval.
+
+### 2026-09-20 — M2.5 versioned artifact readers
+
+- Added an explicit versioned native artifact reader registry around the existing version-1 payload codec. Compatible readers dispatch by the positive integer wire version; incompatible readers return the stable `CRUMBS_CONTRACT_UNSUPPORTED_VERSION` contract issue before schema admission.
+- Malformed envelopes still use the descriptor-safe payload codec, while version probing reads own data descriptors without executing accessors. JSON syntax failures stay at the reader boundary.
+- Property-based codec laws are limited to admitted version-1 artifacts and preserve authored declaration order and values. Reader code has no native lowering or generated-module emission dependency.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file. No public authoring API, external artifact publication, native-device acceptance or Android qualification changed.
+
+Next recommended slice: **M2.6** — emit direct native modules and minimal token/condition metadata. Confirm structured values, ordinary exports, empty styles and theme descriptors retain their specified meaning. Begin only after approval.

@@ -1,0 +1,88 @@
+{
+  "slice": "M2.5",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "working tree before commit",
+  "sourceState": "Implementation and documentation are committed after qualification",
+  "contract": {
+    "wireVersion": 1,
+    "compatibleReader": "nativeArtifactReader",
+    "incompatibleReader": "makeNativeArtifactReader([])",
+    "unsupportedVersionCode": "CRUMBS_CONTRACT_UNSUPPORTED_VERSION",
+    "codecLawDomain": "admitted NativeArtifact version 1 values only",
+    "loweringBoundary": "reader and codec modules do not import native lowering or code emission"
+  },
+  "verification": [
+    {
+      "command": "bun test packages/css/test/m2-5-artifact-reader.test.ts",
+      "status": "passed",
+      "tests": 6,
+      "assertions": 316
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "tests": 634,
+      "assertions": 22671,
+      "files": 105
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "pages": 20
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "claim": "declared host smoke ceilings only"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run"
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "The isolated npm install remains registry-blocked: the prior sandbox attempt returned ENOTFOUND and the escalated retry reached the registry but ended with EIDLETIMEOUT; no peer override or legacy install mode was used"
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Performance registry thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Exact Node v22.0.0 floor environment is unavailable; the host provides Node v22.16.0/v24.15.0"
+    }
+  ],
+  "boundaries": {
+    "publicApiChanged": false,
+    "effectConsumerRequirementChanged": false,
+    "nativeLoweringChanged": false,
+    "generatedModuleEmissionChanged": false,
+    "artifactPublication": false,
+    "published": false,
+    "pushed": false,
+    "nativeDeviceAccepted": false,
+    "androidAccepted": false
+  }
+}

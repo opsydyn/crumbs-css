@@ -3,7 +3,7 @@ import * as Result from "effect/Result"
 import * as SchemaIssue from "effect/SchemaIssue"
 
 export type ContractIssue = {
-  readonly code: "CRUMBS_CONTRACT_INVALID_PAYLOAD" | "CRUMBS_CONTRACT_INVALID_JSON"
+  readonly code: "CRUMBS_CONTRACT_INVALID_PAYLOAD" | "CRUMBS_CONTRACT_INVALID_JSON" | "CRUMBS_CONTRACT_UNSUPPORTED_VERSION"
   readonly boundary: string
   readonly path: ReadonlyArray<string | number>
   readonly message: string
