@@ -90,6 +90,8 @@ export type MigratedScalarProperty =
   | "backfaceVisibility" | "cursor"
   | "borderCurve" | "pointerEvents"
   | "borderStyle" | "outlineStyle" | "isolation" | "resizeMode" | "objectFit" | "mixBlendMode"
+  | "outlineColor" | "outlineOffset" | "outlineWidth"
+  | "borderBlockColor" | "borderBlockStartColor" | "borderBlockEndColor"
   | "borderTopLeftRadius" | "borderTopRightRadius" | "borderBottomRightRadius" | "borderBottomLeftRadius"
   | "borderStartStartRadius" | "borderStartEndRadius" | "borderEndStartRadius" | "borderEndEndRadius"
   | "borderTopStartRadius" | "borderTopEndRadius" | "borderBottomStartRadius" | "borderBottomEndRadius"
@@ -137,7 +139,8 @@ const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
 const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
   "backgroundColor", "color", "tintColor", "overlayColor", "shadowColor", "textShadowColor", "textDecorationColor",
   "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
-  "borderStartColor", "borderEndColor",
+  "borderStartColor", "borderEndColor", "outlineColor",
+  "borderBlockColor", "borderBlockStartColor", "borderBlockEndColor",
 ])
 const stringValueProperties: ReadonlySet<MigratedScalarProperty> = new Set(["fontFamily"])
 const numberOrStringValueProperties: ReadonlySet<MigratedScalarProperty> = new Set(["aspectRatio"])
@@ -274,6 +277,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
   "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
+  "outlineColor", "outlineOffset", "outlineWidth", "borderBlockColor", "borderBlockStartColor", "borderBlockEndColor",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -313,6 +317,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
   "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
+  "outlineColor", "outlineOffset", "outlineWidth", "borderBlockColor", "borderBlockStartColor", "borderBlockEndColor",
   "borderRadius", "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -440,6 +445,7 @@ const migratedScalarProperties = [
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
   "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
+  "outlineColor", "outlineOffset", "outlineWidth", "borderBlockColor", "borderBlockStartColor", "borderBlockEndColor",
   "borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius",
   "borderStartStartRadius", "borderStartEndRadius", "borderEndStartRadius", "borderEndEndRadius",
   "borderTopStartRadius", "borderTopEndRadius", "borderBottomStartRadius", "borderBottomEndRadius",
@@ -505,6 +511,8 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   borderCurve: ["view", "text"], pointerEvents: ["view", "text"],
   borderStyle: ["view", "text"], outlineStyle: ["view", "text"], isolation: ["view", "text"],
   resizeMode: ["image"], objectFit: ["image"], mixBlendMode: ["view", "text"],
+  outlineColor: ["view", "text"], outlineOffset: ["view", "text"], outlineWidth: ["view", "text"],
+  borderBlockColor: ["view", "text"], borderBlockStartColor: ["view", "text"], borderBlockEndColor: ["view", "text"],
   borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
   borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
   borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],

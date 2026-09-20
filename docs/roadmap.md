@@ -1086,3 +1086,10 @@ Next recommended slice: **M2.2ap** — batch the remaining exact literal surface
 - Focused qualification passed 6 tests with 319 assertions; full qualification and consumer evidence are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2aq** — batch the remaining outline and logical border-colour scalars: `outlineColor`, `outlineOffset`, `outlineWidth`, `borderBlockColor`, `borderBlockStartColor` and `borderBlockEndColor`. Begin only after approval.
+
+### 2026-09-20 — M2.2aq outline and logical border-colour scalar IR
+
+- Migrated view/text-only `outlineColor`, `outlineOffset`, `outlineWidth`, `borderBlockColor`, `borderBlockStartColor` and `borderBlockEndColor` through the established colour and finite-number/token domains.
+- Focused qualification passed 5 tests with 190 assertions; full qualification and consumer evidence are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2ar** — audit the remaining installed structured and union-valued style fields, define their native IR ownership and exact compatibility boundaries, then migrate the first structured family. Begin only after approval.

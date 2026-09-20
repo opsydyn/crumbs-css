@@ -419,3 +419,7 @@ Approved M2.2ao migrates view/text-only `borderCurve` and `pointerEvents` throug
 ### Batched literal-surface scalar IR — 2026-09-20
 
 Approved M2.2ap batches view/text-only `borderStyle`, `outlineStyle`, `isolation` and `mixBlendMode` with image-only `resizeMode` and `objectFit`. Each field retains its exact installed literal/token domain and primitive contract; capture and Effect Schema decoding reject unsupported values, forged provenance and cross-property literals. [Implementation evidence](../assessments/2026-09-20-native-ir-literal-surface.md) records exhaustive literal coverage, primitive rejection, generated ordering and consumer qualification.
+
+### Outline and logical border-colour scalar IR — 2026-09-20
+
+Approved M2.2aq migrates view/text-only `outlineColor`, `outlineOffset`, `outlineWidth`, `borderBlockColor`, `borderBlockStartColor` and `borderBlockEndColor`. Colour fields reuse the established non-empty colour/token domain; outline dimensions use finite-number/token admission. Capture and Effect Schema decoding enforce the view/text primitive contract and reject invalid values, forged provenance and cross-property values. [Implementation evidence](../assessments/2026-09-20-native-ir-outline-border-color.md) records generated ordering, primitive rejection and consumer qualification.
