@@ -9,6 +9,7 @@ import {
 export type StructuredNativeProperty =
   | "boxShadow"
   | "filter"
+  | "experimental_backgroundRepeat"
   | "transform"
   | "shadowOffset"
   | "textShadowOffset"
@@ -104,6 +105,12 @@ export type FilterFunction =
   | { readonly sepia: FilterAmount }
   | { readonly dropShadow: DropShadowItem }
 export type FilterValue = ReadonlyArray<FilterFunction>
+export type BackgroundRepeatKeyword = "repeat" | "space" | "round" | "no-repeat"
+export type BackgroundRepeatValue = {
+  readonly x: BackgroundRepeatKeyword
+  readonly y: BackgroundRepeatKeyword
+}
+export type BackgroundRepeatList = ReadonlyArray<BackgroundRepeatValue>
 export type FontVariant =
   | "small-caps"
   | "oldstyle-nums"
@@ -139,7 +146,7 @@ export type FontVariant =
   | "stylistic-nineteen"
   | "stylistic-twenty"
 export type FontVariantValue = ReadonlyArray<FontVariant>
-export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FilterValue | FontVariantValue
+export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FilterValue | BackgroundRepeatList | FontVariantValue
 export type StructuredDeclaration = {
   readonly _tag: "NativeStructuredDeclaration"
   readonly property: StructuredNativeProperty
@@ -159,12 +166,13 @@ export type StructuredCaptureContext = {
 }
 
 const structuredProperties = [
-  "boxShadow", "filter", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "experimental_backgroundRepeat", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ] as const satisfies ReadonlyArray<StructuredNativeProperty>
 const allPrimitives = ["view", "text", "image"] as const
 const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
   boxShadow: ["view"],
   filter: ["view", "text"],
+  experimental_backgroundRepeat: ["view", "text"],
   transform: ["view", "text", "image"],
   shadowOffset: ["view", "text", "image"],
   textShadowOffset: ["text"],
@@ -303,6 +311,12 @@ const FilterFunctionSchema = Schema.Union([
   Schema.Struct({ dropShadow: DropShadowItemSchema }),
 ])
 const FilterValueSchema = Schema.Array(FilterFunctionSchema)
+const BackgroundRepeatKeywordSchema = Schema.Literals(["repeat", "space", "round", "no-repeat"])
+const BackgroundRepeatValueSchema = Schema.Struct({
+  x: BackgroundRepeatKeywordSchema,
+  y: BackgroundRepeatKeywordSchema,
+})
+const BackgroundRepeatListSchema = Schema.Array(BackgroundRepeatValueSchema)
 const fontVariantValues = [
   "small-caps", "oldstyle-nums", "lining-nums", "tabular-nums", "common-ligatures",
   "no-common-ligatures", "discretionary-ligatures", "no-discretionary-ligatures", "historical-ligatures",
@@ -320,10 +334,11 @@ const StructuredValueSchema = Schema.Union([
   TransformValueSchema,
   BoxShadowValueSchema,
   FilterValueSchema,
+  BackgroundRepeatListSchema,
   FontVariantValueSchema,
 ])
 const StructuredNativePropertySchema = Schema.Literals([
-  "boxShadow", "filter", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "experimental_backgroundRepeat", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ])
 const StructuredPropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
@@ -379,10 +394,11 @@ export function captureStructuredIntoNativeIr(
   const selectedProperties = structuredProperties.filter(property => {
     const descriptor = descriptors[property]
     if (descriptor?.enumerable !== true) return false
-    // React Native also exposes string forms for transform, boxShadow and filter.
+    // React Native also exposes string forms for transform, boxShadow, filter and
+    // experimental_backgroundRepeat.
     // Leave those forms on the compatibility route while taking only ordered
     // static arrays into IR.
-    return (property !== "transform" && property !== "boxShadow" && property !== "filter") || !("value" in descriptor) || Array.isArray(descriptor.value)
+    return (property !== "transform" && property !== "boxShadow" && property !== "filter" && property !== "experimental_backgroundRepeat") || !("value" in descriptor) || Array.isArray(descriptor.value)
   })
   if (selectedProperties.length === 0) return { cssRule: rule as Record<string, unknown> }
   let primitiveDomain = [...metadata.primitiveDomain]
@@ -469,6 +485,9 @@ function admitStructuredValue(
   }
   if (property === "filter") {
     return admitFilter(value, context, property)
+  }
+  if (property === "experimental_backgroundRepeat") {
+    return admitBackgroundRepeat(value, context, property)
   }
   if (property === "transform") {
     return admitTransform(value, context, property)
@@ -581,6 +600,43 @@ function admitFilterFunction(
     return Object.freeze({ dropShadow: admitDropShadow(entry, context, index) })
   }
   return invalid(`unsupported filter function ${JSON.stringify(key)}`)
+}
+
+function admitBackgroundRepeat(
+  value: unknown,
+  context: StructuredCaptureContext,
+  property: "experimental_backgroundRepeat",
+): BackgroundRepeatList {
+  const entries = admitDenseArray(value, context, property)
+  return Object.freeze(entries.map((entry, index) => admitBackgroundRepeatValue(entry, context, index)))
+}
+
+function admitBackgroundRepeatValue(
+  value: unknown,
+  context: StructuredCaptureContext,
+  index: number,
+): BackgroundRepeatValue {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid experimental_backgroundRepeat in ${context.sourceId} at ${context.className}.experimental_backgroundRepeat[${index}]: ${detail}.`, "experimental_backgroundRepeat")
+  }
+  if (!isPlainStructuredObject(value)) return invalid("expected one plain { x, y } record")
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 2 ||
+    !names.includes("x") || !names.includes("y")) {
+    return invalid("expected exactly x and y repeat-keyword fields")
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const x = descriptors.x
+  const y = descriptors.y
+  if (x === undefined || y === undefined || x.enumerable !== true || y.enumerable !== true ||
+    !("value" in x) || !("value" in y)) {
+    return invalid("x and y must be enumerable data properties")
+  }
+  if (!isBackgroundRepeatKeyword(x.value) || !isBackgroundRepeatKeyword(y.value)) {
+    return invalid("x and y must be repeat, space, round or no-repeat")
+  }
+  return Object.freeze({ x: x.value, y: y.value })
 }
 
 function admitDropShadow(
@@ -802,8 +858,13 @@ function isBoxShadowColor(value: unknown): value is string {
   return typeof value === "string" && value.length > 0 && !/^var\s*\(/i.test(value)
 }
 
+function isBackgroundRepeatKeyword(value: unknown): value is BackgroundRepeatKeyword {
+  return typeof value === "string" && backgroundRepeatKeywords.has(value)
+}
+
 const filterAmountKeys = new Set(["brightness", "contrast", "grayscale", "invert", "opacity", "saturate", "sepia"])
 const dropShadowKeys = new Set(["offsetX", "offsetY", "standardDeviation", "color"])
+const backgroundRepeatKeywords: ReadonlySet<string> = new Set(["repeat", "space", "round", "no-repeat"])
 const filterAmountPattern = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:%|px)?$/
 const filterBlurPattern = /^-?(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/
 const dropShadowLengthPattern = /^(?:0|-?(?:\d+(?:\.\d+)?|\.\d+)px)$/
@@ -865,6 +926,7 @@ function isFontVariant(value: unknown): value is FontVariant {
 function isStructuredValueForProperty(property: StructuredNativeProperty, value: unknown): boolean {
   if (property === "boxShadow") return isBoxShadowValue(value)
   if (property === "filter") return isFilterValue(value)
+  if (property === "experimental_backgroundRepeat") return isBackgroundRepeatList(value)
   if (property === "transform") return isTransformValue(value)
   if (property === "shadowOffset" || property === "textShadowOffset") {
     return typeof value === "object" && value !== null && !Array.isArray(value) &&
@@ -889,6 +951,23 @@ function isBoxShadowValue(value: unknown): value is BoxShadowValue {
 function isFilterValue(value: unknown): value is FilterValue {
   const operations = inspectDenseArray(value)
   return operations !== undefined && operations.every(isFilterFunction)
+}
+
+function isBackgroundRepeatList(value: unknown): value is BackgroundRepeatList {
+  const entries = inspectDenseArray(value)
+  return entries !== undefined && entries.every(isBackgroundRepeatValue)
+}
+
+function isBackgroundRepeatValue(value: unknown): value is BackgroundRepeatValue {
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 2 ||
+    !names.includes("x") || !names.includes("y")) return false
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const x = descriptors.x
+  const y = descriptors.y
+  return x !== undefined && y !== undefined && x.enumerable === true && y.enumerable === true &&
+    "value" in x && "value" in y && isBackgroundRepeatKeyword(x.value) && isBackgroundRepeatKeyword(y.value)
 }
 
 function isFilterFunction(value: unknown): value is FilterFunction {

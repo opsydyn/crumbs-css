@@ -1,0 +1,90 @@
+{
+  "slice": "M2.2az",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "26de3d5d726df788df10e072dc9c3c7849db6d60",
+  "sourceState": "Working tree before implementation commit; unrelated pre-existing changes preserved",
+  "implementation": {
+    "property": "experimental_backgroundRepeat",
+    "primitiveDomain": ["view", "text"],
+    "value": "dense list of exact plain {x, y} records",
+    "keywords": ["repeat", "space", "round", "no-repeat"],
+    "compatibility": "string forms remain on the runtime route",
+    "composition": "whole-list last winner, including empty-list replacement",
+    "schema": "Effect Schema validates item shape, provenance and primitive domain",
+    "safety": "descriptor-safe capture clones and deeply freezes admitted arrays and records"
+  },
+  "verification": [
+    {
+      "command": "bun test packages/css/test/native-ir-background-repeat.test.ts",
+      "status": "passed",
+      "receipt": "6 tests, 231 expect() calls"
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "receipt": "599 tests, 21420 assertions, 99 files"
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "receipt": "20 pages built"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed",
+      "receipt": "storybook application typecheck completed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "receipt": "workspace Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "receipt": "packed Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "receipt": "host Bun benchmark completed; warm README transform p95 10.573625 ms; warm consumer transform p95 7.734583 ms",
+      "claimBoundary": "host smoke only; native-device performance not run"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run",
+      "pendingThresholds": [
+        "js-frame-time",
+        "ui-frame-time",
+        "allocation-bytes",
+        "retained-memory-bytes"
+      ],
+      "missingBaselines": ["js-frame-time", "ui-frame-time", "allocation-bytes"]
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "performance thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "CRUMBS_AUDIT_NODE_FLOOR is unset"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "boundaries": [
+    "no public API or native ABI change",
+    "experimental_backgroundSize, experimental_backgroundPosition and experimental_backgroundImage remain separate contracts",
+    "experimental background fields remain outside the CSS-to-React-Native allowlist",
+    "no native-device rendering or performance acceptance claim",
+    "no publish or push"
+  ]
+}

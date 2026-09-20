@@ -1157,3 +1157,12 @@ Next recommended slice: **M2.2ay** — audit the experimental background family 
 - Audit evidence is recorded in the matching assessment and qualification file; no public API, structured IR or native ABI changed.
 
 Next recommended slice: **M2.2az** — migrate `experimental_backgroundRepeat` as a view/text-only closed `{ x, y }` literal record, preserving compatibility strings and whole-value composition. Begin only after approval.
+
+### 2026-09-20 — M2.2az experimental background repeat structured IR
+
+- Migrated marked static `experimental_backgroundRepeat` arrays through a view/text-only closed `{ x, y }` record with the installed `repeat`, `space`, `round` and `no-repeat` keyword domain.
+- Descriptor-safe dense-array and record admission rejects accessors, symbols, sparse/decorated or subclassed arrays, extra keys, dynamic values and image primitive use. Effect Schema, provenance and primitive matrices remain property-specific; whole-list last-winner composition is preserved, including empty-list replacement.
+- Repeat strings remain on the compatibility route and the experimental field remains outside the CSS-to-React-Native allowlist. No public API, native ABI or native-device acceptance claim changed.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
+
+Next recommended slice: **M2.2ba** — migrate `experimental_backgroundSize` as a separate view/text-only keyword or `{ x, y }` length record, with an explicit finite non-negative length-percentage domain. Begin only after approval.
