@@ -1184,3 +1184,12 @@ Next recommended slice: **M2.2bb** — migrate `experimental_backgroundPosition`
 - No public API, native ABI or native-device acceptance claim changed. Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file.
 
 Next recommended slice: **M2.2bc** — migrate `experimental_backgroundImage` only behind an explicit native-device acceptance gate for linear/radial gradient parsing, colour-stop semantics, defaults and platform support. Begin only after approval.
+
+### 2026-09-20 — M2.2bc experimental background image structured IR
+
+- Migrated marked static `experimental_backgroundImage` arrays through a view/text-only linear/radial gradient union with explicit direction, shape, size and position fields.
+- Added descriptor-safe dense-list and nested-stop admission. Static stops require literal colour strings, at least two colour stops, finite number/percentage positions and internal one-position transition hints; opaque colours, variables, implicit defaults and unsupported units remain on the runtime route.
+- Effect Schema, provenance and primitive checks share the capture contract. Admitted values are cloned and frozen, and whole-list last-winner composition includes empty-list replacement. Compatibility strings remain outside the CSS-to-React-Native allowlist.
+- Focused, full package, consumer, documentation and performance gates are recorded in the matching evidence file. Native rendering remains pending the dedicated packed iOS simulator gate; Android stays parked.
+
+Next recommended slice: **M2.2bd** — execute the dedicated packed iOS native acceptance gate for canonical linear/radial gradients, retain direct light/dark screenshots and record parser/rendering differences; keep Android parked until a separate decision and evidence exist. Begin only after approval.

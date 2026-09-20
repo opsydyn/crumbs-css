@@ -12,6 +12,7 @@ export type StructuredNativeProperty =
   | "experimental_backgroundRepeat"
   | "experimental_backgroundSize"
   | "experimental_backgroundPosition"
+  | "experimental_backgroundImage"
   | "transform"
   | "shadowOffset"
   | "textShadowOffset"
@@ -143,6 +144,49 @@ export type BackgroundPositionValue =
   | BackgroundPositionBottomLeft
   | BackgroundPositionBottomRight
 export type BackgroundPositionList = ReadonlyArray<BackgroundPositionValue>
+export type BackgroundGradientStopPosition = number | `${number}%`
+export type BackgroundGradientColorStop = {
+  readonly color: string | null
+  readonly positions?: ReadonlyArray<BackgroundGradientStopPosition>
+}
+export type BackgroundLinearDirection =
+  | `${number}deg`
+  | `${number}grad`
+  | `${number}rad`
+  | `${number}turn`
+  | "to top"
+  | "to right"
+  | "to bottom"
+  | "to left"
+  | "to top right"
+  | "to right top"
+  | "to bottom right"
+  | "to right bottom"
+  | "to top left"
+  | "to left top"
+  | "to bottom left"
+  | "to left bottom"
+export type BackgroundLinearGradientValue = {
+  readonly type: "linear-gradient"
+  readonly direction: BackgroundLinearDirection
+  readonly colorStops: ReadonlyArray<BackgroundGradientColorStop>
+}
+export type BackgroundRadialShape = "circle" | "ellipse"
+export type BackgroundRadialExtent = "closest-corner" | "closest-side" | "farthest-corner" | "farthest-side"
+export type BackgroundRadialSizeLength = number | `${number}px` | `${number}%`
+export type BackgroundRadialSize = BackgroundRadialExtent | {
+  readonly x: BackgroundRadialSizeLength
+  readonly y: BackgroundRadialSizeLength
+}
+export type BackgroundRadialGradientValue = {
+  readonly type: "radial-gradient"
+  readonly shape: BackgroundRadialShape
+  readonly size: BackgroundRadialSize
+  readonly position: BackgroundPositionValue
+  readonly colorStops: ReadonlyArray<BackgroundGradientColorStop>
+}
+export type BackgroundImageValue = BackgroundLinearGradientValue | BackgroundRadialGradientValue
+export type BackgroundImageList = ReadonlyArray<BackgroundImageValue>
 export type FontVariant =
   | "small-caps"
   | "oldstyle-nums"
@@ -178,7 +222,7 @@ export type FontVariant =
   | "stylistic-nineteen"
   | "stylistic-twenty"
 export type FontVariantValue = ReadonlyArray<FontVariant>
-export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FilterValue | BackgroundRepeatList | BackgroundSizeList | BackgroundPositionList | FontVariantValue
+export type StructuredValue = ShadowOffsetValue | TransformOriginValue | TransformMatrixValue | TransformValue | BoxShadowValue | FilterValue | BackgroundRepeatList | BackgroundSizeList | BackgroundPositionList | BackgroundImageList | FontVariantValue
 export type StructuredDeclaration = {
   readonly _tag: "NativeStructuredDeclaration"
   readonly property: StructuredNativeProperty
@@ -198,7 +242,7 @@ export type StructuredCaptureContext = {
 }
 
 const structuredProperties = [
-  "boxShadow", "filter", "experimental_backgroundRepeat", "experimental_backgroundSize", "experimental_backgroundPosition", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "experimental_backgroundRepeat", "experimental_backgroundSize", "experimental_backgroundPosition", "experimental_backgroundImage", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ] as const satisfies ReadonlyArray<StructuredNativeProperty>
 const allPrimitives = ["view", "text", "image"] as const
 const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
@@ -207,6 +251,7 @@ const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, Na
   experimental_backgroundRepeat: ["view", "text"],
   experimental_backgroundSize: ["view", "text"],
   experimental_backgroundPosition: ["view", "text"],
+  experimental_backgroundImage: ["view", "text"],
   transform: ["view", "text", "image"],
   shadowOffset: ["view", "text", "image"],
   textShadowOffset: ["text"],
@@ -400,6 +445,50 @@ const BackgroundPositionValueSchema = Schema.Union([
   BackgroundPositionBottomRightSchema,
 ])
 const BackgroundPositionListSchema = Schema.Array(BackgroundPositionValueSchema)
+const BackgroundGradientColorSchema = Schema.String.check(Schema.makeFilter<string>(value =>
+  value.length > 0 && !/^var\s*\(/i.test(value)
+    ? undefined : { path: [], issue: "Expected a non-empty native gradient colour string" },
+))
+const BackgroundGradientStopPositionSchema = Schema.Union([Schema.Finite, PercentageValueSchema])
+const BackgroundGradientColorStopSchema = Schema.Struct({
+  color: Schema.Union([BackgroundGradientColorSchema, Schema.Null]),
+  positions: Schema.optional(Schema.Array(BackgroundGradientStopPositionSchema)),
+})
+const BackgroundLinearDirectionSchema = Schema.String.check(Schema.makeFilter<string>(value =>
+  isBackgroundLinearDirection(value)
+    ? undefined : { path: [], issue: "Expected a finite deg/grad/rad/turn angle or supported direction keyword" },
+))
+const BackgroundLinearGradientSchema = Schema.Struct({
+  type: Schema.Literal("linear-gradient"),
+  direction: BackgroundLinearDirectionSchema,
+  colorStops: Schema.Array(BackgroundGradientColorStopSchema),
+})
+const BackgroundRadialShapeSchema = Schema.Literals(["circle", "ellipse"])
+const BackgroundRadialExtentSchema = Schema.Literals(["closest-corner", "closest-side", "farthest-corner", "farthest-side"])
+const BackgroundRadialSizeLengthStringSchema = Schema.String.check(
+  Schema.isPattern(/^(?:\d+(?:\.\d+)?|\.\d+)(?:px|%)$/),
+  Schema.makeFilter<string>(value => Number.isFinite(Number.parseFloat(value)) && Number.parseFloat(value) >= 0
+    ? undefined : { path: [], issue: "Expected a finite non-negative radial size length" }),
+)
+const BackgroundRadialSizeLengthSchema = Schema.Union([
+  Schema.Finite.check(Schema.makeFilter<number>(value => value >= 0
+    ? undefined : { path: [], issue: "Expected a non-negative radial size" })),
+  BackgroundRadialSizeLengthStringSchema,
+])
+const BackgroundRadialSizeRecordSchema = Schema.Struct({
+  x: BackgroundRadialSizeLengthSchema,
+  y: BackgroundRadialSizeLengthSchema,
+})
+const BackgroundRadialSizeSchema = Schema.Union([BackgroundRadialExtentSchema, BackgroundRadialSizeRecordSchema])
+const BackgroundRadialGradientSchema = Schema.Struct({
+  type: Schema.Literal("radial-gradient"),
+  shape: BackgroundRadialShapeSchema,
+  size: BackgroundRadialSizeSchema,
+  position: BackgroundPositionValueSchema,
+  colorStops: Schema.Array(BackgroundGradientColorStopSchema),
+})
+const BackgroundImageValueSchema = Schema.Union([BackgroundLinearGradientSchema, BackgroundRadialGradientSchema])
+const BackgroundImageListSchema = Schema.Array(BackgroundImageValueSchema)
 const fontVariantValues = [
   "small-caps", "oldstyle-nums", "lining-nums", "tabular-nums", "common-ligatures",
   "no-common-ligatures", "discretionary-ligatures", "no-discretionary-ligatures", "historical-ligatures",
@@ -420,10 +509,11 @@ const StructuredValueSchema = Schema.Union([
   BackgroundRepeatListSchema,
   BackgroundSizeListSchema,
   BackgroundPositionListSchema,
+  BackgroundImageListSchema,
   FontVariantValueSchema,
 ])
 const StructuredNativePropertySchema = Schema.Literals([
-  "boxShadow", "filter", "experimental_backgroundRepeat", "experimental_backgroundSize", "experimental_backgroundPosition", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
+  "boxShadow", "filter", "experimental_backgroundRepeat", "experimental_backgroundSize", "experimental_backgroundPosition", "experimental_backgroundImage", "transform", "shadowOffset", "textShadowOffset", "transformOrigin", "transformMatrix", "fontVariant",
 ])
 const StructuredPropertyProvenanceSchema = Schema.Struct({
   packageOwner: Schema.NonEmptyString,
@@ -483,7 +573,7 @@ export function captureStructuredIntoNativeIr(
     // experimental background properties.
     // Leave those forms on the compatibility route while taking only ordered
     // static arrays into IR.
-    return (property !== "transform" && property !== "boxShadow" && property !== "filter" && property !== "experimental_backgroundRepeat" && property !== "experimental_backgroundSize" && property !== "experimental_backgroundPosition") || !("value" in descriptor) || Array.isArray(descriptor.value)
+    return (property !== "transform" && property !== "boxShadow" && property !== "filter" && property !== "experimental_backgroundRepeat" && property !== "experimental_backgroundSize" && property !== "experimental_backgroundPosition" && property !== "experimental_backgroundImage") || !("value" in descriptor) || Array.isArray(descriptor.value)
   })
   if (selectedProperties.length === 0) return { cssRule: rule as Record<string, unknown> }
   let primitiveDomain = [...metadata.primitiveDomain]
@@ -579,6 +669,9 @@ function admitStructuredValue(
   }
   if (property === "experimental_backgroundPosition") {
     return admitBackgroundPosition(value, context, property)
+  }
+  if (property === "experimental_backgroundImage") {
+    return admitBackgroundImage(value, context, property)
   }
   if (property === "transform") {
     return admitTransform(value, context, property)
@@ -803,6 +896,188 @@ function admitBackgroundPositionValue(
     return invalid("position fields must be finite numbers, zero, px or percentage lengths")
   }
   return Object.freeze({ [shape[0]]: first.value, [shape[1]]: second.value }) as BackgroundPositionValue
+}
+
+function admitBackgroundImage(
+  value: unknown,
+  context: StructuredCaptureContext,
+  property: "experimental_backgroundImage",
+): BackgroundImageList {
+  const entries = admitDenseArray(value, context, property)
+  return Object.freeze(entries.map((entry, index) => admitBackgroundImageValue(entry, context, index)))
+}
+
+function admitBackgroundImageValue(
+  value: unknown,
+  context: StructuredCaptureContext,
+  index: number,
+): BackgroundImageValue {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid experimental_backgroundImage in ${context.sourceId} at ${context.className}.experimental_backgroundImage[${index}]: ${detail}.`, "experimental_backgroundImage")
+  }
+  if (!isPlainStructuredObject(value)) return invalid("expected one canonical linear-gradient or radial-gradient record")
+  const typeDescriptor = Object.getOwnPropertyDescriptor(value, "type")
+  if (typeDescriptor === undefined || typeDescriptor.enumerable !== true || !("value" in typeDescriptor)) {
+    return invalid("type must be an enumerable data property")
+  }
+  if (typeDescriptor.value === "linear-gradient") return admitBackgroundLinearGradient(value, context, index)
+  if (typeDescriptor.value === "radial-gradient") return admitBackgroundRadialGradient(value, context, index)
+  return invalid("type must be linear-gradient or radial-gradient")
+}
+
+function admitBackgroundLinearGradient(
+  value: Record<string, unknown>,
+  context: StructuredCaptureContext,
+  index: number,
+): BackgroundLinearGradientValue {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid experimental_backgroundImage in ${context.sourceId} at ${context.className}.experimental_backgroundImage[${index}]: ${detail}.`, "experimental_backgroundImage")
+  }
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 3 ||
+    names.some(name => name !== "type" && name !== "direction" && name !== "colorStops")) {
+    return invalid("linear gradients require exactly type, direction and colorStops")
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const direction = descriptors.direction
+  const colorStops = descriptors.colorStops
+  if (direction === undefined || colorStops === undefined || direction.enumerable !== true || colorStops.enumerable !== true ||
+    !("value" in direction) || !("value" in colorStops)) {
+    return invalid("linear gradient fields must be enumerable data properties")
+  }
+  if (!isBackgroundLinearDirection(direction.value)) {
+    return invalid("direction must be a finite deg, grad, rad or turn angle or supported keyword")
+  }
+  return Object.freeze({
+    type: "linear-gradient",
+    direction: direction.value,
+    colorStops: admitBackgroundGradientStops(colorStops.value, context, invalid),
+  })
+}
+
+function admitBackgroundRadialGradient(
+  value: Record<string, unknown>,
+  context: StructuredCaptureContext,
+  index: number,
+): BackgroundRadialGradientValue {
+  const invalid = (detail: string): never => {
+    throw structuredAdmissionError("CRUMBS_STRUCTURED_IR_INVALID_VALUE", context.sourceId,
+      `Invalid experimental_backgroundImage in ${context.sourceId} at ${context.className}.experimental_backgroundImage[${index}]: ${detail}.`, "experimental_backgroundImage")
+  }
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 5 ||
+    names.some(name => name !== "type" && name !== "shape" && name !== "size" && name !== "position" && name !== "colorStops")) {
+    return invalid("radial gradients require exactly type, shape, size, position and colorStops")
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const shape = descriptors.shape
+  const size = descriptors.size
+  const position = descriptors.position
+  const colorStops = descriptors.colorStops
+  if (shape === undefined || size === undefined || position === undefined || colorStops === undefined ||
+    shape.enumerable !== true || size.enumerable !== true || position.enumerable !== true || colorStops.enumerable !== true ||
+    !("value" in shape) || !("value" in size) || !("value" in position) || !("value" in colorStops)) {
+    return invalid("radial gradient fields must be enumerable data properties")
+  }
+  if (!isBackgroundRadialShape(shape.value)) return invalid("shape must be circle or ellipse")
+  const radialSize = admitBackgroundRadialSize(size.value)
+  if (radialSize === undefined) return invalid("size must be a radial extent or finite non-negative x/y lengths")
+  const radialPosition = cloneBackgroundPositionRecord(position.value)
+  if (radialPosition === undefined) return invalid("position must be one canonical top/left, top/right, bottom/left or bottom/right record")
+  return Object.freeze({
+    type: "radial-gradient",
+    shape: shape.value,
+    size: radialSize,
+    position: radialPosition,
+    colorStops: admitBackgroundGradientStops(colorStops.value, context, invalid),
+  })
+}
+
+function admitBackgroundGradientStops(
+  value: unknown,
+  context: StructuredCaptureContext,
+  invalid: (detail: string) => never,
+): ReadonlyArray<BackgroundGradientColorStop> {
+  const entries = inspectDenseArray(value)
+  if (entries === undefined || entries.length < 2) return invalid("colorStops must be a dense array with at least two entries")
+  const stops = entries.map((entry, stopIndex) => admitBackgroundGradientStop(entry, context, stopIndex, invalid))
+  if (stops.filter(stop => stop.color !== null).length < 2) return invalid("colorStops must contain at least two colour stops")
+  for (let index = 0; index < stops.length; index += 1) {
+    if (stops[index]!.color === null &&
+      (index === 0 || index === stops.length - 1 || stops[index - 1]!.color === null || stops[index + 1]!.color === null)) {
+      return invalid("transition hints must sit between two colour stops")
+    }
+  }
+  return Object.freeze(stops)
+}
+
+function admitBackgroundGradientStop(
+  value: unknown,
+  context: StructuredCaptureContext,
+  stopIndex: number,
+  invalid: (detail: string) => never,
+): BackgroundGradientColorStop {
+  if (!isPlainStructuredObject(value)) return invalid(`colorStops[${stopIndex}] must be a plain colour-stop object`)
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length < 1 || names.length > 2 ||
+    !names.includes("color") || names.some(name => name !== "color" && name !== "positions")) {
+    return invalid(`colorStops[${stopIndex}] must contain color and optional positions only`)
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const color = descriptors.color
+  const positions = descriptors.positions
+  if (color === undefined || color.enumerable !== true || !("value" in color) ||
+    (positions !== undefined && (positions.enumerable !== true || !("value" in positions)))) {
+    return invalid(`colorStops[${stopIndex}] fields must be enumerable data properties`)
+  }
+  if (color.value !== null && !isBackgroundGradientColor(color.value)) {
+    return invalid(`colorStops[${stopIndex}].color must be null or a non-empty native colour string`)
+  }
+  let clonedPositions: ReadonlyArray<BackgroundGradientStopPosition> | undefined
+  if (positions !== undefined) {
+    const entries = inspectDenseArray(positions.value)
+    if (entries === undefined || entries.length > 2 || !entries.every(isBackgroundGradientStopPosition)) {
+      return invalid(`colorStops[${stopIndex}].positions must be a dense array of finite numbers or percentages`)
+    }
+    if (color.value === null && entries.length !== 1) {
+      return invalid(`colorStops[${stopIndex}] transition hints require exactly one position`)
+    }
+    clonedPositions = Object.freeze(entries as BackgroundGradientStopPosition[])
+  } else if (color.value === null) {
+    return invalid(`colorStops[${stopIndex}] transition hints require exactly one position`)
+  }
+  return Object.freeze({
+    color: color.value,
+    ...(clonedPositions === undefined ? {} : { positions: clonedPositions }),
+  })
+}
+
+function admitBackgroundRadialSize(
+  value: unknown,
+): BackgroundRadialSize | undefined {
+  if (isBackgroundRadialExtent(value)) return value
+  if (!isPlainStructuredObject(value)) return undefined
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 2 ||
+    names.some(name => name !== "x" && name !== "y")) return undefined
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const x = descriptors.x
+  const y = descriptors.y
+  if (x === undefined || y === undefined || x.enumerable !== true || y.enumerable !== true ||
+    !("value" in x) || !("value" in y) || !isBackgroundRadialSizeLength(x.value) || !isBackgroundRadialSizeLength(y.value)) return undefined
+  return Object.freeze({ x: x.value, y: y.value })
+}
+
+function cloneBackgroundPositionRecord(value: unknown): BackgroundPositionValue | undefined {
+  if (!isBackgroundPositionValue(value)) return undefined
+  const names = Object.getOwnPropertyNames(value)
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const first = descriptors[names[0]!]
+  const second = descriptors[names[1]!]
+  if (first === undefined || second === undefined || !("value" in first) || !("value" in second)) return undefined
+  return Object.freeze({ [names[0]!]: first.value, [names[1]!]: second.value }) as BackgroundPositionValue
 }
 
 function admitDropShadow(
@@ -1039,11 +1314,46 @@ function isBackgroundPositionLength(value: unknown): value is BackgroundPosition
     (value === "0" || Number.isFinite(Number.parseFloat(value))))
 }
 
+function isBackgroundGradientColor(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && !/^var\s*\(/i.test(value)
+}
+
+function isBackgroundGradientStopPosition(value: unknown): value is BackgroundGradientStopPosition {
+  return isFiniteNumber(value) || isPercentage(value)
+}
+
+function isBackgroundLinearDirection(value: unknown): value is BackgroundLinearDirection {
+  return typeof value === "string" && (backgroundLinearDirectionKeywords.has(value) ||
+    backgroundLinearAnglePattern.test(value) && Number.isFinite(Number.parseFloat(value)))
+}
+
+function isBackgroundRadialShape(value: unknown): value is BackgroundRadialShape {
+  return value === "circle" || value === "ellipse"
+}
+
+function isBackgroundRadialExtent(value: unknown): value is BackgroundRadialExtent {
+  return typeof value === "string" && backgroundRadialExtents.has(value)
+}
+
+function isBackgroundRadialSizeLength(value: unknown): value is BackgroundRadialSizeLength {
+  if (isFiniteNumber(value)) return value >= 0
+  return typeof value === "string" && backgroundRadialSizeLengthPattern.test(value) &&
+    Number.isFinite(Number.parseFloat(value)) && Number.parseFloat(value) >= 0
+}
+
 const filterAmountKeys = new Set(["brightness", "contrast", "grayscale", "invert", "opacity", "saturate", "sepia"])
 const dropShadowKeys = new Set(["offsetX", "offsetY", "standardDeviation", "color"])
 const backgroundRepeatKeywords: ReadonlySet<string> = new Set(["repeat", "space", "round", "no-repeat"])
 const backgroundSizeLengthPattern = /^(?:\d+(?:\.\d+)?|\.\d+)(?:px|%)$/
 const backgroundPositionLengthPattern = /^(?:0|-?(?:\d+(?:\.\d+)?|\.\d+)(?:px|%))$/
+const backgroundLinearAnglePattern = /^[+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:deg|grad|rad|turn)$/
+const backgroundLinearDirectionKeywords: ReadonlySet<string> = new Set([
+  "to top", "to right", "to bottom", "to left",
+  "to top right", "to right top", "to bottom right", "to right bottom",
+  "to top left", "to left top", "to bottom left", "to left bottom",
+])
+const backgroundRadialExtents: ReadonlySet<string> = new Set(["closest-corner", "closest-side", "farthest-corner", "farthest-side"])
+const backgroundRadialSizeLengthPattern = /^(?:\d+(?:\.\d+)?|\.\d+)(?:px|%)$/
 const backgroundPositionShapes = [
   ["top", "left"],
   ["top", "right"],
@@ -1114,6 +1424,7 @@ function isStructuredValueForProperty(property: StructuredNativeProperty, value:
   if (property === "experimental_backgroundRepeat") return isBackgroundRepeatList(value)
   if (property === "experimental_backgroundSize") return isBackgroundSizeList(value)
   if (property === "experimental_backgroundPosition") return isBackgroundPositionList(value)
+  if (property === "experimental_backgroundImage") return isBackgroundImageList(value)
   if (property === "transform") return isTransformValue(value)
   if (property === "shadowOffset" || property === "textShadowOffset") {
     return typeof value === "object" && value !== null && !Array.isArray(value) &&
@@ -1190,6 +1501,77 @@ function isBackgroundPositionValue(value: unknown): value is BackgroundPositionV
   const second = descriptors[shape[1]]
   return first !== undefined && second !== undefined && first.enumerable === true && second.enumerable === true &&
     "value" in first && "value" in second && isBackgroundPositionLength(first.value) && isBackgroundPositionLength(second.value)
+}
+
+function isBackgroundImageList(value: unknown): value is BackgroundImageList {
+  const entries = inspectDenseArray(value)
+  return entries !== undefined && entries.every(isBackgroundImageValue)
+}
+
+function isBackgroundImageValue(value: unknown): value is BackgroundImageValue {
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const type = descriptors.type
+  if (Object.getOwnPropertySymbols(value).length > 0 || type === undefined || type.enumerable !== true || !("value" in type)) return false
+  if (type.value === "linear-gradient") {
+    if (names.length !== 3 || names.some(name => name !== "type" && name !== "direction" && name !== "colorStops")) return false
+    const direction = descriptors.direction
+    const colorStops = descriptors.colorStops
+    return direction !== undefined && colorStops !== undefined && direction.enumerable === true && colorStops.enumerable === true &&
+      "value" in direction && "value" in colorStops && isBackgroundLinearDirection(direction.value) && isBackgroundGradientStops(colorStops.value)
+  }
+  if (type.value === "radial-gradient") {
+    if (names.length !== 5 || names.some(name => name !== "type" && name !== "shape" && name !== "size" && name !== "position" && name !== "colorStops")) return false
+    const shape = descriptors.shape
+    const size = descriptors.size
+    const position = descriptors.position
+    const colorStops = descriptors.colorStops
+    return shape !== undefined && size !== undefined && position !== undefined && colorStops !== undefined &&
+      shape.enumerable === true && size.enumerable === true && position.enumerable === true && colorStops.enumerable === true &&
+      "value" in shape && "value" in size && "value" in position && "value" in colorStops &&
+      isBackgroundRadialShape(shape.value) && isBackgroundRadialSize(size.value) &&
+      isBackgroundPositionValue(position.value) && isBackgroundGradientStops(colorStops.value)
+  }
+  return false
+}
+
+function isBackgroundGradientStops(value: unknown): value is ReadonlyArray<BackgroundGradientColorStop> {
+  const entries = inspectDenseArray(value)
+  if (entries === undefined || entries.length < 2) return false
+  const stops = entries.filter(isBackgroundGradientStop)
+  if (stops.length !== entries.length || stops.filter(stop => stop.color !== null).length < 2) return false
+  return stops.every((stop, index) => stop.color !== null ||
+    (index > 0 && index < stops.length - 1 && stops[index - 1]!.color !== null && stops[index + 1]!.color !== null))
+}
+
+function isBackgroundGradientStop(value: unknown): value is BackgroundGradientColorStop {
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length < 1 || names.length > 2 ||
+    !names.includes("color") || names.some(name => name !== "color" && name !== "positions")) return false
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const color = descriptors.color
+  const positions = descriptors.positions
+  if (color === undefined || color.enumerable !== true || !("value" in color) ||
+    (positions !== undefined && (positions.enumerable !== true || !("value" in positions)))) return false
+  if (color.value !== null && !isBackgroundGradientColor(color.value)) return false
+  if (positions === undefined) return color.value !== null
+  const entries = inspectDenseArray(positions.value)
+  if (entries === undefined || entries.length > 2 || !entries.every(isBackgroundGradientStopPosition)) return false
+  return color.value !== null || entries.length === 1
+}
+
+function isBackgroundRadialSize(value: unknown): value is BackgroundRadialSize {
+  if (isBackgroundRadialExtent(value)) return true
+  if (!isPlainStructuredObject(value)) return false
+  const names = Object.getOwnPropertyNames(value)
+  if (Object.getOwnPropertySymbols(value).length > 0 || names.length !== 2 || names.some(name => name !== "x" && name !== "y")) return false
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  const x = descriptors.x
+  const y = descriptors.y
+  return x !== undefined && y !== undefined && x.enumerable === true && y.enumerable === true &&
+    "value" in x && "value" in y && isBackgroundRadialSizeLength(x.value) && isBackgroundRadialSizeLength(y.value)
 }
 
 function isFilterFunction(value: unknown): value is FilterFunction {

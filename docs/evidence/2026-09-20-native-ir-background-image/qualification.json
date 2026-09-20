@@ -1,0 +1,93 @@
+{
+  "slice": "M2.2bc",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "1c10855119ee4d255a67a266373ad3d4965e5778",
+  "sourceState": "Working tree before implementation commit; unrelated pre-existing changes preserved",
+  "implementation": {
+    "property": "experimental_backgroundImage",
+    "primitiveDomain": ["view", "text"],
+    "value": "dense list of canonical linear-gradient or radial-gradient records",
+    "linearDomain": "explicit direction keyword or finite deg/grad/rad/turn angle plus dense colour stops",
+    "radialDomain": "explicit circle/ellipse shape, extent or finite non-negative x/y size, and canonical position record",
+    "colourStops": "literal non-empty colour strings, at least two colour stops, finite number/percentage positions and internal one-position transition hints",
+    "compatibility": "authored strings, opaque platform colours, variables, implicit defaults, unsupported units and dynamic forms remain on the runtime route",
+    "composition": "whole-list last winner, including empty-list replacement",
+    "schema": "Effect Schema validates gradient shape, nested stops, provenance and primitive domain",
+    "safety": "descriptor-safe capture clones and deeply freezes admitted lists, records, positions and stops",
+    "nativeGate": "dedicated packed iOS simulator rendering gate pending; Android remains parked"
+  },
+  "verification": [
+    {
+      "command": "bun test packages/css/test/native-ir-background-image.test.ts",
+      "status": "passed",
+      "receipt": "6 tests, 236 expect() calls"
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "receipt": "617 tests, 22127 assertions, 102 files"
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "receipt": "20 pages built"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed",
+      "receipt": "storybook application typecheck completed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "receipt": "workspace Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "receipt": "packed Expo web, iOS and Android bundles; 3 source maps"
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "receipt": "host Bun benchmark completed; warm README transform p95 29.551042 ms; warm consumer transform p95 31.525708 ms; 240-export p95 0.445696 ms",
+      "claimBoundary": "host smoke only; native-device rendering and frame performance not run"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run",
+      "pendingThresholds": [
+        "js-frame-time",
+        "ui-frame-time",
+        "allocation-bytes",
+        "retained-memory-bytes"
+      ],
+      "missingBaselines": ["js-frame-time", "ui-frame-time", "allocation-bytes"]
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "performance thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "CRUMBS_AUDIT_NODE_FLOOR is unset"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "boundaries": [
+    "no public API or native ABI change",
+    "experimental_backgroundImage remains outside the CSS-to-React-Native allowlist",
+    "native iOS rendering gate is pending and Android remains parked",
+    "no native-device performance acceptance claim",
+    "no publish or push"
+  ]
+}
