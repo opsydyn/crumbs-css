@@ -1,4 +1,3 @@
-import { cssDeclarationsToRN } from "../css-to-rn"
 import { NativeStylesCompatibilityError } from "../native-compatibility"
 import { NativeStylesDiagnosticCode } from "../diagnostics"
 import {
@@ -15,12 +14,12 @@ import {
   type StructuredDeclarationBlock,
 } from "./structured-ir"
 import { markNativeCaptureRule } from "./native-capture"
+import {
+  NO_COMPATIBILITY_CAPTURE,
+  normalizeCompatibilityScalarValue,
+} from "./shorthand-normalization"
 
 const allPrimitives = ["view", "text", "image"] as const
-const nativeToken = /^var\(--crumbs-[A-Za-z0-9_-]+\)$/
-const cssVariable = /var\s*\(/i
-const singleNativeDimension = /^(?:auto|[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?%)$/i
-const noCapture = Symbol("no compatibility capture")
 
 export type CompatibilityCaptureContext = ScalarCaptureContext & StructuredCaptureContext
 export type CompatibilityCaptureResult = {
@@ -56,8 +55,8 @@ export function captureCompatibilityIntoNativeIr(
     }
 
     if (!isAuthoredScalarProperty(property)) continue
-    const canonical = canonicalScalarValue(property, value)
-    if (canonical === noCapture) continue
+    const canonical = normalizeCompatibilityScalarValue(property, value)
+    if (canonical === NO_COMPATIBILITY_CAPTURE) continue
     scalarRule[property] = canonical
     capturedProperties.add(property)
   }
@@ -89,31 +88,6 @@ export function captureCompatibilityIntoNativeIr(
   }
 
   return { cssRule, ...(scalarBlock === undefined ? {} : { scalarBlock }), ...(structuredBlock === undefined ? {} : { structuredBlock }) }
-}
-
-function canonicalScalarValue(property: string, value: unknown): unknown {
-  if (typeof value === "number" || typeof value === "boolean") return value
-  if (typeof value !== "string") return noCapture
-  if (nativeToken.test(value)) return value
-  if (cssVariable.test(value)) return noCapture
-  if (isAliasSingleDimension(property, value)) return value
-
-  const converted = cssDeclarationsToRN([[toCssPropertyName(property), value]])
-  const entries = Object.entries(converted)
-  if (entries.length !== 1 || entries[0]?.[0] !== property) return noCapture
-  return entries[0][1]
-}
-
-function isAliasSingleDimension(property: string, value: string): boolean {
-  return ["inset", "insetInline", "insetBlock", "insetInlineStart", "insetInlineEnd", "insetBlockStart", "insetBlockEnd",
-    "gap", "padding", "paddingHorizontal", "paddingVertical", "paddingInline", "paddingBlock", "paddingInlineStart",
-    "paddingInlineEnd", "paddingBlockStart", "paddingBlockEnd", "margin", "marginHorizontal", "marginVertical", "marginInline",
-    "marginBlock", "marginInlineStart", "marginInlineEnd", "marginBlockStart", "marginBlockEnd", "borderWidth", "borderColor",
-    "borderRadius"].includes(property) && singleNativeDimension.test(value)
-}
-
-function toCssPropertyName(property: string): string {
-  return property.replace(/[A-Z]/g, letter => `-${letter.toLowerCase()}`)
 }
 
 function isOffsetProperty(property: string): boolean {

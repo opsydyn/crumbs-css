@@ -18,13 +18,15 @@ import {
 import { cssDeclarationsToRN } from "./css-to-rn"
 import { assertNativeCssCompatibility, NativeStylesCompatibilityError } from "./native-compatibility"
 import { NativeStylesDiagnosticCode } from "./diagnostics"
-import { NativeStyleMapType } from "./native-style-map"
-import {captureNativeExports, ExportRecordType, ExportStringType, ExportUndefinedType, ExportNegativeZeroType} from "./export-values"
+import { captureNativeExports } from "./export-values"
 import { parseCssClassRules } from "./parse-virtual-css"
 import { splitStructuredNativeValues } from "./structured-native-values"
 import { getNativeCaptureMetadata } from "./compiler/native-capture"
 import { captureCompatibilityIntoNativeIr } from "./compiler/compatibility-adapter"
+import { emitStyleSheetModule, type BuildStyleSheetCodeOptions } from "./compiler/code-emission"
+import { analyseDependencyImports } from "./compiler/dependency-analysis"
 import { collectStyleExports } from "./compiler/export-admission"
+import { indexStyleExportOwnership } from "./compiler/export-ownership"
 import {
   captureScalarIntoNativeIr,
   lowerScalarBlock,
@@ -50,10 +52,6 @@ export type TransformCssTsOptions = {
   readonly strictDiagnostics?: boolean
   readonly useStyleSheet?: boolean
 }
-type BuildStyleSheetCodeOptions = {
-  readonly useStyleSheet?: boolean
-}
-
 const originalNodeEnv = process.env.NODE_ENV
 
 // -- Testable core functions --------------------------------------------------
@@ -75,45 +73,7 @@ export function buildStyleSheetCode(
   depRelativePaths: ReadonlyArray<string> = [],
   options: BuildStyleSheetCodeOptions = {},
 ): string {
-  const useStyleSheet = options.useStyleSheet ?? true
-  const createEntries = [...classStyles.entries()]
-    .map(([cls, styles]) => `  ${JSON.stringify(cls)}: ${serializeRuntimeValue(styles)}`)
-    .join(",\n")
-
-  const exports = [...exportMap.entries()]
-    .map(([name, value]) => serializeStyleExport(name, value, classStyles))
-    .join("\n")
-
-  const depImports =
-    depRelativePaths.length > 0 ? depRelativePaths.map((p) => `import "${p}";`).join("\n") : ""
-
-  const parts = [
-    useStyleSheet ? `import { StyleSheet } from "react-native";` : "",
-    depImports,
-    useStyleSheet
-      ? `const _s = StyleSheet.create({\n${createEntries}\n});`
-      : `const _s = {\n${createEntries}\n};`,
-    exports,
-  ].filter(Boolean)
-
-  return parts.join("\n")
-}
-
-function serializeRuntimeValue(value: unknown): string {
-  if (typeof value === "number") {
-    if (!Number.isFinite(value)) throw new TypeError("Native style output contains a non-finite number")
-    return Object.is(value, -0) ? "-0" : JSON.stringify(value)
-  }
-  if (typeof value === "string" || typeof value === "boolean" || value === null) return JSON.stringify(value)
-  if (Array.isArray(value)) return `[${value.map(serializeRuntimeValue).join(",")}]`
-  if (typeof value === "object" && value !== null) {
-    const entries = Object.entries(value).map(([key, entry]) => {
-      const property = key === "__proto__" ? `[${JSON.stringify(key)}]` : JSON.stringify(key)
-      return `${property}:${serializeRuntimeValue(entry)}`
-    })
-    return `{${entries.join(",")}}`
-  }
-  throw new TypeError(`Native style output contains unsupported ${typeof value}`)
+  return emitStyleSheetModule(exportMap, classStyles, depRelativePaths, options)
 }
 
 function sourceIdentity(filePath: string, projectRoot: string): { readonly packageOwner: string; readonly sourceId: string } {
@@ -143,20 +103,6 @@ function sourceIdentity(filePath: string, projectRoot: string): { readonly packa
 
 function toPosixPath(value: string): string {
   return value.split(path.sep).join("/")
-}
-
-function serializeStyleExport(
-  name: string,
-  value: StyleExportValue,
-  classStyles: ReadonlyMap<string, Record<string, unknown>>,
-): string {
-  if (typeof value === "string") {
-    return classStyles.has(value)
-      ? `export const ${name} = _s["${value}"];`
-      : `export const ${name} = undefined;`
-  }
-
-  return `export const ${name} = ${serializeExportValue(value, classStyles)};`
 }
 
 function evaluateCompiledCssModule(source: string, filePath: string, cssAdapter: Adapter): unknown {
@@ -406,13 +352,14 @@ export async function transformCssTsToStyleSheet(
   const exportMap = new Map<string, StyleExportValue>()
   const remaining = lines.slice(firstNonImportIdx).join("\n")
   collectStyleExports(remaining, exportMap, absoluteFilePath)
+  const exportOwnership = indexStyleExportOwnership(exportMap)
 
   const classStyles = new Map<string, Record<string, unknown>>()
   for (const vp of virtualPaths) {
     const cssFile = await getSourceFromVirtualCssFile(vp)
     assertNativeCssCompatibility(cssFile.source)
     for (const [cls, decls] of parseCssClassRules(cssFile.source)) {
-      const exportName = findExportNameForClass(cls, exportMap)
+      const exportName = exportOwnership.exportNameForClass(cls)
       const rnStyles = cssDeclarationsToRN(decls, {
         context: {
           className: cls,
@@ -445,7 +392,7 @@ export async function transformCssTsToStyleSheet(
   // Raw vanilla-extract compositions retain upstream class-list semantics;
   // browser class-list order itself does not describe a CSS cascade.
   const resolvedClassStyles = new Map<string, Record<string, unknown>>()
-  for (const compositeName of collectExportClassNames(exportMap)) {
+  for (const compositeName of exportOwnership.classNames) {
     if (resolvedClassStyles.has(compositeName)) continue
     const classNames = compositeName.trim().split(/\s+/)
     const merged: Record<string, unknown> = {}
@@ -461,12 +408,11 @@ export async function transformCssTsToStyleSheet(
   // Exclude the entry file itself, third-party packages, and this package's
   // compiled internals. Only user-authored project files should be emitted as
   // Metro-visible side-effect imports.
-  const entryDir = path.dirname(absoluteFilePath)
-  const projectRoot = path.resolve(cwd)
-  const depRelativePaths = Object.keys(capturedInputs)
-    .map((p) => path.resolve(cwd, p))
-    .filter((abs) => shouldEmitDependencyImport(abs, absoluteFilePath, projectRoot))
-    .map((abs) => toRelativeImport(entryDir, abs))
+  const depRelativePaths = analyseDependencyImports(capturedInputs, {
+    cwd,
+    absoluteEntryPath: absoluteFilePath,
+    nativeStylesDistRoot: nativeStylesDistRoot(),
+  })
 
   return buildStyleSheetCode(
     exportMap,
@@ -476,114 +422,8 @@ export async function transformCssTsToStyleSheet(
   )
 }
 
-function shouldEmitDependencyImport(
-  absoluteDependencyPath: string,
-  absoluteEntryPath: string,
-  projectRoot: string,
-): boolean {
-  return (
-    absoluteDependencyPath !== absoluteEntryPath &&
-    isInsidePath(projectRoot, absoluteDependencyPath) &&
-    !isInsidePath(path.join(projectRoot, "node_modules"), absoluteDependencyPath) &&
-    !isInsidePath(path.join(projectRoot, "dist"), absoluteDependencyPath) &&
-    !isInsidePath(nativeStylesDistRoot(), absoluteDependencyPath)
-  )
-}
-
 function nativeStylesDistRoot(): string {
   return path.resolve(path.dirname(__filename), "../dist")
-}
-
-function isInsidePath(parentPath: string, childPath: string): boolean {
-  const relative = path.relative(parentPath, childPath)
-  return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative))
-}
-
-function toRelativeImport(fromDir: string, absoluteDependencyPath: string): string {
-  const rel = path.relative(fromDir, absoluteDependencyPath)
-  return rel.startsWith(".") ? rel : `./${rel}`
-}
-
-function collectExportClassNames(
-  exportMap: ReadonlyMap<string, StyleExportValue>,
-): ReadonlyArray<string> {
-  return [...exportMap.values()].flatMap(collectClassNamesFromExportValue)
-}
-
-function findExportNameForClass(
-  className: string,
-  exportMap: ReadonlyMap<string, StyleExportValue>,
-): string | undefined {
-  for (const [name, value] of exportMap) {
-    if (collectClassNamesFromExportValue(value).includes(className)) return name
-  }
-
-  return undefined
-}
-
-function serializeExportValue(
-  value: unknown,
-  classStyles: ReadonlyMap<string, Record<string, unknown>>,
-): string {
-  if (typeof value === "object" && value !== null && "$$type" in value) {
-    if (value.$$type === ExportStringType && "value" in value) return JSON.stringify(value.value)
-    if (value.$$type === ExportUndefinedType) return "undefined"
-    if (value.$$type === ExportNegativeZeroType) return "-0"
-    if (value.$$type === ExportRecordType && "entries" in value) {
-      const record = `{ ${(value.entries as Array<[string, unknown]>).map(([key, entry]) =>
-        `${key === "__proto__" ? `[${JSON.stringify(key)}]` : JSON.stringify(key)}: ${serializeExportValue(entry, classStyles)}`).join(", ")} }`
-      return "nullPrototype" in value && value.nullPrototype === true ? `Object.assign(Object.create(null), ${record})` : record
-    }
-  }
-  if (typeof value === "object" && value !== null && "$$type" in value && value.$$type === NativeStyleMapType && "styles" in value) {
-    return `Object.defineProperty(${serializeExportValue(value.styles, classStyles)}, Symbol.for(${JSON.stringify(NativeStyleMapType)}), { value: true, enumerable: true })`
-  }
-  if (isRecipeClassRef(value)) {
-    return classStyles.has(value.className) ? `_s["${value.className}"]` : "undefined"
-  }
-  if (typeof value === "string") {
-    return classStyles.has(value) ? `_s["${value}"]` : JSON.stringify(value)
-  }
-  if (
-    typeof value === "number" ||
-    typeof value === "boolean" ||
-    value === null ||
-    value === undefined
-  ) {
-    return JSON.stringify(value)
-  }
-  if (Array.isArray(value)) {
-    return `[${value.map((entry) => serializeExportValue(entry, classStyles)).join(", ")}]`
-  }
-  if (typeof value === "object") {
-    const entries = Object.entries(value)
-      .map(([key, entry]) => `${JSON.stringify(key)}: ${serializeExportValue(entry, classStyles)}`)
-      .join(", ")
-    return `{ ${entries} }`
-  }
-
-  return "undefined"
-}
-
-function collectClassNamesFromExportValue(value: unknown): ReadonlyArray<string> {
-  if (isRecipeClassRef(value)) return [value.className]
-  if (typeof value === "string") return [value]
-  if (Array.isArray(value)) return value.flatMap(collectClassNamesFromExportValue)
-  if (typeof value === "object" && value !== null) {
-    return Object.values(value).flatMap(collectClassNamesFromExportValue)
-  }
-  return []
-}
-
-function isRecipeClassRef(value: unknown): value is { readonly className: string } {
-  return (
-    typeof value === "object" &&
-    value !== null &&
-    "$$type" in value &&
-    value.$$type === "crumbs.css.class" &&
-    "className" in value &&
-    typeof value.className === "string"
-  )
 }
 
 // -- Metro transformer -------------------------------------------------------

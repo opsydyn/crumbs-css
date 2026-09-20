@@ -1,0 +1,86 @@
+{
+  "slice": "M2.4",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "working tree before commit",
+  "sourceState": "Implementation and documentation are committed after qualification",
+  "stages": {
+    "validation": "own enumerable data descriptors; accessors fail before execution",
+    "shorthandNormalization": "lossless compatibility scalar admission is isolated from capture",
+    "dependencyAnalysis": "project-local imports are filtered, deduplicated and sorted once",
+    "ownershipIndex": "class/export ownership is indexed once with lexical tie-breaking",
+    "codeEmission": "style, export, dependency and plain-record serialization is deterministic"
+  },
+  "verification": [
+    {
+      "command": "focused M2.4, adapter, structured compiler and transformer suites",
+      "status": "passed",
+      "tests": 52,
+      "assertions": 485
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "tests": 628,
+      "assertions": 22355,
+      "files": 104
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "pages": 20
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "claim": "declared host smoke ceilings only"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run"
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "The isolated npm install remains registry-blocked: the prior sandbox attempt returned ENOTFOUND and the escalated retry reached the registry but ended with EIDLETIMEOUT; no peer override or legacy install mode was used"
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Performance registry thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Exact Node v22.0.0 floor environment is unavailable; the host provides Node v22.16.0/v24.15.0"
+    }
+  ],
+  "boundaries": {
+    "publicApiChanged": false,
+    "artifactAbiChanged": false,
+    "effectConsumerRequirementChanged": false,
+    "metroDependencyInvalidationQualified": false,
+    "published": false,
+    "pushed": false,
+    "nativeDeviceAccepted": false,
+    "androidAccepted": false
+  }
+}

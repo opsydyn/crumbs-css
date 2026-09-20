@@ -143,7 +143,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M2.2an: Migrate shared `backfaceVisibility` and `cursor` literal/token domains.
 - [x] M2.2ao: Migrate view/text-only `borderCurve` and `pointerEvents` literal/token domains.
 - [x] M2.3: Route the supported vanilla-extract compatibility adapter into the same IR. Unsupported syntax must fail with context; do not silently recover via regex parsing or partially reconstructed payloads.
-- [ ] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
+- [x] M2.4: Separate validation, shorthand normalization, dependency analysis, and code emission. Index export/class ownership once for diagnostic lookup. Define deterministic serialization ordering and own-property handling for record keys.
 - [ ] M2.5: Version encoded artifacts and test compatible/incompatible readers. Distinguish codecs from lossy lowering/code generation; test codec laws only for their defined domain.
 - [ ] M2.6: Emit direct native modules and minimal token/condition metadata. Confirm structured values, ordinary exports, empty styles, and theme descriptors retain their specified meaning.
 - [ ] M2.7: Verify real dependency changes rebuild baked importer values. Include nested `.css.ts` imports, plain token modules, monorepo dependencies, target/config changes, and compiler updates before adding persistent caching.
@@ -1209,3 +1209,13 @@ Next recommended slice: **M2.3** — route the supported vanilla-extract compati
 - No public authoring API, Effect consumer requirement, external artifact ABI, publication or push changed.
 
 Next recommended slice: **M2.4** — separate validation, shorthand normalization, dependency analysis and code emission, then index export/class ownership for deterministic diagnostics and serialization. Begin only after approval.
+
+### 2026-09-20 — M2.4 compiler stage separation and deterministic emission
+
+- Separated own-data validation, compatibility shorthand normalisation, dependency analysis, export/class ownership indexing and final code emission into explicit compiler modules. Enumerable accessors fail before execution; inherited keys are ignored; own `__proto__` keys remain data.
+- Dependency inputs are filtered to project-authored files, deduplicated and sorted once. Export/class ownership is indexed once with deterministic lexical tie-breaking, so CSS conversion diagnostics do not rescan the export graph for every class.
+- Style tables, named exports, dependency imports and plain record keys now serialise deterministically. Encoded export records keep their authored semantic order, while equivalent map insertion orders produce byte-identical modules.
+- Stage-contract tests, the transformer/structured/adapter suites, full package check and package typecheck pass. Final Storybook, Expo workspace, documentation, benchmark and budget gates are recorded in the qualification file; packed Expo remains registry-blocked, performance readiness remains fail-closed, and Android/native-device acceptance stays incomplete.
+- No public API, Effect consumer requirement, external artifact ABI, publication or push changed. M2.7 still owns actual Metro dependency invalidation.
+
+Next recommended slice: **M2.5** — version encoded artifacts and test compatible/incompatible readers, keeping codec laws separate from lossy lowering and code generation. Begin only after approval.
