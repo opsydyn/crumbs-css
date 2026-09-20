@@ -87,6 +87,7 @@ export type MigratedScalarProperty =
   | "flexDirection" | "flexWrap" | "alignContent" | "alignItems" | "alignSelf" | "justifyContent"
   | "boxSizing"
   | "aspectRatio"
+  | "rotation" | "scaleX" | "scaleY" | "translateX" | "translateY"
   | "backfaceVisibility" | "cursor"
   | "borderCurve" | "pointerEvents"
   | "borderStyle" | "outlineStyle" | "isolation" | "resizeMode" | "objectFit" | "mixBlendMode"
@@ -274,6 +275,7 @@ const MigratedScalarPropertySchema = Schema.Literals([
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
   "aspectRatio",
+  "rotation", "scaleX", "scaleY", "translateX", "translateY",
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
   "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
@@ -314,6 +316,7 @@ const AuthoredScalarPropertySchema = Schema.Literals([
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
   "aspectRatio",
+  "rotation", "scaleX", "scaleY", "translateX", "translateY",
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
   "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
@@ -442,6 +445,7 @@ const migratedScalarProperties = [
   "flexDirection", "flexWrap", "alignContent", "alignItems", "alignSelf", "justifyContent",
   "boxSizing",
   "aspectRatio",
+  "rotation", "scaleX", "scaleY", "translateX", "translateY",
   "backfaceVisibility", "cursor",
   "borderCurve", "pointerEvents",
   "borderStyle", "outlineStyle", "isolation", "resizeMode", "objectFit", "mixBlendMode",
@@ -507,6 +511,11 @@ const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiv
   alignSelf: ["view", "text", "image"], justifyContent: ["view", "text", "image"],
   boxSizing: ["view", "text", "image"],
   aspectRatio: ["view", "text", "image"],
+  rotation: ["view", "text", "image"],
+  scaleX: ["view", "text", "image"],
+  scaleY: ["view", "text", "image"],
+  translateX: ["view", "text", "image"],
+  translateY: ["view", "text", "image"],
   backfaceVisibility: ["view", "text", "image"], cursor: ["view", "text", "image"],
   borderCurve: ["view", "text"], pointerEvents: ["view", "text"],
   borderStyle: ["view", "text"], outlineStyle: ["view", "text"], isolation: ["view", "text"],

@@ -190,6 +190,8 @@ const NATIVE_STYLE_PROPS = new Set([
   "textTransform",
   "tintColor",
   "top",
+  "translateX",
+  "translateY",
   "transform",
   "transformOrigin",
   "userSelect",

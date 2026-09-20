@@ -1,0 +1,74 @@
+{
+  "slice": "M2.2as",
+  "recordedAt": "2026-09-20",
+  "sourceRevision": "13627d5",
+  "verification": [
+    {
+      "command": "focused scalar transform companion suite",
+      "status": "passed",
+      "tests": 5,
+      "assertions": 200
+    },
+    {
+      "command": "bun run check",
+      "status": "passed",
+      "tests": 563,
+      "assertions": 20033,
+      "files": 94
+    },
+    {
+      "command": "bun run app:typecheck",
+      "status": "passed"
+    },
+    {
+      "command": "bun run playground:check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run playground:packed --check",
+      "status": "passed",
+      "platforms": ["web", "ios", "android"],
+      "runtimeSourceMaps": 3
+    },
+    {
+      "command": "bun run docs:build",
+      "status": "passed",
+      "pages": 20
+    },
+    {
+      "command": "bun run --filter @opsydyn/crumbs-css bench:native-styles",
+      "status": "passed",
+      "claim": "declared host smoke ceilings only"
+    },
+    {
+      "command": "bun run budgets:validate",
+      "status": "passed",
+      "registryReady": false,
+      "performanceQualification": "not-run"
+    },
+    {
+      "command": "bun run budgets:readiness",
+      "status": "incomplete",
+      "exitCode": 1,
+      "reason": "Performance registry thresholds and baselines remain pending review"
+    },
+    {
+      "command": "bun run measure:host-budgets",
+      "status": "incomplete",
+      "reason": "Exact Node v22.0.0 floor binary unavailable; host has Node v22.16.0 and v24.15.0"
+    }
+  ],
+  "boundaries": {
+    "properties": ["rotation", "scaleX", "scaleY", "translateX", "translateY"],
+    "primitiveDomain": "view-text-image",
+    "valueDomain": "finite-number-or-token",
+    "orderedTransformArray": "deferred",
+    "publicApiChanged": false,
+    "artifactAbiChanged": false,
+    "published": false,
+    "pushed": false,
+    "nativeDeviceAccepted": false
+  }
+}
