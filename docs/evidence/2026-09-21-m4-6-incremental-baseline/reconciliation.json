@@ -1,0 +1,47 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21T20:31:50Z",
+  "sourceRevision": "43c5ece39360cf321fdb074d82cee41d5daaba23",
+  "sourceState": "The current full-host Metro report is promoted as the admitted expanded-protocol baseline; no old evidence was rewritten.",
+  "metric": {
+    "id": "incremental-rebuild",
+    "selector": "metro-incremental.direct-css-edit-ms.median",
+    "baseline": 123.95049999999901,
+    "current": {
+      "min": 122.82970799999748,
+      "median": 123.95049999999901,
+      "max": 126.82683300000281,
+      "maxDeviationPercent": 2.3205497355830107
+    },
+    "delta": 0.0,
+    "deltaPercent": 0.0,
+    "environment": "exact",
+    "thresholdStatus": "approved",
+    "threshold": {
+      "absoluteMax": 137.506,
+      "maxRegressionPercent": 10
+    },
+    "result": "pass"
+  },
+  "baselineEvidence": "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json",
+  "currentEvidence": "docs/evidence/2026-09-21-m4-6-full-host-comparison/metro-incremental.json",
+  "protocol": {
+    "requestUrl": "/src/incremental-entry.bundle?platform=ios&dev=true&minify=false&modulesOnly=false&runModule=true",
+    "repetitions": 5,
+    "editKind": "direct-css-source",
+    "cacheState": "One cleared Metro server and warm initial graph; three dependency-only controls (plain token, nested .css.ts and workspace source) prove parent rebuilds before one excluded direct-edit warmup and five retained direct .css.ts edits; dependency receipts require the new baked value and absence of the old value"
+  },
+  "registry": {
+    "registryReady": false,
+    "performanceQualification": "not-run"
+  },
+  "previousEvaluation": {
+    "comparisonEvidence": "docs/evidence/2026-09-21-m4-6-full-host-comparison/comparison.json",
+    "result": "incomplete-environment-mismatch",
+    "reason": "The previous comparison used the old baseline contract before reconciliation."
+  },
+  "limits": [
+    "This is a direct re-evaluation of the retained current run under the reconciled baseline, not a second Metro workload.",
+    "The full registry remains blocked by missing or diagnostic native/device domains."
+  ]
+}

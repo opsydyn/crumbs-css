@@ -31,6 +31,13 @@ artifact scans and zero-growth limits. The historical
 continues to fail against its old compatibility baseline when current output
 is compared.
 
+The incremental-rebuild baseline now follows the expanded M2.7-aware protocol:
+three dependency-only receipts (plain token, nested `.css.ts`, and workspace
+source) prove parent invalidation before one excluded warmup and five retained
+direct edits. The controls are retained correctness evidence and are excluded
+from the direct-edit median. The reconciled median is 123.9505 ms; its existing
+approved ceiling remains 137.506 ms with a 10% relative limit.
+
 Retained-memory evidence is diagnostic because it lacks forced-GC release-device
 provenance. JS frames, UI frames, and allocations have no qualifying baseline
 or threshold. The registry therefore remains pending and cannot produce
@@ -45,6 +52,6 @@ Run `bun run build && bun run measure:runtime-graph-budgets <output-directory>` 
 
 Comparison adapters require matching runtime/compiler identities and scenario contracts. The benchmark fingerprint includes environment, protocol, fixture hashes and sampling shape; editor comparison includes its exact generated manifest; Effect-boundary comparison includes Effect/build/protocol and Node identities; runtime initialization includes runtime/format, host and sampling protocol; Metro comparison includes Expo/Metro/RN identities, the direct-edit protocol and exact fixture hashes. A mismatch reports incomplete before evaluating thresholds. Current medians are compared with the recorded baseline and must satisfy both the absolute ceiling and the relative regression ceiling.
 
-Run `bun run measure:metro-incremental <output.json>` for the focused Metro scenario. It warms one cleared iOS development graph, excludes one direct-edit warmup, then records five direct `.css.ts` edits from file write through a 75 ms watcher-settle interval and receipt of the updated full bundle. Every receipt must contain all four newly compiled padding longhands, omit the previous values, change the bundle hash, and restore both edited files. A dependency-only control is diagnostic: Metro 0.84 updates the dependency module but leaves the importing baked `.css.ts` transform stale. That control is not admitted as incremental-rebuild evidence and remains an M2.7 correctness requirement.
+Run `bun run measure:metro-incremental <output.json>` for the focused Metro scenario. It warms one cleared iOS development graph, records three dependency-only invalidation receipts, excludes one direct-edit warmup, then records five direct `.css.ts` edits from file write through a 75 ms watcher-settle interval and receipt of the updated full bundle. Every direct receipt must contain all four newly compiled padding longhands, omit the previous values, change the bundle hash, and restore both edited files. The dependency receipts prove that plain-token, nested `.css.ts`, and workspace-source parents rebuild; they remain separate correctness samples and are excluded from the direct-edit median.
 
 The review packet preserves approved decisions beside their min/median/max envelopes and derives mechanical candidates only for recorded metrics still awaiting review. Candidates use the larger of the observed maximum or the median plus twice the observed deviation, with a minimum ten-percent review margin and upward rounding. High-noise metrics and approved zero-growth policies remain visible. The tool never edits or activates `budgets.json`.

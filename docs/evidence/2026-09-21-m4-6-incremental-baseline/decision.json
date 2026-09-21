@@ -1,0 +1,99 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21T20:31:50Z",
+  "sourceRevision": "43c5ece39360cf321fdb074d82cee41d5daaba23",
+  "decision": "admit-expanded-incremental-protocol",
+  "metric": {
+    "id": "incremental-rebuild",
+    "selector": "metro-incremental.direct-css-edit-ms.median",
+    "baselineEvidence": "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json",
+    "samples": [
+      123.95049999999901,
+      122.8393750000032,
+      122.82970799999748,
+      126.82683300000281,
+      125.72208399999727
+    ],
+    "envelope": {
+      "min": 122.82970799999748,
+      "median": 123.95049999999901,
+      "max": 126.82683300000281,
+      "maxDeviationPercent": 2.3205497355830107
+    },
+    "repetitions": 5
+  },
+  "protocol": {
+    "requestUrl": "/src/incremental-entry.bundle?platform=ios&dev=true&minify=false&modulesOnly=false&runModule=true",
+    "repetitions": 5,
+    "editKind": "direct-css-source",
+    "cacheState": "One cleared Metro server and warm initial graph; three dependency-only controls (plain token, nested .css.ts and workspace source) prove parent rebuilds before one excluded direct-edit warmup and five retained direct .css.ts edits; dependency receipts require the new baked value and absence of the old value"
+  },
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "expo": "56.0.4",
+    "metro": "0.84.4",
+    "reactNative": "0.85.3"
+  },
+  "controls": [
+    {
+      "kind": "plain-token",
+      "previousCompiledValue": 30001,
+      "compiledValue": 30002,
+      "editToReceiptMs": 118.66329199999745,
+      "attempts": 2,
+      "bundleSha256": "909fb5698ba1b756289900cd64efc1b0541fb541b17982e79dd5daec33f6b6c0",
+      "receipt": {
+        "compiledValuePresent": true,
+        "previousCompiledValueAbsent": true
+      }
+    },
+    {
+      "kind": "nested-css",
+      "previousCompiledValue": 31001,
+      "compiledValue": 31003,
+      "editToReceiptMs": 113.66366600000038,
+      "attempts": 2,
+      "bundleSha256": "dacb644366ff097f225241a4d0055d19f7b5977cf157b6380300bacaf1297bed",
+      "receipt": {
+        "compiledValuePresent": true,
+        "previousCompiledValueAbsent": true
+      }
+    },
+    {
+      "kind": "workspace-source",
+      "previousCompiledValue": 32001,
+      "compiledValue": 32004,
+      "editToReceiptMs": 58.63479200000074,
+      "attempts": 1,
+      "bundleSha256": "f9a8d53a5e531cd80711840deda4c1fde34c7b80d362d692775c0269061a55c9",
+      "receipt": {
+        "compiledValuePresent": true,
+        "previousCompiledValueAbsent": true
+      }
+    }
+  ],
+  "previousBaseline": {
+    "evidence": "docs/evidence/2026-09-15-metro-incremental/baseline.json",
+    "value": 125.00500000000011,
+    "protocol": "One cleared Metro server and warm initial graph; one excluded direct-edit warmup; five retained sequential direct .css.ts edits"
+  },
+  "thresholdDecision": {
+    "absoluteMax": 137.506,
+    "maxRegressionPercent": 10,
+    "decision": "preserve-approved-ceiling",
+    "rationale": "The expanded fixture and dependency controls change the scenario contract, so the baseline is re-recorded. The previously approved direct-edit ceiling is preserved as an explicit product limit; it is not mechanically tightened or relaxed from one new run."
+  },
+  "review": {
+    "status": "approved",
+    "approvedBy": "Alan Currie (session approval)",
+    "approvedAt": "2026-09-21T20:31:50Z"
+  },
+  "limits": [
+    "The direct-edit median is host Expo/Metro development evidence, not release Hermes or physical-device performance.",
+    "Dependency controls prove the expanded invalidation contract but are excluded from the direct-edit median.",
+    "The old baseline remains retained for history; it is not rewritten."
+  ]
+}

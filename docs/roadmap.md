@@ -1734,3 +1734,29 @@ Next recommended slice: **M4.6 incremental baseline protocol reconciliation**
 — decide whether the dependency-control and expanded-fixture contract is the
 new admitted scenario, then retain a new five-repetition baseline and update
 the registry only through a reviewed evidence decision.
+
+### 2026-09-21 — M4.6 incremental baseline protocol reconciliation
+
+- Admitted the expanded M2.7-aware Metro contract: plain-token, nested
+  `.css.ts`, and workspace-source invalidation receipts precede one excluded
+  warmup and five retained direct edits. The controls prove parent rebuilds and
+  remain separate correctness evidence rather than entering the direct-edit
+  median.
+- Replaced the incremental registry baseline with the current five-sample
+  median of 123.9505 ms and retained the previously approved 137.506 ms /
+  10% ceiling through an explicit session decision. The old 125.005 ms evidence
+  remains immutable historical evidence.
+- Focused reconciliation passes with exact protocol identity and zero delta;
+  registry validation and budget-contract tests pass. Whole-registry readiness
+  remains false for the missing or diagnostic native/device domains, and
+  physical iOS and Android stay backlogged.
+
+See [M4.6 incremental baseline reconciliation assessment](assessments/2026-09-21-m4-6-incremental-baseline-protocol-reconciliation.md),
+[baseline decision evidence](evidence/2026-09-21-m4-6-incremental-baseline/decision.json),
+and [reconciliation evidence](evidence/2026-09-21-m4-6-incremental-baseline/reconciliation.json).
+
+Next recommended slice: **M4.6 historical compatibility budget disposition** —
+decide whether the old 11,307-byte compatibility metric remains a legacy
+diagnostic, is retired in favour of the admitted split graphs, or requires a
+same-functionality `theme` graph reduction plan. Keep the current split gates
+and whole-registry fail-closed boundaries intact.

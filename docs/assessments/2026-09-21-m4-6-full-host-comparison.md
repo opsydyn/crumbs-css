@@ -47,7 +47,8 @@ This is host and emitted-artifact evidence. It does not qualify Hermes frame
 time, allocation or retained-memory behaviour, physical iOS, or Android. Those
 gates remain backlogged.
 
-Next recommended slice: **M4.6 incremental baseline protocol reconciliation**
-— decide whether the dependency-control and expanded-fixture contract is the
-new admitted scenario, then retain a new five-repetition baseline and update
-the registry only through a reviewed evidence decision.
+Next recommended slice: **M4.6 historical compatibility budget disposition** —
+decide whether the old 11,307-byte compatibility metric remains a legacy
+diagnostic, is retired in favour of the admitted split graphs, or requires a
+same-functionality `theme` graph reduction plan. Keep the current split gates
+and whole-registry fail-closed boundaries intact.
