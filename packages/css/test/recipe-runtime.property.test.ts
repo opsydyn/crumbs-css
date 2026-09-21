@@ -49,12 +49,36 @@ describe("native recipe runtime properties", () => {
       fc.property(recipeCaseArbitrary, ({ recipe, selection }) => {
         const expected = expectedRecipeStyleIds(recipe, selection)
         const resolved = withSilencedWarnings(() => resolveRecipeStyle(recipe, selection))
-        const resolvedFromResolver = withSilencedWarnings(() =>
-          createRecipeResolver(recipe)(selection),
-        )
+        const cachedResolver = createRecipeResolver(recipe, {cacheSize: 8})
+        const uncachedResolver = createRecipeResolver(recipe, {cacheSize: 0})
+        const resolvedFromResolver = withSilencedWarnings(() => cachedResolver(selection))
+        const resolvedFromUncachedResolver = withSilencedWarnings(() => uncachedResolver(selection))
 
         expect(styleIds(resolved)).toEqual(expected)
         expect(resolvedFromResolver).toEqual(resolved)
+        expect(resolvedFromUncachedResolver).toEqual(resolved)
+        expect(cachedResolver(selection)).toBe(resolvedFromResolver)
+        expect(uncachedResolver(selection)).not.toBe(resolvedFromUncachedResolver)
+      }),
+      { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED },
+    )
+  })
+
+  it("keeps generated resolver plans linear instead of expanding variant products", () => {
+    fc.assert(
+      fc.property(recipeCaseArbitrary, ({recipe, selection}) => {
+        const resolver = createRecipeResolver(recipe, {cacheSize: 8})
+        const authoredVariants = Object.entries(recipe.variants ?? {})
+        const authoredValueCount = authoredVariants.reduce(
+          (count, [, values]) => count + Object.keys(values).length,
+          0,
+        )
+
+        expect(resolver.plan.variants).toHaveLength(authoredVariants.length)
+        expect(resolver.plan.variants.reduce((count, variant) => count + Object.keys(variant.values).length, 0))
+          .toBe(authoredValueCount)
+        withSilencedWarnings(() => resolver(selection))
+        expect(resolver.getCacheStats().size).toBe(1)
       }),
       { numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED },
     )

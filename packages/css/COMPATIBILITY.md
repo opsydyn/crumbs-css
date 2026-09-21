@@ -487,6 +487,22 @@ invalidation. The store contract is covered by atomic publication, selector,
 nested-scope, disposal and shared-identity tests. These checks do not claim
 device frame, native rendering or retained-memory performance.
 
+### Cached and uncached evaluator equivalence (M4.5)
+
+Seeded property suites compare cached theme resolution with an independent
+uncached oracle over generated literal/token styles and arrays. Repeated calls
+for the same immutable input/theme retain the documented references; a new
+theme scope or style artifact receives a new cache identity and cannot reuse a
+stale resolved value. Dependency-plan transitions recompute and notify only
+paths whose declared token changed, while static and unrelated outputs retain
+their references.
+
+Generated recipe cases compare the bounded resolver with its zero-capacity and
+direct uncached forms. The plan retains authored variants and values linearly
+and one selection does not materialize a Cartesian product. These are semantic,
+identity and invalidation checks; they do not claim React render, native frame,
+device-memory or Android performance.
+
 ### Static structured compiler boundary
 
 Transform arrays accept exactly one operation per entry: finite numeric `perspective`, `scale`, `scaleX`, `scaleY`; finite numeric or percentage `translateX` / `translateY`; `rotate`, `rotateX`, `rotateY`, `rotateZ`, `skewX`, `skewY` with numeric `deg` / `rad` strings; or `matrix` with exactly 16 finite numbers. Empty transform arrays are preserved. Offsets require exactly finite numeric `width` and `height`. No nested merging, unit conversion or nested token evaluation occurs. CSS transform strings retain the existing CSS converter contract.

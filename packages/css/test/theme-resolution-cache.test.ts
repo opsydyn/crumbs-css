@@ -101,4 +101,30 @@ describe("native theme resolution cache", () => {
    },
   ), {numRuns: 100, seed: 20260921})
  })
+
+ it("does not reuse a cached value after a theme scope or style artifact replacement", () => {
+  const token = createThemeTokenReference("--crumbs-color-accent")
+  const style: Record<string, unknown> = {color: token, opacity: 0.5}
+  const firstTheme = {
+   contract: {},
+   values: {},
+   tokens: {"--crumbs-color-accent": "#2463eb"},
+  }
+  const first = resolveThemeTokens(style, firstTheme)
+
+  const replacementTheme = {
+   contract: {},
+   values: {},
+   tokens: {"--crumbs-color-accent": "#7c3aed"},
+  }
+  const scoped = resolveThemeTokens(style, replacementTheme)
+  expect(scoped).toEqual({color: "#7c3aed", opacity: 0.5})
+  expect(scoped).not.toBe(first)
+
+  const replacementStyle: Record<string, unknown> = {color: token, opacity: 0.5}
+  const artifact = resolveThemeTokens(replacementStyle, replacementTheme)
+  expect(artifact).toEqual(scoped)
+  expect(artifact).not.toBe(scoped)
+  expect(resolveThemeTokens(style, firstTheme)).toBe(first)
+ })
 })

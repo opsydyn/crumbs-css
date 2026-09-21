@@ -174,7 +174,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M4.2: Use compiler-emitted dependency plans for token resolution. Record both recomputation and notification counts; resolving only affected data does not prove unrelated components avoided rendering.
 - [x] M4.3: Precompute recipe order/defaults/compound matchers and canonical selection keys. Make cache bounds, eviction, and resolver lifetime explicit; exercise workloads that exceed the bound.
 - [x] M4.4: Add selective subscriptions with consistent snapshots and tests for concurrent rendering, provider updates, nested scopes, unmount, and hot reload. No consumer may observe a mixture of old values and new derived tokens.
-- [ ] M4.5: Compare cached and uncached evaluators on generated inputs. Test identity promises, invalidation completeness, zero eager Cartesian expansion, and no stale results after scope or artifact replacement.
+- [x] M4.5: Compare cached and uncached evaluators on generated inputs. Test identity promises, invalidation completeness, zero eager Cartesian expansion, and no stale results after scope or artifact replacement.
 - [ ] M4.6: Run M1 device/bundle/editor budgets and retained-memory scenarios. Record improvements and regressions against equivalent native workloads; do not introduce native engine dependencies without a separate decision.
 
 **Exit:** semantic equivalence, identity, notification, and cache-bound tests pass; release-mode device evidence meets committed budgets; runtime work excludes schema traversal and repeated compilation.
@@ -1354,3 +1354,20 @@ Next recommended slice: **M4.4** — add selective subscriptions with consistent
   native rendering or retained-memory qualification; Android remains deferred.
 
 Next recommended slice: **M4.5** — compare cached and uncached evaluators on generated inputs, including identity, invalidation, zero eager Cartesian expansion and stale-result checks after scope or artifact replacement. Begin only after approval.
+
+### 2026-09-21 — M4.5 cached and uncached evaluator equivalence
+
+- Added seeded generated comparisons between cached theme resolution and an
+  independent uncached flatten/token oracle. Same-snapshot calls retain their
+  documented references; replacement themes and style artifacts receive new
+  identities and cannot return stale values.
+- Added generated dependency-plan transitions that verify only declared paths
+  are recomputed and notified while unrelated and static outputs retain their
+  references. Recipe properties compare bounded, zero-capacity and direct
+  uncached resolution and prove plans stay linear without eager Cartesian
+  expansion.
+- Updated compatibility/runtime guidance and the M4.5 assessment. Focused
+  package tests pass; no production dependency/API, device, Android, publication
+  or protected release/version change was included.
+
+Next recommended slice: **M4.6** — run the committed M1 device, bundle, editor and retained-memory budgets and record improvements or regressions against equivalent native workloads. Begin only after approval.

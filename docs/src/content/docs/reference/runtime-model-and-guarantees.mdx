@@ -94,6 +94,27 @@ resolver owns its plan and cache for its lifetime; there is no process-global
 strong selection cache. The recipe and its styles must be treated as immutable
 snapshots.
 
+## Cached and uncached evaluator equivalence
+
+The package tests compare cached theme resolution with an independent uncached
+oracle over generated literal/token styles and arrays. Repeated calls for the
+same immutable input and theme retain their documented references. Replacing a
+theme snapshot or style artifact creates a new cache identity, so a prior
+resolved value cannot leak into the replacement.
+
+Compiler dependency plans provide the selective invalidation boundary: a token
+change recomputes and notifies only declared paths, while static and unrelated
+outputs retain their references. Generated recipe cases compare bounded,
+zero-capacity and direct uncached resolvers. The plan stores authored variant
+values and compound matchers linearly; it never eagerly expands the variant
+Cartesian product.
+
+The suite uses fixed seeds and an independent oracle. It qualifies semantic
+equivalence, reference identity and invalidation completeness only; it does
+not measure React renders, Hermes/native frame time, device memory or Android
+behaviour. Mutating an input after resolution remains outside the snapshot
+contract.
+
 ## Native structured values and variant maps
 
 Legacy token ownership is the exact raw path of key segments. Identical paths can reuse a token name while themes retain independent value maps; different paths that sanitize to that name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`. Registration is atomic and exposed metadata paths are frozen. Theme creation rejects relocated, invalid or unregistered leaves with `CRUMBS_CSS_INVALID_THEME_CONTRACT`. Registry checks apply within an authoring module instance/compiled graph. Namespace roots by package/design system; distinct cross-package/provider identities and wrong-provider detection remain M3 work. Existing non-colliding names stay unchanged.
