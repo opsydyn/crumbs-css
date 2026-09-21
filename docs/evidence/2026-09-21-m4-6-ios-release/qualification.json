@@ -1,0 +1,34 @@
+{
+  "slice": "M4.6-native-ios-followup",
+  "recordedAt": "2026-09-21",
+  "sourceRevision": "81e6cc81dca41aa8505eca37c5b437548c37d887",
+  "target": "Release Hermes iOS simulator; Android remains parked",
+  "verification": [
+    {"command": "Expo prebuild and CocoaPods resolution", "status": "passed", "artifact": "build.json"},
+    {"command": "Xcode Release build/install/launch on Crumbs Acceptance", "status": "passed", "artifact": "build.json"},
+    {"command": "25-cycle retained-memory workload at 100 rows", "status": "completed", "receipt": "memory-100.json"},
+    {"command": "25-cycle retained-memory workload at 1,000 rows", "status": "completed", "receipt": "memory-1000.json"},
+    {"command": "bun test packages/css/test/playground-memory.test.ts packages/css/test/budget-contract.test.ts", "status": "passed", "tests": 18, "assertions": 369},
+    {"command": "bun run budgets:validate", "status": "passed", "registryReady": false, "performanceQualification": "not-run"},
+    {"command": "bun run budgets:readiness", "status": "fail-closed", "exitCode": 1, "pendingThresholds": ["js-frame-time", "ui-frame-time", "allocation-bytes", "retained-memory-bytes"]}
+  ],
+  "admission": {
+    "iosSimulatorReleaseRun": true,
+    "retainedMemoryQualified": false,
+    "reasons": [
+      "No approved M1.8 retained-memory budget was applied",
+      "Simulator evidence is not a physical-device qualification",
+      "JS/UI frame and native allocation probes were not run"
+    ]
+  },
+  "boundaries": {
+    "publicApiChanged": false,
+    "nativeDependencyAdded": false,
+    "repositoryRuntimeChanged": false,
+    "androidAccepted": false,
+    "published": false,
+    "pushed": false,
+    "roadmapItemClosed": false
+  },
+  "next": "Review runtime-byte and editor-instantiation regressions, decide the native probe/budget contract, and obtain physical-device plus frame/allocation evidence before closing M4.6; Android remains the final parked move."
+}

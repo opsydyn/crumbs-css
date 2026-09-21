@@ -1,0 +1,52 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21",
+  "slice": "M4.6-native-ios-followup",
+  "sourceRevision": "81e6cc81dca41aa8505eca37c5b437548c37d887",
+  "sourceState": "Repository source remained unchanged apart from protected pre-existing release/version edits; the native project and Memory route were disposable temporary workspace files.",
+  "target": {
+    "platform": "ios",
+    "deviceKind": "simulator",
+    "deviceName": "Crumbs Acceptance",
+    "deviceUdid": "BA031750-0722-4DCC-87AE-EC8EE894FB1B",
+    "os": "iOS 26.5",
+    "state": "booted"
+  },
+  "toolchain": {
+    "xcode": "26.5",
+    "xcodeBuild": "17F42",
+    "expo": "56.0.4",
+    "reactNative": "0.85.3",
+    "hermes": true,
+    "expoJsEngine": "hermes",
+    "cocoapods": "1.17.0"
+  },
+  "artifact": {
+    "configuration": "Release",
+    "bundleId": "dev.crumbs.playground",
+    "bundleVersion": "1",
+    "appBinarySha256": "6216de09f9863ede518b76a3ff37fe3dc95649cbb59dd2a549289448ee6e3583",
+    "mainJsBundleSha256": "1c51d14757643c9f8b3d9c4bd5e517f95d526daaa2cba87c36e904e3241fba23",
+    "hermesFramework": "Frameworks/hermesvm.framework"
+  },
+  "verification": {
+    "expoPrebuild": "passed",
+    "podInstall": "passed (86 dependencies, 85 pods)",
+    "releaseBuild": "passed",
+    "install": "passed",
+    "launch": "passed",
+    "memoryRoute": "visible",
+    "visualReceipt": "release-ios · Crumbs 0.1.2-alpha.2 · Revision 81e6cc8"
+  },
+  "disposableHarnessFindings": [
+    "The first temporary bundle selected workspace React 19.2.3 instead of the app-local React 19.2.5 and failed at ThemeProvider.useState; app-local-first module resolution fixed the duplicate React identity.",
+    "The temporary workspace also needed the repository root as a Metro fallback for @vanilla-extract/css; this resolver adjustment was not copied into the repository."
+  ],
+  "boundaries": {
+    "repositoryFilesChanged": false,
+    "androidTouched": false,
+    "nativeDependencyAdded": false,
+    "published": false,
+    "pushed": false
+  }
+}

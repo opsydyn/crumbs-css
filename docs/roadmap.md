@@ -1397,3 +1397,31 @@ Next recommended slice: **M4.6 native qualification follow-up** — capture the
 release-mode Hermes iOS run with controlled retained-memory evidence, then
 repeat for Android only when the parked prerequisite is authorised. Review the
 runtime-byte and editor-instantiation regressions before activating budgets.
+
+### 2026-09-21 — M4.6 iOS release Hermes follow-up (simulator evidence; gate open)
+
+- Built and launched the playground in a disposable Expo 56 iOS project with
+  Xcode 26.5, React Native 0.85.3 and Hermes Release configuration on the
+  dedicated iOS 26.5 `Crumbs Acceptance` simulator. The final app embedded the
+  Hermes framework and ran the Memory route at revision `81e6cc8`.
+- Completed the retained-memory protocol at 100 and 1,000 rows: 25 cycles,
+  six post-unmount checkpoints, balanced container/row cleanup and completed
+  `globalThis.gc`-backed `performance.memory` readings. The receipts retain the
+  metrics, GC method, source, run identity and simulator/toolchain provenance.
+- The runs remain diagnostic: no M1.8 retained-memory budget was applied, the
+  target is a simulator rather than a physical release device, and JS/UI frame
+  plus native allocation probes were not run. The performance registry remains
+  fail-closed; Android was not touched.
+- The only React/Metro changes were disposable harness corrections after the
+  first temporary bundle exposed duplicate React resolution and a workspace
+  fallback gap. No repository runtime, API, dependency or protected release
+  edit changed.
+
+See [M4.6 iOS release assessment](assessments/2026-09-21-m4-6-ios-release.md)
+and [iOS release evidence](evidence/2026-09-21-m4-6-ios-release/).
+
+Next recommended slice: **M4.6 native budget decision and physical-device
+qualification** — review the runtime-byte and editor-instantiation regressions,
+settle a native probe and approved retained-memory budget, then collect physical
+iOS frame/allocation/retained-memory evidence. Keep Android parked until the
+final platform move is explicitly authorised.

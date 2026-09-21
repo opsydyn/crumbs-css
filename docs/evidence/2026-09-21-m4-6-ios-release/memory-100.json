@@ -1,0 +1,64 @@
+{
+  "formatVersion": 1,
+  "receiptKind": "captured-release-hermes-ios-simulator-memory-receipt",
+  "runId": "1789986108985",
+  "startedAt": "2026-09-21T10:21:48.985Z",
+  "finishedAt": "2026-09-21T10:21:57.949Z",
+  "identity": {
+    "mode": "release-ios",
+    "crumbsVersion": "0.1.2-alpha.2",
+    "sourceRevision": "81e6cc8"
+  },
+  "environment": {
+    "platform": "ios",
+    "development": false,
+    "reactNative": {
+      "major": 0,
+      "minor": 85,
+      "patch": 3
+    }
+  },
+  "scenario": {
+    "rowCount": 100,
+    "cycles": 25,
+    "sampleEvery": 5,
+    "mountDwellMs": 100,
+    "postUnmountSampleDelayMs": 500,
+    "hookPlacement": "one public useThemedStyles hook per row under a constant light theme",
+    "memorySources": ["external adapter", "performance.memory", "measureUserAgentSpecificMemory"],
+    "forcedGc": "external adapter or globalThis.gc only",
+    "budget": null
+  },
+  "summary": {
+    "protocolComplete": true,
+    "lifecycleBalanced": true,
+    "readingsComplete": true,
+    "gcVerified": true,
+    "sourceConsistent": true,
+    "budgetApplied": false,
+    "withinBudget": null,
+    "memoryQualified": false,
+    "metrics": {
+      "retainedBytes": 1603944,
+      "slopeBytesPerCycle": 59634.01142857143,
+      "p95DeltaBytes": 1643576
+    },
+    "status": "completed",
+    "reason": null
+  },
+  "counts": {
+    "containerMounts": 25,
+    "containerUnmounts": 25,
+    "rowMounts": 2500,
+    "rowUnmounts": 2500
+  },
+  "samples": [
+    {"cycle": 0, "status": "available", "usedBytes": 4418536, "source": "performance.memory", "gc": {"status": "completed", "method": "globalThis.gc"}},
+    {"cycle": 5, "status": "available", "usedBytes": 5201936, "source": "performance.memory", "gc": {"status": "completed", "method": "globalThis.gc"}},
+    {"cycle": 10, "status": "available", "usedBytes": 6062112, "source": "performance.memory", "gc": {"status": "completed", "method": "globalThis.gc"}},
+    {"cycle": 15, "status": "available", "usedBytes": 6020576, "source": "performance.memory", "gc": {"status": "completed", "method": "globalThis.gc"}},
+    {"cycle": 20, "status": "available", "usedBytes": 6021192, "source": "performance.memory", "gc": {"status": "completed", "method": "globalThis.gc"}},
+    {"cycle": 25, "status": "available", "usedBytes": 6022480, "source": "performance.memory", "gc": {"status": "completed", "method": "globalThis.gc"}}
+  ],
+  "limits": "Functional mount/unmount and diagnostic memory-reading protocol. No approved M1.8 budget is applied, so this run cannot qualify retained memory. Cleanup balance is not leak proof. Timings include instrumentation and uncontrolled host load; no release-device, frame, thermal or calibrated performance qualification."
+}
