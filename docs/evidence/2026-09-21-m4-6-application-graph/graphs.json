@@ -1,0 +1,134 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21T17:30:06Z",
+  "slice": "M4.6 application graph verification",
+  "sourceRevision": "588f03e",
+  "sourceState": "Working tree after M4.6 import adoption; generated exports were measured before this slice was committed",
+  "environment": {
+    "bun": "1.4.2",
+    "node": "v24.15.0",
+    "npm": "11.12.1",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "26.6.2",
+    "expo": "56"
+  },
+  "protocol": {
+    "packageBuild": "bun run build:dev",
+    "playgroundWorkspace": "bun run playground:check",
+    "playgroundPacked": "bun run playground:packed --check",
+    "storybookWorkspace": "EXPO_PUBLIC_STORYBOOK_ENABLED=true STORYBOOK_DISABLE_TELEMETRY=1 EXPO_NO_METRO_WORKSPACE_ROOT=1 CI=1 expo export --platform all --source-maps",
+    "storybookPacked": "Disposable staged Storybook app; npm install --legacy-peer-deps, then the same Expo export. Optional @gorhom/bottom-sheet and react-native-svg peers were installed together because Storybook imports them at bundle time.",
+    "bundleBytes": "Filesystem bytes for each exported bundle and source map",
+    "moduleBytes": "Buffer.byteLength of each Crumbs source-map sourcesContent entry; this is a diagnostic module measure, not minified or Hermes contribution"
+  },
+  "retainedPackageBaseline": {
+    "theme": { "esmBytes": 44017, "commonjsBytes": 44764 },
+    "themeCore": { "esmBytes": 17271, "commonjsBytes": 17641 },
+    "runtimeEmittedBytesBaseline": 11307,
+    "runtimeEmittedBytesCurrentCommonjs": 44764,
+    "runtimeEmittedBytesDeltaPercent": 295.8963473954188,
+    "thresholdStatus": "fail-closed"
+  },
+  "consumers": [
+    {
+      "name": "playground",
+      "mode": "workspace",
+      "runtimeGuard": { "status": "passed", "sourceMaps": 3 },
+      "reachableCrumbsModules": {
+        "theme.mjs": 44017,
+        "theme-core.mjs": 17271,
+        "total": 61288
+      },
+      "platforms": [
+        { "platform": "web", "bundle": "index-24251aa84c6dcd9268580430f1b3e948.js", "bundleBytes": 520894, "sourceMap": "index-24251aa84c6dcd9268580430f1b3e948.js.map", "sourceMapBytes": 2130062 },
+        { "platform": "ios", "bundle": "index-6d055df056718b0706c559c7faa9627b.hbc", "bundleBytes": 1363936, "sourceMap": "index-6d055df056718b0706c559c7faa9627b.hbc.map", "sourceMapBytes": 4182804 },
+        { "platform": "android", "bundle": "index-0b461fa1f43320d7a60b56bf9434992d.hbc", "bundleBytes": 1367884, "sourceMap": "index-0b461fa1f43320d7a60b56bf9434992d.hbc.map", "sourceMapBytes": 4195800 }
+      ]
+    },
+    {
+      "name": "playground",
+      "mode": "packed",
+      "runtimeGuard": { "status": "passed", "sourceMaps": 3 },
+      "reachableCrumbsModules": {
+        "theme.mjs": 44017,
+        "theme-core.mjs": 17271,
+        "total": 61288
+      },
+      "platforms": [
+        { "platform": "web", "bundle": "index-83066df08c8ed2113c8de909531df376.js", "bundleBytes": 520299, "sourceMap": "index-83066df08c8ed2113c8de909531df376.js.map", "sourceMapBytes": 2114399 },
+        { "platform": "ios", "bundle": "index-49429938815e8f27fcd7d55adc1fa460.hbc", "bundleBytes": 1366824, "sourceMap": "index-49429938815e8f27fcd7d55adc1fa460.hbc.map", "sourceMapBytes": 4159506 },
+        { "platform": "android", "bundle": "index-3eabf033a963503b84057efd2148e152.hbc", "bundleBytes": 1370680, "sourceMap": "index-3eabf033a963503b84057efd2148e152.hbc.map", "sourceMapBytes": 4172652 }
+      ]
+    },
+    {
+      "name": "storybook",
+      "mode": "workspace",
+      "runtimeGuard": {
+        "status": "failed-closed",
+        "firstFailure": "Non-runtime Crumbs module: /../../packages/css/dist/tokens.mjs",
+        "additionalCompilerFamily": "@vanilla-extract/*",
+        "effectSources": 0
+      },
+      "reachableCrumbsModules": {
+        "theme-core.mjs": 17271,
+        "tokens.mjs": 1029,
+        "domains-BZrLFxht.mjs": 34741,
+        "theme-token-BvTY83dd.mjs": 14630,
+        "native-style-31Ob1WDk.mjs": 8674,
+        "native-capture-Cp01GlXd.mjs": 1880,
+        "theme.mjs": 44017,
+        "total": 122242
+      },
+      "vanillaExtractSourceContentBytes": { "web": 66009, "ios": 66801, "android": 66801 },
+      "platforms": [
+        { "platform": "web", "bundle": "index-19168ba1db64f40c2e70fda8a505fe9.js", "bundleBytes": 4217218, "sourceMap": "index-19168ba1db64f40c2e70fda8a505fe9.js.map", "sourceMapBytes": 12687859, "secondaryBundle": { "bundle": "index-435154ed3d289a9fe39da5f7a444520b.js", "bundleBytes": 41745, "sourceMap": "index-435154ed3d289a9fe39da5f7a444520b.js.map", "sourceMapBytes": 141652 } },
+        { "platform": "ios", "bundle": "index-f26bbc2a5c0ad23cdfe1dde47e387e28.hbc", "bundleBytes": 5063016, "sourceMap": "index-f26bbc2a5c0ad23cdfe1dde47e387e28.hbc.map", "sourceMapBytes": 11761502 },
+        { "platform": "android", "bundle": "index-9e47ccf970c5198b32745e4840e8d18e.hbc", "bundleBytes": 5072484, "sourceMap": "index-9e47ccf970c5198b32745e4840e8d18e.hbc.map", "sourceMapBytes": 11792243 }
+      ]
+    },
+    {
+      "name": "storybook",
+      "mode": "packed",
+      "runtimeGuard": {
+        "status": "failed-closed",
+        "firstFailure": "Non-runtime Crumbs module: /node_modules/@opsydyn/crumbs-css/dist/tokens.mjs",
+        "additionalCompilerFamily": "@vanilla-extract/*",
+        "effectSources": 0,
+        "installNote": "npm resolved @storybook/react-native 10.6.0 from the declared range while the workspace lockfile has 10.4.4; the existing Reanimated 4.3.1 peer was retained with legacy resolution"
+      },
+      "reachableCrumbsModules": {
+        "theme-core.mjs": 17271,
+        "tokens.mjs": 1029,
+        "domains-BZrLFxht.mjs": 34741,
+        "theme-token-BvTY83dd.mjs": 14630,
+        "native-style-31Ob1WDk.mjs": 8674,
+        "native-capture-Cp01GlXd.mjs": 1880,
+        "theme.mjs": 44017,
+        "total": 122242
+      },
+      "vanillaExtractSourceContentBytes": { "web": 69553, "ios": 70345, "android": 70345 },
+      "platforms": [
+        { "platform": "web", "bundle": "index-328452561a9af5869462241dea229d03.js", "bundleBytes": 4634136, "sourceMap": "index-328452561a9af5869462241dea229d03.js.map", "sourceMapBytes": 14122620, "secondaryBundle": { "bundle": "index-9236bc9e9a694cf098a150294062afb6.js", "bundleBytes": 41364, "sourceMap": "index-9236bc9e9a694cf098a150294062afb6.js.map", "sourceMapBytes": 142307 } },
+        { "platform": "ios", "bundle": "index-ea26424fe79ba6d7d5168ed931a5a441.hbc", "bundleBytes": 5564296, "sourceMap": "index-ea26424fe79ba6d7d5168ed931a5a441.hbc.map", "sourceMapBytes": 12961608 },
+        { "platform": "android", "bundle": "index-2cd3eb2fa119ff8fa0add4d3bd4cd1ff.hbc", "bundleBytes": 5573776, "sourceMap": "index-2cd3eb2fa119ff8fa0add4d3bd4cd1ff.hbc.map", "sourceMapBytes": 12991726 }
+      ]
+    }
+  ],
+  "thresholdDecision": {
+    "runtimeByteThresholdReopened": false,
+    "performanceRegistry": "fail-closed",
+    "reason": [
+      "Playground workspace and packed source maps pass the strict three-platform runtime contract, but both compatibility and lean entrypoints are present because the app also exercises advanced recipe APIs.",
+      "Storybook workspace and packed exports complete, but its token contract and TokenThemeProvider path reaches tokens, native-style and @vanilla-extract modules; the strict guard correctly rejects that ordinary application graph.",
+      "No exact pre-adoption Metro/Hermes application-byte baseline is retained, and source-map sourcesContent bytes are not a native performance measure.",
+      "The retained package-level runtime-emitted-bytes threshold remains the deterministic +295.9% failure recorded in the M4.6 budget comparison."
+    ]
+  },
+  "limits": [
+    "Export success is JavaScript bundle and source-map evidence; it is not physical iOS or Android acceptance.",
+    "Android exports were inspected only as JavaScript/source-map artifacts. Android device qualification remains parked.",
+    "The disposable packed Storybook install used npm legacy peer resolution and current range-resolved Storybook packages; its byte difference from workspace is not a Crumbs regression attribution.",
+    "The benchmark-only playground incremental*.ts files are excluded from the isolated app typecheck because they import repository fixtures that are intentionally absent from a packed consumer."
+  ]
+}

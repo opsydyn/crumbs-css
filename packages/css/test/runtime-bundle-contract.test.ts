@@ -6,7 +6,8 @@ import {assertRuntimeBundleSources, verifyRuntimeBundles} from "../../../scripts
 describe('Metro runtime bundle source contract', () => {
  it('rejects compiler sources and accepts the emitted runtime in both modes', () => {
   expect(assertRuntimeBundleSources(['/app/node_modules/@opsydyn/crumbs-css/dist/theme.cjs','/app/node_modules/react/index.js'])).toBe(1)
-  expect(assertRuntimeBundleSources(['/repo/packages/css/dist/theme.mjs'])).toBe(1)
+  expect(assertRuntimeBundleSources(['/app/node_modules/@opsydyn/crumbs-css/dist/theme-core.cjs','/app/node_modules/react/index.js'])).toBe(1)
+  expect(assertRuntimeBundleSources(['/repo/packages/css/dist/theme.mjs','/repo/packages/css/dist/theme-core.mjs'])).toBe(2)
   for (const name of ['style.cjs','index.mjs','transformer.cjs','metro-plugin.cjs']) expect(() => assertRuntimeBundleSources([`/app/node_modules/@opsydyn/crumbs-css/dist/${name}`])).toThrow(/Non-runtime Crumbs/)
   for (const name of ['@vanilla-extract/css','@vanilla-extract/integration','css-to-react-native','esbuild']) expect(() => assertRuntimeBundleSources([`/app/node_modules/${name}/index.js`])).toThrow(/Compiler dependency/)
  })

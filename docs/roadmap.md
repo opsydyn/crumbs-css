@@ -1542,3 +1542,30 @@ workspace and packed Expo/Storybook bundles after adoption, compare reachable
 `theme` and `theme/core` bytes against the retained baseline, and decide
 whether any runtime-byte threshold can be reopened. Keep physical iOS and
 Android qualification backlogged.
+
+### 2026-09-21 — M4.6 application graph verification
+
+- Built fresh workspace and isolated packed Expo playground exports for web,
+  iOS and Android. All six source-map sets passed the strict runtime contract;
+  each reaches `theme.mjs` (44,017 source-content bytes) and `theme-core.mjs`
+  (17,271 bytes), for a 61,288-byte diagnostic module sum. The app exercises
+  advanced recipe APIs as well as common hooks, so both entrypoints are present.
+- Built workspace and packed Storybook exports for all three targets. The
+  exports complete, but the strict guard remains fail-closed: Storybook's token
+  contract and `TokenThemeProvider` path reaches `tokens`, `domains`,
+  `native-style`, `native-capture` and `@vanilla-extract/*` modules. The Crumbs
+  source-content sum is 122,242 bytes before the vanilla-extract modules.
+- No exact pre-adoption application-byte baseline is retained, source-map
+  module bytes are not native performance, and the retained package runtime
+  threshold remains the +295.9% failure. The performance registry stays
+  fail-closed. Android was inspected only through exported JavaScript/source
+  maps and remains parked for device qualification.
+
+See [M4.6 application graph assessment](assessments/2026-09-21-m4-6-application-graph.md)
+and [application graph evidence](evidence/2026-09-21-m4-6-application-graph/graphs.json).
+
+Next recommended slice: **M4.6 token runtime boundary repair** — split token
+contract/theme construction from the `native-style` and vanilla-extract
+authoring graph, then repeat workspace and packed application graph checks.
+Keep physical iOS and Android qualification backlogged to the final
+device-enabled move.
