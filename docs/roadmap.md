@@ -1624,3 +1624,33 @@ reduce the compatibility graph against a same-functionality baseline or record
 an explicitly approved split budget for `theme/core`, `tokens` and the
 compatibility entrypoint. Keep the registry fail-closed and physical iOS and
 Android qualification backlogged.
+
+### 2026-09-21 — M4.6 runtime emitted-byte budget decision
+
+- Traced the retained `effect.runtime.cjs.graph-bytes` selector to the old
+  compatibility `theme.cjs` graph at 11,307 bytes. The historical source
+  runtime was 325 lines; the current runtime is 1,078 lines and the intervening
+  runtime/token work adds 2,531 lines across the public entrypoint and token
+  surfaces. The old value is therefore historical lineage rather than a
+  same-functionality ceiling for the current API.
+- Rebuilt and scanned the current entrypoint graphs: `theme-core` is 17,271 /
+  17,641 bytes, `tokens` is 56,013 / 63,308 bytes across its local chunks, and
+  compatibility `theme` is 44,017 / 44,764 bytes (ESM/CJS). Each graph has
+  zero nonliteral loads; only `theme` and `theme-core` retain React as a direct
+  external. The token graph remains free of Effect and authoring dependencies.
+- Recorded those three scopes as candidate split baselines in the
+  [runtime-byte decision evidence](evidence/2026-09-21-m4-6-runtime-byte-budget-decision/decision.json),
+  while leaving ceilings, growth rules and registry selectors pending explicit
+  review. The existing 44,764-byte compatibility result remains a +295.9%
+  fail-closed comparison against 11,307 bytes; no threshold, dependency,
+  native target or Android state changed.
+
+See [M4.6 runtime-byte budget assessment](assessments/2026-09-21-m4-6-runtime-byte-budget-decision.md)
+and [runtime-byte decision evidence](evidence/2026-09-21-m4-6-runtime-byte-budget-decision/decision.json).
+
+Next recommended slice: **M4.6 split-budget review and admission** — review
+the `theme-core`, `tokens` and compatibility `theme` scopes, approve concrete
+ESM/CJS ceilings and growth rules, then add only accepted metrics to the
+fail-closed registry. If the compatibility size is rejected, follow with a
+same-functionality `theme` graph reduction slice. Keep physical iOS and
+Android qualification backlogged to the final device-enabled move.
