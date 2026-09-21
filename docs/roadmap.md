@@ -1371,3 +1371,29 @@ Next recommended slice: **M4.5** — compare cached and uncached evaluators on g
   or protected release/version change was included.
 
 Next recommended slice: **M4.6** — run the committed M1 device, bundle, editor and retained-memory budgets and record improvements or regressions against equivalent native workloads. Begin only after approval.
+
+### 2026-09-21 — M4.6 budget qualification (host/editor complete; native gate open)
+
+- Ran the exact Node-floor Effect/runtime matrix, five native-style host
+  benchmark processes, five direct Expo/Metro edit repetitions with three
+  dependency controls, and the 100/1,000/10,000-token editor matrix. Raw
+  reports and the derived comparison are retained in the M4.6 evidence
+  directory.
+- Runtime initialisation, transforms, editor wall/memory and completion remain
+  within their approved host limits. The comparison exposes a runtime graph
+  byte regression (+295.9%) and 10,000-token TypeScript/tsgo instantiation
+  regressions (+70.1%); these remain review items. Metro receipts are complete
+  but comparison admission is incomplete because the current fixture identity
+  differs from the retained baseline.
+- Re-ran the retained-memory admission/property suite. Existing live memory
+  receipts remain development-web diagnostics without forced-GC provenance or
+  an approved budget. Release Hermes/device, frame, allocation and native
+  retained-memory gates remain unavailable; Android stays parked. M4.6 remains
+  unchecked and the performance registry remains fail-closed.
+
+See [M4.6 assessment](assessments/2026-09-21-m4-6-budget-qualification.md).
+
+Next recommended slice: **M4.6 native qualification follow-up** — capture the
+release-mode Hermes iOS run with controlled retained-memory evidence, then
+repeat for Android only when the parked prerequisite is authorised. Review the
+runtime-byte and editor-instantiation regressions before activating budgets.
