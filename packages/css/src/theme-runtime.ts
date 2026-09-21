@@ -17,10 +17,13 @@ import type {
   NativeRecipe,
   NativeRecipeSelection,
   NativeRecipeVariantsConfig,
+  NativeSprinklesLookupPlan,
+  NativeSprinklesSelection,
   NativeStyle,
   NativeTheme,
 } from "./native-style"
-import { NativeRecipeType } from "./native-tags"
+import type { NativePrimitiveDomain } from "./compiler/native-capture"
+import { NativeRecipeType, NativeSprinklesLookupPlanType } from "./native-tags"
 import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
 import {
   getThemeContractIdentityKey,
@@ -58,6 +61,14 @@ import {
   type RecipeResolverCacheStats,
 } from "./runtime/recipe-resolution-plan"
 import {
+  canonicalSprinklesSelectionKey,
+  createSprinklesResolutionPlan,
+  resolveSprinklesLookupPlan,
+  validateSprinklesSelection,
+  type NativeSprinklesResolutionPlan,
+  type NativeSprinklesResolutionSelection,
+} from "./runtime/sprinkles-resolution-plan"
+import {
   createThemeSelectorStore,
   createThemeStore,
   type ThemeSelectorStore,
@@ -65,6 +76,10 @@ import {
 } from "./runtime/theme-store"
 
 export type { NativeThemeTokenReference } from "./theme-token"
+export type {
+  NativeSprinklesLookupPlan,
+  NativeSprinklesSelection,
+} from "./native-style"
 export type {
   ThemeDependencyPlan,
   ThemeDependencyPlanEntry,
@@ -78,6 +93,10 @@ export type {
   RecipeResolutionVariant,
   RecipeResolverCacheStats,
 } from "./runtime/recipe-resolution-plan"
+export type {
+  NativeSprinklesResolutionPlan,
+  NativeSprinklesResolutionSelection,
+} from "./runtime/sprinkles-resolution-plan"
 export {
   createThemeTokenReference,
   isThemeTokenReference,
@@ -112,6 +131,34 @@ export type RecipeResolverControls = {
 
 export type BoundedNativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> =
   NativeRecipeResolver<TVariants> & RecipeResolverControls
+
+export type NativeSprinklesResolver<
+  TProperties extends object,
+  TShorthands extends Readonly<Record<string, readonly string[]>>,
+> = (
+  selection?: NativeSprinklesSelection<TProperties, TShorthands>,
+) => ReadonlyArray<NativeStyle>
+
+export type SprinklesResolverOptions = {
+  /** Maximum number of canonical selections retained by this resolver. Zero disables selection caching. */
+  readonly cacheSize?: number
+}
+
+export type SprinklesResolverControls<
+  TProperties extends object,
+  TShorthands extends Readonly<Record<string, readonly string[]>>,
+> = {
+  readonly plan: NativeSprinklesResolutionPlan<TProperties, TShorthands>
+  readonly getCacheStats: () => RecipeResolverCacheStats & {readonly disposed: boolean}
+  readonly clearCache: () => void
+  readonly dispose: () => void
+}
+
+export type BoundedNativeSprinklesResolver<
+  TProperties extends object,
+  TShorthands extends Readonly<Record<string, readonly string[]>>,
+> = NativeSprinklesResolver<TProperties, TShorthands> &
+  SprinklesResolverControls<TProperties, TShorthands>
 
 type TokenThemeScopeState = {
   readonly baseTheme: NativeTheme<Record<string, unknown>>
@@ -352,6 +399,12 @@ export function useThemedStyle<TInput>(style: TInput): ResolvedNativeStyleInput<
 export type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>>> = {
   readonly [K in keyof TStyles]: TStyles[K] extends NativeRecipe<infer TVariants>
     ? NativeRecipe<TVariants>
+    : TStyles[K] extends NativeSprinklesLookupPlan<
+      infer TPrimitives extends NativePrimitiveDomain,
+      infer TProperties extends object,
+      infer TShorthands extends Readonly<Record<string, readonly string[]>>
+    >
+      ? NativeSprinklesLookupPlan<TPrimitives, TProperties, TShorthands>
     : TStyles[K] extends NativePrimitiveStyle
       ? TStyles[K] | undefined
       : TStyles[K] extends TokenizedNativePrimitiveStyle
@@ -652,6 +705,60 @@ export function createRecipeResolver<TVariants extends NativeRecipeVariantsConfi
   return resolve
 }
 
+/**
+ * Create a bounded runtime selector for a generated Sprinkles lookup plan.
+ * Static utility authoring stays in `createSprinkles`; this resolver only
+ * selects already-compiled atomic references and preserves authored order.
+ */
+export function createSprinklesResolver<
+  TPrimitives extends NativePrimitiveDomain,
+  TProperties extends object,
+  TShorthands extends Readonly<Record<string, readonly string[]>>,
+>(
+  lookup: NativeSprinklesLookupPlan<TPrimitives, TProperties, TShorthands>,
+  options: SprinklesResolverOptions = {},
+): BoundedNativeSprinklesResolver<TProperties, TShorthands> {
+  const plan = createSprinklesResolutionPlan(lookup)
+  const cacheSize = validateRecipeResolverCacheSize(
+    options.cacheSize ?? DEFAULT_RECIPE_RESOLVER_CACHE_SIZE,
+  )
+  const cache = createBoundedRecipeSelectionCache<ReadonlyArray<NativeStyle>>(cacheSize)
+  let disposed = false
+
+  const resolve = ((selection = {}) => {
+    if (disposed) throw new Error("Sprinkles resolver has been disposed")
+    validateSprinklesSelection(plan, selection)
+    const key = canonicalSprinklesSelectionKey(selection as Readonly<Record<string, unknown>>)
+    const cached = cache.get(key)
+    if (cached.hit) return cached.value
+
+    const resolved = resolveSprinklesLookupPlan(
+      plan,
+      selection as NativeSprinklesResolutionSelection<TProperties, TShorthands>,
+    )
+    cache.set(key, resolved)
+    return resolved
+  }) as BoundedNativeSprinklesResolver<TProperties, TShorthands>
+
+  Object.defineProperties(resolve, {
+    plan: {value: plan, enumerable: true},
+    getCacheStats: {
+      value: () => Object.freeze({...cache.stats(), disposed}),
+      enumerable: true,
+    },
+    clearCache: {value: () => cache.clear(), enumerable: true},
+    dispose: {
+      value: () => {
+        if (disposed) return
+        cache.clear()
+        disposed = true
+      },
+      enumerable: true,
+    },
+  })
+  return resolve
+}
+
 function flattenStyle(style: unknown): Record<string, unknown> | undefined {
   if (style === null || style === undefined || style === false) return undefined
   if (Array.isArray(style)) {
@@ -671,10 +778,12 @@ function resolveStyleExport(
   theme: NativeTheme<Record<string, unknown>>,
 ):
   | NativeRecipe<NativeRecipeVariantsConfig>
+  | NativeSprinklesLookupPlan
   | NativeStyle
   | Readonly<Record<string, NativeStyle | undefined>>
   | undefined {
   if (isNativeRecipe(style)) return resolveRecipeThemeTokens(style, theme)
+  if (isNativeSprinklesLookupPlan(style)) return resolveSprinklesThemeTokens(style, theme)
   if (isNestedStyleMap(style)) {
     const resolved: Record<string, NativeStyle | undefined> = {}
     let changed = false
@@ -687,6 +796,32 @@ function resolveStyleExport(
     return isNativeStyleMap(style) ? markNativeStyleMap(resolved) : resolved
   }
   return resolveThemeTokens(style, theme)
+}
+
+function resolveSprinklesThemeTokens(
+  plan: NativeSprinklesLookupPlan,
+  theme: NativeTheme<Record<string, unknown>>,
+): NativeSprinklesLookupPlan {
+  let changed = false
+  const properties: Record<string, Record<string, NativeStyle>> = {}
+  for (const [property, scale] of Object.entries(plan.properties)) {
+    const resolvedScale: Record<string, NativeStyle> = {}
+    for (const [scaleName, style] of Object.entries(scale)) {
+      const next = typeof style === "object" && style !== null
+        ? resolveThemeTokens(style, theme) ?? style
+        : style
+      resolvedScale[scaleName] = next as NativeStyle
+      if (next !== style) changed = true
+    }
+    properties[property] = resolvedScale
+  }
+  if (!changed) return plan
+  return Object.freeze({
+    ...plan,
+    properties: Object.freeze(Object.fromEntries(
+      Object.entries(properties).map(([property, scale]) => [property, Object.freeze(scale)]),
+    )),
+  }) as NativeSprinklesLookupPlan
 }
 
 function resolveRecipeThemeTokens<TVariants extends NativeRecipeVariantsConfig>(
@@ -785,6 +920,15 @@ function isNativeRecipe(value: unknown): value is NativeRecipe<NativeRecipeVaria
     value !== null &&
     "$$type" in value &&
     value.$$type === NativeRecipeType
+  )
+}
+
+function isNativeSprinklesLookupPlan(value: unknown): value is NativeSprinklesLookupPlan {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "$$type" in value &&
+    value.$$type === NativeSprinklesLookupPlanType
   )
 }
 

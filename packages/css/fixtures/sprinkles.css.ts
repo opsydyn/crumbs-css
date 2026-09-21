@@ -1,4 +1,4 @@
-import { createSprinkles, defineProperties, recipe, styleVariants, viewStyle } from "@opsydyn/crumbs-css/style"
+import { createSprinkles, createSprinklesLookupPlan, defineProperties, recipe, styleVariants, viewStyle } from "@opsydyn/crumbs-css/style"
 import { createTokenContract, defineToken } from "@opsydyn/crumbs-css/tokens"
 
 const vars = createTokenContract({
@@ -18,6 +18,7 @@ const viewProperties = defineProperties({
   },
 })
 const sprinkles = createSprinkles(viewProperties)
+export const sprinklesPlan = createSprinklesLookupPlan(viewProperties, "sprinkles")
 
 // The longhand is authored after px, so it wins only for paddingLeft.
 export const card = sprinkles({ px: "sm", paddingLeft: "token", backgroundColor: "canvas" })

@@ -7,6 +7,7 @@ import { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
 import { getNativeCaptureMetadata, markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/native-capture"
 export {
   createSprinkles,
+  createSprinklesLookupPlan,
   defineProperties,
 } from "./sprinkles"
 export type {
@@ -14,7 +15,9 @@ export type {
   NativeSprinklePropertyConfig,
   NativeSprinklePropertyKey,
   NativeSprinkleShorthandConfig,
+  NativeSprinkleStaticResult,
   NativeSprinklesConfig,
+  NativeSprinklesLookupPlan,
   NativeSprinklesSelection,
 } from "./sprinkles"
 import {
@@ -23,7 +26,12 @@ import {
   type TokenDomain,
   type TokenDomainValue,
 } from "./theme-token"
-export { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
+export {
+  NativeRecipeType,
+  NativeRecipeClassType,
+  NativeSprinklesLookupPlanType,
+  NativeSprinklesLookupPlanVersion,
+} from "./native-tags"
 
 export {
   createTheme,

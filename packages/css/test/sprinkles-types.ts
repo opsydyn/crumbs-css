@@ -1,8 +1,10 @@
 import {
   createSprinkles,
+  createSprinklesLookupPlan,
   defineProperties,
   type NativeSprinklesSelection,
 } from "../src/native-style"
+import { createSprinklesResolver } from "../src/theme-runtime"
 import {
   createTokenContract,
   defineToken,
@@ -28,6 +30,11 @@ const viewProperties = defineProperties({
 const viewSprinkles = createSprinkles(viewProperties)
 const viewResult: ViewStyle = viewSprinkles({ px: "sm", backgroundColor: "canvas" })
 void viewResult
+
+const viewPlan = createSprinklesLookupPlan(viewProperties)
+const viewResolver = createSprinklesResolver(viewPlan)
+const dynamicViewResult: ReadonlyArray<ViewStyle> = viewResolver({ px: "sm", backgroundColor: "canvas" })
+void dynamicViewResult
 
 // @ts-expect-error A view property set cannot expose text-only properties.
 defineProperties({ primitives: ["view"] as const, properties: { color: { text: "red" } } })

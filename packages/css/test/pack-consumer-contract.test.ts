@@ -81,9 +81,9 @@ function createPackedConsumer(): string {
 
 const consumerTypeSource = `
   import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
-  import { createTheme, createThemeContract, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
+  import { createSprinklesLookupPlan, createTheme, createThemeContract, defineProperties, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
   import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
-  import { createRecipeResolver, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
+  import { createRecipeResolver, createSprinklesResolver, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
   import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens";
   import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
   import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
@@ -117,6 +117,11 @@ const consumerTypeSource = `
   resolveThemeTokens({ color: vars.color.text }, activeTheme);
   resolveCoreThemeTokens({ color: vars.color.text }, activeTheme);
   createRecipeResolver(button)(selection);
+  const utilityProperties = defineProperties({
+    primitives: ["view"] as const,
+    properties: { padding: { sm: 8 } },
+  });
+  createSprinklesResolver(createSprinklesLookupPlan(utilityProperties))({ padding: "sm" });
   const tokenVars = createTokenContract({ color: { text: defineToken("color") } });
   const tokenTheme = createTokenTheme(tokenVars, { color: { text: "#ffffff" } });
   const tokenFocus = createTokenThemeFocus(tokenVars, tokenVars.color.text);
@@ -199,7 +204,9 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
 
         if (typeof root.withNativeStyles !== "function") throw new Error("missing root withNativeStyles");
         if (typeof style.createThemeContract !== "function") throw new Error("missing style createThemeContract");
+        if (typeof style.createSprinklesLookupPlan !== "function") throw new Error("missing style createSprinklesLookupPlan");
         if (typeof theme.createRecipeResolver !== "function") throw new Error("missing theme createRecipeResolver");
+        if (typeof theme.createSprinklesResolver !== "function") throw new Error("missing theme createSprinklesResolver");
         if (typeof themeCore.resolveThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
         if (typeof tokenOptic.createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (typeof metro.withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
@@ -212,17 +219,19 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
       resolve(consumerRoot, "runtime.mjs"),
       `
         import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
-        import { createThemeContract } from "@opsydyn/crumbs-css/style";
+        import { createSprinklesLookupPlan, createThemeContract, defineProperties } from "@opsydyn/crumbs-css/style";
         import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
-        import { createRecipeResolver } from "@opsydyn/crumbs-css/theme";
+        import { createRecipeResolver, createSprinklesResolver } from "@opsydyn/crumbs-css/theme";
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
 
         if (typeof NativeStylesDiagnosticCode.UnsupportedSelector !== "string") throw new Error("missing root diagnostic code");
         if (typeof createThemeContract !== "function") throw new Error("missing style createThemeContract");
+        if (typeof createSprinklesLookupPlan !== "function") throw new Error("missing style createSprinklesLookupPlan");
         if (typeof resolveCoreThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
         if (typeof createRecipeResolver !== "function") throw new Error("missing theme createRecipeResolver");
+        if (typeof createSprinklesResolver !== "function") throw new Error("missing theme createSprinklesResolver");
         if (typeof createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (typeof withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");

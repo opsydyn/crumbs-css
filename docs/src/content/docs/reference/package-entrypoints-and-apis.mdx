@@ -19,7 +19,7 @@ Use this entrypoint in `.css.ts` authoring modules for:
 - `style`
 - `styleVariants`
 - `recipe`
-- `defineProperties` and `createSprinkles` for finite, primitive-scoped utility scales
+- `defineProperties`, `createSprinkles`, and `createSprinklesLookupPlan` for finite, primitive-scoped utility scales
 - `createThemeContract`
 - `createTheme`
 - `viewStyle`
@@ -83,6 +83,45 @@ The mapper receives the finite value and its key. Static utility classes keep
 their primitive scope and token payload through composition, mapped variants,
 recipe bases, branches, and compound styles.
 
+For values chosen from component state, export a generated lookup plan from the
+authored module. It contains one compiled reference per property and scale, so
+runtime selection does not expand a Cartesian product of all combinations:
+
+```ts
+// spacing.css.ts
+import { createSprinklesLookupPlan } from "@opsydyn/crumbs-css/style"
+
+export const sprinklesPlan = createSprinklesLookupPlan(viewProperties, "spacing")
+```
+
+Resolve the plan through the normal theme path, then create a bounded runtime
+resolver. Selection order remains authored order, including shorthand targets;
+the resolver returns a readonly array suitable for a React Native `style` prop.
+
+```tsx
+import { createSprinklesResolver } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
+import { useMemo } from "react"
+import { View } from "react-native"
+import * as s from "./spacing.css"
+
+export function Card({ compact }: { compact: boolean }) {
+  const themed = useThemedStyles(s)
+  const resolve = useMemo(
+    () => createSprinklesResolver(themed.sprinklesPlan),
+    [themed.sprinklesPlan],
+  )
+  return <View style={resolve({ px: compact ? "sm" : "lg" })} />
+}
+```
+
+`createSprinklesResolver(plan, { cacheSize })` defaults to a resolver-local
+least-recently-used cache of 32 selections, bounded to `0..1024`; `0` disables
+retention. It exposes `getCacheStats()`, `clearCache()`, and `dispose()` just
+like the recipe resolver. `createSprinkles` remains the authored static path;
+the `NativeSprinklesLookupPlan` and `NativeSprinklesResolver` types make the
+static/runtime boundary explicit.
+
 ### `@opsydyn/crumbs-css/theme`
 
 Use this compatibility entrypoint in runtime/component code when you need the
@@ -92,6 +131,7 @@ advanced theme APIs:
 - `createThemeDependencyResolver`
 - `resolveRecipeStyle`
 - `createRecipeResolver`
+- `createSprinklesResolver`
 - `TokenThemeProvider`
 - `TokenThemeScopeProvider`
 - `useTokenTheme`

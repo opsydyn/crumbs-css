@@ -34,6 +34,38 @@ wins over the earlier `px` alias, while `paddingRight` stays at `8`. Scale
 values must be finite and property-compatible; domain-branded theme tokens
 are accepted only by compatible properties.
 
+When a component chooses a utility at runtime, generate a lookup plan in the
+authored module and resolve it from the theme runtime. The plan is finite and
+non-Cartesian: it stores one compiled reference per property and scale.
+
+```ts
+// spacing.css.ts
+import { createSprinklesLookupPlan } from "@opsydyn/crumbs-css/style"
+
+export const sprinklesPlan = createSprinklesLookupPlan(viewProperties, "spacing")
+```
+
+```tsx
+import { createSprinklesResolver } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
+import { useMemo } from "react"
+
+function Card({ compact }: { compact: boolean }) {
+  const themed = useThemedStyles({ sprinklesPlan })
+  const resolve = useMemo(
+    () => createSprinklesResolver(themed.sprinklesPlan),
+    [themed.sprinklesPlan],
+  )
+  return <View style={resolve({ px: compact ? "sm" : "lg" })} />
+}
+```
+
+The resolver preserves selection and shorthand target order, returns a
+readonly style array, and exposes a bounded local cache with `getCacheStats`,
+`clearCache`, and `dispose` controls. `createSprinkles` remains the static
+authored path; `NativeSprinklesLookupPlan` and `NativeSprinklesResolver` keep
+the two phases distinct in public types.
+
 ## Example
 
 ```ts

@@ -186,7 +186,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 
 - [x] M5.1: Define the public native `defineProperties` / `createSprinkles` adaptation with finite values, domain-safe token scales, native primitive kinds, and typed shorthands. Publish precedence examples for overlapping aliases and longhands.
 - [x] M5.2: Support utilities in style composition and recipe bases/branches without losing kind or contract information. Add the mapped `styleVariants(values, mapper)` overload.
-- [ ] M5.3: Support static selections in authored modules and dynamic runtime selection through generated lookup plans; public names/types must accurately distinguish these phases.
+- [x] M5.3: Support static selections in authored modules and dynamic runtime selection through generated lookup plans; public names/types must accurately distinguish these phases.
 - [ ] M5.4: Compare atomic, fused, and hybrid output on identical design-system fixtures. Measure bytes, startup, array lengths, selection allocations, and native frames. Choose the default from evidence and document it.
 - [ ] M5.5: Test deterministic output, token-only policy compatibility, invalid properties/scales, identity on repeated selections, and compiler/runtime equivalence.
 
@@ -1831,3 +1831,30 @@ Next recommended roadmap item: **M5.3** — support static selections in
 authored modules and dynamic runtime selection through generated lookup plans,
 with public names and types distinguishing those phases. Keep M4.6
 release-device gates and Android qualification backlogged.
+
+### 2026-09-21 — M5.3 static and runtime Sprinkles selection
+
+- Added `createSprinklesLookupPlan` to the `/style` authoring surface. It
+  emits one primitive-scoped compiled reference per property and scale, with
+  shorthand targets retained as ordered metadata; it does not expand the
+  Cartesian product of possible selections.
+- Added `createSprinklesResolver` to `/theme`. The bounded resolver validates
+  generated plans and runtime selections, preserves authored key and shorthand
+  target order, returns readonly native style arrays, and exposes the same
+  bounded cache and lifecycle controls as recipe resolvers.
+- Added `NativeSprinkleStaticResult`, `NativeSprinklesLookupPlan`,
+  `NativeSprinklesResolutionPlan`, and `NativeSprinklesResolver` types so
+  authored static outputs and runtime lookup phases remain distinct. Theme
+  style resolution now resolves tokenized lookup entries before selection.
+- Added transformer, public API, package consumer, cache lifecycle,
+  property-based equivalence, theme-token, and type-fixture coverage. Android,
+  device frame/allocation budgets, and native visual acceptance remain
+  explicitly backlogged.
+
+See [M5.3 static and runtime Sprinkles assessment](assessments/2026-09-21-m5-3-sprinkles-runtime-selection.md).
+
+Next recommended roadmap item: **M5.4** — compare atomic, fused, and hybrid
+output on identical design-system fixtures; measure bytes, startup, array
+lengths, selection allocations, and native frames, then choose and document
+the default. Keep Android and release-device gates backlogged until a device is
+available.

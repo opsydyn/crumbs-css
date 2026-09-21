@@ -1,5 +1,9 @@
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import { markNativeCaptureRule, type NativePrimitiveDomain, type NativePrimitiveKind } from "../compiler/native-capture"
+import {
+  NativeSprinklesLookupPlanType,
+  NativeSprinklesLookupPlanVersion,
+} from "../native-tags"
 import type {
   NativeImageStyleInput,
   NativeStyle,
@@ -90,12 +94,28 @@ export type NativeSprinklesSelection<
     | false | null | undefined
 }>
 
-type NativeSprinkleResult<TPrimitives extends NativePrimitiveDomain> =
+export type NativeSprinkleStaticResult<TPrimitives extends NativePrimitiveDomain> =
   TPrimitives extends readonly [infer TPrimitive extends NativePrimitiveKind]
     ? TPrimitive extends "view" ? ViewStyle
       : TPrimitive extends "text" ? TextStyle
         : ImageStyle
     : NativeStyle
+
+export type NativeSprinklesLookupPlan<
+  TPrimitives extends NativePrimitiveDomain = NativePrimitiveDomain,
+  TProperties extends object = NativeSprinklePropertyMap,
+  TShorthands extends Readonly<Record<string, readonly string[]>> = Readonly<Record<string, readonly string[]>>,
+> = {
+  readonly $$type: typeof NativeSprinklesLookupPlanType
+  readonly version: typeof NativeSprinklesLookupPlanVersion
+  readonly primitives: TPrimitives
+  readonly properties: {
+    readonly [TProperty in keyof TProperties]: TProperties[TProperty] extends Readonly<Record<string, unknown>>
+      ? { readonly [TScale in keyof TProperties[TProperty]]: NativeSprinkleStaticResult<TPrimitives> }
+      : never
+  }
+  readonly shorthands: TShorthands
+}
 
 type NativeSprinklePropertyMap = Readonly<Record<string, Readonly<Record<string, unknown>>>>
 
@@ -163,7 +183,7 @@ export function createSprinkles<
 ): (
   selection: NativeSprinklesSelection<TProperties, TShorthands>,
   debugId?: string,
-) => NativeSprinkleResult<TPrimitives> {
+) => NativeSprinkleStaticResult<TPrimitives> {
   const primitives = normalizePrimitives(definition.primitives)
   const properties = validateProperties(definition.properties, primitives)
   const shorthands = validateShorthands(definition.shorthands, properties)
@@ -175,11 +195,53 @@ export function createSprinkles<
       shorthands as Readonly<Record<string, readonly string[]>>,
     )
     const marked = markNativeCaptureRule(rule, primitives)
-    return style(marked as NativeStyleRule, debugId) as NativeSprinkleResult<TPrimitives>
+    return style(marked as NativeStyleRule, debugId) as NativeSprinkleStaticResult<TPrimitives>
   }) as (
     selection: NativeSprinklesSelection<TProperties, TShorthands>,
     debugId?: string,
-  ) => NativeSprinkleResult<TPrimitives>
+  ) => NativeSprinkleStaticResult<TPrimitives>
+}
+
+/**
+ * Generate a finite, non-Cartesian lookup plan for runtime selections.
+ *
+ * `createSprinkles` is the authored static path and returns one compiled style
+ * reference. This plan emits one native style reference per property/scale;
+ * the runtime resolver can then select and order those references without
+ * evaluating authoring code or expanding every combination.
+ */
+export function createSprinklesLookupPlan<
+  const TPrimitives extends NativePrimitiveDomain,
+  const TProperties extends NativeSprinklePropertyMap,
+  const TShorthands extends NativeSprinkleShorthandConfig<TProperties>,
+>(
+  definition: NativeSprinkleDefinition<TPrimitives, TProperties, TShorthands>,
+  debugId?: string,
+): NativeSprinklesLookupPlan<TPrimitives, TProperties, TShorthands> {
+  const primitives = normalizePrimitives(definition.primitives)
+  const properties = validateProperties(definition.properties, primitives)
+  const shorthands = validateShorthands(definition.shorthands, properties)
+  const lookup: Record<string, Record<string, NativeSprinkleStaticResult<TPrimitives>>> = {}
+
+  for (const [property, scale] of Object.entries(properties)) {
+    const entries: Record<string, NativeSprinkleStaticResult<TPrimitives>> = {}
+    for (const [scaleName, value] of Object.entries(scale)) {
+      const rule = markNativeCaptureRule({[property]: value}, primitives)
+      entries[scaleName] = style(
+        rule as NativeStyleRule,
+        debugId === undefined ? undefined : `${debugId}_${property}_${scaleName}`,
+      ) as NativeSprinkleStaticResult<TPrimitives>
+    }
+    lookup[property] = Object.freeze(entries)
+  }
+
+  return Object.freeze({
+    $$type: NativeSprinklesLookupPlanType,
+    version: NativeSprinklesLookupPlanVersion,
+    primitives: Object.freeze(primitives) as TPrimitives,
+    properties: Object.freeze(lookup),
+    shorthands,
+  }) as unknown as NativeSprinklesLookupPlan<TPrimitives, TProperties, TShorthands>
 }
 
 function normalizePrimitives(value: readonly NativePrimitiveKind[]): NativePrimitiveDomain {

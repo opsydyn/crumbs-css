@@ -31,6 +31,7 @@ const ADVANCED_API_NAMES = new Set([
   "TokenThemeProvider",
   "TokenThemeScopeProvider",
   "createRecipeResolver",
+  "createSprinklesResolver",
   "createThemeDependencyPlan",
   "createThemeDependencyResolver",
   "isTokenThemeCompatible",
