@@ -7,6 +7,7 @@ import {
   summarizeBenchmarkReports,
 } from "../packages/css/bench/budget-contract"
 import { runEffectBoundaryAudit } from "../packages/css/bench/effect-boundary-audit"
+import { scanRuntimeGraphEvidence } from "../packages/css/bench/runtime-graph-budget"
 import { measureRuntimeInitialization } from "../packages/css/bench/runtime-initialization"
 import { measureMetroIncremental } from "../packages/css/bench/metro-incremental"
 
@@ -19,6 +20,8 @@ await mkdir(output, { recursive: true })
 const sourceRevision = Bun.spawnSync(["git", "rev-parse", "HEAD"], { cwd: repoRoot }).stdout.toString().trim()
 const effect = (await runEffectBoundaryAudit(floorNode, 5)).result
 await writeFile(join(output, "effect.json"), JSON.stringify(effect, null, 2) + "\n")
+const runtimeGraph = scanRuntimeGraphEvidence(join(repoRoot, "packages/css"), 5)
+await writeFile(join(output, "runtime-graph.json"), JSON.stringify(runtimeGraph, null, 2) + "\n")
 const runtimeInit = measureRuntimeInitialization(floorNode, 15)
 await writeFile(join(output, "runtime-initialization.json"), JSON.stringify(runtimeInit, null, 2) + "\n")
 const incremental = await measureMetroIncremental(join(output, "metro-incremental.json"), 5, Number(process.env.CRUMBS_METRO_PORT ?? 8093))
@@ -56,7 +59,7 @@ const editor = JSON.parse(await readFile(editorFile, "utf8")) as unknown
 
 const registryResult = budgetRegistryCodec.decodeJson(await readFile(join(repoRoot, "packages/css/bench/budgets.json"), "utf8"))
 if (!registryResult.ok) throw Error(`Budget registry invalid: ${JSON.stringify(registryResult.issues)}`)
-const comparison = compareRecordedMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor })
+const comparison = compareRecordedMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor, runtimeGraph })
 const review = createThresholdReviewPacket(registryResult.value, repoRoot)
 await writeFile(join(output, "comparison.json"), JSON.stringify({
   formatVersion: 1,

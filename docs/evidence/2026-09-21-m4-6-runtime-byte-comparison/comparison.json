@@ -1,0 +1,316 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21T20:14:59.615Z",
+  "sourceRevision": "4055ca2b770e3c26e73495fc0fe1b552d531aac0",
+  "sourceState": "Current checkout after package build; split graphs are compared against the retained M4.6 admission evidence",
+  "registry": {
+    "status": "thresholds-pending-review",
+    "registryReady": false,
+    "performanceQualification": "not-run"
+  },
+  "splitComparison": {
+    "metrics": [
+      {
+        "id": "runtime-theme-core-esm-graph-bytes",
+        "unit": "bytes",
+        "baseline": 17271,
+        "current": {
+          "min": 17271,
+          "median": 17271,
+          "max": 17271,
+          "maxDeviationPercent": 0
+        },
+        "delta": 0,
+        "deltaPercent": 0,
+        "environment": "exact",
+        "thresholdStatus": "approved",
+        "result": "pass"
+      },
+      {
+        "id": "runtime-theme-core-cjs-graph-bytes",
+        "unit": "bytes",
+        "baseline": 17641,
+        "current": {
+          "min": 17641,
+          "median": 17641,
+          "max": 17641,
+          "maxDeviationPercent": 0
+        },
+        "delta": 0,
+        "deltaPercent": 0,
+        "environment": "exact",
+        "thresholdStatus": "approved",
+        "result": "pass"
+      },
+      {
+        "id": "runtime-tokens-esm-graph-bytes",
+        "unit": "bytes",
+        "baseline": 56013,
+        "current": {
+          "min": 56013,
+          "median": 56013,
+          "max": 56013,
+          "maxDeviationPercent": 0
+        },
+        "delta": 0,
+        "deltaPercent": 0,
+        "environment": "exact",
+        "thresholdStatus": "approved",
+        "result": "pass"
+      },
+      {
+        "id": "runtime-tokens-cjs-graph-bytes",
+        "unit": "bytes",
+        "baseline": 63308,
+        "current": {
+          "min": 63308,
+          "median": 63308,
+          "max": 63308,
+          "maxDeviationPercent": 0
+        },
+        "delta": 0,
+        "deltaPercent": 0,
+        "environment": "exact",
+        "thresholdStatus": "approved",
+        "result": "pass"
+      },
+      {
+        "id": "runtime-theme-compatibility-esm-graph-bytes",
+        "unit": "bytes",
+        "baseline": 44017,
+        "current": {
+          "min": 44017,
+          "median": 44017,
+          "max": 44017,
+          "maxDeviationPercent": 0
+        },
+        "delta": 0,
+        "deltaPercent": 0,
+        "environment": "exact",
+        "thresholdStatus": "approved",
+        "result": "pass"
+      },
+      {
+        "id": "runtime-theme-compatibility-cjs-graph-bytes",
+        "unit": "bytes",
+        "baseline": 44764,
+        "current": {
+          "min": 44764,
+          "median": 44764,
+          "max": 44764,
+          "maxDeviationPercent": 0
+        },
+        "delta": 0,
+        "deltaPercent": 0,
+        "environment": "exact",
+        "thresholdStatus": "approved",
+        "result": "pass"
+      }
+    ],
+    "allPassed": true
+  },
+  "historicalCompatibilityMetric": {
+    "id": "runtime-emitted-bytes",
+    "selector": "effect.runtime.cjs.graph-bytes",
+    "baseline": 11307,
+    "current": {
+      "min": 44764,
+      "median": 44764,
+      "max": 44764,
+      "maxDeviationPercent": 0
+    },
+    "delta": 33457,
+    "deltaPercent": 295.8963473954188,
+    "environment": "graph-only-current-checkout",
+    "thresholdStatus": "approved",
+    "result": "fail",
+    "qualification": "Retained historical compatibility comparison; it remains separate from the admitted split graph budgets and is expected to stay fail-closed until the compatibility policy changes."
+  },
+  "protocol": {
+    "build": "bun run build",
+    "graphScanner": "packages/css/bench/effect-boundary-audit.ts readEmittedGraph",
+    "measure": "sum of emitted local graph artifact filesystem bytes",
+    "repetitions": 5,
+    "repetitionOrder": "sequential scans of the same freshly rebuilt artifacts; graph bytes are deterministic and every scan retains the same artifact hashes",
+    "formats": [
+      "esm",
+      "cjs"
+    ],
+    "entrypoints": [
+      "theme-core",
+      "tokens",
+      "theme"
+    ]
+  },
+  "currentGraphs": {
+    "theme-core": {
+      "esm": {
+        "entry": "theme-core.mjs",
+        "graphBytes": 17271,
+        "samples": [
+          17271,
+          17271,
+          17271,
+          17271,
+          17271
+        ],
+        "externals": [
+          "react"
+        ],
+        "nonliteralLoads": 0,
+        "artifacts": [
+          {
+            "file": "theme-core.mjs",
+            "bytes": 17271,
+            "sha256": "a67217f2efcf0ba6d045331d0dbe87a98e7cb4697f15b62f802868f6e002cba6"
+          }
+        ]
+      },
+      "cjs": {
+        "entry": "theme-core.cjs",
+        "graphBytes": 17641,
+        "samples": [
+          17641,
+          17641,
+          17641,
+          17641,
+          17641
+        ],
+        "externals": [
+          "react"
+        ],
+        "nonliteralLoads": 0,
+        "artifacts": [
+          {
+            "file": "theme-core.cjs",
+            "bytes": 17641,
+            "sha256": "ab8296c64cb09b9981b0f84f60fe3119ba2aaf1afcd4f8828d4528c5ae19aeaf"
+          }
+        ]
+      }
+    },
+    "tokens": {
+      "esm": {
+        "entry": "tokens.mjs",
+        "graphBytes": 56013,
+        "samples": [
+          56013,
+          56013,
+          56013,
+          56013,
+          56013
+        ],
+        "externals": [],
+        "nonliteralLoads": 0,
+        "artifacts": [
+          {
+            "file": "domains-563FdpDY.mjs",
+            "bytes": 34743,
+            "sha256": "d138439fce8cdcf7aee14c9d0c1099718aa98e902ec6258a410d708535866da5"
+          },
+          {
+            "file": "theme-contract-cWyeOrCI.mjs",
+            "bytes": 5611,
+            "sha256": "d73adede43beb439aa3901d27975f0b2376773ce8819b34893e698dd28717fe6"
+          },
+          {
+            "file": "theme-token-BvTY83dd.mjs",
+            "bytes": 14630,
+            "sha256": "226c0a40afdeac3670943ccc959e7bacfb689a2eef4198ca89140a47b96ef61c"
+          },
+          {
+            "file": "tokens.mjs",
+            "bytes": 1029,
+            "sha256": "cc3e7931432a4442b65ac7a3259971b176e6af79e51d3ec06e534856aeb034a1"
+          }
+        ]
+      },
+      "cjs": {
+        "entry": "tokens.cjs",
+        "graphBytes": 63308,
+        "samples": [
+          63308,
+          63308,
+          63308,
+          63308,
+          63308
+        ],
+        "externals": [],
+        "nonliteralLoads": 0,
+        "artifacts": [
+          {
+            "file": "domains-Bq93D2Rv.cjs",
+            "bytes": 38301,
+            "sha256": "b35686d51c907882ecbaac3b6c6f7b86641791d2242903a14855f054583fb2cc"
+          },
+          {
+            "file": "theme-contract-zQtH6IvI.cjs",
+            "bytes": 6188,
+            "sha256": "c115548c23c14a82b4941ee6f6d56b5b84726765b4cceb1e0a9976ff7342f869"
+          },
+          {
+            "file": "theme-token-C5cCf7zW.cjs",
+            "bytes": 17290,
+            "sha256": "283c9c1442ca93923ad759c8962c1b8dad2cb5d9488a7281361388b4a53d6a27"
+          },
+          {
+            "file": "tokens.cjs",
+            "bytes": 1529,
+            "sha256": "58cde139687579caa08999c46763dcf327c94e16b10a0ce59b06163fa2bc9060"
+          }
+        ]
+      }
+    },
+    "theme": {
+      "esm": {
+        "entry": "theme.mjs",
+        "graphBytes": 44017,
+        "samples": [
+          44017,
+          44017,
+          44017,
+          44017,
+          44017
+        ],
+        "externals": [
+          "react"
+        ],
+        "nonliteralLoads": 0,
+        "artifacts": [
+          {
+            "file": "theme.mjs",
+            "bytes": 44017,
+            "sha256": "2867cdbb05ba8a73aa3bbf69b423e0ac31514697e716a7c84fca69a9d7514356"
+          }
+        ]
+      },
+      "cjs": {
+        "entry": "theme.cjs",
+        "graphBytes": 44764,
+        "samples": [
+          44764,
+          44764,
+          44764,
+          44764,
+          44764
+        ],
+        "externals": [
+          "react"
+        ],
+        "nonliteralLoads": 0,
+        "artifacts": [
+          {
+            "file": "theme.cjs",
+            "bytes": 44764,
+            "sha256": "d1dcab1b6cfe237264b84b3620dd0d2caf50872752219e1ab666c31b12d3930a"
+          }
+        ]
+      }
+    }
+  },
+  "limits": [
+    "The adapter scans emitted package graphs after a completed package build; it does not measure device or Hermes performance",
+    "The historical runtime-emitted-bytes result remains visible and does not gate the admitted split graph comparison",
+    "Whole-registry readiness remains blocked by pending device, UI-frame, allocation and retained-memory domains"
+  ]
+}

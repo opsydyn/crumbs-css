@@ -1681,3 +1681,31 @@ format-specific graphs against their baselines and reports the split results
 alongside the retained historical compatibility failure. Keep the whole
 registry fail-closed until release-device frame, allocation and retained-memory
 evidence is available.
+
+### 2026-09-21 — M4.6 current split-budget comparison run
+
+- Added a shared current-checkout graph adapter and a focused
+  `measure:runtime-graph-budgets` command. After a completed package build it
+  scans ESM/CJS `theme-core`, `tokens`, and compatibility `theme` five times,
+  checks deterministic artifact hashes, and writes a retained comparison
+  report.
+- All six admitted split budgets pass at their zero-growth baselines. The
+  historical `runtime-emitted-bytes` comparison remains visible at 44,764
+  bytes versus 11,307 bytes (+295.9%) and remains fail-closed by policy.
+- The full `measure:host-budgets` adapter now records the same runtime graph
+  evidence, so a future host matrix cannot silently omit the six admitted
+  selectors. The current graph fingerprint records Node for traceability but
+  uses explicit Bun/build-tool/host equivalence for this deterministic emitted
+  byte scan.
+- Build, focused budget tests, and registry validation pass. The registry is
+  still not ready because release-device frame, allocation, and retained-memory
+  evidence remains pending or diagnostic. Physical iOS and Android stay
+  backlogged.
+
+See [M4.6 current split-budget comparison assessment](assessments/2026-09-21-m4-6-runtime-byte-budget-comparison.md)
+and [current split-budget comparison evidence](evidence/2026-09-21-m4-6-runtime-byte-comparison/comparison.json).
+
+Next recommended slice: **M4.6 full host comparison rerun** — run the updated
+`measure:host-budgets` adapter so the Effect boundary, runtime initialization,
+benchmark, Metro, editor, and split graph reports are compared together. Keep
+the historical compatibility failure visible and the whole registry fail-closed.

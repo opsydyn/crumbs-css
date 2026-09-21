@@ -260,6 +260,19 @@ export function compareRecordedMetrics(registry: BudgetRegistry, repoRoot: strin
   }
 }
 
+export function compareRuntimeGraphMetrics(registry: BudgetRegistry, repoRoot: string, currentEvidence: unknown) {
+  const runtimeGraphMetrics = registry.metrics.filter(metric => metric.baseline.status === "recorded" &&
+    metric.baseline.selector.startsWith("runtime.") && metric.baseline.selector.endsWith(".graph-bytes"))
+  const scopedRegistry: BudgetRegistry = { ...registry, metrics: runtimeGraphMetrics }
+  const report = compareRecordedMetrics(scopedRegistry, repoRoot, {
+    effect: {}, runtimeInit: {}, benchmark: {}, incremental: {}, editor: {}, runtimeGraph: currentEvidence,
+  })
+  return {
+    metrics: report.metrics,
+    allPassed: report.metrics.length > 0 && report.metrics.every(metric => metric.result === "pass"),
+  }
+}
+
 function extractBaselineSamples(selector: BaselineSelector, evidence: unknown): number[] {
   if (selector === "effect.runtime.cjs.graph-bytes") {
     const data = evidence as EffectBoundaryEvidence
@@ -323,7 +336,26 @@ function environmentFingerprint(selector: BaselineSelector, evidence: unknown): 
   }
   if (selector.startsWith("runtime.") && selector.endsWith(".graph-bytes")) {
     const data = evidence as RuntimeGraphBudgetEvidence
-    return { sourceRevision: data.sourceRevision, environment: data.environment, protocol: data.protocol, selector }
+    const environment = data.environment as {
+      bun?: unknown
+      npm?: unknown
+      platform?: unknown
+      architecture?: unknown
+      osRelease?: unknown
+      buildTool?: unknown
+    }
+    return {
+      environment: {
+        bun: environment.bun,
+        npm: environment.npm,
+        platform: environment.platform,
+        architecture: environment.architecture,
+        osRelease: environment.osRelease,
+        buildTool: environment.buildTool,
+      },
+      protocol: data.protocol,
+      selector,
+    }
   }
   if (selector.startsWith("runtime-init.")) {
     const data = evidence as RuntimeInitializationEvidence

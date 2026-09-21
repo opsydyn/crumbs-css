@@ -5,6 +5,7 @@ import {
   BudgetRegistryVersion,
   assessBudgetRegistry,
   budgetRegistryCodec,
+  compareRuntimeGraphMetrics,
   compareRecordedMetrics,
   createThresholdReviewPacket,
   requiredBudgetDomains,
@@ -176,6 +177,40 @@ describe("performance budget registry", () => {
       expect(metric.delta).toBe(0)
       expect(metric.result).toBe("pass")
     }
+  })
+
+  it("compares split runtime graphs independently of the current source revision", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const admission = JSON.parse(readFileSync(resolve(repoRoot,
+      "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8"))
+    const current = {
+      ...admission,
+      sourceRevision: "current-working-tree",
+      environment: { ...admission.environment, node: "v26.3.0" },
+    }
+    const report = compareRuntimeGraphMetrics(decoded.value, repoRoot, current)
+    expect(report.metrics).toHaveLength(6)
+    expect(report.allPassed).toBe(true)
+    expect(report.metrics.every(metric => metric.environment === "exact" && metric.result === "pass")).toBe(true)
+
+    const regressed = {
+      ...current,
+      currentGraphs: {
+        ...current.currentGraphs,
+        "theme-core": {
+          ...current.currentGraphs["theme-core"],
+          esm: {
+            ...current.currentGraphs["theme-core"].esm,
+            samples: current.currentGraphs["theme-core"].esm.samples.map((value: number) => value + 1),
+          },
+        },
+      },
+    }
+    const failed = compareRuntimeGraphMetrics(decoded.value, repoRoot, regressed)
+    expect(failed.metrics.find(metric => metric.id === "runtime-theme-core-esm-graph-bytes")?.result).toBe("fail")
+    expect(failed.allPassed).toBe(false)
   })
 
   it("adapts independent benchmark reports only when their environments and scenarios agree", () => {
