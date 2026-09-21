@@ -1599,3 +1599,28 @@ exact Metro/Hermes application baseline can be admitted, and keep the registry
 fail-closed until the baseline and remaining device/editor gates are explicit.
 Keep physical iOS and Android qualification backlogged to the final
 device-enabled move.
+
+### 2026-09-21 — M4.6 application-byte threshold re-evaluation
+
+- Rebased the retained Storybook application comparison on the repaired token
+  boundary. Crumbs source-content modules fell from 122,242 to 117,301 bytes
+  (−4.04%); workspace and packed web/iOS/Android bundles fell by approximately
+  2.0–2.3%, and every current map set passes the strict runtime guard.
+- Kept the comparison explicitly diagnostic: the prior maps came from a
+  different revision and a graph that failed the runtime contract, while
+  application bundle/source-map bytes are not native startup, frame,
+  allocation or retained-memory measurements. The comparison is a repair delta
+  rather than an approved application baseline.
+- Kept the approved package runtime-byte metric unchanged at 44,764 bytes
+  against its 11,307-byte zero-growth baseline (+295.9% failure). The budget
+  registry remains fail-closed; no threshold, dependency, native target or
+  Android state changed.
+
+See [M4.6 application-byte threshold assessment](assessments/2026-09-21-m4-6-application-byte-threshold.md)
+and [application-byte review evidence](evidence/2026-09-21-m4-6-application-byte-threshold/review.json).
+
+Next recommended slice: **M4.6 runtime emitted-byte budget decision** — either
+reduce the compatibility graph against a same-functionality baseline or record
+an explicitly approved split budget for `theme/core`, `tokens` and the
+compatibility entrypoint. Keep the registry fail-closed and physical iOS and
+Android qualification backlogged.

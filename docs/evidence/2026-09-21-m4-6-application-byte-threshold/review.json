@@ -1,0 +1,89 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21T18:32:00Z",
+  "slice": "M4.6 application-byte threshold re-evaluation",
+  "sourceRevision": "b45d79d",
+  "sourceState": "Committed token runtime boundary repair; comparison uses retained pre-repair application evidence and the fresh post-repair graph evidence",
+  "decision": {
+    "status": "not-admitted",
+    "runtimeByteThresholdReopened": false,
+    "performanceRegistryChanged": false,
+    "reason": [
+      "The before/after Storybook comparison is a repair delta between two different Crumbs revisions, not an approved pre-adoption application baseline.",
+      "The prior graph failed the runtime boundary contract and the current graph passes it, so the comparison demonstrates boundary repair rather than a stable performance workload.",
+      "The retained approved runtime-emitted-bytes metric still compares the ordinary compatibility CJS graph at 44,764 bytes with the 11,307-byte zero-growth baseline and remains a failure.",
+      "The current application maps provide bundle and source-map sizes but no exact native startup, frame, allocation or retained-memory baseline."
+    ]
+  },
+  "inputs": {
+    "priorApplicationEvidence": {
+      "path": "docs/evidence/2026-09-21-m4-6-application-graph/graphs.json",
+      "sourceRevision": "588f03e",
+      "storybookCrumbsSourceContentBytes": 122242,
+      "runtimeGuard": "failed-closed at tokens.mjs"
+    },
+    "currentApplicationEvidence": {
+      "path": "docs/evidence/2026-09-21-m4-6-token-runtime-boundary/graphs.json",
+      "sourceRevision": "f6bf62c",
+      "storybookCrumbsSourceContentBytes": 117301,
+      "runtimeGuard": "passed in workspace and packed exports"
+    },
+    "approvedPackageMetric": {
+      "registryId": "runtime-emitted-bytes",
+      "baselineBytes": 11307,
+      "currentCommonjsBytes": 44764,
+      "deltaBytes": 33457,
+      "deltaPercent": 295.8963473954188,
+      "threshold": { "absoluteMaxBytes": 11307, "maxRegressionPercent": 0 },
+      "result": "fail",
+      "registry": "packages/css/bench/budgets.json"
+    }
+  },
+  "repairDelta": {
+    "storybookCrumbsSourceContent": {
+      "beforeBytes": 122242,
+      "afterBytes": 117301,
+      "deltaBytes": -4941,
+      "deltaPercent": -4.041982297410055,
+      "interpretation": "diagnostic repair delta; not an approved application baseline"
+    },
+    "workspace": {
+      "web": {
+        "bundle": { "beforeBytes": 4217218, "afterBytes": 4132121, "deltaBytes": -85097, "deltaPercent": -2.0178468364689706 },
+        "sourceMap": { "beforeBytes": 12687859, "afterBytes": 12352922, "deltaBytes": -334937, "deltaPercent": -2.6398228416630416 }
+      },
+      "ios": {
+        "bundle": { "beforeBytes": 5063016, "afterBytes": 4945416, "deltaBytes": -117600, "deltaPercent": -2.3227262169426286 },
+        "sourceMap": { "beforeBytes": 11761502, "afterBytes": 11472880, "deltaBytes": -288622, "deltaPercent": -2.4539552856429392 }
+      },
+      "android": {
+        "bundle": { "beforeBytes": 5072484, "afterBytes": 4954788, "deltaBytes": -117696, "deltaPercent": -2.3202833168128278 },
+        "sourceMap": { "beforeBytes": 11792243, "afterBytes": 11503638, "deltaBytes": -288605, "deltaPercent": -2.4474139483048307 }
+      }
+    },
+    "packed": {
+      "web": {
+        "bundle": { "beforeBytes": 4634136, "afterBytes": 4539994, "deltaBytes": -94142, "deltaPercent": -2.0314897965877567 },
+        "sourceMap": { "beforeBytes": 14122620, "afterBytes": 13766182, "deltaBytes": -356438, "deltaPercent": -2.5238801298909124 }
+      },
+      "ios": {
+        "bundle": { "beforeBytes": 5564296, "afterBytes": 5446132, "deltaBytes": -118164, "deltaPercent": -2.1236109653404491 },
+        "sourceMap": { "beforeBytes": 12961608, "afterBytes": 12668862, "deltaBytes": -292746, "deltaPercent": -2.2585623635585956 }
+      },
+      "android": {
+        "bundle": { "beforeBytes": 5573776, "afterBytes": 5455444, "deltaBytes": -118332, "deltaPercent": -2.1230131960810765 },
+        "sourceMap": { "beforeBytes": 12991726, "afterBytes": 12698968, "deltaBytes": -292758, "deltaPercent": -2.2534188297998279 }
+      }
+    }
+  },
+  "boundaryChecks": {
+    "workspace": { "sourceMaps": 4, "passed": 4, "vanillaExtractSourceContentBytes": 0, "effectSourceCount": 0 },
+    "packed": { "sourceMaps": 4, "passed": 4, "vanillaExtractSourceContentBytes": 0, "effectSourceCount": 0 }
+  },
+  "admissionRequirements": [
+    "Retain an exact pre-adoption Metro/Hermes application baseline from the same app, dependency lock, build mode, platform and source-map protocol.",
+    "Separate Crumbs source-content diagnostics from minified bundle, Hermes bytecode, startup, frame, allocation and retained-memory metrics.",
+    "Run at least five independent repetitions per admitted application scenario and retain environment, artifact and source identities.",
+    "Obtain the outstanding release-Hermes device evidence before activating the whole performance registry; Android remains parked until the final device move."
+  ]
+}
