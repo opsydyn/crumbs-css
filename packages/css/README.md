@@ -72,7 +72,7 @@ module.exports = withNativeStyles(config)
 
 The package ships with a pre-built transformer. Metro cache invalidation is based on the transformer file, so package updates invalidate stale `.css.ts` output automatically.
 
-Runtime APIs belong in `@opsydyn/crumbs-css/theme`: its ESM/CommonJS artifacts import only React externally. The package root, `/style` and Metro tooling remain build-time entrypoints. See the [runtime dependency boundary](./COMPATIBILITY.md#runtime-dependency-boundary).
+Runtime APIs belong in `@opsydyn/crumbs-css/theme/core` for common provider, hook and token-resolution consumers. It is the lean runtime graph and imports only React externally. Use `@opsydyn/crumbs-css/theme` when you need token scopes, dependency plans or recipe resolver controls; that compatibility graph also imports only React externally. The package root, `/style` and Metro tooling remain build-time entrypoints. See the [runtime dependency boundary](./COMPATIBILITY.md#runtime-dependency-boundary).
 
 ## Minimal theme example
 
@@ -114,7 +114,7 @@ export const title = style({
 ```
 
 ```tsx
-import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { Text, View } from "react-native"
 import { darkTheme } from "./theme.css"
 import * as s from "./screen.css"
@@ -191,7 +191,8 @@ export const button = recipe({
 ```
 
 ```tsx
-import { createRecipeResolver, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { createRecipeResolver } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { useMemo } from "react"
 import { Pressable } from "react-native"
 import * as s from "./button.css"

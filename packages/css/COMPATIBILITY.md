@@ -41,7 +41,7 @@ The package pins `effect@4.0.0-rc.115` as its own implementation dependency; con
 
 ## Runtime dependency boundary
 
-Import application runtime APIs from `@opsydyn/crumbs-css/theme` (or its existing `dist/theme` alias). Both ESM and CommonJS runtime artifacts depend externally only on React; their emitted graph contains no Node built-ins, authoring entrypoints, esbuild, vanilla-extract integration or CSS conversion code. Shared tags are pure data. One declaration graph preserves nominal token types across authoring and runtime entries.
+Import common application runtime APIs from `@opsydyn/crumbs-css/theme/core`. Its ESM and CommonJS graphs contain the provider, hooks and token-resolution helpers and depend externally only on React. Use `@opsydyn/crumbs-css/theme` (or its existing `dist/theme` alias) for token scopes, dependency plans and recipe resolver controls. Both runtime graphs contain no Node built-ins, authoring entrypoints, esbuild, vanilla-extract integration or CSS conversion code. Shared tags are pure data. One declaration graph preserves nominal token types across authoring and runtime entries.
 
 The package root, `/style`, Metro plugin and transformer are build-time entrypoints and can require Node/compiler dependencies. Runtime isolation does not remove those installed package dependencies or make authoring modules safe to import into application bundles. Regenerate compiled styles and use the theme subpath in runtime code. Production Expo checks inspect retained iOS, Android and web source maps; native/device performance remains separate qualification.
 

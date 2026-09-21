@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 import * as rootApi from "@opsydyn/crumbs-css"
 import * as styleApi from "@opsydyn/crumbs-css/style"
 import * as themeApi from "@opsydyn/crumbs-css/theme"
+import * as themeCoreApi from "@opsydyn/crumbs-css/theme/core"
 import * as tokenApi from "@opsydyn/crumbs-css/tokens"
 import * as tokenOpticApi from "@opsydyn/crumbs-css/tokens/optic"
 import * as tokenSchemaApi from "@opsydyn/crumbs-css/tokens/schema"
@@ -54,6 +55,21 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "useThemedStyle",
       "useThemedStyles",
       "useTokenTheme",
+    ])
+  })
+
+  it("exposes a lean theme/core subpath for common runtime consumers", () => {
+    expect(namedApiKeys(themeCoreApi)).toEqual([
+      "NativeThemeTokenReferenceType",
+      "ThemeProvider",
+      "createThemeTokenReference",
+      "isThemeTokenReference",
+      "resolveThemeStyles",
+      "resolveThemeTokens",
+      "useTheme",
+      "useThemeSelector",
+      "useThemedStyle",
+      "useThemedStyles",
     ])
   })
 

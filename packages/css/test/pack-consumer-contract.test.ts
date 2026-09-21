@@ -82,6 +82,7 @@ function createPackedConsumer(): string {
 const consumerTypeSource = `
   import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
   import { createTheme, createThemeContract, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
+  import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
   import { createRecipeResolver, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
   import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens";
   import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
@@ -114,6 +115,7 @@ const consumerTypeSource = `
   const selection: ButtonSelection = { tone: "primary" };
 
   resolveThemeTokens({ color: vars.color.text }, activeTheme);
+  resolveCoreThemeTokens({ color: vars.color.text }, activeTheme);
   createRecipeResolver(button)(selection);
   const tokenVars = createTokenContract({ color: { text: defineToken("color") } });
   const tokenTheme = createTokenTheme(tokenVars, { color: { text: "#ffffff" } });
@@ -190,6 +192,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const root = require("@opsydyn/crumbs-css");
         const style = require("@opsydyn/crumbs-css/style");
         const theme = require("@opsydyn/crumbs-css/theme");
+        const themeCore = require("@opsydyn/crumbs-css/theme/core");
         const tokenOptic = require("@opsydyn/crumbs-css/tokens/optic");
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
@@ -197,6 +200,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof root.withNativeStyles !== "function") throw new Error("missing root withNativeStyles");
         if (typeof style.createThemeContract !== "function") throw new Error("missing style createThemeContract");
         if (typeof theme.createRecipeResolver !== "function") throw new Error("missing theme createRecipeResolver");
+        if (typeof themeCore.resolveThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
         if (typeof tokenOptic.createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (typeof metro.withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformer.transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
@@ -209,6 +213,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
       `
         import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
         import { createThemeContract } from "@opsydyn/crumbs-css/style";
+        import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
         import { createRecipeResolver } from "@opsydyn/crumbs-css/theme";
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
@@ -216,6 +221,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
 
         if (typeof NativeStylesDiagnosticCode.UnsupportedSelector !== "string") throw new Error("missing root diagnostic code");
         if (typeof createThemeContract !== "function") throw new Error("missing style createThemeContract");
+        if (typeof resolveCoreThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
         if (typeof createRecipeResolver !== "function") throw new Error("missing theme createRecipeResolver");
         if (typeof createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (typeof withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");

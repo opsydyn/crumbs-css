@@ -28,7 +28,20 @@ Use this entrypoint in `.css.ts` authoring modules for:
 
 ### `@opsydyn/crumbs-css/theme`
 
-Use this entrypoint in runtime/component code for:
+Use this compatibility entrypoint in runtime/component code when you need the
+advanced theme APIs:
+
+- `createThemeDependencyPlan`
+- `createThemeDependencyResolver`
+- `resolveRecipeStyle`
+- `createRecipeResolver`
+- `TokenThemeProvider`
+- `TokenThemeScopeProvider`
+- `useTokenTheme`
+
+### `@opsydyn/crumbs-css/theme/core`
+
+Use this lean entrypoint for common provider, hook and token-resolution code:
 
 - `ThemeProvider`
 - `useTheme`
@@ -37,10 +50,12 @@ Use this entrypoint in runtime/component code for:
 - `useThemedStyles`
 - `resolveThemeTokens`
 - `resolveThemeStyles`
-- `createThemeDependencyPlan`
-- `createThemeDependencyResolver`
-- `resolveRecipeStyle`
-- `createRecipeResolver`
+- `createThemeTokenReference`
+- `isThemeTokenReference`
+
+It is emitted as an independent graph so consumers that do not need scopes,
+dependency plans or recipe controls do not load those implementations. Both
+theme entrypoints retain a React-only external runtime dependency boundary.
 
 `createRecipeResolver(recipe, { cacheSize })` precomputes the recipe selection
 plan and returns a callable resolver with `getCacheStats()`, `clearCache()` and

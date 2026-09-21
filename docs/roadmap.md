@@ -1495,3 +1495,26 @@ Next recommended slice: **M4.6 runtime graph split** — add a lean core theme
 entrypoint for common consumers, retain the compatibility entrypoint, and
 measure both graphs before any threshold review. Keep physical iOS and Android
 qualification backlogged to the final platform move.
+
+### 2026-09-21 — M4.6 runtime graph split
+
+- Added the opt-in `@opsydyn/crumbs-css/theme/core` entrypoint for
+  `ThemeProvider`, theme hooks and pure token/style resolution. The existing
+  `@opsydyn/crumbs-css/theme` surface remains the compatibility entrypoint for
+  token scopes, dependency plans and recipe resolver controls.
+- Built the two runtime entries as separate tsdown graphs. The lean graph is
+  17,271 ESM bytes / 17,641 CommonJS bytes versus 44,017 / 44,764 for the
+  compatibility graph, a 60.8% / 60.6% reduction. Both remain React-only
+  externally and guarded graph tests reject compiler imports.
+- Added package export, declaration, packed-consumer and public API contracts,
+  plus runtime guidance and the [graph evidence](evidence/2026-09-21-m4-6-runtime-graph-split/graphs.json).
+  This is emitted host evidence only; no Metro/Hermes, native, device or
+  threshold qualification changed.
+
+See [M4.6 runtime graph assessment](assessments/2026-09-21-m4-6-runtime-graph-split.md).
+
+Next recommended slice: **M4.6 import adoption and graph policy** — inventory
+internal/example consumers, move common runtime imports to `theme/core`, and
+add a regression check that prevents advanced APIs from leaking into the lean
+entrypoint before revisiting the runtime-byte threshold. Keep physical iOS and
+Android qualification backlogged.

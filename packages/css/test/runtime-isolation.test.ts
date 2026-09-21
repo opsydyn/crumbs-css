@@ -22,19 +22,24 @@ function graph(entry: string): {files: string[], externals: string[]} {
  return {files: [...visited],externals: [...externals]}
 }
 describe("public runtime dependency isolation", () => {
- for (const format of ['mjs','cjs']) {
-  it(`loads only React and pure package data in ${format}`, () => {
-   const result = graph(`theme.${format}`)
-   expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name !== 'react')).toEqual([])
-   expect(result.files.filter(file => /\/(?:style|index|transformer|metro-plugin)\.(?:mjs|cjs)$/.test(file))).toEqual([])
-   expect(result.externals).toEqual(['react'])
+ for (const entry of ['theme', 'theme-core']) {
+  for (const format of ['mjs','cjs']) {
+   it(`loads only React and pure package data in ${entry} ${format}`, () => {
+    const result = graph(`${entry}.${format}`)
+    expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name !== 'react')).toEqual([])
+    expect(result.files.filter(file => /\/(?:style|index|transformer|metro-plugin)\.(?:mjs|cjs)$/.test(file))).toEqual([])
+    expect(result.externals).toEqual(['react'])
+   })
+  }
+ }
+ for (const entry of ['theme', 'theme-core']) {
+  it(`can require ${entry} CommonJS runtime while compiler and Node imports are denied`, () => {
+   const entryPath = path.join(root, `${entry}.cjs`)
+   const script = `const Module = require('node:module'); const original = Module._load; Module._load = function(name, ...args) { if (name !== 'react' && !name.startsWith('./')) throw new Error('Forbidden runtime import: ' + name); if (/style|transformer|metro-plugin/.test(name)) throw new Error('Compiler import: ' + name); return original.call(this,name,...args); }; const api = require(${JSON.stringify(entryPath)}); const value = api.resolveThemeTokens({width:api.createThemeTokenReference('--crumbs-runtime-size')},{contract:{},values:{},tokens:{'--crumbs-runtime-size':24}}); if (value.width !== 24) throw new Error('Wrong runtime result');`
+   // Load the entry before denying its absolute path; its transitive imports stay guarded.
+   const guarded = script.replace("name !== 'react' && !name.startsWith('./')", `name !== ${JSON.stringify(entryPath)} && name !== 'react' && !name.startsWith('./')`)
+   const result = Bun.spawnSync(['node','-e',guarded],{stdout:'pipe',stderr:'pipe'})
+   expect({code:result.exitCode,stderr:result.stderr.toString()}).toEqual({code:0,stderr:''})
   })
  }
- it("can require CommonJS runtime while compiler and Node imports are denied", () => {
-  const script = `const Module = require('node:module'); const original = Module._load; Module._load = function(name, ...args) { if (name !== 'react' && !name.startsWith('./')) throw new Error('Forbidden runtime import: ' + name); if (/style|transformer|metro-plugin/.test(name)) throw new Error('Compiler import: ' + name); return original.call(this,name,...args); }; const api = require(${JSON.stringify(path.join(root,'theme.cjs'))}); const value = api.resolveThemeTokens({width:api.createThemeTokenReference('--crumbs-runtime-size')},{contract:{},values:{},tokens:{'--crumbs-runtime-size':24}}); if (value.width !== 24) throw new Error('Wrong runtime result');`
-  // Load the entry before denying its absolute path; its transitive imports stay guarded.
-  const guarded = script.replace("name !== 'react' && !name.startsWith('./')", `name !== ${JSON.stringify(path.join(root,'theme.cjs'))} && name !== 'react' && !name.startsWith('./')`)
-  const result = Bun.spawnSync(['node','-e',guarded],{stdout:'pipe',stderr:'pipe'})
-  expect({code:result.exitCode,stderr:result.stderr.toString()}).toEqual({code:0,stderr:''})
- })
 })
