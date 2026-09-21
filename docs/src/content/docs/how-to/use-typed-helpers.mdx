@@ -9,6 +9,31 @@ Use the narrowest helper when the style is intended for a single primitive:
 - `textStyle`
 - `imageStyle`
 
+For finite utility scales, use `defineProperties` and `createSprinkles` from
+the same authoring entrypoint. Declare the primitive domain explicitly so a
+view utility cannot accidentally carry text-only or image-only properties.
+
+```ts
+import { createSprinkles, defineProperties } from "@opsydyn/crumbs-css/style"
+
+const viewProperties = defineProperties({
+  primitives: ["view"] as const,
+  properties: {
+    paddingLeft: { sm: 8, lg: 24 },
+    paddingRight: { sm: 8, lg: 24 },
+  },
+  shorthands: { px: ["paddingLeft", "paddingRight"] as const },
+})
+
+export const sprinkles = createSprinkles(viewProperties)
+export const card = sprinkles({ px: "sm", paddingLeft: "lg" })
+```
+
+Selections are applied in object order. The `paddingLeft` longhand therefore
+wins over the earlier `px` alias, while `paddingRight` stays at `8`. Scale
+values must be finite and property-compatible; domain-branded theme tokens
+are accepted only by compatible properties.
+
 ## Example
 
 ```ts

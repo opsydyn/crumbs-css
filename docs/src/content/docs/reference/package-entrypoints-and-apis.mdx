@@ -19,12 +19,43 @@ Use this entrypoint in `.css.ts` authoring modules for:
 - `style`
 - `styleVariants`
 - `recipe`
+- `defineProperties` and `createSprinkles` for finite, primitive-scoped utility scales
 - `createThemeContract`
 - `createTheme`
 - `viewStyle`
 - `textStyle`
 - `imageStyle`
 - type exports such as `NativeRecipeProps`
+
+### Native sprinkles
+
+Define each finite scale against the primitive kinds that may consume it. The
+property value is checked against the React Native property type, and branded
+domain tokens retain their colour, length, opacity, or enum boundary.
+
+```ts
+import { createSprinkles, defineProperties } from "@opsydyn/crumbs-css/style"
+
+const viewProperties = defineProperties({
+  primitives: ["view"] as const,
+  properties: {
+    paddingLeft: { sm: 8, lg: 24 },
+    paddingRight: { sm: 8, lg: 24 },
+    backgroundColor: { canvas: "#0a0a0a" },
+  },
+  shorthands: {
+    px: ["paddingLeft", "paddingRight"] as const,
+  },
+})
+
+export const sprinkles = createSprinkles(viewProperties)
+export const card = sprinkles({ px: "sm", paddingLeft: "lg" })
+```
+
+Selection keys are resolved in authored object order. Here `px` first assigns
+both physical sides, then `paddingLeft: "lg"` replaces only the left side;
+`paddingRight` remains `8`. `false`, `null`, and `undefined` omit a selection,
+and an unknown scale or shorthand target fails before a class is emitted.
 
 ### `@opsydyn/crumbs-css/theme`
 

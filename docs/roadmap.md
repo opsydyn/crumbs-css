@@ -184,7 +184,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Decisions:** D2, D7.\
 **Affected paths:** new `packages/css/src/sprinkles/`, public exports/build configuration, `native-style.ts`, utility type/property/compiler tests, examples and API docs.
 
-- [ ] M5.1: Define the public native `defineProperties` / `createSprinkles` adaptation with finite values, domain-safe token scales, native primitive kinds, and typed shorthands. Publish precedence examples for overlapping aliases and longhands.
+- [x] M5.1: Define the public native `defineProperties` / `createSprinkles` adaptation with finite values, domain-safe token scales, native primitive kinds, and typed shorthands. Publish precedence examples for overlapping aliases and longhands.
 - [ ] M5.2: Support utilities in style composition and recipe bases/branches without losing kind or contract information. Add the mapped `styleVariants(values, mapper)` overload.
 - [ ] M5.3: Support static selections in authored modules and dynamic runtime selection through generated lookup plans; public names/types must accurately distinguish these phases.
 - [ ] M5.4: Compare atomic, fused, and hybrid output on identical design-system fixtures. Measure bytes, startup, array lengths, selection allocations, and native frames. Choose the default from evidence and document it.
@@ -1787,3 +1787,28 @@ Next recommended roadmap item: **M5.1** — define the public native
 domain-safe token scales, native primitive kinds and typed shorthands. Keep
 M4.6 release-device gates and Android qualification explicitly backlogged to
 the final device-enabled move.
+
+### 2026-09-21 — M5.1 native Sprinkles contract
+
+- Added the public `defineProperties` / `createSprinkles` adaptation to the
+  `/style` and package-root authoring surfaces. Definitions carry an explicit
+  `view`, `text`, or `image` primitive domain (all three remain the default
+  shared domain), finite named scales, and typed shorthand targets.
+- Added compile-time domain checks for branded colour, length, opacity, and
+  enum tokens; definition-time checks reject non-finite, empty, cyclic, or
+  accessor-backed scale data. The native compiler remains the final structured
+  and scalar admission boundary.
+- Selection resolution is deterministic: authored keys are processed in
+  order, shorthand targets expand in declaration order, and a later winner is
+  moved to its final native IR position. The precedence example is covered in
+  the reference and typed-helper docs.
+- Added type fixtures, a transformer fixture, public API coverage and runtime
+  validation for the new contract. M4.6 device gates and Android remain
+  explicitly backlogged.
+
+See [M5.1 native Sprinkles assessment](assessments/2026-09-21-m5-1-native-sprinkles.md).
+
+Next recommended roadmap item: **M5.2** — support utility outputs in style
+composition and recipe bases/branches without losing primitive kind or token
+contract information, then add the mapped `styleVariants(values, mapper)`
+overload. Keep M4.6 release-device gates and Android qualification backlogged.

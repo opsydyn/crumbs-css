@@ -19,9 +19,11 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "NativeRecipeClassType",
       "NativeRecipeType",
       "NativeThemeTokenReferenceType",
+      "createSprinkles",
       "createTheme",
       "createThemeContract",
       "createThemeTokenReference",
+      "defineProperties",
       "getThemeTokenPath",
       "getThemeVarName",
       "imageStyle",
@@ -111,6 +113,8 @@ describe("@opsydyn/crumbs-css public API contract", () => {
   it("keeps diagnostics and Metro integration available from the package root", () => {
     expect(rootApi).toHaveProperty("NativeStylesDiagnosticCode")
     expect(rootApi).toHaveProperty("withNativeStyles")
+    expect(rootApi).toHaveProperty("createSprinkles")
+    expect(rootApi).toHaveProperty("defineProperties")
     expect(rootApi).not.toHaveProperty("ThemeProvider")
     expect(rootApi).not.toHaveProperty("createRecipeResolver")
   })

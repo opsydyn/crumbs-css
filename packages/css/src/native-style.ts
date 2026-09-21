@@ -4,7 +4,19 @@ import { getFileScope } from "@vanilla-extract/css/fileScope"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import { markNativeStyleMap, NativeRecipeClassSymbol } from "./native-style-map"
 import { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
-import { markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/native-capture"
+import { getNativeCaptureMetadata, markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/native-capture"
+export {
+  createSprinkles,
+  defineProperties,
+} from "./sprinkles"
+export type {
+  NativeSprinkleDefinition,
+  NativeSprinklePropertyConfig,
+  NativeSprinklePropertyKey,
+  NativeSprinkleShorthandConfig,
+  NativeSprinklesConfig,
+  NativeSprinklesSelection,
+} from "./sprinkles"
 import {
   type DomainThemeVar,
   type LegacyNativeThemeVar,
@@ -159,6 +171,7 @@ export type NativeStyleVariants<TVariants extends Readonly<Record<string, Native
 }
 type ColorStyleProperty = "color" | `${string}Color`
 type LengthStyleProperty =
+  | "fontSize" | "letterSpacing" | "lineHeight" | "flexBasis"
   | "width" | "height" | "minWidth" | "minHeight" | "maxWidth" | "maxHeight"
   | "top" | "right" | "bottom" | "left" | "start" | "end"
   | "inset" | "insetInline" | "insetBlock" | "insetInlineStart" | "insetInlineEnd" | "insetBlockStart" | "insetBlockEnd"
@@ -181,7 +194,7 @@ type EnumStyleProperty =
   | "fontStyle" | "fontWeight" | "textAlign" | "textAlignVertical" | "verticalAlign"
   | "textDecorationLine" | "textDecorationStyle" | "textTransform" | "writingDirection" | "userSelect"
 
-type TokenDomainForProperty<K extends PropertyKey> =
+export type NativeStyleTokenDomainForProperty<K extends PropertyKey> =
   K extends ColorStyleProperty ? Extract<TokenDomain, { readonly kind: "color" }>
     : K extends LengthStyleProperty ? Extract<TokenDomain, { readonly kind: "length" }>
       : K extends OpacityStyleProperty ? Extract<TokenDomain, { readonly kind: "opacity" }>
@@ -190,7 +203,7 @@ type TokenDomainForProperty<K extends PropertyKey> =
 
 type NativeStyleTokenForProperty<K extends PropertyKey> =
   LegacyNativeThemeVar |
-  ([TokenDomainForProperty<K>] extends [never] ? never : DomainThemeVar<TokenDomainForProperty<K>>)
+  ([NativeStyleTokenDomainForProperty<K>] extends [never] ? never : DomainThemeVar<NativeStyleTokenDomainForProperty<K>>)
 
 type LengthStyleLiteral = number | `${number}%` | "auto"
 type NativeStyleValueInput<TValue, TProperty extends PropertyKey = never> =
@@ -232,7 +245,11 @@ function authorStyle(rule: unknown, primitiveDomain: NativePrimitiveDomain, debu
   // A compiled reference is a build-time class handle, not a declaration object.
   if (typeof rule === "string") return authorStyle([rule], primitiveDomain, debugId)
   if (!Array.isArray(rule)) {
-    return vanillaStyle(markNativeCaptureRule(rule as Record<string, unknown>, primitiveDomain) as StyleRule, debugId)
+    const record = rule as Record<string, unknown>
+    const marked = getNativeCaptureMetadata(record) === undefined
+      ? markNativeCaptureRule(record, primitiveDomain)
+      : record
+    return vanillaStyle(marked as StyleRule, debugId)
   }
 
   // ADR D2: native order includes inline rules, nested sequences and repeats.

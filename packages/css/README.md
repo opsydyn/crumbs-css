@@ -25,6 +25,7 @@ Validated consumer baseline:
 - `style`
 - `styleVariants`
 - `recipe`
+- `defineProperties` and `createSprinkles`
 - `createThemeContract`
 - `createTheme`
 
@@ -33,6 +34,7 @@ Validated consumer baseline:
 - React Native focused, not a browser CSS runtime
 - Metro-transform based
 - Typed authoring helpers for view, text, and image styles
+- Finite, primitive-scoped utility scales with typed shorthands
 - Runtime theme token resolution with `ThemeProvider` and `useThemedStyles`
 - Explicit state handling through `styleVariants` and `recipe`
 

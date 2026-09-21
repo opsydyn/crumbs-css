@@ -21,7 +21,7 @@ Monorepo for `@opsydyn/crumbs-css` — React Native style authoring with a famil
 
 ## What it does
 
-Compiles `.css.ts` files to React Native `StyleSheet.create` output at Metro transform time. The authoring API mirrors vanilla-extract — `style`, `styleVariants`, `recipe`, `createThemeContract`, `createTheme` — so the mental model is familiar if you already use vanilla-extract on web.
+Compiles `.css.ts` files to React Native `StyleSheet.create` output at Metro transform time. The authoring API mirrors vanilla-extract — `style`, `styleVariants`, `recipe`, `defineProperties`, `createSprinkles`, `createThemeContract`, `createTheme` — so the mental model is familiar if you already use vanilla-extract on web.
 
 At runtime, `ThemeProvider` and `useThemedStyles` resolve token references into concrete values without re-running the transform.
 
