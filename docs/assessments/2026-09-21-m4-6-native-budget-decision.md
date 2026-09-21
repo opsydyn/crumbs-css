@@ -42,7 +42,8 @@ Evidence: [target inventory](../evidence/2026-09-21-m4-6-native-budget/native-ta
 [regression review](../evidence/2026-09-21-m4-6-native-budget/regression-review.json),
 and [native probe contract](../evidence/2026-09-21-m4-6-native-budget/native-probe-contract.json).
 
-M4.6 remains unchecked. The next bounded slice is a host-only ablation that
-slims the theme runtime graph and isolates the domain-aware type-instantiation
-cost, while the physical iOS run waits for a connected device. Android remains
-the final parked platform move.
+M4.6 remains unchecked. Physical iOS qualification is explicitly backlogged to
+the final device-enabled platform move alongside Android. The active next
+bounded slice is host-only ablation that slims the theme runtime graph and
+isolates the domain-aware type-instantiation cost; device access must not block
+that work.

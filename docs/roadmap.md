@@ -1453,3 +1453,20 @@ Next recommended slice: **M4.6 host ablation and runtime/type-surface repair** �
 isolate the theme graph and domain-aware type-instantiation costs before
 re-running the physical iOS contract when a device is connected. Keep Android
 parked until the final platform move.
+
+### 2026-09-21 — M4.6 physical native qualification backlogged
+
+- Physical iOS release qualification is now explicitly backlogged to the final
+  device-enabled platform move because no iPhone/iPad is available. The iOS
+  simulator evidence remains diagnostic and does not become a budget baseline.
+- Android remains parked for the same final move. No device tooling, native
+  target or Android state was changed in this slice.
+- Host-side remediation remains active: first run the runtime-graph and
+  domain-aware type-instantiation ablations, then revisit the existing probe
+  contract when a physical device is available. The performance registry stays
+  fail-closed and no threshold is changed.
+
+Next recommended slice: **M4.6 host ablation and runtime/type-surface repair** —
+isolate and reduce the two deterministic host regressions without waiting for
+device access. Keep physical iOS and Android qualification backlogged to the
+final platform move.
