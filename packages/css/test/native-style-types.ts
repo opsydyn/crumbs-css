@@ -1,5 +1,7 @@
 import {
+  createSprinkles,
   createThemeContract,
+  defineProperties,
   imageStyle,
   type NativeRecipeProps,
   type NativeRecipeVariants,
@@ -10,6 +12,7 @@ import {
   textStyle,
   viewStyle,
 } from "../src/native-style"
+import type { ViewStyle } from "react-native"
 import {
   createRecipeResolver,
   type NativeRecipeResolver,
@@ -36,6 +39,43 @@ const composedText = textStyle([textStyle({ color: "red" }), { color: "blue" }])
 const composedImage = imageStyle([imageStyle({ resizeMode: "contain" }), { resizeMode: "cover" }])
 styleVariants({ active: [baseStyle, { color: "blue" }] })
 void [composedStyle, composedView, composedText, composedImage]
+
+const utilityProperties = defineProperties({
+  primitives: ["view"] as const,
+  properties: {
+    padding: { sm: 8, lg: 24 },
+    opacity: { muted: 0.5 },
+  },
+})
+const utilities = createSprinkles(utilityProperties)
+const composedUtilities: ViewStyle = viewStyle([utilities({ padding: "sm" }), { opacity: 1 }])
+void composedUtilities
+
+const mappedUtilities = styleVariants(
+  { compact: "sm", roomy: "lg" } as const,
+  (scale, key) => {
+    const _key: "compact" | "roomy" = key
+    void _key
+    return utilities({ padding: scale })
+  },
+)
+const mappedUtility: ViewStyle = mappedUtilities.compact
+void mappedUtility
+
+const utilityRecipe = recipe({
+  base: utilities({ padding: "sm" }),
+  variants: {
+    density: {
+      compact: utilities({ padding: "sm" }),
+      roomy: utilities({ padding: "lg" }),
+    },
+  },
+  compoundVariants: [{
+    variants: { density: "roomy" },
+    style: utilities({ opacity: "muted" }),
+  }],
+})
+void utilityRecipe
 
 // @ts-expect-error Arbitrary browser class names are not native style inputs.
 style(["unknown-browser-class"])

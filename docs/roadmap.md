@@ -185,7 +185,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Affected paths:** new `packages/css/src/sprinkles/`, public exports/build configuration, `native-style.ts`, utility type/property/compiler tests, examples and API docs.
 
 - [x] M5.1: Define the public native `defineProperties` / `createSprinkles` adaptation with finite values, domain-safe token scales, native primitive kinds, and typed shorthands. Publish precedence examples for overlapping aliases and longhands.
-- [ ] M5.2: Support utilities in style composition and recipe bases/branches without losing kind or contract information. Add the mapped `styleVariants(values, mapper)` overload.
+- [x] M5.2: Support utilities in style composition and recipe bases/branches without losing kind or contract information. Add the mapped `styleVariants(values, mapper)` overload.
 - [ ] M5.3: Support static selections in authored modules and dynamic runtime selection through generated lookup plans; public names/types must accurately distinguish these phases.
 - [ ] M5.4: Compare atomic, fused, and hybrid output on identical design-system fixtures. Measure bytes, startup, array lengths, selection allocations, and native frames. Choose the default from evidence and document it.
 - [ ] M5.5: Test deterministic output, token-only policy compatibility, invalid properties/scales, identity on repeated selections, and compiler/runtime equivalence.
@@ -1812,3 +1812,22 @@ Next recommended roadmap item: **M5.2** — support utility outputs in style
 composition and recipe bases/branches without losing primitive kind or token
 contract information, then add the mapped `styleVariants(values, mapper)`
 overload. Keep M4.6 release-device gates and Android qualification backlogged.
+
+### 2026-09-21 — M5.2 utility composition and mapped variants
+
+- Added the vanilla-extract-shaped `styleVariants(values, mapper, debugId?)`
+  overload. The mapper receives the finite value and variant key; result maps
+  retain the native style result type and existing style-map metadata.
+- Utility classes now compose through native helper arrays and are accepted as
+  recipe bases, variant branches, and compound styles. Recipe authoring uses
+  the same ordered native path, including compiled utility class references.
+- Added package type fixtures and a transformer/evaluation fixture covering
+  utility composition, mapped token-backed values, recipe branches and
+  compounds. M4.6 device gates and Android remain explicitly backlogged.
+
+See [M5.2 utility composition assessment](assessments/2026-09-21-m5-2-utility-composition.md).
+
+Next recommended roadmap item: **M5.3** — support static selections in
+authored modules and dynamic runtime selection through generated lookup plans,
+with public names and types distinguishing those phases. Keep M4.6
+release-device gates and Android qualification backlogged.

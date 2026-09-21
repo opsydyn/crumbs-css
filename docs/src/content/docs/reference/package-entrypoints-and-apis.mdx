@@ -57,6 +57,32 @@ both physical sides, then `paddingLeft: "lg"` replaces only the left side;
 `paddingRight` remains `8`. `false`, `null`, and `undefined` omit a selection,
 and an unknown scale or shorthand target fails before a class is emitted.
 
+Utility outputs compose directly with Crumbs helpers and recipe branches. The
+mapper overload follows vanilla-extract's data-first shape while retaining the
+native result type:
+
+```ts
+const spacing = { compact: "sm", roomy: "lg" } as const
+
+export const spacingStates = styleVariants(spacing, (scale, state) => {
+  return sprinkles({ px: scale })
+})
+
+export const card = recipe({
+  base: sprinkles({ px: "sm" }),
+  variants: {
+    density: {
+      compact: spacingStates.compact,
+      roomy: spacingStates.roomy,
+    },
+  },
+})
+```
+
+The mapper receives the finite value and its key. Static utility classes keep
+their primitive scope and token payload through composition, mapped variants,
+recipe bases, branches, and compound styles.
+
 ### `@opsydyn/crumbs-css/theme`
 
 Use this compatibility entrypoint in runtime/component code when you need the

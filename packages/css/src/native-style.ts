@@ -124,8 +124,9 @@ export type NativeImageStyleInput = NativeStyleInput<ImageStyle>
 export type NativeTextStyleInput = NativeStyleInput<TextStyle>
 export type NativeViewStyleInput = NativeStyleInput<ViewStyle>
 export type NativeRecipeVariantValue = string | boolean
+export type NativeRecipeStyleInput = NativeViewStyleInput | ViewStyle | NativeStyle
 export type NativeRecipeVariantsConfig = Readonly<
-  Record<string, Readonly<Record<string, NativeViewStyleInput | NativeStyle>>>
+  Record<string, Readonly<Record<string, NativeRecipeStyleInput>>>
 >
 export type NativeRecipeVariantSelection<TValues> = keyof TValues extends "false" | "true"
   ? boolean | keyof TValues
@@ -134,11 +135,11 @@ export type NativeRecipeSelection<TVariants extends NativeRecipeVariantsConfig> 
   readonly [K in keyof TVariants]?: NativeRecipeVariantSelection<TVariants[K]>
 }
 export type NativeRecipeCompoundVariant<TVariants extends NativeRecipeVariantsConfig> = {
-  readonly style: NativeViewStyleInput | NativeStyle
+  readonly style: NativeRecipeStyleInput
   readonly variants: NativeRecipeSelection<TVariants>
 }
 export type NativeRecipeConfig<TVariants extends NativeRecipeVariantsConfig> = {
-  readonly base?: NativeViewStyleInput | NativeStyle
+  readonly base?: NativeRecipeStyleInput
   readonly compoundVariants?: ReadonlyArray<NativeRecipeCompoundVariant<TVariants>>
   readonly defaultVariants?: NativeRecipeSelection<TVariants>
   readonly variants: TVariants
@@ -166,8 +167,10 @@ type NativeRecipeClassRef = {
   readonly $$type: typeof NativeRecipeClassType
   readonly className: string
 }
-export type NativeStyleVariants<TVariants extends Readonly<Record<string, NativeAuthoringRule>>> = {
-  readonly [K in keyof TVariants]: NativeStyleResult<TVariants[K]>
+export type NativeStyleVariants<TVariants extends object> = {
+  readonly [K in keyof TVariants]: TVariants[K] extends NativeAuthoringRule
+    ? NativeStyleResult<TVariants[K]>
+    : never
 }
 type ColorStyleProperty = "color" | `${string}Color`
 type LengthStyleProperty =
@@ -264,15 +267,45 @@ function authorStyle(rule: unknown, primitiveDomain: NativePrimitiveDomain, debu
   return classList
 }
 
+export function styleVariants<
+  const TData extends Readonly<Record<string | number, unknown>>,
+  const TStyle extends NativeAuthoringRule,
+>(
+  values: TData,
+  mapper: (value: TData[keyof TData], key: keyof TData) => TStyle,
+  debugId?: string,
+): NativeStyleVariants<{ readonly [K in keyof TData]: TStyle }>
+
 export function styleVariants<const TVariants extends Readonly<Record<string, NativeAuthoringRule>>>(
   variants: TVariants & { readonly [K in keyof TVariants]: CheckedNativeRule<TVariants[K]> },
   debugId?: string,
-): NativeStyleVariants<TVariants> {
-  const result: Partial<Record<keyof TVariants, NativeStyle>> = {}
-  for (const [name, rule] of Object.entries(variants) as Array<[keyof TVariants, NativeAuthoringRule]>) {
-    result[name] = authorStyle(rule, ["view", "text", "image"], debugId === undefined ? undefined : `${debugId}_${String(name)}`) as unknown as NativeStyle
+): NativeStyleVariants<TVariants>
+
+export function styleVariants(
+  values: Readonly<Record<string | number, unknown>>,
+  mapperOrDebugId?: string | ((value: unknown, key: string) => NativeAuthoringRule),
+  debugId?: string,
+): Record<string, NativeStyle> {
+  const mapper = typeof mapperOrDebugId === "function" ? mapperOrDebugId : undefined
+  const resolvedDebugId = typeof mapperOrDebugId === "string" ? mapperOrDebugId : debugId
+  return styleVariantsFromEntries(values, mapper, resolvedDebugId)
+}
+
+function styleVariantsFromEntries(
+  values: Readonly<Record<string | number, unknown>>,
+  mapper: ((value: unknown, key: string) => NativeAuthoringRule) | undefined,
+  debugId: string | undefined,
+): Record<string, NativeStyle> {
+  const result: Record<string, NativeStyle> = {}
+  for (const [name, value] of Object.entries(values)) {
+    const rule = mapper === undefined ? value : mapper(value, name)
+    result[name] = authorStyle(
+      rule,
+      ["view", "text", "image"],
+      debugId === undefined ? undefined : `${debugId}_${name}`,
+    ) as unknown as NativeStyle
   }
-  return markNativeStyleMap(result) as NativeStyleVariants<TVariants>
+  return markNativeStyleMap(result)
 }
 
 export function recipe<TVariants extends NativeRecipeVariantsConfig>(
@@ -306,10 +339,10 @@ export function recipe<TVariants extends NativeRecipeVariantsConfig>(
   } as NativeRecipe<TVariants>
 }
 
-function recipeClass(rule: NativeViewStyleInput | NativeStyle, debugId?: string): NativeRecipeClassRef {
+function recipeClass(rule: NativeRecipeStyleInput, debugId?: string): NativeRecipeClassRef {
   return Object.defineProperty({
     $$type: NativeRecipeClassType,
-    className: vanillaStyle(markNativeCaptureRule(rule as Record<string, unknown>, ["view"]) as StyleRule, debugId),
+    className: authorStyle(rule, ["view"], debugId),
   }, NativeRecipeClassSymbol, { value: true, enumerable: true }) as NativeRecipeClassRef
 }
 

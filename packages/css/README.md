@@ -35,6 +35,7 @@ Validated consumer baseline:
 - Metro-transform based
 - Typed authoring helpers for view, text, and image styles
 - Finite, primitive-scoped utility scales with typed shorthands
+- Utility outputs compose with native helpers and recipe branches; mapped `styleVariants(values, mapper)` preserves the native result type
 - Runtime theme token resolution with `ThemeProvider` and `useThemedStyles`
 - Explicit state handling through `styleVariants` and `recipe`
 

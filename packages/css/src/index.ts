@@ -11,6 +11,7 @@ export type {
   NativeRecipeConfig,
   NativeRecipeProps,
   NativeRecipeSelection,
+  NativeRecipeStyleInput,
   NativeRecipeVariants,
   NativeSprinkleDefinition,
   NativeSprinklePropertyConfig,
