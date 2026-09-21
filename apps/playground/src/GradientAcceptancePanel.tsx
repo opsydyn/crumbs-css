@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Pressable, ScrollView, Text, View } from "react-native"
-import { resolveRecipeStyle, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as screen from "./screen.css"
 
 const { copy, button, gradientScroll, gradientCard, gradientKeyword, gradientAngle, gradientRadialExtent, gradientRadialSize, gradientStops, gradientLayered, gradientEmpty } = screen

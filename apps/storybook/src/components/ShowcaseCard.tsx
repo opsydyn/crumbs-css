@@ -1,4 +1,4 @@
-import { useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { Pressable, Text, View } from "react-native"
 import * as s from "./ShowcaseCard.css"
 

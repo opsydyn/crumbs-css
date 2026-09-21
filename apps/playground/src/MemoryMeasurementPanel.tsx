@@ -1,6 +1,6 @@
 import { Profiler, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react"
 import { Platform, Pressable, Text, TextInput, View } from "react-native"
-import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as screen from "./screen.css"
 import { light } from "./theme.css"
 import { appendMemorySample, createMemoryPlan, summarizeMemory, type MemoryCounts, type MemoryObservation, type MemorySample } from "./memory-plan"

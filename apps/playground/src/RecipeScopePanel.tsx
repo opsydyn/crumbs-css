@@ -1,6 +1,7 @@
 import { Profiler, useLayoutEffect, useRef, useState } from "react"
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
-import { ThemeProvider, resolveRecipeStyle, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme"
+import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as module from "./measurement.css"
 import { dark, light } from "./theme.css"
 import { createScopePlan, summarizeScopes, type Identity, type ScopeObservation, type Sample } from "./scope-plan"

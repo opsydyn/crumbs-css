@@ -1,6 +1,6 @@
 import { Profiler, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { Platform, Pressable, StyleSheet, Text, TextInput, View, useWindowDimensions } from "react-native"
-import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as screen from "./screen.css"
 import { light } from "./theme.css"
 import { ContextRecorder, type ContextKind, type ContextValue, type HookIdentity } from "./context-plan"

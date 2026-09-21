@@ -1518,3 +1518,27 @@ internal/example consumers, move common runtime imports to `theme/core`, and
 add a regression check that prevents advanced APIs from leaking into the lean
 entrypoint before revisiting the runtime-byte threshold. Keep physical iOS and
 Android qualification backlogged.
+
+### 2026-09-21 — M4.6 import adoption and graph policy
+
+- Migrated common provider and themed-style imports in the playground,
+  Storybook, themed-screen/recipe tutorials and the compatibility recipe guide
+  to `@opsydyn/crumbs-css/theme/core`. Mixed modules now split imports so
+  `resolveRecipeStyle`, `createRecipeResolver` and `TokenThemeProvider` remain
+  explicit compatibility-entrypoint consumers.
+- Added the source policy test at
+  `packages/css/test/theme-entrypoint-policy.test.ts`. It rejects common APIs
+  imported from `theme`, advanced/unknown APIs imported from `theme/core`, and
+  bare compatibility imports without an explicit advanced API.
+- Package build, app typechecks, the 725-test package suite, docs build and
+  budget validation pass. This proves source adoption and API boundaries; it
+  does not yet qualify Metro/Hermes application bytes or change the
+  fail-closed registry.
+
+See [M4.6 import adoption assessment](assessments/2026-09-21-m4-6-import-adoption.md).
+
+Next recommended slice: **M4.6 application graph verification** — build the
+workspace and packed Expo/Storybook bundles after adoption, compare reachable
+`theme` and `theme/core` bytes against the retained baseline, and decide
+whether any runtime-byte threshold can be reopened. Keep physical iOS and
+Android qualification backlogged.

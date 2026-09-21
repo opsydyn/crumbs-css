@@ -1,7 +1,7 @@
 import { Profiler, useEffect, useMemo, useRef, useState } from "react"
 import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
 import type { TextStyle, ViewStyle, ViewToken } from "react-native"
-import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as screen from "./screen.css"
 import { light } from "./theme.css"
 import { createScrollPlan, ScrollRecorder, type ScrollSample } from "./scroll-plan"

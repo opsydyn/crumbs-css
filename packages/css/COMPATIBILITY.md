@@ -709,7 +709,8 @@ Create a resolver for the themed recipe, then select recipe styles from
 component state:
 
 ```tsx
-import { createRecipeResolver, useThemedStyles } from "@opsydyn/crumbs-css/theme"
+import { createRecipeResolver } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { useMemo } from "react"
 import * as s from "./button.css"
 
