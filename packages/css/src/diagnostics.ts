@@ -19,6 +19,7 @@ export const NativeStylesDiagnosticCode = {
   TokenThemeFocusInvalid: "CRUMBS_CSS_TOKEN_THEME_FOCUS_INVALID",
   TokenThemeExternalContractMismatch: "CRUMBS_CSS_TOKEN_THEME_EXTERNAL_CONTRACT_MISMATCH",
   TokenThemeExternalTokenMismatch: "CRUMBS_CSS_TOKEN_THEME_EXTERNAL_TOKEN_MISMATCH",
+  TokenThemeTokenContractMismatch: "CRUMBS_CSS_TOKEN_THEME_TOKEN_CONTRACT_MISMATCH",
   InvalidThemeContract: "CRUMBS_CSS_INVALID_THEME_CONTRACT",
   PartialRecipePayload: "CRUMBS_CSS_PARTIAL_RECIPE_PAYLOAD",
   UnsupportedAtRule: "CRUMBS_CSS_UNSUPPORTED_AT_RULE",

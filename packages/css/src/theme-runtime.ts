@@ -25,7 +25,10 @@ import {
   getThemeTokenDomainForContract,
   getThemeTokenMetadata,
   type NativeThemeTokenReference,
+  type ThemeVar,
   assertThemeTokenReference,
+  isThemeTokenContract,
+  isThemeTokenOwnedByContract,
   isRegisteredThemeVar,
   isThemeTokenReferenceCandidate,
 } from "./theme-token"
@@ -464,6 +467,13 @@ function isStructuredNativeValue(key: string, value: unknown): boolean {
 }
 
 function resolveTokenValue(varName: string, theme: NativeTheme<Record<string, unknown>>): unknown {
+  const token = `var(${varName})` as ThemeVar
+  if (isThemeTokenContract(theme.contract) && !isThemeTokenOwnedByContract(theme.contract, token)) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemeTokenContractMismatch,
+      `Theme token "${varName}" does not belong to the active domain contract. Use the token reference exported by that contract or keep the legacy reference on a legacy ThemeProvider.`,
+    ))
+  }
   if (!Object.prototype.hasOwnProperty.call(theme.tokens, varName)) {
     throw new Error(formatNativeStylesDiagnostic(NativeStylesDiagnosticCode.MissingThemeToken,
       `Theme token "${varName}" is missing from the active native theme`))

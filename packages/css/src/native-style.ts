@@ -9,6 +9,8 @@ import { markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/na
 import {
   getThemeTokenDomainForContract,
   getThemeTokenMetadata,
+  isThemeTokenContract,
+  isThemeTokenOwnedByContract,
   isRegisteredThemeVar,
   registerThemeTokenReference,
   validateThemeTokenValueForContract,
@@ -434,6 +436,12 @@ function collectThemeValues(
     const themeValue = values[key]
     if (isThemeVar(contractValue)) {
       if (!samePath(getThemeTokenPath(contractValue), nextPath)) invalidThemeContract(nextPath, "token is registered to a different raw path")
+      if (isThemeTokenContract(ownerContract) && !isThemeTokenOwnedByContract(ownerContract, contractValue)) {
+        throw new Error(formatNativeStylesDiagnostic(
+          NativeStylesDiagnosticCode.TokenThemeTokenContractMismatch,
+          `Native theme token at "${formatPath(nextPath)}" belongs to a different domain contract. Reuse the owning contract token or migrate the contract before creating a theme.`,
+        ))
+      }
       if (typeof themeValue !== "string" && typeof themeValue !== "number") {
         throw new Error(`Theme value for "${formatPath(nextPath)}" must be a string or number`)
       }

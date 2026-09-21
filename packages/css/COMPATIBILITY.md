@@ -119,6 +119,42 @@ The pre-M3 `createThemeContract` API remains path-scoped for migration. A token'
 
 The legacy registry is shared across Crumbs package copies in one JavaScript realm, but exact-path reuse still deliberately shares legacy token identity. It does not establish provider compatibility or make unscoped tokens safe to exchange across independently versioned packages. Namespace legacy contract roots by design system/package, avoid sanitizer collisions, and regenerate dependent artifacts after changing paths. Use the identified domain contract API below for distributed design-system packages.
 
+### Legacy token migration boundary (M3.7)
+
+`createThemeContract` and `createTheme` remain a bounded compatibility path for
+pre-M3 consumers. `ThemeValues<TContract>` and `NativeThemeValue` intentionally
+retain the permissive `string | number` value shape, so an existing colour,
+length, enum or other native value keeps working while its contract is being
+migrated. Legacy values are opaque to the domain validator; this path does not
+claim semantic token safety.
+
+Keep those references with the contract that created them and resolve them with
+the ordinary `ThemeProvider`/`useTheme` pair:
+
+```tsx
+const legacyVars = createThemeContract({color: {accent: null}})
+const legacyTheme = createTheme(legacyVars, {color: {accent: "#2463eb"}})
+
+<ThemeProvider theme={legacyTheme}><LegacyScreen /></ThemeProvider>
+```
+
+The legacy token DTO contains only its native variable name. Its path metadata
+is an authoring-time registry detail, so a value copied from another package or
+deep-cloned contract cannot prove provider ownership. Exact raw-path reuse is
+kept for source compatibility, but it is not a cross-package compatibility
+promise. Do not cast a legacy token into a domain contract or use a legacy token
+as an external payload key.
+
+Move a distributed design system to `createTokenContract` with explicit domains
+and a stable identity, create themes with `createTokenTheme`, and use
+`TokenThemeProvider`/`useTokenTheme`. A domain contract records token ownership
+at construction and theme creation rejects a leaf from another domain contract.
+Runtime resolution applies the same check: an old `var(--crumbs-…)` reference
+under an identified theme fails with
+`CRUMBS_CSS_TOKEN_THEME_TOKEN_CONTRACT_MISMATCH` instead of silently reading a
+flat value with the same name. Legacy themes continue to resolve their own
+references so applications can migrate one contract at a time.
+
 ### Domain token contracts and layered aliases (M3.1–M3.3)
 
 Use `@opsydyn/crumbs-css/tokens` for new domain-aware contracts:
@@ -452,6 +488,7 @@ full message text.
 | `CRUMBS_CSS_TOKEN_THEME_FOCUS_INVALID` | A focus target or pure focus path is unknown, derived, foreign to the supplied contract, or absent from the values tree. |
 | `CRUMBS_CSS_TOKEN_THEME_EXTERNAL_CONTRACT_MISMATCH` | An external theme payload identifies a different or unidentified contract. |
 | `CRUMBS_CSS_TOKEN_THEME_EXTERNAL_TOKEN_MISMATCH` | An external token ID is unknown/derived, missing, or carries a value outside its local domain. |
+| `CRUMBS_CSS_TOKEN_THEME_TOKEN_CONTRACT_MISMATCH` | A token leaf or runtime reference belongs to a different domain contract; the theme is not resolved through an unrelated flat token name. |
 | `CRUMBS_CSS_INVALID_THEME_CONTRACT` | A contract contains an invalid or misplaced/unregistered native token leaf. |
 | `CRUMBS_CSS_UNSUPPORTED_EXPORT` | `.css.ts` export contains an unsupported value or export name; error includes file and data path. Always fatal. |
 | `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE` | Constructor or resolver rejected a malformed native token reference/name. |

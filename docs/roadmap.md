@@ -161,7 +161,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
 - [x] M3.5: Add immutable theme patches and external-theme decoding. Update canonical values and derived token/index data atomically. Invalid patches leave the current snapshot untouched and return structured context.
 - [x] M3.6: Use reusable Optic focuses for useful nested transformations. Validate domain-changing results; test semantic lens laws, old-snapshot preservation, and promised structural sharing separately.
-- [ ] M3.7: Add migration notes for legacy unscoped tokens and the permissive `string | number` contract. Preserve a bounded compatibility path without allowing old tokens to bind silently to unrelated contracts.
+- [x] M3.7: Add migration notes for legacy unscoped tokens and the permissive `string | number` contract. Preserve a bounded compatibility path without allowing old tokens to bind silently to unrelated contracts.
 
 **Exit:** cross-contract isolation and domain correctness hold in types and runtime; external data is decoded once at ingress; scope/portal scenarios are tested; values and token maps never diverge; property suites cover valid aliases and adversarial mutations.
 
@@ -1295,3 +1295,11 @@ Next recommended slice: **M3.2** — add stable contract/package identity, a con
 - Updated compatibility guidance, diagnostic codes, packed consumer checks and the M3.6 assessment. Final resolved-theme identity sharing remains a separate M4 runtime promise; no publication or push occurred and protected release/version edits remain outside the slice.
 
 Next recommended slice: **M3.7** — write the legacy unscoped-token migration notes and bound the permissive `string | number` compatibility path without allowing old tokens to bind silently to unrelated contracts. Begin only after approval.
+
+### 2026-09-21 — M3.7 legacy token migration boundary
+
+- Kept `createThemeContract`/`createTheme` and the legacy `string | number` value shape as an explicitly bounded compatibility path. Legacy references remain on `ThemeProvider`/`useTheme`; their path-scoped registry is not treated as cross-package provider authentication.
+- Recorded domain-contract token ownership and rejected foreign token leaves during theme construction. Identified runtime themes reject old or unrelated native token references with `CRUMBS_CSS_TOKEN_THEME_TOKEN_CONTRACT_MISMATCH` before flat lookup can bind them to an unrelated contract.
+- Added the migration assessment and compatibility guidance. Focused and full package verification remain required for the commit; no publication, push or native evidence occurred, and protected release/version edits remain outside the slice.
+
+Next recommended slice: **M4.1** — share resolved outputs for the same immutable module/theme snapshot with weak ownership and structural sharing, while retaining the original reference for static styles. Begin only after approval.

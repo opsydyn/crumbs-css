@@ -179,6 +179,16 @@ export function registerThemeTokenContract(
   domainContracts.set(contract, new Map(entries))
 }
 
+/** @internal A domain contract owns token references through this local map. */
+export function isThemeTokenContract(contract: unknown): contract is object {
+  return typeof contract === "object" && contract !== null && domainContracts.has(contract)
+}
+
+/** @internal Check token ownership without relying on the global var-name registry. */
+export function isThemeTokenOwnedByContract(contract: object, token: ThemeVar): boolean {
+  return domainContracts.get(contract)?.has(String(token)) ?? false
+}
+
 /** Reserve a stable identity before publishing any contract-local metadata. */
 export function assertThemeContractIdentityAvailable(
   identity: TokenContractIdentity,
