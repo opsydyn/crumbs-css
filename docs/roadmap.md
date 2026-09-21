@@ -1470,3 +1470,28 @@ Next recommended slice: **M4.6 host ablation and runtime/type-surface repair** �
 isolate and reduce the two deterministic host regressions without waiting for
 device access. Keep physical iOS and Android qualification backlogged to the
 final platform move.
+
+### 2026-09-21 — M4.6 host ablation and type-surface repair
+
+- Reproduced the editor regression and isolated `ThemeValues<T>` domain
+  inference as the dominant cost: a legacy-only temporary ablation reduced the
+  10,000-token result to 494,020 / 494,118 instantiations, but it would remove
+  domain value typing and was discarded.
+- Added a type-only contract marker carrying the full resolved domain theme
+  value shape, including aliases. Legacy contracts now use a cheap recursive
+  value mapper, while domain contracts retain their precise values without
+  per-leaf `DomainThemeVar<infer ...>` work.
+- Five fresh repetitions produce 113,999 TypeScript and 114,097 tsgo
+  instantiations at 10,000 tokens, a 76.8% / 76.7% reduction below the
+  approved baselines. Build, typecheck and the full 717-test package suite
+  pass. The runtime CJS theme graph remains 44,764 bytes and stays open.
+- No dependency, Effect boundary, runtime policy, native target, Android state
+  or performance threshold changed.
+
+See [host ablation assessment](assessments/2026-09-21-m4-6-host-ablation.md)
+and [repaired editor evidence](evidence/2026-09-21-m4-6-host-ablation/editor-repaired.json).
+
+Next recommended slice: **M4.6 runtime graph split** — add a lean core theme
+entrypoint for common consumers, retain the compatibility entrypoint, and
+measure both graphs before any threshold review. Keep physical iOS and Android
+qualification backlogged to the final platform move.

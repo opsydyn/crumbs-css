@@ -23,6 +23,7 @@ import {
   type ThemeTokenOriginStep,
   type ThemeVar,
   type ExternalTokenThemePayload,
+  type nativeThemeValuesBrand,
 } from "../theme-token"
 import {
   createTheme,
@@ -134,8 +135,17 @@ type TokenContractNode<TRootShape, TShape extends TokenContractInput> = {
   readonly [K in keyof TShape]: TokenContractValue<TRootShape, TShape, TShape[K]>
 }
 
+type ResolvedTokenThemeValues<TContract> = {
+  readonly [K in keyof TContract]: TContract[K] extends DomainThemeVar<infer TDomain>
+    ? TokenDomainValue<TDomain>
+    : TContract[K] extends Readonly<Record<string, unknown>>
+      ? ResolvedTokenThemeValues<TContract[K]>
+      : never
+}
+
 export type TokenContract<TShape extends TokenContractInput> = TokenContractNode<TShape, TShape> & {
   readonly [tokenContractShapeBrand]?: TShape
+  readonly [nativeThemeValuesBrand]: ResolvedTokenThemeValues<TokenContractNode<TShape, TShape>>
 }
 
 type HasRequiredToken<TValue> =

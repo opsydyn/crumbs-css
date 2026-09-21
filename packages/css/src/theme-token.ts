@@ -34,6 +34,9 @@ export type TokenDomainValue<TDomain extends TokenDomain> =
 declare const legacyThemeVarBrand: unique symbol
 declare const domainThemeVarBrand: unique symbol
 
+/** Type-only marker used to select the already-derived value shape for domain contracts. */
+export declare const nativeThemeValuesBrand: unique symbol
+
 /** The pre-M3 unscoped token brand retained for the migration path. */
 export type LegacyNativeThemeVar = `var(--crumbs-${string})` & {
   readonly [legacyThemeVarBrand]: "legacy"

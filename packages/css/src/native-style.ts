@@ -20,6 +20,7 @@ import {
   type ThemeVar,
   type TokenDomain,
   type TokenDomainValue,
+  type nativeThemeValuesBrand,
 } from "./theme-token"
 export { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
 
@@ -205,15 +206,16 @@ export type ThemeContract<T extends ThemeContractInput> = {
       ? ThemeContract<T[K]>
       : never
 }
-export type ThemeValues<T> = {
-  readonly [K in keyof T]: T[K] extends DomainThemeVar<infer TDomain>
-    ? TokenDomainValue<TDomain>
-    : T[K] extends NativeThemeVar
-      ? NativeThemeValue
-      : T[K] extends Record<string, unknown>
-        ? ThemeValues<T[K]>
-        : never
+type LegacyThemeValues<T> = {
+  readonly [K in keyof T]: T[K] extends NativeThemeVar
+    ? NativeThemeValue
+    : T[K] extends Record<string, unknown>
+      ? LegacyThemeValues<T[K]>
+      : never
 }
+export type ThemeValues<T> = T extends { readonly [nativeThemeValuesBrand]: infer TValues }
+  ? TValues
+  : LegacyThemeValues<T>
 export type NativeTheme<TContract> = {
   readonly contract: TContract
   readonly tokens: Readonly<Record<string, NativeThemeValue>>
