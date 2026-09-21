@@ -5,7 +5,11 @@ import {
   type ReactElement,
   type ReactNode,
   use,
+  useCallback,
+  useLayoutEffect,
   useMemo,
+  useState,
+  useSyncExternalStore,
 } from "react"
 import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diagnostics"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
@@ -53,6 +57,12 @@ import {
   type RecipeResolutionPlan,
   type RecipeResolverCacheStats,
 } from "./runtime/recipe-resolution-plan"
+import {
+  createThemeSelectorStore,
+  createThemeStore,
+  type ThemeSelectorStore,
+  type ThemeStore,
+} from "./runtime/theme-store"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export type {
@@ -75,6 +85,7 @@ export {
 } from "./theme-token"
 
 type NativeThemeContextValue = NativeTheme<Record<string, unknown>>
+type NativeThemeStore = ThemeStore<NativeThemeContextValue>
 type ThemeProviderProps<TContract extends Record<string, unknown>> = {
   readonly children?: ReactNode
   readonly theme: NativeTheme<TContract>
@@ -102,13 +113,17 @@ export type RecipeResolverControls = {
 export type BoundedNativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> =
   NativeRecipeResolver<TVariants> & RecipeResolverControls
 
-const NativeThemeContext = createContext<NativeThemeContextValue | null>(null)
 type TokenThemeScopeState = {
   readonly baseTheme: NativeTheme<Record<string, unknown>>
   readonly layers: ReadonlyMap<TokenThemeContextName, unknown>
   readonly theme: NativeTheme<Record<string, unknown>>
+  readonly store: NativeThemeStore
 }
 type TokenThemeContextValue = ReadonlyMap<string, TokenThemeScopeState>
+const ThemeStoreContext: Context<NativeThemeStore | null> = sharedRegistry(
+  Symbol.for("crumbs.css.theme-store-context.v1"),
+  () => createContext<NativeThemeStore | null>(null),
+)
 const TokenThemeContext: Context<TokenThemeContextValue | null> = sharedRegistry(
   Symbol.for("crumbs.css.token-theme-context.v2"),
   () => createContext<TokenThemeContextValue | null>(null),
@@ -124,23 +139,59 @@ const themeResolutionCache = sharedRegistry(
   () => new WeakMap<object, WeakMap<object, ThemeResolutionCacheByInput>>(),
 )
 
+function useThemeStore(theme: NativeThemeContextValue): NativeThemeStore {
+  const [store] = useState(() => createThemeStore(theme))
+  useLayoutEffect(() => {
+    store.setSnapshot(theme)
+  }, [store, theme])
+  return store
+}
+
+function useThemeStoreSelector<TSelected>(
+  store: NativeThemeStore,
+  selector: (theme: NativeThemeContextValue) => TSelected,
+): TSelected {
+  const selectedStore = useMemo<ThemeSelectorStore<TSelected>>(
+    () => createThemeSelectorStore(store, selector),
+    [selector, store],
+  )
+  return useSyncExternalStore(
+    selectedStore.subscribe,
+    selectedStore.getSnapshot,
+    selectedStore.getSnapshot,
+  )
+}
+
+const identityThemeSelector = (theme: NativeThemeContextValue): NativeThemeContextValue => theme
+
 export function ThemeProvider<TContract extends Record<string, unknown>>({
   children,
   theme,
 }: ThemeProviderProps<TContract>): ReactElement {
+  const store = useThemeStore(theme as NativeThemeContextValue)
   return createElement(
-    NativeThemeContext.Provider,
-    { value: theme as NativeThemeContextValue },
+    ThemeStoreContext.Provider,
+    {value: store},
     children,
   )
 }
 
 export function useTheme<TContract extends Record<string, unknown>>(): NativeTheme<TContract> {
-  const theme = use(NativeThemeContext)
-  if (theme === null) {
+  const store = use(ThemeStoreContext)
+  if (store === null) {
     throw new Error("useTheme must be used within a ThemeProvider from @opsydyn/crumbs-css/theme")
   }
-  return theme as NativeTheme<TContract>
+  return useThemeStoreSelector(store, identityThemeSelector) as NativeTheme<TContract>
+}
+
+export function useThemeSelector<TSelected>(
+  selector: (theme: NativeTheme<Record<string, unknown>>) => TSelected,
+): TSelected {
+  const store = use(ThemeStoreContext)
+  if (store === null) {
+    throw new Error("useThemeSelector must be used within a ThemeProvider from @opsydyn/crumbs-css/theme")
+  }
+  return useThemeStoreSelector(store, selector)
 }
 
 export type TokenThemeProviderProps<TContract extends Record<string, unknown>> = {
@@ -161,16 +212,17 @@ export function TokenThemeProvider<TContract extends Record<string, unknown>>({
 }: TokenThemeProviderProps<TContract>): ReactElement {
   const key = requireTokenContractKey(contract)
   assertTokenThemeCompatibility(contract, theme)
+  const store = useThemeStore(theme as NativeThemeContextValue)
   const parent = use(TokenThemeContext)
   const value = useMemo(() => {
     const next = new Map(parent ?? [])
     const baseTheme = theme as NativeTheme<Record<string, unknown>>
-    next.set(key, {baseTheme, layers: new Map(), theme: baseTheme})
+    next.set(key, {baseTheme, layers: new Map(), store, theme: baseTheme})
     return next
-  }, [key, parent, theme])
+  }, [key, parent, store, theme])
   return createElement(
-    NativeThemeContext.Provider,
-    {value: theme as NativeThemeContextValue},
+    ThemeStoreContext.Provider,
+    {value: store},
     createElement(TokenThemeContext.Provider, {value}, children),
   )
 }
@@ -188,7 +240,7 @@ export function useTokenTheme<TContract extends Record<string, unknown>>(
       `No TokenThemeProvider is active for contract ${JSON.stringify(key)}. Mount TokenThemeProvider with the same identified contract before calling useTokenTheme.`,
     ))
   }
-  const theme = state.theme
+  const theme = useThemeStoreSelector(state.store, identityThemeSelector)
   assertTokenThemeCompatibility(contract, theme)
   return theme as NativeTheme<TContract>
 }
@@ -227,28 +279,34 @@ export function TokenThemeScopeProvider<TContract extends Record<string, unknown
     ))
   }
   assertTokenThemeCompatibility(contract, parentState.theme)
-  const state = useMemo(() => {
+  const scopedTheme = useMemo(() => {
     const layers = new Map(parentState.layers)
     layers.set(context, values)
-    const theme = materializeTokenThemeScope(
+    return materializeTokenThemeScope(
       contract as Record<string, unknown>,
       parentState.baseTheme,
       layers,
     )
+  }, [context, contract, parentState, values])
+  const store = useThemeStore(scopedTheme)
+  const state = useMemo(() => {
+    const layers = new Map(parentState.layers)
+    layers.set(context, values)
     return {
       baseTheme: parentState.baseTheme,
       layers,
-      theme,
+      store,
+      theme: scopedTheme,
     } satisfies TokenThemeScopeState
-  }, [contract, context, parentState, values])
+  }, [context, parentState, scopedTheme, store, values])
   const nextContext = useMemo(() => {
     const next = new Map(parent ?? [])
     next.set(key, state)
     return next
   }, [key, parent, state])
   return createElement(
-    NativeThemeContext.Provider,
-    {value: state.theme},
+    ThemeStoreContext.Provider,
+    {value: store},
     createElement(TokenThemeContext.Provider, {value: nextContext}, children),
   )
 }
@@ -284,8 +342,11 @@ type ResolvedNativeStyleInput<TInput, TSeen = never> = TInput extends false | nu
       : NativeStyle
 
 export function useThemedStyle<TInput>(style: TInput): ResolvedNativeStyleInput<TInput> | undefined {
-  const theme = useTheme()
-  return useMemo(() => resolveThemeTokens(style, theme), [style, theme])
+  const selector = useCallback(
+    (theme: NativeTheme<Record<string, unknown>>) => resolveThemeTokens(style, theme),
+    [style],
+  )
+  return useThemeSelector(selector)
 }
 
 export type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>>> = {
@@ -303,8 +364,11 @@ export type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>
 export function useThemedStyles<TStyles extends Readonly<Record<string, unknown>>>(
   styles: TStyles,
 ): ResolvedThemeStyles<TStyles> {
-  const theme = useTheme()
-  return useMemo(() => resolveThemeStyles(styles, theme), [styles, theme])
+  const selector = useCallback(
+    (theme: NativeTheme<Record<string, unknown>>) => resolveThemeStyles(styles, theme),
+    [styles],
+  )
+  return useThemeSelector(selector)
 }
 
 export function resolveThemeStyles<TStyles extends Readonly<Record<string, unknown>>>(

@@ -56,6 +56,28 @@ an invalidation signal for a future subscription layer; it does not measure
 React renders or native frames. The style shape must match the emitted paths,
 and style modules and themes must be treated as immutable snapshots.
 
+## Selective theme subscriptions
+
+`useThemeSelector(selector)` reads a selected value from the active
+`ThemeProvider` snapshot. The selector runs against a complete immutable theme
+and the hook subscribes with React's `useSyncExternalStore` contract. A
+provider update publishes one snapshot during the layout commit, so a
+consumer never resolves a mixture of old token values and new derived values.
+
+Selectors are compared by reference. Return a primitive or a memoized object
+for unchanged input; an inline selector that allocates a new object on every
+call will intentionally invalidate on every snapshot read. `useThemedStyle`
+and `useThemedStyles` provide stable selectors over their style input and keep
+the existing weak-cache identity guarantees.
+
+`TokenThemeProvider` and each `TokenThemeScopeProvider` own a separate store.
+Nested scopes therefore update and notify independently while retaining their
+documented token precedence. Consumer unmount releases its subscription, and
+the shared-symbol context/store identity survives duplicate package copies and
+hot reload. Store tests cover atomic publication, selected-reference
+invalidation, nested stores, disposal and context identity; they do not
+establish device frame time, native rendering or retained-memory budgets.
+
 ## Bounded recipe selection
 
 `createRecipeResolver` precomputes one immutable plan for its recipe: authored

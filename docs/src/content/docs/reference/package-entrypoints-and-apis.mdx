@@ -32,6 +32,7 @@ Use this entrypoint in runtime/component code for:
 
 - `ThemeProvider`
 - `useTheme`
+- `useThemeSelector`
 - `useThemedStyle`
 - `useThemedStyles`
 - `resolveThemeTokens`
@@ -45,6 +46,12 @@ Use this entrypoint in runtime/component code for:
 plan and returns a callable resolver with `getCacheStats()`, `clearCache()` and
 `dispose()` controls. The cache is resolver-local, least-recently-used and
 bounded to `0..1024` entries; the default is `32` and `0` disables retention.
+
+`useThemeSelector(selector)` subscribes to the selected value of the nearest
+theme snapshot. Selectors should return a stable reference for unchanged
+input; primitives are the simplest choice. The hook is intended for focused
+token or derived-style reads when a component should not observe unrelated
+theme changes.
 
 ### `@opsydyn/crumbs-css/metro-plugin`
 

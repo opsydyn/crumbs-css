@@ -467,6 +467,26 @@ fewer React renders, native frames or device-memory retention.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
+### Selective theme subscriptions (M4.4)
+
+`ThemeProvider`, `TokenThemeProvider` and `TokenThemeScopeProvider` publish
+immutable theme snapshots through a shared-symbol external store. The public
+`useThemeSelector(selector)` hook and the themed style hooks use React's
+`useSyncExternalStore` contract, so each consumer observes one complete
+snapshot and is notified only when its selected reference changes. Provider
+prop updates publish one snapshot during the layout commit; consumers cannot
+resolve against a mixture of old and new token values.
+
+Token theme scopes own independent stores. Updating a parent store does not
+notify an unrelated scope, and unmounting a selector releases its parent
+subscription. The store and React context identities are shared through
+`Symbol.for` so duplicate or hot-reloaded package copies can continue to read
+the same provider. Selectors should return a stable reference (primitives are
+safe); allocating a new object for an unchanged snapshot defeats selective
+invalidation. The store contract is covered by atomic publication, selector,
+nested-scope, disposal and shared-identity tests. These checks do not claim
+device frame, native rendering or retained-memory performance.
+
 ### Static structured compiler boundary
 
 Transform arrays accept exactly one operation per entry: finite numeric `perspective`, `scale`, `scaleX`, `scaleY`; finite numeric or percentage `translateX` / `translateY`; `rotate`, `rotateX`, `rotateY`, `rotateZ`, `skewX`, `skewY` with numeric `deg` / `rad` strings; or `matrix` with exactly 16 finite numbers. Empty transform arrays are preserved. Offsets require exactly finite numeric `width` and `height`. No nested merging, unit conversion or nested token evaluation occurs. CSS transform strings retain the existing CSS converter contract.

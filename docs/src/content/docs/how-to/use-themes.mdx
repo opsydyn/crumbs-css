@@ -39,6 +39,17 @@ Wrap the relevant subtree with `ThemeProvider`:
 
 Use `useThemedStyles`, `useThemedStyle`, `resolveThemeStyles`, or `resolveThemeTokens` before render. Raw themed exports intentionally contain token references until runtime resolution.
 
+For a focused read, use `useThemeSelector` and return a primitive or a
+memoized value:
+
+```tsx
+const foreground = useThemeSelector((theme) => theme.color.text)
+```
+
+Selectors compare their result by reference, so avoid allocating a new object
+for an unchanged theme snapshot. The themed style hooks already retain stable
+resolved references for unchanged style and theme inputs.
+
 ## Common mistakes
 
 - using browser CSS variables like `var(--brand)` instead of a theme contract

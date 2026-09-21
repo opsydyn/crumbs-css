@@ -50,6 +50,7 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "resolveThemeStyles",
       "resolveThemeTokens",
       "useTheme",
+      "useThemeSelector",
       "useThemedStyle",
       "useThemedStyles",
       "useTokenTheme",

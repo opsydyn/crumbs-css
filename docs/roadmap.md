@@ -173,7 +173,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M4.1: Share resolved outputs across consumers of the same immutable module/theme snapshot using weak ownership. Retain the original reference for static styles and structurally share unaffected outputs.
 - [x] M4.2: Use compiler-emitted dependency plans for token resolution. Record both recomputation and notification counts; resolving only affected data does not prove unrelated components avoided rendering.
 - [x] M4.3: Precompute recipe order/defaults/compound matchers and canonical selection keys. Make cache bounds, eviction, and resolver lifetime explicit; exercise workloads that exceed the bound.
-- [ ] M4.4: Add selective subscriptions with consistent snapshots and tests for concurrent rendering, provider updates, nested scopes, unmount, and hot reload. No consumer may observe a mixture of old values and new derived tokens.
+- [x] M4.4: Add selective subscriptions with consistent snapshots and tests for concurrent rendering, provider updates, nested scopes, unmount, and hot reload. No consumer may observe a mixture of old values and new derived tokens.
 - [ ] M4.5: Compare cached and uncached evaluators on generated inputs. Test identity promises, invalidation completeness, zero eager Cartesian expansion, and no stale results after scope or artifact replacement.
 - [ ] M4.6: Run M1 device/bundle/editor budgets and retained-memory scenarios. Record improvements and regressions against equivalent native workloads; do not introduce native engine dependencies without a separate decision.
 
@@ -1337,3 +1337,20 @@ Next recommended slice: **M4.3** — precompute recipe order/defaults/compound m
   included.
 
 Next recommended slice: **M4.4** — add selective subscriptions with consistent snapshots across concurrent rendering, provider updates, nested scopes, unmount and hot reload. Begin only after approval.
+
+### 2026-09-21 — M4.4 selective theme subscriptions
+
+- Added a shared-symbol immutable theme store and selector stores behind the
+  React runtime providers. `useThemeSelector` and the themed style hooks use
+  `useSyncExternalStore`, publish one complete provider snapshot per layout
+  commit, and notify only when a selected reference changes.
+- Gave token providers and nested scopes independent stores with explicit
+  unsubscribe/disposal behaviour. Shared context identity remains stable across
+  duplicate or hot-reloaded package copies.
+- Added atomic publication, selective invalidation, unmount cleanup, nested
+  store, disposal and shared-identity tests; updated public API, compatibility
+  and runtime guarantees documentation. Focused package tests, typecheck and
+  runtime build pass. These are store/React contract checks, not device frame,
+  native rendering or retained-memory qualification; Android remains deferred.
+
+Next recommended slice: **M4.5** — compare cached and uncached evaluators on generated inputs, including identity, invalidation, zero eager Cartesian expansion and stale-result checks after scope or artifact replacement. Begin only after approval.
