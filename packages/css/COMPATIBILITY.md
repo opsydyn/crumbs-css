@@ -60,6 +60,7 @@ The package root, `/style`, Metro plugin and transformer are build-time entrypoi
 | `createThemeContract` / `createTheme` | Supported | Produces exact typed theme contracts and token maps. |
 | `var(--crumbs-...)` native theme tokens | Supported | Serialized as `crumbs.css.theme-token` references. |
 | `ThemeProvider` / `useThemedStyles` | Supported | Resolves token references against the active native theme. |
+| `createThemeDependencyPlan` / `createThemeDependencyResolver` | Supported | Consumes compiler-emitted path/token metadata and reports selective pure-resolution work; React subscriptions and native render claims remain separate. |
 | Structured values in runtime styles | Supported at resolution | Transform arrays/order, shadow offsets, font variants, filters, shadows, background arrays and opaque native values retain their shape/reference and scalar siblings. Static marked subsets have separate `.css.ts` compiler contracts. |
 | Static native structured authoring | Supported subset | `transform` arrays and numeric `shadowOffset` / `textShadowOffset` bypass CSS serialization. Order and whole-value composition replacement survive both object and StyleSheet emission, imported bases, helpers, variant maps and recipes. |
 | Metro dependency imports | Supported | Side-effect imports keep hot reload aware of dependent `.css.ts` files. |
@@ -420,6 +421,27 @@ be collected with the module or theme; there is no global unbounded strong cache
 and no claim that this removes React renders or native work. Mutating a style or
 theme after resolution violates the immutable snapshot contract and is not a
 supported invalidation mechanism.
+
+### Compiler dependency plans (M4.2)
+
+Generated native modules now emit a version-2 `__crumbsModule` descriptor. Its
+frozen `dependencyPlan` contains canonical path entries such as
+`["button", "variants", "tone", "primary"]` and the token variable names
+required by each resolved style leaf. The plan is derived after native
+composition and lowering, so dead declarations are not included. Paths and
+token lists are sorted, deduplicated and immutable.
+
+`createThemeDependencyResolver(styles, dependencyPlan)` consumes that metadata
+and returns a resolver whose transition receipt records `recomputations` and
+`notifications`. An immutable theme transition compares the active contract
+identity and only token values named by the plan, resolves affected paths and
+keeps unaffected output references.
+`notifications` counts changed output paths that a future subscription layer
+could invalidate; it is not a React render or native-frame measurement.
+
+Plan paths must match the supplied compiled export shape. Missing paths or an
+unsupported plan version fail closed. The resolver assumes the style module and
+themes are immutable snapshots; mutation is not an invalidation mechanism.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 

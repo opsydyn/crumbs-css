@@ -36,8 +36,21 @@ import type {
   TokenThemeContextName,
   TokenThemeLayer,
 } from "./tokens/domains"
+import {
+  createThemeDependencyPlan,
+  themeDependencyPathKey,
+  type ThemeDependencyPlan,
+  type ThemeDependencyPlanEntry,
+  type ThemeDependencyPathSegment,
+} from "./runtime/theme-dependency-plan"
 
 export type { NativeThemeTokenReference } from "./theme-token"
+export type {
+  ThemeDependencyPlan,
+  ThemeDependencyPlanEntry,
+  ThemeDependencyPathSegment,
+} from "./runtime/theme-dependency-plan"
+export { createThemeDependencyPlan } from "./runtime/theme-dependency-plan"
 export {
   createThemeTokenReference,
   isThemeTokenReference,
@@ -243,7 +256,7 @@ export function useThemedStyle<TInput>(style: TInput): ResolvedNativeStyleInput<
   return useMemo(() => resolveThemeTokens(style, theme), [style, theme])
 }
 
-type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>>> = {
+export type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>>> = {
   readonly [K in keyof TStyles]: TStyles[K] extends NativeRecipe<infer TVariants>
     ? NativeRecipe<TVariants>
     : TStyles[K] extends NativePrimitiveStyle
@@ -279,6 +292,171 @@ export function resolveThemeStyles<TStyles extends Readonly<Record<string, unkno
   const result = (changed ? resolved : styles) as ResolvedThemeStyles<TStyles>
   setCachedResolution(theme, styles, "styles", result)
   return result
+}
+
+export type ThemeDependencyResolutionMetrics = {
+  readonly recomputations: number
+  readonly notifications: number
+  readonly changedTokens: ReadonlyArray<string>
+}
+
+export type ThemeDependencyResolution<TStyles extends Readonly<Record<string, unknown>>> = {
+  readonly value: ResolvedThemeStyles<TStyles>
+  readonly metrics: ThemeDependencyResolutionMetrics
+}
+
+export type ThemeDependencyResolver<TStyles extends Readonly<Record<string, unknown>>> = {
+  readonly resolve: (
+    theme: NativeTheme<Record<string, unknown>>,
+  ) => ThemeDependencyResolution<TStyles>
+}
+
+/**
+ * Resolves only the exported paths named by a compiler dependency plan. The
+ * receipt's notification count is the number of output paths whose resolved
+ * value changed; it is an invalidation signal for a future subscription layer,
+ * not a claim about React renders.
+ */
+export function createThemeDependencyResolver<TStyles extends Readonly<Record<string, unknown>>>(
+  styles: TStyles,
+  plan: ThemeDependencyPlan,
+): ThemeDependencyResolver<TStyles> {
+  if (plan.$$type !== "crumbs.css.theme-dependency-plan" || plan.version !== 1) {
+    throw new TypeError("Unsupported theme dependency plan version")
+  }
+  const canonicalPlan = createThemeDependencyPlan(plan.entries)
+  const byToken = new Map<string, ThemeDependencyPlanEntry[]>()
+  for (const entry of canonicalPlan.entries) {
+    for (const token of entry.tokens) {
+      const dependants = byToken.get(token)
+      if (dependants === undefined) byToken.set(token, [entry])
+      else dependants.push(entry)
+    }
+  }
+  const planTokens = [...byToken.keys()].sort((left, right) => left.localeCompare(right))
+  let previousTheme: NativeTheme<Record<string, unknown>> | undefined
+  let previousValue: ResolvedThemeStyles<TStyles> | undefined
+  let hasPrevious = false
+
+  return {
+    resolve(theme) {
+      if (hasPrevious && theme === previousTheme) {
+        return {
+          value: previousValue!,
+          metrics: {recomputations: 0, notifications: 0, changedTokens: []},
+        }
+      }
+
+      const contractChanged = hasPrevious && previousTheme!.contract !== theme.contract
+      const changedTokens = hasPrevious && !contractChanged
+        ? planTokens.filter(token => themeTokenChanged(previousTheme!, theme, token))
+        : planTokens
+      const affected = hasPrevious
+        ? uniquePlanEntries(changedTokens.flatMap(token => byToken.get(token) ?? []))
+        : canonicalPlan.entries
+      let nextValue = hasPrevious ? previousValue! : styles as ResolvedThemeStyles<TStyles>
+      let notifications = 0
+      for (const entry of affected) {
+        const source = readThemeDependencyPath(styles, entry.path)
+        const previous = hasPrevious ? readThemeDependencyPath(previousValue, entry.path).value : undefined
+        const next = resolveThemeTokens(source.value, theme)
+        if (hasPrevious && equivalentResolvedValue(previous, next)) continue
+        nextValue = setThemeDependencyPath(nextValue, entry.path, next)
+        if (hasPrevious) notifications += 1
+      }
+
+      previousTheme = theme
+      previousValue = nextValue
+      hasPrevious = true
+      return {
+        value: nextValue,
+        metrics: {
+          recomputations: affected.length,
+          notifications,
+          changedTokens: Object.freeze([...changedTokens]),
+        },
+      }
+    },
+  }
+}
+
+function themeTokenChanged(
+  previous: NativeTheme<Record<string, unknown>>,
+  next: NativeTheme<Record<string, unknown>>,
+  token: string,
+): boolean {
+  const previousHas = Object.prototype.hasOwnProperty.call(previous.tokens, token)
+  const nextHas = Object.prototype.hasOwnProperty.call(next.tokens, token)
+  return previousHas !== nextHas || !Object.is(previous.tokens[token], next.tokens[token])
+}
+
+function uniquePlanEntries(entries: ReadonlyArray<ThemeDependencyPlanEntry>): ReadonlyArray<ThemeDependencyPlanEntry> {
+  const byPath = new Map<string, ThemeDependencyPlanEntry>()
+  for (const entry of entries) byPath.set(themeDependencyPathKey(entry.path), entry)
+  return [...byPath.values()].sort((left, right) =>
+    themeDependencyPathKey(left.path).localeCompare(themeDependencyPathKey(right.path)))
+}
+
+function readThemeDependencyPath(
+  root: unknown,
+  path: ReadonlyArray<ThemeDependencyPathSegment>,
+): {readonly value: unknown} {
+  let cursor = root
+  for (const segment of path) {
+    if (cursor === null || typeof cursor !== "object" ||
+      !Object.prototype.hasOwnProperty.call(cursor, segment)) {
+      throw new TypeError(`Theme dependency plan path does not exist: ${formatThemeDependencyPath(path)}`)
+    }
+    cursor = (cursor as Record<PropertyKey, unknown>)[segment]
+  }
+  return {value: cursor}
+}
+
+function setThemeDependencyPath<T>(
+  root: T,
+  path: ReadonlyArray<ThemeDependencyPathSegment>,
+  value: unknown,
+): T {
+  if (path.length === 0) return value as T
+  const nextRoot = cloneThemeDependencyContainer(root)
+  let cursor = nextRoot
+  for (let index = 0; index < path.length - 1; index += 1) {
+    const segment = path[index]!
+    const objectCursor = cursor as Record<PropertyKey, unknown>
+    const child = objectCursor[segment]
+    const nextChild = cloneThemeDependencyContainer(child)
+    objectCursor[segment] = nextChild
+    cursor = nextChild
+  }
+  const finalCursor = cursor as Record<PropertyKey, unknown>
+  finalCursor[path[path.length - 1]!] = value
+  return nextRoot as T
+}
+
+function cloneThemeDependencyContainer(value: unknown): Record<PropertyKey, unknown> | unknown[] {
+  if (Array.isArray(value)) return [...value]
+  if (value !== null && typeof value === "object") {
+    return Object.assign(Object.create(Object.getPrototypeOf(value)), value) as Record<PropertyKey, unknown>
+  }
+  throw new TypeError("Theme dependency plan path traverses a non-container value")
+}
+
+function equivalentResolvedValue(left: unknown, right: unknown): boolean {
+  if (Object.is(left, right)) return true
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return Array.isArray(left) && Array.isArray(right) && left.length === right.length &&
+      left.every((entry, index) => Object.is(entry, right[index]))
+  }
+  if (left === null || right === null || typeof left !== "object" || typeof right !== "object") return false
+  const leftKeys = Reflect.ownKeys(left)
+  const rightKeys = Reflect.ownKeys(right)
+  return leftKeys.length === rightKeys.length && leftKeys.every(key =>
+    Object.prototype.hasOwnProperty.call(right, key) &&
+    Object.is((left as Record<PropertyKey, unknown>)[key], (right as Record<PropertyKey, unknown>)[key]))
+}
+
+function formatThemeDependencyPath(path: ReadonlyArray<ThemeDependencyPathSegment>): string {
+  return path.map(segment => typeof segment === "number" ? `[${segment}]` : segment).join(".")
 }
 
 export function resolveThemeTokens<TInput>(

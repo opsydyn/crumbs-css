@@ -40,6 +40,22 @@ not claim fewer React renders, fewer native frames or a bounded device-memory
 profile. Treating a style or theme as mutable after resolution is outside the
 contract.
 
+## Planned dependency resolution
+
+Generated native modules carry a versioned dependency plan in their internal
+`__crumbsModule` descriptor. Each immutable path entry names the token variables
+used by that style leaf, after native composition and lowering have removed
+overridden declarations. Entries are canonical, sorted and frozen.
+
+Pass the plan to `createThemeDependencyResolver(styles, dependencyPlan)` when
+you need selective pure resolution. Each theme transition returns the resolved
+value and a receipt with `recomputations`, `notifications` and `changedTokens`.
+Only entries whose declared token values or active contract identity changed
+are recomputed, and unchanged output references are retained. `notifications` counts changed output paths as
+an invalidation signal for a future subscription layer; it does not measure
+React renders or native frames. The style shape must match the emitted paths,
+and style modules and themes must be treated as immutable snapshots.
+
 ## Native structured values and variant maps
 
 Legacy token ownership is the exact raw path of key segments. Identical paths can reuse a token name while themes retain independent value maps; different paths that sanitize to that name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`. Registration is atomic and exposed metadata paths are frozen. Theme creation rejects relocated, invalid or unregistered leaves with `CRUMBS_CSS_INVALID_THEME_CONTRACT`. Registry checks apply within an authoring module instance/compiled graph. Namespace roots by package/design system; distinct cross-package/provider identities and wrong-provider detection remain M3 work. Existing non-colliding names stay unchanged.

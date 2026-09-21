@@ -41,6 +41,8 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "TokenThemeProvider",
       "TokenThemeScopeProvider",
       "createRecipeResolver",
+      "createThemeDependencyPlan",
+      "createThemeDependencyResolver",
       "createThemeTokenReference",
       "isThemeTokenReference",
       "isTokenThemeCompatible",

@@ -49,7 +49,7 @@ export function emitStyleSheetModule(
     useStyleSheet
       ? `const _s = StyleSheet.create({\n${createEntries}\n});`
       : `const _s = {\n${createEntries}\n};`,
-    emitNativeModuleMetadata(classStyles),
+    emitNativeModuleMetadata(classStyles, exportMap),
     exports,
   ].filter(Boolean)
 

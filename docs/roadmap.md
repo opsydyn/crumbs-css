@@ -171,7 +171,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Affected paths:** new focused `packages/css/src/runtime/` modules behind `theme-runtime.ts`; theme/recipe/cache tests, benchmark scenarios, runtime guarantees documentation.
 
 - [x] M4.1: Share resolved outputs across consumers of the same immutable module/theme snapshot using weak ownership. Retain the original reference for static styles and structurally share unaffected outputs.
-- [ ] M4.2: Use compiler-emitted dependency plans for token resolution. Record both recomputation and notification counts; resolving only affected data does not prove unrelated components avoided rendering.
+- [x] M4.2: Use compiler-emitted dependency plans for token resolution. Record both recomputation and notification counts; resolving only affected data does not prove unrelated components avoided rendering.
 - [ ] M4.3: Precompute recipe order/defaults/compound matchers and canonical selection keys. Make cache bounds, eviction, and resolver lifetime explicit; exercise workloads that exceed the bound.
 - [ ] M4.4: Add selective subscriptions with consistent snapshots and tests for concurrent rendering, provider updates, nested scopes, unmount, and hot reload. No consumer may observe a mixture of old values and new derived tokens.
 - [ ] M4.5: Compare cached and uncached evaluators on generated inputs. Test identity promises, invalidation completeness, zero eager Cartesian expansion, and no stale results after scope or artifact replacement.
@@ -1232,7 +1232,7 @@ Next recommended slice: **M2.6** — emit direct native modules and minimal toke
 ### 2026-09-20 — M2.6 direct native module emission
 
 - The transformer now carries captured named exports and virtual CSS paths directly from the required vanilla-extract authoring evaluation into native lowering. It no longer serialises a vanilla module and re-evaluates that generated text merely to recover the same data.
-- Every emitted native module has a frozen internal `__crumbsModule` descriptor with the `crumbs.css.native-module` tag, version `1`, sorted unique token variable names from surviving final styles, and a frozen empty `conditions` list. Source export admission and the final emitter both reserve that name, preventing user data from shadowing generated metadata.
+- M2.6 emitted a frozen internal `__crumbsModule` descriptor with the `crumbs.css.native-module` tag, version `1`, sorted unique token variable names from surviving final styles, and a frozen empty `conditions` list. M4.2 extends that descriptor to version `2` with the frozen dependency plan described below. Source export admission and the final emitter both reserve that name, preventing user data from shadowing generated metadata.
 - The direct path retains structured style values, ordinary tag-shaped data, empty styles and theme descriptors. It does not introduce condition programs, a public metadata API, an external artifact ABI, publication, native-device acceptance or Android qualification.
 - Focused and full compiler checks are recorded with the consumer, documentation and host qualification results in the matching evidence file.
 
@@ -1311,3 +1311,11 @@ Next recommended slice: **M4.1** — share resolved outputs for the same immutab
 - Added runtime/compatibility guidance and a seeded 100-case identity property suite. Full package and documentation verification remain required for the commit; no publication, push or device evidence occurred, and protected release/version edits remain outside the slice.
 
 Next recommended slice: **M4.2** — use compiler-emitted dependency plans for token resolution and record recomputation and notification counts without treating selective recomputation as proof of render isolation. Begin only after approval.
+
+### 2026-09-21 — M4.2 compiler dependency plans
+
+- Added a version-1 frozen dependency plan to the generated version-2 `__crumbsModule` descriptor. Each canonical path entry records the surviving token variables for a style leaf after composition and lowering; recipe branches and style-variant leaves are represented independently.
+- Added `createThemeDependencyResolver`, which consumes the emitted plan and immutable themes. It compares only declared token values, recomputes affected paths, preserves unaffected output references and returns per-transition `recomputations`, `notifications` and `changedTokens` receipts. Plan shape mismatches and unsupported versions fail closed.
+- Added compiler-emission, runtime transition, integration and canonicalisation tests, plus compatibility/runtime documentation. Notifications are output invalidation receipts, not React render or native-frame evidence; no subscription layer, device qualification, publication or push occurred, and protected release/version edits remain outside the slice.
+
+Next recommended slice: **M4.3** — precompute recipe order/defaults/compound matchers and canonical selection keys, with explicit finite cache bounds and eviction. Begin only after approval.
