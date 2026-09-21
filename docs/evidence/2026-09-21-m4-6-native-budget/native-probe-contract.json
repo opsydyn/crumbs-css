@@ -1,0 +1,53 @@
+{
+  "formatVersion": 1,
+  "name": "crumbs-release-hermes-native-performance-v1",
+  "status": "proposed",
+  "qualificationTarget": "physical release Hermes iOS device",
+  "simulatorAdmission": "diagnostic-only",
+  "minimumIndependentRepetitions": 5,
+  "comparison": {
+    "baseline": "equivalent plain React Native workload",
+    "candidate": "same workload using Crumbs public APIs",
+    "identity": ["git revision", "package version", "bundle hash", "device model", "OS", "Expo", "React Native", "Hermes", "Release configuration"],
+    "thermal": "record device thermal state before and after each repetition; exclude throttled runs from the baseline set"
+  },
+  "scenarios": [
+    "static and themed list mount/rerender/unmount",
+    "recipe selection and nested scope switch",
+    "retained-memory mount/unmount at 100 and 1,000 rows",
+    "the same workload with an equivalent plain React Native style path"
+  ],
+  "warmup": {
+    "coldLaunchesExcluded": 1,
+    "measuredLaunches": 5,
+    "scenarioWarmupCycles": 2
+  },
+  "probes": {
+    "jsAndUiFrames": {
+      "instrument": "Animation Hitches",
+      "admission": "exportable trace and five independent runs; report p95 JS and UI frame duration separately"
+    },
+    "allocations": {
+      "instrument": "Allocations",
+      "admission": "exportable trace; report allocated bytes for the completed scenario after warmup, preserving raw traces"
+    },
+    "retainedMemory": {
+      "javascriptReceipt": "existing MemoryMeasurementPanel report",
+      "gc": "completed globalThis.gc or named native adapter on every checkpoint",
+      "checkpoints": 6,
+      "nativeContext": "pair the receipt with the same-run Allocations trace; do not infer native retention from JS heap alone"
+    }
+  },
+  "artifacts": [
+    "release app identity and bundle hashes",
+    "one raw xctrace bundle per measured repetition and exported summary",
+    "one versioned JSON receipt per workload",
+    "device/OS/toolchain/thermal record",
+    "plain-RN comparison and threshold review packet"
+  ],
+  "approval": {
+    "thresholdValues": "remain pending until the five-run physical-device envelope is reviewed",
+    "absoluteAndRelativeLimits": "both required",
+    "android": "separate final platform gate; not included in this proposal"
+  }
+}

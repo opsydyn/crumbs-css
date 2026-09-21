@@ -1425,3 +1425,31 @@ qualification** — review the runtime-byte and editor-instantiation regressions
 settle a native probe and approved retained-memory budget, then collect physical
 iOS frame/allocation/retained-memory evidence. Keep Android parked until the
 final platform move is explicitly authorised.
+
+### 2026-09-21 — M4.6 native budget decision (physical target unavailable)
+
+- The connected-target inventory contains the Mac mini and the dedicated iOS
+  simulator only; no physical iPhone or iPad is connected. M1.6 and M4.6
+  therefore remain open. Android was not inspected.
+- Reviewed the exact runtime/editor comparison. The CJS theme graph remains a
+  deterministic +295.9% zero-growth failure, while tsc and tsgo each retain a
+  +70.1% 10,000-token instantiation failure. The runtime graph growth is in
+  Crumbs' expanded theme entrypoint; Effect remains externalised from ordinary
+  runtime. A disposable TypeScript trace points to the domain-aware conditional
+  style/token types as the likely editor cost centre; no public type or threshold
+  change is admitted without ablation.
+- Proposed the physical-device probe contract: five independent Release Hermes
+  repetitions against a plain React Native comparison, one excluded cold launch,
+  recorded thermal/toolchain identity, exportable `Animation Hitches` and
+  `Allocations` traces, and six GC-backed retained-memory checkpoints. Simulator
+  traces remain diagnostic and no threshold is approved from them.
+- No dependency, native package, runtime policy, budget threshold or Android
+  state changed. The performance registry remains fail-closed.
+
+See [native budget decision](assessments/2026-09-21-m4-6-native-budget-decision.md)
+and [native budget evidence](evidence/2026-09-21-m4-6-native-budget/).
+
+Next recommended slice: **M4.6 host ablation and runtime/type-surface repair** —
+isolate the theme graph and domain-aware type-instantiation costs before
+re-running the physical iOS contract when a device is connected. Keep Android
+parked until the final platform move.

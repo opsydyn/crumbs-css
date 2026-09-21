@@ -1,0 +1,67 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21",
+  "sourceRevision": "c93dd87",
+  "comparisonEvidence": "docs/evidence/2026-09-21-m4-6/comparison.json",
+  "regressions": [
+    {
+      "id": "runtime-emitted-bytes",
+      "baseline": 11307,
+      "currentMedian": 44764,
+      "delta": 33457,
+      "deltaPercent": 295.8963473954188,
+      "environment": "exact",
+      "policy": "approved zero growth",
+      "status": "confirmed-fail",
+      "review": "The CJS theme graph is deterministic at 44,764 bytes. Current runtimeDependencies externalise Effect and the emitted graph lists only React as an external; the growth is therefore in Crumbs runtime modules."
+    },
+    {
+      "id": "editor-tsc-instantiations-10000",
+      "baseline": 490410,
+      "currentMedian": 834137,
+      "delta": 343727,
+      "deltaPercent": 70.08972084582288,
+      "environment": "exact",
+      "policy": "approved zero growth",
+      "status": "confirmed-fail",
+      "review": "The 10,000-token fixture reproduces the deterministic count regression while wall time, memory and completion remain within their approved limits."
+    },
+    {
+      "id": "editor-tsgo-instantiations-10000",
+      "baseline": 490508,
+      "currentMedian": 834235,
+      "delta": 343727,
+      "deltaPercent": 70.07571741949164,
+      "environment": "exact",
+      "policy": "approved zero growth",
+      "status": "confirmed-fail",
+      "review": "tsgo reproduces the same additional 343,727 instantiations, so this is a public type-surface cost rather than a TypeScript-only measurement issue."
+    }
+  ],
+  "rootCauseAssessment": {
+    "runtimeGraph": {
+      "confidence": "high",
+      "evidence": [
+        "theme-runtime.ts now imports token-domain metadata, dependency plans, recipe-resolution plans and the theme store",
+        "packages/css/build-policy.ts externalises Effect from runtimeDependencies",
+        "effect.json records only React as an external for the current CJS theme graph"
+      ],
+      "conclusion": "The runtime-byte regression is an expanded Crumbs theme graph, not an accidental use-land Effect bundle. Remediation should split or slim the runtime entrypoint before any threshold review."
+    },
+    "editorTypeSurface": {
+      "confidence": "medium",
+      "evidence": [
+        "The generated TypeScript trace names NativeStyleInput, NativeStyleValueInput, NativeStyleTokenForProperty, TokenDomainForProperty and DomainThemeVar repeatedly",
+        "native-style.ts maps a large property union to conditional token-domain types",
+        "the fixture imports style APIs and NativeRecipeProps, so the same public declarations are exercised by both tsc and tsgo"
+      ],
+      "conclusion": "The likely cost centre is the domain-aware conditional style/token surface. Exact attribution needs an ablation before changing public types or approved limits."
+    }
+  },
+  "decision": {
+    "thresholdsChanged": false,
+    "budgetRegistryActivated": false,
+    "effectRuntimePolicyChanged": false,
+    "nativeDependencyAdded": false
+  }
+}
