@@ -27,7 +27,10 @@ Use `recipe` when you need:
 
 ```tsx
 const styles = useThemedStyles(s)
-const resolveButtonStyle = useMemo(() => createRecipeResolver(styles.button), [styles.button])
+const resolveButtonStyle = useMemo(
+  () => createRecipeResolver(styles.button, { cacheSize: 32 }),
+  [styles.button],
+)
 ```
 
 Then select state explicitly:
@@ -35,6 +38,12 @@ Then select state explicitly:
 ```tsx
 <Pressable style={({ pressed }) => resolveButtonStyle({ pressed, tone: "primary" })} />
 ```
+
+The resolver precomputes variant order, defaults and compound matchers. Its
+selection cache is bounded to the resolver lifetime; `cacheSize: 0` disables
+retention. Use `resolveButtonStyle.getCacheStats()` for hit/miss/eviction
+receipts and call `resolveButtonStyle.dispose()` when an owned resolver is no
+longer needed.
 
 ## Why explicit state is the rule
 

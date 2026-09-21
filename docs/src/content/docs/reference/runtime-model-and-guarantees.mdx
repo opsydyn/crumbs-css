@@ -56,6 +56,22 @@ an invalidation signal for a future subscription layer; it does not measure
 React renders or native frames. The style shape must match the emitted paths,
 and style modules and themes must be treated as immutable snapshots.
 
+## Bounded recipe selection
+
+`createRecipeResolver` precomputes one immutable plan for its recipe: authored
+variant order, defaults, compound requirements and the dimensions used by a
+canonical selection key. It evaluates selections on demand, so a recipe with
+many variant values does not create an eager Cartesian product.
+
+Selection results are retained in a resolver-local least-recently-used cache.
+The default `cacheSize` is `32`; `0` disables retention and the accepted maximum
+is `1024`. Use `getCacheStats()` to inspect `capacity`, `size`, `hits`, `misses`,
+`evictions` and `disposed`. `clearCache()` releases current entries, while
+`dispose()` releases them permanently and makes later resolver calls fail. A
+resolver owns its plan and cache for its lifetime; there is no process-global
+strong selection cache. The recipe and its styles must be treated as immutable
+snapshots.
+
 ## Native structured values and variant maps
 
 Legacy token ownership is the exact raw path of key segments. Identical paths can reuse a token name while themes retain independent value maps; different paths that sanitize to that name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`. Registration is atomic and exposed metadata paths are frozen. Theme creation rejects relocated, invalid or unregistered leaves with `CRUMBS_CSS_INVALID_THEME_CONTRACT`. Registry checks apply within an authoring module instance/compiled graph. Namespace roots by package/design system; distinct cross-package/provider identities and wrong-provider detection remain M3 work. Existing non-colliding names stay unchanged.

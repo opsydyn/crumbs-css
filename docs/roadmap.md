@@ -172,7 +172,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 
 - [x] M4.1: Share resolved outputs across consumers of the same immutable module/theme snapshot using weak ownership. Retain the original reference for static styles and structurally share unaffected outputs.
 - [x] M4.2: Use compiler-emitted dependency plans for token resolution. Record both recomputation and notification counts; resolving only affected data does not prove unrelated components avoided rendering.
-- [ ] M4.3: Precompute recipe order/defaults/compound matchers and canonical selection keys. Make cache bounds, eviction, and resolver lifetime explicit; exercise workloads that exceed the bound.
+- [x] M4.3: Precompute recipe order/defaults/compound matchers and canonical selection keys. Make cache bounds, eviction, and resolver lifetime explicit; exercise workloads that exceed the bound.
 - [ ] M4.4: Add selective subscriptions with consistent snapshots and tests for concurrent rendering, provider updates, nested scopes, unmount, and hot reload. No consumer may observe a mixture of old values and new derived tokens.
 - [ ] M4.5: Compare cached and uncached evaluators on generated inputs. Test identity promises, invalidation completeness, zero eager Cartesian expansion, and no stale results after scope or artifact replacement.
 - [ ] M4.6: Run M1 device/bundle/editor budgets and retained-memory scenarios. Record improvements and regressions against equivalent native workloads; do not introduce native engine dependencies without a separate decision.
@@ -1319,3 +1319,21 @@ Next recommended slice: **M4.2** — use compiler-emitted dependency plans for t
 - Added compiler-emission, runtime transition, integration and canonicalisation tests, plus compatibility/runtime documentation. Notifications are output invalidation receipts, not React render or native-frame evidence; no subscription layer, device qualification, publication or push occurred, and protected release/version edits remain outside the slice.
 
 Next recommended slice: **M4.3** — precompute recipe order/defaults/compound matchers and canonical selection keys, with explicit finite cache bounds and eviction. Begin only after approval.
+
+### 2026-09-21 — M4.3 bounded recipe selection plans
+
+- Added an immutable per-resolver recipe plan for authored variant order,
+  defaults, compound requirements and canonical selection-key dimensions. The
+  evaluator remains demand-driven and never materializes the variant Cartesian
+  product.
+- Added resolver-local LRU selection caching with a default capacity of 32, an
+  explicit `0..1024` bound, hit/miss/eviction/capacity receipts, `clearCache`
+  and terminal `dispose` lifetime controls. Equivalent selections reuse frozen
+  style-array outputs; uncached and over-bound workloads are covered.
+- Preserved legacy variant string lookup and diagnostics, while making
+  canonical keys type-sensitive for compound matching. Added focused tests,
+  compatibility/runtime guidance and the M4.3 assessment. No subscriptions,
+  device evidence, publication, push or protected release/version edits were
+  included.
+
+Next recommended slice: **M4.4** — add selective subscriptions with consistent snapshots across concurrent rendering, provider updates, nested scopes, unmount and hot reload. Begin only after approval.

@@ -41,6 +41,11 @@ Use this entrypoint in runtime/component code for:
 - `resolveRecipeStyle`
 - `createRecipeResolver`
 
+`createRecipeResolver(recipe, { cacheSize })` precomputes the recipe selection
+plan and returns a callable resolver with `getCacheStats()`, `clearCache()` and
+`dispose()` controls. The cache is resolver-local, least-recently-used and
+bounded to `0..1024` entries; the default is `32` and `0` disables retention.
+
 ### `@opsydyn/crumbs-css/metro-plugin`
 
 Use this entrypoint in `metro.config.js` for:

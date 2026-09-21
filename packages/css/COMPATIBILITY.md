@@ -443,6 +443,28 @@ Plan paths must match the supplied compiled export shape. Missing paths or an
 unsupported plan version fail closed. The resolver assumes the style module and
 themes are immutable snapshots; mutation is not an invalidation mechanism.
 
+### Bounded recipe selection (M4.3)
+
+`createRecipeResolver` builds one immutable selection plan for its recipe. The
+plan records authored variant order, default values and compound requirements,
+then derives a type-sensitive canonical key for each effective selection. It
+does not eagerly expand the Cartesian product of variant values. Direct
+`resolveRecipeStyle` calls use the same plan semantics without retaining a
+resolver cache.
+
+Resolver selection caching is local to the returned callable and uses a finite
+least-recently-used bound. `cacheSize` defaults to `32`, accepts `0` to disable
+retention and has a maximum of `1024`; non-finite or non-integral values fail
+closed. `getCacheStats()` reports capacity, retained entries, hits, misses,
+evictions and disposal state. `clearCache()` releases retained selections;
+`dispose()` releases them permanently and later calls throw. This lifetime is
+explicit and avoids a process-global strong selection cache.
+
+The plan and selection outputs assume immutable recipe snapshots. Cache hits
+preserve the same frozen style-array reference for an equivalent key. These
+receipts and identity guarantees measure resolver work only; they do not claim
+fewer React renders, native frames or device-memory retention.
+
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
 ### Static structured compiler boundary

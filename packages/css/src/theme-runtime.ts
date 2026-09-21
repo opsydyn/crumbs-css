@@ -43,6 +43,16 @@ import {
   type ThemeDependencyPlanEntry,
   type ThemeDependencyPathSegment,
 } from "./runtime/theme-dependency-plan"
+import {
+  canonicalRecipeSelectionKey,
+  createBoundedRecipeSelectionCache,
+  createRecipeResolutionPlan,
+  DEFAULT_RECIPE_RESOLVER_CACHE_SIZE,
+  resolveRecipeResolutionPlan,
+  validateRecipeResolverCacheSize,
+  type RecipeResolutionPlan,
+  type RecipeResolverCacheStats,
+} from "./runtime/recipe-resolution-plan"
 
 export type { NativeThemeTokenReference } from "./theme-token"
 export type {
@@ -51,6 +61,13 @@ export type {
   ThemeDependencyPathSegment,
 } from "./runtime/theme-dependency-plan"
 export { createThemeDependencyPlan } from "./runtime/theme-dependency-plan"
+export type {
+  RecipeCompoundMatcher,
+  RecipeResolutionInput,
+  RecipeResolutionPlan,
+  RecipeResolutionVariant,
+  RecipeResolverCacheStats,
+} from "./runtime/recipe-resolution-plan"
 export {
   createThemeTokenReference,
   isThemeTokenReference,
@@ -69,6 +86,21 @@ type RecipeDiagnosticTarget = {
 export type NativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> = (
   selection?: NativeRecipeSelection<TVariants>,
 ) => ReadonlyArray<NativeStyle>
+
+export type RecipeResolverOptions = {
+  /** Maximum number of canonical selections retained by this resolver. Zero disables selection caching. */
+  readonly cacheSize?: number
+}
+
+export type RecipeResolverControls = {
+  readonly plan: RecipeResolutionPlan
+  readonly getCacheStats: () => RecipeResolverCacheStats & {readonly disposed: boolean}
+  readonly clearCache: () => void
+  readonly dispose: () => void
+}
+
+export type BoundedNativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> =
+  NativeRecipeResolver<TVariants> & RecipeResolverControls
 
 const NativeThemeContext = createContext<NativeThemeContextValue | null>(null)
 type TokenThemeScopeState = {
@@ -500,34 +532,60 @@ export function resolveRecipeStyle<TVariants extends NativeRecipeVariantsConfig>
   selection: NativeRecipeSelection<TVariants> = {},
 ): ReadonlyArray<NativeStyle> {
   warnForPartialRecipePayload(recipe)
-
-  const selected = { ...(recipe.defaultVariants ?? {}), ...selection }
-  const styles: Array<NativeStyle | undefined> = []
-  styles.push(recipe.base)
-
-  for (const [variantName, variantValues] of Object.entries(recipe.variants ?? {})) {
-    const selectedValue = selected[variantName]
-    if (selectedValue === undefined) continue
-    if (variantValues === undefined || !(String(selectedValue) in variantValues)) {
-      warnForInvalidRecipeVariant(recipe, variantName, selectedValue, variantValues)
-      continue
-    }
-    styles.push(variantValues[String(selectedValue)])
-  }
-
-  for (const compoundVariant of recipe.compoundVariants ?? []) {
-    if (compoundVariantMatches(compoundVariant.variants, selected)) {
-      styles.push(compoundVariant.style)
-    }
-  }
-
-  return styles.filter((style): style is NativeStyle => style !== undefined)
+  const plan = createRecipeResolutionPlan(recipe)
+  return resolveRecipeResolutionPlan(
+    plan,
+    selection,
+    (variantName, selectedValue, variantValues) =>
+      warnForInvalidRecipeVariant(recipe, variantName, selectedValue, variantValues),
+  )
 }
 
 export function createRecipeResolver<TVariants extends NativeRecipeVariantsConfig>(
   recipe: NativeRecipe<TVariants>,
-): NativeRecipeResolver<TVariants> {
-  return (selection = {}) => resolveRecipeStyle(recipe, selection)
+  options: RecipeResolverOptions = {},
+): BoundedNativeRecipeResolver<TVariants> {
+  const plan = createRecipeResolutionPlan(recipe)
+  const cacheSize = validateRecipeResolverCacheSize(
+    options.cacheSize ?? DEFAULT_RECIPE_RESOLVER_CACHE_SIZE,
+  )
+  const cache = createBoundedRecipeSelectionCache<ReadonlyArray<NativeStyle>>(cacheSize)
+  let disposed = false
+
+  const resolve = ((selection = {}) => {
+    if (disposed) throw new Error("Recipe resolver has been disposed")
+    warnForPartialRecipePayload(recipe)
+    const key = canonicalRecipeSelectionKey(plan, selection)
+    const cached = cache.get(key)
+    if (cached.hit) return cached.value
+
+    const resolved = resolveRecipeResolutionPlan(
+      plan,
+      selection,
+      (variantName, selectedValue, variantValues) =>
+        warnForInvalidRecipeVariant(recipe, variantName, selectedValue, variantValues),
+    )
+    cache.set(key, resolved)
+    return resolved
+  }) as BoundedNativeRecipeResolver<TVariants>
+
+  Object.defineProperties(resolve, {
+    plan: {value: plan, enumerable: true},
+    getCacheStats: {
+      value: () => Object.freeze({...cache.stats(), disposed}),
+      enumerable: true,
+    },
+    clearCache: {value: () => cache.clear(), enumerable: true},
+    dispose: {
+      value: () => {
+        if (disposed) return
+        cache.clear()
+        disposed = true
+      },
+      enumerable: true,
+    },
+  })
+  return resolve
 }
 
 function flattenStyle(style: unknown): Record<string, unknown> | undefined {
@@ -655,15 +713,6 @@ function shouldWarnInDev(): boolean {
   if (nativeDev !== undefined) return nativeDev
   if (typeof process === "undefined") return true
   return process.env.NODE_ENV !== "production"
-}
-
-function compoundVariantMatches(
-  compoundSelection: Readonly<Record<string, unknown>>,
-  selection: Readonly<Record<string, unknown>>,
-): boolean {
-  return Object.entries(compoundSelection).every(
-    ([variantName, value]) => selection[variantName] === value,
-  )
 }
 
 function isNativeRecipe(value: unknown): value is NativeRecipe<NativeRecipeVariantsConfig> {
