@@ -1709,3 +1709,28 @@ Next recommended slice: **M4.6 full host comparison rerun** — run the updated
 `measure:host-budgets` adapter so the Effect boundary, runtime initialization,
 benchmark, Metro, editor, and split graph reports are compared together. Keep
 the historical compatibility failure visible and the whole registry fail-closed.
+
+### 2026-09-21 — M4.6 full host comparison rerun
+
+- Restored the exact Node v22.0.0 floor in the temporary measurement cache and
+  completed the updated full host matrix, including Effect boundary,
+  initialization, Metro incremental, benchmarks, editor scale, and all six
+  split runtime graph selectors.
+- The combined report has 22 recorded comparisons: 20 pass, the retained
+  historical `runtime-emitted-bytes` comparison remains a +295.9% fail-closed
+  result, and `incremental-rebuild` is incomplete because its current
+  dependency-control/expanded-fixture protocol differs from the retained
+  baseline.
+- The incremental mismatch is recorded as a protocol boundary, not treated as
+  a performance regression. The split runtime graph metrics remain exact and
+  pass at zero growth. Whole-registry performance qualification remains
+  `not-run`; release-device frame, allocation, and retained-memory work is
+  still pending or diagnostic.
+
+See [M4.6 full host comparison assessment](assessments/2026-09-21-m4-6-full-host-comparison.md)
+and [full host comparison evidence](evidence/2026-09-21-m4-6-full-host-comparison/comparison.json).
+
+Next recommended slice: **M4.6 incremental baseline protocol reconciliation**
+— decide whether the dependency-control and expanded-fixture contract is the
+new admitted scenario, then retain a new five-repetition baseline and update
+the registry only through a reviewed evidence decision.
