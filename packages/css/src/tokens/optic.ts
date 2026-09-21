@@ -17,7 +17,7 @@ import {
 import {
   getThemeTokenPath,
   type NativeTheme,
-} from "../native-style"
+} from "../theme-contract"
 import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "../diagnostics"
 
 /** A plain-data result for one validated focus update. */

@@ -1,0 +1,208 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21T18:06:32Z",
+  "slice": "M4.6 token runtime boundary repair",
+  "sourceRevision": "f6bf62c",
+  "sourceState": "Working tree after the approved token runtime boundary repair; generated exports were measured before this slice was committed",
+  "environment": {
+    "bun": "1.4.2",
+    "node": "v24.15.0",
+    "npm": "11.12.1",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "26.6.2",
+    "expo": "56"
+  },
+  "protocol": {
+    "packageBuild": "packages/css: bun run build:dev",
+    "tokenGraph": "packages/css/test/runtime-isolation.test.ts plus direct emitted graph scan for tokens.mjs and tokens.cjs",
+    "workspaceStorybook": "EXPO_PUBLIC_STORYBOOK_ENABLED=true STORYBOOK_DISABLE_TELEMETRY=1 EXPO_NO_METRO_WORKSPACE_ROOT=1 CI=1 expo export --platform all --source-maps",
+    "packedStorybook": "Disposable staged Storybook app; npm install --legacy-peer-deps, then the same Expo export. Optional @gorhom/bottom-sheet and react-native-svg peers were installed together because Storybook imports them at bundle time.",
+    "runtimeGuard": "bun scripts/runtime-bundle-contract.ts <dist>",
+    "bundleBytes": "Filesystem bytes for each exported bundle and source map",
+    "moduleBytes": "Buffer.byteLength of each Crumbs source-map sourcesContent entry; this is a diagnostic module measure, not minified or Hermes contribution"
+  },
+  "tokenRuntimeGraph": {
+    "mjs": {
+      "entry": "tokens.mjs",
+      "files": [
+        "tokens.mjs",
+        "domains-563FdpDY.mjs",
+        "theme-contract-cWyeOrCI.mjs",
+        "theme-token-BvTY83dd.mjs"
+      ],
+      "bytes": {
+        "tokens.mjs": 1029,
+        "domains-563FdpDY.mjs": 34743,
+        "theme-contract-cWyeOrCI.mjs": 5611,
+        "theme-token-BvTY83dd.mjs": 14630
+      },
+      "externals": []
+    },
+    "cjs": {
+      "entry": "tokens.cjs",
+      "files": [
+        "tokens.cjs",
+        "domains-Bq93D2Rv.cjs",
+        "theme-contract-zQtH6IvI.cjs",
+        "theme-token-C5cCf7zW.cjs"
+      ],
+      "bytes": {
+        "tokens.cjs": 1529,
+        "domains-Bq93D2Rv.cjs": 38301,
+        "theme-contract-zQtH6IvI.cjs": 6188,
+        "theme-token-C5cCf7zW.cjs": 17290
+      },
+      "externals": []
+    },
+    "forbiddenSources": [
+      "node built-ins",
+      "@vanilla-extract/*",
+      "css-to-react-native",
+      "effect",
+      "native-style",
+      "native-capture",
+      "style",
+      "index",
+      "transformer",
+      "metro-plugin"
+    ]
+  },
+  "retainedPackageBaseline": {
+    "theme": { "esmBytes": 44017, "commonjsBytes": 44764 },
+    "themeCore": { "esmBytes": 17271, "commonjsBytes": 17641 },
+    "tokens": { "esmBytes": 1029, "commonjsBytes": 1529 },
+    "runtimeEmittedBytesBaseline": 11307,
+    "runtimeEmittedBytesCurrentCommonjs": 44764,
+    "runtimeEmittedBytesDeltaPercent": 295.8963473954188,
+    "thresholdStatus": "fail-closed"
+  },
+  "consumers": [
+    {
+      "name": "storybook",
+      "mode": "workspace",
+      "runtimeGuard": {
+        "status": "passed",
+        "sourceMaps": 4,
+        "crumbCounts": [0, 6, 6, 6]
+      },
+      "reachableCrumbsModules": {
+        "theme-core.mjs": 17271,
+        "tokens.mjs": 1029,
+        "domains-563FdpDY.mjs": 34743,
+        "theme-token-BvTY83dd.mjs": 14630,
+        "theme-contract-cWyeOrCI.mjs": 5611,
+        "theme.mjs": 44017,
+        "total": 117301
+      },
+      "vanillaExtractSourceContentBytes": { "web": 0, "ios": 0, "android": 0 },
+      "effectSourceCount": { "web": 0, "ios": 0, "android": 0 },
+      "platforms": [
+        {
+          "platform": "web",
+          "bundle": "index-75a8ef84b5b6173f7e1030db1f38e7ee.js",
+          "bundleBytes": 4132121,
+          "sourceMap": "index-75a8ef84b5b6173f7e1030db1f38e7ee.js.map",
+          "sourceMapBytes": 12352922,
+          "crumbTotalBytes": 117301
+        },
+        {
+          "platform": "web-secondary",
+          "bundle": "index-c6c80236be4b8f2e9bf36213fdebef67.js",
+          "bundleBytes": 41754,
+          "sourceMap": "index-c6c80236be4b8f2e9bf36213fdebef67.js.map",
+          "sourceMapBytes": 141652,
+          "crumbTotalBytes": 0
+        },
+        {
+          "platform": "ios",
+          "bundle": "index-cb7d2a11e10644e2ae8ffdcf13583ba8.hbc",
+          "bundleBytes": 4945416,
+          "sourceMap": "index-cb7d2a11e10644e2ae8ffdcf13583ba8.hbc.map",
+          "sourceMapBytes": 11472880,
+          "crumbTotalBytes": 117301
+        },
+        {
+          "platform": "android",
+          "bundle": "index-21256c374904620bfa433258d71b76f3.hbc",
+          "bundleBytes": 4954788,
+          "sourceMap": "index-21256c374904620bfa433258d71b76f3.hbc.map",
+          "sourceMapBytes": 11503638,
+          "crumbTotalBytes": 117301
+        }
+      ]
+    },
+    {
+      "name": "storybook",
+      "mode": "packed",
+      "runtimeGuard": {
+        "status": "passed",
+        "sourceMaps": 4,
+        "crumbCounts": [6, 0, 6, 6],
+        "installNote": "npm 11 legacy peer resolution; the current Storybook range resolved 10.6.0 while the workspace lockfile uses 10.4.4, and optional bottom-sheet/SVG peers were installed for the export"
+      },
+      "reachableCrumbsModules": {
+        "theme-core.mjs": 17271,
+        "tokens.mjs": 1029,
+        "domains-563FdpDY.mjs": 34743,
+        "theme-token-BvTY83dd.mjs": 14630,
+        "theme-contract-cWyeOrCI.mjs": 5611,
+        "theme.mjs": 44017,
+        "total": 117301
+      },
+      "vanillaExtractSourceContentBytes": { "web": 0, "ios": 0, "android": 0 },
+      "effectSourceCount": { "web": 0, "ios": 0, "android": 0 },
+      "platforms": [
+        {
+          "platform": "web",
+          "bundle": "index-2dedb39a759dc2c000589b48664d373d.js",
+          "bundleBytes": 4539994,
+          "sourceMap": "index-2dedb39a759dc2c000589b48664d373d.js.map",
+          "sourceMapBytes": 13766182,
+          "crumbTotalBytes": 117301
+        },
+        {
+          "platform": "web-secondary",
+          "bundle": "index-735880f6c75c10b7a4cec4777c02e288.js",
+          "bundleBytes": 41360,
+          "sourceMap": "index-735880f6c75c10b7a4cec4777c02e288.js.map",
+          "sourceMapBytes": 142307,
+          "crumbTotalBytes": 0
+        },
+        {
+          "platform": "ios",
+          "bundle": "index-a67b0200b361eca9625175b4c831d099.hbc",
+          "bundleBytes": 5446132,
+          "sourceMap": "index-a67b0200b361eca9625175b4c831d099.hbc.map",
+          "sourceMapBytes": 12668862,
+          "crumbTotalBytes": 117301
+        },
+        {
+          "platform": "android",
+          "bundle": "index-4a2f71e5cd35e1e4be16b5d9015948da.hbc",
+          "bundleBytes": 5455444,
+          "sourceMap": "index-4a2f71e5cd35e1e4be16b5d9015948da.hbc.map",
+          "sourceMapBytes": 12698968,
+          "crumbTotalBytes": 117301
+        }
+      ]
+    }
+  ],
+  "thresholdDecision": {
+    "runtimeByteThresholdReopened": false,
+    "performanceRegistry": "fail-closed",
+    "reason": [
+      "The token contract graph is now an ordinary runtime graph with no compiler, Node, vanilla-extract or Effect sources, and workspace plus packed Storybook maps pass the strict contract.",
+      "The repaired Storybook Crumbs graph is 117,301 source-content bytes, down from the prior 122,242-byte graph because native-style and native-capture are no longer reachable; source-map module bytes are diagnostic rather than native performance measurements.",
+      "No exact pre-adoption Metro/Hermes application-byte baseline is retained, and the retained package-level runtime-emitted-bytes threshold remains the deterministic +295.9% failure.",
+      "The Storybook packed install uses current range-resolved packages and legacy peer resolution, so its absolute bundle difference from workspace is not a Crumbs regression attribution."
+    ]
+  },
+  "limits": [
+    "Export success is JavaScript bundle and source-map evidence; it is not physical iOS or Android acceptance.",
+    "Android exports were inspected only as JavaScript/source-map artifacts. Android device qualification remains parked.",
+    "The ordinary tokens entrypoint is runtime-safe; tokens/schema and tokens/optic remain explicit Effect boundaries and were not pulled into this graph.",
+    "The package still ships compiler dependencies for build-time entrypoints; isolating the token graph does not remove those installed dependencies.",
+    "The performance registry remains fail-closed until an exact application baseline and the outstanding device/editor/retained-memory gates are admitted."
+  ]
+}

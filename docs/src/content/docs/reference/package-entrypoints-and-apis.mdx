@@ -57,6 +57,24 @@ It is emitted as an independent graph so consumers that do not need scopes,
 dependency plans or recipe controls do not load those implementations. Both
 theme entrypoints retain a React-only external runtime dependency boundary.
 
+### `@opsydyn/crumbs-css/tokens`
+
+Use this runtime-safe entrypoint for domain-aware token contracts and theme
+snapshots:
+
+- `createTokenContract`
+- `createTokenTheme`
+- `createTokenThemeFromExternalPayload`
+- `applyTokenThemePatch`
+- `createTokenThemeScope`
+- `alias` and `defineAlias`
+- `defineToken` and `token`
+
+Its contract/theme construction graph contains only plain runtime data and
+validation helpers. `@opsydyn/crumbs-css/tokens/schema` and
+`@opsydyn/crumbs-css/tokens/optic` are explicit advanced boundaries for Effect
+Schema decoding and Optic-based updates.
+
 `createRecipeResolver(recipe, { cacheSize })` precomputes the recipe selection
 plan and returns a callable resolver with `getCacheStats()`, `clearCache()` and
 `dispose()` controls. The cache is resolver-local, least-recently-used and

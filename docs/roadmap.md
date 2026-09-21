@@ -1569,3 +1569,33 @@ contract/theme construction from the `native-style` and vanilla-extract
 authoring graph, then repeat workspace and packed application graph checks.
 Keep physical iOS and Android qualification backlogged to the final
 device-enabled move.
+
+### 2026-09-21 — M4.6 token runtime boundary repair
+
+- Extracted legacy theme contract construction and token-path helpers into the
+  dedicated `theme-contract.ts` runtime module. `native-style.ts` retains its
+  authoring compatibility surface through re-exports, while `tokens/domains`
+  now imports the runtime contract directly.
+- Added ESM/CommonJS token graph tests and widened the source contract for the
+  safe `tokens` entrypoint plus its hashed `domains`, `theme-contract` and
+  `theme-token` chunks. Both formats have no Node built-ins, vanilla-extract,
+  CSS conversion, Effect, native-style or native-capture imports.
+- Fresh workspace and packed Storybook web/iOS/Android source maps pass the
+  strict runtime guard. The main maps reach six Crumbs modules totalling
+  117,301 source-content bytes, with zero vanilla-extract or Effect sources;
+  the previous 122,242-byte graph included native-style and native-capture.
+- Package tests (727), typecheck, docs, app typecheck, playground workspace
+  qualification and budget validation pass. The package runtime-byte threshold
+  remains fail-closed at +295.9%; no application baseline, device evidence or
+  performance threshold was changed. Android remains source-map-only and
+  physical iOS/Android stay backlogged.
+
+See [M4.6 token runtime boundary assessment](assessments/2026-09-21-m4-6-token-runtime-boundary.md)
+and [token runtime graph evidence](evidence/2026-09-21-m4-6-token-runtime-boundary/graphs.json).
+
+Next recommended slice: **M4.6 application-byte threshold re-evaluation** —
+rebase the runtime comparison on the repaired token boundary, decide whether an
+exact Metro/Hermes application baseline can be admitted, and keep the registry
+fail-closed until the baseline and remaining device/editor gates are explicit.
+Keep physical iOS and Android qualification backlogged to the final
+device-enabled move.

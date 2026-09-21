@@ -14,7 +14,8 @@ export function assertRuntimeBundleSources(sources: ReadonlyArray<string>): numb
       throw new Error(`Compiler dependency in runtime bundle: ${source}`)
     }
     if (/(?:node_modules\/@opsydyn\/crumbs-css|packages\/css)\/(?:dist|src)\//.test(source)) {
-      if (!/\/theme(?:-core)?\.(?:mjs|cjs)$/.test(source)) {
+      if (!/(?:\/theme(?:-core)?|\/tokens)\.(?:mjs|cjs)$/.test(source) &&
+        !/(?:\/domains|\/theme-contract|\/theme-token)-[^/]+\.(?:mjs|cjs)$/.test(source)) {
         throw new Error(`Non-runtime Crumbs module in runtime bundle: ${source}`)
       }
       crumbs++

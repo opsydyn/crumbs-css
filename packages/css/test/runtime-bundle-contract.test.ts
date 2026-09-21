@@ -7,8 +7,8 @@ describe('Metro runtime bundle source contract', () => {
  it('rejects compiler sources and accepts the emitted runtime in both modes', () => {
   expect(assertRuntimeBundleSources(['/app/node_modules/@opsydyn/crumbs-css/dist/theme.cjs','/app/node_modules/react/index.js'])).toBe(1)
   expect(assertRuntimeBundleSources(['/app/node_modules/@opsydyn/crumbs-css/dist/theme-core.cjs','/app/node_modules/react/index.js'])).toBe(1)
-  expect(assertRuntimeBundleSources(['/repo/packages/css/dist/theme.mjs','/repo/packages/css/dist/theme-core.mjs'])).toBe(2)
-  for (const name of ['style.cjs','index.mjs','transformer.cjs','metro-plugin.cjs']) expect(() => assertRuntimeBundleSources([`/app/node_modules/@opsydyn/crumbs-css/dist/${name}`])).toThrow(/Non-runtime Crumbs/)
+  expect(assertRuntimeBundleSources(['/repo/packages/css/dist/theme.mjs','/repo/packages/css/dist/theme-core.mjs','/repo/packages/css/dist/tokens.mjs','/repo/packages/css/dist/domains-AbC123.mjs','/repo/packages/css/dist/theme-contract-AbC123.cjs','/repo/packages/css/dist/theme-token-AbC123.mjs'])).toBe(6)
+  for (const name of ['style.cjs','index.mjs','transformer.cjs','metro-plugin.cjs','tokens-optic.mjs','tokens-schema.cjs','native-style-AbC123.mjs','native-capture-AbC123.mjs']) expect(() => assertRuntimeBundleSources([`/app/node_modules/@opsydyn/crumbs-css/dist/${name}`])).toThrow(/Non-runtime Crumbs/)
   for (const name of ['@vanilla-extract/css','@vanilla-extract/integration','css-to-react-native','esbuild']) expect(() => assertRuntimeBundleSources([`/app/node_modules/${name}/index.js`])).toThrow(/Compiler dependency/)
  })
  it('rejects Effect in ordinary app maps including Bun and Windows paths', () => {

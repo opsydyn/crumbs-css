@@ -33,7 +33,7 @@ import {
   isThemeVar,
   type NativeTheme,
   type ThemeContractInput,
-} from "../native-style"
+} from "../theme-contract"
 import {
   normalizeTokenContractIdentity,
   tokenContractShapeSignature,

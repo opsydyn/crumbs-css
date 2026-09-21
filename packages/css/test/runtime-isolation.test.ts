@@ -42,4 +42,11 @@ describe("public runtime dependency isolation", () => {
    expect({code:result.exitCode,stderr:result.stderr.toString()}).toEqual({code:0,stderr:''})
   })
  }
+ for (const format of ['mjs', 'cjs']) {
+  it(`keeps token contract runtime free of authoring modules in ${format}`, () => {
+   const result = graph(`tokens.${format}`)
+   expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name.startsWith('@vanilla-extract/') || name === 'css-to-react-native' || name === 'effect')).toEqual([])
+   expect(result.files.filter(file => /\/(?:native-style|native-capture|style|index|transformer|metro-plugin)(?:[-.]|\.(?:mjs|cjs)$)/.test(file))).toEqual([])
+  })
+ }
 })
