@@ -24,6 +24,22 @@ The root, `/style`, Metro plugin and transformer remain build-time entrypoints. 
 - explicit state selection for interactive styles
 - stable diagnostic codes for tooling and CI
 
+## Resolved output identity
+
+`resolveThemeTokens` and `resolveThemeStyles` treat style exports and themes as
+immutable snapshot inputs. Reusing the same object with the same `NativeTheme`
+returns the cached result: static object styles retain their original
+reference, tokenized styles retain their resolved reference, and style maps
+reuse unchanged entries. Flattened style arrays and recipes retain their
+existing semantic output while sharing repeated results.
+
+The cache uses weak keys for both the input object and theme snapshot. A new
+theme object is a new cache identity, so an update cannot read values from an
+older snapshot. This is an output identity and allocation guarantee; it does
+not claim fewer React renders, fewer native frames or a bounded device-memory
+profile. Treating a style or theme as mutable after resolution is outside the
+contract.
+
 ## Native structured values and variant maps
 
 Legacy token ownership is the exact raw path of key segments. Identical paths can reuse a token name while themes retain independent value maps; different paths that sanitize to that name fail with `CRUMBS_CSS_THEME_TOKEN_COLLISION`. Registration is atomic and exposed metadata paths are frozen. Theme creation rejects relocated, invalid or unregistered leaves with `CRUMBS_CSS_INVALID_THEME_CONTRACT`. Registry checks apply within an authoring module instance/compiled graph. Namespace roots by package/design system; distinct cross-package/provider identities and wrong-provider detection remain M3 work. Existing non-colliding names stay unchanged.

@@ -69,6 +69,15 @@ const TokenThemeContext: Context<TokenThemeContextValue | null> = sharedRegistry
   () => createContext<TokenThemeContextValue | null>(null),
 )
 const recipeDiagnosticWarnings = new Set<string>()
+type ThemeResolutionCacheKind = "tokens" | "styles" | "recipe"
+type ThemeResolutionCacheEntry = {
+  readonly value: unknown
+}
+type ThemeResolutionCacheByInput = Map<ThemeResolutionCacheKind, ThemeResolutionCacheEntry>
+const themeResolutionCache = sharedRegistry(
+  Symbol.for("crumbs.css.theme-resolution-cache.v1"),
+  () => new WeakMap<object, WeakMap<object, ThemeResolutionCacheByInput>>(),
+)
 
 export function ThemeProvider<TContract extends Record<string, unknown>>({
   children,
@@ -257,29 +266,55 @@ export function resolveThemeStyles<TStyles extends Readonly<Record<string, unkno
   styles: TStyles,
   theme: NativeTheme<Record<string, unknown>>,
 ): ResolvedThemeStyles<TStyles> {
+  const cached = getCachedResolution(theme, styles, "styles")
+  if (cached.hit) return cached.value as ResolvedThemeStyles<TStyles>
+
   const resolved = {} as Record<keyof TStyles, unknown>
+  let changed = false
   for (const [key, style] of Object.entries(styles)) {
-    resolved[key as keyof TStyles] = resolveStyleExport(style, theme)
+    const next = resolveStyleExport(style, theme)
+    resolved[key as keyof TStyles] = next
+    if (next !== style) changed = true
   }
-  return resolved as ResolvedThemeStyles<TStyles>
+  const result = (changed ? resolved : styles) as ResolvedThemeStyles<TStyles>
+  setCachedResolution(theme, styles, "styles", result)
+  return result
 }
 
 export function resolveThemeTokens<TInput>(
   style: TInput,
   theme: NativeTheme<Record<string, unknown>>,
 ): ResolvedNativeStyleInput<TInput> | undefined {
-  const flattened = flattenStyle(style)
-  if (flattened === undefined) return undefined
+  const cached = getCachedResolution(theme, style, "tokens")
+  if (cached.hit) return cached.value as ResolvedNativeStyleInput<TInput> | undefined
 
-  const resolved: Record<string, unknown> = {}
-  for (const [key, value] of Object.entries(flattened)) {
-    if (isThemeTokenReferenceCandidate(value)) {
-      assertThemeTokenReference(value, key)
-      resolved[key] = resolveTokenValue(value.varName, theme)
-    } else resolved[key] = value
+  const flattened = flattenStyle(style)
+  if (flattened === undefined) {
+    setCachedResolution(theme, style, "tokens", undefined)
+    return undefined
   }
 
-  return resolved as ResolvedNativeStyleInput<TInput>
+  const entries = Object.entries(flattened)
+  let changed = Array.isArray(style)
+  let resolved: Record<string, unknown> | undefined = Array.isArray(style) ? {} : undefined
+  for (const [index, entry] of entries.entries()) {
+    const [key, value] = entry
+    if (isThemeTokenReferenceCandidate(value)) {
+      assertThemeTokenReference(value, key)
+      if (resolved === undefined) {
+        resolved = {}
+        for (const [previousKey, previousValue] of entries.slice(0, index)) {
+          resolved[previousKey] = previousValue
+        }
+      }
+      resolved[key] = resolveTokenValue(value.varName, theme)
+      changed = true
+    } else if (resolved !== undefined) resolved[key] = value
+  }
+
+  const result = (changed ? resolved ?? {} : style) as ResolvedNativeStyleInput<TInput>
+  setCachedResolution(theme, style, "tokens", result)
+  return result
 }
 
 export function resolveRecipeStyle<TVariants extends NativeRecipeVariantsConfig>(
@@ -342,9 +377,13 @@ function resolveStyleExport(
   if (isNativeRecipe(style)) return resolveRecipeThemeTokens(style, theme)
   if (isNestedStyleMap(style)) {
     const resolved: Record<string, NativeStyle | undefined> = {}
+    let changed = false
     for (const [key, value] of Object.entries(style)) {
-      resolved[key] = resolveThemeTokens(value, theme)
+      const next = resolveThemeTokens(value, theme)
+      resolved[key] = next
+      if (next !== value) changed = true
     }
+    if (!changed) return style
     return isNativeStyleMap(style) ? markNativeStyleMap(resolved) : resolved
   }
   return resolveThemeTokens(style, theme)
@@ -354,26 +393,44 @@ function resolveRecipeThemeTokens<TVariants extends NativeRecipeVariantsConfig>(
   recipe: NativeRecipe<TVariants>,
   theme: NativeTheme<Record<string, unknown>>,
 ): NativeRecipe<TVariants> {
+  const cached = getCachedResolution(theme, recipe, "recipe")
+  if (cached.hit) return cached.value as NativeRecipe<TVariants>
+
   const variants: Record<string, Record<string, NativeStyle | undefined>> = {}
+  let changed = recipe.variants === undefined || recipe.defaultVariants === undefined || recipe.compoundVariants === undefined
   for (const [variantName, variantValues] of Object.entries(recipe.variants ?? {})) {
     const resolvedValues: Record<string, NativeStyle | undefined> = {}
     for (const [valueName, style] of Object.entries(variantValues)) {
-      resolvedValues[valueName] = resolveThemeTokens(style, theme)
+      const next = resolveThemeTokens(style, theme)
+      resolvedValues[valueName] = next
+      if (next !== style) changed = true
     }
     variants[variantName] = resolvedValues
   }
 
-  return {
+  const base = recipe.base === undefined ? undefined : resolveThemeTokens(recipe.base, theme)
+  if (base !== recipe.base) changed = true
+  const compoundVariants = (recipe.compoundVariants ?? []).map((compoundVariant) => {
+    const style = resolveThemeTokens(compoundVariant.style, theme)
+    if (style !== compoundVariant.style) changed = true
+    return {style, variants: compoundVariant.variants}
+  })
+
+  if (!changed) {
+    setCachedResolution(theme, recipe, "recipe", recipe)
+    return recipe
+  }
+
+  const resolved = {
     $$type: NativeRecipeType,
     ...(recipe.$$debugName === undefined ? {} : { $$debugName: recipe.$$debugName }),
-    ...(recipe.base === undefined ? {} : { base: resolveThemeTokens(recipe.base, theme) }),
-    compoundVariants: (recipe.compoundVariants ?? []).map((compoundVariant) => ({
-      style: resolveThemeTokens(compoundVariant.style, theme),
-      variants: compoundVariant.variants,
-    })),
+    ...(base === undefined ? {} : { base }),
+    compoundVariants,
     defaultVariants: recipe.defaultVariants ?? {},
     variants,
   } as NativeRecipe<TVariants>
+  setCachedResolution(theme, recipe, "recipe", resolved)
+  return resolved
 }
 
 function warnForPartialRecipePayload(
@@ -682,6 +739,42 @@ function assertTokenThemeCompatibility(
     NativeStylesDiagnosticCode.TokenThemeProviderMismatch,
     `Theme contract ${JSON.stringify(actual)} is incompatible with requested contract ${JSON.stringify(expected)}. Use the theme created from the same stable contract identity and shape.`,
   ))
+}
+
+function getCachedResolution(
+  theme: object,
+  input: unknown,
+  kind: ThemeResolutionCacheKind,
+): {readonly hit: false} | {readonly hit: true; readonly value: unknown} {
+  if (!isCacheableObject(input)) return {hit: false}
+  const byInput = themeResolutionCache.get(theme)
+  const entries = byInput?.get(input)
+  const entry = entries?.get(kind)
+  return entry === undefined ? {hit: false} : {hit: true, value: entry.value}
+}
+
+function setCachedResolution(
+  theme: object,
+  input: unknown,
+  kind: ThemeResolutionCacheKind,
+  value: unknown,
+): void {
+  if (!isCacheableObject(input)) return
+  let byInput = themeResolutionCache.get(theme)
+  if (byInput === undefined) {
+    byInput = new WeakMap<object, ThemeResolutionCacheByInput>()
+    themeResolutionCache.set(theme, byInput)
+  }
+  let entries = byInput.get(input)
+  if (entries === undefined) {
+    entries = new Map()
+    byInput.set(input, entries)
+  }
+  entries.set(kind, {value})
+}
+
+function isCacheableObject(value: unknown): value is object {
+  return typeof value === "object" && value !== null
 }
 
 function sharedRegistry<T>(key: symbol, create: () => T): T {

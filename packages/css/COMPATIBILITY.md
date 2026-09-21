@@ -401,7 +401,25 @@ diagnostic and leaves the old `NativeTheme` untouched.
 Effect 4 Optic is used internally by this subpath, while its declarations
 expose only Crumbs plain-data focus and result types. The published theme
 operation creates one coherent derived snapshot; identity sharing of resolved
-theme outputs is a later M4 runtime promise.
+theme outputs is covered by the M4.1 runtime cache below.
+
+### Resolved output sharing (M4.1)
+
+Theme resolution treats a module style export and a `NativeTheme` as immutable
+snapshot inputs. Within one theme snapshot, repeated resolution of the same
+object input is held by weak ownership: a static object style returns its
+original reference, a tokenized style returns the same resolved object, and a
+style map reuses unchanged entries while sharing its complete resolved map.
+Flattened style arrays keep their existing last-entry semantics and are cached
+as a separate resolved object; the input array is never returned as a style
+object. Repeated recipe resolution follows the same identity rule.
+
+The cache is keyed by both input object and theme object, so a new theme
+snapshot cannot reuse values from an older snapshot. Weak keys allow entries to
+be collected with the module or theme; there is no global unbounded strong cache
+and no claim that this removes React renders or native work. Mutating a style or
+theme after resolution violates the immutable snapshot contract and is not a
+supported invalidation mechanism.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 

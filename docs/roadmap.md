@@ -170,7 +170,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Decisions:** D6, D8.\
 **Affected paths:** new focused `packages/css/src/runtime/` modules behind `theme-runtime.ts`; theme/recipe/cache tests, benchmark scenarios, runtime guarantees documentation.
 
-- [ ] M4.1: Share resolved outputs across consumers of the same immutable module/theme snapshot using weak ownership. Retain the original reference for static styles and structurally share unaffected outputs.
+- [x] M4.1: Share resolved outputs across consumers of the same immutable module/theme snapshot using weak ownership. Retain the original reference for static styles and structurally share unaffected outputs.
 - [ ] M4.2: Use compiler-emitted dependency plans for token resolution. Record both recomputation and notification counts; resolving only affected data does not prove unrelated components avoided rendering.
 - [ ] M4.3: Precompute recipe order/defaults/compound matchers and canonical selection keys. Make cache bounds, eviction, and resolver lifetime explicit; exercise workloads that exceed the bound.
 - [ ] M4.4: Add selective subscriptions with consistent snapshots and tests for concurrent rendering, provider updates, nested scopes, unmount, and hot reload. No consumer may observe a mixture of old values and new derived tokens.
@@ -1303,3 +1303,11 @@ Next recommended slice: **M3.7** — write the legacy unscoped-token migration n
 - Added the migration assessment and compatibility guidance. Focused and full package verification remain required for the commit; no publication, push or native evidence occurred, and protected release/version edits remain outside the slice.
 
 Next recommended slice: **M4.1** — share resolved outputs for the same immutable module/theme snapshot with weak ownership and structural sharing, while retaining the original reference for static styles. Begin only after approval.
+
+### 2026-09-21 — M4.1 resolved output sharing
+
+- Added a shared-symbol weak cache keyed by immutable input object and `NativeTheme` snapshot. Static object styles retain their original reference; tokenized styles, flattened arrays and recipes reuse repeated results within one snapshot.
+- Style maps return the original map when all entries are unchanged and otherwise preserve unchanged entry references. New theme objects have independent cache identities; mutation is outside the snapshot contract and does not act as invalidation.
+- Added runtime/compatibility guidance and a seeded 100-case identity property suite. Full package and documentation verification remain required for the commit; no publication, push or device evidence occurred, and protected release/version edits remain outside the slice.
+
+Next recommended slice: **M4.2** — use compiler-emitted dependency plans for token resolution and record recomputation and notification counts without treating selective recomputation as proof of render isolation. Begin only after approval.
