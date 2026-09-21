@@ -22,6 +22,12 @@ const PositiveInteger = Schema.Int.check(Schema.isGreaterThan(0))
 const Id = Schema.String.check(Schema.isPattern(/^[a-z][a-z0-9-]*$/))
 const BaselineSelectorSchema = Schema.Literals([
   "effect.runtime.cjs.graph-bytes",
+  "runtime.theme-core.esm.graph-bytes",
+  "runtime.theme-core.cjs.graph-bytes",
+  "runtime.tokens.esm.graph-bytes",
+  "runtime.tokens.cjs.graph-bytes",
+  "runtime.theme-compatibility.esm.graph-bytes",
+  "runtime.theme-compatibility.cjs.graph-bytes",
   "runtime-init.floor.esm.load-ms.median",
   "runtime-init.floor.cjs.load-ms.median",
   "runtime-init.current.esm.load-ms.median",
@@ -148,7 +154,14 @@ export function verifyRecordedBaselines(registry: BudgetRegistry, repoRoot: stri
 }
 
 type BaselineSelector = typeof BaselineSelectorSchema.Type
-type EvidenceBundle = { readonly effect: unknown; readonly runtimeInit: unknown; readonly benchmark: unknown; readonly incremental: unknown; readonly editor: unknown }
+type EvidenceBundle = {
+  readonly effect: unknown
+  readonly runtimeInit: unknown
+  readonly benchmark: unknown
+  readonly incremental: unknown
+  readonly editor: unknown
+  readonly runtimeGraph?: unknown
+}
 
 export function summarizeBenchmarkReports(inputs: unknown[]) {
   if (inputs.length === 0) throw Error("At least one benchmark report is required")
@@ -254,6 +267,16 @@ function extractBaselineSamples(selector: BaselineSelector, evidence: unknown): 
     const value = unique(entries.map(entry => entry.graph.bytes))
     return Array.from({ length: Math.max(...entries.map(entry => entry.samples.length)) }, () => value)
   }
+  const runtimeGraph = selector.match(/^runtime\.(theme-core|tokens|theme-compatibility)\.(esm|cjs)\.graph-bytes$/)
+  if (runtimeGraph) {
+    const data = evidence as RuntimeGraphBudgetEvidence
+    const scope = runtimeGraph[1]!
+    const format = runtimeGraph[2]!
+    const entrypoint = scope === "theme-compatibility" ? "theme" : scope
+    const graph = data.currentGraphs[entrypoint]?.[format]
+    if (!graph) throw Error(`Missing runtime graph scenario: ${selector}`)
+    return numbers(graph.samples)
+  }
   const runtimeInit = selector.match(/^runtime-init\.(floor|current)\.(esm|cjs)\.load-ms\.median$/)
   if (runtimeInit) {
     const data = evidence as RuntimeInitializationEvidence
@@ -285,6 +308,7 @@ function extractBaselineSamples(selector: BaselineSelector, evidence: unknown): 
 
 function evidenceForSelector(selector: BaselineSelector, evidence: EvidenceBundle): unknown {
   if (selector.startsWith("effect.")) return evidence.effect
+  if (selector.startsWith("runtime.") && selector.endsWith(".graph-bytes")) return evidence.runtimeGraph
   if (selector.startsWith("runtime-init.")) return evidence.runtimeInit
   if (selector.startsWith("benchmark.")) return evidence.benchmark
   if (selector.startsWith("metro-incremental.")) return evidence.incremental
@@ -296,6 +320,10 @@ function environmentFingerprint(selector: BaselineSelector, evidence: unknown): 
     const data = evidence as EffectBoundaryEvidence
     return { effect: data.effect, build: data.build, protocol: data.protocol, environment: { platform: data.environment.platform, architecture: data.environment.architecture },
       nodes: [...new Set(data.results.flatMap(entry => entry.samples.map(sample => sample.node)))].sort() }
+  }
+  if (selector.startsWith("runtime.") && selector.endsWith(".graph-bytes")) {
+    const data = evidence as RuntimeGraphBudgetEvidence
+    return { sourceRevision: data.sourceRevision, environment: data.environment, protocol: data.protocol, selector }
   }
   if (selector.startsWith("runtime-init.")) {
     const data = evidence as RuntimeInitializationEvidence
@@ -325,6 +353,12 @@ type EffectBoundaryEvidence = {
   protocol: unknown
   environment: { platform: string; architecture: string }
   results: Array<{ scenario: string; format: string; graph: { bytes: number }; samples: Array<{ loadMs: number; node: string }> }>
+}
+type RuntimeGraphBudgetEvidence = {
+  sourceRevision: string
+  environment: unknown
+  protocol: unknown
+  currentGraphs: Record<string, Record<string, { graphBytes: number; samples: number[] }>>
 }
 type BenchmarkSummaryEvidence = {
   environment: unknown

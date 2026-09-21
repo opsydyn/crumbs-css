@@ -1654,3 +1654,30 @@ ESM/CJS ceilings and growth rules, then add only accepted metrics to the
 fail-closed registry. If the compatibility size is rejected, follow with a
 same-functionality `theme` graph reduction slice. Keep physical iOS and
 Android qualification backlogged to the final device-enabled move.
+
+### 2026-09-21 — M4.6 split-budget review and admission
+
+- Admitted six format-specific deterministic graph metrics for the current
+  runtime contract: ESM/CJS `theme-core` at 17,271/17,641 bytes, `tokens` at
+  56,013/63,308 bytes including local chunks, and compatibility `theme` at
+  44,017/44,764 bytes. Each retains five sequential scans, exact artifact
+  hashes and a zero-growth absolute ceiling.
+- Extended the Effect Schema-backed budget registry with closed selectors for
+  those six graphs. The historical `effect.runtime.cjs.graph-bytes` metric
+  remains unchanged, so its +295.9% comparison against the old 11,307-byte
+  baseline stays visible and fail-closed.
+- The registry now has 26 metrics: 22 recorded and approved, with frame,
+  allocation and retained-memory gates still pending or diagnostic. Focused
+  budget tests, baseline re-derivation and CLI validation pass; whole-registry
+  readiness and performance qualification remain false. No dependency, public
+  API, native target or Android state changed.
+
+See [M4.6 split-budget admission assessment](assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md)
+and [split-budget admission evidence](evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json).
+
+Next recommended slice: **M4.6 current split-budget comparison run** — add a
+current-checkout adapter that scans all six admitted entrypoints, compares
+format-specific graphs against their baselines and reports the split results
+alongside the retained historical compatibility failure. Keep the whole
+registry fail-closed until release-device frame, allocation and retained-memory
+evidence is available.

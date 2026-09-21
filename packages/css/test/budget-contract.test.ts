@@ -54,6 +54,25 @@ describe("performance budget registry", () => {
     ])
   })
 
+  it("admits the split runtime graph selectors from the retained admission evidence", () => {
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const graphMetrics = decoded.value.metrics.filter(metric => metric.id.startsWith("runtime-theme-") || metric.id.startsWith("runtime-tokens-"))
+    expect(graphMetrics.map(metric => metric.id)).toEqual([
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes",
+    ])
+    for (const metric of graphMetrics) {
+      expect(metric.baseline.status).toBe("recorded")
+      expect(metric.threshold).toMatchObject({ status: "approved", maxRegressionPercent: 0 })
+    }
+    expect(verifyRecordedBaselines(decoded.value, resolve(import.meta.dir, "../../.."))).toEqual([])
+  })
+
   it("fails closed on unknown versions, fields, invalid repetition counts and duplicate ids", () => {
     const valid = JSON.parse(readFileSync(registryFile, "utf8"))
     for (const mutation of [
@@ -120,13 +139,16 @@ describe("performance budget registry", () => {
     const packet = createThresholdReviewPacket(decoded.value, resolve(import.meta.dir, "../../.."))
     expect(packet.status).toBe("recorded-thresholds-approved")
     expect(packet.candidates).toHaveLength(0)
-    expect(packet.approved).toHaveLength(16)
+    expect(packet.approved).toHaveLength(22)
     expect(packet.approved.find(entry => entry.id === "incremental-rebuild")?.decision).toMatchObject({
       status: "approved", absoluteMax: 137.506, maxRegressionPercent: 10,
     })
     expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-node22-cjs")
     expect(packet.reviewAttention.zeroGrowthPolicy).toEqual(expect.arrayContaining([
       "runtime-emitted-bytes", "editor-tsc-instantiations-10000", "editor-tsgo-instantiations-10000",
+      "runtime-theme-core-esm-graph-bytes", "runtime-theme-core-cjs-graph-bytes",
+      "runtime-tokens-esm-graph-bytes", "runtime-tokens-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes", "runtime-theme-compatibility-cjs-graph-bytes",
     ]))
     for (const approved of packet.approved) {
       expect(approved.samples).toBeGreaterThanOrEqual(5)
@@ -145,9 +167,10 @@ describe("performance budget registry", () => {
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
       incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-metro-incremental/baseline.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
+      runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     })
     expect(report.performanceQualified).toBe(false)
-    expect(report.metrics).toHaveLength(16)
+    expect(report.metrics).toHaveLength(22)
     for (const metric of report.metrics) {
       expect(metric.environment).toBe("exact")
       expect(metric.delta).toBe(0)
@@ -177,6 +200,7 @@ describe("performance budget registry", () => {
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
       incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-metro-incremental/baseline.json"), "utf8")),
       editor: { ...editor, manifest: { ...editor.manifest, scales: [] } },
+      runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     })
     expect(report.metrics.filter(metric => metric.id.startsWith("editor-")).every(metric => metric.environment === "mismatch")).toBe(true)
   })
@@ -197,6 +221,7 @@ describe("performance budget registry", () => {
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
       incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-metro-incremental/baseline.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
+      runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     }
     expect(compareRecordedMetrics(decoded.value, repoRoot, evidence).metrics.every(metric => metric.result === "pass")).toBe(true)
     approved.metrics.find((metric: { id: string }) => metric.id === "runtime-emitted-bytes").threshold.absoluteMax = 0

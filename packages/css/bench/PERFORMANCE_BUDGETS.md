@@ -19,7 +19,23 @@ Set the registry to `active` only after every required baseline is recorded and 
 
 ## Current state
 
-The registry contains 20 metrics across all nine required domains. Sixteen runtime-footprint, transform, incremental-rebuild, and 10,000-token editor/compiler metrics have reproducible recorded host baselines and approved thresholds. Retained-memory evidence is diagnostic because it lacks forced-GC release-device provenance. JS frames, UI frames, and allocations have no qualifying baseline or threshold. The registry therefore remains pending and cannot produce whole-registry performance qualification. Existing benchmark smoke ceilings remain historical local checks and are not M1.8 budgets.
+The registry contains 26 metrics across all nine required domains. Twenty-two
+runtime-footprint, transform, incremental-rebuild, and 10,000-token
+editor/compiler metrics have reproducible recorded host baselines and approved
+thresholds. Six of those are the current split emitted-graph gates:
+`runtime.theme-core.{esm,cjs}.graph-bytes`,
+`runtime.tokens.{esm,cjs}.graph-bytes`, and
+`runtime.theme-compatibility.{esm,cjs}.graph-bytes`. They use five sequential
+artifact scans and zero-growth limits. The historical
+`effect.runtime.cjs.graph-bytes` selector remains separately visible and
+continues to fail against its old compatibility baseline when current output
+is compared.
+
+Retained-memory evidence is diagnostic because it lacks forced-GC release-device
+provenance. JS frames, UI frames, and allocations have no qualifying baseline
+or threshold. The registry therefore remains pending and cannot produce
+whole-registry performance qualification. Existing benchmark smoke ceilings
+remain historical local checks and are not M1.8 budgets.
 
 ## Host comparison and review packets
 
