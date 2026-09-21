@@ -85,6 +85,14 @@ export type ThemeContractIdentityMetadata = {
   readonly signature: string
 }
 
+/** Versioned, plain-data representation accepted at the external theme boundary. */
+export type ExternalTokenThemePayload = {
+  readonly _tag: "CrumbsTokenTheme"
+  readonly version: 1
+  readonly contract: TokenContractIdentity
+  readonly values: Readonly<Record<string, string | number>>
+}
+
 const domainContracts = sharedRegistry(
   Symbol.for("crumbs.css.theme-token-domain-contracts.v1"),
   () => new WeakMap<object, ReadonlyMap<string, ThemeTokenDomainMetadata>>(),

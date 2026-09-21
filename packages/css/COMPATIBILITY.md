@@ -301,7 +301,45 @@ External or persisted token data should use the dedicated
 `@opsydyn/crumbs-css/tokens/schema` entrypoint. It is the Effect 4 Schema
 boundary; ordinary token authoring does not import Effect. Contract identity,
 provider compatibility, layered aliases and independent context scopes use the
-identified APIs above; atomic updates remain the next M3 slice.
+identified APIs above.
+
+### Immutable theme patches and external themes (M3.5)
+
+`applyTokenThemePatch(contract, current, patch)` accepts a sparse
+`TokenThemeLayer` for one complete `NativeTheme`. It validates the contract,
+every path and every domain before cloning and merging canonical definition
+values. A successful result contains a new complete theme and frozen
+`changedPaths`; the previous `values` tree and flat `tokens` map are not
+modified. A failed result is `{ ok: false, error }` and does not publish a
+partial snapshot. Identified contracts are checked by identity and shape
+signature; legacy contracts must use the same contract object for patching.
+
+Persisted or cross-process values use the versioned payload exposed by the
+Effect 4 schema entrypoint:
+
+```ts
+import {
+  decodeExternalTokenTheme,
+  encodeExternalTokenTheme,
+} from "@opsydyn/crumbs-css/tokens/schema"
+import { createTokenThemeFromExternalPayload } from "@opsydyn/crumbs-css/tokens"
+
+const decoded = decodeExternalTokenTheme(input)
+if (decoded.ok) {
+  const result = createTokenThemeFromExternalPayload(vars, decoded.value)
+  if (result.ok) renderWithTheme(result.theme)
+}
+```
+
+The external shape is tagged as `CrumbsTokenTheme`, carries version `1`, an
+identified `{ owner, name, version }` contract and a flat map keyed by stable
+public token IDs. The schema codec rejects unknown fields, unsupported
+versions and non-finite numbers. The runtime mapper checks that identity,
+required definition IDs and token domains still match the local contract;
+aliases are derived locally and cannot be supplied as external values.
+Encoding is available for already decoded payloads and remains in the schema
+subpath. Effect is therefore paid at the ingress boundary, while ordinary
+theme construction and patch application stay Effect-free.
 
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
@@ -383,6 +421,10 @@ full message text.
 | `CRUMBS_CSS_TOKEN_THEME_PROVIDER_MISMATCH` | Identified provider and consumer contracts differ by identity or canonical shape. |
 | `CRUMBS_CSS_TOKEN_THEME_SCOPE_PROVIDER_MISMATCH` | A scope provider has no complete identified provider for its contract. |
 | `CRUMBS_CSS_TOKEN_THEME_SCOPE_INVALID` | A context layer is unknown, incomplete at its base, or violates a token domain. |
+| `CRUMBS_CSS_TOKEN_THEME_PATCH_INVALID` | A sparse patch is malformed, unknown, incomplete or violates a token domain; the current snapshot is retained. |
+| `CRUMBS_CSS_TOKEN_THEME_PATCH_CONTRACT_MISMATCH` | The patch contract and current theme contract are not compatible by identity, shape or legacy object ownership. |
+| `CRUMBS_CSS_TOKEN_THEME_EXTERNAL_CONTRACT_MISMATCH` | An external theme payload identifies a different or unidentified contract. |
+| `CRUMBS_CSS_TOKEN_THEME_EXTERNAL_TOKEN_MISMATCH` | An external token ID is unknown/derived, missing, or carries a value outside its local domain. |
 | `CRUMBS_CSS_INVALID_THEME_CONTRACT` | A contract contains an invalid or misplaced/unregistered native token leaf. |
 | `CRUMBS_CSS_UNSUPPORTED_EXPORT` | `.css.ts` export contains an unsupported value or export name; error includes file and data path. Always fatal. |
 | `CRUMBS_CSS_INVALID_THEME_TOKEN_REFERENCE` | Constructor or resolver rejected a malformed native token reference/name. |

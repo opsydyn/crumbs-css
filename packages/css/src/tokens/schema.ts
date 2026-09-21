@@ -1,5 +1,10 @@
 import * as Schema from "effect/Schema"
 import type { TokenDomain, TokenDomainValue } from "../theme-token"
+import {
+  externalTokenThemeCodec,
+  type ExternalTokenTheme,
+} from "../contracts/payloads"
+import type { ContractResult } from "../contracts/data-codec"
 
 /**
  * Effect 4 ingress decoder for external token values. This lives in the
@@ -12,6 +17,19 @@ export function decodeTokenValue<TDomain extends TokenDomain>(
 ): TokenDomainValue<TDomain> {
   return Schema.decodeUnknownSync(schemaForDomain(domain))(value) as TokenDomainValue<TDomain>
 }
+
+/** Decode a versioned external theme without constructing a runtime theme. */
+export function decodeExternalTokenTheme(input: unknown): ContractResult<ExternalTokenTheme> {
+  return externalTokenThemeCodec.decode(input)
+}
+
+/** Encode an already decoded external theme using its canonical JSON shape. */
+export function encodeExternalTokenTheme(input: ExternalTokenTheme): ContractResult<string> {
+  return externalTokenThemeCodec.encode(input)
+}
+
+export { externalTokenThemeCodec }
+export type { ExternalTokenTheme }
 
 function schemaForDomain(domain: TokenDomain) {
   switch (domain.kind) {

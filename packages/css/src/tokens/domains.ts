@@ -6,6 +6,7 @@ import {
   assertThemeContractIdentityAvailable,
   getThemeContractIdentity,
   getThemeContractIdentityKey,
+  getThemeContractShapeSignature,
   getThemeTokenAliasForContract,
   getThemeTokenDomainForContract,
   getThemeTokenOrigin,
@@ -21,6 +22,7 @@ import {
   type ThemeTokenOrigin,
   type ThemeTokenOriginStep,
   type ThemeVar,
+  type ExternalTokenThemePayload,
 } from "../theme-token"
 import {
   createTheme,
@@ -195,6 +197,25 @@ export type TokenThemeSnapshotInput<TContract> = {
   readonly base: TokenThemeValues<TContract>
   readonly contexts?: TokenThemeContexts<TContract>
 }
+
+export type TokenThemeOperationError = {
+  readonly code: string
+  readonly path: ReadonlyArray<string | number>
+  readonly message: string
+}
+export type TokenThemePatchResult<TContract> =
+  | {
+      readonly ok: true
+      readonly theme: NativeTheme<TContract>
+      readonly changedPaths: ReadonlyArray<ReadonlyArray<string>>
+    }
+  | {
+      readonly ok: false
+      readonly error: TokenThemeOperationError
+    }
+export type ExternalTokenThemeResult<TContract> =
+  | { readonly ok: true; readonly theme: NativeTheme<TContract> }
+  | { readonly ok: false; readonly error: TokenThemeOperationError }
 
 export function defineToken<const TDefinition extends TokenDomainDefinition>(
   definition: TDefinition,
@@ -405,12 +426,116 @@ export function createTokenThemeScopedSnapshot<TContract extends Readonly<Record
 /** Concise alias for callers that model a scope as a resolved snapshot. */
 export const createTokenThemeScope = createTokenThemeScopedSnapshot
 
+/**
+ * Apply a sparse patch to one complete snapshot. The current snapshot is only
+ * read; all validation and derivation happen against cloned values, so a
+ * failed operation cannot leave partially updated canonical or flat state.
+ */
+export function applyTokenThemePatch<TContract extends Readonly<Record<string, unknown>>>(
+  contract: TContract,
+  current: NativeTheme<TContract>,
+  patch: TokenThemeLayer<TContract>,
+): TokenThemePatchResult<TContract> {
+  try {
+    assertPatchContractCompatibility(contract, current)
+    const baseValues = extractBaseThemeValues(contract, current)
+    validateTokenThemeLayer(contract, contract, patch, [], "patch")
+    const nextValues = cloneThemeValue(baseValues)
+    mergeThemeLayer(nextValues, patch)
+    const theme = createTokenTheme(contract, nextValues as TokenThemeValues<TContract>)
+    return {
+      ok: true,
+      theme,
+      changedPaths: collectThemeLayerPaths(contract, patch, []),
+    }
+  } catch (error) {
+    return {ok: false, error: toTokenThemeOperationError(error, NativeStylesDiagnosticCode.TokenThemePatchInvalid)}
+  }
+}
+
+/**
+ * Validate a decoded external payload against one identified contract and
+ * publish a complete native theme. The external format is keyed by stable
+ * public token IDs, so paths and domains cannot drift silently.
+ */
+export function createTokenThemeFromExternalPayload<TContract extends Readonly<Record<string, unknown>>>(
+  contract: TContract,
+  payload: ExternalTokenThemePayload,
+): ExternalTokenThemeResult<TContract> {
+  try {
+    const identity = getThemeContractIdentity(contract)
+    if (identity === undefined || !sameIdentity(identity, payload.contract)) {
+      return {
+        ok: false,
+        error: {
+          code: NativeStylesDiagnosticCode.TokenThemeExternalContractMismatch,
+          path: ["contract"],
+          message: "External token theme identity does not match the identified contract.",
+        },
+      }
+    }
+    const definitions = new Map<string, { readonly path: ReadonlyArray<string>; readonly token: ThemeVar }>()
+    collectExternalThemeDefinitions(contract, contract, [], definitions)
+    const base: Record<string, unknown> = {}
+    for (const [publicId, value] of Object.entries(payload.values)) {
+      const definition = definitions.get(publicId)
+      if (definition === undefined) {
+        return {
+          ok: false,
+          error: {
+            code: NativeStylesDiagnosticCode.TokenThemeExternalTokenMismatch,
+            path: ["values", publicId],
+            message: `External token theme contains unknown or derived token ID "${publicId}".`,
+          },
+        }
+      }
+      if (typeof value === "number" && (!Number.isFinite(value) || Object.is(value, -0))) {
+        return {
+          ok: false,
+          error: {
+            code: NativeStylesDiagnosticCode.TokenThemeExternalTokenMismatch,
+            path: ["values", publicId],
+            message: `External value for "${publicId}" is not a finite JSON number.`,
+          },
+        }
+      }
+      const domain = getThemeTokenDomainForContract(contract, definition.token)
+      if (domain !== undefined && !isTokenDomainValue(domain, value)) {
+        return {
+          ok: false,
+          error: {
+            code: NativeStylesDiagnosticCode.TokenThemeExternalTokenMismatch,
+            path: ["values", publicId],
+            message: `External value for "${publicId}" does not satisfy the ${domain.kind} token domain.`,
+          },
+        }
+      }
+      setPathValue(base, definition.path, value)
+    }
+    for (const [publicId, definition] of definitions) {
+      if (!hasPathValue(base, definition.path)) {
+        return {
+          ok: false,
+          error: {
+            code: NativeStylesDiagnosticCode.TokenThemeExternalTokenMismatch,
+            path: ["values", publicId],
+            message: `External token theme is missing required definition token ID "${publicId}".`,
+          },
+        }
+      }
+    }
+    return {ok: true, theme: createTokenTheme(contract, base as TokenThemeValues<TContract>)}
+  } catch (error) {
+    return {ok: false, error: toTokenThemeOperationError(error, NativeStylesDiagnosticCode.TokenThemeExternalTokenMismatch)}
+  }
+}
+
 function validateTokenThemeLayer(
   rootContract: Readonly<Record<string, unknown>>,
   contract: Readonly<Record<string, unknown>>,
   layer: unknown,
   path: ReadonlyArray<string>,
-  context: TokenThemeContextName,
+  context: string,
 ): void {
   if (!isRecord(layer)) {
     throw new Error(formatNativeStylesDiagnostic(
@@ -512,6 +637,85 @@ function collectBaseThemeValues(
       collectBaseThemeValues(rootContract, contractValue, theme, nextPath, output)
     }
   }
+}
+
+function assertPatchContractCompatibility<TContract extends Readonly<Record<string, unknown>>>(
+  contract: TContract,
+  current: NativeTheme<TContract>,
+): void {
+  const expectedKey = getThemeContractIdentityKey(contract)
+  const actualKey = getThemeContractIdentityKey(current.contract)
+  const expectedSignature = getThemeContractShapeSignature(contract)
+  const actualSignature = getThemeContractShapeSignature(current.contract)
+  const unidentifiedContractsDiffer = expectedKey === undefined && actualKey === undefined &&
+    expectedSignature === undefined && actualSignature === undefined && current.contract !== contract
+  if (unidentifiedContractsDiffer || expectedKey !== actualKey || expectedSignature !== actualSignature) {
+    throw new Error(formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.TokenThemePatchContractMismatch,
+      `Theme patch contract ${JSON.stringify(actualKey ?? "<unidentified>")} is incompatible with ${JSON.stringify(expectedKey ?? "<unidentified>")}.`,
+    ))
+  }
+}
+
+function collectThemeLayerPaths(
+  contract: Readonly<Record<string, unknown>>,
+  layer: unknown,
+  path: ReadonlyArray<string>,
+): ReadonlyArray<ReadonlyArray<string>> {
+  if (!isRecord(layer)) return []
+  const paths: Array<ReadonlyArray<string>> = []
+  for (const [key, value] of Object.entries(layer)) {
+    const nextPath = [...path, key]
+    const contractValue = contract[key]
+    if (isThemeVar(contractValue)) paths.push(Object.freeze([...nextPath]))
+    else if (isRecord(contractValue)) paths.push(...collectThemeLayerPaths(contractValue, value, nextPath))
+  }
+  return Object.freeze(paths)
+}
+
+function collectExternalThemeDefinitions(
+  rootContract: Readonly<Record<string, unknown>>,
+  contract: Readonly<Record<string, unknown>>,
+  path: ReadonlyArray<string>,
+  definitions: Map<string, { readonly path: ReadonlyArray<string>; readonly token: ThemeVar }>,
+): void {
+  for (const [key, value] of Object.entries(contract)) {
+    const nextPath = [...path, key]
+    if (isThemeVar(value)) {
+      if (getThemeTokenAliasForContract(rootContract, value) !== undefined) continue
+      definitions.set(getThemeTokenPublicId(value), {
+        path: Object.freeze([...nextPath]),
+        token: value,
+      })
+    } else if (isRecord(value)) {
+      collectExternalThemeDefinitions(rootContract, value, nextPath, definitions)
+    }
+  }
+}
+
+function hasPathValue(root: Readonly<Record<string, unknown>>, path: ReadonlyArray<string>): boolean {
+  let cursor: unknown = root
+  for (const key of path) {
+    if (!isRecord(cursor) || !Object.prototype.hasOwnProperty.call(cursor, key)) return false
+    cursor = cursor[key]
+  }
+  return true
+}
+
+function sameIdentity(
+  left: TokenContractIdentity,
+  right: TokenContractIdentity,
+): boolean {
+  return left.owner === right.owner && left.name === right.name && left.version === right.version
+}
+
+function toTokenThemeOperationError(
+  error: unknown,
+  fallbackCode: string,
+): TokenThemeOperationError {
+  const message = error instanceof Error ? error.message : String(error)
+  const code = message.match(/CRUMBS_CSS_[A-Z0-9_]+/)?.[0] ?? fallbackCode
+  return {code, path: [], message}
 }
 
 export function isTokenDomainValue(domain: TokenDomain, value: unknown): boolean {
@@ -647,12 +851,27 @@ function setPathValue(root: Record<string, unknown>, path: ReadonlyArray<string>
   for (let index = 0; index < path.length - 1; index += 1) {
     const key = path[index]
     if (key === undefined) return
-    const next = cursor[key]
-    if (!isRecord(next)) cursor[key] = {}
+    const next = Object.prototype.hasOwnProperty.call(cursor, key) ? cursor[key] : undefined
+    if (!isRecord(next)) {
+      const child: Record<string, unknown> = {}
+      Object.defineProperty(cursor, key, {
+        value: child,
+        enumerable: true,
+        configurable: true,
+        writable: true,
+      })
+    }
     cursor = cursor[key] as Record<string, unknown>
   }
   const key = path[path.length - 1]
-  if (key !== undefined) cursor[key] = value
+  if (key !== undefined) {
+    Object.defineProperty(cursor, key, {
+      value,
+      enumerable: true,
+      configurable: true,
+      writable: true,
+    })
+  }
 }
 
 

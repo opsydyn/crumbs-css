@@ -1,6 +1,8 @@
 export {
   createTokenContract,
   createTokenTheme,
+  applyTokenThemePatch,
+  createTokenThemeFromExternalPayload,
   createTokenThemeScope,
   createTokenThemeScopedSnapshot,
   createTokenThemeSnapshot,
@@ -31,6 +33,9 @@ export type {
   TokenThemeContextName,
   TokenThemeContexts,
   TokenThemeLayer,
+  TokenThemeOperationError,
+  TokenThemePatchResult,
+  ExternalTokenThemeResult,
   TokenThemeSnapshotInput,
 } from "./domains"
 export { TOKEN_THEME_CONTEXT_PRECEDENCE } from "./domains"
@@ -43,4 +48,5 @@ export type {
   TokenDomainValue,
   ThemeTokenOrigin,
   ThemeTokenOriginStep,
+  ExternalTokenThemePayload,
 } from "../theme-token"

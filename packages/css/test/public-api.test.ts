@@ -59,8 +59,10 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "TokenAliasDefinitionType",
       "TokenDefinitionType",
       "alias",
+      "applyTokenThemePatch",
       "createTokenContract",
       "createTokenTheme",
+      "createTokenThemeFromExternalPayload",
       "createTokenThemeScope",
       "createTokenThemeScopedSnapshot",
       "createTokenThemeSnapshot",
@@ -75,7 +77,12 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "isTokenDomainValue",
       "token",
     ])
-    expect(namedApiKeys(tokenSchemaApi)).toEqual(["decodeTokenValue"])
+    expect(namedApiKeys(tokenSchemaApi)).toEqual([
+      "decodeExternalTokenTheme",
+      "decodeTokenValue",
+      "encodeExternalTokenTheme",
+      "externalTokenThemeCodec",
+    ])
   })
 
   it("keeps diagnostics and Metro integration available from the package root", () => {

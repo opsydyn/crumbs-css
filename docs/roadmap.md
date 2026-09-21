@@ -31,7 +31,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M0 | Repair native semantics and isolate runtime imports | ADR review | In progress; M0.1 and M0.2 closed for documented compiler contracts; native Android acceptance deferred |
 | M1 | Select Effect 4 boundary implementation and establish budgets | M0 | In progress; M1.1/M1.2 artifact/API and initial shape contracts complete; native Android remains deferred |
 | M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
-| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 through M3.4 closed |
+| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 through M3.5 closed |
 | M4 | Shared resolution, compiled selection, and bounded caches | M2, M3 | Not started |
 | M5 | Native Sprinkles and composition API completeness | M2, M3, M4 | Not started |
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
@@ -159,7 +159,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M3.2: Implement stable contract/package identity, a contract-bound provider/hook interface, and deterministic public token IDs. Test duplicate package copies, evaluation order, hot reload, and identical paths across distinct contracts.
 - [x] M3.3: Add foundation → semantic → component aliases with missing-target/domain/cycle diagnostics and traceable origin. Required tokens stay required; optional fallbacks are explicit.
 - [x] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
-- [ ] M3.5: Add immutable theme patches and external-theme decoding. Update canonical values and derived token/index data atomically. Invalid patches leave the current snapshot untouched and return structured context.
+- [x] M3.5: Add immutable theme patches and external-theme decoding. Update canonical values and derived token/index data atomically. Invalid patches leave the current snapshot untouched and return structured context.
 - [ ] M3.6: Use reusable Optic focuses for useful nested transformations. Validate domain-changing results; test semantic lens laws, old-snapshot preservation, and promised structural sharing separately.
 - [ ] M3.7: Add migration notes for legacy unscoped tokens and the permissive `string | number` contract. Preserve a bounded compatibility path without allowing old tokens to bind silently to unrelated contracts.
 
@@ -1280,4 +1280,11 @@ Next recommended slice: **M3.2** — add stable contract/package identity, a con
 - Focused context properties, type fixtures, alias regression coverage, package typechecking and public API tests pass. The ordinary runtime remains Effect-free; external decoding and atomic patches remain later M3 work. No publication or push occurred; protected release/version edits remain outside the slice.
 - [Assessment](assessments/2026-09-20-independent-theme-contexts.md) records the precedence, nested-scope and portal ownership contract.
 
-Next recommended slice: **M3.5** — add immutable theme patches and external-theme decoding, publishing canonical values and all derived token/index data atomically. Begin only after approval.
+### 2026-09-21 — M3.5 immutable theme patches and external theme decoding
+
+- Added `applyTokenThemePatch` for sparse, domain-checked updates against a complete theme. Contract identity and shape are checked before cloning canonical definition values; a successful result publishes one new `NativeTheme` with matching nested values and flat native tokens plus frozen changed paths. Invalid patches return structured diagnostics and leave the previous snapshot untouched. Legacy unscoped contracts require the same contract object because they have no identity metadata.
+- Added a version-1 `CrumbsTokenTheme` Effect 4 Schema codec at `tokens/schema`. The external payload carries an identified contract and stable public token IDs; the decoder rejects unknown fields, unsupported versions and non-finite numbers. `createTokenThemeFromExternalPayload` remains Effect-free and validates identity, required definition IDs and local token domains before reconstructing aliases.
+- Focused patch properties, external codec/ingress tests, public API expectations and package typechecking pass. The ordinary token bundle remains Effect-free; no Optic updates, structural sharing, device evidence, publication or push occurred. Protected release/version edits remain outside the slice.
+- [Assessment](assessments/2026-09-21-immutable-theme-patches.md) records the atomic update and ingress contract.
+
+Next recommended slice: **M3.6** — use reusable Optic focuses for nested transformations, validate domain-changing results, and test lens laws, old-snapshot preservation and structural sharing separately. Begin only after approval.

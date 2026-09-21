@@ -1,7 +1,8 @@
 import * as Schema from "effect/Schema"
 import { NativeStylesDiagnosticCode } from "../diagnostics"
 import { NativeThemeTokenReferenceType } from "../theme-token"
-import { makeDataCodec } from "./data-codec"
+import { makeDataCodec, type DataCodec } from "./data-codec"
+import type { TokenContractIdentity } from "../tokens/identity"
 
 // ADR D1-D3 / M1.2: internal shape contracts; not the published compiler ABI.
 const JsonNumber = Schema.Finite.check(Schema.makeFilter<number>(value => Object.is(value, -0)
@@ -13,7 +14,7 @@ const Identifier = Schema.NonEmptyString.check(Schema.isPattern(/^[A-Za-z][A-Za-
 const PackageName = Schema.String.check(Schema.isPattern(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/))
 const TokenName = Schema.String.check(Schema.isPattern(/^--crumbs-[A-Za-z0-9_-]+$/))
 export const ContractIdentitySchema = Schema.Struct({ owner: PackageName, name: Identifier, version: PositiveInteger })
-export type ContractIdentity = typeof ContractIdentitySchema.Type
+export type ContractIdentity = TokenContractIdentity
 export const LegacyThemeTokenReferenceSchema = Schema.Struct({ $$type: Schema.Literal(NativeThemeTokenReferenceType), varName: TokenName })
 export const ThemeTokenReferenceSchema = Schema.Struct({ _tag: Schema.Literal("ThemeTokenReference"), contract: ContractIdentitySchema, varName: TokenName })
 export type ThemeTokenReference = typeof ThemeTokenReferenceSchema.Type
@@ -61,9 +62,23 @@ export const NativeArtifactSchema = Schema.Struct({
     : [{ path: ["declarations", index, "value", "contract"], issue: "Token reference contract does not match artifact contract" }]
 })))
 export type NativeArtifact = typeof NativeArtifactSchema.Type
+export const ExternalTokenThemeVersion = 1 as const
+export const ExternalTokenThemeSchema = Schema.Struct({
+  _tag: Schema.Literal("CrumbsTokenTheme"),
+  version: Schema.Literal(ExternalTokenThemeVersion),
+  contract: ContractIdentitySchema,
+  values: Schema.Record(Schema.String, Schema.Union([Schema.String, JsonNumber])),
+})
+export type ExternalTokenTheme = {
+  readonly _tag: "CrumbsTokenTheme"
+  readonly version: typeof ExternalTokenThemeVersion
+  readonly contract: ContractIdentity
+  readonly values: Readonly<Record<string, string | number>>
+}
 export const contractIdentityCodec = makeDataCodec("contract-identity", ContractIdentitySchema)
 export const legacyThemeTokenReferenceCodec = makeDataCodec("legacy-theme-token-reference", LegacyThemeTokenReferenceSchema)
 export const themeTokenReferenceCodec = makeDataCodec("theme-token-reference", ThemeTokenReferenceSchema)
 export const nativeDeclarationCodec = makeDataCodec("native-declaration", NativeDeclarationSchema)
 export const structuredDiagnosticCodec = makeDataCodec("structured-diagnostic", StructuredDiagnosticSchema)
 export const nativeArtifactCodec = makeDataCodec("native-artifact", NativeArtifactSchema)
+export const externalTokenThemeCodec: DataCodec<ExternalTokenTheme> = makeDataCodec("external-token-theme", ExternalTokenThemeSchema)
