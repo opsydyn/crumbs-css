@@ -437,7 +437,7 @@ export function applyTokenThemePatch<TContract extends Readonly<Record<string, u
   patch: TokenThemeLayer<TContract>,
 ): TokenThemePatchResult<TContract> {
   try {
-    assertPatchContractCompatibility(contract, current)
+    assertTokenThemeContractCompatibility(contract, current)
     const baseValues = extractBaseThemeValues(contract, current)
     validateTokenThemeLayer(contract, contract, patch, [], "patch")
     const nextValues = cloneThemeValue(baseValues)
@@ -639,7 +639,8 @@ function collectBaseThemeValues(
   }
 }
 
-function assertPatchContractCompatibility<TContract extends Readonly<Record<string, unknown>>>(
+/** @internal Shared contract guard for atomic patches and optic focus updates. */
+export function assertTokenThemeContractCompatibility<TContract extends Readonly<Record<string, unknown>>>(
   contract: TContract,
   current: NativeTheme<TContract>,
 ): void {

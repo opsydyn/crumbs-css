@@ -3,6 +3,7 @@ import * as rootApi from "@opsydyn/crumbs-css"
 import * as styleApi from "@opsydyn/crumbs-css/style"
 import * as themeApi from "@opsydyn/crumbs-css/theme"
 import * as tokenApi from "@opsydyn/crumbs-css/tokens"
+import * as tokenOpticApi from "@opsydyn/crumbs-css/tokens/optic"
 import * as tokenSchemaApi from "@opsydyn/crumbs-css/tokens/schema"
 
 function namedApiKeys(api: object): ReadonlyArray<string> {
@@ -82,6 +83,9 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "decodeTokenValue",
       "encodeExternalTokenTheme",
       "externalTokenThemeCodec",
+    ])
+    expect(namedApiKeys(tokenOpticApi)).toEqual([
+      "createTokenThemeFocus",
     ])
   })
 

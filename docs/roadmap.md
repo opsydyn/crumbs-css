@@ -160,7 +160,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M3.3: Add foundation → semantic → component aliases with missing-target/domain/cycle diagnostics and traceable origin. Required tokens stay required; optional fallbacks are explicit.
 - [x] M3.4: Add independent brand/mode/density contexts with documented merge and override precedence. Resolve only complete valid snapshots; define behavior for nested scopes and portal ownership.
 - [x] M3.5: Add immutable theme patches and external-theme decoding. Update canonical values and derived token/index data atomically. Invalid patches leave the current snapshot untouched and return structured context.
-- [ ] M3.6: Use reusable Optic focuses for useful nested transformations. Validate domain-changing results; test semantic lens laws, old-snapshot preservation, and promised structural sharing separately.
+- [x] M3.6: Use reusable Optic focuses for useful nested transformations. Validate domain-changing results; test semantic lens laws, old-snapshot preservation, and promised structural sharing separately.
 - [ ] M3.7: Add migration notes for legacy unscoped tokens and the permissive `string | number` contract. Preserve a bounded compatibility path without allowing old tokens to bind silently to unrelated contracts.
 
 **Exit:** cross-contract isolation and domain correctness hold in types and runtime; external data is decoded once at ingress; scope/portal scenarios are tested; values and token maps never diverge; property suites cover valid aliases and adversarial mutations.
@@ -1287,4 +1287,11 @@ Next recommended slice: **M3.2** — add stable contract/package identity, a con
 - Focused patch properties, external codec/ingress tests, public API expectations and package typechecking pass. The ordinary token bundle remains Effect-free; no Optic updates, structural sharing, device evidence, publication or push occurred. Protected release/version edits remain outside the slice.
 - [Assessment](assessments/2026-09-21-immutable-theme-patches.md) records the atomic update and ingress contract.
 
-Next recommended slice: **M3.6** — use reusable Optic focuses for nested transformations, validate domain-changing results, and test lens laws, old-snapshot preservation and structural sharing separately. Begin only after approval.
+### 2026-09-21 — M3.6 reusable Optic theme focuses
+
+- Added the dedicated `tokens/optic` entrypoint with `createTokenThemeFocus`. It accepts only registered definition tokens and rejects aliases or foreign contract tokens with a stable focus diagnostic. The ordinary `tokens` entrypoint remains Effect-free; Effect 4 Optic is bundled only in the dedicated subpath and no public declaration imports Effect types.
+- Added pure `getValues`, `replaceValues` and `modifyValues` operations with own-key-safe path-copy updates. Unaffected nested branches retain their references, inputs remain unchanged, and a seeded 100-case property suite checks get-put, put-get and put-put lens laws.
+- Added validated theme `get`, `replace` and `modify` operations. Domain-changing results and contract mismatches return structured diagnostics through the existing atomic patch boundary; failed updates preserve the old values/token snapshot and successful updates derive aliases and flat tokens together.
+- Updated compatibility guidance, diagnostic codes, packed consumer checks and the M3.6 assessment. Final resolved-theme identity sharing remains a separate M4 runtime promise; no publication or push occurred and protected release/version edits remain outside the slice.
+
+Next recommended slice: **M3.7** — write the legacy unscoped-token migration notes and bound the permissive `string | number` compatibility path without allowing old tokens to bind silently to unrelated contracts. Begin only after approval.

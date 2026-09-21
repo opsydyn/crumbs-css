@@ -19,6 +19,7 @@ const toolEntries = {
   "metro-plugin": "src/metro-plugin.ts",
   style: "src/native-style.ts",
   tokens: "src/tokens/index.ts",
+  "tokens-optic": "src/tokens/optic.ts",
   "tokens-schema": "src/tokens/schema.ts",
   transformer: "src/transformer.ts",
 }

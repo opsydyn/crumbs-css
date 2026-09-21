@@ -341,6 +341,32 @@ Encoding is available for already decoded payloads and remains in the schema
 subpath. Effect is therefore paid at the ingress boundary, while ordinary
 theme construction and patch application stay Effect-free.
 
+### Reusable token focuses (M3.6)
+
+Use the dedicated `@opsydyn/crumbs-css/tokens/optic` entrypoint when a theme
+operation repeatedly targets a nested definition token:
+
+```ts
+import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic"
+
+const accent = createTokenThemeFocus(vars, vars.color.accent)
+const next = accent.modify(value => value.toUpperCase(), current)
+```
+
+`createTokenThemeFocus` accepts registered definition tokens and rejects aliases
+or tokens owned by another contract. The focus is reusable outside render
+loops. `getValues`, `replaceValues` and `modifyValues` are pure nested
+transformations; they use path-copy updates, preserve the input and share
+unaffected branches. `get`, `replace` and `modify` add contract and domain
+validation, then publish through the same atomic patch boundary as
+`applyTokenThemePatch`. A domain-changing result returns a structured
+diagnostic and leaves the old `NativeTheme` untouched.
+
+Effect 4 Optic is used internally by this subpath, while its declarations
+expose only Crumbs plain-data focus and result types. The published theme
+operation creates one coherent derived snapshot; identity sharing of resolved
+theme outputs is a later M4 runtime promise.
+
 Crumbs `styleVariants` artifacts now carry internal symbol metadata that distinguishes variant maps from native property values. String keys and TypeScript variant keys remain unchanged; object spread retains the marker. Regenerate artifacts to retain this identity when using native-property-like variant names. Legacy unmarked maps remain supported when unambiguous; a valid native structured-value shape takes precedence over an ambiguous unmarked map. JSON serialization drops the marker.
 
 ### Static structured compiler boundary
@@ -423,6 +449,7 @@ full message text.
 | `CRUMBS_CSS_TOKEN_THEME_SCOPE_INVALID` | A context layer is unknown, incomplete at its base, or violates a token domain. |
 | `CRUMBS_CSS_TOKEN_THEME_PATCH_INVALID` | A sparse patch is malformed, unknown, incomplete or violates a token domain; the current snapshot is retained. |
 | `CRUMBS_CSS_TOKEN_THEME_PATCH_CONTRACT_MISMATCH` | The patch contract and current theme contract are not compatible by identity, shape or legacy object ownership. |
+| `CRUMBS_CSS_TOKEN_THEME_FOCUS_INVALID` | A focus target or pure focus path is unknown, derived, foreign to the supplied contract, or absent from the values tree. |
 | `CRUMBS_CSS_TOKEN_THEME_EXTERNAL_CONTRACT_MISMATCH` | An external theme payload identifies a different or unidentified contract. |
 | `CRUMBS_CSS_TOKEN_THEME_EXTERNAL_TOKEN_MISMATCH` | An external token ID is unknown/derived, missing, or carries a value outside its local domain. |
 | `CRUMBS_CSS_INVALID_THEME_CONTRACT` | A contract contains an invalid or misplaced/unregistered native token leaf. |
