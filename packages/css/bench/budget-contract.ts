@@ -56,6 +56,7 @@ const commonMetricFields = {
 const MissingBaselineSchema = Schema.Struct({ status: Schema.Literal("missing"), reason: Schema.NonEmptyString })
 const DiagnosticBaselineSchema = Schema.Struct({
   status: Schema.Literal("diagnostic"), evidence: Schema.NonEmptyString,
+  selector: Schema.optionalKey(BaselineSelectorSchema), value: Schema.optionalKey(Schema.Finite),
   reason: Schema.NonEmptyString, repetitions: PositiveInteger,
 })
 const RecordedBaselineSchema = Schema.Struct({
@@ -126,7 +127,7 @@ export function assessBudgetRegistry(registry: BudgetRegistry) {
 
 export type BaselineVerificationIssue = {
   readonly id: string
-  readonly code: "invalid-evidence-path" | "unreadable-evidence" | "baseline-value-mismatch"
+  readonly code: "invalid-evidence-path" | "unreadable-evidence" | "baseline-value-mismatch" | "incomplete-diagnostic-metadata"
   readonly message: string
 }
 
@@ -145,6 +146,36 @@ export function verifyRecordedBaselines(registry: BudgetRegistry, repoRoot: stri
       const actual = median(extractBaselineSamples(metric.baseline.selector, evidence))
       if (!Object.is(actual, metric.baseline.value)) {
         issues.push({ id: metric.id, code: "baseline-value-mismatch", message: `Recorded ${metric.baseline.value}; evidence resolves to ${actual}` })
+      }
+    } catch (error) {
+      issues.push({ id: metric.id, code: "unreadable-evidence", message: error instanceof Error ? error.message : "Evidence could not be read" })
+    }
+  }
+  return issues
+}
+
+export function verifyDiagnosticBaselines(registry: BudgetRegistry, repoRoot: string): BaselineVerificationIssue[] {
+  const evidenceRoot = resolve(repoRoot, "docs/evidence") + sep
+  const issues: BaselineVerificationIssue[] = []
+  for (const metric of registry.metrics) {
+    if (metric.baseline.status !== "diagnostic") continue
+    const hasSelector = metric.baseline.selector !== undefined
+    const hasValue = metric.baseline.value !== undefined
+    if (hasSelector !== hasValue) {
+      issues.push({ id: metric.id, code: "incomplete-diagnostic-metadata", message: "Diagnostic selector and value must be supplied together" })
+      continue
+    }
+    if (!hasSelector || !hasValue) continue
+    const file = resolve(repoRoot, metric.baseline.evidence)
+    if (!file.startsWith(evidenceRoot)) {
+      issues.push({ id: metric.id, code: "invalid-evidence-path", message: "Diagnostic evidence must stay under docs/evidence" })
+      continue
+    }
+    try {
+      const evidence: unknown = JSON.parse(readFileSync(file, "utf8"))
+      const actual = median(extractBaselineSamples(metric.baseline.selector, evidence))
+      if (!Object.is(actual, metric.baseline.value)) {
+        issues.push({ id: metric.id, code: "baseline-value-mismatch", message: `Diagnostic ${metric.baseline.value}; evidence resolves to ${actual}` })
       }
     } catch (error) {
       issues.push({ id: metric.id, code: "unreadable-evidence", message: error instanceof Error ? error.message : "Evidence could not be read" })
@@ -257,6 +288,33 @@ export function compareRecordedMetrics(registry: BudgetRegistry, repoRoot: strin
     metrics,
     reviewAttention: { highNoise: metrics.filter(metric => metric.current.maxDeviationPercent >= 20).map(metric => metric.id) },
     limits: ["Only recorded host/editor metrics are adapted; missing and diagnostic domains remain blockers"],
+  }
+}
+
+export function compareDiagnosticMetrics(registry: BudgetRegistry, repoRoot: string, current: EvidenceBundle) {
+  const metrics = registry.metrics.flatMap(metric => {
+    if (metric.baseline.status !== "diagnostic" || metric.baseline.selector === undefined || metric.baseline.value === undefined) return []
+    const baselineEvidence = JSON.parse(readFileSync(resolve(repoRoot, metric.baseline.evidence), "utf8")) as unknown
+    const currentEvidence = evidenceForSelector(metric.baseline.selector, current)
+    const samples = extractBaselineSamples(metric.baseline.selector, currentEvidence)
+    const currentEnvelope = summarizeEnvelope(samples)
+    const delta = currentEnvelope.median - metric.baseline.value
+    const deltaPercent = metric.baseline.value === 0 ? (delta === 0 ? 0 : null) : delta / metric.baseline.value * 100
+    const environment = JSON.stringify(environmentFingerprint(metric.baseline.selector, baselineEvidence)) ===
+      JSON.stringify(environmentFingerprint(metric.baseline.selector, currentEvidence)) ? "exact" as const : "mismatch" as const
+    let result: "incomplete-environment-mismatch" | "incomplete-insufficient-repetitions" | "pass" | "fail"
+    if (environment === "mismatch") result = "incomplete-environment-mismatch"
+    else if (samples.length < registry.protocol.minimumIndependentRepetitions) result = "incomplete-insufficient-repetitions"
+    else result = currentEnvelope.median <= metric.baseline.value && deltaPercent !== null && deltaPercent <= 0 ? "pass" : "fail"
+    return [{ id: metric.id, unit: metric.unit, baseline: metric.baseline.value, current: currentEnvelope,
+      delta, deltaPercent, environment, result, qualification: "diagnostic-only" as const }]
+  })
+  return {
+    metrics,
+    limits: [
+      "Diagnostic comparisons preserve historical visibility but never contribute to performance qualification",
+      "A diagnostic result uses the retained baseline as a zero-growth reference; current functionality is gated by admitted split metrics",
+    ],
   }
 }
 

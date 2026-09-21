@@ -2,9 +2,12 @@ import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { join, resolve } from "node:path"
 import {
   budgetRegistryCodec,
+  compareDiagnosticMetrics,
   compareRecordedMetrics,
   createThresholdReviewPacket,
   summarizeBenchmarkReports,
+  verifyDiagnosticBaselines,
+  verifyRecordedBaselines,
 } from "../packages/css/bench/budget-contract"
 import { runEffectBoundaryAudit } from "../packages/css/bench/effect-boundary-audit"
 import { scanRuntimeGraphEvidence } from "../packages/css/bench/runtime-graph-budget"
@@ -59,13 +62,17 @@ const editor = JSON.parse(await readFile(editorFile, "utf8")) as unknown
 
 const registryResult = budgetRegistryCodec.decodeJson(await readFile(join(repoRoot, "packages/css/bench/budgets.json"), "utf8"))
 if (!registryResult.ok) throw Error(`Budget registry invalid: ${JSON.stringify(registryResult.issues)}`)
+const baselineIssues = [...verifyRecordedBaselines(registryResult.value, repoRoot), ...verifyDiagnosticBaselines(registryResult.value, repoRoot)]
+if (baselineIssues.length > 0) throw Error(`Budget baseline evidence is invalid: ${JSON.stringify(baselineIssues)}`)
 const comparison = compareRecordedMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor, runtimeGraph })
+const diagnostic = compareDiagnosticMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor, runtimeGraph })
 const review = createThresholdReviewPacket(registryResult.value, repoRoot)
 await writeFile(join(output, "comparison.json"), JSON.stringify({
   formatVersion: 1,
   recordedAt: new Date().toISOString(),
   sourceRevision,
   sourceState: "Working tree based on sourceRevision; retained reports carry detailed source and environment identity",
+  diagnostic,
   ...comparison,
 }, null, 2) + "\n")
 await writeFile(join(output, "threshold-review.json"), JSON.stringify(review, null, 2) + "\n")

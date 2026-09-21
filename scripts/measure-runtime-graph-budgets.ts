@@ -5,6 +5,7 @@ import {
   budgetRegistryCodec,
   compareRuntimeGraphMetrics,
   verifyRecordedBaselines,
+  verifyDiagnosticBaselines,
 } from "../packages/css/bench/budget-contract"
 import { scanRuntimeGraphEvidence } from "../packages/css/bench/runtime-graph-budget"
 
@@ -14,16 +15,20 @@ await mkdir(output, { recursive: true })
 
 const registryResult = budgetRegistryCodec.decodeJson(await readFile(join(repoRoot, "packages/css/bench/budgets.json"), "utf8"))
 if (!registryResult.ok) throw Error(`Budget registry invalid: ${JSON.stringify(registryResult.issues)}`)
-const baselineIssues = verifyRecordedBaselines(registryResult.value, repoRoot)
-if (baselineIssues.length > 0) throw Error(`Recorded budget baselines are invalid: ${JSON.stringify(baselineIssues)}`)
+const baselineIssues = [...verifyRecordedBaselines(registryResult.value, repoRoot), ...verifyDiagnosticBaselines(registryResult.value, repoRoot)]
+if (baselineIssues.length > 0) throw Error(`Budget baseline evidence is invalid: ${JSON.stringify(baselineIssues)}`)
 
 const runtimeGraph = scanRuntimeGraphEvidence(join(repoRoot, "packages/css"), 5)
 await writeFile(join(output, "runtime-graph.json"), JSON.stringify(runtimeGraph, null, 2) + "\n")
 const splitComparison = compareRuntimeGraphMetrics(registryResult.value, repoRoot, runtimeGraph)
 
 const historicalMetric = registryResult.value.metrics.find(metric => metric.id === "runtime-emitted-bytes")
-if (!historicalMetric || historicalMetric.baseline.status !== "recorded" || historicalMetric.threshold.status !== "approved") {
-  throw Error("The retained runtime-emitted-bytes metric must remain recorded and approved")
+if (!historicalMetric || historicalMetric.baseline.status !== "diagnostic" || historicalMetric.baseline.selector !== "effect.runtime.cjs.graph-bytes" || historicalMetric.baseline.value === undefined) {
+  throw Error("The historical runtime-emitted-bytes metric must remain a verified diagnostic")
+}
+const historicalDecision = JSON.parse(await readFile(join(repoRoot,
+  "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-decision/decision.json"), "utf8")) as {
+  historicalBaseline: { approvedThreshold: { absoluteMaxBytes: number; maxRegressionPercent: number } }
 }
 const historicalSamples = runtimeGraph.currentGraphs.theme.cjs.samples
 const historicalCurrent = summarizeEnvelope(historicalSamples)
@@ -31,8 +36,8 @@ const historicalDelta = historicalCurrent.median - historicalMetric.baseline.val
 const historicalDeltaPercent = historicalMetric.baseline.value === 0
   ? historicalDelta === 0 ? 0 : null
   : historicalDelta / historicalMetric.baseline.value * 100
-const historicalResult = historicalCurrent.median <= historicalMetric.threshold.absoluteMax &&
-  historicalDeltaPercent !== null && historicalDeltaPercent <= historicalMetric.threshold.maxRegressionPercent ? "pass" : "fail"
+const historicalResult = historicalCurrent.median <= historicalDecision.historicalBaseline.approvedThreshold.absoluteMaxBytes &&
+  historicalDeltaPercent !== null && historicalDeltaPercent <= historicalDecision.historicalBaseline.approvedThreshold.maxRegressionPercent ? "pass" : "fail"
 const registryAssessment = assessBudgetRegistry(registryResult.value)
 const report = {
   formatVersion: 1,
@@ -53,9 +58,9 @@ const report = {
     delta: historicalDelta,
     deltaPercent: historicalDeltaPercent,
     environment: "graph-only-current-checkout",
-    thresholdStatus: historicalMetric.threshold.status,
+    thresholdStatus: "diagnostic-zero-growth-reference",
     result: historicalResult,
-    qualification: "Retained historical compatibility comparison; it remains separate from the admitted split graph budgets and is expected to stay fail-closed until the compatibility policy changes.",
+    qualification: "Retained historical compatibility diagnostic; it remains separate from the admitted split graph budgets and never contributes to performance qualification.",
   },
   protocol: runtimeGraph.protocol,
   currentGraphs: runtimeGraph.currentGraphs,

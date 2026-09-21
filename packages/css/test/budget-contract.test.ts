@@ -7,9 +7,11 @@ import {
   budgetRegistryCodec,
   compareRuntimeGraphMetrics,
   compareRecordedMetrics,
+  compareDiagnosticMetrics,
   createThresholdReviewPacket,
   requiredBudgetDomains,
   summarizeBenchmarkReports,
+  verifyDiagnosticBaselines,
   verifyRecordedBaselines,
 } from "../bench/budget-contract"
 
@@ -74,6 +76,35 @@ describe("performance budget registry", () => {
     expect(verifyRecordedBaselines(decoded.value, resolve(import.meta.dir, "../../.."))).toEqual([])
   })
 
+  it("keeps the historical compatibility graph as a verified diagnostic", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const metric = decoded.value.metrics.find(candidate => candidate.id === "runtime-emitted-bytes")
+    if (!metric || metric.baseline.status !== "diagnostic") throw Error("Expected the historical metric to be diagnostic")
+    expect(metric.baseline).toMatchObject({
+      evidence: "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
+      selector: "effect.runtime.cjs.graph-bytes",
+      value: 11307,
+      repetitions: 5,
+    })
+    expect(metric.threshold).toMatchObject({ status: "pending-review", absoluteMax: null, maxRegressionPercent: null })
+    expect(verifyDiagnosticBaselines(decoded.value, repoRoot)).toEqual([])
+    expect(assessBudgetRegistry(decoded.value).diagnosticBaselines).toContain("runtime-emitted-bytes")
+
+    const effect = JSON.parse(readFileSync(resolve(repoRoot,
+      "docs/evidence/2026-09-21-m4-6-full-host-comparison/effect.json"), "utf8"))
+    const diagnostic = compareDiagnosticMetrics(decoded.value, repoRoot, {
+      effect,
+      runtimeInit: {},
+      benchmark: {},
+      incremental: {},
+      editor: {},
+    })
+    expect(diagnostic.metrics).toHaveLength(1)
+    expect(diagnostic.metrics[0]).toMatchObject({ id: "runtime-emitted-bytes", result: "fail", delta: 33457, deltaPercent: 295.8963473954188 })
+  })
+
   it("adopts the expanded Metro invalidation protocol without weakening its approved ceiling", () => {
     const repoRoot = resolve(import.meta.dir, "../../..")
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
@@ -98,7 +129,7 @@ describe("performance budget registry", () => {
       { ...valid, unknown: true },
       { ...valid, protocol: { ...valid.protocol, minimumIndependentRepetitions: 0 } },
       { ...valid, metrics: [...valid.metrics, valid.metrics[0]] },
-      { ...valid, metrics: valid.metrics.map((metric: { baseline: { status: string } }, index: number) => index === 4
+      { ...valid, metrics: valid.metrics.map((metric: { baseline: { status: string } }, index: number) => index === 5
         ? { ...metric, baseline: { ...metric.baseline, repetitions: 4 } } : metric) },
     ]) expect(budgetRegistryCodec.decode(mutation).ok).toBe(false)
   })
@@ -157,13 +188,13 @@ describe("performance budget registry", () => {
     const packet = createThresholdReviewPacket(decoded.value, resolve(import.meta.dir, "../../.."))
     expect(packet.status).toBe("recorded-thresholds-approved")
     expect(packet.candidates).toHaveLength(0)
-    expect(packet.approved).toHaveLength(22)
+    expect(packet.approved).toHaveLength(21)
     expect(packet.approved.find(entry => entry.id === "incremental-rebuild")?.decision).toMatchObject({
       status: "approved", absoluteMax: 137.506, maxRegressionPercent: 10,
     })
     expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-node22-cjs")
     expect(packet.reviewAttention.zeroGrowthPolicy).toEqual(expect.arrayContaining([
-      "runtime-emitted-bytes", "editor-tsc-instantiations-10000", "editor-tsgo-instantiations-10000",
+      "editor-tsc-instantiations-10000", "editor-tsgo-instantiations-10000",
       "runtime-theme-core-esm-graph-bytes", "runtime-theme-core-cjs-graph-bytes",
       "runtime-tokens-esm-graph-bytes", "runtime-tokens-cjs-graph-bytes",
       "runtime-theme-compatibility-esm-graph-bytes", "runtime-theme-compatibility-cjs-graph-bytes",
@@ -188,7 +219,7 @@ describe("performance budget registry", () => {
       runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     })
     expect(report.performanceQualified).toBe(false)
-    expect(report.metrics).toHaveLength(22)
+    expect(report.metrics).toHaveLength(21)
     for (const metric of report.metrics) {
       expect(metric.environment).toBe("exact")
       expect(metric.delta).toBe(0)
@@ -276,9 +307,9 @@ describe("performance budget registry", () => {
       runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     }
     expect(compareRecordedMetrics(decoded.value, repoRoot, evidence).metrics.every(metric => metric.result === "pass")).toBe(true)
-    approved.metrics.find((metric: { id: string }) => metric.id === "runtime-emitted-bytes").threshold.absoluteMax = 0
+    approved.metrics.find((metric: { id: string }) => metric.id === "runtime-theme-core-esm-graph-bytes").threshold.absoluteMax = 0
     const failed = budgetRegistryCodec.decode(approved)
     if (!failed.ok) throw Error("Tightened threshold must decode")
-    expect(compareRecordedMetrics(failed.value, repoRoot, evidence).metrics.find(metric => metric.id === "runtime-emitted-bytes")?.result).toBe("fail")
+    expect(compareRecordedMetrics(failed.value, repoRoot, evidence).metrics.find(metric => metric.id === "runtime-theme-core-esm-graph-bytes")?.result).toBe("fail")
   })
 })

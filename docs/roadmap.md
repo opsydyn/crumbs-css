@@ -1760,3 +1760,30 @@ decide whether the old 11,307-byte compatibility metric remains a legacy
 diagnostic, is retired in favour of the admitted split graphs, or requires a
 same-functionality `theme` graph reduction plan. Keep the current split gates
 and whole-registry fail-closed boundaries intact.
+
+### 2026-09-21 — M4.6 historical compatibility budget disposition
+
+- Retired the historical `runtime-emitted-bytes` selector from active budget
+  gates and classified it as a verified diagnostic. Its original selector,
+  11,307-byte value, reason and audit evidence remain machine-checked; the
+  current 44,764-byte comparison remains visible as a diagnostic-only
+  +295.9% result.
+- Kept the six admitted ESM/CJS split graph metrics as the active current
+  functionality gates. Their approved zero-growth ceilings and evidence are
+  unchanged. A same-functionality compatibility graph reduction is not
+  planned because the retained source and graph evidence describe materially
+  expanded public behaviour rather than an equivalent old workload.
+- Added diagnostic baseline verification and separate diagnostic reporting to
+  the budget contract and host adapters. The active recorded comparison now
+  contains 21 approved metrics; diagnostic results never set
+  `performanceQualified`. The registry remains fail-closed for release-device
+  frame, allocation and retained-memory work, and Android remains backlogged.
+
+See [M4.6 historical compatibility disposition assessment](assessments/2026-09-21-m4-6-historical-compatibility-budget-disposition.md)
+and [disposition evidence](evidence/2026-09-21-m4-6-historical-compatibility-disposition/decision.json).
+
+Next recommended roadmap item: **M5.1** — define the public native
+`defineProperties` / `createSprinkles` adaptation with finite values,
+domain-safe token scales, native primitive kinds and typed shorthands. Keep
+M4.6 release-device gates and Android qualification explicitly backlogged to
+the final device-enabled move.

@@ -19,7 +19,7 @@ Set the registry to `active` only after every required baseline is recorded and 
 
 ## Current state
 
-The registry contains 26 metrics across all nine required domains. Twenty-two
+The registry contains 26 metrics across all nine required domains. Twenty-one
 runtime-footprint, transform, incremental-rebuild, and 10,000-token
 editor/compiler metrics have reproducible recorded host baselines and approved
 thresholds. Six of those are the current split emitted-graph gates:
@@ -27,9 +27,10 @@ thresholds. Six of those are the current split emitted-graph gates:
 `runtime.tokens.{esm,cjs}.graph-bytes`, and
 `runtime.theme-compatibility.{esm,cjs}.graph-bytes`. They use five sequential
 artifact scans and zero-growth limits. The historical
-`effect.runtime.cjs.graph-bytes` selector remains separately visible and
-continues to fail against its old compatibility baseline when current output
-is compared.
+`effect.runtime.cjs.graph-bytes` selector is now a verified diagnostic with its
+selector, value and evidence retained; its old zero-growth comparison remains
+separately visible and never contributes to current-functionality
+qualification.
 
 The incremental-rebuild baseline now follows the expanded M2.7-aware protocol:
 three dependency-only receipts (plain token, nested `.css.ts`, and workspace
@@ -46,7 +47,7 @@ remain historical local checks and are not M1.8 budgets.
 
 ## Host comparison and review packets
 
-Run `CRUMBS_AUDIT_NODE_FLOOR=/absolute/path/to/node-v22.0.0 bun run measure:host-budgets <output-directory>` after a complete package build. The command runs the Effect/runtime boundary matrix, the isolated 15-sample runtime-initialization matrix, an Expo/Metro direct-edit run, five independent native-style benchmark processes, and five fresh editor measurements at every scale sequentially. It retains raw reports, an adapted benchmark summary, a baseline comparison, and a threshold review packet. The Metro run binds a localhost port and performs reversible edits, so its host must permit local server and file-watcher operation.
+Run `CRUMBS_AUDIT_NODE_FLOOR=/absolute/path/to/node-v22.0.0 bun run measure:host-budgets <output-directory>` after a complete package build. The command runs the Effect/runtime boundary matrix, the isolated 15-sample runtime-initialization matrix, an Expo/Metro direct-edit run, five independent native-style benchmark processes, and five fresh editor measurements at every scale sequentially. It retains raw reports, an adapted benchmark summary, a comparison for recorded metrics, diagnostic-only comparisons and a threshold review packet. The Metro run binds a localhost port and performs reversible edits, so its host must permit local server and file-watcher operation.
 
 Run `bun run build && bun run measure:runtime-graph-budgets <output-directory>` for the focused M4.6 split graph comparison. The adapter scans `theme-core`, `tokens`, and compatibility `theme` in ESM and CJS five times, retains artifact hashes, compares the six admitted zero-growth metrics, and reports the retained historical `runtime-emitted-bytes` comparison separately. The graph fingerprint uses the Bun/build-tool and host identity that determines the emitted artifacts; the current Node version is retained as evidence but is not an equivalence blocker for this emitted-byte scan. A split-gate failure exits non-zero; the expected historical compatibility failure does not.
 
@@ -54,4 +55,4 @@ Comparison adapters require matching runtime/compiler identities and scenario co
 
 Run `bun run measure:metro-incremental <output.json>` for the focused Metro scenario. It warms one cleared iOS development graph, records three dependency-only invalidation receipts, excludes one direct-edit warmup, then records five direct `.css.ts` edits from file write through a 75 ms watcher-settle interval and receipt of the updated full bundle. Every direct receipt must contain all four newly compiled padding longhands, omit the previous values, change the bundle hash, and restore both edited files. The dependency receipts prove that plain-token, nested `.css.ts`, and workspace-source parents rebuild; they remain separate correctness samples and are excluded from the direct-edit median.
 
-The review packet preserves approved decisions beside their min/median/max envelopes and derives mechanical candidates only for recorded metrics still awaiting review. Candidates use the larger of the observed maximum or the median plus twice the observed deviation, with a minimum ten-percent review margin and upward rounding. High-noise metrics and approved zero-growth policies remain visible. The tool never edits or activates `budgets.json`.
+The review packet preserves approved decisions beside their min/median/max envelopes and derives mechanical candidates only for recorded metrics still awaiting review. Diagnostic baselines are checked for complete optional selector/value metadata and evidence re-derivation, but are excluded from active threshold approval. Candidates use the larger of the observed maximum or the median plus twice the observed deviation, with a minimum ten-percent review margin and upward rounding. High-noise metrics and approved zero-growth policies remain visible. The tool never edits or activates `budgets.json`.

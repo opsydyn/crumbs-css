@@ -1,0 +1,52 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-21T20:46:16Z",
+  "slice": "M4.6 historical compatibility budget disposition",
+  "sourceRevision": "d65cb43ccaa43549695598f33c0229d2b8b3ed36",
+  "decision": {
+    "status": "retired-from-active-gates",
+    "metric": "runtime-emitted-bytes",
+    "selector": "effect.runtime.cjs.graph-bytes",
+    "registryBaselineStatus": "diagnostic",
+    "activeReplacement": [
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "sameFunctionalityReduction": "not-planned",
+    "reason": [
+      "The old 11,307-byte selector measures compatibility-entrypoint lineage from before the current token and runtime contract was added.",
+      "The current compatibility graph is 44,764 bytes and the current source/runtime surface is materially larger; the retained evidence does not identify a same-functionality reduction target that would justify the old ceiling.",
+      "The six format-specific split graphs are deterministic, independently inspectable and already have approved zero-growth ceilings for the current contract.",
+      "The old selector remains machine-checked as a diagnostic so its +295.9% historical comparison cannot be hidden or mistaken for current-functionality qualification."
+    ]
+  },
+  "historicalDiagnostic": {
+    "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
+    "baselineBytes": 11307,
+    "currentBytes": 44764,
+    "deltaBytes": 33457,
+    "deltaPercent": 295.8963473954188,
+    "policy": {
+      "absoluteMaxBytes": 11307,
+      "maxRegressionPercent": 0,
+      "status": "diagnostic-zero-growth-reference"
+    },
+    "result": "fail",
+    "qualification": "diagnostic-only"
+  },
+  "verification": {
+    "diagnosticSelectorAndValueReDerived": true,
+    "splitGraphGatesRemainActive": true,
+    "wholeRegistryPerformanceQualification": "not-run",
+    "nativeDeviceGates": "backlogged"
+  },
+  "limits": [
+    "This decision changes budget classification and reporting; it does not change emitted code, public APIs or dependencies.",
+    "Graph bytes are emitted JavaScript artifact sizes, not Hermes startup, frame time, allocation or retained-memory evidence.",
+    "Physical iOS and Android qualification remain backlogged until the final device-enabled move."
+  ]
+}

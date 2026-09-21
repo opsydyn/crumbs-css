@@ -95,19 +95,17 @@
       "direction": "lower-is-better",
       "environmentClass": "node22-and-current-macos-arm64",
       "baseline": {
-        "status": "recorded",
+        "status": "diagnostic",
         "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
         "selector": "effect.runtime.cjs.graph-bytes",
         "value": 11307,
+        "reason": "Historical compatibility-entrypoint lineage predates the admitted split graph contract; retain its zero-growth comparison for visibility, not as a current-functionality gate.",
         "repetitions": 5
       },
       "threshold": {
-        "status": "approved",
-        "absoluteMax": 11307,
-        "maxRegressionPercent": 0,
-        "approvedBy": "Alan Currie (session approval)",
-        "approvedAt": "2026-09-15T09:06:34Z",
-        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
       }
     },
     {

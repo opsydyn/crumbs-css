@@ -3,6 +3,7 @@ import { resolve } from "node:path"
 import {
   assessBudgetRegistry,
   budgetRegistryCodec,
+  verifyDiagnosticBaselines,
   verifyRecordedBaselines,
 } from "../packages/css/bench/budget-contract"
 
@@ -16,7 +17,7 @@ if (!decoded.ok) {
   console.log(JSON.stringify({ valid: false, registryReady: false, performanceQualification: "not-run", issues: decoded.issues }, null, 2))
   process.exitCode = 1
 } else {
-  const baselineIssues = verifyRecordedBaselines(decoded.value, repoRoot)
+  const baselineIssues = [...verifyRecordedBaselines(decoded.value, repoRoot), ...verifyDiagnosticBaselines(decoded.value, repoRoot)]
   const { ready, ...gaps } = assessBudgetRegistry(decoded.value)
   const valid = baselineIssues.length === 0
   const registryReady = valid && ready
