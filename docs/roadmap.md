@@ -197,7 +197,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Decisions:** D5, D7, D8, D12.\
 **Affected paths:** new `packages/css/src/conditions/` and expression modules; compiler/runtime dependency plans, conditional type/property tests, Storybook adaptive scenarios.
 
-- [ ] M6.1: Define native platform, dimension-bucket, RTL, font-scale, and accessibility conditions with default/overlap precedence. Register and clean up subscriptions predictably; avoid using unbounded raw dimensions as cache keys.
+- [x] M6.1: Define native platform, dimension-bucket, RTL, font-scale, and accessibility conditions with default/overlap precedence. Register and clean up subscriptions predictably; avoid using unbounded raw dimensions as cache keys.
 - [ ] M6.2: Add conditional value normalization and mapping helpers, optional responsive tuple syntax if it preserves readable types, and the associated conditional-value types. Ensure equivalent input forms normalize identically.
 - [ ] M6.3: Define supported expression nodes for aliases, typed scalar operations, optional fallbacks, composition, and exhaustive matching. Specify units/domains, missing inputs, and dependency sets before implementation.
 - [ ] M6.4: Constant-fold static expressions and recompute dynamic programs only for declared dependency changes. Opaque arbitrary closures are not accepted as portable serialized programs.
@@ -1905,3 +1905,30 @@ Next recommended roadmap item: **M6.1** — define native platform,
 dimension-bucket, RTL, font-scale, and accessibility conditions with explicit
 precedence and subscription lifecycle. Keep device frame/allocation gates and
 Android backlogged until the Expo/device harness is available.
+
+### 2026-09-22 — M6.1 native condition snapshots and lifecycle
+
+- Added a finite native condition snapshot with platform, compact/medium/
+  expanded width buckets, short/regular/tall height buckets, orientation,
+  direction, font-scale, motion and contrast preferences. Raw dimensions are
+  used only to derive buckets and never enter snapshot identity or cache keys.
+- Added explicit resolver precedence: the branch matching the most axes wins,
+  later declarations win equal-specificity ties, an empty matcher is the
+  documented default branch and a caller fallback handles an unmatched
+  snapshot.
+- Added a source-backed immutable snapshot store. Sources activate with the
+  first subscriber, deactivate after the last unsubscribe, re-read on
+  reactivation and clean up in reverse order on disposal. Same-bucket resize
+  updates retain snapshot identity and do not notify consumers.
+- Exported the condition model, resolver, store and React
+  `useNativeConditionSnapshot` hook from both `theme` and the lean `theme/core`
+  runtime surfaces. Focused tests cover boundaries, malformed input,
+  precedence, identity and subscription cleanup.
+
+See [M6.1 native condition assessment](assessments/2026-09-22-m6-1-native-conditions.md).
+
+Next recommended roadmap item: **M6.2** — add conditional value
+normalisation and mapping helpers, including any responsive tuple syntax only
+where it preserves readable types and equivalent finite semantics. Keep device
+frame/allocation gates and Android backlogged until the Expo/device harness is
+available.

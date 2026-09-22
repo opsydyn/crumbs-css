@@ -98,6 +98,33 @@ export type {
   NativeSprinklesResolutionSelection,
 } from "./runtime/sprinkles-resolution-plan"
 export {
+  createNativeConditionResolver,
+  createNativeConditionStore,
+  defaultNativeConditionSnapshot,
+  nativeConditionSnapshotKey,
+  NATIVE_CONDITION_BREAKPOINTS,
+  normalizeNativeConditionInput,
+  useNativeConditionSnapshot,
+} from "./conditions"
+export type {
+  NativeConditionBranch,
+  NativeConditionInput,
+  NativeConditionMatcher,
+  NativeConditionSnapshot,
+  NativeConditionSource,
+  NativeConditionStore,
+  NativeConditionStoreOptions,
+  NativeConditionStoreStats,
+  NativeContrastPreference,
+  NativeDirection,
+  NativeFontScaleBucket,
+  NativeHeightBucket,
+  NativeMotionPreference,
+  NativeOrientation,
+  NativePlatform,
+  NativeWidthBucket,
+} from "./conditions"
+export {
   createThemeTokenReference,
   isThemeTokenReference,
   NativeThemeTokenReferenceType,
