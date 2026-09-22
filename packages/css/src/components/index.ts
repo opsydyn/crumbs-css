@@ -310,10 +310,11 @@ function authorSlotStyles(
   entries.forEach(([slot, rule], index) => {
     const kind = slots[slot]
     if (kind === undefined) throw new TypeError(`Component recipe ${branchKind} references unknown slot ${JSON.stringify(slot)}`)
+    const slotDebugId = debugId === undefined ? undefined : `${debugId}.${slot}`
     const className = authorNativeStyle(
       rule,
       [kind],
-      componentDebugId(debugId, "slot", slot, branchKind, ...segments, String(index)),
+      componentDebugId(slotDebugId, "slot", branchKind, ...segments, String(index)),
     )
     result.push([slot, componentStyleReference(className)])
   })
