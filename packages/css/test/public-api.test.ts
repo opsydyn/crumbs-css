@@ -18,6 +18,8 @@ describe("@opsydyn/crumbs-css public API contract", () => {
     expect(namedApiKeys(styleApi)).toEqual([
       "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
       "NATIVE_RESPONSIVE_CONDITION_NAMES",
+      "NativeComponentRecipeType",
+      "NativeComponentRecipeVersion",
       "NativeExpressionEvaluationError",
       "NativeExpressionProgramType",
       "NativeExpressionProgramVersion",
@@ -28,6 +30,8 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "NativeSprinklesLookupPlanType",
       "NativeSprinklesLookupPlanVersion",
       "NativeThemeTokenReferenceType",
+      "componentRecipe",
+      "componentRecipeFromRecipe",
       "createNativeExpressionAdd",
       "createNativeExpressionAlias",
       "createNativeExpressionClamp",
@@ -177,6 +181,8 @@ describe("@opsydyn/crumbs-css public API contract", () => {
     expect(rootApi).toHaveProperty("withNativeStyles")
     expect(rootApi).toHaveProperty("createSprinkles")
     expect(rootApi).toHaveProperty("defineProperties")
+    expect(rootApi).not.toHaveProperty("componentRecipe")
+    expect(rootApi).not.toHaveProperty("componentRecipeFromRecipe")
     expect(rootApi).not.toHaveProperty("ThemeProvider")
     expect(rootApi).not.toHaveProperty("createRecipeResolver")
   })

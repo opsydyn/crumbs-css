@@ -1,10 +1,8 @@
-import { type StyleRule, style as vanillaStyle } from "@vanilla-extract/css"
-import { markCompositionUsed, registerComposition } from "@vanilla-extract/css/adapter"
-import { getFileScope } from "@vanilla-extract/css/fileScope"
+import { type StyleRule } from "@vanilla-extract/css"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import { markNativeStyleMap, NativeRecipeClassSymbol } from "./native-style-map"
 import { NativeRecipeType, NativeRecipeClassType } from "./native-tags"
-import { getNativeCaptureMetadata, markNativeCaptureRule, type NativePrimitiveDomain } from "./compiler/native-capture"
+import { authorNativeStyle } from "./native-authoring"
 export {
   createSprinkles,
   createSprinklesLookupPlan,
@@ -20,6 +18,20 @@ export type {
   NativeSprinklesLookupPlan,
   NativeSprinklesSelection,
 } from "./sprinkles"
+export {componentRecipe, componentRecipeFromRecipe} from "./components"
+export type {
+  NativeComponentCompoundVariant,
+  NativeComponentRecipe,
+  NativeComponentRecipeConfig,
+  NativeComponentRecipeProps,
+  NativeComponentResolvedStyles,
+  NativeComponentSlotKind,
+  NativeComponentSlotStyleInput,
+  NativeComponentSlotStyles,
+  NativeComponentSlots,
+  NativeComponentVariantSelection,
+  NativeComponentVariantsConfig,
+} from "./components"
 export {
   createNativeMapValueFn,
   createNativeNormalizeValueFn,
@@ -105,6 +117,8 @@ import {
   type TokenDomainValue,
 } from "./theme-token"
 export {
+  NativeComponentRecipeType,
+  NativeComponentRecipeVersion,
   NativeRecipeType,
   NativeRecipeClassType,
   NativeSprinklesLookupPlanType,
@@ -306,51 +320,28 @@ export function style<const TRule extends NativeAuthoringRule>(
   rule: TRule & CheckedNativeRule<TRule>,
   debugId?: string,
 ): NativeStyleResult<TRule> {
-  return authorStyle(rule, ["view", "text", "image"], debugId) as unknown as NativeStyleResult<TRule>
+  return authorNativeStyle(rule, ["view", "text", "image"], debugId) as unknown as NativeStyleResult<TRule>
 }
 
 export function viewStyle(
   rule: StaticNativeStyleInput<ViewStyle> | NativeStyleComposition<StaticNativeStyleInput<ViewStyle>, ViewStyle>,
   debugId?: string,
 ): ViewStyle {
-  return authorStyle(rule, ["view"], debugId) as unknown as ViewStyle
+  return authorNativeStyle(rule, ["view"], debugId) as unknown as ViewStyle
 }
 
 export function textStyle(
   rule: StaticNativeStyleInput<TextStyle> | NativeStyleComposition<StaticNativeStyleInput<TextStyle>, TextStyle>,
   debugId?: string,
 ): TextStyle {
-  return authorStyle(rule, ["text"], debugId) as unknown as TextStyle
+  return authorNativeStyle(rule, ["text"], debugId) as unknown as TextStyle
 }
 
 export function imageStyle(
   rule: StaticNativeStyleInput<ImageStyle> | NativeStyleComposition<StaticNativeStyleInput<ImageStyle>, ImageStyle>,
   debugId?: string,
 ): ImageStyle {
-  return authorStyle(rule, ["image"], debugId) as unknown as ImageStyle
-}
-
-function authorStyle(rule: unknown, primitiveDomain: NativePrimitiveDomain, debugId?: string): string {
-  // A compiled reference is a build-time class handle, not a declaration object.
-  if (typeof rule === "string") return authorStyle([rule], primitiveDomain, debugId)
-  if (!Array.isArray(rule)) {
-    const record = rule as Record<string, unknown>
-    const marked = getNativeCaptureMetadata(record) === undefined
-      ? markNativeCaptureRule(record, primitiveDomain)
-      : record
-    return vanillaStyle(marked as StyleRule, debugId)
-  }
-
-  // ADR D2: native order includes inline rules, nested sequences and repeats.
-  const identifier = vanillaStyle({}, debugId)
-  const classList = [identifier, ...rule.map((entry, index) =>
-    typeof entry === "string"
-      ? entry
-      : authorStyle(entry, primitiveDomain, debugId === undefined ? undefined : `${debugId}_${index}`),
-  )].join(" ")
-  registerComposition({ identifier, classList }, getFileScope())
-  markCompositionUsed(identifier)
-  return classList
+  return authorNativeStyle(rule, ["image"], debugId) as unknown as ImageStyle
 }
 
 export function styleVariants<
@@ -385,7 +376,7 @@ function styleVariantsFromEntries(
   const result: Record<string, NativeStyle> = {}
   for (const [name, value] of Object.entries(values)) {
     const rule = mapper === undefined ? value : mapper(value, name)
-    result[name] = authorStyle(
+    result[name] = authorNativeStyle(
       rule,
       ["view", "text", "image"],
       debugId === undefined ? undefined : `${debugId}_${name}`,
@@ -428,7 +419,7 @@ export function recipe<TVariants extends NativeRecipeVariantsConfig>(
 function recipeClass(rule: NativeRecipeStyleInput, debugId?: string): NativeRecipeClassRef {
   return Object.defineProperty({
     $$type: NativeRecipeClassType,
-    className: authorStyle(rule, ["view"], debugId),
+    className: authorNativeStyle(rule, ["view"], debugId),
   }, NativeRecipeClassSymbol, { value: true, enumerable: true }) as NativeRecipeClassRef
 }
 
