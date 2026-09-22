@@ -1,0 +1,105 @@
+import {describe, expect, it} from "bun:test"
+import fc from "fast-check"
+import type {NativeComponentRecipeDescriptor} from "../src/components"
+import {createComponentRecipeResolutionPlan} from "../src/runtime/component-recipe-resolution-plan"
+
+const PROPERTY_RUNS = 100
+const PROPERTY_SEED = 20260923
+
+const planCaseArbitrary = fc.record({
+  compoundCount: fc.integer({min: 0, max: 5}),
+  slotCount: fc.integer({min: 1, max: 4}),
+  valueCounts: fc.array(fc.integer({min: 1, max: 3}), {minLength: 1, maxLength: 4}),
+}).map(({compoundCount, slotCount, valueCounts}) =>
+  makePlanCase(compoundCount, slotCount, valueCounts),
+)
+
+describe("component recipe resolution plan size laws", () => {
+  it("stores authored variants and slot branches exactly without product expansion", () => {
+    fc.assert(
+      fc.property(planCaseArbitrary, recipe => {
+        const plan = createComponentRecipeResolutionPlan(recipe)
+        const authoredVariants = recipe.variants as Record<string, Record<string, Record<string, unknown>>>
+        const authoredVariantValueCount = Object.values(authoredVariants)
+          .reduce((count, values) => count + Object.keys(values).length, 0)
+        const plannedVariantValueCount = plan.variants
+          .reduce((count, variant) => count + Object.keys(variant.values).length, 0)
+        const authoredBranchRecordCount = (recipe.base === undefined ? 0 : 1) +
+          authoredVariantValueCount + recipe.compoundVariants.length
+        const plannedBranchRecordCount = (Object.keys(plan.base).length === 0 ? 0 : 1) +
+          plannedVariantValueCount + plan.compoundMatchers.length
+        const authoredSlotBranchCount = countSlotBranches(recipe.base) +
+          Object.values(authoredVariants).reduce((count, values) =>
+            count + Object.values(values).reduce((valueCount, styles) => valueCount + Object.keys(styles).length, 0), 0) +
+          recipe.compoundVariants.reduce((count, compound) => count + Object.keys(compound.styles).length, 0)
+        const plannedSlotBranchCount = countSlotBranches(plan.base) +
+          plan.variants.reduce((count, variant) => count + Object.values(variant.values)
+            .reduce((valueCount, styles) => valueCount + Object.keys(styles).length, 0), 0) +
+          plan.compoundMatchers.reduce((count, compound) => count + Object.keys(compound.styles).length, 0)
+
+        expect(plan.variantOrder).toEqual(Object.keys(authoredVariants))
+        expect(plannedVariantValueCount).toBe(authoredVariantValueCount)
+        expect(plannedBranchRecordCount).toBe(authoredBranchRecordCount)
+        expect(plannedBranchRecordCount).toBeLessThanOrEqual(authoredBranchRecordCount + recipe.compoundVariants.length)
+        expect(plannedSlotBranchCount).toBe(authoredSlotBranchCount)
+      }),
+      {numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED},
+    )
+  })
+
+  it("keeps three four-valued variants as twelve branches rather than sixty-four combinations", () => {
+    const recipe = makePlanCase(2, 3, [4, 4, 4])
+    const plan = createComponentRecipeResolutionPlan(recipe)
+    const planValueCount = plan.variants.reduce((count, variant) => count + Object.keys(variant.values).length, 0)
+    const cartesianCombinationCount = Object.values(recipe.variants as Record<string, Record<string, unknown>>)
+      .reduce((product, values) => product * Object.keys(values).length, 1)
+
+    expect(Object.keys(recipe.slots)).toHaveLength(3)
+    expect(plan.variants).toHaveLength(3)
+    expect(planValueCount).toBe(12)
+    expect(cartesianCombinationCount).toBe(64)
+    expect(planValueCount).toBeLessThan(cartesianCombinationCount)
+  })
+})
+
+function makePlanCase(
+  compoundCount: number,
+  slotCount: number,
+  valueCounts: ReadonlyArray<number>,
+): NativeComponentRecipeDescriptor {
+  const slots = Object.fromEntries(Array.from({length: slotCount}, (_, slotIndex) => [
+    `slot${slotIndex}`,
+    (["view", "text", "image"] as const)[slotIndex % 3]!,
+  ]))
+  const slotNames = Object.keys(slots)
+  const makeStyles = (seed: number): Record<string, object> => Object.fromEntries(
+    slotNames.filter((_, slotIndex) => (slotIndex + seed) % 2 === 0)
+      .map((slot, slotIndex) => [slot, Object.freeze({id: seed * 10 + slotIndex, slot})]),
+  )
+  const base = makeStyles(1)
+  const variants: Record<string, Record<string, Record<string, object>>> = {}
+  valueCounts.forEach((valueCount, variantIndex) => {
+    variants[`variant${variantIndex}`] = Object.fromEntries(Array.from({length: valueCount}, (_, valueIndex) => [
+      `value${valueIndex}`,
+      makeStyles(variantIndex * 10 + valueIndex),
+    ]))
+  })
+  const compoundVariants = Array.from({length: compoundCount}, (_, index) => ({
+    variants: valueCounts.length === 0 ? {} : {[`variant${index % valueCounts.length}`]: "value0"},
+    styles: makeStyles(index + 20),
+  }))
+  return {
+    $$type: "crumbs.css.component-recipe",
+    version: 1,
+    slots,
+    ...(Object.keys(base).length === 0 ? {} : {base}),
+    variants,
+    defaultVariants: {},
+    compoundVariants,
+  } as unknown as NativeComponentRecipeDescriptor
+}
+
+function countSlotBranches(value: unknown): number {
+  if (value === undefined) return 0
+  return Object.keys(value as Record<string, unknown>).length
+}

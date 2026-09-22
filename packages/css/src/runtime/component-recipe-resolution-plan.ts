@@ -143,6 +143,10 @@ export function resolveComponentRecipeResolutionPlan<
   for (const variant of plan.variants) {
     const selectedValue = selected[variant.name]
     if (selectedValue === undefined) continue
+    if (typeof selectedValue !== "string" && typeof selectedValue !== "boolean") {
+      reportInvalidVariant?.(variant.name, selectedValue, variant.values)
+      continue
+    }
     const valueName = String(selectedValue)
     if (!Object.hasOwn(variant.values, valueName)) {
       reportInvalidVariant?.(variant.name, selectedValue, variant.values)
