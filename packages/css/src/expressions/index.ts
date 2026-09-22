@@ -1028,14 +1028,14 @@ function foldNode<TDomain extends NativeExpressionDomain>(
     case "condition-reference":
       return expression
     case "alias":
-      return createNativeExpressionAlias(expression.name, foldNode(expression.expression)) as NativeExpression<TDomain>
+      return createNativeExpressionAlias(expression.name, foldChild(expression.expression)) as NativeExpression<TDomain>
     case "fallback":
       return createNativeExpressionFallback(
-        foldNode(expression.primary),
-        foldNode(expression.fallback),
+        foldChild(expression.primary),
+        foldChild(expression.fallback),
       ) as NativeExpression<TDomain>
     case "compose": {
-      const entries = expression.expressions.map((entry) => foldNode(entry)) as unknown as readonly [
+      const entries = expression.expressions.map((entry) => foldChild(entry)) as unknown as readonly [
         NativeExpression<TDomain>,
         ...ReadonlyArray<NativeExpression<TDomain>>,
       ]
@@ -1043,39 +1043,53 @@ function foldNode<TDomain extends NativeExpressionDomain>(
     }
     case "add":
       return createNativeExpressionAdd(
-        foldNode(expression.left) as unknown as NativeExpression<AdditiveDomain>,
-        foldNode(expression.right) as unknown as NativeExpression<AdditiveDomain>,
+        foldChild(expression.left) as unknown as NativeExpression<AdditiveDomain>,
+        foldChild(expression.right) as unknown as NativeExpression<AdditiveDomain>,
       ) as NativeExpression<TDomain>
     case "subtract":
       return createNativeExpressionSubtract(
-        foldNode(expression.left) as unknown as NativeExpression<AdditiveDomain>,
-        foldNode(expression.right) as unknown as NativeExpression<AdditiveDomain>,
+        foldChild(expression.left) as unknown as NativeExpression<AdditiveDomain>,
+        foldChild(expression.right) as unknown as NativeExpression<AdditiveDomain>,
       ) as NativeExpression<TDomain>
     case "scale":
       return createNativeExpressionScale(
-        foldNode(expression.expression) as unknown as NativeExpression<NumericDomain>,
+        foldChild(expression.expression) as unknown as NativeExpression<NumericDomain>,
         expression.factor,
       ) as NativeExpression<TDomain>
     case "clamp":
       return createNativeExpressionClamp(
-        foldNode(expression.expression) as unknown as NativeExpression<NumericDomain>,
+        foldChild(expression.expression) as unknown as NativeExpression<NumericDomain>,
         expression.minimum,
         expression.maximum,
       ) as NativeExpression<TDomain>
     case "match": {
       const cases = expression.cases.map((entry) => ({
         value: entry.value,
-        expression: foldNode(entry.expression),
+        expression: foldChild(entry.expression),
       }))
       return createNativeExpressionMatch({
         condition: expression.condition,
         cases,
         ...(expression.fallback === undefined
           ? {}
-          : {fallback: foldNode(expression.fallback)}),
+          : {fallback: foldChild(expression.fallback)}),
       }) as NativeExpression<TDomain>
     }
   }
+}
+
+function foldChild<TDomain extends NativeExpressionDomain>(
+  expression: NativeExpression<TDomain>,
+): NativeExpression<TDomain> {
+  const folded = foldNode(expression)
+  if (folded.dependencies.length === 0 && folded.kind !== "literal") {
+    const value = evaluateNativeExpression(folded, {conditions: DEFAULT_EVALUATION_CONDITIONS})
+    return createNativeExpressionLiteral(
+      folded.domain,
+      value as NativeExpressionValue<TDomain>,
+    ) as NativeExpression<TDomain>
+  }
+  return folded
 }
 
 export function foldNativeExpression<TDomain extends NativeExpressionDomain>(

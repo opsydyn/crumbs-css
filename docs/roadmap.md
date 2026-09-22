@@ -201,7 +201,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M6.2: Add conditional value normalization and mapping helpers, optional responsive tuple syntax if it preserves readable types, and the associated conditional-value types. Ensure equivalent input forms normalize identically.
 - [x] M6.3: Define supported expression nodes for aliases, typed scalar operations, optional fallbacks, composition, and exhaustive matching. Specify units/domains, missing inputs, and dependency sets before implementation.
 - [x] M6.4: Constant-fold static expressions and recompute dynamic programs only for declared dependency changes. Opaque arbitrary closures are not accepted as portable serialized programs.
-- [ ] M6.5: Test normalization idempotence, deterministic evaluation, supported algebraic laws, precise invalidation, and resize/font-scale/RTL behavior on native consumers.
+- [x] M6.5: Test normalization idempotence, deterministic evaluation, supported algebraic laws, precise invalidation, and resize/font-scale/RTL behavior on native consumers.
 
 **Exit:** conditions and expressions have explicit finite semantics and lifecycle rules; every operator has type, property, and reference-evaluation coverage; runtime and editor budgets pass. Container-measurement and continuous motion work remain M11 items.
 
@@ -2001,3 +2001,24 @@ deterministic evaluation, supported algebraic laws, precise invalidation and
 resize/font-scale/RTL behaviour on native consumers. Keep device
 frame/allocation gates and Android backlogged until the Expo/device harness is
 available.
+
+### 2026-09-22 — M6.5 expression laws and native condition boundaries
+
+- Added property coverage for idempotent conditional-value normalisation and
+  expression folding, deterministic evaluation independent of insertion order,
+  scalar algebraic laws and ordered composition semantics.
+- Qualified selective invalidation across generated declared-token changes and
+  verified that unrelated updates skip evaluation while preserving the latest
+  input snapshot.
+- Fed runtime programs from finite native condition snapshots to cover width
+  resize, font-scale, orientation and RTL boundaries. Static descendants are
+  folded before dynamic evaluation, keeping dependency sets intact.
+
+See the [M6.5 expression laws assessment](assessments/2026-09-22-m6-5-expression-laws.md)
+and the [native expression v1 specification](specifications/native-expression-v1.md).
+
+Next recommended roadmap item: **M7.1** — add typed component slots with one
+shared variant selection and view/text/image-specific outputs, preserving the
+existing single-style recipe interface. Keep performance registry activation,
+device frame/allocation gates and Android backlogged until their required
+harnesses are available.

@@ -94,3 +94,22 @@ axis publishes the new input snapshot without evaluating the program; a
 declared change evaluates and publishes the new value atomically. Runtime
 statistics expose evaluation and skip counts for diagnostics. Disposed
 runtimes reject further updates.
+
+## M6.5 laws and native boundaries
+
+Folding is a canonical pass: applying it twice produces the same graph as one
+pass. The pass recursively replaces dependency-free descendants with validated
+literals, including static branches below a dynamic token or condition
+reference. It never removes or invents a declared token or condition
+dependency.
+
+The supported scalar laws are addition commutativity and associativity, scale
+identity, clamp idempotence, and ordered composition association under the
+last-winner rule. Evaluation is independent of object insertion order. Runtime
+invalidation compares the declared dependency set only; unrelated token and
+condition changes update the current input snapshot without re-evaluating.
+
+Native consumers feed the runtime from `normalizeNativeConditionInput`. Width,
+font-scale, orientation and RTL changes are observed through the finite
+`NativeConditionSnapshot` axes, so continuous dimensions do not become cache
+keys and changes within one bucket are skipped.
