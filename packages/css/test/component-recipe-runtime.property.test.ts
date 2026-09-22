@@ -15,6 +15,15 @@ type GeneratedCase = {
   readonly recipe: NativeComponentRecipeDescriptor
   readonly selection: Readonly<Record<string, unknown>>
 }
+type GeneratedStateSelection = {
+  readonly kind: "default" | "non-default" | "prohibited-dependent" | "unknown-discriminator" | "missing-dependent-values"
+  readonly selection: Readonly<Record<string, unknown>>
+  readonly invalid: boolean
+}
+type GeneratedStateCase = {
+  readonly recipe: NativeComponentRecipeDescriptor
+  readonly selections: ReadonlyArray<GeneratedStateSelection>
+}
 
 const generatedCaseArbitrary = fc.integer({min: 1, max: 4}).chain(slotCount =>
   fc.integer({min: 0, max: 4}).chain(variantCount =>
@@ -41,6 +50,29 @@ const generatedCaseArbitrary = fc.integer({min: 1, max: 4}).chain(slotCount =>
   ),
 )
 
+const generatedStateCaseArbitrary = fc.integer({min: 2, max: 4}).chain(statusCount =>
+  fc.integer({min: 2, max: 4}).chain(toneCount => {
+    const fullMask = (1 << toneCount) - 1
+    const properToneMasks = Array.from({length: fullMask - 1}, (_, index) => index + 1)
+    const defaultCaseMasks = properToneMasks.filter(mask => (mask & 1) !== 0)
+    const nonDefaultCaseMasks = properToneMasks.filter(mask => (mask & 1) === 0)
+    return fc.record({
+      slotCount: fc.integer({min: 1, max: 4}),
+      compoundCount: fc.integer({min: 0, max: 4}),
+      defaultCaseMask: fc.constantFrom(...defaultCaseMasks),
+      nonDefaultCaseMask: fc.constantFrom(...nonDefaultCaseMasks),
+      otherCaseMasks: fc.array(fc.constantFrom(...properToneMasks), {
+        minLength: statusCount - 2,
+        maxLength: statusCount - 2,
+      }),
+      otherBusyValues: fc.array(fc.boolean(), {
+        minLength: statusCount - 2,
+        maxLength: statusCount - 2,
+      }),
+    }).map(shape => makeGeneratedStateCase(statusCount, toneCount, shape))
+  }),
+)
+
 describe("component recipe runtime properties", () => {
   it("agrees with an independent authored-data evaluator and keeps canonical result identity", () => {
     fc.assert(
@@ -58,6 +90,59 @@ describe("component recipe runtime properties", () => {
         expect(withoutWarnings(() => resolver(Object.fromEntries(Object.entries(selection).reverse()) as never)))
           .toBe(resolved)
         expect(resolveComponentRecipeStyles(recipe, selection as never)).toEqual(resolved)
+      }),
+      {numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED},
+    )
+  })
+
+  it("agrees with the independent evaluator across generated v2 state selections", () => {
+    let generatedRecipeIndex = 0
+    fc.assert(
+      fc.property(generatedStateCaseArbitrary, ({recipe: generatedRecipe, selections}) => {
+        const recipe = {
+          ...generatedRecipe,
+          $$debugName: `generatedStateRecipe${generatedRecipeIndex++}`,
+        } as NativeComponentRecipeDescriptor
+        const resolver = createComponentRecipeResolver(recipe, {cacheSize: 0})
+        expect(selections.map(({kind}) => kind)).toEqual([
+          "default",
+          "non-default",
+          "prohibited-dependent",
+          "unknown-discriminator",
+          "missing-dependent-values",
+        ])
+        const warnings = captureWarnings(() => {
+          for (const {selection, invalid} of selections) {
+            const expected = referenceResolve(recipe, selection)
+            const resolvedDirectly = resolveComponentRecipeStyles(recipe, selection as never)
+            const resolvedWithoutCache = resolver(selection as never)
+
+            expect(resolvedDirectly).toEqual(expected)
+            expect(resolvedWithoutCache).toEqual(expected)
+            expect(Object.isFrozen(resolvedDirectly)).toBe(true)
+            expect(Object.isFrozen(resolvedWithoutCache)).toBe(true)
+            expect(Object.keys(resolvedWithoutCache)).toEqual(Object.keys(recipe.slots))
+            for (const slot of Object.keys(recipe.slots)) {
+              const directSlot = resolvedDirectly[slot as keyof typeof resolvedDirectly]
+              const actualSlot = resolvedWithoutCache[slot as keyof typeof resolvedWithoutCache]
+              expect(directSlot).toBeDefined()
+              expect(Object.isFrozen(directSlot)).toBe(true)
+              expect(actualSlot).toBeDefined()
+              expect(Object.isFrozen(actualSlot)).toBe(true)
+              if (invalid) {
+                const base = (recipe.base ?? {}) as Record<string, unknown>
+                const expectedBase = base[slot] === undefined ? [] : [base[slot]]
+                expect(actualSlot).toEqual(expectedBase as ReadonlyArray<NativeStyle>)
+              }
+            }
+            if (invalid) expect(resolver({...selection} as never)).toEqual(expected)
+          }
+        })
+
+        expect(warnings).toHaveLength(selections.filter(({invalid}) => invalid).length)
+        expect(new Set(warnings).size).toBe(warnings.length)
+        expect(warnings.every(message => message.includes("CRUMBS_CSS_INVALID_RECIPE_VARIANT"))).toBe(true)
+        expect(warnings.every(message => message.includes(recipe.$$debugName!))).toBe(true)
       }),
       {numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED},
     )
@@ -167,6 +252,91 @@ function generatedCaseFromShape(
   return {recipe, selection}
 }
 
+function makeGeneratedStateCase(
+  statusCount: number,
+  toneCount: number,
+  shape: {
+    readonly slotCount: number
+    readonly compoundCount: number
+    readonly defaultCaseMask: number
+    readonly nonDefaultCaseMask: number
+    readonly otherCaseMasks: ReadonlyArray<number>
+    readonly otherBusyValues: ReadonlyArray<boolean>
+  },
+): GeneratedStateCase {
+  let nextStyleId = 0
+  const slots = Object.fromEntries(Array.from({length: shape.slotCount}, (_, index) => [
+    `slot${index}`,
+    (["view", "text", "image"] as const)[index % 3]!,
+  ]))
+  const slotNames = Object.keys(slots)
+  const makeBranch = (): Record<string, object> => Object.fromEntries(slotNames.map(slot => [
+    slot,
+    Object.freeze({opacity: nextStyleId++}),
+  ]))
+  const statusNames = Array.from({length: statusCount}, (_, index) => `status${index}`)
+  const toneNames = Array.from({length: toneCount}, (_, index) => `tone${index}`)
+  const toneMasks = [shape.defaultCaseMask, shape.nonDefaultCaseMask, ...shape.otherCaseMasks]
+  const busyValues = [false, true, ...shape.otherBusyValues]
+  const variants = {
+    status: Object.fromEntries(statusNames.map(status => [status, makeBranch()])),
+    busy: {
+      false: makeBranch(),
+      true: makeBranch(),
+    },
+    tone: Object.fromEntries(toneNames.map(tone => [tone, makeBranch()])),
+  }
+  const cases = Object.fromEntries(statusNames.map((status, caseIndex) => [
+    status,
+    {
+      busy: [busyValues[caseIndex]!],
+      tone: toneNames.filter((_, toneIndex) => (toneMasks[caseIndex]! & (1 << toneIndex)) !== 0),
+    },
+  ]))
+  const defaultTone = toneNames[0]!
+  const nonDefaultAllowedTones = toneNames.filter((_, toneIndex) =>
+    (shape.nonDefaultCaseMask & (1 << toneIndex)) !== 0,
+  )
+  const nonDefaultDisallowedTone = toneNames.find((_, toneIndex) =>
+    (shape.nonDefaultCaseMask & (1 << toneIndex)) === 0,
+  )!
+  const compoundVariants = Array.from({length: shape.compoundCount}, (_, index) => ({
+    variants: index === 0 ? {status: statusNames[1]!} : {},
+    styles: makeBranch(),
+  }))
+  const recipe = {
+    $$type: "crumbs.css.component-recipe",
+    version: 2,
+    slots,
+    base: makeBranch(),
+    variants,
+    defaultVariants: {status: statusNames[0]!, busy: false, tone: defaultTone},
+    stateVariants: {status: cases},
+    compoundVariants,
+  } as unknown as NativeComponentRecipeDescriptor
+  const selections: ReadonlyArray<GeneratedStateSelection> = [
+    {kind: "default", selection: {}, invalid: false},
+    {
+      kind: "non-default",
+      selection: {status: statusNames[1]!, busy: true, tone: nonDefaultAllowedTones[0]!},
+      invalid: false,
+    },
+    {
+      kind: "prohibited-dependent",
+      selection: {status: statusNames[1]!, busy: true, tone: nonDefaultDisallowedTone},
+      invalid: true,
+    },
+    {
+      kind: "unknown-discriminator",
+      selection: {status: "unknown-status", busy: true, tone: nonDefaultAllowedTones[0]!},
+      invalid: true,
+    },
+    {kind: "missing-dependent-values", selection: {status: statusNames[1]!}, invalid: true},
+  ]
+
+  return {recipe, selections}
+}
+
 function referenceResolve(
   recipe: NativeComponentRecipeDescriptor,
   selection: Readonly<Record<string, unknown>>,
@@ -178,8 +348,27 @@ function referenceResolve(
       collected[slot]?.push(style as NativeStyle)
     }
   }
+  const freezeResult = (): Readonly<Record<string, ReadonlyArray<NativeStyle>>> =>
+    Object.freeze(Object.fromEntries(Object.keys(recipe.slots).map(slot => [
+      slot,
+      Object.freeze(collected[slot] ?? []),
+    ])))
 
   if (recipe.base !== undefined) append(recipe.base)
+  if (recipe.version === 2 && recipe.stateVariants !== undefined) {
+    const stateVariants = recipe.stateVariants as Record<
+      string,
+      Record<string, Record<string, ReadonlyArray<unknown>>>
+    >
+    const [discriminator, cases] = Object.entries(stateVariants)[0] ?? []
+    if (discriminator !== undefined) {
+      const caseName = String(selected[discriminator])
+      const stateCase = Object.entries(cases ?? {}).find(([value]) => value === caseName)?.[1]
+      if (stateCase === undefined || Object.entries(stateCase).some(([axis, allowedValues]) =>
+        !allowedValues.includes(selected[axis]))) return freezeResult()
+    }
+  }
+
   const variants = recipe.variants as Record<string, Record<string, unknown>>
   for (const [variantName, values] of Object.entries(variants)) {
     const value = selected[variantName]
@@ -192,10 +381,19 @@ function referenceResolve(
     if (Object.entries(requirements).every(([name, value]) => selected[name] === value)) append(compound.styles)
   }
 
-  return Object.freeze(Object.fromEntries(Object.keys(recipe.slots).map(slot => [
-    slot,
-    Object.freeze(collected[slot] ?? []),
-  ])))
+  return freezeResult()
+}
+
+function captureWarnings(run: () => void): ReadonlyArray<string> {
+  const warnings: string[] = []
+  const originalWarn = console.warn
+  console.warn = (...args: ReadonlyArray<unknown>) => warnings.push(args.map(String).join(" "))
+  try {
+    run()
+  } finally {
+    console.warn = originalWarn
+  }
+  return warnings
 }
 
 function withoutWarnings<T>(run: () => T): T {
