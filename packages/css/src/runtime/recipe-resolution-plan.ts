@@ -134,7 +134,7 @@ export function resolveRecipeResolutionPlan(
 }
 
 export function canonicalRecipeSelectionKey(
-  plan: RecipeResolutionPlan,
+  plan: Pick<RecipeResolutionPlan, "selectionKeys" | "defaultSelection">,
   selection: Readonly<Record<string, unknown>> = {},
 ): string {
   const selected = {...plan.defaultSelection, ...selection}

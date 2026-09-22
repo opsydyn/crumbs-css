@@ -77,6 +77,20 @@ export type NativeComponentRecipe<TSlots extends NativeComponentSlots, TVariants
   }>
 }
 
+export type NativeComponentRecipeDescriptor = {
+  readonly $$debugName?: string
+  readonly $$type: typeof NativeComponentRecipeType
+  readonly version: typeof NativeComponentRecipeVersion
+  readonly slots: NativeComponentSlots
+  readonly base?: Readonly<Record<string, unknown>>
+  readonly variants: Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, unknown>>>>>>
+  readonly defaultVariants: Readonly<Record<string, unknown>>
+  readonly compoundVariants: ReadonlyArray<{
+    readonly variants: Readonly<Record<string, unknown>>
+    readonly styles: Readonly<Record<string, unknown>>
+  }>
+}
+
 export type NativeComponentRecipeConfig<
   TSlots extends NativeComponentSlots,
   TVariants extends NativeComponentVariantsConfig<TSlots>,

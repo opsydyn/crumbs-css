@@ -14,6 +14,8 @@ import {
 import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diagnostics"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import type {
+  NativeComponentRecipeProps,
+  NativeComponentResolvedStyles,
   NativeRecipe,
   NativeRecipeSelection,
   NativeRecipeVariantsConfig,
@@ -22,6 +24,7 @@ import type {
   NativeStyle,
   NativeTheme,
 } from "./native-style"
+import type {NativeComponentRecipeDescriptor} from "./components"
 import type { NativePrimitiveDomain } from "./compiler/native-capture"
 import { NativeRecipeType, NativeSprinklesLookupPlanType } from "./native-tags"
 import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
@@ -61,6 +64,14 @@ import {
   type RecipeResolverCacheStats,
 } from "./runtime/recipe-resolution-plan"
 import {
+  createComponentRecipeResolutionPlan,
+  resolveComponentRecipeResolutionPlan,
+  type ComponentRecipeCompoundMatcher,
+  type ComponentRecipeInvalidVariantReporter,
+  type ComponentRecipeResolutionPlan,
+  type ComponentRecipeResolutionVariant,
+} from "./runtime/component-recipe-resolution-plan"
+import {
   canonicalSprinklesSelectionKey,
   createSprinklesResolutionPlan,
   resolveSprinklesLookupPlan,
@@ -93,6 +104,16 @@ export type {
   RecipeResolutionVariant,
   RecipeResolverCacheStats,
 } from "./runtime/recipe-resolution-plan"
+export {
+  createComponentRecipeResolutionPlan,
+  resolveComponentRecipeResolutionPlan,
+} from "./runtime/component-recipe-resolution-plan"
+export type {
+  ComponentRecipeCompoundMatcher,
+  ComponentRecipeInvalidVariantReporter,
+  ComponentRecipeResolutionPlan,
+  ComponentRecipeResolutionVariant,
+} from "./runtime/component-recipe-resolution-plan"
 export type {
   NativeSprinklesResolutionPlan,
   NativeSprinklesResolutionSelection,
@@ -166,6 +187,12 @@ type RecipeDiagnosticTarget = {
   readonly $$debugName?: string
   readonly variants?: unknown
 }
+type ComponentRecipeDiagnosticTarget = {
+  readonly $$debugName?: string
+  readonly variants?: unknown
+}
+type ComponentRecipeDescriptor = NativeComponentRecipeDescriptor
+
 export type NativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> = (
   selection?: NativeRecipeSelection<TVariants>,
 ) => ReadonlyArray<NativeStyle>
@@ -184,6 +211,22 @@ export type RecipeResolverControls = {
 
 export type BoundedNativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> =
   NativeRecipeResolver<TVariants> & RecipeResolverControls
+
+export type NativeComponentRecipeResolver<TRecipe extends ComponentRecipeDescriptor> = (
+  selection?: NativeComponentRecipeProps<TRecipe>,
+) => NativeComponentResolvedStyles<TRecipe["slots"]>
+
+export type ComponentRecipeResolverOptions = RecipeResolverOptions
+
+export type ComponentRecipeResolverControls<TRecipe extends ComponentRecipeDescriptor> = {
+  readonly plan: ComponentRecipeResolutionPlan<TRecipe>
+  readonly getCacheStats: () => RecipeResolverCacheStats & {readonly disposed: boolean}
+  readonly clearCache: () => void
+  readonly dispose: () => void
+}
+
+export type BoundedNativeComponentRecipeResolver<TRecipe extends ComponentRecipeDescriptor> =
+  NativeComponentRecipeResolver<TRecipe> & ComponentRecipeResolverControls<TRecipe>
 
 export type NativeSprinklesResolver<
   TProperties extends object,
@@ -758,6 +801,68 @@ export function createRecipeResolver<TVariants extends NativeRecipeVariantsConfi
   return resolve
 }
 
+export function resolveComponentRecipeStyles<TRecipe extends ComponentRecipeDescriptor>(
+  recipe: TRecipe,
+  selection: NativeComponentRecipeProps<TRecipe> = {} as NativeComponentRecipeProps<TRecipe>,
+): NativeComponentResolvedStyles<TRecipe["slots"]> {
+  warnForPartialComponentRecipePayload(recipe)
+  const plan = createComponentRecipeResolutionPlan(recipe)
+  return resolveComponentRecipeResolutionPlan(
+    plan,
+    selection as Readonly<Record<string, unknown>>,
+    (variantName, selectedValue, variantValues) =>
+      warnForInvalidComponentRecipeVariant(recipe, variantName, selectedValue, variantValues),
+  )
+}
+
+export function createComponentRecipeResolver<TRecipe extends ComponentRecipeDescriptor>(
+  recipe: TRecipe,
+  options: ComponentRecipeResolverOptions = {},
+): BoundedNativeComponentRecipeResolver<TRecipe> {
+  const plan = createComponentRecipeResolutionPlan(recipe)
+  const cacheSize = validateRecipeResolverCacheSize(
+    options.cacheSize ?? DEFAULT_RECIPE_RESOLVER_CACHE_SIZE,
+  )
+  const cache = createBoundedRecipeSelectionCache<NativeComponentResolvedStyles<TRecipe["slots"]>>(cacheSize)
+  let disposed = false
+
+  const resolve = ((selection: NativeComponentRecipeProps<TRecipe> = {} as NativeComponentRecipeProps<TRecipe>) => {
+    if (disposed) throw new Error("Component recipe resolver has been disposed")
+    warnForPartialComponentRecipePayload(recipe)
+    const normalizedSelection = selection as Readonly<Record<string, unknown>>
+    const key = canonicalRecipeSelectionKey(plan, normalizedSelection)
+    const cached = cache.get(key)
+    if (cached.hit) return cached.value
+
+    const resolved = resolveComponentRecipeResolutionPlan(
+      plan,
+      normalizedSelection,
+      (variantName, selectedValue, variantValues) =>
+        warnForInvalidComponentRecipeVariant(recipe, variantName, selectedValue, variantValues),
+    )
+    cache.set(key, resolved)
+    return resolved
+  }) as BoundedNativeComponentRecipeResolver<TRecipe>
+
+  Object.defineProperties(resolve, {
+    plan: {value: plan, enumerable: true},
+    getCacheStats: {
+      value: () => Object.freeze({...cache.stats(), disposed}),
+      enumerable: true,
+    },
+    clearCache: {value: () => cache.clear(), enumerable: true},
+    dispose: {
+      value: () => {
+        if (disposed) return
+        cache.clear()
+        disposed = true
+      },
+      enumerable: true,
+    },
+  })
+  return resolve
+}
+
 /**
  * Create a bounded runtime selector for a generated Sprinkles lookup plan.
  * Static utility authoring stays in `createSprinkles`; this resolver only
@@ -932,6 +1037,41 @@ function warnForPartialRecipePayload(
       `Invalid native recipe "${recipeDiagnosticName(recipe)}": missing variants map; using base fallback. This can happen when Metro serves stale transformed output.`,
     ),
   )
+}
+
+function warnForPartialComponentRecipePayload(
+  recipe: ComponentRecipeDiagnosticTarget,
+): void {
+  if (recipe.variants !== undefined) return
+  const name = componentRecipeDiagnosticName(recipe)
+  warnOnce(
+    `missing-component-variants:${name}`,
+    formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.PartialRecipePayload,
+      `Invalid native component recipe "${name}": missing variants map; using base fallback. This can happen when Metro serves stale transformed output.`,
+    ),
+  )
+}
+
+function warnForInvalidComponentRecipeVariant(
+  recipe: ComponentRecipeDiagnosticTarget,
+  variantName: string,
+  selectedValue: unknown,
+  variantValues: Readonly<Record<string, unknown>> | undefined,
+): void {
+  const supportedValues = Object.keys(variantValues ?? {}).join(", ") || "(none)"
+  const name = componentRecipeDiagnosticName(recipe)
+  warnOnce(
+    `invalid-component-variant:${name}:${variantName}:${String(selectedValue)}`,
+    formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.InvalidRecipeVariant,
+      `Invalid native component recipe "${name}": variant "${variantName}" does not define value "${String(selectedValue)}"; supported values: ${supportedValues}.`,
+    ),
+  )
+}
+
+function componentRecipeDiagnosticName(recipe: ComponentRecipeDiagnosticTarget): string {
+  return recipe.$$debugName ?? "anonymous"
 }
 
 function warnForInvalidRecipeVariant(
