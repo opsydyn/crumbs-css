@@ -210,7 +210,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Decisions:** D9, D10, D12.\
 **Affected paths:** new `packages/css/src/components/` contract modules; recipe schemas/types/compiler emitters; Storybook button/input/dialog examples; extension and migration fixtures.
 
-- [ ] M7.1: Add typed slots with one shared variant selection and view/text/image-specific outputs. Preserve existing single-style recipe use through an explicit migration-compatible interface.
+- [x] M7.1: Add typed slots with one shared variant selection and view/text/image-specific outputs. Preserve existing single-style recipe use through an explicit migration-compatible interface.
 - [ ] M7.2: Add exhaustive discriminated state recipes and prohibited-combination checking. Normalize defaults consistently; avoid generating all possible state products eagerly.
 - [ ] M7.3: Declare public/private tokens, slots, variants, and extension points. Specify the complete ordering of inherited defaults, local variants, states, compounds, and permitted consumer overrides before freezing the public API.
 - [ ] M7.4: Demonstrate product-team extension without copying component implementation. Verify a private implementation change leaves the public contract intact; a removed public slot/variant is detectable.
@@ -2022,3 +2022,33 @@ shared variant selection and view/text/image-specific outputs, preserving the
 existing single-style recipe interface. Keep performance registry activation,
 device frame/allocation gates and Android backlogged until their required
 harnesses are available.
+
+### 2026-09-22 — M7.1 typed component slots
+
+- Added the versioned `componentRecipe` descriptor with named `view`, `text`,
+  and `image` slots, one inferred variant selection and slot-specific style
+  outputs. `componentRecipeFromRecipe` is the explicit view-only migration path
+  for existing single-style recipes.
+- Added a shared component resolver plan and bounded cache. It preserves
+  authored base/variant/compound order, returns frozen arrays for every slot,
+  and does not expand variant products. Runtime selection values outside the
+  string/boolean contract are reported and skipped.
+- Theme resolution walks tokens in every component branch. Generic compiler
+  capture and emission preserve the descriptor tag and nested class
+  references; primitive diagnostics include the authored `button.label` path.
+- Qualification covers seeded independent evaluation and plan-size laws,
+  compiler emission, packed ESM/CommonJS consumers, and runtime isolation.
+  Effect 4 remains an internal package dependency for compiler/schema
+  boundaries; the `theme` and `theme/core` runtime graphs stay React-only.
+- Device frame/allocation/retained-memory evidence, visual Storybook acceptance,
+  performance registry activation and Android remain incomplete.
+- `bun run check` passed with 798 tests and 29,108 assertions across 135 files;
+  `bun run docs:build` built 20 pages. Budget validation is structurally valid,
+  with performance qualification still `not-run` and thresholds pending review.
+
+See the [M7.1 component slots assessment](assessments/2026-09-22-m7-1-component-slots.md).
+
+Next recommended roadmap item: **M7.2** — add exhaustive discriminated state
+recipes and prohibited-combination checking without generating state products
+eagerly. Keep performance registry activation, device frame/allocation gates
+and Android backlogged until their required harnesses are available.

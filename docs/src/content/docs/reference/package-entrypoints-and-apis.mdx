@@ -19,13 +19,88 @@ Use this entrypoint in `.css.ts` authoring modules for:
 - `style`
 - `styleVariants`
 - `recipe`
+- `componentRecipe` and `componentRecipeFromRecipe`
 - `defineProperties`, `createSprinkles`, and `createSprinklesLookupPlan` for finite, primitive-scoped utility scales
 - `createThemeContract`
 - `createTheme`
 - `viewStyle`
 - `textStyle`
 - `imageStyle`
-- type exports such as `NativeRecipeProps`
+- type exports such as `NativeRecipeProps`, `NativeComponentRecipeProps`, and `NativeComponentResolvedStyles`
+
+### Typed component recipes
+
+`componentRecipe` declares a component's named view, text, and image style
+slots. Each slot checks style properties against its React Native primitive,
+while every slot shares the component's single variant selection.
+
+```ts
+// button.css.ts
+import {
+  componentRecipe,
+  type NativeComponentRecipeProps,
+} from "@opsydyn/crumbs-css/style"
+
+export const button = componentRecipe({
+  slots: { root: "view", label: "text", icon: "image" } as const,
+  base: {
+    root: { paddingHorizontal: 12 },
+    label: { fontWeight: "700" },
+    icon: { resizeMode: "contain" },
+  },
+  variants: {
+    tone: {
+      primary: {
+        root: { backgroundColor: "#1648d8" },
+        label: { color: "white" },
+      },
+      quiet: {
+        root: { backgroundColor: "transparent" },
+        label: { color: "#202020" },
+      },
+    },
+  },
+  defaultVariants: { tone: "primary" },
+}, "button")
+
+export type ButtonSelection = NativeComponentRecipeProps<typeof button>
+```
+
+Resolve tokenized descriptors through the theme hook before creating a
+resolver. The same selection is applied to all slots; omitted slot branches
+resolve to empty arrays. Results append base styles, matching variants in
+authored order, then matching compounds in authored order.
+
+```tsx
+import { useMemo } from "react"
+import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
+import { createComponentRecipeResolver } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
+import { button, type ButtonSelection } from "./button.css"
+
+function useButtonStyles(tone: NonNullable<ButtonSelection["tone"]>) {
+  const themed = useThemedStyles({ button })
+  const resolve = useMemo(
+    () => createComponentRecipeResolver(themed.button),
+    [themed.button],
+  )
+  const selection: ButtonSelection = { tone }
+  const styles = resolve(selection)
+
+  const rootStyles: ReadonlyArray<ViewStyle> = styles.root
+  const labelStyles: ReadonlyArray<TextStyle> = styles.label
+  const iconStyles: ReadonlyArray<ImageStyle> = styles.icon
+  return { rootStyles, labelStyles, iconStyles }
+}
+```
+
+`createComponentRecipeResolver(recipe, { cacheSize })` builds one plan and one
+resolver-local least-recently-used cache for every slot. The default cache is
+32 selections, bounded to `0..1024`; `0` disables retention. It exposes
+`getCacheStats()`, `clearCache()`, and `dispose()`. Invalid runtime variant
+values are warned about and skipped. `componentRecipeFromRecipe(recipe,
+{ slot })` wraps a legacy recipe in one named **view** slot; it preserves that
+recipe's variant selection and cannot relabel the style as text or image.
 
 ### Native sprinkles
 
@@ -131,6 +206,8 @@ advanced theme APIs:
 - `createThemeDependencyResolver`
 - `resolveRecipeStyle`
 - `createRecipeResolver`
+- `resolveComponentRecipeStyles`
+- `createComponentRecipeResolver`
 - `createSprinklesResolver`
 - `TokenThemeProvider`
 - `TokenThemeScopeProvider`
