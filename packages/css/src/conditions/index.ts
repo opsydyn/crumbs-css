@@ -435,3 +435,22 @@ export function useNativeConditionSnapshot(
 ): NativeConditionSnapshot {
   return useSyncExternalStore(store.subscribe, store.getSnapshot, store.getSnapshot)
 }
+
+export {
+  createNativeMapValueFn,
+  createNativeNormalizeValueFn,
+  mapNativeConditionValueToBranches,
+  NATIVE_RESPONSIVE_CONDITION_MATCHERS,
+  NATIVE_RESPONSIVE_CONDITION_NAMES,
+} from "./values"
+export type {
+  NativeConditionDefinitions,
+  NativeConditionNameList,
+  NativeConditionValueMapper,
+  NativeConditionalRecord,
+  NativeConditionalTuple,
+  NativeConditionalValue,
+  NativeMapValueFn,
+  NativeNormalizedConditionalValue,
+  NativeNormalizeValueFn,
+} from "./values"

@@ -81,7 +81,7 @@ function createPackedConsumer(): string {
 
 const consumerTypeSource = `
   import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
-  import { createSprinklesLookupPlan, createTheme, createThemeContract, defineProperties, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
+  import { createNativeNormalizeValueFn, createSprinklesLookupPlan, createTheme, createThemeContract, defineProperties, NATIVE_RESPONSIVE_CONDITION_NAMES, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
   import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
   import { createRecipeResolver, createSprinklesResolver, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
   import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens";
@@ -122,6 +122,7 @@ const consumerTypeSource = `
     properties: { padding: { sm: 8 } },
   });
   createSprinklesResolver(createSprinklesLookupPlan(utilityProperties))({ padding: "sm" });
+  createNativeNormalizeValueFn(NATIVE_RESPONSIVE_CONDITION_NAMES)([8, 12, 16, 24]);
   const tokenVars = createTokenContract({ color: { text: defineToken("color") } });
   const tokenTheme = createTokenTheme(tokenVars, { color: { text: "#ffffff" } });
   const tokenFocus = createTokenThemeFocus(tokenVars, tokenVars.color.text);
@@ -205,6 +206,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof root.withNativeStyles !== "function") throw new Error("missing root withNativeStyles");
         if (typeof style.createThemeContract !== "function") throw new Error("missing style createThemeContract");
         if (typeof style.createSprinklesLookupPlan !== "function") throw new Error("missing style createSprinklesLookupPlan");
+        if (typeof style.createNativeNormalizeValueFn !== "function") throw new Error("missing style createNativeNormalizeValueFn");
         if (typeof theme.createRecipeResolver !== "function") throw new Error("missing theme createRecipeResolver");
         if (typeof theme.createSprinklesResolver !== "function") throw new Error("missing theme createSprinklesResolver");
         if (typeof themeCore.resolveThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
@@ -219,7 +221,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
       resolve(consumerRoot, "runtime.mjs"),
       `
         import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
-        import { createSprinklesLookupPlan, createThemeContract, defineProperties } from "@opsydyn/crumbs-css/style";
+        import { createNativeNormalizeValueFn, createSprinklesLookupPlan, createThemeContract, defineProperties, NATIVE_RESPONSIVE_CONDITION_NAMES } from "@opsydyn/crumbs-css/style";
         import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
         import { createRecipeResolver, createSprinklesResolver } from "@opsydyn/crumbs-css/theme";
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
@@ -229,6 +231,8 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof NativeStylesDiagnosticCode.UnsupportedSelector !== "string") throw new Error("missing root diagnostic code");
         if (typeof createThemeContract !== "function") throw new Error("missing style createThemeContract");
         if (typeof createSprinklesLookupPlan !== "function") throw new Error("missing style createSprinklesLookupPlan");
+        if (typeof createNativeNormalizeValueFn !== "function") throw new Error("missing style createNativeNormalizeValueFn");
+        createNativeNormalizeValueFn(NATIVE_RESPONSIVE_CONDITION_NAMES)([8, 12, 16, 24]);
         if (typeof resolveCoreThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
         if (typeof createRecipeResolver !== "function") throw new Error("missing theme createRecipeResolver");
         if (typeof createSprinklesResolver !== "function") throw new Error("missing theme createSprinklesResolver");

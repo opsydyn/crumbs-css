@@ -20,6 +20,24 @@ export type {
   NativeSprinklesLookupPlan,
   NativeSprinklesSelection,
 } from "./sprinkles"
+export {
+  createNativeMapValueFn,
+  createNativeNormalizeValueFn,
+  mapNativeConditionValueToBranches,
+  NATIVE_RESPONSIVE_CONDITION_MATCHERS,
+  NATIVE_RESPONSIVE_CONDITION_NAMES,
+} from "./conditions/values"
+export type {
+  NativeConditionDefinitions,
+  NativeConditionNameList,
+  NativeConditionValueMapper,
+  NativeConditionalRecord,
+  NativeConditionalTuple,
+  NativeConditionalValue,
+  NativeMapValueFn,
+  NativeNormalizedConditionalValue,
+  NativeNormalizeValueFn,
+} from "./conditions/values"
 import {
   type DomainThemeVar,
   type LegacyNativeThemeVar,

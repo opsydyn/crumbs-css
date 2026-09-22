@@ -198,7 +198,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 **Affected paths:** new `packages/css/src/conditions/` and expression modules; compiler/runtime dependency plans, conditional type/property tests, Storybook adaptive scenarios.
 
 - [x] M6.1: Define native platform, dimension-bucket, RTL, font-scale, and accessibility conditions with default/overlap precedence. Register and clean up subscriptions predictably; avoid using unbounded raw dimensions as cache keys.
-- [ ] M6.2: Add conditional value normalization and mapping helpers, optional responsive tuple syntax if it preserves readable types, and the associated conditional-value types. Ensure equivalent input forms normalize identically.
+- [x] M6.2: Add conditional value normalization and mapping helpers, optional responsive tuple syntax if it preserves readable types, and the associated conditional-value types. Ensure equivalent input forms normalize identically.
 - [ ] M6.3: Define supported expression nodes for aliases, typed scalar operations, optional fallbacks, composition, and exhaustive matching. Specify units/domains, missing inputs, and dependency sets before implementation.
 - [ ] M6.4: Constant-fold static expressions and recompute dynamic programs only for declared dependency changes. Opaque arbitrary closures are not accepted as portable serialized programs.
 - [ ] M6.5: Test normalization idempotence, deterministic evaluation, supported algebraic laws, precise invalidation, and resize/font-scale/RTL behavior on native consumers.
@@ -1932,3 +1932,25 @@ normalisation and mapping helpers, including any responsive tuple syntax only
 where it preserves readable types and equivalent finite semantics. Keep device
 frame/allocation gates and Android backlogged until the Expo/device harness is
 available.
+
+### 2026-09-22 — M6.2 conditional value normalisation and mapping
+
+- Added typed `NativeConditionalValue` records and bounded responsive tuples.
+  `createNativeNormalizeValueFn` emits one frozen map in configured condition
+  order; scalar, record and tuple forms therefore have the same canonical
+  representation, and nullish entries are omitted.
+- Added `createNativeMapValueFn` for deterministic value mapping and
+  `mapNativeConditionValueToBranches` to attach the M6.1 matchers without
+  evaluating arbitrary runtime programs. The built-in responsive names cover
+  `default`, `compact`, `medium` and `expanded` width buckets.
+- Added type fixtures, malformed-input checks, a generated tuple/record
+  equivalence property and resolver integration coverage. The public helpers
+  are available from `theme` and the lean `theme/core` entrypoint.
+
+See [M6.2 conditional value assessment](assessments/2026-09-22-m6-2-condition-values.md).
+
+Next recommended roadmap item: **M6.3** — define supported expression nodes
+  for aliases, typed scalar operations, fallbacks, composition and exhaustive
+  matching before adding functional style programs. Keep device
+  frame/allocation gates and Android backlogged until the Expo/device harness
+  is available.

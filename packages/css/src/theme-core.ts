@@ -6,13 +6,18 @@
  * this entrypoint lets common theme reads ship a smaller independent graph.
  */
 export {
+  createNativeMapValueFn,
+  createNativeNormalizeValueFn,
   createThemeTokenReference,
   createNativeConditionResolver,
   createNativeConditionStore,
   defaultNativeConditionSnapshot,
   isThemeTokenReference,
+  mapNativeConditionValueToBranches,
   nativeConditionSnapshotKey,
   NATIVE_CONDITION_BREAKPOINTS,
+  NATIVE_RESPONSIVE_CONDITION_MATCHERS,
+  NATIVE_RESPONSIVE_CONDITION_NAMES,
   normalizeNativeConditionInput,
   NativeThemeTokenReferenceType,
   ThemeProvider,
@@ -26,15 +31,24 @@ export {
 } from "./theme-runtime"
 
 export type {
+  NativeConditionDefinitions,
   NativeConditionBranch,
   NativeConditionInput,
   NativeConditionMatcher,
+  NativeConditionNameList,
   NativeConditionSnapshot,
   NativeConditionSource,
   NativeConditionStore,
   NativeConditionStoreOptions,
   NativeConditionStoreStats,
+  NativeConditionValueMapper,
   NativeContrastPreference,
+  NativeConditionalRecord,
+  NativeConditionalTuple,
+  NativeConditionalValue,
+  NativeMapValueFn,
+  NativeNormalizedConditionalValue,
+  NativeNormalizeValueFn,
   NativeDirection,
   NativeFontScaleBucket,
   NativeHeightBucket,
