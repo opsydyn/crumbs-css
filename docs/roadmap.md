@@ -199,7 +199,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 
 - [x] M6.1: Define native platform, dimension-bucket, RTL, font-scale, and accessibility conditions with default/overlap precedence. Register and clean up subscriptions predictably; avoid using unbounded raw dimensions as cache keys.
 - [x] M6.2: Add conditional value normalization and mapping helpers, optional responsive tuple syntax if it preserves readable types, and the associated conditional-value types. Ensure equivalent input forms normalize identically.
-- [ ] M6.3: Define supported expression nodes for aliases, typed scalar operations, optional fallbacks, composition, and exhaustive matching. Specify units/domains, missing inputs, and dependency sets before implementation.
+- [x] M6.3: Define supported expression nodes for aliases, typed scalar operations, optional fallbacks, composition, and exhaustive matching. Specify units/domains, missing inputs, and dependency sets before implementation.
 - [ ] M6.4: Constant-fold static expressions and recompute dynamic programs only for declared dependency changes. Opaque arbitrary closures are not accepted as portable serialized programs.
 - [ ] M6.5: Test normalization idempotence, deterministic evaluation, supported algebraic laws, precise invalidation, and resize/font-scale/RTL behavior on native consumers.
 
@@ -1954,3 +1954,25 @@ Next recommended roadmap item: **M6.3** — define supported expression nodes
   matching before adding functional style programs. Keep device
   frame/allocation gates and Android backlogged until the Expo/device harness
   is available.
+
+### 2026-09-22 — M6.3 native expression data contract
+
+- Added a versioned, frozen expression AST with explicit number, length,
+  duration, opacity, colour and finite-enum domains. Token and condition
+  references, aliases, missing-input fallbacks, ordered composition, typed
+  scalar operators and exhaustive finite matching all validate their domains
+  before a future evaluator is introduced.
+- Added canonical dependency sets and versioned program wrappers. Dependencies
+  are sorted and deduplicated from token names and M6.1 condition axes;
+  arbitrary callbacks and runtime services are not representable. A property
+  test verifies that composition order does not alter dependency identity.
+- Exported the pure constructors and guards from the `style` and package-root
+  authoring surfaces, with type fixtures for cross-domain and invalid-enum
+  rejection. The detailed contract is in the [M6.3 native expression
+  assessment](assessments/2026-09-22-m6-3-native-expressions.md) and [native
+  expression v1 specification](specifications/native-expression-v1.md).
+
+Next recommended roadmap item: **M6.4** — constant-fold static expressions and
+recompute dynamic programs only for declared dependency changes. Keep device
+frame/allocation gates and Android backlogged until the Expo/device harness is
+available.
