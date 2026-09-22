@@ -188,7 +188,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M5.2: Support utilities in style composition and recipe bases/branches without losing kind or contract information. Add the mapped `styleVariants(values, mapper)` overload.
 - [x] M5.3: Support static selections in authored modules and dynamic runtime selection through generated lookup plans; public names/types must accurately distinguish these phases.
 - [x] M5.4: Compare atomic, fused, and hybrid output on identical design-system fixtures. Measure bytes, startup, array lengths, selection allocations, and native frames. Choose the default from evidence and document it.
-- [ ] M5.5: Test deterministic output, token-only policy compatibility, invalid properties/scales, identity on repeated selections, and compiler/runtime equivalence.
+- [x] M5.5: Test deterministic output, token-only policy compatibility, invalid properties/scales, identity on repeated selections, and compiler/runtime equivalence.
 
 **Exit:** utilities compose with styles and recipes under one documented native contract; type fixtures reject cross-domain values; chosen output passes budgets and is supported by a readable comparison report.
 
@@ -1886,3 +1886,22 @@ token-only policy compatibility, invalid properties/scales, repeated-selection
 identity, and compiler/runtime equivalence. Keep native frame/allocation
 qualification and Android backlogged until the Expo/device harness is
 available.
+
+### 2026-09-22 — M5.5 Sprinkles contract qualification
+
+- Added deterministic compiler-output coverage: transforming the same native
+  Sprinkles module twice produces identical bytes.
+- Added token-only compatibility coverage. Token-backed scales remain symbolic
+  in the generated lookup plan and resolve only through the normal theme path;
+  the source plan remains unchanged.
+- Added fail-closed runtime coverage for unknown properties, non-string scales,
+  missing scales, and malformed generated style entries.
+- Added repeated-selection identity coverage and compiler/runtime equivalence
+  for overlapping shorthand/longhand precedence and token-only selections.
+
+See [M5.5 Sprinkles contract assessment](assessments/2026-09-22-m5-5-sprinkles-contract.md).
+
+Next recommended roadmap item: **M6.1** — define native platform,
+dimension-bucket, RTL, font-scale, and accessibility conditions with explicit
+precedence and subscription lifecycle. Keep device frame/allocation gates and
+Android backlogged until the Expo/device harness is available.
