@@ -70,3 +70,27 @@ The representation intentionally excludes arbitrary callbacks, promises,
 Effect environments and opaque serialised code. Any future extension must add
 a versioned node, a domain rule, dependency behaviour, validation errors and
 property laws before it becomes portable.
+
+## Evaluation and folding
+
+M6.4 supplies a pure evaluator over an immutable input state containing a
+finite condition snapshot and a token-value record. Literals and references
+are validated against their declared domains. Composition evaluates every
+entry from left to right and returns the last value, preserving the same
+ordered composition rule used by native style merging. Arithmetic validates
+its result before returning it. A missing token is a distinct evaluation
+error; `fallback` catches that error only. Invalid token values, condition
+values and domain results remain errors.
+
+`foldNativeExpression` recursively folds child nodes and turns any
+dependency-free result into one validated literal. Dynamic references and
+their dependency sets remain data. Folding is therefore observationally
+equivalent to evaluating the original expression with the same state.
+
+`createNativeExpressionRuntime` evaluates a version-1 program once, then
+accepts immutable input snapshots. It compares only the program's declared
+token names and condition axes. An update to an unrelated token or condition
+axis publishes the new input snapshot without evaluating the program; a
+declared change evaluates and publishes the new value atomically. Runtime
+statistics expose evaluation and skip counts for diagnostics. Disposed
+runtimes reject further updates.

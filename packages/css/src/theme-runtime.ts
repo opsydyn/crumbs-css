@@ -111,6 +111,18 @@ export {
   normalizeNativeConditionInput,
   useNativeConditionSnapshot,
 } from "./conditions"
+export {
+  NativeExpressionEvaluationError,
+  createNativeExpressionRuntime,
+  evaluateNativeExpression,
+  foldNativeExpression,
+} from "./expressions"
+export type {
+  NativeExpressionEvaluationErrorCode,
+  NativeExpressionEvaluationState,
+  NativeExpressionRuntime,
+  NativeExpressionRuntimeStats,
+} from "./expressions"
 export type {
   NativeConditionDefinitions,
   NativeConditionBranch,

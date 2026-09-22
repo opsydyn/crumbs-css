@@ -5,9 +5,14 @@ import {
   createNativeExpressionDomain,
   createNativeExpressionLiteral,
   createNativeExpressionMatch,
+  createNativeExpressionProgram,
+  createNativeExpressionRuntime,
   createNativeExpressionScale,
+  evaluateNativeExpression,
+  foldNativeExpression,
   type NativeExpression,
 } from "../src/expressions"
+import type {NativeConditionSnapshot} from "../src/conditions"
 
 const lengthDomain = createNativeExpressionDomain({
   kind: "length",
@@ -42,6 +47,31 @@ void createNativeExpressionMatch({
 void createNativeExpressionConditionReference("contrast")
 void createNativeExpressionAlias("contrastValue", createNativeExpressionConditionReference("contrast"))
 void validEnum
+
+const conditionSnapshot: NativeConditionSnapshot = {
+  platform: "ios",
+  widthBucket: "compact",
+  heightBucket: "regular",
+  orientation: "portrait",
+  direction: "ltr",
+  fontScaleBucket: "normal",
+  motion: "full",
+  contrast: "normal",
+}
+const expressionProgram = createNativeExpressionProgram(length)
+const expressionRuntime = createNativeExpressionRuntime(expressionProgram, {
+  tokens: {},
+  conditions: conditionSnapshot,
+})
+const evaluatedLength: number = evaluateNativeExpression(length, {
+  tokens: {},
+  conditions: conditionSnapshot,
+})
+const foldedLength = foldNativeExpression(length)
+void expressionRuntime.getValue()
+void expressionRuntime.update({tokens: {}, conditions: conditionSnapshot})
+void evaluatedLength
+void foldedLength
 
 // @ts-expect-error Arithmetic operands must share the same unit/domain.
 void createNativeExpressionAdd(length, duration)

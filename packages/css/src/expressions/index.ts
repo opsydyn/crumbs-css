@@ -766,3 +766,404 @@ export function isNativeExpressionProgram(value: unknown): value is NativeExpres
     Array.isArray(value.dependencies)
   )
 }
+
+export type NativeExpressionEvaluationErrorCode =
+  | "missing-input"
+  | "invalid-input"
+  | "domain-error"
+
+export class NativeExpressionEvaluationError extends Error {
+  readonly code: NativeExpressionEvaluationErrorCode
+  readonly dependency?: NativeExpressionDependency
+
+  constructor(
+    code: NativeExpressionEvaluationErrorCode,
+    message: string,
+    dependency?: NativeExpressionDependency,
+  ) {
+    super(message)
+    this.name = "NativeExpressionEvaluationError"
+    this.code = code
+    if (dependency !== undefined) this.dependency = dependency
+  }
+}
+
+export type NativeExpressionEvaluationState = Readonly<{
+  readonly tokens?: Readonly<Record<string, unknown>>
+  readonly conditions: NativeConditionSnapshot
+}>
+
+export type NativeExpressionRuntimeStats = Readonly<{
+  readonly evaluations: number
+  readonly skipped: number
+  readonly declaredDependencies: readonly NativeExpressionDependency[]
+  readonly disposed: boolean
+}>
+
+export type NativeExpressionRuntime<
+  TDomain extends NativeExpressionDomain = NativeExpressionDomain,
+> = Readonly<{
+  readonly getValue: () => NativeExpressionValue<TDomain>
+  readonly getState: () => NativeExpressionEvaluationState
+  readonly getStats: () => NativeExpressionRuntimeStats
+  /** Returns true only when a declared dependency caused a new evaluation. */
+  readonly update: (state: NativeExpressionEvaluationState) => boolean
+  readonly dispose: () => void
+}>
+
+const DEFAULT_EVALUATION_CONDITIONS: NativeConditionSnapshot = Object.freeze({
+  platform: "unknown",
+  widthBucket: "compact",
+  heightBucket: "short",
+  orientation: "portrait",
+  direction: "ltr",
+  fontScaleBucket: "normal",
+  motion: "full",
+  contrast: "normal",
+})
+
+function evaluationError(
+  code: NativeExpressionEvaluationErrorCode,
+  message: string,
+  dependency?: NativeExpressionDependency,
+): NativeExpressionEvaluationError {
+  return new NativeExpressionEvaluationError(code, message, dependency)
+}
+
+function assertEvaluationRecord(value: unknown, message: string): Record<string, unknown> {
+  if (!isRecord(value)) throw evaluationError("invalid-input", message)
+  return value
+}
+
+function normalizeEvaluationConditions(value: unknown): NativeConditionSnapshot {
+  const conditions = assertEvaluationRecord(value, "native expression conditions must be an object")
+  const keys = Object.keys(CONDITION_VALUES)
+  if (Object.keys(conditions).length !== keys.length || keys.some((key) => !Object.hasOwn(conditions, key))) {
+    throw evaluationError("invalid-input", "native expression conditions must contain every finite axis")
+  }
+  for (const key of keys) {
+    const candidate = conditions[key]
+    if (!(CONDITION_VALUES[key as NativeConditionKey] as readonly unknown[]).includes(candidate)) {
+      throw evaluationError("invalid-input", `invalid native expression condition value for ${key}`)
+    }
+  }
+  return Object.freeze({...conditions}) as NativeConditionSnapshot
+}
+
+function normalizeEvaluationState(state: NativeExpressionEvaluationState | undefined): NativeExpressionEvaluationState {
+  const candidate = (state ?? {conditions: DEFAULT_EVALUATION_CONDITIONS}) as Record<string, unknown>
+  const conditions = normalizeEvaluationConditions(candidate.conditions)
+  const tokens = candidate.tokens === undefined
+    ? {}
+    : assertEvaluationRecord(candidate.tokens, "native expression tokens must be an object")
+  return Object.freeze({
+    tokens: Object.freeze({...tokens}),
+    conditions,
+  })
+}
+
+function tokenValue(
+  expression: NativeExpressionTokenReference<NativeExpressionDomain>,
+  state: NativeExpressionEvaluationState,
+): unknown {
+  const tokens = state.tokens ?? {}
+  if (!Object.hasOwn(tokens, expression.token) || tokens[expression.token] === undefined) {
+    throw evaluationError(
+      "missing-input",
+      `missing native expression token ${expression.token}`,
+      tokenDependency(expression.token),
+    )
+  }
+  return tokens[expression.token]
+}
+
+function evaluateNode<TDomain extends NativeExpressionDomain>(
+  expression: NativeExpression<TDomain>,
+  state: NativeExpressionEvaluationState,
+): NativeExpressionValue<TDomain> {
+  switch (expression.kind) {
+    case "literal": {
+      try {
+        assertLiteralValue(expression.domain, expression.value)
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw evaluationError("domain-error", `literal does not satisfy its ${expression.domain.kind} domain`)
+        }
+        throw error
+      }
+      return expression.value as NativeExpressionValue<TDomain>
+    }
+    case "token-reference": {
+      const value = tokenValue(
+        expression as NativeExpressionTokenReference<NativeExpressionDomain>,
+        state,
+      )
+      try {
+        assertLiteralValue(expression.domain, value)
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw evaluationError(
+            "domain-error",
+            `token ${expression.token} did not provide a valid ${expression.domain.kind} value`,
+            tokenDependency(expression.token),
+          )
+        }
+        throw error
+      }
+      return value as NativeExpressionValue<TDomain>
+    }
+    case "condition-reference": {
+      const value = state.conditions[expression.condition]
+      try {
+        assertLiteralValue(expression.domain, value)
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw evaluationError(
+            "invalid-input",
+            `condition ${expression.condition} did not provide a valid value`,
+            conditionDependency(expression.condition),
+          )
+        }
+        throw error
+      }
+      return value as NativeExpressionValue<TDomain>
+    }
+    case "alias":
+      return evaluateNode(expression.expression, state) as NativeExpressionValue<TDomain>
+    case "fallback":
+      try {
+        return evaluateNode(expression.primary, state) as NativeExpressionValue<TDomain>
+      } catch (error) {
+        if (error instanceof NativeExpressionEvaluationError && error.code === "missing-input") {
+          return evaluateNode(expression.fallback, state) as NativeExpressionValue<TDomain>
+        }
+        throw error
+      }
+    case "compose": {
+      let value: unknown
+      for (const entry of expression.expressions) value = evaluateNode(entry, state)
+      return value as NativeExpressionValue<TDomain>
+    }
+    case "add": {
+      const value = (evaluateNode(expression.left, state) as number) +
+        (evaluateNode(expression.right, state) as number)
+      try {
+        assertLiteralValue(expression.domain, value)
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw evaluationError("domain-error", "add result does not satisfy its expression domain")
+        }
+        throw error
+      }
+      return value as NativeExpressionValue<TDomain>
+    }
+    case "subtract": {
+      const value = (evaluateNode(expression.left, state) as number) -
+        (evaluateNode(expression.right, state) as number)
+      try {
+        assertLiteralValue(expression.domain, value)
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw evaluationError("domain-error", "subtract result does not satisfy its expression domain")
+        }
+        throw error
+      }
+      return value as NativeExpressionValue<TDomain>
+    }
+    case "scale": {
+      const value = (evaluateNode(expression.expression, state) as number) * expression.factor
+      try {
+        assertLiteralValue(expression.domain, value)
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw evaluationError("domain-error", "scale result does not satisfy its expression domain")
+        }
+        throw error
+      }
+      return value as NativeExpressionValue<TDomain>
+    }
+    case "clamp": {
+      const input = evaluateNode(expression.expression, state) as number
+      const value = Math.min(expression.maximum, Math.max(expression.minimum, input))
+      try {
+        assertLiteralValue(expression.domain, value)
+      } catch (error) {
+        if (error instanceof TypeError) {
+          throw evaluationError("domain-error", "clamp result does not satisfy its expression domain")
+        }
+        throw error
+      }
+      return value as NativeExpressionValue<TDomain>
+    }
+    case "match": {
+      const conditionValue = state.conditions[expression.condition]
+      const selected = expression.cases.find((entry) => entry.value === conditionValue)
+      if (selected !== undefined) return evaluateNode(selected.expression, state) as NativeExpressionValue<TDomain>
+      if (expression.fallback !== undefined) {
+        return evaluateNode(expression.fallback, state) as NativeExpressionValue<TDomain>
+      }
+      throw evaluationError(
+        "invalid-input",
+        `exhaustive match did not cover ${expression.condition}=${String(conditionValue)}`,
+        conditionDependency(expression.condition),
+      )
+    }
+  }
+}
+
+export function evaluateNativeExpression<TDomain extends NativeExpressionDomain>(
+  expression: NativeExpression<TDomain>,
+  state?: NativeExpressionEvaluationState,
+): NativeExpressionValue<TDomain> {
+  assertExpression(expression)
+  return evaluateNode(expression, normalizeEvaluationState(state))
+}
+
+function foldNode<TDomain extends NativeExpressionDomain>(
+  expression: NativeExpression<TDomain>,
+): NativeExpression<TDomain> {
+  switch (expression.kind) {
+    case "literal":
+    case "token-reference":
+    case "condition-reference":
+      return expression
+    case "alias":
+      return createNativeExpressionAlias(expression.name, foldNode(expression.expression)) as NativeExpression<TDomain>
+    case "fallback":
+      return createNativeExpressionFallback(
+        foldNode(expression.primary),
+        foldNode(expression.fallback),
+      ) as NativeExpression<TDomain>
+    case "compose": {
+      const entries = expression.expressions.map((entry) => foldNode(entry)) as unknown as readonly [
+        NativeExpression<TDomain>,
+        ...ReadonlyArray<NativeExpression<TDomain>>,
+      ]
+      return createNativeExpressionCompose(entries) as NativeExpression<TDomain>
+    }
+    case "add":
+      return createNativeExpressionAdd(
+        foldNode(expression.left) as unknown as NativeExpression<AdditiveDomain>,
+        foldNode(expression.right) as unknown as NativeExpression<AdditiveDomain>,
+      ) as NativeExpression<TDomain>
+    case "subtract":
+      return createNativeExpressionSubtract(
+        foldNode(expression.left) as unknown as NativeExpression<AdditiveDomain>,
+        foldNode(expression.right) as unknown as NativeExpression<AdditiveDomain>,
+      ) as NativeExpression<TDomain>
+    case "scale":
+      return createNativeExpressionScale(
+        foldNode(expression.expression) as unknown as NativeExpression<NumericDomain>,
+        expression.factor,
+      ) as NativeExpression<TDomain>
+    case "clamp":
+      return createNativeExpressionClamp(
+        foldNode(expression.expression) as unknown as NativeExpression<NumericDomain>,
+        expression.minimum,
+        expression.maximum,
+      ) as NativeExpression<TDomain>
+    case "match": {
+      const cases = expression.cases.map((entry) => ({
+        value: entry.value,
+        expression: foldNode(entry.expression),
+      }))
+      return createNativeExpressionMatch({
+        condition: expression.condition,
+        cases,
+        ...(expression.fallback === undefined
+          ? {}
+          : {fallback: foldNode(expression.fallback)}),
+      }) as NativeExpression<TDomain>
+    }
+  }
+}
+
+export function foldNativeExpression<TDomain extends NativeExpressionDomain>(
+  expression: NativeExpression<TDomain>,
+): NativeExpression<TDomain> {
+  assertExpression(expression)
+  const folded = foldNode(expression)
+  if (folded.dependencies.length === 0) {
+    const value = evaluateNativeExpression(folded, {conditions: DEFAULT_EVALUATION_CONDITIONS})
+    return createNativeExpressionLiteral(
+      folded.domain,
+      value as NativeExpressionValue<TDomain>,
+    ) as NativeExpression<TDomain>
+  }
+  return folded
+}
+
+function dependencySetsEqual(
+  left: readonly NativeExpressionDependency[],
+  right: readonly NativeExpressionDependency[],
+): boolean {
+  if (left.length !== right.length) return false
+  return left.every((dependency, index) =>
+    nativeExpressionDependencyKey(dependency) === nativeExpressionDependencyKey(right[index] as NativeExpressionDependency),
+  )
+}
+
+function dependencyChanged(
+  dependency: NativeExpressionDependency,
+  previous: NativeExpressionEvaluationState,
+  next: NativeExpressionEvaluationState,
+): boolean {
+  if (dependency.kind === "condition") {
+    return previous.conditions[dependency.key] !== next.conditions[dependency.key]
+  }
+  const previousTokens = previous.tokens ?? {}
+  const nextTokens = next.tokens ?? {}
+  const previousPresent = Object.hasOwn(previousTokens, dependency.name) &&
+    previousTokens[dependency.name] !== undefined
+  const nextPresent = Object.hasOwn(nextTokens, dependency.name) &&
+    nextTokens[dependency.name] !== undefined
+  if (previousPresent !== nextPresent) return true
+  return previousPresent && !Object.is(previousTokens[dependency.name], nextTokens[dependency.name])
+}
+
+export function createNativeExpressionRuntime<TDomain extends NativeExpressionDomain>(
+  program: NativeExpressionProgram<TDomain>,
+  initialState?: NativeExpressionEvaluationState,
+): NativeExpressionRuntime<TDomain> {
+  if (!isNativeExpressionProgram(program)) {
+    throw evaluationError("invalid-input", "native expression program is invalid")
+  }
+  if (!dependencySetsEqual(program.dependencies, program.root.dependencies)) {
+    throw evaluationError("invalid-input", "program dependencies do not match its root")
+  }
+  const root = foldNativeExpression(program.root)
+  const dependencies = root.dependencies
+  let currentState = normalizeEvaluationState(initialState)
+  let currentValue = evaluateNativeExpression(root, currentState) as NativeExpressionValue<TDomain>
+  let evaluations = 1
+  let skipped = 0
+  let disposed = false
+
+  return {
+    getValue: () => currentValue,
+    getState: () => currentState,
+    getStats: () => Object.freeze({
+      evaluations,
+      skipped,
+      declaredDependencies: dependencies,
+      disposed,
+    }),
+    update(nextState) {
+      if (disposed) throw new Error("native expression runtime has been disposed")
+      const normalized = normalizeEvaluationState(nextState)
+      if (!dependencies.some((dependency) => dependencyChanged(dependency, currentState, normalized))) {
+        currentState = normalized
+        skipped += 1
+        return false
+      }
+      const nextValue = evaluateNativeExpression(root, normalized) as NativeExpressionValue<TDomain>
+      currentState = normalized
+      currentValue = nextValue
+      evaluations += 1
+      return true
+    },
+    dispose() {
+      disposed = true
+    },
+  }
+}

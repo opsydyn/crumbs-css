@@ -200,7 +200,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M6.1: Define native platform, dimension-bucket, RTL, font-scale, and accessibility conditions with default/overlap precedence. Register and clean up subscriptions predictably; avoid using unbounded raw dimensions as cache keys.
 - [x] M6.2: Add conditional value normalization and mapping helpers, optional responsive tuple syntax if it preserves readable types, and the associated conditional-value types. Ensure equivalent input forms normalize identically.
 - [x] M6.3: Define supported expression nodes for aliases, typed scalar operations, optional fallbacks, composition, and exhaustive matching. Specify units/domains, missing inputs, and dependency sets before implementation.
-- [ ] M6.4: Constant-fold static expressions and recompute dynamic programs only for declared dependency changes. Opaque arbitrary closures are not accepted as portable serialized programs.
+- [x] M6.4: Constant-fold static expressions and recompute dynamic programs only for declared dependency changes. Opaque arbitrary closures are not accepted as portable serialized programs.
 - [ ] M6.5: Test normalization idempotence, deterministic evaluation, supported algebraic laws, precise invalidation, and resize/font-scale/RTL behavior on native consumers.
 
 **Exit:** conditions and expressions have explicit finite semantics and lifecycle rules; every operator has type, property, and reference-evaluation coverage; runtime and editor budgets pass. Container-measurement and continuous motion work remain M11 items.
@@ -1974,5 +1974,30 @@ Next recommended roadmap item: **M6.3** — define supported expression nodes
 
 Next recommended roadmap item: **M6.4** — constant-fold static expressions and
 recompute dynamic programs only for declared dependency changes. Keep device
+frame/allocation gates and Android backlogged until the Expo/device harness is
+available.
+
+### 2026-09-22 — M6.4 expression evaluation, folding and selective runtime
+
+- Added deterministic evaluation for every M6.3 node. Token and condition
+  values are validated against their declared domains; missing tokens are
+  distinct from invalid values, and fallbacks catch only missing inputs.
+  Ordered composition uses left-to-right last-winner semantics.
+- Added `foldNativeExpression` for dependency-free constant folding and
+  `createNativeExpressionRuntime` for immutable updates that compare only
+  declared token names and condition axes. Unrelated updates skip evaluation;
+  forged dependency lists and disposed runtimes fail closed.
+- Exported evaluator/runtime APIs from the authoring root and style surface,
+  plus the advanced `theme` runtime entrypoint. The lean `theme/core` graph
+  remains free of evaluator code. Property-based folding, token/condition
+  invalidation, runtime lifecycle, public API and type fixtures cover the
+  contract.
+
+See the [M6.4 expression evaluation assessment](assessments/2026-09-22-m6-4-expression-evaluation.md)
+and the [native expression v1 specification](specifications/native-expression-v1.md).
+
+Next recommended roadmap item: **M6.5** — test normalization idempotence,
+deterministic evaluation, supported algebraic laws, precise invalidation and
+resize/font-scale/RTL behaviour on native consumers. Keep device
 frame/allocation gates and Android backlogged until the Expo/device harness is
 available.

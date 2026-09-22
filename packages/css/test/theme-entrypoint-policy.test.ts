@@ -64,14 +64,22 @@ const CORE_API_NAMES = new Set([
 ])
 
 const ADVANCED_API_NAMES = new Set([
+  "NativeExpressionEvaluationError",
+  "NativeExpressionEvaluationErrorCode",
+  "NativeExpressionEvaluationState",
+  "NativeExpressionRuntime",
+  "NativeExpressionRuntimeStats",
   "TokenThemeProvider",
   "TokenThemeScopeProvider",
   "createRecipeResolver",
+  "createNativeExpressionRuntime",
   "createSprinklesResolver",
   "createThemeDependencyPlan",
   "createThemeDependencyResolver",
   "isTokenThemeCompatible",
   "resolveRecipeStyle",
+  "evaluateNativeExpression",
+  "foldNativeExpression",
   "useTokenTheme",
 ])
 
