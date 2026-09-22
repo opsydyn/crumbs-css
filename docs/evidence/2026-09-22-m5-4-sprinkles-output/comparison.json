@@ -1,0 +1,216 @@
+{
+  "formatVersion": 1,
+  "recordedAt": "2026-09-22T06:30:11.209Z",
+  "sourceRevision": "a080b7a43a50f3df3c8a562ea495c5f0c1223381",
+  "sourceState": "Working tree; source hashes identify the benchmark and workload inputs",
+  "sourceFiles": [
+    {
+      "relative": "bench/sprinkles-output.bench.ts",
+      "sha256": "7bfc46fcec3f885018858fe82402f63cb0755e9a3b634854424af3f9649cf3d7"
+    },
+    {
+      "relative": "bench/sprinkles-output-workload.ts",
+      "sha256": "595c26f39c4436d959aba6bd5f8de26ad5d6e8f3db8d78f8d3b4f0fe1a3a3307"
+    },
+    {
+      "relative": "test/sprinkles-output-benchmark.test.ts",
+      "sha256": "a278d2d97c0d9dbbe7a0809dd724abd1d95947f5b2a4e4280dc9ef8db9e4209f"
+    }
+  ],
+  "environment": {
+    "bun": "1.4.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "nodeEnv": "unset"
+  },
+  "fixture": {
+    "name": "bounded-card-sprinkles",
+    "propertyCount": 5,
+    "atomicStyleEntries": 15,
+    "shorthandCount": 1,
+    "fullSelectionCount": 4096,
+    "hotSelectionCount": 12,
+    "workloadSelectionCount": 72
+  },
+  "protocol": {
+    "artifactBytes": "UTF-8 byte length of canonical JSON for the emitted strategy artifact; this is not a Metro/Hermes bundle size",
+    "setup": "Same-process construction after two warmup constructions; seven sequential samples per strategy; median/minimum/maximum reported",
+    "selection": "Same 20000-operation workload per sample after 2000 warmup operations; seven sequential samples; selection timing excludes setup",
+    "allocationModel": "allocationUnits = returned style-array header plus returned style-reference slots; setup allocations count retained atomic entries, fused entries, lookup containers and merged style objects",
+    "semantics": "Every full finite selection is compared before timing; later styles win when flattened in authored axis order"
+  },
+  "measurements": [
+    {
+      "strategy": "atomic",
+      "serializedArtifactBytes": 674,
+      "setup": {
+        "sampleDurationsMs": [
+          0.001125000000001819,
+          0.0031669999999976994,
+          0.0012089999999993495,
+          0.0011660000000013326,
+          0.0012499999999988631,
+          0.0014170000000000016,
+          0.0010000000000012221
+        ],
+        "medianMs": 0.0012089999999993495,
+        "minimumMs": 0.0010000000000012221,
+        "maximumMs": 0.0031669999999976994
+      },
+      "setupAllocations": {
+        "atomicStyleEntries": 15,
+        "fusedStyleEntries": 0,
+        "lookupContainers": 1,
+        "mergedStyleObjects": 0,
+        "totalModelAllocations": 16
+      },
+      "selection": {
+        "sampleDurationsMs": [
+          4.967541999999998,
+          4.8963749999999955,
+          4.150416,
+          3.8374999999999986,
+          4.228041999999995,
+          3.704416000000002,
+          3.877875000000003
+        ],
+        "medianOperationMs": 0.0002075208,
+        "meanOperationMs": 0.00021187261428571422,
+        "operationsPerSecond": 4818794.067871751,
+        "iterations": 140000,
+        "samples": 7,
+        "warmupIterations": 2000,
+        "averageArrayLength": 2.6662,
+        "maximumArrayLength": 5,
+        "averageAllocationUnits": 3.6662,
+        "strategyHits": {
+          "atomic": 140000,
+          "fused": 0
+        },
+        "checksum": 373268
+      }
+    },
+    {
+      "strategy": "fused",
+      "serializedArtifactBytes": 611714,
+      "setup": {
+        "sampleDurationsMs": [
+          3.333207999999992,
+          2.806083000000001,
+          3.2297920000000033,
+          2.7861249999999984,
+          2.734000000000009,
+          3.1193329999999975,
+          2.7416670000000067
+        ],
+        "medianMs": 2.806083000000001,
+        "minimumMs": 2.734000000000009,
+        "maximumMs": 3.333207999999992
+      },
+      "setupAllocations": {
+        "atomicStyleEntries": 0,
+        "fusedStyleEntries": 4096,
+        "lookupContainers": 1,
+        "mergedStyleObjects": 4096,
+        "totalModelAllocations": 8193
+      },
+      "selection": {
+        "sampleDurationsMs": [
+          5.969707999999997,
+          5.711875000000006,
+          5.508082999999999,
+          4.803415999999999,
+          4.891290999999995,
+          5.044958000000008,
+          4.947791000000009
+        ],
+        "medianOperationMs": 0.0002522479000000004,
+        "meanOperationMs": 0.0002634080142857144,
+        "operationsPerSecond": 3964354.1135525745,
+        "iterations": 140000,
+        "samples": 7,
+        "warmupIterations": 2000,
+        "averageArrayLength": 1,
+        "maximumArrayLength": 1,
+        "averageAllocationUnits": 2,
+        "strategyHits": {
+          "atomic": 0,
+          "fused": 140000
+        },
+        "checksum": 280000
+      }
+    },
+    {
+      "strategy": "hybrid",
+      "serializedArtifactBytes": 1831,
+      "setup": {
+        "sampleDurationsMs": [
+          0.02462500000000034,
+          0.012708000000003494,
+          0.010917000000006283,
+          0.006833000000000311,
+          0.007082999999994399,
+          0.006540999999998576,
+          0.006749999999996703
+        ],
+        "medianMs": 0.007082999999994399,
+        "minimumMs": 0.006540999999998576,
+        "maximumMs": 0.02462500000000034
+      },
+      "setupAllocations": {
+        "atomicStyleEntries": 15,
+        "fusedStyleEntries": 12,
+        "lookupContainers": 2,
+        "mergedStyleObjects": 12,
+        "totalModelAllocations": 41
+      },
+      "selection": {
+        "sampleDurationsMs": [
+          6.496250000000003,
+          6.144165999999984,
+          5.419249999999977,
+          5.496207999999996,
+          5.624957999999992,
+          5.512207999999987,
+          5.755750000000006
+        ],
+        "medianOperationMs": 0.00028124789999999964,
+        "meanOperationMs": 0.0002889199285714282,
+        "operationsPerSecond": 3555582.1039019357,
+        "iterations": 140000,
+        "samples": 7,
+        "warmupIterations": 2000,
+        "averageArrayLength": 1.9156,
+        "maximumArrayLength": 4,
+        "averageAllocationUnits": 2.9156,
+        "strategyHits": {
+          "atomic": 69944,
+          "fused": 70056
+        },
+        "checksum": 338240
+      }
+    }
+  ],
+  "recommendation": {
+    "strategy": "hybrid",
+    "criteria": {
+      "hybridReducesAverageArrayLength": true,
+      "hybridReducesSelectionAllocations": true,
+      "hybridAvoidsFusedCartesianArtifact": true
+    },
+    "rationale": "Hybrid keeps atomic fallback coverage, fuses only the measured hot selections, and avoids the fused Cartesian artifact."
+  },
+  "capabilities": {
+    "nativeFrames": {
+      "status": "not-run",
+      "reason": "No release Hermes React Native device harness is available in this checkout; frame timing requires the same fixture in the Expo dog-food app.",
+      "android": "backlogged-until-device-enabled-final-move"
+    },
+    "nativeHeapAllocations": {
+      "status": "not-run",
+      "reason": "The allocation field is a deterministic model count, not a native heap trace; device allocation qualification remains separate."
+    }
+  }
+}

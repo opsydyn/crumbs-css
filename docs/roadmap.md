@@ -187,7 +187,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M5.1: Define the public native `defineProperties` / `createSprinkles` adaptation with finite values, domain-safe token scales, native primitive kinds, and typed shorthands. Publish precedence examples for overlapping aliases and longhands.
 - [x] M5.2: Support utilities in style composition and recipe bases/branches without losing kind or contract information. Add the mapped `styleVariants(values, mapper)` overload.
 - [x] M5.3: Support static selections in authored modules and dynamic runtime selection through generated lookup plans; public names/types must accurately distinguish these phases.
-- [ ] M5.4: Compare atomic, fused, and hybrid output on identical design-system fixtures. Measure bytes, startup, array lengths, selection allocations, and native frames. Choose the default from evidence and document it.
+- [x] M5.4: Compare atomic, fused, and hybrid output on identical design-system fixtures. Measure bytes, startup, array lengths, selection allocations, and native frames. Choose the default from evidence and document it.
 - [ ] M5.5: Test deterministic output, token-only policy compatibility, invalid properties/scales, identity on repeated selections, and compiler/runtime equivalence.
 
 **Exit:** utilities compose with styles and recipes under one documented native contract; type fixtures reject cross-domain values; chosen output passes budgets and is supported by a readable comparison report.
@@ -1857,4 +1857,32 @@ Next recommended roadmap item: **M5.4** — compare atomic, fused, and hybrid
 output on identical design-system fixtures; measure bytes, startup, array
 lengths, selection allocations, and native frames, then choose and document
 the default. Keep Android and release-device gates backlogged until a device is
+available.
+
+### 2026-09-22 — M5.4 Sprinkles output strategy comparison
+
+- Added one reproducible bounded-card design-system fixture with five finite
+  property axes, one overlapping `px` shorthand, 4,096 finite selections, 12
+  hot selections, and a 72-selection mixed hot/cold workload.
+- Added the atomic, fused, and hybrid strategy builders. All strategies are
+  checked for equivalent flattened style semantics across the complete finite
+  selection space before measurement. Fused output expands every selection;
+  hybrid fuses only the hot set and retains the atomic fallback.
+- Recorded canonical artifact bytes, setup timing, selection timing, returned
+  array lengths, and an explicit allocation model. The host evidence chooses
+  hybrid for compiler output: it avoids the fused Cartesian artifact while
+  reducing returned array length and modelled selection allocations relative to
+  atomic output. The existing bounded runtime resolver remains the atomic
+  lookup path until native evidence supports a runtime change.
+- Native frames and native heap allocations remain `not-run`: the Bun host
+  harness cannot qualify release Hermes or device rendering. Android remains
+  the final device-enabled move.
+
+See [M5.4 Sprinkles output comparison assessment](assessments/2026-09-22-m5-4-sprinkles-output-comparison.md)
+and [M5.4 comparison evidence](evidence/2026-09-22-m5-4-sprinkles-output/comparison.json).
+
+Next recommended roadmap item: **M5.5** — test deterministic output,
+token-only policy compatibility, invalid properties/scales, repeated-selection
+identity, and compiler/runtime equivalence. Keep native frame/allocation
+qualification and Android backlogged until the Expo/device harness is
 available.
