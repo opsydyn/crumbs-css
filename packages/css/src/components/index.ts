@@ -5,6 +5,7 @@ import {NativeRecipeClassSymbol} from "../native-style-map"
 import type {
   NativeImageStyleInput,
   NativeRecipe,
+  NativeStyle,
   NativeRecipeStyleInput,
   NativeRecipeVariantsConfig,
   NativeStyleComposition,
@@ -82,12 +83,12 @@ export type NativeComponentRecipeDescriptor = {
   readonly $$type: typeof NativeComponentRecipeType
   readonly version: typeof NativeComponentRecipeVersion
   readonly slots: NativeComponentSlots
-  readonly base?: Readonly<Record<string, unknown>>
-  readonly variants: Readonly<Record<string, Readonly<Record<string, Readonly<Record<string, unknown>>>>>>
-  readonly defaultVariants: Readonly<Record<string, unknown>>
+  readonly base?: object
+  readonly variants: object
+  readonly defaultVariants: object
   readonly compoundVariants: ReadonlyArray<{
-    readonly variants: Readonly<Record<string, unknown>>
-    readonly styles: Readonly<Record<string, unknown>>
+    readonly variants: object
+    readonly styles: object
   }>
 }
 
@@ -204,17 +205,17 @@ export function componentRecipeFromRecipe<
   const slots = Object.freeze({[options.slot]: "view" as const}) as Readonly<Record<TSlot, "view">>
   const base = recipe.base === undefined
     ? undefined
-    : freezeRecord([[options.slot, recipe.base]]) as NativeComponentResolvedSlotStyles<Readonly<Record<TSlot, "view">>>
+    : freezeRecord([[options.slot, freezeLegacyClassReference(recipe.base)]]) as NativeComponentResolvedSlotStyles<Readonly<Record<TSlot, "view">>>
   const variants = freezeRecord(Object.entries(recipe.variants ?? {}).map(([name, values]) => [
     name,
     freezeRecord(Object.entries(values).map(([value, style]) => [
       value,
-      freezeRecord([[options.slot, style]]),
+      freezeRecord([[options.slot, freezeLegacyClassReference(style as NativeStyle)]]),
     ])),
   ]))
   const compoundVariants = Object.freeze((recipe.compoundVariants ?? []).map(compound => Object.freeze({
     variants: Object.freeze({...compound.variants}),
-    styles: freezeRecord([[options.slot, compound.style]]),
+    styles: freezeRecord([[options.slot, freezeLegacyClassReference(compound.style)]]),
   })))
   return Object.freeze({
     $$type: NativeComponentRecipeType,
@@ -382,6 +383,14 @@ function componentStyleReference(className: string): NativeComponentStyleReferen
   }
   Object.defineProperty(reference, NativeRecipeClassSymbol, {value: true, enumerable: true})
   return Object.freeze(reference)
+}
+
+function freezeLegacyClassReference(style: NativeStyle): NativeStyle {
+  if (typeof style === "object" && style !== null &&
+    "$$type" in style && style.$$type === NativeRecipeClassType) {
+    Object.freeze(style)
+  }
+  return style
 }
 
 function recordEntries(value: unknown, context: string): Array<[string, unknown]> {

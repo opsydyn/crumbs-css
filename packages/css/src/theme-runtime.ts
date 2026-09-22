@@ -26,7 +26,13 @@ import type {
 } from "./native-style"
 import type {NativeComponentRecipeDescriptor} from "./components"
 import type { NativePrimitiveDomain } from "./compiler/native-capture"
-import { NativeRecipeType, NativeSprinklesLookupPlanType } from "./native-tags"
+import {
+  NativeComponentRecipeType,
+  NativeComponentRecipeVersion,
+  NativeRecipeClassType,
+  NativeRecipeType,
+  NativeSprinklesLookupPlanType,
+} from "./native-tags"
 import { isNativeStyleMap, markNativeStyleMap } from "./native-style-map"
 import {
   getThemeContractIdentityKey,
@@ -272,7 +278,7 @@ const TokenThemeContext: Context<TokenThemeContextValue | null> = sharedRegistry
   () => createContext<TokenThemeContextValue | null>(null),
 )
 const recipeDiagnosticWarnings = new Set<string>()
-type ThemeResolutionCacheKind = "tokens" | "styles" | "recipe"
+type ThemeResolutionCacheKind = "tokens" | "styles" | "recipe" | "component-recipe"
 type ThemeResolutionCacheEntry = {
   readonly value: unknown
 }
@@ -476,6 +482,8 @@ type RecursiveStyleLeaf<TInput> = [Extract<TInput, NativePrimitiveStyle>] extend
   ? NativeStyle : Extract<TInput, NativePrimitiveStyle>
 type ResolvedNativeStyleInput<TInput, TSeen = never> = TInput extends false | null | undefined
   ? undefined
+  : TInput extends NativeComponentRecipeDescriptor
+    ? TInput
   : TInput extends NativePrimitiveStyle
     ? TInput
     : TInput extends ReadonlyArray<infer TEntry>
@@ -493,7 +501,9 @@ export function useThemedStyle<TInput>(style: TInput): ResolvedNativeStyleInput<
 }
 
 export type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>>> = {
-  readonly [K in keyof TStyles]: TStyles[K] extends NativeRecipe<infer TVariants>
+  readonly [K in keyof TStyles]: TStyles[K] extends NativeComponentRecipeDescriptor
+    ? TStyles[K]
+    : TStyles[K] extends NativeRecipe<infer TVariants>
     ? NativeRecipe<TVariants>
     : TStyles[K] extends NativeSprinklesLookupPlan<
       infer TPrimitives extends NativePrimitiveDomain,
@@ -710,6 +720,12 @@ export function resolveThemeTokens<TInput>(
 ): ResolvedNativeStyleInput<TInput> | undefined {
   const cached = getCachedResolution(theme, style, "tokens")
   if (cached.hit) return cached.value as ResolvedNativeStyleInput<TInput> | undefined
+
+  if (isNativeComponentRecipe(style)) {
+    const resolved = resolveComponentRecipeThemeTokens(style, theme)
+    setCachedResolution(theme, style, "tokens", resolved)
+    return resolved as ResolvedNativeStyleInput<TInput>
+  }
 
   const flattened = flattenStyle(style)
   if (flattened === undefined) {
@@ -936,10 +952,12 @@ function resolveStyleExport(
   theme: NativeTheme<Record<string, unknown>>,
 ):
   | NativeRecipe<NativeRecipeVariantsConfig>
+  | NativeComponentRecipeDescriptor
   | NativeSprinklesLookupPlan
   | NativeStyle
   | Readonly<Record<string, NativeStyle | undefined>>
   | undefined {
+  if (isNativeComponentRecipe(style)) return resolveComponentRecipeThemeTokens(style, theme)
   if (isNativeRecipe(style)) return resolveRecipeThemeTokens(style, theme)
   if (isNativeSprinklesLookupPlan(style)) return resolveSprinklesThemeTokens(style, theme)
   if (isNestedStyleMap(style)) {
@@ -1024,6 +1042,143 @@ function resolveRecipeThemeTokens<TVariants extends NativeRecipeVariantsConfig>(
   } as NativeRecipe<TVariants>
   setCachedResolution(theme, recipe, "recipe", resolved)
   return resolved
+}
+
+function resolveComponentRecipeThemeTokens<TRecipe extends NativeComponentRecipeDescriptor>(
+  recipe: TRecipe,
+  theme: NativeTheme<Record<string, unknown>>,
+): TRecipe {
+  const cached = getCachedResolution(theme, recipe, "component-recipe")
+  if (cached.hit) return cached.value as TRecipe
+  if (recipe.version !== NativeComponentRecipeVersion) {
+    throw new TypeError(`Unsupported component recipe version ${String(recipe.version)}`)
+  }
+
+  let changed = recipe.variants === undefined || recipe.defaultVariants === undefined ||
+    recipe.compoundVariants === undefined
+  const base = recipe.base === undefined
+    ? undefined
+    : resolveComponentSlotStyles(recipe.base, theme, "base", () => { changed = true })
+  const variants: Record<string, Record<string, Readonly<Record<string, unknown>>>> = {}
+  for (const [variantName, variantValues] of Object.entries(recipe.variants ?? {})) {
+    const resolvedValues: Record<string, Readonly<Record<string, unknown>>> = {}
+    for (const [valueName, styles] of Object.entries(variantValues)) {
+      resolvedValues[valueName] = resolveComponentSlotStyles(
+        styles,
+        theme,
+        `variant ${JSON.stringify(variantName)} value ${JSON.stringify(valueName)}`,
+        () => { changed = true },
+      )
+    }
+    variants[variantName] = Object.freeze(resolvedValues)
+  }
+
+  const compoundVariants = (recipe.compoundVariants ?? []).map((compound, index) => Object.freeze({
+    variants: Object.freeze({...compound.variants}),
+    styles: resolveComponentSlotStyles(
+      compound.styles,
+      theme,
+      `compound variant ${index}`,
+      () => { changed = true },
+    ),
+  }))
+  if (!changed) {
+    setCachedResolution(theme, recipe, "component-recipe", recipe)
+    return recipe
+  }
+
+  const frozenVariants = Object.freeze(Object.fromEntries(
+    Object.entries(variants).map(([variantName, values]) => [
+      variantName,
+      Object.freeze(Object.fromEntries(Object.entries(values).map(([valueName, styles]) => [
+        valueName,
+        freezeComponentSlotStyles(styles),
+      ]))),
+    ]),
+  ))
+  const frozenCompounds = Object.freeze(compoundVariants.map((compound) => Object.freeze({
+    variants: compound.variants,
+    styles: freezeComponentSlotStyles(compound.styles),
+  })))
+  const resolved = Object.freeze({
+    $$type: NativeComponentRecipeType,
+    version: NativeComponentRecipeVersion,
+    ...(recipe.$$debugName === undefined ? {} : {$$debugName: recipe.$$debugName}),
+    slots: Object.freeze({...recipe.slots}),
+    ...(base === undefined ? {} : {base: freezeComponentSlotStyles(base)}),
+    variants: frozenVariants,
+    defaultVariants: Object.freeze({...recipe.defaultVariants}),
+    compoundVariants: frozenCompounds,
+  }) as TRecipe
+  setCachedResolution(theme, recipe, "component-recipe", resolved)
+  return resolved
+}
+
+function resolveComponentSlotStyles(
+  styles: unknown,
+  theme: NativeTheme<Record<string, unknown>>,
+  context: string,
+  markChanged: () => void,
+): Readonly<Record<string, unknown>> {
+  const entries: Array<readonly [string, unknown]> = []
+  assertComponentThemeRecord(styles, `Component recipe ${context} slot styles`)
+  for (const [slot, style] of Object.entries(styles)) {
+    const next = resolveThemeTokens(style, theme)
+    if (next !== style) markChanged()
+    entries.push([slot, next ?? style])
+  }
+  return Object.freeze(Object.fromEntries(entries))
+}
+
+function assertComponentThemeRecord(
+  value: unknown,
+  context: string,
+): asserts value is Readonly<Record<string, unknown>> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${context} must be a record`)
+  }
+  const prototype = Object.getPrototypeOf(value)
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new TypeError(`${context} must be a plain record`)
+  }
+  for (const descriptor of Object.values(Object.getOwnPropertyDescriptors(value))) {
+    if (!("value" in descriptor) || !descriptor.enumerable) {
+      throw new TypeError(`${context} must contain enumerable data properties`)
+    }
+  }
+}
+
+function freezeComponentSlotStyles(
+  styles: Readonly<Record<string, unknown>>,
+): Readonly<Record<string, unknown>> {
+  return Object.freeze(Object.fromEntries(Object.entries(styles).map(([slot, style]) => [
+    slot,
+    cloneAndFreezeComponentStyle(style),
+  ])))
+}
+
+function cloneAndFreezeComponentStyle(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return Object.freeze(value.map((entry) => cloneAndFreezeComponentStyle(entry)))
+  }
+  if (value === null || typeof value !== "object") return value
+  if ("$$type" in value && value.$$type === NativeRecipeClassType &&
+    "className" in value && typeof value.className === "string" && Object.isFrozen(value)) {
+    return value
+  }
+  const clone = Object.create(Object.getPrototypeOf(value)) as Record<PropertyKey, unknown>
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key)
+    if (descriptor === undefined) continue
+    if (!("value" in descriptor)) {
+      throw new TypeError("Component recipe style values must be plain data records")
+    }
+    Object.defineProperty(clone, key, {
+      ...descriptor,
+      value: cloneAndFreezeComponentStyle(descriptor.value),
+    })
+  }
+  return Object.freeze(clone)
 }
 
 function warnForPartialRecipePayload(
@@ -1113,6 +1268,15 @@ function isNativeRecipe(value: unknown): value is NativeRecipe<NativeRecipeVaria
     value !== null &&
     "$$type" in value &&
     value.$$type === NativeRecipeType
+  )
+}
+
+function isNativeComponentRecipe(value: unknown): value is NativeComponentRecipeDescriptor {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "$$type" in value &&
+    value.$$type === NativeComponentRecipeType
   )
 }
 
