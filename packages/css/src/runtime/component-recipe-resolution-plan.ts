@@ -5,12 +5,23 @@ import type {
   NativeComponentSlots,
 } from "../components"
 import type {NativeStyle} from "../native-style"
-import {NativeComponentRecipeType, NativeComponentRecipeVersion} from "../native-tags"
+import {
+  NativeComponentRecipeLegacyVersion,
+  NativeComponentRecipeType,
+  NativeComponentRecipeVersion,
+} from "../native-tags"
 
 export const ComponentRecipeResolutionPlanType = "crumbs.css.component-recipe-resolution-plan" as const
 export const ComponentRecipeResolutionPlanVersion = 1 as const
 
 type ComponentSlotRecord = NativeComponentResolvedSlotStyles<NativeComponentSlots>
+type ComponentRecipeStateConstraint = {
+  readonly discriminator: string
+  readonly cases: ReadonlyArray<{
+    readonly value: string
+    readonly constraints: ReadonlyArray<readonly [string, ReadonlyArray<string | boolean>]>
+  }>
+}
 
 export type ComponentRecipeResolutionVariant = {
   readonly name: string
@@ -36,6 +47,7 @@ export type ComponentRecipeResolutionPlan<
   readonly base: ComponentSlotRecord
   readonly variants: ReadonlyArray<ComponentRecipeResolutionVariant>
   readonly compoundMatchers: ReadonlyArray<ComponentRecipeCompoundMatcher>
+  readonly stateConstraint?: ComponentRecipeStateConstraint
 }
 
 export type ComponentRecipeInvalidVariantReporter = (
@@ -44,13 +56,20 @@ export type ComponentRecipeInvalidVariantReporter = (
   variantValues: ComponentSlotRecordMap,
 ) => void
 
+type ComponentRecipeInvalidStateReporter = (
+  discriminator: string,
+  selection: Readonly<Record<string, unknown>>,
+  constraint: ComponentRecipeStateConstraint,
+) => void
+
 type ComponentSlotRecordMap = Readonly<Record<string, ComponentSlotRecord>>
 
 /** Build one shared plan for all slots without expanding variant products. */
 export function createComponentRecipeResolutionPlan<
   TRecipe extends NativeComponentRecipeDescriptor,
 >(recipe: TRecipe): ComponentRecipeResolutionPlan<TRecipe> {
-  if (recipe.$$type !== NativeComponentRecipeType || recipe.version !== NativeComponentRecipeVersion) {
+  if (recipe.$$type !== NativeComponentRecipeType ||
+    (recipe.version !== NativeComponentRecipeLegacyVersion && recipe.version !== NativeComponentRecipeVersion)) {
     throw new TypeError("Unsupported component recipe descriptor version")
   }
   const slots = validateComponentSlots(recipe.slots)
@@ -97,6 +116,10 @@ export function createComponentRecipeResolutionPlan<
     }
   }
 
+  const stateConstraint = recipe.version === NativeComponentRecipeVersion
+    ? validateStateConstraint(recipe.stateVariants, variants, defaultSelection)
+    : undefined
+
   const selectionKeySet = new Set<string>([
     ...variantOrder,
     ...Object.keys(defaultSelection),
@@ -120,6 +143,7 @@ export function createComponentRecipeResolutionPlan<
     base,
     variants: Object.freeze(variants),
     compoundMatchers: Object.freeze(compoundMatchers),
+    ...(stateConstraint === undefined ? {} : {stateConstraint}),
   }) as ComponentRecipeResolutionPlan<TRecipe>
 }
 
@@ -129,6 +153,7 @@ export function resolveComponentRecipeResolutionPlan<
   plan: ComponentRecipeResolutionPlan<TRecipe>,
   selection: Readonly<Record<string, unknown>> = {},
   reportInvalidVariant?: ComponentRecipeInvalidVariantReporter,
+  reportInvalidState?: ComponentRecipeInvalidStateReporter,
 ): NativeComponentResolvedStyles<TRecipe["slots"]> {
   const selected = {...plan.defaultSelection, ...selection}
   const collected = Object.fromEntries(
@@ -138,6 +163,11 @@ export function resolveComponentRecipeResolutionPlan<
   for (const slot of plan.slotOrder) {
     const baseStyle = plan.base[slot]
     if (baseStyle !== undefined) collected[slot]!.push(baseStyle as NativeStyle)
+  }
+
+  if (plan.stateConstraint !== undefined && !matchesSelectedState(plan.stateConstraint, selected)) {
+    reportInvalidState?.(plan.stateConstraint.discriminator, selected, plan.stateConstraint)
+    return freezeCollectedSlotStyles(plan.slotOrder, collected) as NativeComponentResolvedStyles<TRecipe["slots"]>
   }
 
   for (const variant of plan.variants) {
@@ -159,9 +189,159 @@ export function resolveComponentRecipeResolutionPlan<
     if (compound.matches(selected)) appendSlotStyles(collected, compound.styles)
   }
 
+  return freezeCollectedSlotStyles(plan.slotOrder, collected) as NativeComponentResolvedStyles<TRecipe["slots"]>
+}
+
+function validateStateConstraint(
+  value: unknown,
+  variants: ReadonlyArray<ComponentRecipeResolutionVariant>,
+  defaults: Readonly<Record<string, unknown>>,
+): ComponentRecipeStateConstraint | undefined {
+  if (value === undefined) return undefined
+  const discriminators = stateRecordEntries(value, "Component recipe stateVariants")
+  if (discriminators.length !== 1) {
+    throw new TypeError("Component recipe stateVariants must define exactly one discriminator")
+  }
+  const [discriminator, rawCases] = discriminators[0]!
+  const discriminatorVariant = variants.find(variant => variant.name === discriminator)
+  if (discriminatorVariant === undefined) {
+    throw new TypeError(`Component recipe stateVariants references unknown discriminator variant ${JSON.stringify(discriminator)}`)
+  }
+
+  const cases = stateRecordEntries(rawCases, `Component recipe stateVariants discriminator ${JSON.stringify(discriminator)}`)
+  const expectedCaseNames = Object.keys(discriminatorVariant.values)
+  const actualCaseNames = new Set(cases.map(([name]) => name))
+  const missingCase = expectedCaseNames.find(name => !actualCaseNames.has(name))
+  if (missingCase !== undefined) {
+    throw new TypeError(`Component recipe stateVariants is missing state case ${JSON.stringify(missingCase)}`)
+  }
+  const extraCase = cases.find(([name]) => !Object.hasOwn(discriminatorVariant.values, name))?.[0]
+  if (extraCase !== undefined) {
+    throw new TypeError(`Component recipe stateVariants has unknown state case ${JSON.stringify(extraCase)}`)
+  }
+  if (!Object.hasOwn(defaults, discriminator)) {
+    throw new TypeError(`Component recipe defaultVariants must define discriminator ${JSON.stringify(discriminator)} for stateVariants`)
+  }
+  const defaultCaseName = String(defaults[discriminator])
+  let defaultConstraints: ReadonlyArray<readonly [string, ReadonlyArray<string | boolean>]> = []
+  const normalizedCases = cases.map(([caseName, rawConstraints]) => {
+    const constraints = stateRecordEntries(rawConstraints, `Component recipe state ${JSON.stringify(caseName)} constraints`)
+    const normalizedConstraints: Array<readonly [string, ReadonlyArray<string | boolean>]> = []
+    for (const [axis, rawAllowedValues] of constraints) {
+      if (axis === discriminator) {
+        throw new TypeError(`Component recipe state ${JSON.stringify(caseName)} cannot constrain its discriminator ${JSON.stringify(discriminator)}`)
+      }
+      const variant = variants.find(entry => entry.name === axis)
+      if (variant === undefined) {
+        throw new TypeError(`Component recipe state ${JSON.stringify(caseName)} references unknown constrained variant ${JSON.stringify(axis)}`)
+      }
+      const allowedValues = validateStateConstraintValues(rawAllowedValues, variant.values, caseName, axis)
+      normalizedConstraints.push([axis, allowedValues])
+    }
+    if (caseName === defaultCaseName) defaultConstraints = normalizedConstraints
+    return Object.freeze({value: caseName, constraints: Object.freeze(normalizedConstraints)})
+  })
+
+  for (const [axis, allowedValues] of defaultConstraints) {
+    if (!Object.hasOwn(defaults, axis)) {
+      throw new TypeError(`Component recipe defaultVariants must define constrained variant ${JSON.stringify(axis)} for its default state`)
+    }
+    if (!allowedValues.includes(defaults[axis] as string | boolean)) {
+      throw new TypeError(`Component recipe default selection for state ${JSON.stringify(defaultCaseName)} violates constraint ${JSON.stringify(axis)}`)
+    }
+  }
+
+  return Object.freeze({discriminator, cases: Object.freeze(normalizedCases)})
+}
+
+function validateStateConstraintValues(
+  value: unknown,
+  variantValues: Readonly<Record<string, ComponentSlotRecord>>,
+  caseName: string,
+  axis: string,
+): ReadonlyArray<string | boolean> {
+  const context = `Component recipe state ${JSON.stringify(caseName)} allowed values for variant ${JSON.stringify(axis)}`
+  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) {
+    throw new TypeError(`${context} must be a non-empty array`)
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  if (Object.getOwnPropertySymbols(value).length > 0) {
+    throw new TypeError(`${context} cannot contain symbol properties`)
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (key === "length") continue
+    if (typeof key !== "string" || !/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) {
+      throw new TypeError(`${context} must contain only tuple values`)
+    }
+  }
+  if (value.length === 0) throw new TypeError(`${context} must be non-empty`)
+
+  const values: Array<string | boolean> = []
+  const seen = new Set<string>()
+  for (let index = 0; index < value.length; index += 1) {
+    const descriptor = descriptors[String(index)]
+    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
+      throw new TypeError(`${context} must contain dense enumerable data values`)
+    }
+    const allowedValue = descriptor.value
+    if (typeof allowedValue !== "string" && typeof allowedValue !== "boolean") {
+      throw new TypeError(`${context} values must be strings or booleans`)
+    }
+    if (!Object.hasOwn(variantValues, String(allowedValue))) {
+      throw new TypeError(`${context} has unknown value ${JSON.stringify(allowedValue)} for variant ${JSON.stringify(axis)}`)
+    }
+    const key = typeof allowedValue === "boolean"
+      ? `b:${allowedValue ? 1 : 0}`
+      : `s:${allowedValue.length}:${allowedValue}`
+    if (seen.has(key)) throw new TypeError(`${context} contains duplicate allowed value ${JSON.stringify(allowedValue)}`)
+    seen.add(key)
+    values.push(allowedValue)
+  }
+  return Object.freeze(values)
+}
+
+function matchesSelectedState(
+  constraint: ComponentRecipeStateConstraint,
+  selection: Readonly<Record<string, unknown>>,
+): boolean {
+  const discriminatorValue = selection[constraint.discriminator]
+  if (typeof discriminatorValue !== "string" && typeof discriminatorValue !== "boolean") return false
+  const selectedCase = constraint.cases.find(({value}) => value === String(discriminatorValue))
+  if (selectedCase === undefined) return false
+  return selectedCase.constraints.every(([axis, allowedValues]) =>
+    allowedValues.includes(selection[axis] as string | boolean))
+}
+
+function freezeCollectedSlotStyles(
+  slotOrder: ReadonlyArray<string>,
+  collected: Readonly<Record<string, ReadonlyArray<NativeStyle>>>,
+): Readonly<Record<string, ReadonlyArray<NativeStyle>>> {
   return Object.freeze(Object.fromEntries(
-    plan.slotOrder.map((slot) => [slot, Object.freeze(collected[slot] ?? [])]),
-  )) as NativeComponentResolvedStyles<TRecipe["slots"]>
+    slotOrder.map((slot) => [slot, Object.freeze(collected[slot] ?? [])]),
+  ))
+}
+
+function stateRecordEntries(value: unknown, context: string): Array<[string, unknown]> {
+  assertStateRecord(value, context)
+  return Object.entries(value as Record<string, unknown>)
+}
+
+function assertStateRecord(value: unknown, context: string): asserts value is Record<string, unknown> {
+  if (value === null || typeof value !== "object" || Array.isArray(value)) {
+    throw new TypeError(`${context} must be a plain record`)
+  }
+  const prototype = Object.getPrototypeOf(value)
+  if (prototype !== Object.prototype && prototype !== null) {
+    throw new TypeError(`${context} must be a plain record`)
+  }
+  if (Object.getOwnPropertySymbols(value).length > 0) {
+    throw new TypeError(`${context} cannot contain symbol properties`)
+  }
+  for (const [name, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
+    if (!("value" in descriptor) || !descriptor.enumerable) {
+      throw new TypeError(`${context}.${name} must be an enumerable data property`)
+    }
+  }
 }
 
 function appendSlotStyles(

@@ -28,6 +28,7 @@ import type {NativeComponentRecipeDescriptor} from "./components"
 import type { NativePrimitiveDomain } from "./compiler/native-capture"
 import {
   NativeComponentRecipeType,
+  NativeComponentRecipeLegacyVersion,
   NativeComponentRecipeVersion,
   NativeRecipeClassType,
   NativeRecipeType,
@@ -828,6 +829,8 @@ export function resolveComponentRecipeStyles<TRecipe extends ComponentRecipeDesc
     selection as Readonly<Record<string, unknown>>,
     (variantName, selectedValue, variantValues) =>
       warnForInvalidComponentRecipeVariant(recipe, variantName, selectedValue, variantValues),
+    (discriminator, normalizedSelection, constraint) =>
+      warnForInvalidComponentRecipeState(recipe, discriminator, normalizedSelection, constraint),
   )
 }
 
@@ -855,6 +858,8 @@ export function createComponentRecipeResolver<TRecipe extends ComponentRecipeDes
       normalizedSelection,
       (variantName, selectedValue, variantValues) =>
         warnForInvalidComponentRecipeVariant(recipe, variantName, selectedValue, variantValues),
+      (discriminator, normalizedStateSelection, constraint) =>
+        warnForInvalidComponentRecipeState(recipe, discriminator, normalizedStateSelection, constraint),
     )
     cache.set(key, resolved)
     return resolved
@@ -1050,7 +1055,7 @@ function resolveComponentRecipeThemeTokens<TRecipe extends NativeComponentRecipe
 ): TRecipe {
   const cached = getCachedResolution(theme, recipe, "component-recipe")
   if (cached.hit) return cached.value as TRecipe
-  if (recipe.version !== NativeComponentRecipeVersion) {
+  if (recipe.version !== NativeComponentRecipeLegacyVersion && recipe.version !== NativeComponentRecipeVersion) {
     throw new TypeError(`Unsupported component recipe version ${String(recipe.version)}`)
   }
 
@@ -1100,14 +1105,18 @@ function resolveComponentRecipeThemeTokens<TRecipe extends NativeComponentRecipe
     variants: compound.variants,
     styles: freezeComponentSlotStyles(compound.styles),
   })))
+  const stateVariants = recipe.stateVariants === undefined
+    ? undefined
+    : cloneAndFreezeComponentStyle(recipe.stateVariants)
   const resolved = Object.freeze({
     $$type: NativeComponentRecipeType,
-    version: NativeComponentRecipeVersion,
+    version: recipe.version,
     ...(recipe.$$debugName === undefined ? {} : {$$debugName: recipe.$$debugName}),
     slots: Object.freeze({...recipe.slots}),
     ...(base === undefined ? {} : {base: freezeComponentSlotStyles(base)}),
     variants: frozenVariants,
     defaultVariants: Object.freeze({...recipe.defaultVariants}),
+    ...(stateVariants === undefined ? {} : {stateVariants}),
     compoundVariants: frozenCompounds,
   }) as TRecipe
   setCachedResolution(theme, recipe, "component-recipe", resolved)
@@ -1223,6 +1232,51 @@ function warnForInvalidComponentRecipeVariant(
       `Invalid native component recipe "${name}": variant "${variantName}" does not define value "${String(selectedValue)}"; supported values: ${supportedValues}.`,
     ),
   )
+}
+
+function warnForInvalidComponentRecipeState(
+  recipe: ComponentRecipeDiagnosticTarget,
+  discriminator: string,
+  selection: Readonly<Record<string, unknown>>,
+  constraint: {
+    readonly cases: ReadonlyArray<{
+      readonly value: string
+      readonly constraints: ReadonlyArray<readonly [string, ReadonlyArray<string | boolean>]>
+    }>
+  },
+): void {
+  const name = componentRecipeDiagnosticName(recipe)
+  const keys = Object.keys(selection).sort((left, right) => left.localeCompare(right))
+  const selectionKey = keys.map((key) => `${key.length}:${key}=${componentDiagnosticValue(selection[key])}`).join("|")
+  const describedSelection = keys.map((key) => `${JSON.stringify(key)}: ${componentDiagnosticValue(selection[key])}`).join(", ")
+  const supportedCases = constraint.cases.map(({value, constraints}) => {
+    const requirements = constraints.map(([axis, values]) =>
+      `${axis}: ${values.map(value => JSON.stringify(value)).join(" | ")}`,
+    ).join(", ")
+    return requirements === "" ? JSON.stringify(value) : `${JSON.stringify(value)} (${requirements})`
+  }).join("; ")
+  warnOnce(
+    `invalid-component-state:${name}:${discriminator}:${selectionKey}`,
+    formatNativeStylesDiagnostic(
+      NativeStylesDiagnosticCode.InvalidRecipeVariant,
+      `Invalid native component recipe "${name}": state "${discriminator}" rejects normalized selection {${describedSelection}}; supported states: ${supportedCases}.`,
+    ),
+  )
+}
+
+function componentDiagnosticValue(value: unknown): string {
+  if (value === null) return "null"
+  switch (typeof value) {
+    case "undefined": return "undefined"
+    case "boolean": return String(value)
+    case "string": return JSON.stringify(value)
+    case "number": return Number.isNaN(value) ? "NaN" : String(value)
+    case "bigint": return `${String(value)}n`
+    case "symbol": return String(value)
+    case "function": return "[function]"
+    case "object": return "[object]"
+  }
+  return "[unknown]"
 }
 
 function componentRecipeDiagnosticName(recipe: ComponentRecipeDiagnosticTarget): string {

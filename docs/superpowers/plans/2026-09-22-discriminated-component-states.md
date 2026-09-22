@@ -81,7 +81,7 @@ Add an optional readonly stateConstraint: ComponentRecipeStateConstraint field t
 
 The cases are authored records, not generated selection combinations.
 
-- [ ] **Step 1: Add compile-time examples for state constraints**
+- [x] **Step 1: Add compile-time examples for state constraints**
 
 Extend packages/css/test/component-recipe-types.ts with the ready/loading/disabled example from the spec. Prove that {tone: "quiet"} uses the default ready state and that {status: "loading", busy: true} is accepted. Add @ts-expect-error examples for loading with the quiet tone, loading without its required busy: true, a missing/extra state case, two discriminator entries in stateVariants, an unknown constrained axis, an unknown allowed value, and a boolean discriminator assigned with a dependent value prohibited by that boolean case.
 
@@ -109,13 +109,13 @@ const explicitLoading: ConstrainedButtonProps = {status: "loading", busy: true}
 const prohibitedTone: ConstrainedButtonProps = {status: "loading", busy: true, tone: "quiet"}
 ```
 
-- [ ] **Step 2: Run typecheck and observe the expected missing-contract failures**
+- [x] **Step 2: Run typecheck and observe the expected missing-contract failures**
 
 Run: bun run typecheck
 
 Expected: the state fixture fails because stateVariants is not yet accepted and because the current flat selection type does not reject prohibited combinations. Keep the @ts-expect-error assertions; do not weaken them to make the current API pass.
 
-- [ ] **Step 3: Add authoring-boundary failures before changing the constructor**
+- [x] **Step 3: Add authoring-boundary failures before changing the constructor**
 
 Extend component-recipe-authoring.test.ts with cases for missing and extra state cases, multiple discriminator entries, unknown discriminator/constrained axes, empty and duplicate allowed-value tuples, values absent from a variant, missing default discriminator/default-constrained values, and defaults prohibited by their declared default state. Assert descriptive TypeError messages. Also assert that a valid state descriptor and all nested case/allowed-value records are frozen.
 
@@ -130,7 +130,7 @@ expect(() => componentRecipe({
 } as never)).toThrow(/unknown constrained variant "unknown"/)
 ```
 
-- [ ] **Step 4: Add runtime plan and resolver regressions for v1, valid v2, and prohibited v2 selections**
+- [x] **Step 4: Add runtime plan and resolver regressions for v1, valid v2, and prohibited v2 selections**
 
 In component-recipe-resolution-plan.test.ts, hand-author v1 and v2 plain descriptors. Assert that v1 still creates a plan, v2 indexes exactly the authored state cases/constraints, malformed/missing/extra v2 cases throw before resolution, and version 3 throws as unsupported. In component-recipe-runtime.test.ts, use a descriptor with base, discriminator, dependent variant, and a matching compound. Assert the valid selection retains base/variant/compound order; a prohibited combination and an unknown discriminator return base-only arrays for every slot and do not append any compound style.
 
@@ -140,7 +140,7 @@ In component-recipe-theme.test.ts, verify a token-changing v1 descriptor stays v
 
 Update the existing component-recipe-compiler.test.ts fixture result type and assertion to expect version 2 for newly authored componentRecipe descriptors. Keep hand-authored v1 descriptors in legacy runtime fixtures.
 
-- [ ] **Step 5: Run the new authoring and runtime tests to verify their red state**
+- [x] **Step 5: Run the new authoring and runtime tests to verify their red state**
 
 Run:
 
@@ -150,7 +150,7 @@ bun test packages/css/test/component-recipe-authoring.test.ts packages/css/test/
 
 Expected: constructor tests fail because invalid state declarations are accepted, and v2 runtime tests fail because the current plan rejects v2 or ignores state constraints. Existing v1 assertions may pass; keep each new failure tied to the intended state behavior.
 
-- [ ] **Step 6: Implement descriptor v2, state typing, authoring validation, and state-aware resolution**
+- [x] **Step 6: Implement descriptor v2, state typing, authoring validation, and state-aware resolution**
 
 In native-tags.ts, retain a named internal v1 compatibility value and make NativeComponentRecipeVersion equal 2 without adding the legacy value to the public runtime exports. Update component types so v1 and v2 descriptors are readable, while the authoring constructor emits v2. Define NativeComponentStateVariants<TVariants> as a one-discriminator union whose case keys exactly cover that variant's values; case records map sibling variant names to non-empty readonly tuples of allowed values. Add stateVariants to the config/descriptor, derive one selection-union member per authored case, make the default case discriminator optional, require non-default discriminators, and require a constrained value when the case does not admit its default. Map authored boolean case keys "true" and "false" to boolean literals in the selection union. Do not distribute over every product of the unconstrained variant axes.
 
@@ -176,7 +176,7 @@ return freezeCollectedSlotStyles(plan.slotOrder, collected)
 
 The internal reporter receives the discriminator, normalized selection, and authored case names. Keep the public resolver return type and cache-control surface unchanged.
 
-- [ ] **Step 7: Run the focused type, authoring, runtime, plan, and theme tests**
+- [x] **Step 7: Run the focused type, authoring, runtime, plan, and theme tests**
 
 Run:
 
@@ -187,7 +187,7 @@ bun test packages/css/test/component-recipe-authoring.test.ts packages/css/test/
 
 Expected: all type fixtures pass, v1 descriptors keep their old behavior, v2 stateful descriptors enforce defaults and prohibited combinations, and non-stateful recipes retain their prior output/order/cache behavior.
 
-- [ ] **Step 8: Commit the end-to-end state contract**
+- [x] **Step 8: Commit the end-to-end state contract**
 
 ```bash
 git add packages/css/src/native-tags.ts packages/css/src/components/index.ts packages/css/src/native-style.ts packages/css/src/runtime/component-recipe-resolution-plan.ts packages/css/src/theme-runtime.ts packages/css/test/component-recipe-types.ts packages/css/test/component-recipe-authoring.test.ts packages/css/test/component-recipe-runtime.test.ts packages/css/test/component-recipe-resolution-plan.test.ts packages/css/test/component-recipe-theme.test.ts packages/css/test/component-recipe-compiler.test.ts packages/css/test/public-api.test.ts

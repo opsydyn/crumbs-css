@@ -29,6 +29,7 @@ export type {
   NativeComponentSlotStyleInput,
   NativeComponentSlotStyles,
   NativeComponentSlots,
+  NativeComponentStateVariants,
   NativeComponentVariantSelection,
   NativeComponentVariantsConfig,
 } from "./components"

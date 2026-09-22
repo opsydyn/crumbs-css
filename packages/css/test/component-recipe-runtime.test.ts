@@ -17,6 +17,19 @@ type Variants = Readonly<{
   tone: Readonly<{primary: object; quiet: object}>
   disabled: Readonly<{false: object; true: object}>
 }>
+type StateSlots = Readonly<{root: "view"; label: "text"}>
+type StateButtonVariants = Readonly<{
+  status: Readonly<{ready: object; loading: object}>
+  busy: Readonly<{false: object; true: object}>
+  tone: Readonly<{primary: object; quiet: object}>
+}>
+type StateButtonStateVariants = Readonly<{
+  status: Readonly<{
+    ready: Readonly<{busy: readonly [false]; tone: readonly ["primary", "quiet"]}>
+    loading: Readonly<{busy: readonly [true]; tone: readonly ["primary"]}>
+  }>
+}>
+type StateButtonDefaults = Readonly<{status: "ready"; busy: false; tone: "primary"}>
 
 const button = {
   $$type: "crumbs.css.component-recipe",
@@ -40,6 +53,39 @@ const button = {
     {variants: {tone: "quiet", disabled: true}, styles: {label: {opacity: 0.7}}},
   ],
 } as unknown as NativeComponentRecipe<Slots, Variants>
+
+const stateButton = {
+  $$type: "crumbs.css.component-recipe",
+  version: 2,
+  $$debugName: "componentStateRuntimeButton",
+  slots: {root: "view", label: "text"},
+  base: {root: {padding: 1}, label: {fontSize: 10}},
+  variants: {
+    status: {
+      ready: {root: {opacity: 0.1}},
+      loading: {root: {opacity: 0.2}},
+    },
+    busy: {
+      false: {label: {opacity: 0.9}},
+      true: {label: {opacity: 0.5}},
+    },
+    tone: {
+      primary: {root: {borderWidth: 1}},
+      quiet: {root: {borderWidth: 2}},
+    },
+  },
+  defaultVariants: {status: "ready", busy: false, tone: "primary"},
+  stateVariants: {
+    status: {
+      ready: {busy: [false], tone: ["primary", "quiet"]},
+      loading: {busy: [true], tone: ["primary"]},
+    },
+  },
+  compoundVariants: [{
+    variants: {status: "loading", busy: true},
+    styles: {label: {fontWeight: "700"}},
+  }],
+} as unknown as NativeComponentRecipe<StateSlots, StateButtonVariants, StateButtonStateVariants, StateButtonDefaults>
 
 describe("component recipe resolution", () => {
   it("precomputes one shared authored-order plan and resolves every slot", () => {
@@ -125,6 +171,57 @@ describe("component recipe resolution", () => {
     expect(reports[0]?.slice(0, 2)).toEqual(["tone", "danger"])
     expect(resolved.root).toEqual([{padding: 12}, {opacity: 0.5}])
     expect(resolved.label).toEqual([{fontWeight: "700"}])
+  })
+
+  it("normalizes state defaults and returns base-only styles for prohibited v2 selections", () => {
+    const resolver = createComponentRecipeResolver(stateButton, {cacheSize: 0})
+    const defaultQuiet = resolver({tone: "quiet"} as never)
+    expect(defaultQuiet.root).toEqual([
+      {padding: 1},
+      {opacity: 0.1},
+      {borderWidth: 2},
+    ])
+    expect(defaultQuiet.label).toEqual([{fontSize: 10}, {opacity: 0.9}])
+
+    const loading = resolver({status: "loading", busy: true, tone: "primary"} as never)
+    expect(loading.root).toEqual([
+      {padding: 1},
+      {opacity: 0.2},
+      {borderWidth: 1},
+    ])
+    expect(loading.label).toEqual([
+      {fontSize: 10},
+      {opacity: 0.5},
+      {fontWeight: "700"},
+    ])
+
+    const warnings = captureWarnings(() => {
+      const prohibited = {status: "loading", busy: false, tone: "quiet"}
+      const result = resolver(prohibited as never)
+      resolver({tone: "quiet", busy: false, status: "loading"} as never)
+      const unknown = resolver({status: "paused", busy: false, tone: "primary"} as never)
+      expect(result.root).toEqual([{padding: 1}])
+      expect(result.label).toEqual([{fontSize: 10}])
+      expect(unknown.root).toEqual([{padding: 1}])
+      expect(unknown.label).toEqual([{fontSize: 10}])
+    })
+    expect(warnings).toHaveLength(2)
+    expect(warnings.every(message => message.includes("CRUMBS_CSS_INVALID_RECIPE_VARIANT"))).toBe(true)
+    expect(warnings.every(message => message.includes("componentStateRuntimeButton"))).toBe(true)
+    expect(warnings.every(message => message.includes('state "status"'))).toBe(true)
+
+    const {stateVariants: _stateVariants, ...unconstrainedV2} = stateButton
+    const unconstrained = createComponentRecipeResolver(
+      unconstrainedV2 as unknown as NativeComponentRecipe<StateSlots, StateButtonVariants, undefined, StateButtonDefaults>,
+      {cacheSize: 0},
+    )
+    const independent = unconstrained({status: "loading", busy: false, tone: "quiet"} as never)
+    expect(independent.root).toEqual([
+      {padding: 1},
+      {opacity: 0.2},
+      {borderWidth: 2},
+    ])
+    expect(independent.label).toEqual([{fontSize: 10}, {opacity: 0.9}])
   })
 
   it("resolves the view-only migration adapter without replacing legacy class references", () => {

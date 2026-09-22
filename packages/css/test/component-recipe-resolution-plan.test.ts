@@ -15,6 +15,53 @@ const planCaseArbitrary = fc.record({
 )
 
 describe("component recipe resolution plan size laws", () => {
+  it("keeps v1 compatibility and indexes only authored v2 state records", () => {
+    const legacyPlan = createComponentRecipeResolutionPlan(makePlanCase(0, 1, [2]))
+    const stateRecipe = makeStateRecipe()
+    const plan = createComponentRecipeResolutionPlan(stateRecipe)
+    const {stateVariants: _stateVariants, ...unconstrainedV2} = stateRecipe
+    const unconstrainedPlan = createComponentRecipeResolutionPlan(
+      unconstrainedV2 as unknown as NativeComponentRecipeDescriptor,
+    )
+
+    expect(legacyPlan.recipe.version).toBe(1)
+    expect(plan.stateConstraint).toEqual({
+      discriminator: "status",
+      cases: [
+        {value: "ready", constraints: [["busy", [false]], ["tone", ["primary", "quiet"]]]},
+        {value: "loading", constraints: [["busy", [true]], ["tone", ["primary"]]]},
+      ],
+    })
+    expect(Object.isFrozen(plan.stateConstraint)).toBe(true)
+    expect(Object.isFrozen(plan.stateConstraint?.cases)).toBe(true)
+    expect(Object.isFrozen(plan.stateConstraint?.cases[0]?.constraints)).toBe(true)
+    expect(unconstrainedPlan.stateConstraint).toBeUndefined()
+    expect(unconstrainedPlan.recipe.version).toBe(2)
+  })
+
+  it("rejects malformed state cases, invalid normalized defaults, and unknown descriptor versions", () => {
+    const stateRecipe = makeStateRecipe()
+    const malformedCases = [
+      {status: {ready: {tone: ["primary"]}}},
+      {status: {ready: {tone: ["primary"]}, loading: {}, disabled: {}}},
+    ]
+
+    for (const stateVariants of malformedCases) {
+      expect(() => createComponentRecipeResolutionPlan({
+        ...stateRecipe,
+        stateVariants,
+      } as unknown as NativeComponentRecipeDescriptor)).toThrow(/state(?:Variants| case)/i)
+    }
+    expect(() => createComponentRecipeResolutionPlan({
+      ...stateRecipe,
+      defaultVariants: {status: "ready", busy: true, tone: "primary"},
+    } as unknown as NativeComponentRecipeDescriptor)).toThrow(/default selection.*violates/)
+    expect(() => createComponentRecipeResolutionPlan({
+      ...stateRecipe,
+      version: 3,
+    } as unknown as NativeComponentRecipeDescriptor)).toThrow(/Unsupported component recipe descriptor version/)
+  })
+
   it("stores authored variants and slot branches exactly without product expansion", () => {
     fc.assert(
       fc.property(planCaseArbitrary, recipe => {
@@ -61,6 +108,40 @@ describe("component recipe resolution plan size laws", () => {
     expect(planValueCount).toBeLessThan(cartesianCombinationCount)
   })
 })
+
+function makeStateRecipe(): NativeComponentRecipeDescriptor & {readonly stateVariants: object} {
+  return {
+    $$type: "crumbs.css.component-recipe",
+    version: 2,
+    slots: {root: "view", label: "text"},
+    base: {root: {id: "base-root"}, label: {id: "base-label"}},
+    variants: {
+      status: {
+        ready: {root: {id: "status-ready"}},
+        loading: {root: {id: "status-loading"}},
+      },
+      busy: {
+        false: {label: {id: "busy-false"}},
+        true: {label: {id: "busy-true"}},
+      },
+      tone: {
+        primary: {root: {id: "tone-primary"}},
+        quiet: {root: {id: "tone-quiet"}},
+      },
+    },
+    defaultVariants: {status: "ready", busy: false, tone: "primary"},
+    stateVariants: {
+      status: {
+        ready: {busy: [false], tone: ["primary", "quiet"]},
+        loading: {busy: [true], tone: ["primary"]},
+      },
+    },
+    compoundVariants: [{
+      variants: {status: "loading", busy: true},
+      styles: {label: {id: "loading-compound"}},
+    }],
+  } as unknown as NativeComponentRecipeDescriptor & {readonly stateVariants: object}
+}
 
 function makePlanCase(
   compoundCount: number,

@@ -10,7 +10,7 @@ const root = path.resolve(import.meta.dir, "..")
 type CompiledStyle = Record<string, unknown>
 type CompiledComponent = {
   readonly $$type: "crumbs.css.component-recipe"
-  readonly version: 1
+  readonly version: 2
   readonly slots: Record<string, "view" | "text" | "image">
   readonly base?: Record<string, CompiledStyle>
   readonly variants: Record<string, Record<string, Record<string, CompiledStyle>>>
@@ -64,7 +64,7 @@ describe("component recipe compiler artifacts", () => {
 
     const button = exports.button!
     expect(button.$$type).toBe("crumbs.css.component-recipe")
-    expect(button.version).toBe(1)
+    expect(button.version).toBe(2)
     expect(button.slots).toEqual({root: "view", label: "text", icon: "image"})
     expect(button.base?.root).toEqual({
       opacity: 0.5,

@@ -6,6 +6,16 @@ import * as themeCoreApi from "@opsydyn/crumbs-css/theme/core"
 import * as tokenApi from "@opsydyn/crumbs-css/tokens"
 import * as tokenOpticApi from "@opsydyn/crumbs-css/tokens/optic"
 import * as tokenSchemaApi from "@opsydyn/crumbs-css/tokens/schema"
+import type {NativeComponentStateVariants} from "@opsydyn/crumbs-css/style"
+
+type PublicStateVariants = NativeComponentStateVariants<{
+  status: {ready: object; loading: object}
+  tone: {primary: object; quiet: object}
+}>
+const publicStateVariants: PublicStateVariants = {
+  status: {ready: {tone: ["primary"]}, loading: {tone: ["quiet"]}},
+}
+void publicStateVariants
 
 function namedApiKeys(api: object): ReadonlyArray<string> {
   return Object.keys(api)

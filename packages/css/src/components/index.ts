@@ -1,6 +1,11 @@
 import type {ImageStyle, TextStyle, ViewStyle} from "react-native"
 import {authorNativeStyle} from "../native-authoring"
-import {NativeComponentRecipeType, NativeComponentRecipeVersion, NativeRecipeClassType} from "../native-tags"
+import {
+  NativeComponentRecipeLegacyVersion,
+  NativeComponentRecipeType,
+  NativeComponentRecipeVersion,
+  NativeRecipeClassType,
+} from "../native-tags"
 import {NativeRecipeClassSymbol} from "../native-style-map"
 import type {
   NativeImageStyleInput,
@@ -44,6 +49,221 @@ export type NativeComponentRecipeSelection<
   readonly [K in keyof TVariants]?: NativeComponentVariantSelection<TVariants[K]>
 }
 
+type NativeComponentNonEmptyTuple<T> = readonly [T, ...T[]]
+type NativeComponentStateCaseConstraints<
+  TVariants extends NativeComponentVariantsShape,
+  TDiscriminator extends keyof TVariants,
+> = Readonly<{
+  readonly [K in Exclude<keyof TVariants, TDiscriminator>]?: NativeComponentNonEmptyTuple<
+    NativeComponentVariantSelection<TVariants[K]>
+  >
+}>
+type NativeComponentStateCases<
+  TVariants extends NativeComponentVariantsShape,
+  TDiscriminator extends keyof TVariants,
+> = Readonly<{
+  readonly [TCase in keyof TVariants[TDiscriminator]]: NativeComponentStateCaseConstraints<
+    TVariants,
+    TDiscriminator
+  >
+}>
+
+/** One exhaustive discriminator with per-case constraints over sibling variant axes. */
+export type NativeComponentStateVariants<
+  TVariants extends NativeComponentVariantsShape,
+> = {
+  readonly [TDiscriminator in keyof TVariants]: Readonly<{
+    readonly [K in TDiscriminator]: NativeComponentStateCases<TVariants, TDiscriminator>
+  }> & Readonly<{
+    readonly [K in Exclude<keyof TVariants, TDiscriminator>]?: never
+  }>
+}[keyof TVariants]
+
+type IsUnion<T, TAll = T> = T extends TAll ? ([TAll] extends [T] ? false : true) : never
+type StateConstraintTupleIsValid<TVariant, TAllowed> = TAllowed extends readonly [unknown, ...unknown[]]
+  ? Exclude<TAllowed[number], NativeComponentVariantSelection<TVariant>> extends never ? true : false
+  : false
+type StateCaseConstraintsAreValid<
+  TVariants extends NativeComponentVariantsShape,
+  TDiscriminator extends keyof TVariants,
+  TCase extends object,
+> = [Exclude<keyof TCase, Exclude<keyof TVariants, TDiscriminator>>] extends [never]
+  ? false extends {
+      [TAxis in keyof TCase]: TAxis extends keyof TVariants
+        ? StateConstraintTupleIsValid<TVariants[TAxis], TCase[TAxis]>
+        : false
+    }[keyof TCase]
+    ? false
+    : true
+  : false
+type StateCasesAreValid<
+  TVariants extends NativeComponentVariantsShape,
+  TDiscriminator extends keyof TVariants,
+  TCases extends object,
+> = [
+  Exclude<keyof TCases, keyof TVariants[TDiscriminator]> |
+  Exclude<keyof TVariants[TDiscriminator], keyof TCases>
+] extends [never]
+  ? false extends {
+      [TCase in keyof TCases]: TCases[TCase] extends object
+        ? StateCaseConstraintsAreValid<TVariants, TDiscriminator, TCases[TCase]>
+        : false
+    }[keyof TCases]
+    ? false
+    : true
+  : false
+type StateVariantMapIsValid<
+  TVariants extends NativeComponentVariantsShape,
+  TStates,
+> = TStates extends object
+  ? [keyof TStates] extends [never]
+    ? false
+    : IsUnion<keyof TStates> extends true
+      ? false
+      : [Exclude<keyof TStates, keyof TVariants>] extends [never]
+        ? keyof TStates extends infer TDiscriminator
+          ? TDiscriminator extends keyof TStates & keyof TVariants
+            ? TStates[TDiscriminator] extends object
+              ? StateCasesAreValid<TVariants, TDiscriminator, TStates[TDiscriminator]>
+              : false
+            : false
+          : false
+        : false
+  : false
+
+type IsRequiredProperty<T, K extends PropertyKey> = K extends keyof T
+  ? {} extends Pick<T, K> ? false : true
+  : false
+type StringifiedStateValue<T> = T extends string ? T : T extends boolean ? `${T}` : never
+type DefaultStateCaseKey<TStates, TDiscriminator extends keyof TStates, TDefaults> =
+  TDiscriminator extends keyof TDefaults
+    ? Extract<keyof TStates[TDiscriminator], StringifiedStateValue<TDefaults[TDiscriminator]>>
+    : never
+type StateDefaultCaseConstraintsAreValid<TConstraints extends object, TDefaults> =
+  [Exclude<keyof TConstraints, keyof TDefaults>] extends [never]
+    ? false extends {
+        [TAxis in keyof TConstraints]: TAxis extends keyof TDefaults
+          ? IsRequiredProperty<TDefaults, TAxis> extends true
+            ? TConstraints[TAxis] extends ReadonlyArray<infer TAllowed>
+              ? [TDefaults[TAxis]] extends [TAllowed] ? true : false
+              : false
+            : false
+          : false
+      }[keyof TConstraints]
+      ? false
+      : true
+    : false
+type StateDefaultsAreValid<TVariants extends NativeComponentVariantsShape, TStates, TDefaults> =
+  TStates extends undefined
+    ? true
+    : TStates extends object
+      ? [keyof TStates] extends [never]
+        ? false
+        : IsUnion<keyof TStates> extends true
+          ? false
+          : keyof TStates extends infer TDiscriminator
+            ? TDiscriminator extends keyof TStates & keyof TVariants
+              ? IsRequiredProperty<TDefaults, TDiscriminator> extends true
+                ? [DefaultStateCaseKey<TStates, TDiscriminator, TDefaults>] extends [never]
+                  ? false
+                  : DefaultStateCaseKey<TStates, TDiscriminator, TDefaults> extends infer TCase
+                    ? TCase extends keyof TStates[TDiscriminator]
+                      ? TStates[TDiscriminator][TCase] extends object
+                        ? StateDefaultCaseConstraintsAreValid<TStates[TDiscriminator][TCase], TDefaults>
+                        : false
+                      : false
+                    : false
+                : false
+              : false
+            : false
+      : false
+
+type ComponentStateCaseValue<TVariant, TCase extends string> =
+  keyof TVariant extends "false" | "true"
+    ? TCase extends "true" ? true : false
+    : TCase
+type RequiredStateAxisKeys<TConstraints, TDefaults> = {
+  [TAxis in keyof TConstraints]-?: TAxis extends keyof TDefaults
+    ? IsRequiredProperty<TDefaults, TAxis> extends true
+      ? TConstraints[TAxis] extends ReadonlyArray<infer TAllowed>
+        ? [TDefaults[TAxis]] extends [TAllowed] ? never : TAxis
+        : TAxis
+      : TAxis
+    : TAxis
+}[keyof TConstraints]
+type StateCaseAxisValue<TVariants, TConstraints, TAxis extends keyof TVariants> =
+  TAxis extends keyof TConstraints
+    ? TConstraints[TAxis] extends ReadonlyArray<infer TAllowed> ? TAllowed : never
+    : NativeComponentVariantSelection<TVariants[TAxis]>
+type StateCaseAxisSelection<
+  TVariants extends NativeComponentVariantsShape,
+  TConstraints extends object,
+  TDefaults,
+  TDiscriminator extends keyof TVariants,
+> = {
+  readonly [TAxis in Exclude<keyof TVariants, TDiscriminator> as
+    TAxis extends RequiredStateAxisKeys<TConstraints, TDefaults> ? never : TAxis]?:
+      StateCaseAxisValue<TVariants, TConstraints, TAxis>
+} & {
+  readonly [TAxis in Extract<Exclude<keyof TVariants, TDiscriminator>, RequiredStateAxisKeys<TConstraints, TDefaults>>]:
+    StateCaseAxisValue<TVariants, TConstraints, TAxis>
+}
+type StateCaseSelection<
+  TVariants extends NativeComponentVariantsShape,
+  TStates extends object,
+  TDefaults,
+  TDiscriminator extends keyof TVariants & keyof TStates,
+  TCase extends string,
+  TConstraints extends object,
+> = (TCase extends DefaultStateCaseKey<TStates, TDiscriminator, TDefaults>
+  ? {readonly [K in TDiscriminator]?: ComponentStateCaseValue<TVariants[TDiscriminator], TCase>}
+  : {readonly [K in TDiscriminator]: ComponentStateCaseValue<TVariants[TDiscriminator], TCase>}) &
+  StateCaseAxisSelection<TVariants, TConstraints, TDefaults, TDiscriminator>
+type NativeComponentStateRecipeSelection<
+  TVariants extends NativeComponentVariantsShape,
+  TStates,
+  TDefaults,
+> = TStates extends undefined
+  ? NativeComponentRecipeSelection<TVariants>
+  : TStates extends object
+    ? {
+        [TDiscriminator in keyof TStates]: TDiscriminator extends keyof TVariants
+          ? {
+              [TCase in keyof TStates[TDiscriminator]]: TCase extends string
+                ? TStates[TDiscriminator][TCase] extends object
+                  ? StateCaseSelection<
+                    TVariants,
+                    TStates,
+                    TDefaults,
+                    TDiscriminator,
+                    TCase,
+                    TStates[TDiscriminator][TCase]
+                  >
+                  : never
+                : never
+            }[keyof TStates[TDiscriminator]]
+          : never
+      }[keyof TStates]
+    : never
+
+type NativeComponentStateContractValidation<
+  TVariants extends NativeComponentVariantsShape,
+  TStates,
+  TDefaults,
+> = [TStates] extends [undefined]
+  ? unknown
+  : StateVariantMapIsValid<TVariants, TStates> extends true
+    ? StateDefaultsAreValid<TVariants, TStates, TDefaults> extends true ? unknown : never
+    : never
+
+type StateVariantsFromConfig<TConfig> = TConfig extends {readonly stateVariants: infer TStates}
+  ? TStates
+  : undefined
+type DefaultsFromConfig<TConfig, TVariants extends NativeComponentVariantsShape> =
+  TConfig extends {readonly defaultVariants: infer TDefaults}
+    ? TDefaults
+    : NativeComponentRecipeSelection<TVariants>
+
 export type NativeComponentCompoundVariant<
   TSlots extends NativeComponentSlots,
   TVariants extends NativeComponentVariantsShape,
@@ -61,7 +281,12 @@ export type NativeComponentResolvedSlotStyles<TSlots extends NativeComponentSlot
   readonly [TSlot in keyof TSlots & string]: NativeComponentSlotStyleResult<TSlots[TSlot]>
 }>
 
-export type NativeComponentRecipe<TSlots extends NativeComponentSlots, TVariants extends NativeComponentVariantsShape> = {
+export type NativeComponentRecipe<
+  TSlots extends NativeComponentSlots,
+  TVariants extends NativeComponentVariantsShape,
+  TStateVariants extends NativeComponentStateVariants<TVariants> | undefined = undefined,
+  TDefaults extends NativeComponentRecipeSelection<TVariants> = NativeComponentRecipeSelection<TVariants>,
+> = {
   readonly $$debugName?: string
   readonly $$type: typeof NativeComponentRecipeType
   readonly version: typeof NativeComponentRecipeVersion
@@ -72,20 +297,21 @@ export type NativeComponentRecipe<TSlots extends NativeComponentSlots, TVariants
       readonly [V in keyof TVariants[K]]: NativeComponentResolvedSlotStyles<TSlots>
     }
   }
-  readonly defaultVariants: NativeComponentRecipeSelection<TVariants>
+  readonly defaultVariants: TDefaults
   readonly compoundVariants: ReadonlyArray<NativeComponentCompoundVariant<TSlots, TVariants> & {
     readonly styles: NativeComponentResolvedSlotStyles<TSlots>
   }>
-}
+} & (TStateVariants extends undefined ? {} : {readonly stateVariants: TStateVariants})
 
 export type NativeComponentRecipeDescriptor = {
   readonly $$debugName?: string
   readonly $$type: typeof NativeComponentRecipeType
-  readonly version: typeof NativeComponentRecipeVersion
+  readonly version: typeof NativeComponentRecipeLegacyVersion | typeof NativeComponentRecipeVersion
   readonly slots: NativeComponentSlots
   readonly base?: object
   readonly variants: object
   readonly defaultVariants: object
+  readonly stateVariants?: object
   readonly compoundVariants: ReadonlyArray<{
     readonly variants: object
     readonly styles: object
@@ -95,17 +321,26 @@ export type NativeComponentRecipeDescriptor = {
 export type NativeComponentRecipeConfig<
   TSlots extends NativeComponentSlots,
   TVariants extends NativeComponentVariantsConfig<TSlots>,
+  TStateVariants extends NativeComponentStateVariants<TVariants> | undefined =
+    NativeComponentStateVariants<TVariants> | undefined,
+  TDefaults extends NativeComponentRecipeSelection<TVariants> = NativeComponentRecipeSelection<TVariants>,
 > = {
   readonly slots: TSlots
   readonly base?: NativeComponentSlotStyles<TSlots>
   readonly variants: TVariants
-  readonly defaultVariants?: NativeComponentRecipeSelection<TVariants>
+  readonly defaultVariants?: TDefaults
   readonly compoundVariants?: ReadonlyArray<NativeComponentCompoundVariant<TSlots, TVariants>>
+  readonly stateVariants?: TStateVariants
 }
 
 export type NativeComponentRecipeProps<TRecipe> =
-  TRecipe extends NativeComponentRecipe<infer TSlots, infer TVariants>
-    ? NativeComponentRecipeSelection<TVariants>
+  TRecipe extends NativeComponentRecipe<
+    infer _TSlots,
+    infer TVariants,
+    infer TStateVariants,
+    infer TDefaults
+  >
+    ? NativeComponentStateRecipeSelection<TVariants, TStateVariants, TDefaults>
     : never
 
 export type NativeComponentResolvedStyles<TSlots extends NativeComponentSlots> = Readonly<{
@@ -142,10 +377,30 @@ type NativeComponentVariantsFromRecipe<
 export function componentRecipe<
   const TSlots extends NativeComponentSlots,
   const TVariants extends NativeComponentVariantsConfig<TSlots>,
+  const TConfig extends NativeComponentRecipeConfig<
+    TSlots,
+    TVariants,
+    NativeComponentStateVariants<TVariants> | undefined,
+    NativeComponentRecipeSelection<TVariants>
+  >,
 >(
-  config: NativeComponentRecipeConfig<TSlots, TVariants>,
+  config: NativeComponentRecipeConfig<
+    TSlots,
+    TVariants,
+    NativeComponentStateVariants<TVariants> | undefined,
+    NativeComponentRecipeSelection<TVariants>
+  > & TConfig & NativeComponentStateContractValidation<
+    TVariants,
+    StateVariantsFromConfig<TConfig>,
+    DefaultsFromConfig<TConfig, TVariants>
+  >,
   debugId?: string,
-): NativeComponentRecipe<TSlots, TVariants> {
+): NativeComponentRecipe<
+  TSlots,
+  TVariants,
+  StateVariantsFromConfig<TConfig>,
+  DefaultsFromConfig<TConfig, TVariants>
+> {
   assertPlainRecord(config, "component recipe")
   const slots = validateSlots(config.slots)
   const baseInput = config.base === undefined
@@ -157,7 +412,8 @@ export function componentRecipe<
     config.defaultVariants === undefined ? {} : config.defaultVariants,
     variantValues,
     `${componentName(debugId)} default variants`,
-  )
+  ) as DefaultsFromConfig<TConfig, TVariants>
+  const stateVariants = validateStateVariants(config.stateVariants, variantValues, defaultVariants)
   const validatedCompounds = validateCompounds(
     config.compoundVariants === undefined ? [] : config.compoundVariants,
     variantValues,
@@ -181,8 +437,14 @@ export function componentRecipe<
     ...(base === undefined ? {} : {base}),
     variants,
     defaultVariants,
+    ...(stateVariants === undefined ? {} : {stateVariants}),
     compoundVariants,
-  }) as NativeComponentRecipe<TSlots, TVariants>
+  }) as NativeComponentRecipe<
+    TSlots,
+    TVariants,
+    StateVariantsFromConfig<TConfig>,
+    DefaultsFromConfig<TConfig, TVariants>
+  >
 }
 
 /**
@@ -266,6 +528,126 @@ function selectionValues(variants: ValidatedVariants): Readonly<Record<string, R
     name,
     Object.fromEntries(values.map(([value]) => [value, true])),
   ]))
+}
+
+function validateStateVariants(
+  value: unknown,
+  variantValues: Readonly<Record<string, Readonly<Record<string, unknown>>>>,
+  defaultVariants: Readonly<Record<string, unknown>>,
+): Readonly<Record<string, unknown>> | undefined {
+  if (value === undefined) return undefined
+  const discriminators = recordEntries(value, "component recipe stateVariants")
+  if (discriminators.length !== 1) {
+    throw new TypeError("Component recipe stateVariants must define exactly one discriminator")
+  }
+
+  const [discriminator, rawCases] = discriminators[0]!
+  const discriminatorValues = variantValues[discriminator]
+  if (discriminatorValues === undefined) {
+    throw new TypeError(`Component recipe stateVariants references unknown discriminator variant ${JSON.stringify(discriminator)}`)
+  }
+  const cases = recordEntries(rawCases, `component recipe stateVariants discriminator ${JSON.stringify(discriminator)}`)
+  const expectedCases = Object.keys(discriminatorValues)
+  const actualCaseNames = new Set(cases.map(([caseName]) => caseName))
+  const missingCase = expectedCases.find(caseName => !actualCaseNames.has(caseName))
+  if (missingCase !== undefined) {
+    throw new TypeError(`Component recipe stateVariants is missing state case ${JSON.stringify(missingCase)}`)
+  }
+  const extraCase = cases.find(([caseName]) => !Object.hasOwn(discriminatorValues, caseName))?.[0]
+  if (extraCase !== undefined) {
+    throw new TypeError(`Component recipe stateVariants has unknown state case ${JSON.stringify(extraCase)}`)
+  }
+
+  if (!Object.hasOwn(defaultVariants, discriminator)) {
+    throw new TypeError(`Component recipe defaultVariants must define discriminator ${JSON.stringify(discriminator)} for stateVariants`)
+  }
+  const defaultCaseName = String(defaultVariants[discriminator])
+  let defaultConstraints: ReadonlyArray<readonly [string, ReadonlyArray<string | boolean>]> = []
+  const frozenCases = cases.map(([caseName, rawConstraints]) => {
+    const constraints = recordEntries(
+      rawConstraints,
+      `component recipe state ${JSON.stringify(caseName)} constraints`,
+    )
+    const frozenConstraints: Array<readonly [string, ReadonlyArray<string | boolean>]> = []
+    for (const [axis, rawAllowedValues] of constraints) {
+      if (axis === discriminator) {
+        throw new TypeError(`Component recipe state ${JSON.stringify(caseName)} cannot constrain its discriminator ${JSON.stringify(discriminator)}`)
+      }
+      const values = variantValues[axis]
+      if (values === undefined) {
+        throw new TypeError(`Component recipe state ${JSON.stringify(caseName)} references unknown constrained variant ${JSON.stringify(axis)}`)
+      }
+      const allowedValues = validateStateAllowedValues(
+        rawAllowedValues,
+        values,
+        caseName,
+        axis,
+      )
+      frozenConstraints.push([axis, allowedValues])
+    }
+    if (caseName === defaultCaseName) defaultConstraints = frozenConstraints
+    return [caseName, freezeRecord(frozenConstraints)] as const
+  })
+
+  for (const [axis, allowedValues] of defaultConstraints) {
+    if (!Object.hasOwn(defaultVariants, axis)) {
+      throw new TypeError(`Component recipe defaultVariants must define constrained variant ${JSON.stringify(axis)} for its default state`)
+    }
+    if (!allowedValues.includes(defaultVariants[axis] as string | boolean)) {
+      throw new TypeError(`Component recipe default selection for state ${JSON.stringify(defaultCaseName)} violates constraint ${JSON.stringify(axis)}`)
+    }
+  }
+
+  return freezeRecord([[discriminator, freezeRecord(frozenCases)]])
+}
+
+function validateStateAllowedValues(
+  value: unknown,
+  variantValues: Readonly<Record<string, unknown>>,
+  caseName: string,
+  axis: string,
+): ReadonlyArray<string | boolean> {
+  const context = `Component recipe state ${JSON.stringify(caseName)} allowed values for variant ${JSON.stringify(axis)}`
+  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) {
+    throw new TypeError(`${context} must be a non-empty array`)
+  }
+  const descriptors = Object.getOwnPropertyDescriptors(value)
+  if (Object.getOwnPropertySymbols(value).length > 0) {
+    throw new TypeError(`${context} cannot contain symbol properties`)
+  }
+  for (const key of Reflect.ownKeys(value)) {
+    if (key === "length") continue
+    if (typeof key !== "string" || !/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) {
+      throw new TypeError(`${context} must contain only tuple values`)
+    }
+  }
+  if (value.length === 0) throw new TypeError(`${context} must be non-empty`)
+
+  const allowedValues: Array<string | boolean> = []
+  const seen = new Set<string>()
+  for (let index = 0; index < value.length; index += 1) {
+    const descriptor = descriptors[String(index)]
+    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
+      throw new TypeError(`${context} must contain dense enumerable data values`)
+    }
+    const allowedValue = descriptor.value
+    if (typeof allowedValue !== "string" && typeof allowedValue !== "boolean") {
+      throw new TypeError(`${context} values must be strings or booleans`)
+    }
+    const valueName = String(allowedValue)
+    if (!Object.hasOwn(variantValues, valueName)) {
+      throw new TypeError(`${context} has unknown value ${JSON.stringify(allowedValue)} for variant ${JSON.stringify(axis)}`)
+    }
+    const key = typeof allowedValue === "boolean"
+      ? `b:${allowedValue ? 1 : 0}`
+      : `s:${allowedValue.length}:${allowedValue}`
+    if (seen.has(key)) {
+      throw new TypeError(`${context} contains duplicate allowed value ${JSON.stringify(allowedValue)}`)
+    }
+    seen.add(key)
+    allowedValues.push(allowedValue)
+  }
+  return Object.freeze(allowedValues)
 }
 
 function authorVariants(

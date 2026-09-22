@@ -34,7 +34,7 @@ describe("component recipe authoring", () => {
     }, "button"))
 
     expect(button.$$type).toBe("crumbs.css.component-recipe")
-    expect(button.version).toBe(1)
+    expect(button.version).toBe(2)
     expect(button.$$debugName).toBe("button")
     expect(Object.keys(button.slots)).toEqual(["root", "label", "icon"])
     expect(Object.keys(button.base ?? {})).toEqual(["root", "label", "icon"])
@@ -72,6 +72,70 @@ describe("component recipe authoring", () => {
     } as never)).toThrow(/default value "danger" is not defined for variant "tone"/)
   })
 
+  it("validates exhaustive state constraints and freezes their plain-data descriptor", () => {
+    const validStateVariants = {
+      status: {
+        ready: {busy: [false], tone: ["primary", "quiet"]},
+        loading: {busy: [true], tone: ["primary"]},
+      },
+    }
+    const validDefaults = {status: "ready", busy: false, tone: "primary"}
+    const makeConfig = (stateVariants: unknown, defaultVariants: unknown = validDefaults) => ({
+      slots: {root: "view"},
+      variants: {
+        status: {
+          ready: {root: {opacity: 1}},
+          loading: {root: {opacity: 0.7}},
+        },
+        busy: {
+          false: {root: {opacity: 1}},
+          true: {root: {opacity: 0.7}},
+        },
+        tone: {
+          primary: {root: {opacity: 1}},
+          quiet: {root: {opacity: 0.8}},
+        },
+      },
+      defaultVariants,
+      stateVariants,
+    })
+
+    inFileScope(() => {
+      const assertInvalid = (stateVariants: unknown, message: RegExp, defaults?: unknown) => {
+        expect(() => componentRecipe(makeConfig(stateVariants, defaults) as never)).toThrow(message)
+      }
+
+      assertInvalid({status: {ready: {busy: [false]}}}, /missing state case "loading"/)
+      assertInvalid({status: {ready: {busy: [false]}, loading: {}, disabled: {}}}, /unknown state case "disabled"/)
+      assertInvalid({status: {ready: {}, loading: {}}, tone: {primary: {}, quiet: {}}}, /exactly one discriminator/)
+      assertInvalid({unknown: {ready: {}, loading: {}}}, /unknown discriminator variant "unknown"/)
+      assertInvalid({status: {ready: {unknown: ["x"]}, loading: {}}}, /unknown constrained variant "unknown"/)
+      assertInvalid({status: {ready: {tone: []}, loading: {}}}, /allowed values for variant "tone" must be non-empty/)
+      assertInvalid({status: {ready: {tone: ["primary", "primary"]}, loading: {}}}, /duplicate allowed value "primary"/)
+      assertInvalid({status: {ready: {tone: ["danger"]}, loading: {}}}, /unknown value "danger" for variant "tone"/)
+      assertInvalid(validStateVariants, /defaultVariants must define discriminator "status"/, {busy: false, tone: "primary"})
+      assertInvalid(validStateVariants, /defaultVariants must define constrained variant "tone"/, {status: "ready", busy: false})
+      assertInvalid(validStateVariants, /default selection for state "ready" violates constraint "busy"/, {
+        status: "ready",
+        busy: true,
+        tone: "primary",
+      })
+
+      const button = componentRecipe(makeConfig(validStateVariants) as never) as unknown as {
+        readonly version: number
+        readonly stateVariants: typeof validStateVariants
+      }
+      expect(button.version).toBe(2)
+      expect(button.stateVariants).toEqual(validStateVariants)
+      expect(Object.isFrozen(button.stateVariants)).toBe(true)
+      expect(Object.isFrozen(button.stateVariants?.status)).toBe(true)
+      expect(Object.isFrozen(button.stateVariants?.status.ready)).toBe(true)
+      expect(Object.isFrozen(button.stateVariants?.status.ready.busy)).toBe(true)
+      expect(Object.isFrozen(button.stateVariants?.status.ready.tone)).toBe(true)
+      expect(Object.isFrozen(button.stateVariants?.status.loading.tone)).toBe(true)
+    })
+  })
+
   it("wraps a legacy recipe as a view slot without replacing its class references", () => {
     const {legacy, wrapped} = inFileScope(() => {
       const legacy = recipe({
@@ -89,6 +153,7 @@ describe("component recipe authoring", () => {
     })
 
     expect(wrapped.$$type).toBe("crumbs.css.component-recipe")
+    expect(wrapped.version).toBe(2)
     expect(wrapped.slots).toEqual({root: "view"})
     expect(wrapped.defaultVariants).toEqual(legacy.defaultVariants)
     expect(Object.isFrozen(wrapped.defaultVariants)).toBe(true)
