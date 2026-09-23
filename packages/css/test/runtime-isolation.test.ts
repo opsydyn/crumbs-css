@@ -28,6 +28,7 @@ describe("public runtime dependency isolation", () => {
     const result = graph(`${entry}.${format}`)
     expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name !== 'react')).toEqual([])
     expect(result.files.filter(file => /\/(?:style|index|transformer|metro-plugin)\.(?:mjs|cjs)$/.test(file))).toEqual([])
+    expect(result.files.filter(file => /\/(?:native-style|native-capture|compiler)(?:[-.]|\/)/.test(file))).toEqual([])
     expect(result.externals).toEqual(['react'])
    })
   }
@@ -35,11 +36,19 @@ describe("public runtime dependency isolation", () => {
  for (const entry of ['theme', 'theme-core']) {
   it(`can require ${entry} CommonJS runtime while compiler and Node imports are denied`, () => {
    const entryPath = path.join(root, `${entry}.cjs`)
-   const script = `const Module = require('node:module'); const original = Module._load; Module._load = function(name, ...args) { if (name !== 'react' && !name.startsWith('./')) throw new Error('Forbidden runtime import: ' + name); if (/style|transformer|metro-plugin/.test(name)) throw new Error('Compiler import: ' + name); return original.call(this,name,...args); }; const api = require(${JSON.stringify(entryPath)}); const value = api.resolveThemeTokens({width:api.createThemeTokenReference('--crumbs-runtime-size')},{contract:{},values:{},tokens:{'--crumbs-runtime-size':24}}); if (value.width !== 24) throw new Error('Wrong runtime result'); const component = {$$type:'crumbs.css.component-recipe',version:1,slots:{root:'view'},base:{root:{width:api.createThemeTokenReference('--crumbs-runtime-size')}},variants:{},defaultVariants:{},compoundVariants:[]}; const resolvedComponent = api.resolveThemeTokens(component,{contract:{},values:{},tokens:{'--crumbs-runtime-size':24}}); if (resolvedComponent.base.root.width !== 24) throw new Error('Wrong component runtime result');`
+   const statefulRuntimeAssertions = entry === 'theme'
+    ? `const resolveComponent = api.createComponentRecipeResolver(resolvedStatefulComponent); const valid = resolveComponent({status:'loading',busy:true,tone:'primary'}); if (!valid.root.some(style => style.opacity === 0.7) || !valid.root.some(style => style.padding === 2) || !valid.root.some(style => style.margin === 1)) throw new Error('Valid v2 state did not resolve'); const prohibited = resolveComponent({status:'loading',busy:false,tone:'quiet'}); if (JSON.stringify(prohibited.root) !== JSON.stringify([{width:24}])) throw new Error('Prohibited v2 state did not fall back to base styles');`
+    : ''
+   const script = `const Module = require('node:module'); const original = Module._load; Module._load = function(name, ...args) { if (name !== 'react' && !name.startsWith('./')) throw new Error('Forbidden runtime import: ' + name); if (/effect|vanilla|style|transformer|metro-plugin|compiler|native-capture/.test(name)) throw new Error('Compiler import: ' + name); return original.call(this,name,...args); }; const api = require(${JSON.stringify(entryPath)}); const value = api.resolveThemeTokens({width:api.createThemeTokenReference('--crumbs-runtime-size')},{contract:{},values:{},tokens:{'--crumbs-runtime-size':24}}); if (value.width !== 24) throw new Error('Wrong runtime result'); const legacy = {$$type:'crumbs.css.component-recipe',version:1,slots:{root:'view'},base:{root:{width:api.createThemeTokenReference('--crumbs-runtime-size')}},variants:{},defaultVariants:{},compoundVariants:[]}; const resolvedLegacy = api.resolveThemeTokens(legacy,{contract:{},values:{},tokens:{'--crumbs-runtime-size':24}}); if (resolvedLegacy.base.root.width !== 24) throw new Error('Wrong v1 component runtime result'); const stateful = {$$type:'crumbs.css.component-recipe',version:2,slots:{root:'view'},base:{root:{width:api.createThemeTokenReference('--crumbs-runtime-size')}},variants:{status:{ready:{root:{opacity:1}},loading:{root:{opacity:0.7}}},busy:{false:{root:{padding:1}},true:{root:{padding:2}}},tone:{primary:{root:{margin:1}},quiet:{root:{margin:2}}}},defaultVariants:{status:'ready',busy:false,tone:'primary'},stateVariants:{status:{ready:{busy:[false],tone:['primary','quiet']},loading:{busy:[true],tone:['primary']}}},compoundVariants:[]}; const resolvedStatefulComponent = api.resolveThemeTokens(stateful,{contract:{},values:{},tokens:{'--crumbs-runtime-size':24}}); if (resolvedStatefulComponent.version !== 2 || resolvedStatefulComponent.base.root.width !== 24 || JSON.stringify(resolvedStatefulComponent.stateVariants) !== JSON.stringify(stateful.stateVariants)) throw new Error('V2 state metadata was not preserved and token-resolved'); ${statefulRuntimeAssertions}`
    // Load the entry before denying its absolute path; its transitive imports stay guarded.
    const guarded = script.replace("name !== 'react' && !name.startsWith('./')", `name !== ${JSON.stringify(entryPath)} && name !== 'react' && !name.startsWith('./')`)
    const result = Bun.spawnSync(['node','-e',guarded],{stdout:'pipe',stderr:'pipe'})
-   expect({code:result.exitCode,stderr:result.stderr.toString()}).toEqual({code:0,stderr:''})
+   expect(result.exitCode).toBe(0)
+   if (entry === 'theme') {
+    expect(result.stderr.toString()).toContain('state "status" rejects normalized selection')
+   } else {
+    expect(result.stderr.toString()).toBe('')
+   }
   })
  }
  for (const format of ['mjs', 'cjs']) {

@@ -19,6 +19,7 @@ type CompiledComponent = {
     readonly variants: Record<string, string | boolean>
     readonly styles: Record<string, CompiledStyle>
   }>
+  readonly stateVariants?: Record<string, Record<string, Record<string, ReadonlyArray<string | boolean>>>>
 }
 
 async function compile(source: string): Promise<Record<string, CompiledComponent>> {
@@ -83,6 +84,83 @@ describe("component recipe compiler artifacts", () => {
     expect(resolved.base?.root).toEqual({opacity: 0.5, paddingTop: 12, paddingRight: 12, paddingBottom: 12, paddingLeft: 12})
     expect(resolved.variants.tone?.primary?.label).toEqual({color: "#fff"})
     expect(resolved.compoundVariants[0]?.styles.label).toEqual({fontWeight: "700"})
+  })
+
+  it("preserves state constraints and every authored branch in the compiled v2 descriptor", async () => {
+    const exports = await compile(`
+      const vars = createThemeContract({color: {label: null}});
+      export const button = componentRecipe({
+        slots: {root: "view", label: "text"},
+        base: {
+          root: {opacity: 0.25},
+          label: {color: vars.color.label},
+        },
+        variants: {
+          status: {
+            ready: {root: {borderWidth: 1}},
+            loading: {root: {borderWidth: 2}},
+          },
+          busy: {
+            false: {root: {opacity: 0.5}},
+            true: {root: {opacity: 0.75}},
+          },
+          tone: {
+            primary: {label: {fontWeight: "700", color: vars.color.label}},
+            quiet: {label: {fontWeight: "400"}},
+          },
+        },
+        defaultVariants: {status: "ready", busy: false, tone: "primary"},
+        stateVariants: {
+          status: {
+            ready: {busy: [false], tone: ["primary", "quiet"]},
+            loading: {busy: [true], tone: ["primary"]},
+          },
+        },
+      }, "button");
+    `)
+
+    const button = exports.button!
+    expect(button.$$type).toBe("crumbs.css.component-recipe")
+    expect(button.version).toBe(2)
+    expect(button.stateVariants).toEqual({
+      status: {
+        ready: {busy: [false], tone: ["primary", "quiet"]},
+        loading: {busy: [true], tone: ["primary"]},
+      },
+    })
+    expect(button.base).toEqual({
+      root: {opacity: 0.25},
+      label: {color: {$$type: "crumbs.css.theme-token", varName: "--crumbs-color-label"}},
+    })
+    expect(button.variants).toEqual({
+      status: {
+        ready: {root: {borderTopWidth: 1, borderRightWidth: 1, borderBottomWidth: 1, borderLeftWidth: 1}},
+        loading: {root: {borderTopWidth: 2, borderRightWidth: 2, borderBottomWidth: 2, borderLeftWidth: 2}},
+      },
+      busy: {
+        false: {root: {opacity: 0.5}},
+        true: {root: {opacity: 0.75}},
+      },
+      tone: {
+        primary: {
+          label: {
+            fontWeight: "700",
+            color: {$$type: "crumbs.css.theme-token", varName: "--crumbs-color-label"},
+          },
+        },
+        quiet: {label: {fontWeight: "400"}},
+      },
+    })
+
+    const resolved = resolveThemeTokens(button, {
+      contract: {},
+      values: {},
+      tokens: {"--crumbs-color-label": "#fff"},
+    })!
+    expect(resolved.stateVariants).toEqual(button.stateVariants)
+    expect(resolved.base?.label).toEqual({color: "#fff"})
+    expect(resolved.variants.tone?.primary?.label).toEqual({fontWeight: "700", color: "#fff"})
+    expect(resolved.variants.tone?.quiet?.label).toEqual({fontWeight: "400"})
   })
 
   it("reports an escaped primitive mismatch with the component slot path", async () => {

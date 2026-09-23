@@ -79,6 +79,72 @@ function createPackedConsumer(): string {
   return resolve(tempRoot, "consumer")
 }
 
+async function writePackedStatefulFixture(consumerRoot: string): Promise<void> {
+  const filename = resolve(consumerRoot, "button.css.ts")
+  writeFileSync(filename, `
+    import {componentRecipe, createThemeContract} from "@opsydyn/crumbs-css/style";
+    const vars = createThemeContract({color: {label: null}});
+    export const button = componentRecipe({
+      slots: {root: "view", label: "text"},
+      base: {
+        root: {opacity: 0.25},
+        label: {color: vars.color.label},
+      },
+      variants: {
+        status: {
+          ready: {root: {borderWidth: 1}},
+          loading: {root: {borderWidth: 2}},
+        },
+        busy: {
+          false: {root: {opacity: 0.5}},
+          true: {root: {opacity: 0.75}},
+        },
+        tone: {
+          primary: {label: {fontWeight: "700", color: vars.color.label}},
+          quiet: {label: {fontWeight: "400"}},
+        },
+      },
+      defaultVariants: {status: "ready", busy: false, tone: "primary"},
+      stateVariants: {
+        status: {
+          ready: {busy: [false], tone: ["primary", "quiet"]},
+          loading: {busy: [true], tone: ["primary"]},
+        },
+      },
+    }, "button");
+  `)
+
+  const requireFromConsumer = createRequire(resolve(consumerRoot, "package.json"))
+  const {transformCssTsToStyleSheet} = requireFromConsumer(
+    "@opsydyn/crumbs-css/dist/transformer",
+  ) as {
+    readonly transformCssTsToStyleSheet: (
+      filePath: string,
+      cwd: string,
+      options: {readonly useStyleSheet: false; readonly strictDiagnostics: true},
+    ) => Promise<string>
+  }
+  const code = await transformCssTsToStyleSheet(filename, consumerRoot, {
+    useStyleSheet: false,
+    strictDiagnostics: true,
+  })
+  writeFileSync(resolve(consumerRoot, "button.css"), code)
+}
+
+const statefulConsumerAssertions = `
+  const contains = (styles, slot, property, expected) => styles[slot].some(style => style[property] === expected);
+  if (button.version !== 2) throw new Error("stateful component descriptor version was not preserved");
+  if (JSON.stringify(button.stateVariants) !== JSON.stringify({status: {ready: {busy: [false], tone: ["primary", "quiet"]}, loading: {busy: [true], tone: ["primary"]}}})) throw new Error("state constraints were not preserved");
+  const themedButton = THEME.resolveThemeTokens(button, {contract: {}, values: {}, tokens: {"--crumbs-color-label": "#fff"}});
+  const resolveButton = THEME.createComponentRecipeResolver(themedButton);
+  const defaultStyles = resolveButton({});
+  if (!contains(defaultStyles, "root", "borderTopWidth", 1) || !contains(defaultStyles, "root", "opacity", 0.5) || !contains(defaultStyles, "label", "color", "#fff")) throw new Error("default state styles did not resolve");
+  const loadingStyles = resolveButton({status: "loading", busy: true, tone: "primary"});
+  if (!contains(loadingStyles, "root", "borderTopWidth", 2) || !contains(loadingStyles, "root", "opacity", 0.75) || !contains(loadingStyles, "label", "fontWeight", "700")) throw new Error("valid non-default state styles did not resolve");
+  const prohibitedStyles = resolveButton({status: "loading", busy: false, tone: "quiet"});
+  if (JSON.stringify(prohibitedStyles.root) !== JSON.stringify([{opacity: 0.25}])) throw new Error("prohibited state input did not fall back to base styles");
+`
+
 const consumerTypeSource = `
   import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
   import { componentRecipe, createNativeNormalizeValueFn, createSprinklesLookupPlan, createTheme, createThemeContract, defineProperties, NATIVE_RESPONSIVE_CONDITION_NAMES, type NativeComponentRecipeProps, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
@@ -173,7 +239,7 @@ function writeConsumerTsconfig(
 }
 
 describe("@opsydyn/crumbs-css packed consumer contract", () => {
-  it("ships only the compiled npm surface and can be consumed outside the monorepo", () => {
+  it("ships only the compiled npm surface and can be consumed outside the monorepo", async () => {
     const consumerRoot = createPackedConsumer()
     const packageRoot = resolve(consumerRoot, "node_modules", "@opsydyn", "crumbs-css")
 
@@ -198,7 +264,17 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
 
     writeFileSync(
       resolve(consumerRoot, "package.json"),
-      JSON.stringify({ private: true, type: "module" }, null, 2),
+      JSON.stringify({name: "crumbs-css-packed-consumer", private: true, type: "module"}, null, 2),
+    )
+    await writePackedStatefulFixture(consumerRoot)
+    writeFileSync(
+      resolve(consumerRoot, "css-loader.mjs"),
+      `import {readFile} from "node:fs/promises";
+       import {fileURLToPath} from "node:url";
+       export async function load(url, context, nextLoad) {
+         if (url.endsWith(".css")) return {format: "module", shortCircuit: true, source: await readFile(fileURLToPath(url), "utf8")};
+         return nextLoad(url, context);
+       }`,
     )
 
     writeFileSync(
@@ -211,6 +287,11 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const tokenOptic = require("@opsydyn/crumbs-css/tokens/optic");
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
+        require.extensions[".css"] = (module, filename) => {
+          const source = require("node:fs").readFileSync(filename, "utf8").replace(/^export const (\\w+) =/gm, "exports.$1 =");
+          module._compile(source, filename);
+        };
+        const {button} = require("./button.css");
 
         if (typeof root.withNativeStyles !== "function") throw new Error("missing root withNativeStyles");
         if (typeof style.createThemeContract !== "function") throw new Error("missing style createThemeContract");
@@ -227,6 +308,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof tokenOptic.createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (typeof metro.withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformer.transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
+        ${statefulConsumerAssertions.replaceAll("THEME", "theme")}
       `,
     )
     run(["node", "runtime.cjs"], consumerRoot)
@@ -241,6 +323,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
+        import {button} from "./button.css";
 
         if (typeof NativeStylesDiagnosticCode.UnsupportedSelector !== "string") throw new Error("missing root diagnostic code");
         if (typeof createThemeContract !== "function") throw new Error("missing style createThemeContract");
@@ -258,9 +341,10 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (typeof withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
+        ${statefulConsumerAssertions.replaceAll("THEME", "({resolveThemeTokens, createComponentRecipeResolver})")}
       `,
     )
-    run(["node", "runtime.mjs"], consumerRoot)
+    run(["node", "--loader", "./css-loader.mjs", "runtime.mjs"], consumerRoot)
 
     writeFileSync(resolve(consumerRoot, "consumer-types.ts"), consumerTypeSource)
     const primitiveTypes = readFileSync(resolve(PACKAGE_ROOT, "test/primitive-reference-types.ts"), "utf8")
