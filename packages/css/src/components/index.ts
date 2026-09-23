@@ -24,6 +24,7 @@ import {
   validateNativeComponentContract,
   type NativeComponentContract,
 } from "./contracts"
+import type {NativeComponentRecipeExtensionTypeDetails} from "./extension-contract"
 
 export type {
   NativeComponentContract,
@@ -469,15 +470,19 @@ type NativeComponentContractValidation<TSlots, TVariants, TStates, TContract> =
         : never
       : never
 
-type PublicComponentSelection<TVariants extends NativeComponentVariantsShape, TStates, TDefaults, TContract> =
-  PublicVariantsForContract<TVariants, TContract> extends infer TPublicVariants extends NativeComponentVariantsShape
+type MergePublicVariantMaps<TLeft, TRight> = {
+  readonly [TAxis in keyof TLeft | keyof TRight]:
+    (TAxis extends keyof TLeft ? TLeft[TAxis] : Readonly<Record<never, never>>) &
+    (TAxis extends keyof TRight ? NonNullable<TRight[TAxis]> : Readonly<Record<never, never>>)
+}
+type PublicComponentSelection<TVariants extends NativeComponentVariantsShape, TStates, TDefaults, TContract, TAdded = {}> =
+  MergePublicVariantMaps<PublicVariantsForContract<TVariants, TContract>, TAdded> extends infer TPublicVariants extends NativeComponentVariantsShape
     ? Extract<keyof Exclude<TStates, undefined>, keyof TPublicVariants> extends never
       ? NativeComponentRecipeSelection<TPublicVariants>
       : NativeComponentStateRecipeSelection<TPublicVariants, Exclude<TStates, undefined>, TDefaults>
     : never
 
-/** Consumer selection narrowed to the surfaces declared by a v3 contract. */
-export type NativeComponentPublicProps<TRecipe> =
+type NativeComponentPublicPropsFromBase<TRecipe, TAdded> =
   TRecipe extends NativeComponentRecipe<
     infer _TSlots,
     infer TVariants,
@@ -486,9 +491,20 @@ export type NativeComponentPublicProps<TRecipe> =
     infer TContract
   >
     ? TContract extends NativeComponentContract
-      ? PublicComponentSelection<TVariants, TStateVariants, TDefaults, TContract>
+      ? PublicComponentSelection<TVariants, TStateVariants, TDefaults, TContract, TAdded>
       : never
     : never
+
+/** Consumer selection narrowed to the surfaces declared by a v3 contract. */
+export type NativeComponentPublicProps<TRecipe> =
+  [NativeComponentRecipeExtensionTypeDetails<TRecipe>] extends [never]
+    ? NativeComponentPublicPropsFromBase<TRecipe, {}>
+    : NativeComponentRecipeExtensionTypeDetails<TRecipe> extends {
+        readonly base: infer TBase
+        readonly variants: infer TAdded
+      }
+      ? NativeComponentPublicPropsFromBase<TBase, TAdded>
+      : never
 
 export type NativeComponentResolvedStyles<TSlots extends NativeComponentSlots> = Readonly<{
   readonly [TSlot in keyof TSlots & string]: ReadonlyArray<NativeComponentSlotStyleResult<TSlots[TSlot]>>

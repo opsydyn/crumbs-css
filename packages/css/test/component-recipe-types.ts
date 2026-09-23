@@ -1,6 +1,7 @@
 import {
   componentRecipe,
   componentRecipeFromRecipe,
+  extendComponentRecipe,
   recipe,
   type NativeComponentRecipeConfig,
   type NativeComponentRecipeProps,
@@ -289,6 +290,35 @@ const consumerCannotSelectPrivateAxis: ContractedButtonPublicProps = {density: "
 // @ts-expect-error dangerInternal is private in the component contract.
 const consumerCannotSelectPrivateValue: ContractedButtonPublicProps = {tone: "dangerInternal"}
 void [ownerCanSelectPrivateSurfaces, consumerCanSelectPublicValue, consumerCannotSelectPrivateAxis, consumerCannotSelectPrivateValue]
+
+const extendedButton = extendComponentRecipe(contractedButton, {
+  identity: {owner: "@acme/brand", name: "ButtonExtension", version: 1},
+  defaultVariants: {tone: "brand"},
+  variants: {tone: {brand: {root: {opacity: 0.5}}}},
+  slotOverrides: {root: {borderWidth: 1}},
+})
+const extendedButtonResolver = createComponentRecipeResolver(contractedButton, {extensions: [extendedButton]})
+extendedButtonResolver({tone: "brand"})
+extendedButtonResolver({tone: "quiet"})
+// @ts-expect-error Private owner axes stay unavailable through an extension resolver.
+extendedButtonResolver({density: "compact"})
+// @ts-expect-error Private owner values stay unavailable through an extension resolver.
+extendedButtonResolver({tone: "dangerInternal"})
+extendComponentRecipe(contractedButton, {
+  identity: {owner: "@acme/brand", name: "InvalidDensityDefault", version: 1},
+  // @ts-expect-error Defaults may only be changed on the declared tone axis.
+  defaultVariants: {density: "compact"},
+})
+extendComponentRecipe(contractedButton, {
+  identity: {owner: "@acme/brand", name: "InvalidSizeValue", version: 1},
+  // @ts-expect-error New values may only be added to the declared tone axis.
+  variants: {size: {large: {root: {opacity: 1}}}},
+})
+extendComponentRecipe(contractedButton, {
+  identity: {owner: "@acme/brand", name: "InvalidPrivateSlot", version: 1},
+  // @ts-expect-error Extensions may style only the root slot in this contract.
+  slotOverrides: {internalIcon: {width: 16}},
+})
 
 const publiclyConstrainedButton = componentRecipe({
   contract: {

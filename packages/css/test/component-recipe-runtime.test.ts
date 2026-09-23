@@ -1,9 +1,8 @@
 import {describe, expect, it} from "bun:test"
 import {endFileScope, setFileScope} from "@vanilla-extract/css/fileScope"
 import type {ImageStyle, TextStyle, ViewStyle} from "react-native"
-import type {
-  NativeComponentRecipe,
-} from "../src/native-style"
+import type {NativeComponentRecipeDescriptor} from "../src/components"
+import type {NativeComponentRecipe} from "../src/native-style"
 import {componentRecipeFromRecipe, recipe} from "../src/native-style"
 import {
   createComponentRecipeResolutionPlan,
@@ -241,6 +240,45 @@ describe("component recipe resolution", () => {
     } finally {
       endFileScope()
     }
+  })
+
+  it("rejects unknown extension keys before they reach the bounded selection cache", () => {
+    const identity = {owner: "@acme/ui", name: "RuntimeExtensionButton", version: 1}
+    const recipeData = {
+      $$type: "crumbs.css.component-recipe",
+      version: 3,
+      contract: {
+        identity,
+        public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+        extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+      },
+      slots: {root: "view"},
+      base: {root: {padding: 1}},
+      variants: {tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}}},
+      defaultVariants: {tone: "primary"},
+      compoundVariants: [],
+    }
+    const recipe = recipeData as unknown as NativeComponentRecipeDescriptor
+    const extension = {
+      $$type: "crumbs.css.component-recipe-extension",
+      version: 1,
+      identity: {owner: "@acme/brand", name: "RuntimeExtension", version: 1},
+      componentIdentity: identity,
+      defaultVariants: {tone: "brand"},
+      variants: {tone: {brand: {root: {$$type: "crumbs.css.class", className: "brandTone"}}}},
+      compoundVariants: [],
+      slotOverrides: {},
+    }
+    const resolver = createComponentRecipeResolver(recipe, {extensions: [extension] as never, cacheSize: 2})
+
+    expect(() => resolver({privateAxis: "secret"} as never)).toThrow(/unknown.*selection key/i)
+    expect(resolver.getCacheStats()).toMatchObject({hits: 0, misses: 0, size: 0})
+    const resolved = resolver({} as never).root!
+    expect(resolved).toHaveLength(2)
+    expect(resolved[0]).toEqual(recipeData.base.root)
+    expect(resolved[1]).toMatchObject({$$type: "crumbs.css.class", className: "brandTone"})
+    expect(() => resolver({[Symbol("unknown")]: "secret"} as never)).toThrow(/symbol selection key/i)
+    expect(resolver.getCacheStats()).toMatchObject({hits: 0, misses: 1, size: 1})
   })
 
   it("rejects invalid resolver cache capacities", () => {

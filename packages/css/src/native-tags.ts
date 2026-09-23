@@ -5,5 +5,7 @@ export const NativeComponentRecipeType = "crumbs.css.component-recipe" as const
 export const NativeComponentRecipeLegacyVersion = 1 as const
 export const NativeComponentRecipeVersion = 2 as const
 export const NativeComponentRecipeContractVersion = 3 as const
+export const NativeComponentRecipeExtensionType = "crumbs.css.component-recipe-extension" as const
+export const NativeComponentRecipeExtensionVersion = 1 as const
 export const NativeSprinklesLookupPlanType = "crumbs.css.sprinkles-lookup-plan" as const
 export const NativeSprinklesLookupPlanVersion = 1 as const

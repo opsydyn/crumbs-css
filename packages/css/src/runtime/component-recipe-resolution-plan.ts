@@ -7,6 +7,11 @@ import type {
 import type {NativeStyle} from "../native-style"
 import {validateNativeComponentContract} from "../components/contracts"
 import {
+  validateNativeComponentRecipeExtensionChain,
+  type NativeComponentRecipeExtensionDescriptor,
+  type NativeComponentRecipeExtensionPlan,
+} from "../components/extension-contract"
+import {
   NativeComponentRecipeContractVersion,
   NativeComponentRecipeLegacyVersion,
   NativeComponentRecipeType,
@@ -36,6 +41,12 @@ export type ComponentRecipeCompoundMatcher = {
   readonly styles: ComponentSlotRecord
 }
 
+export type ComponentRecipeResolutionPlanOptions<
+  TExtensions extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor> = ReadonlyArray<NativeComponentRecipeExtensionDescriptor>,
+> = {
+  readonly extensions?: TExtensions
+}
+
 export type ComponentRecipeResolutionPlan<
   TRecipe extends NativeComponentRecipeDescriptor = NativeComponentRecipeDescriptor,
 > = {
@@ -50,6 +61,7 @@ export type ComponentRecipeResolutionPlan<
   readonly variants: ReadonlyArray<ComponentRecipeResolutionVariant>
   readonly compoundMatchers: ReadonlyArray<ComponentRecipeCompoundMatcher>
   readonly stateConstraint?: ComponentRecipeStateConstraint
+  readonly extensionPlan?: NativeComponentRecipeExtensionPlan
 }
 
 export type ComponentRecipeInvalidVariantReporter = (
@@ -69,7 +81,11 @@ type ComponentSlotRecordMap = Readonly<Record<string, ComponentSlotRecord>>
 /** Build one shared plan for all slots without expanding variant products. */
 export function createComponentRecipeResolutionPlan<
   TRecipe extends NativeComponentRecipeDescriptor,
->(recipe: TRecipe): ComponentRecipeResolutionPlan<TRecipe> {
+  TExtensions extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor> = ReadonlyArray<NativeComponentRecipeExtensionDescriptor>,
+>(
+  recipe: TRecipe,
+  options: ComponentRecipeResolutionPlanOptions<TExtensions> = {},
+): ComponentRecipeResolutionPlan<TRecipe> {
   if (recipe.$$type !== NativeComponentRecipeType ||
     (recipe.version !== NativeComponentRecipeLegacyVersion &&
       recipe.version !== NativeComponentRecipeVersion &&
@@ -137,17 +153,46 @@ export function createComponentRecipeResolutionPlan<
     throw new TypeError("Component contract metadata requires component recipe version 3")
   }
 
+  const extensionPlan = validateNativeComponentRecipeExtensionChain(
+    recipe,
+    options.extensions === undefined ? [] : options.extensions,
+  )
+  const effectiveDefaults = Object.freeze({...defaultSelection, ...extensionPlan.defaultVariants})
+  const mergedVariants = variants.map(variant => {
+    const addedValues = extensionPlan.variants[variant.name]
+    return addedValues === undefined
+      ? variant
+      : Object.freeze({name: variant.name, values: Object.freeze({...variant.values, ...addedValues})})
+  })
+  const extensionCompoundMatchers = extensionPlan.compoundVariants.map((compound, index) => {
+    const requirements = Object.freeze(Object.entries(compound.variants) as Array<readonly [string, unknown]>)
+    return Object.freeze({
+      requirements,
+      matches: (selection: Readonly<Record<string, unknown>>) =>
+        requirements.every(([name, value]) => selection[name] === value),
+      styles: validateSlotRecord(compound.styles as ComponentSlotRecord, slots, `extension compound variant ${index}`),
+    })
+  })
+  const extensionOverrides = extensionPlan.slotOverrides.map((styles, index) =>
+    validateSlotRecord(styles as ComponentSlotRecord, slots, `extension slot overrides ${index}`))
+  const hasExtensions = extensionPlan.extensions.length > 0
+
   const selectionKeySet = new Set<string>([
-    ...variantOrder,
-    ...Object.keys(defaultSelection),
+    ...(hasExtensions
+      ? variantOrder.filter(name => extensionPlan.selectionKeys.includes(name))
+      : variantOrder),
+    ...Object.keys(effectiveDefaults).filter(name => !hasExtensions || extensionPlan.selectionKeys.includes(name)),
     ...compoundMatchers.flatMap(({requirements}) => requirements.map(([name]) => name)),
+    ...extensionCompoundMatchers.flatMap(({requirements}) => requirements.map(([name]) => name)),
   ])
-  const selectionKeys = [
-    ...variantOrder,
-    ...[...selectionKeySet]
-      .filter((name) => !variantOrder.includes(name))
-      .sort((left, right) => left.localeCompare(right)),
-  ]
+  const selectionKeys = hasExtensions
+    ? variantOrder.filter(name => extensionPlan.selectionKeys.includes(name))
+    : [
+        ...variantOrder,
+        ...[...selectionKeySet]
+          .filter((name) => !variantOrder.includes(name))
+          .sort((left, right) => left.localeCompare(right)),
+      ]
 
   return Object.freeze({
     $$type: ComponentRecipeResolutionPlanType,
@@ -156,11 +201,12 @@ export function createComponentRecipeResolutionPlan<
     slotOrder: Object.freeze(slotOrder),
     variantOrder: Object.freeze(variantOrder),
     selectionKeys: Object.freeze(selectionKeys),
-    defaultSelection,
+    defaultSelection: effectiveDefaults,
     base,
-    variants: Object.freeze(variants),
-    compoundMatchers: Object.freeze(compoundMatchers),
+    variants: Object.freeze(mergedVariants),
+    compoundMatchers: Object.freeze([...compoundMatchers, ...extensionCompoundMatchers]),
     ...(stateConstraint === undefined ? {} : {stateConstraint}),
+    ...(hasExtensions ? {extensionPlan: Object.freeze({...extensionPlan, slotOverrides: Object.freeze(extensionOverrides)})} : {}),
   }) as ComponentRecipeResolutionPlan<TRecipe>
 }
 
@@ -172,6 +218,7 @@ export function resolveComponentRecipeResolutionPlan<
   reportInvalidVariant?: ComponentRecipeInvalidVariantReporter,
   reportInvalidState?: ComponentRecipeInvalidStateReporter,
 ): NativeComponentResolvedStyles<TRecipe["slots"]> {
+  validateComponentRecipeExtensionSelection(plan, selection)
   const selected = {...plan.defaultSelection, ...selection}
   const collected = Object.fromEntries(
     plan.slotOrder.map((slot) => [slot, [] as NativeStyle[]]),
@@ -222,7 +269,27 @@ export function resolveComponentRecipeResolutionPlan<
     if (compound.matches(selected)) appendSlotStyles(collected, compound.styles)
   }
 
+  for (const override of plan.extensionPlan?.slotOverrides ?? []) {
+    appendSlotStyles(collected, override as ComponentSlotRecord)
+  }
+
   return freezeCollectedSlotStyles(plan.slotOrder, collected) as NativeComponentResolvedStyles<TRecipe["slots"]>
+}
+
+/** Reject private and unknown keys before resolver cache lookup. */
+export function validateComponentRecipeExtensionSelection(
+  plan: Pick<ComponentRecipeResolutionPlan, "extensionPlan" | "selectionKeys">,
+  selection: Readonly<Record<string, unknown>>,
+): void {
+  if (plan.extensionPlan === undefined) return
+  if (Object.getOwnPropertySymbols(selection).length > 0) {
+    throw new TypeError("Component recipe extension resolver received an unknown symbol selection key")
+  }
+  for (const key of Object.keys(selection)) {
+    if (!plan.selectionKeys.includes(key)) {
+      throw new TypeError(`Component recipe extension resolver received unknown or private selection key ${JSON.stringify(key)}`)
+    }
+  }
 }
 
 function validateStateConstraint(

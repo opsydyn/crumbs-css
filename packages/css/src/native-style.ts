@@ -19,6 +19,7 @@ export type {
   NativeSprinklesSelection,
 } from "./sprinkles"
 export {componentRecipe, componentRecipeFromRecipe} from "./components"
+export {extendComponentRecipe} from "./components/extensions"
 export type {
   NativeComponentCompoundVariant,
   NativeComponentContract,
@@ -37,6 +38,8 @@ export type {
   NativeComponentVariantSelection,
   NativeComponentVariantsConfig,
 } from "./components"
+export type {NativeComponentRecipeExtensionConfig} from "./components/extensions"
+export type {NativeComponentRecipeExtensionDescriptor} from "./components/extension-contract"
 export {
   createNativeMapValueFn,
   createNativeNormalizeValueFn,
@@ -125,6 +128,8 @@ export {
   NativeComponentRecipeType,
   NativeComponentRecipeContractVersion,
   NativeComponentRecipeVersion,
+  NativeComponentRecipeExtensionType,
+  NativeComponentRecipeExtensionVersion,
   NativeRecipeType,
   NativeRecipeClassType,
   NativeSprinklesLookupPlanType,

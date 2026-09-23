@@ -15,6 +15,7 @@ import { formatNativeStylesDiagnostic, NativeStylesDiagnosticCode } from "./diag
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
 import type {
   NativeComponentRecipeProps,
+  NativeComponentPublicProps,
   NativeComponentResolvedStyles,
   NativeRecipe,
   NativeRecipeSelection,
@@ -25,6 +26,7 @@ import type {
   NativeTheme,
 } from "./native-style"
 import type {NativeComponentRecipeDescriptor} from "./components"
+import type {NativeComponentRecipeExtensionDescriptor} from "./components/extension-contract"
 import {validateNativeComponentContract} from "./components/contracts"
 import type { NativePrimitiveDomain } from "./compiler/native-capture"
 import {
@@ -75,9 +77,11 @@ import {
 import {
   createComponentRecipeResolutionPlan,
   resolveComponentRecipeResolutionPlan,
+  validateComponentRecipeExtensionSelection,
   type ComponentRecipeCompoundMatcher,
   type ComponentRecipeInvalidVariantReporter,
   type ComponentRecipeResolutionPlan,
+  type ComponentRecipeResolutionPlanOptions,
   type ComponentRecipeResolutionVariant,
 } from "./runtime/component-recipe-resolution-plan"
 import {
@@ -221,11 +225,25 @@ export type RecipeResolverControls = {
 export type BoundedNativeRecipeResolver<TVariants extends NativeRecipeVariantsConfig> =
   NativeRecipeResolver<TVariants> & RecipeResolverControls
 
-export type NativeComponentRecipeResolver<TRecipe extends ComponentRecipeDescriptor> = (
-  selection?: NativeComponentRecipeProps<TRecipe>,
+type LastComponentRecipeExtension<TExtensions extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor>> =
+  TExtensions extends readonly [...ReadonlyArray<unknown>, infer TLast] ? TLast : never
+type ComponentRecipeSelectionForExtensions<
+  TRecipe extends ComponentRecipeDescriptor,
+  TExtensions extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor>,
+> = TExtensions extends readonly [NativeComponentRecipeExtensionDescriptor, ...ReadonlyArray<NativeComponentRecipeExtensionDescriptor>]
+  ? NativeComponentPublicProps<LastComponentRecipeExtension<TExtensions>>
+  : NativeComponentRecipeProps<TRecipe>
+
+export type NativeComponentRecipeResolver<
+  TRecipe extends ComponentRecipeDescriptor,
+  TSelection = NativeComponentRecipeProps<TRecipe>,
+> = (
+  selection?: TSelection,
 ) => NativeComponentResolvedStyles<TRecipe["slots"]>
 
-export type ComponentRecipeResolverOptions = RecipeResolverOptions
+export type ComponentRecipeResolverOptions<
+  TExtensions extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor> = ReadonlyArray<NativeComponentRecipeExtensionDescriptor>,
+> = RecipeResolverOptions & ComponentRecipeResolutionPlanOptions<TExtensions>
 
 export type ComponentRecipeResolverControls<TRecipe extends ComponentRecipeDescriptor> = {
   readonly plan: ComponentRecipeResolutionPlan<TRecipe>
@@ -234,8 +252,10 @@ export type ComponentRecipeResolverControls<TRecipe extends ComponentRecipeDescr
   readonly dispose: () => void
 }
 
-export type BoundedNativeComponentRecipeResolver<TRecipe extends ComponentRecipeDescriptor> =
-  NativeComponentRecipeResolver<TRecipe> & ComponentRecipeResolverControls<TRecipe>
+export type BoundedNativeComponentRecipeResolver<
+  TRecipe extends ComponentRecipeDescriptor,
+  TSelection = NativeComponentRecipeProps<TRecipe>,
+> = NativeComponentRecipeResolver<TRecipe, TSelection> & ComponentRecipeResolverControls<TRecipe>
 
 export type NativeSprinklesResolver<
   TProperties extends object,
@@ -820,12 +840,17 @@ export function createRecipeResolver<TVariants extends NativeRecipeVariantsConfi
   return resolve
 }
 
-export function resolveComponentRecipeStyles<TRecipe extends ComponentRecipeDescriptor>(
+export function resolveComponentRecipeStyles<
+  TRecipe extends ComponentRecipeDescriptor,
+  const TExtensions extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor> = readonly [],
+>(
   recipe: TRecipe,
-  selection: NativeComponentRecipeProps<TRecipe> = {} as NativeComponentRecipeProps<TRecipe>,
+  selection: ComponentRecipeSelectionForExtensions<TRecipe, TExtensions> =
+    {} as ComponentRecipeSelectionForExtensions<TRecipe, TExtensions>,
+  options: ComponentRecipeResolutionPlanOptions<TExtensions> = {},
 ): NativeComponentResolvedStyles<TRecipe["slots"]> {
   warnForPartialComponentRecipePayload(recipe)
-  const plan = createComponentRecipeResolutionPlan(recipe)
+  const plan = createComponentRecipeResolutionPlan(recipe, options)
   return resolveComponentRecipeResolutionPlan(
     plan,
     selection as Readonly<Record<string, unknown>>,
@@ -836,21 +861,29 @@ export function resolveComponentRecipeStyles<TRecipe extends ComponentRecipeDesc
   )
 }
 
-export function createComponentRecipeResolver<TRecipe extends ComponentRecipeDescriptor>(
+export function createComponentRecipeResolver<
+  TRecipe extends ComponentRecipeDescriptor,
+  const TExtensions extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor> = readonly [],
+>(
   recipe: TRecipe,
-  options: ComponentRecipeResolverOptions = {},
-): BoundedNativeComponentRecipeResolver<TRecipe> {
-  const plan = createComponentRecipeResolutionPlan(recipe)
+  options: ComponentRecipeResolverOptions<TExtensions> = {},
+): BoundedNativeComponentRecipeResolver<
+  TRecipe,
+  ComponentRecipeSelectionForExtensions<TRecipe, TExtensions>
+> {
+  const plan = createComponentRecipeResolutionPlan(recipe, options)
   const cacheSize = validateRecipeResolverCacheSize(
     options.cacheSize ?? DEFAULT_RECIPE_RESOLVER_CACHE_SIZE,
   )
   const cache = createBoundedRecipeSelectionCache<NativeComponentResolvedStyles<TRecipe["slots"]>>(cacheSize)
   let disposed = false
 
-  const resolve = ((selection: NativeComponentRecipeProps<TRecipe> = {} as NativeComponentRecipeProps<TRecipe>) => {
+  const resolve = ((selection: ComponentRecipeSelectionForExtensions<TRecipe, TExtensions> =
+    {} as ComponentRecipeSelectionForExtensions<TRecipe, TExtensions>) => {
     if (disposed) throw new Error("Component recipe resolver has been disposed")
     warnForPartialComponentRecipePayload(recipe)
     const normalizedSelection = selection as Readonly<Record<string, unknown>>
+    validateComponentRecipeExtensionSelection(plan, normalizedSelection)
     const key = canonicalRecipeSelectionKey(plan, normalizedSelection)
     const cached = cache.get(key)
     if (cached.hit) return cached.value

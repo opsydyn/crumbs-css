@@ -147,6 +147,55 @@ describe("component recipe resolution plan size laws", () => {
     expect(() => createComponentRecipeResolutionPlan(recipe)).toThrow(/public (slot|value).*unknown|unknown.*public/i)
   })
 
+  it("precomputes extension defaults, added branches, compounds, and ordered overrides", () => {
+    const identity = {owner: "@acme/ui", name: "PlanExtensionButton", version: 1}
+    const classReference = (className: string) => ({$$type: "crumbs.css.class", className})
+    const recipeData = {
+      $$type: "crumbs.css.component-recipe",
+      version: 3,
+      contract: {
+        identity,
+        public: {slots: ["root"], variants: {size: ["small", "large"], tone: ["primary", "quiet"]}},
+        extensionPoints: {defaults: ["tone"], variantValues: ["tone"], compoundVariants: true, slotStyles: ["root"]},
+      },
+      slots: {root: "view"},
+      base: {root: {padding: 8}},
+      variants: {
+        size: {small: {root: {padding: 4}}, large: {root: {backgroundColor: "navy"}}},
+        tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}},
+      },
+      defaultVariants: {size: "small", tone: "primary"},
+      compoundVariants: [{variants: {size: "large"}, styles: {root: {borderRadius: 12}}}],
+    }
+    const recipe = recipeData as unknown as NativeComponentRecipeDescriptor
+    const extension = {
+      $$type: "crumbs.css.component-recipe-extension",
+      version: 1,
+      identity: {owner: "@acme/brand", name: "PlanExtension", version: 1},
+      componentIdentity: identity,
+      defaultVariants: {tone: "brand"},
+      variants: {tone: {brand: {root: classReference("brandTone")}}},
+      compoundVariants: [{
+        variants: {size: "large", tone: "brand"},
+        styles: {root: classReference("brandCompound")},
+      }],
+      slotOverrides: {root: classReference("brandOverride")},
+    }
+    const plan = createComponentRecipeResolutionPlan(recipe, {extensions: [extension] as never})
+
+    expect(plan.variantOrder).toEqual(["size", "tone"])
+    expect(plan.defaultSelection).toEqual({size: "small", tone: "brand"})
+    expect(plan.variants[1]?.values).toHaveProperty("brand")
+    const resolved = resolveComponentRecipeResolutionPlan(plan, {size: "large"}).root!
+    expect(resolved).toHaveLength(6)
+    expect(resolved[0]).toEqual(recipeData.base.root)
+    expect(resolved[1]).toEqual(recipeData.variants.size.large.root)
+    expect(resolved[2]).toMatchObject({$$type: "crumbs.css.class", className: "brandTone"})
+    expect(resolved[3]).toEqual(recipeData.compoundVariants[0]!.styles.root)
+    expect(resolved[4]).toMatchObject({$$type: "crumbs.css.class", className: "brandCompound"})
+    expect(resolved[5]).toMatchObject({$$type: "crumbs.css.class", className: "brandOverride"})
+  })
+
   it("stores authored variants and slot branches exactly without product expansion", () => {
     fc.assert(
       fc.property(planCaseArbitrary, recipe => {
