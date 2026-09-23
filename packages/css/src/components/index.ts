@@ -139,6 +139,12 @@ type DefaultStateCaseKey<TStates, TDiscriminator extends keyof TStates, TDefault
   TDiscriminator extends keyof TDefaults
     ? Extract<keyof TStates[TDiscriminator], StringifiedStateValue<TDefaults[TDiscriminator]>>
     : never
+type OptionalDefaultStateCaseKey<TStates, TDiscriminator extends keyof TStates, TDefaults> =
+  [DefaultStateCaseKey<TStates, TDiscriminator, TDefaults>] extends [never]
+    ? never
+    : IsUnion<DefaultStateCaseKey<TStates, TDiscriminator, TDefaults>> extends true
+      ? never
+      : DefaultStateCaseKey<TStates, TDiscriminator, TDefaults>
 type StateDefaultCaseConstraintsAreValid<TConstraints extends object, TDefaults> =
   [Exclude<keyof TConstraints, keyof TDefaults>] extends [never]
     ? false extends {
@@ -215,7 +221,7 @@ type StateCaseSelection<
   TDiscriminator extends keyof TVariants & keyof TStates,
   TCase extends string,
   TConstraints extends object,
-> = (TCase extends DefaultStateCaseKey<TStates, TDiscriminator, TDefaults>
+> = (TCase extends OptionalDefaultStateCaseKey<TStates, TDiscriminator, TDefaults>
   ? {readonly [K in TDiscriminator]?: ComponentStateCaseValue<TVariants[TDiscriminator], TCase>}
   : {readonly [K in TDiscriminator]: ComponentStateCaseValue<TVariants[TDiscriminator], TCase>}) &
   StateCaseAxisSelection<TVariants, TConstraints, TDefaults, TDiscriminator>
@@ -250,15 +256,32 @@ type NativeComponentStateContractValidation<
   TVariants extends NativeComponentVariantsShape,
   TStates,
   TDefaults,
+  TConfig,
 > = [TStates] extends [undefined]
   ? unknown
   : StateVariantMapIsValid<TVariants, TStates> extends true
-    ? StateDefaultsAreValid<TVariants, TStates, TDefaults> extends true ? unknown : never
+    ? TConfig extends {readonly defaultVariants?: unknown}
+      ? IsRequiredProperty<TConfig, "defaultVariants"> extends true
+        ? StateDefaultsAreValid<TVariants, TStates, TDefaults> extends true ? unknown : never
+        : unknown
+      : StateDefaultsAreValid<TVariants, TStates, TDefaults> extends true ? unknown : never
     : never
 
-type StateVariantsFromConfig<TConfig> = TConfig extends {readonly stateVariants: infer TStates}
+type IsEqual<TLeft, TRight> =
+  (<T>() => T extends TLeft ? 1 : 2) extends
+    (<T>() => T extends TRight ? 1 : 2) ? true : false
+type StateVariantsFromConfig<
+  TConfig,
+  TVariants extends NativeComponentVariantsShape,
+> = TConfig extends {readonly stateVariants: infer TStates}
   ? TStates
-  : undefined
+  : TConfig extends {readonly stateVariants?: infer TStates}
+    ? IsEqual<TStates, NativeComponentStateVariants<TVariants> | undefined> extends true
+      ? undefined
+      : Exclude<TStates, undefined> extends infer TExplicitStates
+        ? [TExplicitStates] extends [never] ? undefined : TExplicitStates
+        : undefined
+    : undefined
 type DefaultsFromConfig<TConfig, TVariants extends NativeComponentVariantsShape> =
   TConfig extends {readonly defaultVariants: infer TDefaults}
     ? TDefaults
@@ -341,7 +364,14 @@ export type NativeComponentRecipeProps<TRecipe> =
     infer TDefaults
   >
     ? NativeComponentStateRecipeSelection<TVariants, TStateVariants, TDefaults>
-    : never
+    : TRecipe extends {
+        readonly version: typeof NativeComponentRecipeLegacyVersion
+        readonly variants: infer TVariants
+      }
+      ? {
+          readonly [TVariant in keyof TVariants]?: NativeComponentVariantSelection<TVariants[TVariant]>
+        }
+      : never
 
 export type NativeComponentResolvedStyles<TSlots extends NativeComponentSlots> = Readonly<{
   readonly [TSlot in keyof TSlots & string]: ReadonlyArray<NativeComponentSlotStyleResult<TSlots[TSlot]>>
@@ -391,14 +421,15 @@ export function componentRecipe<
     NativeComponentRecipeSelection<TVariants>
   > & TConfig & NativeComponentStateContractValidation<
     TVariants,
-    StateVariantsFromConfig<TConfig>,
-    DefaultsFromConfig<TConfig, TVariants>
+    StateVariantsFromConfig<TConfig, TVariants>,
+    DefaultsFromConfig<TConfig, TVariants>,
+    TConfig
   >,
   debugId?: string,
 ): NativeComponentRecipe<
   TSlots,
   TVariants,
-  StateVariantsFromConfig<TConfig>,
+  StateVariantsFromConfig<TConfig, TVariants>,
   DefaultsFromConfig<TConfig, TVariants>
 > {
   assertPlainRecord(config, "component recipe")
@@ -442,7 +473,7 @@ export function componentRecipe<
   }) as NativeComponentRecipe<
     TSlots,
     TVariants,
-    StateVariantsFromConfig<TConfig>,
+    StateVariantsFromConfig<TConfig, TVariants>,
     DefaultsFromConfig<TConfig, TVariants>
   >
 }

@@ -2,9 +2,14 @@ import {
   componentRecipe,
   componentRecipeFromRecipe,
   recipe,
+  type NativeComponentRecipeConfig,
   type NativeComponentRecipeProps,
   type NativeComponentResolvedStyles,
 } from "../src/native-style"
+import {
+  createComponentRecipeResolver,
+  resolveComponentRecipeStyles,
+} from "../src/theme-runtime"
 import type {ImageStyle, TextStyle, ViewStyle} from "react-native"
 
 const button = componentRecipe({
@@ -175,6 +180,68 @@ const booleanFalseState: BooleanStateProps = {enabled: false, tone: "quiet"}
 // @ts-expect-error The false boolean case does not permit the primary tone.
 const prohibitedBooleanTone: BooleanStateProps = {enabled: false, tone: "primary"}
 void [booleanFalseState, prohibitedBooleanTone]
+
+const legacyV1Descriptor = {
+  $$type: "crumbs.css.component-recipe",
+  version: 1,
+  slots: {root: "view"},
+  variants: {
+    tone: {
+      primary: {root: {opacity: 1}},
+      quiet: {root: {opacity: 0.5}},
+    },
+  },
+  defaultVariants: {tone: "primary"},
+  compoundVariants: [],
+} as const
+type LegacyV1Props = NativeComponentRecipeProps<typeof legacyV1Descriptor>
+const legacyV1Selection: LegacyV1Props = {tone: "quiet"}
+createComponentRecipeResolver(legacyV1Descriptor)({tone: "quiet"})
+resolveComponentRecipeStyles(legacyV1Descriptor, {tone: "quiet"})
+void legacyV1Selection
+
+const typedStateSlots = {root: "view"} as const
+const typedStateVariants = {
+  status: {ready: {root: {opacity: 1}}, loading: {root: {opacity: 0.7}}},
+  tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}},
+} as const
+const typedStateMap = {
+  status: {
+    ready: {tone: ["primary", "quiet"]},
+    loading: {tone: ["primary"]},
+  },
+} as const
+const typedStateConfig: NativeComponentRecipeConfig<
+  typeof typedStateSlots,
+  typeof typedStateVariants,
+  typeof typedStateMap
+> = {
+  slots: typedStateSlots,
+  variants: typedStateVariants,
+  defaultVariants: {status: "ready", tone: "primary"},
+  stateVariants: typedStateMap,
+}
+const typedStateButton = componentRecipe(typedStateConfig)
+type TypedStateButtonProps = NativeComponentRecipeProps<typeof typedStateButton>
+const typedStateAllowed: TypedStateButtonProps = {status: "loading", tone: "primary"}
+// @ts-expect-error An explicitly typed config must retain its state constraints.
+const typedStateProhibited: TypedStateButtonProps = {status: "loading", tone: "quiet"}
+void [typedStateAllowed, typedStateProhibited]
+
+function createRecipeWithDynamicDefault(defaultStatus: "ready" | "loading") {
+  const recipeWithDynamicDefault = componentRecipe({
+    slots: typedStateSlots,
+    variants: typedStateVariants,
+    defaultVariants: {status: defaultStatus, tone: "primary"},
+    stateVariants: typedStateMap,
+  })
+  type DynamicDefaultProps = NativeComponentRecipeProps<typeof recipeWithDynamicDefault>
+  const explicitReady: DynamicDefaultProps = {status: "ready", tone: "quiet"}
+  // @ts-expect-error The default may be loading, where quiet is prohibited.
+  const ambiguousDefault: DynamicDefaultProps = {tone: "quiet"}
+  return [recipeWithDynamicDefault, explicitReady, ambiguousDefault] as const
+}
+void createRecipeWithDynamicDefault
 
 const legacy = componentRecipeFromRecipe(
   recipe({variants: {tone: {primary: {opacity: 1}}}}),

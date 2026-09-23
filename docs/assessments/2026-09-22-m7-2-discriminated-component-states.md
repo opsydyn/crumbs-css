@@ -43,6 +43,11 @@ Implementation and qualification commits:
   return base-only styles for a prohibited state, and retain v1 resolution.
   The compiler test asserts the emitted tag, version, exact state map, authored
   style branches, and token resolution.
+- Final review hardening adds compile-time coverage for v1 resolver selections,
+  explicitly annotated optional state maps, and defaults whose discriminator is
+  a union. The fixes keep v1 props selectable, preserve annotated state rules,
+  and require an explicit discriminator when the default cannot identify one
+  state case.
 
 Full qualification passed on this workspace:
 
