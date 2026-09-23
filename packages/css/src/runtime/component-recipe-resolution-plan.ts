@@ -5,7 +5,9 @@ import type {
   NativeComponentSlots,
 } from "../components"
 import type {NativeStyle} from "../native-style"
+import {validateNativeComponentContract} from "../components/contracts"
 import {
+  NativeComponentRecipeContractVersion,
   NativeComponentRecipeLegacyVersion,
   NativeComponentRecipeType,
   NativeComponentRecipeVersion,
@@ -69,7 +71,9 @@ export function createComponentRecipeResolutionPlan<
   TRecipe extends NativeComponentRecipeDescriptor,
 >(recipe: TRecipe): ComponentRecipeResolutionPlan<TRecipe> {
   if (recipe.$$type !== NativeComponentRecipeType ||
-    (recipe.version !== NativeComponentRecipeLegacyVersion && recipe.version !== NativeComponentRecipeVersion)) {
+    (recipe.version !== NativeComponentRecipeLegacyVersion &&
+      recipe.version !== NativeComponentRecipeVersion &&
+      recipe.version !== NativeComponentRecipeContractVersion)) {
     throw new TypeError("Unsupported component recipe descriptor version")
   }
   const slots = validateComponentSlots(recipe.slots)
@@ -116,9 +120,22 @@ export function createComponentRecipeResolutionPlan<
     }
   }
 
-  const stateConstraint = recipe.version === NativeComponentRecipeVersion
+  const stateConstraint = recipe.version === NativeComponentRecipeVersion ||
+      recipe.version === NativeComponentRecipeContractVersion
     ? validateStateConstraint(recipe.stateVariants, variants, defaultSelection)
     : undefined
+  if (recipe.version === NativeComponentRecipeContractVersion) {
+    if (recipe.contract === undefined) {
+      throw new TypeError("Version 3 component recipes require contract metadata")
+    }
+    const variantSurface = Object.fromEntries(variants.map(variant => [
+      variant.name,
+      Object.fromEntries(Object.keys(variant.values).map(value => [value, true])),
+    ]))
+    validateNativeComponentContract(recipe.contract, {slots, variants: variantSurface}, recipe.stateVariants)
+  } else if (recipe.contract !== undefined) {
+    throw new TypeError("Component contract metadata requires component recipe version 3")
+  }
 
   const selectionKeySet = new Set<string>([
     ...variantOrder,
@@ -170,7 +187,11 @@ export function resolveComponentRecipeResolutionPlan<
     return freezeCollectedSlotStyles(plan.slotOrder, collected) as NativeComponentResolvedStyles<TRecipe["slots"]>
   }
 
+  const stateDiscriminator = plan.recipe.version === NativeComponentRecipeContractVersion
+    ? plan.stateConstraint?.discriminator
+    : undefined
   for (const variant of plan.variants) {
+    if (variant.name === stateDiscriminator) continue
     const selectedValue = selected[variant.name]
     if (selectedValue === undefined) continue
     if (typeof selectedValue !== "string" && typeof selectedValue !== "boolean") {
@@ -183,6 +204,18 @@ export function resolveComponentRecipeResolutionPlan<
       continue
     }
     appendSlotStyles(collected, variant.values[valueName]!)
+  }
+
+  if (stateDiscriminator !== undefined) {
+    const variant = plan.variants.find(entry => entry.name === stateDiscriminator)
+    const selectedValue = selected[stateDiscriminator]
+    if (variant !== undefined && selectedValue !== undefined &&
+      (typeof selectedValue === "string" || typeof selectedValue === "boolean")) {
+      const valueName = String(selectedValue)
+      if (Object.hasOwn(variant.values, valueName)) {
+        appendSlotStyles(collected, variant.values[valueName]!)
+      }
+    }
   }
 
   for (const compound of plan.compoundMatchers) {

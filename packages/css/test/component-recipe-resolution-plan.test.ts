@@ -1,7 +1,10 @@
 import {describe, expect, it} from "bun:test"
 import fc from "fast-check"
 import type {NativeComponentRecipeDescriptor} from "../src/components"
-import {createComponentRecipeResolutionPlan} from "../src/runtime/component-recipe-resolution-plan"
+import {
+  createComponentRecipeResolutionPlan,
+  resolveComponentRecipeResolutionPlan,
+} from "../src/runtime/component-recipe-resolution-plan"
 
 const PROPERTY_RUNS = 100
 const PROPERTY_SEED = 20260923
@@ -73,8 +76,75 @@ describe("component recipe resolution plan size laws", () => {
     } as unknown as NativeComponentRecipeDescriptor)).toThrow(/default selection.*violates/)
     expect(() => createComponentRecipeResolutionPlan({
       ...stateRecipe,
-      version: 3,
+      version: 4,
     } as unknown as NativeComponentRecipeDescriptor)).toThrow(/Unsupported component recipe descriptor version/)
+  })
+
+  it("moves the v3 state discriminator after ordinary branches and keeps invalid states base-only", () => {
+    const recipe = {
+      $$type: "crumbs.css.component-recipe",
+      version: 3,
+      contract: {
+        identity: {owner: "@acme/ui", name: "V3Ordering", version: 1},
+        public: {
+          slots: ["root"],
+          variants: {
+            status: ["ready", "loading"],
+            busy: ["false", "true"],
+            tone: ["primary"],
+          },
+        },
+      },
+      slots: {root: "view"},
+      base: {root: {padding: 1}},
+      variants: {
+        status: {
+          ready: {root: {backgroundColor: "green"}},
+          loading: {root: {backgroundColor: "red"}},
+        },
+        busy: {
+          false: {root: {opacity: 0.8}},
+          true: {root: {opacity: 0.5}},
+        },
+        tone: {primary: {root: {borderWidth: 2}}},
+      },
+      defaultVariants: {status: "ready", busy: false, tone: "primary"},
+      stateVariants: {
+        status: {
+          ready: {busy: [false], tone: ["primary"]},
+          loading: {busy: [true], tone: ["primary"]},
+        },
+      },
+      compoundVariants: [{variants: {status: "loading"}, styles: {root: {borderColor: "red"}}}],
+    } as unknown as NativeComponentRecipeDescriptor
+    const plan = createComponentRecipeResolutionPlan(recipe)
+
+    expect(resolveComponentRecipeResolutionPlan(plan, {status: "loading", busy: true, tone: "primary"}).root)
+      .toEqual([
+        {padding: 1},
+        {opacity: 0.5},
+        {borderWidth: 2},
+        {backgroundColor: "red"},
+        {borderColor: "red"},
+      ])
+    expect(resolveComponentRecipeResolutionPlan(plan, {status: "loading", busy: false, tone: "primary"}).root)
+      .toEqual([{padding: 1}])
+  })
+
+  it("rejects v3 descriptors whose public contract does not match the authored surfaces", () => {
+    const recipe = {
+      $$type: "crumbs.css.component-recipe",
+      version: 3,
+      contract: {
+        identity: {owner: "@acme/ui", name: "InvalidV3Surface", version: 1},
+        public: {slots: ["label"], variants: {tone: ["danger"]}},
+      },
+      slots: {root: "view"},
+      variants: {tone: {primary: {root: {opacity: 1}}}},
+      defaultVariants: {tone: "primary"},
+      compoundVariants: [],
+    } as unknown as NativeComponentRecipeDescriptor
+    expect(() => createComponentRecipeResolutionPlan(recipe)).toThrow(/public (slot|value).*unknown|unknown.*public/i)
   })
 
   it("stores authored variants and slot branches exactly without product expansion", () => {

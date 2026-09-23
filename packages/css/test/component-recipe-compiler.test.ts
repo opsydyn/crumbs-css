@@ -10,7 +10,15 @@ const root = path.resolve(import.meta.dir, "..")
 type CompiledStyle = Record<string, unknown>
 type CompiledComponent = {
   readonly $$type: "crumbs.css.component-recipe"
-  readonly version: 2
+  readonly version: 2 | 3
+  readonly contract?: {
+    readonly identity: {readonly owner: string; readonly name: string; readonly version: number}
+    readonly public: {
+      readonly slots: ReadonlyArray<string>
+      readonly variants: Readonly<Record<string, ReadonlyArray<string>>>
+    }
+    readonly extensionPoints?: object
+  }
   readonly slots: Record<string, "view" | "text" | "image">
   readonly base?: Record<string, CompiledStyle>
   readonly variants: Record<string, Record<string, Record<string, CompiledStyle>>>
@@ -170,5 +178,34 @@ describe("component recipe compiler artifacts", () => {
         variants: {tone: {primary: {label: {resizeMode: "contain"} as never}}},
       }, "button");
     `)).rejects.toThrow(/button\.label/)
+  })
+  it("captures and preserves v3 component contract metadata", async () => {
+    const exports = await compile(`
+      export const button = componentRecipe({
+        contract: {
+          identity: {owner: "@acme/ui", name: "CompiledButton", version: 1},
+          public: {slots: ["root"], variants: {tone: ["primary"]}},
+          extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+        },
+        slots: {root: "view", internalIcon: "image"},
+        variants: {
+          tone: {primary: {root: {opacity: 1}}},
+          density: {compact: {internalIcon: {width: 12}}},
+        },
+        defaultVariants: {tone: "primary", density: "compact"},
+      }, "button");
+    `)
+
+    const button = exports.button!
+    expect(button.version).toBe(3)
+    expect(button.contract).toEqual({
+      identity: {owner: "@acme/ui", name: "CompiledButton", version: 1},
+      public: {slots: ["root"], variants: {tone: ["primary"]}},
+      extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+    })
+    expect(button.variants.density?.compact?.internalIcon).toEqual({width: 12})
+    const resolved = resolveThemeTokens(button, {contract: {}, values: {}, tokens: {}})!
+    expect(resolved.version).toBe(3)
+    expect(resolved.contract).toEqual(button.contract)
   })
 })

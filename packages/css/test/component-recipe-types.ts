@@ -4,6 +4,7 @@ import {
   recipe,
   type NativeComponentRecipeConfig,
   type NativeComponentRecipeProps,
+  type NativeComponentPublicProps,
   type NativeComponentResolvedStyles,
 } from "../src/native-style"
 import {
@@ -259,6 +260,74 @@ componentRecipe({slots: {root: "view"} as const, base: {label: {opacity: 1}}, va
 // @ts-expect-error Variant selection values come from the authored variant map.
 const invalidSelection: ButtonProps = {tone: "danger"}
 void invalidSelection
+
+const contractedButton = componentRecipe({
+  contract: {
+    identity: {owner: "@acme/ui", name: "Button", version: 1},
+    public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+    extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+  },
+  slots: {root: "view", internalIcon: "image"} as const,
+  variants: {
+    tone: {
+      primary: {root: {opacity: 1}},
+      quiet: {root: {opacity: 0.8}},
+      dangerInternal: {root: {opacity: 0.4}},
+    },
+    density: {
+      compact: {internalIcon: {width: 12}},
+    },
+  },
+  defaultVariants: {tone: "primary", density: "compact"},
+})
+type ContractedButtonOwnerProps = NativeComponentRecipeProps<typeof contractedButton>
+type ContractedButtonPublicProps = NativeComponentPublicProps<typeof contractedButton>
+const ownerCanSelectPrivateSurfaces: ContractedButtonOwnerProps = {density: "compact", tone: "dangerInternal"}
+const consumerCanSelectPublicValue: ContractedButtonPublicProps = {tone: "quiet"}
+// @ts-expect-error density is private in the component contract.
+const consumerCannotSelectPrivateAxis: ContractedButtonPublicProps = {density: "compact"}
+// @ts-expect-error dangerInternal is private in the component contract.
+const consumerCannotSelectPrivateValue: ContractedButtonPublicProps = {tone: "dangerInternal"}
+void [ownerCanSelectPrivateSurfaces, consumerCanSelectPublicValue, consumerCannotSelectPrivateAxis, consumerCannotSelectPrivateValue]
+
+const publiclyConstrainedButton = componentRecipe({
+  contract: {
+    identity: {owner: "@acme/ui", name: "PublicStateButton", version: 1},
+    public: {
+      slots: ["root"],
+      variants: {status: ["ready", "loading"], tone: ["primary", "quiet"]},
+    },
+  },
+  slots: {root: "view"} as const,
+  variants: {
+    status: {ready: {root: {opacity: 1}}, loading: {root: {opacity: 0.5}}},
+    tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}},
+  },
+  defaultVariants: {status: "ready", tone: "quiet"},
+  stateVariants: {
+    status: {ready: {tone: ["quiet"]}, loading: {tone: ["primary"]}},
+  },
+})
+type PubliclyConstrainedSelection = NativeComponentPublicProps<typeof publiclyConstrainedButton>
+const publicLoadingState: PubliclyConstrainedSelection = {status: "loading", tone: "primary"}
+// @ts-expect-error The public state contract disallows quiet while loading.
+const invalidPublicLoadingState: PubliclyConstrainedSelection = {status: "loading", tone: "quiet"}
+void [publicLoadingState, invalidPublicLoadingState]
+
+// @ts-expect-error A public discriminator cannot depend on a private density axis.
+componentRecipe({
+  contract: {
+    identity: {owner: "@acme/ui", name: "InvalidPublicState", version: 1},
+    public: {slots: ["root"], variants: {status: ["ready", "loading"]}},
+  },
+  slots: {root: "view", internalIcon: "image"} as const,
+  variants: {
+    status: {ready: {root: {opacity: 1}}, loading: {root: {opacity: 0.5}}},
+    density: {compact: {internalIcon: {width: 12}}, roomy: {internalIcon: {width: 16}}},
+  },
+  defaultVariants: {status: "ready", density: "compact"},
+  stateVariants: {status: {ready: {density: ["compact"]}, loading: {density: ["roomy"]}}},
+})
 
 componentRecipe({
   slots: {root: "view"} as const,

@@ -25,8 +25,10 @@ import type {
   NativeTheme,
 } from "./native-style"
 import type {NativeComponentRecipeDescriptor} from "./components"
+import {validateNativeComponentContract} from "./components/contracts"
 import type { NativePrimitiveDomain } from "./compiler/native-capture"
 import {
+  NativeComponentRecipeContractVersion,
   NativeComponentRecipeType,
   NativeComponentRecipeLegacyVersion,
   NativeComponentRecipeVersion,
@@ -1055,8 +1057,21 @@ function resolveComponentRecipeThemeTokens<TRecipe extends NativeComponentRecipe
 ): TRecipe {
   const cached = getCachedResolution(theme, recipe, "component-recipe")
   if (cached.hit) return cached.value as TRecipe
-  if (recipe.version !== NativeComponentRecipeLegacyVersion && recipe.version !== NativeComponentRecipeVersion) {
+  if (recipe.version !== NativeComponentRecipeLegacyVersion && recipe.version !== NativeComponentRecipeVersion &&
+    recipe.version !== NativeComponentRecipeContractVersion) {
     throw new TypeError(`Unsupported component recipe version ${String(recipe.version)}`)
+  }
+  if (recipe.version === NativeComponentRecipeContractVersion) {
+    if (recipe.contract === undefined) {
+      throw new TypeError("Version 3 component recipes require contract metadata")
+    }
+    const variantSurface = Object.fromEntries(Object.entries(recipe.variants ?? {}).map(([axis, values]) => [
+      axis,
+      Object.fromEntries(Object.keys(values).map(value => [value, true])),
+    ]))
+    validateNativeComponentContract(recipe.contract, {slots: recipe.slots, variants: variantSurface}, recipe.stateVariants)
+  } else if (recipe.contract !== undefined) {
+    throw new TypeError("Component contract metadata requires component recipe version 3")
   }
 
   let changed = recipe.variants === undefined || recipe.defaultVariants === undefined ||
@@ -1113,6 +1128,7 @@ function resolveComponentRecipeThemeTokens<TRecipe extends NativeComponentRecipe
     version: recipe.version,
     ...(recipe.$$debugName === undefined ? {} : {$$debugName: recipe.$$debugName}),
     slots: Object.freeze({...recipe.slots}),
+    ...(recipe.contract === undefined ? {} : {contract: recipe.contract}),
     ...(base === undefined ? {} : {base: freezeComponentSlotStyles(base)}),
     variants: frozenVariants,
     defaultVariants: Object.freeze({...recipe.defaultVariants}),

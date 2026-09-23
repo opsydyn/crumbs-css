@@ -6,7 +6,10 @@ import * as themeCoreApi from "@opsydyn/crumbs-css/theme/core"
 import * as tokenApi from "@opsydyn/crumbs-css/tokens"
 import * as tokenOpticApi from "@opsydyn/crumbs-css/tokens/optic"
 import * as tokenSchemaApi from "@opsydyn/crumbs-css/tokens/schema"
-import type {NativeComponentStateVariants} from "@opsydyn/crumbs-css/style"
+import type {
+  NativeComponentPublicProps,
+  NativeComponentStateVariants,
+} from "@opsydyn/crumbs-css/style"
 
 type PublicStateVariants = NativeComponentStateVariants<{
   status: {ready: object; loading: object}
@@ -16,6 +19,8 @@ const publicStateVariants: PublicStateVariants = {
   status: {ready: {tone: ["primary"]}, loading: {tone: ["quiet"]}},
 }
 void publicStateVariants
+type PublicPropsExport = NativeComponentPublicProps<never>
+void (null as unknown as PublicPropsExport)
 
 function namedApiKeys(api: object): ReadonlyArray<string> {
   return Object.keys(api)
@@ -28,6 +33,7 @@ describe("@opsydyn/crumbs-css public API contract", () => {
     expect(namedApiKeys(styleApi)).toEqual([
       "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
       "NATIVE_RESPONSIVE_CONDITION_NAMES",
+      "NativeComponentRecipeContractVersion",
       "NativeComponentRecipeType",
       "NativeComponentRecipeVersion",
       "NativeExpressionEvaluationError",

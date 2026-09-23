@@ -21,9 +21,13 @@ export type {
 export {componentRecipe, componentRecipeFromRecipe} from "./components"
 export type {
   NativeComponentCompoundVariant,
+  NativeComponentContract,
+  NativeComponentContractExtensionPoints,
+  NativeComponentContractIdentity,
   NativeComponentRecipe,
   NativeComponentRecipeConfig,
   NativeComponentRecipeProps,
+  NativeComponentPublicProps,
   NativeComponentResolvedStyles,
   NativeComponentSlotKind,
   NativeComponentSlotStyleInput,
@@ -119,6 +123,7 @@ import {
 } from "./theme-token"
 export {
   NativeComponentRecipeType,
+  NativeComponentRecipeContractVersion,
   NativeComponentRecipeVersion,
   NativeRecipeType,
   NativeRecipeClassType,

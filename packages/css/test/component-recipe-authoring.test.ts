@@ -52,6 +52,136 @@ describe("component recipe authoring", () => {
     expect(Object.isFrozen(button.compoundVariants[0]?.styles)).toBe(true)
   })
 
+  it("emits v3 only for a validated public component contract", () => {
+    const button = inFileScope(() => componentRecipe({
+      contract: {
+        identity: {owner: "@acme/ui", name: "Button", version: 1},
+        public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+        extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+      },
+      slots: {root: "view", internalIcon: "image"} as const,
+      variants: {
+        tone: {
+          primary: {root: {opacity: 1}},
+          quiet: {root: {opacity: 0.8}},
+          dangerInternal: {root: {opacity: 0.4}},
+        },
+        density: {compact: {internalIcon: {width: 12}}},
+      },
+      defaultVariants: {tone: "primary", density: "compact"},
+    }, "publicButton"))
+
+    const privateRecipe = inFileScope(() => componentRecipe({
+      slots: {root: "view"} as const,
+      variants: {tone: {primary: {root: {opacity: 1}}}},
+    }))
+    expect(button.version).toBe(3)
+    expect(button.contract).toEqual({
+      identity: {owner: "@acme/ui", name: "Button", version: 1},
+      public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+      extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+    })
+    expect(Object.isFrozen(button.contract)).toBe(true)
+    expect(Object.isFrozen(button.contract?.identity)).toBe(true)
+    expect(Object.isFrozen(button.contract?.public)).toBe(true)
+    expect(Object.isFrozen(button.contract?.public.slots)).toBe(true)
+    expect(Object.isFrozen(button.contract?.public.variants.tone)).toBe(true)
+    expect(Object.isFrozen(button.contract?.extensionPoints)).toBe(true)
+    expect(privateRecipe.version).toBe(2)
+    expect("contract" in privateRecipe).toBe(false)
+  })
+
+  it("rejects changed public surfaces for one component identity", () => {
+    const create = (publicTone: "primary" | "quiet") => inFileScope(() => componentRecipe({
+      contract: {
+        identity: {owner: "@acme/ui", name: "IdentityCollision", version: 1},
+        public: {slots: ["root"], variants: {tone: [publicTone]}},
+      },
+      slots: {root: "view"} as const,
+      variants: {tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}}},
+    }))
+    create("primary")
+    expect(() => create("quiet")).toThrow(/component contract identity.*different public surface/i)
+  })
+
+  it("normalizes prototype-named public axes as own contract data", () => {
+    const recipe = inFileScope(() => componentRecipe({
+      contract: {
+        identity: {owner: "@acme/ui", name: "PrototypeAxis", version: 1},
+        public: {
+          slots: ["root"],
+          variants: Object.fromEntries([["__proto__", ["primary"]]]),
+        },
+      },
+      slots: {root: "view"},
+      variants: Object.fromEntries([["__proto__", {primary: {root: {opacity: 1}}}]]),
+      defaultVariants: Object.fromEntries([["__proto__", "primary"]]),
+    } as never)) as unknown as {
+      readonly contract: {
+        readonly public: {readonly variants: Readonly<Record<string, ReadonlyArray<string>>>}
+      }
+    }
+
+    expect(Object.keys(recipe.contract!.public.variants)).toEqual(["__proto__"])
+    expect(Object.hasOwn(recipe.contract!.public.variants, "__proto__")).toBe(true)
+    expect(recipe.contract!.public.variants["__proto__"]).toEqual(["primary"])
+  })
+
+  it("seals extension permissions to declared public axes, values, and slots", () => {
+    const config = (identityName: string, extensionPoints: unknown) => ({
+      contract: {
+        identity: {owner: "@acme/ui", name: identityName, version: 1},
+        public: {slots: ["root"], variants: {tone: ["primary"]}},
+        extensionPoints,
+      },
+      slots: {root: "view", internalIcon: "image"} as const,
+      variants: {
+        tone: {primary: {root: {opacity: 1}}},
+        density: {compact: {internalIcon: {width: 12}}},
+      },
+    })
+    inFileScope(() => {
+      expect(() => componentRecipe(config("PrivateAxisPermission", {defaults: ["density"]}) as never))
+        .toThrow(/extension permission.*public variant axis/i)
+      expect(() => componentRecipe(config("UnknownAxisPermission", {variantValues: ["unknown"]}) as never))
+        .toThrow(/extension permission.*public variant axis/i)
+      expect(() => componentRecipe(config("PrivateSlotPermission", {slotStyles: ["internalIcon"]}) as never))
+        .toThrow(/extension permission.*public slot/i)
+    })
+  })
+
+  it("rejects public state cases that depend on private axes or values", () => {
+    inFileScope(() => {
+      expect(() => componentRecipe({
+        contract: {
+          identity: {owner: "@acme/ui", name: "PrivateStateAxis", version: 1},
+          public: {slots: ["root"], variants: {status: ["ready", "loading"]}},
+        },
+        slots: {root: "view", internalIcon: "image"},
+        variants: {
+          status: {ready: {root: {opacity: 1}}, loading: {root: {opacity: 0.5}}},
+          density: {compact: {internalIcon: {width: 12}}, roomy: {internalIcon: {width: 16}}},
+        },
+        defaultVariants: {status: "ready", density: "compact"},
+        stateVariants: {status: {ready: {density: ["compact"]}, loading: {density: ["roomy"]}}},
+      } as never)).toThrow(/public state.*private|private.*public state/i)
+
+      expect(() => componentRecipe({
+        contract: {
+          identity: {owner: "@acme/ui", name: "PrivateStateValue", version: 1},
+          public: {slots: ["root"], variants: {status: ["ready"], tone: ["primary"]}},
+        },
+        slots: {root: "view"},
+        variants: {
+          status: {ready: {root: {opacity: 1}}, loading: {root: {opacity: 0.5}}},
+          tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}},
+        },
+        defaultVariants: {status: "ready", tone: "primary"},
+        stateVariants: {status: {ready: {tone: ["primary"]}, loading: {tone: ["quiet"]}}},
+      } as never)).toThrow(/public state.*case|state case.*public/i)
+    })
+  })
+
   it("rejects malformed slots and branch maps at construction", () => {
     expect(() => componentRecipe({slots: {}, variants: {}} as never)).toThrow(/at least one slot/)
     expect(() => componentRecipe({slots: {"": "view"}, variants: {}} as never)).toThrow(/slot names must be non-empty/)
@@ -165,5 +295,23 @@ describe("component recipe authoring", () => {
     expect(Object.isFrozen(wrapped.compoundVariants[0]?.styles.root)).toBe(true)
     expect(Object.isFrozen(wrapped)).toBe(true)
     expect(() => componentRecipeFromRecipe(legacy, {slot: ""})).toThrow(/slot name must be non-empty/)
+  })
+
+  it("allows migrated recipes to opt into a validated v3 contract", () => {
+    const {legacy, wrapped} = inFileScope(() => {
+      const legacy = recipe({variants: {tone: {primary: {opacity: 1}, quiet: {opacity: 0.5}}}})
+      return {
+        legacy,
+        wrapped: componentRecipeFromRecipe(legacy, {
+          slot: "root",
+          contract: {
+            identity: {owner: "@acme/ui", name: "WrappedButton", version: 1},
+            public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+          },
+        }),
+      }
+    })
+    expect(wrapped.version).toBe(3)
+    expect(wrapped.contract?.identity.name).toBe("WrappedButton")
   })
 })

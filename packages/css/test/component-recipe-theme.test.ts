@@ -139,7 +139,7 @@ describe("component recipe theme resolution", () => {
   })
 
   it("preserves state metadata and descriptor versions while resolving v1 and v2 tokens", () => {
-    const resolvedV1 = resolveThemeTokens(legacyButton, theme)!
+    const resolvedV1 = resolveThemeTokens(legacyButton, theme) as NativeComponentRecipeDescriptor
     const resolvedV2 = resolveThemeTokens(statefulV2, theme)!
 
     expect(resolvedV1.version).toBe(1)
@@ -149,9 +149,29 @@ describe("component recipe theme resolution", () => {
     expect(resolveThemeTokens(statefulV2, theme)).toBe(resolvedV2)
   })
 
+  it("preserves frozen v3 contract metadata when theme tokens are transformed", () => {
+    const contract = deepFreeze({
+      identity: {owner: "@acme/ui", name: "ThemedV3Button", version: 1},
+      public: {slots: ["root", "label"], variants: {tone: ["primary", "quiet"]}},
+    })
+    const v3Button = deepFreeze({
+      ...button,
+      version: 3,
+      contract,
+    }) as unknown as NativeComponentRecipeDescriptor
+
+    const resolved = resolveThemeTokens(v3Button, theme) as NativeComponentRecipeDescriptor
+    expect(resolved.version).toBe(3)
+    expect(resolved.contract).toEqual(contract)
+    expect(resolved.contract).toBe(contract)
+    expect(Object.isFrozen(resolved.contract)).toBe(true)
+    expect(Object.isFrozen(resolved.contract?.identity)).toBe(true)
+    expect(resolved.base).toMatchObject({root: {backgroundColor: "#101820"}})
+  })
+
   it("rejects an unsupported component descriptor version instead of treating it as a style map", () => {
-    expect(() => resolveThemeTokens({...legacyButton, version: 3} as never, theme))
-      .toThrow("Unsupported component recipe version 3")
+    expect(() => resolveThemeTokens({...legacyButton, version: 4} as never, theme))
+      .toThrow("Unsupported component recipe version 4")
   })
 })
 

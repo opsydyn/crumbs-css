@@ -1,6 +1,7 @@
 import type {ImageStyle, TextStyle, ViewStyle} from "react-native"
 import {authorNativeStyle} from "../native-authoring"
 import {
+  NativeComponentRecipeContractVersion,
   NativeComponentRecipeLegacyVersion,
   NativeComponentRecipeType,
   NativeComponentRecipeVersion,
@@ -18,8 +19,20 @@ import type {
   NativeViewStyleInput,
 } from "../native-style"
 import type {NativePrimitiveKind} from "../compiler/native-capture"
+import {
+  registerNativeComponentContract,
+  validateNativeComponentContract,
+  type NativeComponentContract,
+} from "./contracts"
+
+export type {
+  NativeComponentContract,
+  NativeComponentContractExtensionPoints,
+  NativeComponentContractIdentity,
+} from "./contracts"
 
 export {NativeComponentRecipeType, NativeComponentRecipeVersion}
+export {NativeComponentRecipeContractVersion}
 
 export type NativeComponentSlotKind = NativePrimitiveKind
 export type NativeComponentSlots = Readonly<Record<string, NativeComponentSlotKind>>
@@ -309,10 +322,10 @@ export type NativeComponentRecipe<
   TVariants extends NativeComponentVariantsShape,
   TStateVariants extends NativeComponentStateVariants<TVariants> | undefined = undefined,
   TDefaults extends NativeComponentRecipeSelection<TVariants> = NativeComponentRecipeSelection<TVariants>,
+  TContract extends NativeComponentContract | undefined = undefined,
 > = {
   readonly $$debugName?: string
   readonly $$type: typeof NativeComponentRecipeType
-  readonly version: typeof NativeComponentRecipeVersion
   readonly slots: TSlots
   readonly base?: NativeComponentResolvedSlotStyles<TSlots>
   readonly variants: {
@@ -325,11 +338,14 @@ export type NativeComponentRecipe<
     readonly styles: NativeComponentResolvedSlotStyles<TSlots>
   }>
 } & (TStateVariants extends undefined ? {} : {readonly stateVariants: TStateVariants})
+  & (TContract extends NativeComponentContract
+    ? {readonly version: typeof NativeComponentRecipeContractVersion; readonly contract: TContract}
+    : {readonly version: typeof NativeComponentRecipeVersion})
 
 export type NativeComponentRecipeDescriptor = {
   readonly $$debugName?: string
   readonly $$type: typeof NativeComponentRecipeType
-  readonly version: typeof NativeComponentRecipeLegacyVersion | typeof NativeComponentRecipeVersion
+  readonly version: typeof NativeComponentRecipeLegacyVersion | typeof NativeComponentRecipeVersion | typeof NativeComponentRecipeContractVersion
   readonly slots: NativeComponentSlots
   readonly base?: object
   readonly variants: object
@@ -339,6 +355,7 @@ export type NativeComponentRecipeDescriptor = {
     readonly variants: object
     readonly styles: object
   }>
+  readonly contract?: NativeComponentContract
 }
 
 export type NativeComponentRecipeConfig<
@@ -347,8 +364,10 @@ export type NativeComponentRecipeConfig<
   TStateVariants extends NativeComponentStateVariants<TVariants> | undefined =
     NativeComponentStateVariants<TVariants> | undefined,
   TDefaults extends NativeComponentRecipeSelection<TVariants> = NativeComponentRecipeSelection<TVariants>,
+  TContract extends NativeComponentContract | undefined = NativeComponentContract | undefined,
 > = {
   readonly slots: TSlots
+  readonly contract?: TContract
   readonly base?: NativeComponentSlotStyles<TSlots>
   readonly variants: TVariants
   readonly defaultVariants?: TDefaults
@@ -361,7 +380,8 @@ export type NativeComponentRecipeProps<TRecipe> =
     infer _TSlots,
     infer TVariants,
     infer TStateVariants,
-    infer TDefaults
+    infer TDefaults,
+    infer _TContract
   >
     ? NativeComponentStateRecipeSelection<TVariants, TStateVariants, TDefaults>
     : TRecipe extends {
@@ -372,6 +392,103 @@ export type NativeComponentRecipeProps<TRecipe> =
           readonly [TVariant in keyof TVariants]?: NativeComponentVariantSelection<TVariants[TVariant]>
         }
       : never
+
+type ContractPublicVariants<TContract> =
+  TContract extends {readonly public: {readonly variants: infer TVariants}} ? TVariants : never
+type ContractPublicSlots<TContract> =
+  TContract extends {readonly public: {readonly slots: ReadonlyArray<infer TSlot>}} ? TSlot : never
+type ContractPublicValues<TContract, TAxis> =
+  TAxis extends keyof ContractPublicVariants<TContract>
+    ? ContractPublicVariants<TContract>[TAxis] extends ReadonlyArray<infer TValue> ? TValue : never
+    : never
+type PublicVariantsForContract<TVariants extends NativeComponentVariantsShape, TContract> = {
+  readonly [TAxis in keyof TVariants as TAxis extends keyof ContractPublicVariants<TContract> ? TAxis : never]:
+    Pick<TVariants[TAxis], Extract<keyof TVariants[TAxis], ContractPublicValues<TContract, TAxis>>>
+}
+type ContractPublicSurfaceIsValid<TSlots, TVariants, TContract> =
+  [Exclude<ContractPublicSlots<TContract>, keyof TSlots>] extends [never]
+    ? [Exclude<keyof ContractPublicVariants<TContract>, keyof TVariants>] extends [never]
+      ? false extends {
+          [TAxis in keyof ContractPublicVariants<TContract>]: TAxis extends keyof TVariants
+            ? Exclude<ContractPublicValues<TContract, TAxis>, keyof TVariants[TAxis]> extends never ? true : false
+            : false
+        }[keyof ContractPublicVariants<TContract>]
+        ? false
+        : true
+      : false
+    : false
+type StringifiedContractStateValue<TValue> =
+  TValue extends true ? "true" : TValue extends false ? "false" : TValue
+type ContractPublicConstraintsAreValid<TConstraints, TContract> =
+  [Exclude<keyof TConstraints, keyof ContractPublicVariants<TContract>>] extends [never]
+    ? false extends {
+        [TAxis in keyof TConstraints]: TAxis extends keyof ContractPublicVariants<TContract>
+          ? TConstraints[TAxis] extends ReadonlyArray<infer TAllowed>
+            ? Exclude<StringifiedContractStateValue<TAllowed>, ContractPublicValues<TContract, TAxis>> extends never
+              ? true
+              : false
+            : false
+          : false
+      }[keyof TConstraints]
+      ? false
+      : true
+    : false
+type ContractPublicStateCasesAreValid<TStates, TContract, TDiscriminator extends keyof TStates> =
+  TStates[TDiscriminator] extends object
+    ? [Exclude<keyof TStates[TDiscriminator], ContractPublicValues<TContract, TDiscriminator>>] extends [never]
+      ? [Exclude<ContractPublicValues<TContract, TDiscriminator>, keyof TStates[TDiscriminator]>] extends [never]
+        ? false extends {
+            [TCase in keyof TStates[TDiscriminator]]: TStates[TDiscriminator][TCase] extends object
+              ? ContractPublicConstraintsAreValid<TStates[TDiscriminator][TCase], TContract>
+              : false
+          }[keyof TStates[TDiscriminator]]
+          ? false
+          : true
+        : false
+      : false
+    : false
+type ContractPublicStateProjectionIsValid<TStates, TContract> =
+  Exclude<TStates, undefined> extends infer TConcreteStates
+    ? TConcreteStates extends object
+      ? Extract<keyof TConcreteStates, keyof ContractPublicVariants<TContract>> extends infer TDiscriminator
+        ? [TDiscriminator] extends [never] ? true
+          : TDiscriminator extends keyof TConcreteStates
+            ? ContractPublicStateCasesAreValid<TConcreteStates, TContract, TDiscriminator>
+            : false
+        : false
+      : true
+    : true
+type ContractFromConfig<TConfig> = TConfig extends {readonly contract: infer TContract extends NativeComponentContract}
+  ? TContract
+  : undefined
+type NativeComponentContractValidation<TSlots, TVariants, TStates, TContract> =
+  [TContract] extends [undefined] ? unknown
+    : TContract extends NativeComponentContract
+      ? ContractPublicSurfaceIsValid<TSlots, TVariants, TContract> extends true
+        ? ContractPublicStateProjectionIsValid<TStates, TContract> extends true ? unknown : never
+        : never
+      : never
+
+type PublicComponentSelection<TVariants extends NativeComponentVariantsShape, TStates, TDefaults, TContract> =
+  PublicVariantsForContract<TVariants, TContract> extends infer TPublicVariants extends NativeComponentVariantsShape
+    ? Extract<keyof Exclude<TStates, undefined>, keyof TPublicVariants> extends never
+      ? NativeComponentRecipeSelection<TPublicVariants>
+      : NativeComponentStateRecipeSelection<TPublicVariants, Exclude<TStates, undefined>, TDefaults>
+    : never
+
+/** Consumer selection narrowed to the surfaces declared by a v3 contract. */
+export type NativeComponentPublicProps<TRecipe> =
+  TRecipe extends NativeComponentRecipe<
+    infer _TSlots,
+    infer TVariants,
+    infer TStateVariants,
+    infer TDefaults,
+    infer TContract
+  >
+    ? TContract extends NativeComponentContract
+      ? PublicComponentSelection<TVariants, TStateVariants, TDefaults, TContract>
+      : never
+    : never
 
 export type NativeComponentResolvedStyles<TSlots extends NativeComponentSlots> = Readonly<{
   readonly [TSlot in keyof TSlots & string]: ReadonlyArray<NativeComponentSlotStyleResult<TSlots[TSlot]>>
@@ -411,26 +528,34 @@ export function componentRecipe<
     TSlots,
     TVariants,
     NativeComponentStateVariants<TVariants> | undefined,
-    NativeComponentRecipeSelection<TVariants>
+    NativeComponentRecipeSelection<TVariants>,
+    NativeComponentContract | undefined
   >,
 >(
   config: NativeComponentRecipeConfig<
     TSlots,
     TVariants,
     NativeComponentStateVariants<TVariants> | undefined,
-    NativeComponentRecipeSelection<TVariants>
+    NativeComponentRecipeSelection<TVariants>,
+    NativeComponentContract | undefined
   > & TConfig & NativeComponentStateContractValidation<
     TVariants,
     StateVariantsFromConfig<TConfig, TVariants>,
     DefaultsFromConfig<TConfig, TVariants>,
     TConfig
+  > & NativeComponentContractValidation<
+    TSlots,
+    TVariants,
+    StateVariantsFromConfig<TConfig, TVariants>,
+    ContractFromConfig<TConfig>
   >,
   debugId?: string,
 ): NativeComponentRecipe<
   TSlots,
   TVariants,
   StateVariantsFromConfig<TConfig, TVariants>,
-  DefaultsFromConfig<TConfig, TVariants>
+  DefaultsFromConfig<TConfig, TVariants>,
+  ContractFromConfig<TConfig>
 > {
   assertPlainRecord(config, "component recipe")
   const slots = validateSlots(config.slots)
@@ -445,6 +570,11 @@ export function componentRecipe<
     `${componentName(debugId)} default variants`,
   ) as DefaultsFromConfig<TConfig, TVariants>
   const stateVariants = validateStateVariants(config.stateVariants, variantValues, defaultVariants)
+  const contract = config.contract === undefined
+    ? undefined
+    : validateNativeComponentContract(config.contract, {slots, variants: variantValues}, stateVariants, {
+        registerIdentity: false,
+      })
   const validatedCompounds = validateCompounds(
     config.compoundVariants === undefined ? [] : config.compoundVariants,
     variantValues,
@@ -459,12 +589,14 @@ export function componentRecipe<
     : authorSlotStyles(baseInput, slots, debugId, "base")
   const variants = authorVariants(validatedVariants, slots, debugId)
   const compoundVariants = authorCompoundVariants(validatedCompounds, slots, debugId)
+  if (contract !== undefined) registerNativeComponentContract(contract)
 
   return Object.freeze({
     $$type: NativeComponentRecipeType,
-    version: NativeComponentRecipeVersion,
+    version: contract === undefined ? NativeComponentRecipeVersion : NativeComponentRecipeContractVersion,
     ...(debugId === undefined ? {} : {$$debugName: debugId}),
     slots,
+    ...(contract === undefined ? {} : {contract}),
     ...(base === undefined ? {} : {base}),
     variants,
     defaultVariants,
@@ -474,7 +606,8 @@ export function componentRecipe<
     TSlots,
     TVariants,
     StateVariantsFromConfig<TConfig, TVariants>,
-    DefaultsFromConfig<TConfig, TVariants>
+    DefaultsFromConfig<TConfig, TVariants>,
+    ContractFromConfig<TConfig>
   >
 }
 
@@ -485,12 +618,16 @@ export function componentRecipe<
 export function componentRecipeFromRecipe<
   const TSlot extends string,
   TVariants extends NativeRecipeVariantsConfig,
+  const TContract extends NativeComponentContract | undefined = undefined,
 >(
   recipe: NativeRecipe<TVariants>,
-  options: {readonly slot: TSlot; readonly debugId?: string},
+  options: {readonly slot: TSlot; readonly debugId?: string; readonly contract?: TContract},
 ): NativeComponentRecipe<
   Readonly<Record<TSlot, "view">>,
-  NativeComponentVariantsFromRecipe<TSlot, TVariants>
+  NativeComponentVariantsFromRecipe<TSlot, TVariants>,
+  undefined,
+  NativeComponentRecipeSelection<NativeComponentVariantsFromRecipe<TSlot, TVariants>>,
+  TContract
 > {
   if (typeof options?.slot !== "string" || options.slot.length === 0) {
     throw new TypeError("Component recipe migration slot name must be non-empty")
@@ -510,20 +647,30 @@ export function componentRecipeFromRecipe<
     variants: Object.freeze({...compound.variants}),
     styles: freezeRecord([[options.slot, freezeLegacyClassReference(compound.style)]]),
   })))
+  const contract = options.contract === undefined
+    ? undefined
+    : validateNativeComponentContract(options.contract, {
+        slots,
+        variants: variantSelectionValues(variants),
+      })
   return Object.freeze({
     $$type: NativeComponentRecipeType,
-    version: NativeComponentRecipeVersion,
+    version: contract === undefined ? NativeComponentRecipeVersion : NativeComponentRecipeContractVersion,
     ...((options.debugId ?? recipe.$$debugName) === undefined
       ? {}
       : {$$debugName: options.debugId ?? recipe.$$debugName}),
     slots,
+    ...(contract === undefined ? {} : {contract}),
     ...(base === undefined ? {} : {base}),
     variants,
     defaultVariants: Object.freeze({...recipe.defaultVariants}),
     compoundVariants,
   }) as unknown as NativeComponentRecipe<
     Readonly<Record<TSlot, "view">>,
-    NativeComponentVariantsFromRecipe<TSlot, TVariants>
+    NativeComponentVariantsFromRecipe<TSlot, TVariants>,
+    undefined,
+    NativeComponentRecipeSelection<NativeComponentVariantsFromRecipe<TSlot, TVariants>>,
+    TContract
   >
 }
 
@@ -558,6 +705,14 @@ function selectionValues(variants: ValidatedVariants): Readonly<Record<string, R
   return Object.fromEntries(variants.map(([name, values]) => [
     name,
     Object.fromEntries(values.map(([value]) => [value, true])),
+  ]))
+}
+
+function variantSelectionValues(value: unknown): Readonly<Record<string, Readonly<Record<string, unknown>>>> {
+  return Object.fromEntries(recordEntries(value, "component recipe variants").map(([axis, values]) => [
+    axis,
+    Object.fromEntries(recordEntries(values, "component recipe variant " + JSON.stringify(axis))
+      .map(([variantValue]) => [variantValue, true])),
   ]))
 }
 
