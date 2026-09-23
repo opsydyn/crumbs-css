@@ -33,6 +33,9 @@ export type TokenDomainValue<TDomain extends TokenDomain> =
 
 declare const legacyThemeVarBrand: unique symbol
 declare const domainThemeVarBrand: unique symbol
+declare const domainThemeVarVisibilityBrand: unique symbol
+
+export type ThemeTokenVisibility = "public" | "private"
 
 /** Type-only marker used to select the already-derived value shape for domain contracts. */
 export declare const nativeThemeValuesBrand: unique symbol
@@ -43,9 +46,19 @@ export type LegacyNativeThemeVar = `var(--crumbs-${string})` & {
 }
 
 /** A domain-carrying token reference used by the M3 token contract API. */
-export type DomainThemeVar<TDomain extends TokenDomain = TokenDomain> = `var(--crumbs-${string})` & {
+export type DomainThemeVar<
+  TDomain extends TokenDomain = TokenDomain,
+  TVisibility extends ThemeTokenVisibility = ThemeTokenVisibility,
+> = `var(--crumbs-${string})` & {
   readonly [domainThemeVarBrand]: TDomain
+  readonly [domainThemeVarVisibilityBrand]: TVisibility
 }
+
+/** A token reference declared for use by consumers of its publishing contract. */
+export type PublicDomainThemeVar<TDomain extends TokenDomain = TokenDomain> = DomainThemeVar<TDomain, "public">
+
+/** A token reference retained for implementation use inside its publishing contract. */
+export type PrivateDomainThemeVar<TDomain extends TokenDomain = TokenDomain> = DomainThemeVar<TDomain, "private">
 
 /** Legacy token values remain the public `NativeThemeVar` migration type. */
 export type NativeThemeVar = LegacyNativeThemeVar
@@ -61,6 +74,7 @@ export type ThemeTokenDomainMetadata = {
 export type ThemeTokenReferenceMetadata = {
   readonly path: ReadonlyArray<string>
   readonly varName: string
+  readonly visibility: ThemeTokenVisibility
   readonly publicId?: string
   readonly origin?: ThemeTokenOrigin
 }
@@ -119,13 +133,19 @@ export function createThemeTokenReference(varName: string): NativeThemeTokenRefe
 export function registerThemeTokenReference(
   varName: string,
   path: ReadonlyArray<string>,
-  metadata: { readonly publicId?: string; readonly origin?: ThemeTokenOrigin } = {},
+  metadata: {
+    readonly publicId?: string
+    readonly origin?: ThemeTokenOrigin
+    readonly visibility?: ThemeTokenVisibility
+  } = {},
 ): NativeThemeVar {
   if (!NATIVE_TOKEN_NAME.test(varName)) invalidReference("registry")
   const token = `var(${varName})` as NativeThemeVar
   const existing = themeTokenRegistry.get(token)
+  const visibility = metadata.visibility ?? "public"
   if (existing !== undefined && (!samePath(existing.path, path) ||
-    (metadata.publicId !== undefined && existing.publicId !== metadata.publicId))) {
+    (metadata.publicId !== undefined && existing.publicId !== metadata.publicId) ||
+    (existing.visibility ?? "public") !== visibility)) {
     throw new Error(formatNativeStylesDiagnostic(
       NativeStylesDiagnosticCode.ThemeTokenCollision,
       `Native theme token "${varName}" is already owned by ${JSON.stringify(existing.path)} and cannot be rebound to ${JSON.stringify(path)}.`,
@@ -135,13 +155,16 @@ export function registerThemeTokenReference(
     themeTokenRegistry.set(token, Object.freeze({
       path: Object.freeze([...path]),
       varName,
+      visibility,
       ...(metadata.publicId === undefined ? {} : {publicId: metadata.publicId}),
       ...(metadata.origin === undefined ? {} : {origin: freezeOrigin(metadata.origin)}),
     }))
-  } else if ((metadata.publicId !== undefined && existing.publicId === undefined) ||
+  } else if (existing.visibility === undefined ||
+    (metadata.publicId !== undefined && existing.publicId === undefined) ||
     (metadata.origin !== undefined && existing.origin === undefined)) {
     themeTokenRegistry.set(token, Object.freeze({
       ...existing,
+      visibility,
       ...(metadata.publicId === undefined ? {} : {publicId: metadata.publicId}),
       ...(metadata.origin === undefined ? {} : {origin: freezeOrigin(metadata.origin)}),
     }))
@@ -164,6 +187,11 @@ export function getThemeTokenMetadata(value: ThemeVar): ThemeTokenReferenceMetad
 export function getThemeTokenPublicId(value: ThemeVar): string {
   const metadata = getThemeTokenMetadata(value)
   return metadata.publicId ?? metadata.varName
+}
+
+/** @internal Visibility is authoring metadata used to constrain component contracts. */
+export function getThemeTokenVisibility(value: ThemeVar): ThemeTokenVisibility {
+  return getThemeTokenMetadata(value).visibility ?? "public"
 }
 
 export function getThemeTokenOrigin(value: ThemeVar): ThemeTokenOrigin | undefined {

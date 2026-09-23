@@ -39,13 +39,21 @@ export type {
   TokenThemeSnapshotInput,
 } from "./domains"
 export { TOKEN_THEME_CONTEXT_PRECEDENCE } from "./domains"
-export type {TokenContractIdentity, TokenContractIdentityInput} from "./identity"
+export type {
+  TokenContractIdentity,
+  TokenContractIdentityInput,
+  TokenContractVisibility,
+  TokenContractVisibilityPath,
+} from "./identity"
 export type {
   DomainThemeVar,
   LegacyNativeThemeVar,
   NativeThemeVar,
+  PrivateDomainThemeVar,
+  PublicDomainThemeVar,
   TokenDomain,
   TokenDomainValue,
+  ThemeTokenVisibility,
   ThemeTokenOrigin,
   ThemeTokenOriginStep,
   ExternalTokenThemePayload,

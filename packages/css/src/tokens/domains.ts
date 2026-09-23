@@ -17,6 +17,7 @@ import {
   type NativeThemeVar,
   type TokenDomain,
   type TokenDomainValue,
+  type ThemeTokenVisibility,
   type ThemeTokenAliasMetadata,
   type ThemeTokenDomainMetadata,
   type ThemeTokenOrigin,
@@ -41,6 +42,8 @@ import {
   tokenVariableName,
   type TokenContractIdentity,
   type TokenContractIdentityInput,
+  type TokenContractVisibility,
+  type TokenContractVisibilityPath,
 } from "./identity"
 
 export type TokenDomainDefinition =
@@ -122,18 +125,75 @@ type AliasTargetDomain<TShape, TTarget, TDeclaredDomain, TDepth extends Readonly
         ? AliasTargetDomain<TShape, TNestedTarget, TNestedDomain, [...TDepth, unknown]>
       : TokenDomain
 
-type TokenContractValue<TRootShape, TShape, TValue> =
+type EqualTokenSegment<TLeft extends string, TRight extends string> =
+  TLeft extends TRight ? TRight extends TLeft ? true : false : false
+
+type EqualTokenPath<TLeft extends ReadonlyArray<string>, TRight extends ReadonlyArray<string>> =
+  number extends TLeft["length"] ? boolean
+    : number extends TRight["length"] ? boolean
+      : TLeft extends readonly [infer TLeftHead extends string, ...infer TLeftTail extends ReadonlyArray<string>]
+        ? TRight extends readonly [infer TRightHead extends string, ...infer TRightTail extends ReadonlyArray<string>]
+          ? EqualTokenSegment<TLeftHead, TRightHead> extends true
+            ? EqualTokenPath<TLeftTail, TRightTail>
+            : false
+          : false
+        : TRight extends readonly [] ? true : false
+
+type TokenPathInList<
+  TPaths extends ReadonlyArray<ReadonlyArray<string>>,
+  TPath extends ReadonlyArray<string>,
+> = TPaths extends readonly [infer THead extends ReadonlyArray<string>, ...infer TTail extends ReadonlyArray<ReadonlyArray<string>>]
+  ? EqualTokenPath<THead, TPath> extends true ? true : TokenPathInList<TTail, TPath>
+  : number extends TPaths["length"] ? boolean : false
+
+type TokenPathVisibility<
+  TPath extends ReadonlyArray<string>,
+  TPublicPaths,
+> = TPublicPaths extends undefined ? "public"
+  : TPublicPaths extends ReadonlyArray<ReadonlyArray<string>>
+    ? TokenPathInList<TPublicPaths, TPath> extends true ? "public"
+      : TokenPathInList<TPublicPaths, TPath> extends false ? "private"
+        : ThemeTokenVisibility
+    : ThemeTokenVisibility
+
+type AliasTargetVisibility<
+  TShape,
+  TTarget,
+  TPublicPaths,
+  TDepth extends ReadonlyArray<unknown> = [],
+> = TPublicPaths extends undefined ? "public"
+  : TDepth["length"] extends 8 ? ThemeTokenVisibility
+  : [AliasTargetValue<TShape, TTarget>] extends [never] ? "private"
+    : AliasTargetValue<TShape, TTarget> extends TokenDefinition
+      ? TokenPathVisibility<AliasTargetPath<TTarget>, TPublicPaths>
+      : AliasTargetValue<TShape, TTarget> extends TokenAliasDefinition<infer TNestedTarget, infer _TNestedDomain>
+        ? AliasTargetVisibility<TShape, TNestedTarget, TPublicPaths, [...TDepth, unknown]>
+        : "private"
+
+type TokenContractValue<TRootShape, TShape, TValue, TPublicPaths, TPath extends ReadonlyArray<string>> =
   TValue extends TokenDefinition<infer TDomain>
-    ? DomainThemeVar<TDomain>
+    ? DomainThemeVar<TDomain, TokenPathVisibility<TPath, TPublicPaths>>
     : TValue extends TokenAliasDefinition<infer TTarget, infer TDeclaredDomain>
-      ? DomainThemeVar<AliasTargetDomain<TRootShape, TTarget, TDeclaredDomain>>
+      ? DomainThemeVar<
+          AliasTargetDomain<TRootShape, TTarget, TDeclaredDomain>,
+          AliasTargetVisibility<TRootShape, TTarget, TPublicPaths>
+        >
       : TValue extends TokenContractInput
-        ? TokenContractNode<TRootShape, TValue>
+        ? TokenContractNode<TRootShape, TValue, TPublicPaths, TPath>
         : never
 
-type TokenContractNode<TRootShape, TShape extends TokenContractInput> = {
-  readonly [K in keyof TShape]: TokenContractValue<TRootShape, TShape, TShape[K]>
+type TokenContractNode<
+  TRootShape,
+  TShape extends TokenContractInput,
+  TPublicPaths,
+  TPath extends ReadonlyArray<string> = [],
+> = {
+  readonly [K in keyof TShape]: TokenContractValue<TRootShape, TShape, TShape[K], TPublicPaths, [...TPath, K & string]>
 }
+
+type TokenContractPublicPaths<TOptions> = TOptions extends {readonly visibility?: infer TVisibility}
+  ? TVisibility extends TokenContractVisibility ? TVisibility["public"] : undefined
+  : undefined
 
 type ResolvedTokenThemeValues<TContract> = {
   readonly [K in keyof TContract]: TContract[K] extends DomainThemeVar<infer TDomain>
@@ -143,10 +203,13 @@ type ResolvedTokenThemeValues<TContract> = {
       : never
 }
 
-export type TokenContract<TShape extends TokenContractInput> = TokenContractNode<TShape, TShape> & {
-  readonly [tokenContractShapeBrand]?: TShape
-  readonly [nativeThemeValuesBrand]: ResolvedTokenThemeValues<TokenContractNode<TShape, TShape>>
-}
+export type TokenContract<TShape extends TokenContractInput, TOptions = undefined> =
+  TokenContractNode<TShape, TShape, TokenContractPublicPaths<TOptions>> & {
+    readonly [tokenContractShapeBrand]?: TShape
+    readonly [nativeThemeValuesBrand]: ResolvedTokenThemeValues<
+      TokenContractNode<TShape, TShape, TokenContractPublicPaths<TOptions>>
+    >
+  }
 
 type HasRequiredToken<TValue> =
   TValue extends AnyTokenAliasDefinition ? false
@@ -336,13 +399,39 @@ type ResolvedTokenEntry = {
   readonly chainPaths: ReadonlyArray<ReadonlyArray<string>>
 }
 
-export function createTokenContract<const TShape extends TokenContractInput>(
+export function createTokenContract<
+  const TShape extends TokenContractInput,
+  const TOptions extends TokenContractOptions | undefined = undefined,
+>(
   shape: TShape,
-  identityOrOptions?: TokenContractIdentityInput,
-): TokenContract<TShape> {
+  identityOrOptions?: TOptions,
+): TokenContract<TShape, TOptions> {
+  const visibilityOption = readTokenContractVisibility(identityOrOptions)
   const identity = normalizeTokenContractIdentity(identityOrOptions)
+  if (visibilityOption !== undefined && identity === undefined) {
+    throw new Error("Token contract visibility requires a stable contract identity.")
+  }
   const entries = collectTokenEntries(shape, [])
+  const publicDefinitionPaths = visibilityOption === undefined
+    ? undefined
+    : validatePublicTokenPaths(visibilityOption, entries)
   const resolvedEntries = resolveTokenEntries(entries)
+  const visibilityByPath = new Map<string, ThemeTokenVisibility>()
+  for (const entry of entries) {
+    if (entry.kind === "token") {
+      visibilityByPath.set(pathKey(entry.path),
+        publicDefinitionPaths === undefined || publicDefinitionPaths.has(pathKey(entry.path)) ? "public" : "private")
+    }
+  }
+  for (const entry of entries) {
+    if (entry.kind !== "alias") continue
+    const resolved = resolvedEntries.get(pathKey(entry.path))
+    const terminalPath = resolved?.chainPaths[resolved.chainPaths.length - 1]
+    const terminal = terminalPath === undefined ? undefined : resolvedEntries.get(pathKey(terminalPath))
+    visibilityByPath.set(pathKey(entry.path), terminal?.entry.kind === "token"
+      ? terminalPath === undefined ? "private" : visibilityByPath.get(pathKey(terminalPath)) ?? "private"
+      : visibilityOption === undefined ? "public" : "private")
+  }
   const domainEntries = [...resolvedEntries.values()].map(resolved => ({
     path: resolved.entry.path,
     domain: resolved.domain,
@@ -355,14 +444,74 @@ export function createTokenContract<const TShape extends TokenContractInput>(
         }
       : {}),
   }))
-  const signature = tokenContractShapeSignature(domainEntries)
+  const allReferencesPublic = entries.every(entry => visibilityByPath.get(pathKey(entry.path)) === "public")
+  const signature = tokenContractShapeSignature(domainEntries, allReferencesPublic
+    ? undefined
+    : entries.filter(entry => visibilityByPath.get(pathKey(entry.path)) === "public").map(entry => entry.path))
   if (identity !== undefined) assertThemeContractIdentityAvailable(identity, signature)
   const legacyContract = createThemeContract(toLegacyShape(shape))
   const domains = new Map<string, ThemeTokenDomainMetadata>()
-  const contract = mapContract(shape, legacyContract, [], domains, identity, resolvedEntries) as TokenContract<TShape>
+  const contract = mapContract(shape, legacyContract, [], domains, identity, resolvedEntries, visibilityByPath) as TokenContract<TShape, TOptions>
   registerThemeTokenContract(contract as object, domains,
     identity === undefined ? undefined : {identity, signature})
   return contract
+}
+
+function readTokenContractVisibility(
+  input: TokenContractIdentityInput | undefined,
+): ReadonlyArray<TokenContractVisibilityPath> | undefined {
+  if (!isRecord(input)) return undefined
+  const descriptor = Object.getOwnPropertyDescriptor(input, "visibility")
+  if (descriptor === undefined) return undefined
+  if (!("value" in descriptor) || descriptor.enumerable !== true || !isRecord(descriptor.value)) {
+    throw new Error("Token contract visibility must be a plain { public: paths } data property.")
+  }
+  const visibility = descriptor.value
+  const publicDescriptor = Object.getOwnPropertyDescriptor(visibility, "public")
+  if (Object.keys(visibility).length !== 1 || publicDescriptor === undefined ||
+    !("value" in publicDescriptor) || publicDescriptor.enumerable !== true || !Array.isArray(publicDescriptor.value)) {
+    throw new Error("Token contract visibility must contain only a public path array.")
+  }
+  const paths: TokenContractVisibilityPath[] = []
+  for (const candidate of publicDescriptor.value as ReadonlyArray<unknown>) {
+    if (!Array.isArray(candidate) || candidate.length === 0) {
+      throw new Error("Each public token path must be a non-empty array of non-empty string segments.")
+    }
+    const path: string[] = []
+    for (let index = 0; index < candidate.length; index += 1) {
+      const segmentDescriptor = Object.getOwnPropertyDescriptor(candidate, String(index))
+      if (segmentDescriptor === undefined || !("value" in segmentDescriptor) ||
+        typeof segmentDescriptor.value !== "string" || segmentDescriptor.value.length === 0) {
+        throw new Error("Each public token path must be a non-empty array of non-empty string segments.")
+      }
+      path.push(segmentDescriptor.value)
+    }
+    paths.push(Object.freeze(path))
+  }
+  return Object.freeze(paths)
+}
+
+function validatePublicTokenPaths(
+  paths: ReadonlyArray<TokenContractVisibilityPath>,
+  entries: ReadonlyArray<TokenEntry>,
+): ReadonlySet<string> {
+  const entriesByPath = new Map(entries.map(entry => [pathKey(entry.path), entry]))
+  const publicPaths = new Set<string>()
+  for (const path of paths) {
+    const key = pathKey(path)
+    if (publicPaths.has(key)) {
+      throw new Error(`Duplicate public token path "${formatPath(path)}".`)
+    }
+    const entry = entriesByPath.get(key)
+    if (entry === undefined) {
+      throw new Error(`Unknown public token path "${formatPath(path)}"; public paths must name definition tokens.`)
+    }
+    if (entry.kind !== "token") {
+      throw new Error(`Public token path "${formatPath(path)}" names an alias; aliases inherit visibility from their target.`)
+    }
+    publicPaths.add(key)
+  }
+  return publicPaths
 }
 
 export function getTokenContractIdentity(contract: object): TokenContractIdentity | undefined {
@@ -991,6 +1140,7 @@ function mapContract(
   domains: Map<string, ThemeTokenDomainMetadata>,
   identity: TokenContractIdentity | undefined,
   resolvedEntries: ReadonlyMap<string, ResolvedTokenEntry>,
+  visibilityByPath: ReadonlyMap<string, ThemeTokenVisibility>,
 ): unknown {
   const result: Record<string, unknown> = {}
   for (const [key, value] of Object.entries(shape)) {
@@ -1004,8 +1154,15 @@ function mapContract(
         : tokenPublicId(identity, nextPath)
       const origin = createTokenOrigin(resolved, publicId, identity, resolvedEntries, legacyContract)
       const reference = identity === undefined
-        ? registerThemeTokenReference(getThemeVarName(legacyValue as NativeThemeVar), nextPath, {origin})
-        : registerThemeTokenReference(tokenVariableName(identity, nextPath), nextPath, {publicId, origin})
+        ? registerThemeTokenReference(getThemeVarName(legacyValue as NativeThemeVar), nextPath, {
+            origin,
+            visibility: visibilityByPath.get(pathKey(nextPath)) ?? "private",
+          })
+        : registerThemeTokenReference(tokenVariableName(identity, nextPath), nextPath, {
+            publicId,
+            origin,
+            visibility: visibilityByPath.get(pathKey(nextPath)) ?? "private",
+          })
       const alias = resolved.entry.kind === "alias"
         ? {
             targetPath: Object.freeze([...(resolved.targetPath ?? [])]),
@@ -1020,7 +1177,7 @@ function mapContract(
       })
       result[key] = reference as unknown as DomainThemeVar<TokenDomain>
     } else {
-      result[key] = mapContract(value, legacyContract, nextPath, domains, identity, resolvedEntries)
+      result[key] = mapContract(value, legacyContract, nextPath, domains, identity, resolvedEntries, visibilityByPath)
     }
   }
   return result

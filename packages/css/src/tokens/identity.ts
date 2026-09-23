@@ -15,6 +15,15 @@ export type TokenContractIdentity = {
 
 export type TokenContractIdentityInput = TokenContractIdentity | {
   readonly identity?: TokenContractIdentity
+  readonly visibility?: TokenContractVisibility
+}
+
+/** A token path whose visibility is declared by its publishing contract. */
+export type TokenContractVisibilityPath = ReadonlyArray<string>
+
+/** Public paths are definitions; aliases inherit from their terminal definition. */
+export type TokenContractVisibility = {
+  readonly public: ReadonlyArray<TokenContractVisibilityPath>
 }
 
 const PACKAGE_NAME = /^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/
@@ -28,9 +37,12 @@ export function normalizeTokenContractIdentity(
   const identityDescriptor = isRecord(input)
     ? Object.getOwnPropertyDescriptor(input, "identity")
     : undefined
+  const visibilityDescriptor = isRecord(input)
+    ? Object.getOwnPropertyDescriptor(input, "visibility")
+    : undefined
   const candidate = identityDescriptor !== undefined && "value" in identityDescriptor
     ? identityDescriptor.value
-    : input
+    : visibilityDescriptor !== undefined ? undefined : input
   if (candidate === undefined) return undefined
   const owner = isRecord(candidate) ? ownData(candidate, "owner") : undefined
   const name = isRecord(candidate) ? ownData(candidate, "name") : undefined
@@ -90,8 +102,9 @@ export function tokenContractShapeSignature(
     readonly domain: { readonly kind: string; readonly allowNegative?: boolean; readonly values?: ReadonlyArray<string> }
     readonly alias?: { readonly target: ReadonlyArray<string>; readonly fallback?: string | number }
   }>,
+  publicPaths?: ReadonlyArray<TokenContractVisibilityPath>,
 ): string {
-  return entries
+  const shapeSignature = entries
     .map(entry => {
       const path = entry.path.map(segment => segment.length + ":" + segment).join("/")
       const alias = entry.alias === undefined
@@ -100,6 +113,19 @@ export function tokenContractShapeSignature(
           (entry.alias.fallback === undefined ? "" : "|fallback:" + JSON.stringify(entry.alias.fallback))
       return path + "=" + domainSignature(entry.domain) + alias
     })
+    .sort()
+    .join(";")
+  return publicPaths === undefined
+    ? shapeSignature
+    : shapeSignature + "|public:" + tokenContractVisibilitySignature(publicPaths)
+}
+
+/** Canonical, order-independent encoding for a set of public token paths. */
+export function tokenContractVisibilitySignature(
+  paths: ReadonlyArray<TokenContractVisibilityPath>,
+): string {
+  return [...paths]
+    .map(path => path.map(segment => segment.length + ":" + segment).join("/"))
     .sort()
     .join(";")
 }
