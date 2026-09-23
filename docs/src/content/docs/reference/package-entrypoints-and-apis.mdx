@@ -49,6 +49,14 @@ export const button = componentRecipe({
     icon: { resizeMode: "contain" },
   },
   variants: {
+    status: {
+      ready: { root: { opacity: 1 } },
+      loading: { root: { opacity: 0.7 } },
+    },
+    busy: {
+      false: { root: { opacity: 1 } },
+      true: { root: { opacity: 0.8 } },
+    },
     tone: {
       primary: {
         root: { backgroundColor: "#1648d8" },
@@ -60,11 +68,48 @@ export const button = componentRecipe({
       },
     },
   },
-  defaultVariants: { tone: "primary" },
+  defaultVariants: { status: "ready", busy: false, tone: "primary" },
+  stateVariants: {
+    status: {
+      ready: { busy: [false], tone: ["primary", "quiet"] },
+      loading: { busy: [true], tone: ["primary"] },
+    },
+  },
 }, "button")
 
 export type ButtonSelection = NativeComponentRecipeProps<typeof button>
+
+const readyQuiet: ButtonSelection = { tone: "quiet" }
+const loadingPrimary: ButtonSelection = {
+  status: "loading",
+  busy: true,
+  tone: "primary",
+}
 ```
+
+`stateVariants` adds one discriminator over the recipe's existing variant
+axes. Its cases must cover every value of that discriminator exactly once;
+each case may constrain other axes to non-empty lists of values declared by
+those variants. These constraints add no style branches: the ordinary
+`variants` map continues to own the styles.
+
+The type `ButtonSelection` reflects those case constraints. For example,
+`readyQuiet` uses the defaults `status: "ready"` and `busy: false`, so the
+quiet tone is permitted. `loadingPrimary` explicitly selects the required
+loading values. At runtime Crumbs merges `defaultVariants` with the supplied
+selection before checking the active case. If a selection violates that
+case's constraints, the resolver returns only base styles for every slot,
+skips variant and compound styles, and reports the invalid state in
+development. This fail-closed behavior also covers untyped callers and
+runtime data; invalid independent variant values outside a state constraint
+retain their existing warn-and-skip behavior.
+
+Newly authored component recipes emit descriptor version 2 with the finite
+state map. Runtime readers continue to accept version 1 descriptors with
+their previous unconstrained behavior, as well as version 2; unsupported
+descriptor versions fail closed. The resolver stores authored variant
+branches and state cases, then checks only the selected case. It does not
+materialize the Cartesian product of all variant values.
 
 Resolve tokenized descriptors through the theme hook before creating a
 resolver. The same selection is applied to all slots; omitted slot branches
