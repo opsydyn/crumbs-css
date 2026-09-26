@@ -34,6 +34,7 @@ that format.
 | **Runtime-supported** | Focused runtime tests accept the listed current format; the complete packed package combination is not qualified by that status alone. |
 | **Rejected** | The owning runtime or decoder fails closed for this unsupported version. |
 | **Unqualified** | The package, host or platform combination has not completed the named compatibility checks; no compatibility claim is made. |
+| **Pending qualification** | The exact checks are defined and awaiting a clean retained receipt; this is not a compatibility claim. |
 
 ### Qualified packed package row
 
@@ -56,6 +57,34 @@ unsupported payload versions fail at their owning boundary. It also records the
 generated native metadata and dependency-plan versions, packed app typecheck,
 and iOS/web source-map inventories. This does not qualify a mixed Crumbs release
 pair.
+
+### M8.3 runtime-resolution qualification
+
+The M8.3 packed resolution and production Metro row is **Pending qualification**
+until `bun run playground:distribution --m8-3-check` completes from a clean
+source snapshot and writes its retained receipt. A dirty-source run can provide
+interim diagnostic evidence only; it does not qualify the row.
+
+| Dimension | M8.3 target and pending evidence |
+| --- | --- |
+| Crumbs package | `@opsydyn/crumbs-css@0.1.1-alpha.1`; every declared packed export and ESM/CommonJS/types condition is resolved and checked. |
+| Runtime graph classes | Ordinary runtime, advanced Effect runtime, compiler tooling and package metadata are audited from the packed artifact. |
+| Focused token-value decoder | `@opsydyn/crumbs-css/tokens/schema/value` contains only `decodeTokenValue`; the existing `/tokens/schema` entry remains compatible and continues to expose its full API. |
+| Effect boundary | Effect 4 is an implementation dependency that may be bundled by the explicit `/tokens/schema`, `/tokens/schema/value` and `/tokens/optic` entries; consumers do not add an Effect peer dependency or use an Effect runner. |
+| Node | `>=22.0.0`; the packed import/require resolution probe checks the runtime floor. |
+| Expo / React / React Native | Expo `56.0.4`, React `19.2.5`, React Native `0.85.3`. |
+| Production Metro surfaces | iOS and web bundles for ordinary runtime, the focused token-value decoder, and a full-schema positive control; source maps identify the installed packed ESM entries and raw JavaScript checks the `external-token-theme` canary pair. |
+| Android, device and publishing | Android export, Android/device acceptance, physical-device acceptance and publishing remain deferred; M8.3 does not qualify them. |
+| Evidence | **Pending qualification**; expected receipt: `docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json`. |
+
+The initial Expo probe found that importing only `decodeTokenValue` from the
+combined `/tokens/schema` artifact retained the external-theme codec
+initializer. Use `/tokens/schema/value` when a consumer needs only per-value
+validation; this focused entry avoids pulling in the broader theme payload
+contract while keeping the original `/tokens/schema` API intact. This is an
+entry-boundary result, not a claim that Metro removes unused declarations from
+the combined schema artifact. M8.3 is still **Pending qualification** until the
+clean packed receipt records the final package hash and all iOS/web gates.
 
 ### Artifact boundaries
 
@@ -94,17 +123,17 @@ do not add an Effect peer dependency or use an Effect runner.
 | Android native acceptance | Not run; user deferred it until last. | Android production JavaScript exports do not qualify native Android behavior. |
 | Expo list lifecycle/memo workloads | Five-cycle static/themed mount/rerender/local-theme-switch/unmount probes at 25/100/1,000 rows; actual web receipts. | Instrumented effect/reference checks and optional React Profiler work; not scroll, native rendering, frame, leak or release-budget qualification. [Protocol](../../docs/assessments/2026-09-14-expo-list-workloads.md). |
 | Native/device performance | Not run by this harness; reported explicitly as `not-run` with a reason in benchmark JSON. | Hermes, rendering/frame time, memory and device measurements require separate qualification. |
-| Effect emitted loading and host initialization | Current transformer/theme and a private bundled initial-contract candidate load from ESM/CommonJS on exact Node 22.0.0 and Node 24.15.0; 60 fresh-process samples and direct graphs retained. | External Effect CommonJS fails on Node 22.0.0, so tooling bundles Effect. No public external-theme decoder exists; its footprint remains unqualified. Host timings are not device budgets. |
+| Effect emitted loading and host initialization | Current transformer/theme and a private bundled initial-contract candidate load from ESM/CommonJS on exact Node 22.0.0 and Node 24.15.0; 60 fresh-process samples and direct graphs retained. | External Effect CommonJS fails on Node 22.0.0, so tooling bundles Effect. The public schema and focused value decoders have separate packed entries; M8.3 iOS/web bundle qualification remains pending. Host timings are not device budgets. |
 
 Compiler fixtures live under `packages/css/fixtures/consumer`, with a shared required-file admission check used by tests and benchmarks. They are test assets and are excluded from the published tarball. Removing an application directory cannot turn these scenarios into silent passes. Optional native capabilities remain visibly unqualified; they are not substitutes for mandatory compiler coverage.
 
 ## Internal Effect dependency
 
-The package pins `effect@4.0.0-rc.115` as its own implementation dependency; consumers do not add an Effect peer dependency or use services/runners. This is an ESM prerelease. Its APIs and initial internal shape/data codecs are qualified without migrating production Crumbs validation or changing public entrypoints/types. [Initial contract policies](../../docs/assessments/2026-09-14-internal-payload-contracts.md) distinguish shape validation from native property/token-domain admission and published artifact compatibility. Ordinary runtime artifacts remain React-only. [Exact selection and limits](../../docs/assessments/2026-09-14-effect4-api-selection.md) distinguish installed dependency size, current Node interoperability, and the [emitted boundary audit](../../docs/assessments/2026-09-14-effect-boundary-audit.md) and remaining decoder/device measurements.
+The package pins `effect@4.0.0-rc.115` as its own implementation dependency; consumers do not add an Effect peer dependency or use services/runners. This is an ESM prerelease. Effect Schema powers the explicit `tokens/schema` and focused `tokens/schema/value` decoder entries; the ordinary runtime entries remain isolated from it. The focused decoder subpath was added after the packed Metro probe showed the combined schema artifact retained the external-theme codec even when only the value decoder was imported. M8.3 production-bundle qualification is pending its clean receipt. [Initial contract policies](../../docs/assessments/2026-09-14-internal-payload-contracts.md) distinguish shape validation from native property/token-domain admission and published artifact compatibility. [Exact selection and limits](../../docs/assessments/2026-09-14-effect4-api-selection.md) distinguish installed dependency size, current Node interoperability, and the [emitted boundary audit](../../docs/assessments/2026-09-14-effect-boundary-audit.md) and remaining decoder/device measurements.
 
 ## Runtime dependency boundary
 
-Import common application runtime APIs from `@opsydyn/crumbs-css/theme/core`. Its ESM and CommonJS graphs contain the provider, hooks and token-resolution helpers and depend externally only on React. Use `@opsydyn/crumbs-css/theme` (or its existing `dist/theme` alias) for token scopes, dependency plans and recipe resolver controls. Use `@opsydyn/crumbs-css/tokens` for domain-aware contracts, themes and atomic patches; its ordinary graph is runtime-safe and contains no Node built-ins, authoring entrypoints, Effect, esbuild, vanilla-extract integration or CSS conversion code. Keep `/tokens/schema` and `/tokens/optic` as explicit advanced boundaries for Effect ingress decoding and Optic updates. Shared tags are pure data. One declaration graph preserves nominal token types across authoring and runtime entries.
+Import common application runtime APIs from `@opsydyn/crumbs-css/theme/core`. Its ESM and CommonJS graphs contain the provider, hooks and token-resolution helpers and depend externally only on React. Use `@opsydyn/crumbs-css/theme` (or its existing `dist/theme` alias) for token scopes, dependency plans and recipe resolver controls. Use `@opsydyn/crumbs-css/tokens` for domain-aware contracts, themes and atomic patches; its ordinary graph is runtime-safe and contains no Node built-ins, authoring entrypoints, Effect, esbuild, vanilla-extract integration or CSS conversion code. Use `/tokens/schema/value` when only domain-aware token-value decoding is needed; use `/tokens/schema` for external theme payload codecs and `/tokens/optic` for Optic updates. These are explicit advanced Effect boundaries. Shared tags are pure data. One declaration graph preserves nominal token types across authoring and runtime entries.
 
 The package root, `/style`, Metro plugin and transformer are build-time entrypoints and can require Node/compiler dependencies. Runtime isolation does not remove those installed package dependencies or make authoring modules safe to import into application bundles. Regenerate compiled styles and use the theme subpath in runtime code. Production Expo checks inspect retained iOS, Android and web source maps; native/device performance remains separate qualification.
 

@@ -14,6 +14,7 @@ bun run playground:distribution --artifacts-only
 bun run playground:distribution --prepare-only
 bun run playground:distribution --check
 bun run playground:distribution --m8-2-check
+bun run playground:distribution --m8-3-check
 bun run playground:published --version=alpha --check
 bun run playground:sdk-candidate docs/evidence/YYYY-MM-DD-expo-sdk-candidate/qualification.json
 ```
@@ -37,6 +38,18 @@ maps. The result is kept separately at
 not modify or replace the M8.1 receipt. Android export and Android/device
 acceptance remain parked, and the result does not claim native-device rendering,
 startup, accessibility or performance.
+
+The M8.3 `--m8-3-check` mode resolves every packed Crumbs export and its ESM,
+CommonJS and declaration target, audits each runtime dependency graph, then
+exports isolated production Expo surfaces for iOS and web: ordinary runtime,
+the focused `tokens/schema/value` decoder, and the full `tokens/schema`
+positive control. It verifies packed-source maps and the raw JavaScript
+`external-token-theme` canary pair. A dirty-source run writes interim evidence
+under its temporary build directory; only a clean-source run writes
+`docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json` and can
+qualify the M8.3 matrix row. Until then the published row remains pending.
+Android export, Android/device acceptance, physical-device acceptance and
+publishing remain deferred.
 
 The [nested SDK upgrade configuration](upgrade/README.md) is excluded from the monorepo workspaces and never changes the supported app implicitly. Its runner verifies npm's live `latest` and official blank-template versions, packs the current Crumbs source, and exercises npm resolution without peer overrides. A recorded `peer-blocked` result means the newest SDK remains unsupported and the isolation contract passed; it is not a successful consumer qualification.
 

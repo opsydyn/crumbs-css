@@ -69,4 +69,31 @@ describe("M8.2 compiler, artifact, and runtime compatibility policy", () => {
     expect(playgroundReadme).toContain("Android")
     expect(playgroundReadme).toContain("device")
   })
+
+  it("publishes the M8.3 runtime-resolution policy as pending until its receipt exists", () => {
+    for (const value of [
+      "M8.3 runtime-resolution qualification",
+      "Pending qualification",
+      "tokens/schema/value",
+      "tokens/schema",
+      "Effect 4",
+      "implementation dependency",
+      "22.0.0",
+      "56.0.4",
+      "19.2.5",
+      "0.85.3",
+      "iOS and web",
+      "Android export",
+      "device acceptance",
+      "publishing",
+      "external-token-theme",
+      "docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json",
+    ]) {
+      expect(packageMatrix).toContain(value)
+    }
+    expect(playgroundReadme).toContain("bun run playground:distribution --m8-3-check")
+    expect(playgroundReadme).toContain("docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json")
+    expect(publicReference).toContain("M8.3")
+    expect(publicReference).toContain("Pending qualification")
+  })
 })
