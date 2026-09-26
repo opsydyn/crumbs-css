@@ -1,6 +1,6 @@
 # M8.3 ESM/CommonJS/Metro Resolution and Tree-Shaking Design
 
-**Status:** Architecture approved; written-spec review pending.
+**Status:** Architecture and written spec approved.
 **Date:** 2026-09-26
 **Roadmap:** M8.3 in [roadmap.md](../../roadmap.md)
 
