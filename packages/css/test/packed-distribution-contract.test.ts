@@ -8,6 +8,7 @@ import {
   verifyExpoBundleInventory,
   verifyDistinctInstalledArtifactCopies,
   verifyInstalledArtifact,
+  verifySharedReactRuntime,
 } from "../../../scripts/packed-distribution-contract"
 
 const temporaryRoots: string[] = []
@@ -122,6 +123,50 @@ test("verifyDistinctInstalledArtifactCopies rejects a nested package symlink", a
     nestedConsumerRoot,
     expected,
   )).rejects.toThrow(/@opsydyn\/crumbs-css.*symlink/i)
+})
+
+test("verifySharedReactRuntime returns the one canonical React entry resolved by both copies", async () => {
+  const consumerRoot = await createConsumer()
+  const directPackageRoot = join(consumerRoot, "node_modules", "@opsydyn", "crumbs-css")
+  const nestedPackageRoot = join(
+    consumerRoot,
+    "node_modules",
+    "@acme",
+    "ui",
+    "node_modules",
+    "@opsydyn",
+    "crumbs-css",
+  )
+  const expectedReactRoot = join(consumerRoot, "node_modules", "react")
+  const crumbsIdentity = {name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1"}
+  await writePackage(directPackageRoot, crumbsIdentity)
+  await writePackage(nestedPackageRoot, crumbsIdentity)
+  await writePackage(expectedReactRoot, {name: "react", version: "19.2.5"})
+
+  const reactEntry = await verifySharedReactRuntime(directPackageRoot, nestedPackageRoot)
+
+  expect(reactEntry).toBe(await realpath(join(expectedReactRoot, "dist/index.js")))
+})
+
+test("verifySharedReactRuntime rejects copies that resolve different React entries", async () => {
+  const consumerRoot = await createConsumer()
+  const directPackageRoot = join(consumerRoot, "node_modules", "@opsydyn", "crumbs-css")
+  const nestedPackageRoot = join(
+    consumerRoot,
+    "node_modules",
+    "@acme",
+    "ui",
+    "node_modules",
+    "@opsydyn",
+    "crumbs-css",
+  )
+  await writePackage(directPackageRoot, {name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1"})
+  await writePackage(nestedPackageRoot, {name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1"})
+  await writePackage(join(consumerRoot, "node_modules", "react"), {name: "react", version: "19.2.5"})
+  await writePackage(join(nestedPackageRoot, "node_modules", "react"), {name: "react", version: "19.2.4"})
+
+  await expect(verifySharedReactRuntime(directPackageRoot, nestedPackageRoot))
+    .rejects.toThrow(/different React runtime paths/i)
 })
 
 test("verifyInstalledArtifact rejects a missing package", async () => {

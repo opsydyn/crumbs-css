@@ -631,3 +631,33 @@ export async function verifyDistinctInstalledArtifactCopies(
 
   return { direct, nested }
 }
+
+export async function verifySharedReactRuntime(
+  directPackageRoot: string,
+  nestedPackageRoot: string,
+): Promise<string> {
+  async function resolveReact(packageRoot: string): Promise<string> {
+    let canonicalPackageRoot: string
+    try {
+      canonicalPackageRoot = await realpath(packageRoot)
+    } catch (error) {
+      throw new Error(`Cannot resolve Crumbs package root at ${packageRoot}: ${messageOf(error)}`, { cause: error })
+    }
+    try {
+      return await realpath(createRequire(join(canonicalPackageRoot, "package.json")).resolve("react"))
+    } catch (error) {
+      throw new Error(`Cannot resolve React from Crumbs package at ${canonicalPackageRoot}: ${messageOf(error)}`, { cause: error })
+    }
+  }
+
+  const [directReactPath, nestedReactPath] = await Promise.all([
+    resolveReact(directPackageRoot),
+    resolveReact(nestedPackageRoot),
+  ])
+  if (directReactPath !== nestedReactPath) {
+    throw new Error(
+      `Crumbs package copies resolve different React runtime paths: direct ${directReactPath}; nested ${nestedReactPath}`,
+    )
+  }
+  return directReactPath
+}
