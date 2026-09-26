@@ -226,7 +226,7 @@ Inspect the receipt. Require every manifest export target and condition, both ad
 
 Only after the receipt and all gates pass, change the matrix from pending to qualified, retain the receipt link, and mark M8.3 `[x]` in `docs/roadmap.md` with M8.4 recommended next. Update the compatibility test to require the qualified state, then run `bun run check`, `bun run docs:build`, and `git diff --check` against the final documentation.
 
-- [ ] **Step 3: Commit Task 5**
+- [x] **Step 3: Commit Task 5**
 
 ```sh
 git add packages/css/COMPATIBILITY.md packages/css/test/compatibility-matrix.test.ts docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json docs/roadmap.md
