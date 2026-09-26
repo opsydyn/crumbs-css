@@ -1,7 +1,7 @@
 import assert from "node:assert/strict"
 import { createRequire } from "node:module"
 import { realpathSync } from "node:fs"
-import { dirname } from "node:path"
+import { dirname, join } from "node:path"
 import { PassThrough } from "node:stream"
 import React from "react"
 import { renderToPipeableStream } from "react-dom/server"
@@ -43,6 +43,22 @@ assert.equal(
   appReactPath,
   uiReactPath,
   `App and UI must share one React instance; resolved ${appReactPath} and ${uiReactPath}`,
+)
+const directCrumbsReactPath = realpathSync(
+  createRequire(join(directCrumbsRoot, "package.json")).resolve("react"),
+)
+const nestedCrumbsReactPath = realpathSync(
+  createRequire(join(nestedCrumbsRoot, "package.json")).resolve("react"),
+)
+assert.equal(
+  directCrumbsReactPath,
+  appReactPath,
+  `Direct Crumbs copy must resolve the app's React instance; resolved ${directCrumbsReactPath} and ${appReactPath}`,
+)
+assert.equal(
+  nestedCrumbsReactPath,
+  appReactPath,
+  `Nested Crumbs copy must resolve the app's React instance; resolved ${nestedCrumbsReactPath} and ${appReactPath}`,
 )
 
 const secondaryContract = createTokenContract({
@@ -188,6 +204,7 @@ assert.throws(() => createTokenContract({
 console.log(JSON.stringify({
   status: "passed",
   crumbsCopies: [directCrumbsRoot, nestedCrumbsRoot],
+  crumbsReactPaths: [directCrumbsReactPath, nestedCrumbsReactPath],
   sharedReact: appReactPath,
   lazyThemeValues: ["#2457d6", "#c42f73"],
   rejectedFutureVersions: ["recipe:4", "extension:2", "sprinkles:2", "theme-dependency-plan:2", "external-token-theme:2"],

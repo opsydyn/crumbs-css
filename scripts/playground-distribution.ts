@@ -6,6 +6,7 @@ import {
   assertNoWorkspaceOrLinkDependencies,
   verifyExpoBundleInventory,
   verifyInstalledArtifact,
+  verifySharedReactRuntime,
   type PackageIdentity,
   type PackageManifest,
 } from "./packed-distribution-contract"
@@ -230,6 +231,7 @@ async function sourceRevision(repositoryRoot: string, logRoot: string): Promise<
 type RuntimeProbeResult = Readonly<{
   status: "passed"
   crumbsCopies: ReadonlyArray<string>
+  crumbsReactPaths: ReadonlyArray<string>
   sharedReact: string
   lazyThemeValues: ReadonlyArray<string>
   rejectedFutureVersions: ReadonlyArray<string>
@@ -287,6 +289,7 @@ async function qualifyM8_2Consumer(repositoryRoot: string): Promise<void> {
   } catch (error) {
     throw new Error(`Could not read the M8.2 runtime probe result: ${runtimeProbeOutput}`, {cause: error})
   }
+  const sharedReactPath = await verifySharedReactRuntime(directCrumbsPackageRoot, nestedCrumbsPath)
   const expectedFutureVersions = [
     "recipe:4",
     "extension:2",
@@ -299,13 +302,16 @@ async function qualifyM8_2Consumer(repositoryRoot: string): Promise<void> {
       runtimeProbe.crumbsCopies.length !== 2 ||
       runtimeProbe.crumbsCopies[0] !== directCrumbsPackageRoot ||
       runtimeProbe.crumbsCopies[1] !== nestedCrumbsPath ||
-      typeof runtimeProbe.sharedReact !== "string" ||
+      !Array.isArray(runtimeProbe.crumbsReactPaths) ||
+      runtimeProbe.crumbsReactPaths.length !== 2 ||
+      runtimeProbe.crumbsReactPaths[0] !== sharedReactPath ||
+      runtimeProbe.crumbsReactPaths[1] !== sharedReactPath ||
+      runtimeProbe.sharedReact !== sharedReactPath ||
       JSON.stringify(runtimeProbe.lazyThemeValues) !== JSON.stringify(["#2457d6", "#c42f73"]) ||
       JSON.stringify(runtimeProbe.rejectedFutureVersions) !== JSON.stringify(expectedFutureVersions) ||
       runtimeProbe.rejectedIdentityShapeCollision !== true) {
     throw new Error(`M8.2 runtime probe result did not match the qualified contract: ${runtimeProbeOutput}`)
   }
-  const sharedReactPath = runtimeProbe.sharedReact
   const nativeModuleMetadata = await inspectNativeModuleMetadata(uiPackageRoot)
 
   const tsc = join(prepared.appRoot, "node_modules/.bin/tsc")
