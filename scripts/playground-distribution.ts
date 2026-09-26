@@ -1,15 +1,20 @@
 import { createHash } from "node:crypto"
-import { cp, lstat, mkdir, readFile, realpath, writeFile } from "node:fs/promises"
+import { cp, lstat, mkdir, readFile, readdir, realpath, writeFile } from "node:fs/promises"
+import { builtinModules } from "node:module"
 import { tmpdir } from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { dirname, extname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import {
   assertNoWorkspaceOrLinkDependencies,
   verifyExpoBundleInventory,
   verifyInstalledArtifact,
   verifySharedReactRuntime,
+  type BundleInventory,
   type PackageIdentity,
   type PackageManifest,
 } from "./packed-distribution-contract"
+import { verifyPackedExportMap, type PackedExportResolution } from "./packed-export-contract"
+import { auditPackedRuntimeEntrypoints, type PackedRuntimeGraph } from "./packed-runtime-graph"
+import { verifyTreeShakingCanary, type MetroJavaScriptBundle } from "./metro-tree-shaking-contract"
 import {
   buildPackedDistributionArtifacts,
   type PackedArtifact,
@@ -20,9 +25,13 @@ const packageNames = ["@opsydyn/crumbs-css", "@acme/design-tokens", "@acme/ui"] 
 const appTemplateName = "packages/css/fixtures/packed-distribution/app"
 const evidenceRelativePath = "docs/evidence/2026-09-26-m8-1-packed-design-system/qualification.json"
 const m8_2EvidenceRelativePath = "docs/evidence/2026-09-26-m8-2-compatibility-matrix/qualification.json"
+const m8_3EvidenceRelativePath = "docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json"
+const m8_3Canary = "external-token-theme"
+const m8_3RuntimeSurfaces = ["ordinary", "schema-decoder", "schema-positive-control"] as const
 type PackageName = typeof packageNames[number]
-type DistributionMode = "--artifacts-only" | "--prepare-only" | "--check" | "--m8-2-check"
-type LegacyDistributionMode = Exclude<DistributionMode, "--m8-2-check">
+type M8_3RuntimeSurface = typeof m8_3RuntimeSurfaces[number]
+type DistributionMode = "--artifacts-only" | "--prepare-only" | "--check" | "--m8-2-check" | "--m8-3-check"
+type LegacyDistributionMode = Exclude<DistributionMode, "--m8-2-check" | "--m8-3-check">
 type AppManifest = PackageIdentity & PackageManifest & Readonly<{
   dependencies: Readonly<Record<string, string>>
   devDependencies?: Readonly<Record<string, string>>
@@ -33,6 +42,16 @@ type InstalledArtifact = Readonly<{
   version: string
   packageRoot: string
   entryPath: string
+}>
+type GeneratedBundle = MetroJavaScriptBundle & Readonly<{sha256: string; bytes: number}>
+type RuntimeSurfaceInventory = Readonly<{
+  surface: M8_3RuntimeSurface
+  bundles: ReadonlyArray<Readonly<{platform: "ios" | "web"; path: string; sha256: string; bytes: number}>>
+  inventory: ReadonlyArray<Readonly<{
+    platform: "ios" | "web"
+    sourceMapFiles: ReadonlyArray<string>
+    packageSources: Readonly<Record<string, ReadonlyArray<string>>>
+  }>>
 }>
 
 function sha256(bytes: Uint8Array): string {
@@ -257,6 +276,332 @@ async function inspectNativeModuleMetadata(uiPackageRoot: string): Promise<Reado
     )
   }
   return {path, version: Number(metadataVersion), dependencyPlanVersion: Number(dependencyPlanVersion)}
+}
+
+async function findJavascriptBundleFiles(directory: string): Promise<ReadonlyArray<string>> {
+  const files: Array<string> = []
+  const visit = async (current: string): Promise<void> => {
+    for (const entry of await readdir(current, {withFileTypes: true})) {
+      const path = join(current, entry.name)
+      if (entry.isDirectory()) await visit(path)
+      else if (entry.isFile() && [".js", ".jsbundle"].includes(extname(entry.name).toLowerCase())) {
+        files.push(path)
+      }
+    }
+  }
+  await visit(directory)
+  return files.sort()
+}
+
+async function readJavascriptBundles(
+  appRoot: string,
+  platform: "ios" | "web",
+  directory: string,
+): Promise<ReadonlyArray<GeneratedBundle>> {
+  const files = await findJavascriptBundleFiles(directory)
+  if (files.length === 0) throw new Error("No generated " + platform + " JavaScript bundles found in " + directory)
+  return Promise.all(files.map(async path => {
+    const javascript = await readFile(path, "utf8")
+    return {
+      platform,
+      path: relative(appRoot, path).split(sep).join("/"),
+      javascript,
+      sha256: sha256(Buffer.from(javascript, "utf8")),
+      bytes: Buffer.byteLength(javascript),
+    }
+  }))
+}
+
+function toAppRelative(appRoot: string, path: string): string {
+  const relativePath = relative(appRoot, path)
+  if (isAbsolute(relativePath) || relativePath === ".." || relativePath.startsWith(".." + sep)) {
+    throw new Error("Expected an Expo artifact within " + appRoot + ", received " + path)
+  }
+  return relativePath.split(sep).join("/")
+}
+
+function sourceMapReferences(value: unknown): ReadonlyArray<string> {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return []
+  const record = value as Readonly<Record<string, unknown>>
+  const references: Array<string> = []
+  if (Array.isArray(record.sources)) {
+    for (const source of record.sources) if (typeof source === "string") references.push(source)
+  }
+  if (Array.isArray(record.sections)) {
+    for (const section of record.sections) {
+      if (typeof section === "object" && section !== null && !Array.isArray(section)) {
+        references.push(...sourceMapReferences((section as Readonly<Record<string, unknown>>).map))
+      }
+    }
+  }
+  return references
+}
+
+const builtinSourceNames = new Set(builtinModules.map(specifier => specifier.replace(/^node:/, "")))
+const compilerSourcePattern = /(?:^|\/)node_modules\/(?:@vanilla-extract|css-to-react-native|metro|metro-transform-worker|typescript|tsdown)(?:\/|$)/i
+
+async function assertM8_3SurfaceInventory(
+  surface: M8_3RuntimeSurface,
+  inventories: ReadonlyArray<BundleInventory>,
+  appRoot: string,
+  installedCrumbsRoot: string,
+): Promise<ReadonlyArray<Readonly<{
+  platform: "ios" | "web"
+  sourceMapFiles: ReadonlyArray<string>
+  packageSources: Readonly<Record<string, ReadonlyArray<string>>>
+}>>> {
+  const byPlatform = new Map(inventories.map(inventory => [inventory.platform, inventory]))
+  const required = surface === "ordinary"
+    ? ["dist/theme-core.mjs", "dist/tokens.mjs"]
+    : [surface === "schema-decoder" ? "dist/tokens-schema-value.mjs" : "dist/tokens-schema.mjs"]
+  const forbiddenCrumbsSource = surface === "ordinary"
+    ? /(?:^|\/)(?:tokens-(?:schema(?:-value)?|optic)|(?:Struct|Schema)-[^/]+|transformer|metro-plugin|style|native-style[^/]*)|(?:^|\/)effect(?:\/|$)/i
+    : /(?:^|\/)(?:transformer|metro-plugin|style|native-style[^/]*)(?:[.-]|$)/i
+  const summarized: Array<Readonly<{
+    platform: "ios" | "web"
+    sourceMapFiles: ReadonlyArray<string>
+    packageSources: Readonly<Record<string, ReadonlyArray<string>>>
+  }>> = []
+
+  for (const platform of ["ios", "web"] as const) {
+    const inventory = byPlatform.get(platform)
+    if (inventory === undefined) throw new Error("Missing " + platform + " source-map inventory for " + surface)
+    const crumbsSources = inventory.packageSources["@opsydyn/crumbs-css"] ?? []
+    if (crumbsSources.length === 0) {
+      throw new Error("No " + platform + " source map includes installed Crumbs source for " + surface)
+    }
+    const relativeSources = crumbsSources.map(source => {
+      const sourceRelative = relative(installedCrumbsRoot, source)
+      if (isAbsolute(sourceRelative) || sourceRelative === ".." || sourceRelative.startsWith(".." + sep)) {
+        throw new Error(surface + " source inventory escaped the installed Crumbs package: " + source)
+      }
+      return sourceRelative.split(sep).join("/")
+    }).sort()
+    for (const expected of required) {
+      if (!relativeSources.some(source => source === expected || source.endsWith("/" + expected))) {
+        throw new Error(surface + " " + platform + " inventory is missing packed Crumbs entry " + expected)
+      }
+    }
+    if (surface === "schema-decoder" &&
+        relativeSources.some(source => source === "dist/tokens-schema.mjs" || source.endsWith("/dist/tokens-schema.mjs"))) {
+      throw new Error(surface + " " + platform + " inventory reached the combined tokens/schema entry")
+    }
+    for (const source of relativeSources) {
+      if (forbiddenCrumbsSource.test(source)) {
+        throw new Error(surface + " " + platform + " inventory includes a forbidden Crumbs source " + source)
+      }
+    }
+
+    for (const sourceMapPath of inventory.sourceMapFiles) {
+      const sourceMap = JSON.parse(await readFile(sourceMapPath, "utf8")) as unknown
+      for (const rawSource of sourceMapReferences(sourceMap)) {
+        const source = rawSource.replaceAll("\\", "/")
+        const cleanSource = source.replace(/[?#].*$/, "")
+        if (cleanSource.startsWith("node:") || builtinSourceNames.has(cleanSource) ||
+            (cleanSource.startsWith("node_modules/") && builtinSourceNames.has(cleanSource.split("/")[1] ?? ""))) {
+          throw new Error(surface + " " + platform + " source map includes a Node built-in source " + rawSource)
+        }
+        if (compilerSourcePattern.test(cleanSource)) {
+          throw new Error(surface + " " + platform + " source map includes compiler source " + rawSource)
+        }
+        if (surface === "ordinary" &&
+            (/(?:^|\/)node_modules\/effect(?:\/|$)/i.test(cleanSource) ||
+              /(?:^|\/)effect\/dist\//i.test(cleanSource))) {
+          throw new Error(surface + " " + platform + " source map includes Effect source " + rawSource)
+        }
+      }
+    }
+
+    summarized.push({
+      platform,
+      sourceMapFiles: inventory.sourceMapFiles.map(path => toAppRelative(appRoot, path)),
+      packageSources: {
+        "@opsydyn/crumbs-css": relativeSources.map(source => "node_modules/@opsydyn/crumbs-css/" + source),
+      },
+    })
+  }
+  return summarized
+}
+
+async function buildM8_3RuntimeSurface(
+  prepared: Awaited<ReturnType<typeof preparePackedConsumer>>,
+  repositoryRoot: string,
+  surface: M8_3RuntimeSurface,
+  buildRoot: string,
+): Promise<Readonly<{
+  surface: RuntimeSurfaceInventory
+  javascriptBundles: ReadonlyArray<GeneratedBundle>
+}>> {
+  const appRoot = prepared.appRoot
+  await writeFile(join(appRoot, "index.js"), [
+    'import { registerRootComponent } from "expo"',
+    'import Surface from "./src/runtime-surfaces/' + surface + '"',
+    "registerRootComponent(Surface)",
+    "",
+  ].join("\n"))
+  const env = {
+    EXPO_NO_METRO_WORKSPACE_ROOT: "1",
+    EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH: "1",
+    EXPO_UNSTABLE_TREE_SHAKING: "1",
+  }
+  const expo = join(appRoot, "node_modules/.bin/expo")
+  const platformDirectories = {} as Record<"ios" | "web", string>
+  for (const platform of ["ios", "web"] as const) {
+    const outputDirectory = join(appRoot, "dist", "m8-3", surface, platform)
+    await mkdir(outputDirectory, {recursive: true})
+    platformDirectories[platform] = outputDirectory
+    await run(
+      [expo, "export", "--platform", platform, "--source-maps", "--no-bytecode", "--output-dir", outputDirectory],
+      appRoot,
+      join(buildRoot, "logs/export-" + surface + "-" + platform + ".log"),
+      env,
+    )
+  }
+
+  const bundleSets = await Promise.all((["ios", "web"] as const).map(platform =>
+    readJavascriptBundles(appRoot, platform, platformDirectories[platform])))
+  const javascriptBundles = bundleSets.flat()
+  const inventory = await verifyExpoBundleInventory(
+    [
+      {platform: "ios", directory: platformDirectories.ios},
+      {platform: "web", directory: platformDirectories.web},
+    ],
+    appRoot,
+    repositoryRoot,
+    ["@opsydyn/crumbs-css"],
+  )
+  const crumbsRoot = prepared.installedPackages["@opsydyn/crumbs-css"].packageRoot
+  const summarizedInventory = await assertM8_3SurfaceInventory(surface, inventory, appRoot, crumbsRoot)
+  return {
+    surface: {
+      surface,
+      bundles: javascriptBundles.map(({platform, path, sha256: digest, bytes}) => ({
+        platform,
+        path,
+        sha256: digest,
+        bytes,
+      })),
+      inventory: summarizedInventory,
+    },
+    javascriptBundles,
+  }
+}
+
+async function qualifyM8_3Consumer(repositoryRoot: string): Promise<void> {
+  const artifacts = await buildPackedDistributionArtifacts(repositoryRoot)
+  const prepared = await preparePackedConsumer(repositoryRoot, artifacts)
+  const crumbsPackageRoot = prepared.installedPackages["@opsydyn/crumbs-css"].packageRoot
+  const exportResolutions: ReadonlyArray<PackedExportResolution> =
+    await verifyPackedExportMap(crumbsPackageRoot, prepared.appRoot)
+  const runtimeGraphs: ReadonlyArray<PackedRuntimeGraph> =
+    await auditPackedRuntimeEntrypoints(crumbsPackageRoot)
+
+  const tsc = join(prepared.appRoot, "node_modules/.bin/tsc")
+  await run(
+    [tsc, "--project", "tsconfig.json", "--noEmit"],
+    prepared.appRoot,
+    join(artifacts.buildRoot, "logs/typecheck-m8-3-consumer.log"),
+    {EXPO_NO_METRO_WORKSPACE_ROOT: "1"},
+  )
+
+  const surfaceResults = new Map<M8_3RuntimeSurface, RuntimeSurfaceInventory>()
+  const bundleResults = new Map<M8_3RuntimeSurface, ReadonlyArray<GeneratedBundle>>()
+  for (const surface of m8_3RuntimeSurfaces) {
+    const result = await buildM8_3RuntimeSurface(prepared, repositoryRoot, surface, artifacts.buildRoot)
+    surfaceResults.set(surface, result.surface)
+    bundleResults.set(surface, result.javascriptBundles)
+  }
+
+  for (const bundle of bundleResults.get("ordinary")!) {
+    if (bundle.javascript.includes(m8_3Canary)) {
+      throw new Error("Ordinary runtime bundle " + bundle.platform + " " + bundle.path + " retained " + m8_3Canary)
+    }
+  }
+  const canary = verifyTreeShakingCanary(
+    bundleResults.get("schema-decoder")!,
+    bundleResults.get("schema-positive-control")!,
+    m8_3Canary,
+  )
+  const directDependencyVersions = await installedDirectDependencyVersions(prepared.appRoot, prepared.installManifest)
+  const npmVersion = await run(
+    ["npm", "--version"],
+    prepared.appRoot,
+    join(artifacts.buildRoot, "logs/npm-version.log"),
+  )
+  const nodeVersion = await run(
+    ["node", "--version"],
+    prepared.appRoot,
+    join(artifacts.buildRoot, "logs/node-version.log"),
+  )
+  const source = await sourceRevision(repositoryRoot, artifacts.buildRoot)
+  const sourceSurfaces = Object.fromEntries(
+    [...surfaceResults.entries()].map(([surface, result]) => [surface, result]),
+  )
+  const qualification = {
+    formatVersion: 1,
+    generatedAt: new Date().toISOString(),
+    source,
+    app: {
+      name: prepared.sourceManifest.name,
+      version: prepared.sourceManifest.version,
+      declaredDependencyRanges: prepared.sourceManifest.dependencies,
+      resolvedDependencyVersions: directDependencyVersions,
+      packageLockSha256: sha256(await readFile(join(prepared.appRoot, "package-lock.json"))),
+    },
+    crumbsArtifact: {
+      name: artifacts.crumbs.name,
+      version: artifacts.crumbs.version,
+      tarballSha256: artifacts.crumbs.sha256,
+      exportResolutions,
+      runtimeGraphs,
+    },
+    toolchain: {node: nodeVersion, bun: Bun.version, npm: npmVersion},
+    treeShaking: {
+      mode: "Expo production export",
+      environment: {
+        EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH: "1",
+        EXPO_UNSTABLE_TREE_SHAKING: "1",
+      },
+      hermesBytecode: "disabled for JavaScript inspection",
+      platforms: ["ios", "web"],
+      surfaces: sourceSurfaces,
+      canary: {
+        literal: m8_3Canary,
+        ordinary: "omitted",
+        decoder: canary.decoder,
+        positiveControl: canary.positiveControl,
+      },
+    },
+    results: {
+      packedExports: "passed",
+      packedRuntimeGraphs: "passed",
+      consumerTypecheck: "passed",
+      productionExports: {ios: "passed", web: "passed"},
+      pairedTreeShakingCanary: "passed",
+    },
+    limitations: [
+      "This qualification covers packed ESM/CommonJS resolution and production Metro JavaScript/source-map inventories for the exact recorded package and Expo versions.",
+      "The iOS export is a bundle qualification, not iOS device acceptance; Android export and all physical-device acceptance remain deferred.",
+      "Publishing and consumer behavior outside the recorded Node, Expo, React Native and React versions are not qualified by this receipt.",
+    ],
+  }
+  const receiptPath = source.dirty
+    ? join(artifacts.buildRoot, "m8-3-interim-qualification.json")
+    : join(repositoryRoot, m8_3EvidenceRelativePath)
+  if (!source.dirty) await mkdir(dirname(receiptPath), {recursive: true})
+  await writeFile(receiptPath, JSON.stringify(qualification, null, 2) + "\n")
+  console.log(JSON.stringify({
+    mode: "qualified-m8.3",
+    buildRoot: artifacts.buildRoot,
+    consumerRoot: prepared.appRoot,
+    qualification: receiptPath,
+    source,
+    packageHash: artifacts.crumbs.sha256,
+    exportTargetCount: exportResolutions.length,
+    runtimeGraphCount: runtimeGraphs.length,
+    treeShaking: qualification.treeShaking,
+    results: qualification.results,
+  }, null, 2))
 }
 
 async function qualifyM8_2Consumer(repositoryRoot: string): Promise<void> {
@@ -550,12 +895,14 @@ async function qualifyConsumer(
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2)
-  if (args.length !== 1 || !["--artifacts-only", "--prepare-only", "--check", "--m8-2-check"].includes(args[0]!)) {
-    throw new Error("Usage: bun run playground:distribution --artifacts-only|--prepare-only|--check|--m8-2-check")
+  if (args.length !== 1 || !["--artifacts-only", "--prepare-only", "--check", "--m8-2-check", "--m8-3-check"].includes(args[0]!)) {
+    throw new Error("Usage: bun run playground:distribution --artifacts-only|--prepare-only|--check|--m8-2-check|--m8-3-check")
   }
   const repositoryRoot = await realpath(resolve(import.meta.dir, ".."))
   if (args[0] === "--m8-2-check") {
     await qualifyM8_2Consumer(repositoryRoot)
+  } else if (args[0] === "--m8-3-check") {
+    await qualifyM8_3Consumer(repositoryRoot)
   } else {
     await qualifyConsumer(repositoryRoot, args[0] as LegacyDistributionMode)
   }

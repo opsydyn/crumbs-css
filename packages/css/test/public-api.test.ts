@@ -6,6 +6,7 @@ import * as themeCoreApi from "@opsydyn/crumbs-css/theme/core"
 import * as tokenApi from "@opsydyn/crumbs-css/tokens"
 import * as tokenOpticApi from "@opsydyn/crumbs-css/tokens/optic"
 import * as tokenSchemaApi from "@opsydyn/crumbs-css/tokens/schema"
+import * as tokenValueSchemaApi from "@opsydyn/crumbs-css/tokens/schema/value"
 import type {
   NativeComponentPublicProps,
   NativeComponentStateVariants,
@@ -194,6 +195,7 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "encodeExternalTokenTheme",
       "externalTokenThemeCodec",
     ])
+    expect(namedApiKeys(tokenValueSchemaApi)).toEqual(["decodeTokenValue"])
     expect(namedApiKeys(tokenOpticApi)).toEqual([
       "createTokenThemeFocus",
     ])

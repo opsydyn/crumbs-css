@@ -16,7 +16,7 @@
 - The packed Expo consumer baseline is Expo `56.0.4`, React Native `0.85.3`, and React `19.2.5`.
 - The package manifest remains authoritative for public paths and conditional targets; test all declared compatibility aliases, including `./dist/theme` and `./dist/metro-plugin`.
 - Ordinary runtime paths allow React only for theme entries, no external dependency for `./tokens`, and no Effect, Node built-ins, authoring modules, or compiler dependencies.
-- `./tokens/schema` and `./tokens/optic` may bundle Effect internally; Effect remains an implementation dependency, not a consumer peer or required userland import.
+- `./tokens/schema`, `./tokens/schema/value`, and `./tokens/optic` may bundle Effect internally; Effect remains an implementation dependency, not a consumer peer or required userland import.
 - Compiler tooling may retain only Node and compiler dependencies admitted by `packages/css/build-policy.ts`; Effect must not remain an external import.
 - Production Expo exports cover iOS and web with Metro tree shaking explicitly enabled. Android export, Android device behavior, physical-device acceptance, and publishing remain out of scope.
 - Preserve existing `--check` and `--m8-2-check` behavior and receipts. Add a distinct `--m8-3-check` mode and receipt.
@@ -42,8 +42,9 @@
 | `scripts/packed-runtime-graph.ts` | Walk packed ESM/CommonJS local edges and enforce entrypoint dependency classes. |
 | `packages/css/test/packed-runtime-graph.test.ts` | Pin graph traversal, missing-edge, dynamic-loader, and dependency-class behavior with packed-file fixtures. |
 | `packages/css/fixtures/packed-distribution/app/src/runtime-surfaces/ordinary.tsx` | Use only `theme/core` and `tokens` in the ordinary runtime bundle. |
-| `packages/css/fixtures/packed-distribution/app/src/runtime-surfaces/schema-decoder.tsx` | Call `decodeTokenValue` from `tokens/schema` without importing the external theme decoder. |
+| `packages/css/fixtures/packed-distribution/app/src/runtime-surfaces/schema-decoder.tsx` | Call `decodeTokenValue` from the focused `tokens/schema/value` entry. |
 | `packages/css/fixtures/packed-distribution/app/src/runtime-surfaces/schema-positive-control.tsx` | Call `decodeExternalTokenTheme` so the canary detector has a positive control. |
+| `packages/css/src/tokens/schema-value.ts` | Implement the focused token-value decoder without importing the external-theme contract graph. |
 | `scripts/metro-tree-shaking-contract.ts` | Read emitted JavaScript bundle files and assert the paired canary result. |
 | `packages/css/test/metro-tree-shaking-contract.test.ts` | Prove the canary rejects false absence/presence results and ignores source maps. |
 | `scripts/playground-distribution.ts` | Add `--m8-3-check`, stage each entry surface, run iOS/web production exports, and write the receipt. |
@@ -68,7 +69,7 @@
 
 Test nested conditional export flattening, rejection of targets outside the packed package, and target-file existence. For each manifest target, assert its resolved path is a regular file inside the installed package root. From the isolated consumer, compare Node's `import.meta.resolve` and `createRequire().resolve` results with the manifest's import and require conditions. Load each executable public path in both formats; separately read `./package.json`. Assert the package has no Effect peer dependency, and assert the running Node version is at least `22.0.0`.
 
-Add ESM and CommonJS functional probes for `@opsydyn/crumbs-css/tokens/schema`: call `decodeTokenValue` with a valid color value and `decodeExternalTokenTheme` with a valid version-1 payload. Extend the existing consumer type source so both functions and the exported schema types resolve from the packed declaration graph in both Node16 and Bundler modes. Link the declared Effect dependency into this extracted-tarball type fixture only if the emitted declarations require it; its presence in the fixture must not grant it admission in a runtime graph.
+Add ESM and CommonJS functional probes for `@opsydyn/crumbs-css/tokens/schema`: call `decodeTokenValue` with a valid color value and `decodeExternalTokenTheme` with a valid version-1 payload. Also qualify the probe-justified `@opsydyn/crumbs-css/tokens/schema/value` entry in both module formats and declaration modes. Extend the existing consumer type source so these functions and the exported schema types resolve from the packed declaration graph in both Node16 and Bundler modes. Link the declared Effect dependency into this extracted-tarball type fixture only if the emitted declarations require it; its presence in the fixture must not grant it admission in a runtime graph.
 
 - [ ] **Step 2: Run the focused test and verify it fails**
 
@@ -97,7 +98,7 @@ git commit -m "test: qualify packed public exports"
 - Create: `scripts/packed-runtime-graph.ts`
 - Create: `packages/css/test/packed-runtime-graph.test.ts`
 
-**Interfaces:** Export `auditPackedRuntimeEntrypoints(packageRoot: string): Promise<ReadonlyArray<PackedRuntimeGraph>>`. Each result records `subpath`, module format, visited files, and external specifiers. Classify exports as ordinary runtime (`./theme`, `./theme/core`, `./dist/theme`, `./tokens`), advanced runtime (`./tokens/schema`, `./tokens/optic`), compiler tooling, or package metadata. Fail if any manifest export is unclassified.
+**Interfaces:** Export `auditPackedRuntimeEntrypoints(packageRoot: string): Promise<ReadonlyArray<PackedRuntimeGraph>>`. Each result records `subpath`, module format, visited files, and external specifiers. Classify exports as ordinary runtime (`./theme`, `./theme/core`, `./dist/theme`, `./tokens`), advanced runtime (`./tokens/schema`, `./tokens/schema/value`, `./tokens/optic`), compiler tooling, or package metadata. Fail if any manifest export is unclassified.
 
 - [ ] **Step 1: Add failing graph fixtures**
 
@@ -133,8 +134,11 @@ git commit -m "test: audit packed runtime dependency graphs"
 - Create: `scripts/metro-tree-shaking-contract.ts`
 - Test: `packages/css/test/metro-tree-shaking-contract.test.ts`
 - Modify: `scripts/playground-distribution.ts`
+- Modify: `packages/css/package.json`, `packages/css/tsdown.config.ts`, `scripts/packed-runtime-graph.ts`
+- Modify: `packages/css/test/public-api.test.ts`, `packages/css/test/packed-runtime-graph.test.ts`, `packages/css/test/pack-consumer-contract.test.ts`
+- Create: `packages/css/src/tokens/schema-value.ts`
 
-**Interfaces:** Export `verifyTreeShakingCanary(decoderBundles: ReadonlyArray<Readonly<{platform: "ios" | "web"; path: string; javascript: string}>>, positiveControlBundles: ReadonlyArray<Readonly<{platform: "ios" | "web"; path: string; javascript: string}>>, canary: string): Readonly<{decoder: ReadonlyArray<"ios" | "web">; positiveControl: ReadonlyArray<"ios" | "web">}>`. Accept only generated JavaScript bundle paths (for example `.js` or `.jsbundle`), fail if either platform is absent, if decoder JavaScript contains the canary, or if positive-control JavaScript omits it, and ignore/reject `.map` paths.
+**Interfaces:** Export `verifyTreeShakingCanary(decoderBundles: ReadonlyArray<Readonly<{platform: "ios" | "web"; path: string; javascript: string}>>, positiveControlBundles: ReadonlyArray<Readonly<{platform: "ios" | "web"; path: string; javascript: string}>>, canary: string): Readonly<{decoder: ReadonlyArray<"ios" | "web">; positiveControl: ReadonlyArray<"ios" | "web">}>`. Accept only generated JavaScript bundle paths (for example `.js` or `.jsbundle`), fail if either platform is absent, if focused decoder JavaScript contains the canary, or if positive-control JavaScript omits it, and ignore/reject `.map` paths.
 
 - [ ] **Step 1: Add failing canary helper tests**
 
@@ -148,11 +152,11 @@ Expected: FAIL because the canary helper and runtime-surface fixtures do not exi
 
 - [ ] **Step 3: Implement the surfaces and canary check**
 
-The ordinary surface calls APIs imported only from `theme/core` and `tokens`; the decoder surface imports and calls only `decodeTokenValue`; the positive control imports and calls `decodeExternalTokenTheme`. In the staged consumer copy, point `index.js` at one surface at a time and export each surface for iOS and web into separate output directories.
+The ordinary surface calls APIs imported only from `theme/core` and `tokens`; the decoder surface imports and calls only `decodeTokenValue` from the focused `tokens/schema/value` entry; the positive control imports and calls `decodeExternalTokenTheme` from the existing `tokens/schema` entry. The first packed probe demonstrated that Metro retains the combined schema entry's external-theme initializer when only its value decoder is imported, so the focused export is an evidence-driven package-boundary fix that preserves the existing API. In the staged consumer copy, point `index.js` at one surface at a time and export each surface for iOS and web into separate output directories.
 
 Run Expo production export with source maps and bytecode disabled for JavaScript inspection. Set `EXPO_UNSTABLE_METRO_OPTIMIZE_GRAPH=1` and `EXPO_UNSTABLE_TREE_SHAKING=1` explicitly. Expo documents tree shaking as production-only and limited to ESM `import`/`export` modules ([tree-shaking guidance](https://docs.expo.dev/guides/tree-shaking/)).
 
-Before exporting, call `verifyPackedExportMap` and `auditPackedRuntimeEntrypoints` on the installed Crumbs package and include both results in the receipt. Use source-map inventories to prove each surface resolves the installed packed ESM target: ordinary includes `theme-core.mjs` and `tokens.mjs`; decoder surfaces include `tokens-schema.mjs`. Reject Effect, advanced schema/optic, compiler, Node built-in, or repository sources from ordinary inventories; reject compiler, Node built-in, or repository sources from decoder inventories. Scan every generated JavaScript bundle directly for the paired canary; do not inspect `.map` files for canary results.
+Before exporting, call `verifyPackedExportMap` and `auditPackedRuntimeEntrypoints` on the installed Crumbs package and include both results in the receipt. Use source-map inventories to prove each surface resolves the installed packed ESM target: ordinary includes `theme-core.mjs` and `tokens.mjs`; the focused decoder includes `tokens-schema-value.mjs` and excludes the combined `tokens-schema.mjs`; the positive control includes `tokens-schema.mjs`. Reject Effect, advanced schema/optic, compiler, Node built-in, or repository sources from ordinary inventories; reject compiler, Node built-in, or repository sources from decoder inventories. Scan every generated JavaScript bundle directly for the paired canary; do not inspect `.map` files for canary results.
 
 - [ ] **Step 4: Run focused checks and the new packed qualification mode**
 
@@ -165,8 +169,8 @@ Expected: all packed exports and graph classes pass; iOS and web production expo
 - [ ] **Step 5: Commit Task 3**
 
 ```sh
-git add packages/css/fixtures/packed-distribution/app/src/runtime-surfaces scripts/metro-tree-shaking-contract.ts packages/css/test/metro-tree-shaking-contract.test.ts scripts/playground-distribution.ts
-git commit -m "test: prove Metro decoder tree shaking"
+git add packages/css/fixtures/packed-distribution/app/src/runtime-surfaces packages/css/src/tokens/schema-value.ts packages/css/src/tokens/schema.ts packages/css/package.json packages/css/tsdown.config.ts packages/css/test/metro-tree-shaking-contract.test.ts packages/css/test/public-api.test.ts packages/css/test/packed-runtime-graph.test.ts packages/css/test/pack-consumer-contract.test.ts scripts/metro-tree-shaking-contract.ts scripts/packed-runtime-graph.ts scripts/playground-distribution.ts docs/superpowers/plans/2026-09-26-m8-3-runtime-resolution.md docs/superpowers/specs/2026-09-26-m8-3-runtime-resolution-design.md
+git commit -m "feat: add focused token schema decoder entry"
 ```
 
 ### Task 4: Publish the M8.3 compatibility policy

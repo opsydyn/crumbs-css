@@ -229,6 +229,7 @@ const consumerTypeSource = `
   import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens";
   import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
   import { decodeExternalTokenTheme, decodeTokenValue, type ExternalTokenTheme } from "@opsydyn/crumbs-css/tokens/schema";
+  import { decodeTokenValue as decodeTokenValueFocused } from "@opsydyn/crumbs-css/tokens/schema/value";
   import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
   import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
 
@@ -310,6 +311,8 @@ const consumerTypeSource = `
   const focusedValue: string = tokenFocus.get(tokenTheme);
   tokenFocus.replace("#000000", tokenTheme);
   const decodedColor: string = decodeTokenValue({kind: "color"}, "#ffffff");
+  const decodedFocusedColor: string = decodeTokenValueFocused({kind: "color"}, "#ffffff");
+  void decodedFocusedColor;
   const externalTheme: ExternalTokenTheme = {_tag: "CrumbsTokenTheme", version: 1, contract: {owner: "@acme/ui", name: "Theme", version: 1}, values: {"color.text": decodedColor}};
   const decodedTheme = decodeExternalTokenTheme(externalTheme);
   if (decodedTheme.ok) {
@@ -416,6 +419,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const themeCore = require("@opsydyn/crumbs-css/theme/core");
         const tokenOptic = require("@opsydyn/crumbs-css/tokens/optic");
         const tokenSchema = require("@opsydyn/crumbs-css/tokens/schema");
+        const tokenValueSchema = require("@opsydyn/crumbs-css/tokens/schema/value");
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
         require.extensions[".css"] = (module, filename) => {
@@ -443,6 +447,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof themeCore.resolveThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
         if (typeof tokenOptic.createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (tokenSchema.decodeTokenValue({kind: "color"}, "#ffffff") !== "#ffffff") throw new Error("token schema color decode failed");
+        if (tokenValueSchema.decodeTokenValue({kind: "color"}, "#ffffff") !== "#ffffff") throw new Error("focused token schema color decode failed");
         const decodedExternalTheme = tokenSchema.decodeExternalTokenTheme({_tag: "CrumbsTokenTheme", version: 1, contract: {owner: "@acme/ui", name: "Theme", version: 1}, values: {"color.text": "#ffffff"}});
         if (!decodedExternalTheme.ok || decodedExternalTheme.value.values["color.text"] !== "#ffffff") throw new Error("external token theme decode failed");
         if (typeof metro.withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
@@ -462,6 +467,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { createComponentRecipeResolver, createRecipeResolver, createSprinklesResolver, createThemeTokenReference, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
         import { decodeExternalTokenTheme, decodeTokenValue } from "@opsydyn/crumbs-css/tokens/schema";
+        import { decodeTokenValue as decodeTokenValueFocused } from "@opsydyn/crumbs-css/tokens/schema/value";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
         import {button} from "./button.css";
@@ -484,6 +490,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof createSprinklesResolver !== "function") throw new Error("missing theme createSprinklesResolver");
         if (typeof createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
         if (decodeTokenValue({kind: "color"}, "#ffffff") !== "#ffffff") throw new Error("token schema color decode failed");
+        if (decodeTokenValueFocused({kind: "color"}, "#ffffff") !== "#ffffff") throw new Error("focused token schema color decode failed");
         const decodedExternalTheme = decodeExternalTokenTheme({_tag: "CrumbsTokenTheme", version: 1, contract: {owner: "@acme/ui", name: "Theme", version: 1}, values: {"color.text": "#ffffff"}});
         if (!decodedExternalTheme.ok || decodedExternalTheme.value.values["color.text"] !== "#ffffff") throw new Error("external token theme decode failed");
         if (typeof withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");

@@ -21,6 +21,7 @@ const toolEntries = {
   tokens: "src/tokens/index.ts",
   "tokens-optic": "src/tokens/optic.ts",
   "tokens-schema": "src/tokens/schema.ts",
+  "tokens-schema-value": "src/tokens/schema-value.ts",
   transformer: "src/transformer.ts",
 }
 

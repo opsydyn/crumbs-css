@@ -22,6 +22,7 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "./dist/theme": runtimeExport("theme"),
     "./tokens": runtimeExport("tokens"),
     "./tokens/schema": runtimeExport("tokens-schema"),
+    "./tokens/schema/value": runtimeExport("tokens-schema-value"),
     "./tokens/optic": runtimeExport("tokens-optic"),
     "./style": runtimeExport("style"),
     "./metro-plugin": runtimeExport("metro-plugin"),
@@ -47,6 +48,8 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "dist/tokens.cjs": 'const token = require("./token-local.cjs"); module.exports = { token };\n',
     "dist/tokens-schema.mjs": 'export const decode = value => value;\n',
     "dist/tokens-schema.cjs": 'exports.decode = value => value;\n',
+    "dist/tokens-schema-value.mjs": 'export const decodeTokenValue = value => value;\n',
+    "dist/tokens-schema-value.cjs": 'exports.decodeTokenValue = value => value;\n',
     "dist/tokens-optic.mjs": 'export const focus = value => value;\n',
     "dist/tokens-optic.cjs": 'exports.focus = value => value;\n',
     "dist/style.mjs": 'import "node:path"; import "@vanilla-extract/css"; export const style = true;\n',
@@ -101,9 +104,11 @@ test("auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and c
     .toEqual(["@vanilla-extract/css", "node:path"])
   expect(graphs.find((graph) => graph.subpath === "./tokens/schema" && graph.format === "esm")?.classification)
     .toBe("advanced-runtime")
+  expect(graphs.find((graph) => graph.subpath === "./tokens/schema/value" && graph.format === "esm")?.classification)
+    .toBe("advanced-runtime")
   expect(graphs.find((graph) => graph.subpath === "./package.json" && graph.format === "metadata"))
     .toMatchObject({classification: "metadata", files: ["package.json"], externalSpecifiers: []})
-  expect(graphs).toHaveLength(23)
+  expect(graphs).toHaveLength(25)
 })
 
 test("auditPackedRuntimeEntrypoints fails when an exported local file is missing", async () => {
@@ -205,7 +210,7 @@ test("compiler entries allow only build-policy externals and reject Effect", asy
   })
 
   const allowedGraphs = await auditPackedRuntimeEntrypoints(allowedPackage)
-  expect(allowedGraphs).toHaveLength(23)
+  expect(allowedGraphs).toHaveLength(25)
   expect(allowedGraphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.externalSpecifiers)
     .toEqual(["metro", "node:fs", "url"])
   await expect(auditPackedRuntimeEntrypoints(deniedPackage)).rejects.toThrow(/compiler-tooling.*not-in-build-policy/i)

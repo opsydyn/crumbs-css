@@ -6,7 +6,7 @@
 
 ## Intent
 
-Qualify the package consumers actually install. Every declared export must resolve to the intended ESM or CommonJS artifact, ordinary runtime paths must stay isolated from Effect and compiler tooling, and production Metro must remove unused code from an explicitly imported decoder surface.
+Qualify the package consumers actually install. Every declared export must resolve to the intended ESM or CommonJS artifact, ordinary runtime paths must stay isolated from Effect and compiler tooling, and production Metro must keep unused code outside the explicitly imported focused decoder entry graph.
 
 This slice extends the existing packed-consumer and runtime-isolation checks. It does not redesign the export map in advance. Change package exports or build settings only when a probe demonstrates a real resolution or dependency-graph defect.
 
@@ -14,14 +14,14 @@ This slice extends the existing packed-consumer and runtime-isolation checks. It
 
 The package already declares explicit root and subpath exports, emits ESM and CommonJS builds, and separates ordinary runtime dependencies from compiler dependencies. The packed consumer contract exercises ESM and CJS consumers across several authoring and runtime paths. Runtime isolation inspects ordinary theme and token graphs. The Metro bundle contract rejects Effect and compiler sources in ordinary Expo runtime maps.
 
-The remaining gap is a systematic check derived from the complete manifest export map, direct qualification of the dedicated schema entry in both module formats, dependency classification of the advanced Effect entrypoints, and observable proof that production Metro removes an unused Crumbs export implementation. Existing size differences or source-map presence alone do not prove tree shaking.
+The remaining gap is a systematic check derived from the complete manifest export map, direct qualification of the dedicated schema entries in both module formats, dependency classification of the advanced Effect entrypoints, and observable proof that production Metro resolves a focused decoder entry without pulling in the broader external-theme codec. Existing size differences or source-map presence alone do not prove isolation.
 
 ## Entrypoint dependency contract
 
 | Class | Public paths | Allowed emitted dependencies | Forbidden dependencies |
 | --- | --- | --- | --- |
 | Ordinary runtime | ./theme, ./theme/core, ./dist/theme, ./tokens | React for theme entries; no external dependency for the token entry unless a later decision documents one | Effect, Node built-ins, authoring/compiler modules and compiler dependencies |
-| Explicit advanced runtime | ./tokens/schema, ./tokens/optic | Effect may be bundled inside the Crumbs artifact; it is an implementation dependency, not a consumer peer or required userland import | External Effect imports, Node built-ins, authoring/compiler modules and compiler dependencies |
+| Explicit advanced runtime | ./tokens/schema, ./tokens/schema/value, ./tokens/optic | Effect may be bundled inside the Crumbs artifact; it is an implementation dependency, not a consumer peer or required userland import | External Effect imports, Node built-ins, authoring/compiler modules and compiler dependencies |
 | Authoring/compiler tooling | ., ./style, ./metro-plugin, ./dist/transformer, ./dist/metro-plugin | The Node and compiler dependencies admitted by the package build policy | Missing local artifacts, unresolved local imports, or an undocumented dynamic-loading edge |
 | Package metadata | ./package.json | The packed manifest | Workspace-only or source-tree targets |
 
@@ -39,13 +39,13 @@ The packed Expo consumer uses the M8.1/M8.2 baseline recorded in the M8.2 compat
 
 ## Production Metro proof
 
-The Metro fixture has separate ordinary-runtime and schema-decoder import surfaces:
+The Metro fixture has separate ordinary-runtime, focused schema-decoder, and positive-control import surfaces:
 
 1. The ordinary fixture imports only theme/core and tokens. Its retained module/source inventory must identify the packed ESM targets and contain no Effect, Node built-ins, or compiler sources.
-2. The decoder-only fixture imports and calls decodeTokenValue from tokens/schema. It may contain bundled Effect, but it must still exclude Node built-ins and compiler sources.
-3. A positive control imports and calls decodeExternalTokenTheme from the same subpath.
+2. The decoder-only fixture imports and calls decodeTokenValue from tokens/schema/value. It may contain bundled Effect, but it must still exclude Node built-ins and compiler sources.
+3. A positive control imports and calls decodeExternalTokenTheme from tokens/schema.
 
-The deterministic tree-shaking canary is the literal external-token-theme, created by packages/css/src/contracts/payloads.ts when externalTokenThemeCodec is retained. The decoder-only production bundle must omit this literal; the positive control must retain it. Check generated bundle JavaScript directly, not source-map sourcesContent or total bundle size alone. This paired absent/present result demonstrates both removal and detector sensitivity.
+The first packed Expo probe showed that importing decodeTokenValue from the existing combined tokens/schema entry retained the external-theme codec initializer: Metro did not remove unused declarations from that single emitted module. M8.3 therefore adds the focused tokens/schema/value entry, built from an isolated source module while preserving decodeTokenValue from the existing path for compatibility. The deterministic canary is the literal external-token-theme, created by packages/css/src/contracts/payloads.ts when externalTokenThemeCodec is retained. The focused decoder production bundle must omit this literal; the tokens/schema positive control must retain it. Check generated bundle JavaScript directly, not source-map sourcesContent or total bundle size alone. This paired absent/present result demonstrates entry-graph isolation and detector sensitivity; it does not claim function-level tree shaking inside the combined tokens/schema artifact.
 
 The module inventory also proves that the Metro consumer resolved the installed packed ESM entries. The receipt records the exact package hash, dependency versions, Node version, production flags, iOS/web bundle identities, allowed/forbidden module results and canary outcomes.
 
@@ -53,4 +53,4 @@ The module inventory also proves that the Metro consumer resolved the installed 
 
 Missing manifest targets, an incorrect ESM/CommonJS branch, unresolved local graph edges, unauthorized external imports, compiler leakage, an ordinary bundle that contains Effect, or a failed canary pair blocks M8.3 completion. Fix only defects demonstrated by these probes; preserve public API behavior and the approved Effect boundary.
 
-The slice adds no consumer Effect peer dependency and no new public API by default. Hot reload and invalidation remain M8.4; publication-policy reconciliation remains M8.5; Android/device acceptance and publishing remain parked. On successful qualification, update packages/css/COMPATIBILITY.md, retain the M8.3 receipt, and mark M8.3 complete in the roadmap with M8.4 recommended next.
+The probe-justified tokens/schema/value focused subpath preserves the existing tokens/schema API and adds no consumer Effect peer dependency. Hot reload and invalidation remain M8.4; publication-policy reconciliation remains M8.5; Android/device acceptance and publishing remain parked. On successful qualification, update packages/css/COMPATIBILITY.md, retain the M8.3 receipt, and mark M8.3 complete in the roadmap with M8.4 recommended next.

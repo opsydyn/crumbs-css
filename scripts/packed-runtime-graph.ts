@@ -33,6 +33,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./dist/theme": "ordinary-runtime",
   "./tokens": "ordinary-runtime",
   "./tokens/schema": "advanced-runtime",
+  "./tokens/schema/value": "advanced-runtime",
   "./tokens/optic": "advanced-runtime",
   "./style": "compiler-tooling",
   "./metro-plugin": "compiler-tooling",
