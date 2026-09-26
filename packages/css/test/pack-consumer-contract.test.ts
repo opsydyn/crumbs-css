@@ -5,6 +5,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  realpathSync,
   symlinkSync,
   writeFileSync,
 } from "node:fs"
@@ -76,14 +77,14 @@ function createPackedConsumer(): string {
     linkRootDependency(resolve(tempRoot, "consumer"), dependency)
   }
 
-  return resolve(tempRoot, "consumer")
+  return realpathSync(resolve(tempRoot, "consumer"))
 }
 
 async function writePackedStatefulFixture(consumerRoot: string): Promise<void> {
-  const filename = resolve(consumerRoot, "button.css.ts")
-  writeFileSync(filename, `
-    import {componentRecipe, createThemeContract, extendComponentRecipe} from "@opsydyn/crumbs-css/style";
-    const vars = createThemeContract({color: {label: null, brand: null}});
+  const buttonFilename = resolve(consumerRoot, "button.css.ts")
+  writeFileSync(buttonFilename, `
+    import {componentRecipe, createThemeContract} from "@opsydyn/crumbs-css/style";
+    const vars = createThemeContract({color: {label: null}});
     export const button = componentRecipe({
       slots: {root: "view", label: "text"},
       base: {
@@ -112,6 +113,19 @@ async function writePackedStatefulFixture(consumerRoot: string): Promise<void> {
         },
       },
     }, "button");
+  `)
+
+  const uiRoot = resolve(consumerRoot, "packages", "ui")
+  const brandRoot = resolve(consumerRoot, "packages", "brand")
+  mkdirSync(uiRoot, {recursive: true})
+  mkdirSync(brandRoot, {recursive: true})
+  writeFileSync(resolve(uiRoot, "package.json"), JSON.stringify({name: "@acme/ui", type: "module"}))
+  writeFileSync(resolve(brandRoot, "package.json"), JSON.stringify({name: "@acme/brand", type: "module"}))
+
+  const ownerFilename = resolve(uiRoot, "button.css.ts")
+  writeFileSync(ownerFilename, `
+    import {componentRecipe, createThemeContract} from "@opsydyn/crumbs-css/style";
+    export const vars = createThemeContract({color: {label: null, brand: null}});
     export const contractedButton = componentRecipe({
       contract: {
         identity: {owner: "@acme/ui", name: "PackedContractButton", version: 1},
@@ -130,6 +144,12 @@ async function writePackedStatefulFixture(consumerRoot: string): Promise<void> {
       },
       defaultVariants: {tone: "primary", density: "compact"},
     }, "contractedButton");
+  `)
+
+  const brandFilename = resolve(brandRoot, "branded-button.css.ts")
+  writeFileSync(brandFilename, `
+    import {extendComponentRecipe} from "@opsydyn/crumbs-css/style";
+    import {contractedButton, vars} from "../ui/button.css";
     export const brand = extendComponentRecipe(contractedButton, {
       identity: {owner: "@acme/brand", name: "PackedButtonBrand", version: 1},
       defaultVariants: {tone: "brand"},
@@ -149,11 +169,30 @@ async function writePackedStatefulFixture(consumerRoot: string): Promise<void> {
       options: {readonly useStyleSheet: false; readonly strictDiagnostics: true},
     ) => Promise<string>
   }
-  const code = await transformCssTsToStyleSheet(filename, consumerRoot, {
-    useStyleSheet: false,
-    strictDiagnostics: true,
-  })
-  writeFileSync(resolve(consumerRoot, "button.css"), code)
+  const modules = [
+    {sourcePath: buttonFilename, outputPath: resolve(consumerRoot, "button.css")},
+    {sourcePath: ownerFilename, outputPath: resolve(uiRoot, "button.css")},
+    {sourcePath: brandFilename, outputPath: resolve(brandRoot, "branded-button.css")},
+  ]
+  const compiledModules: Array<{readonly outputPath: string; readonly code: string}> = []
+  for (const module of modules) {
+    const code = await transformCssTsToStyleSheet(module.sourcePath, consumerRoot, {
+      useStyleSheet: false,
+      strictDiagnostics: true,
+    })
+    if (module.sourcePath === brandFilename) {
+      expect(code).toContain('import "../ui/button.css.ts";')
+      const brandSource = readFileSync(brandFilename, "utf8")
+      expect(brandSource).toContain('import {contractedButton, vars} from "../ui/button.css"')
+      expect(brandSource).not.toContain("componentRecipe(")
+    }
+    compiledModules.push({outputPath: module.outputPath, code})
+  }
+  for (const module of compiledModules) {
+    // Metro tracks .css.ts source dependencies; this Node fixture loads each
+    // independently compiled output as .css while retaining the same graph.
+    writeFileSync(module.outputPath, module.code.replaceAll(".css.ts", ".css"))
+  }
 }
 
 const statefulConsumerAssertions = `
@@ -352,10 +391,14 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
         require.extensions[".css"] = (module, filename) => {
-          const source = require("node:fs").readFileSync(filename, "utf8").replace(/^export const (\\w+) =/gm, "exports.$1 =");
+          const source = require("node:fs").readFileSync(filename, "utf8")
+            .replace(/^import (["'][^"']+["']);$/gm, "require($1);")
+            .replace(/^export const (\\w+) =/gm, "exports.$1 =");
           module._compile(source, filename);
         };
-        const {button, contractedButton, brand} = require("./button.css");
+        const {button} = require("./button.css");
+        const {contractedButton} = require("./packages/ui/button.css");
+        const {brand} = require("./packages/brand/branded-button.css");
 
         if (typeof root.withNativeStyles !== "function") throw new Error("missing root withNativeStyles");
         if (typeof style.createThemeContract !== "function") throw new Error("missing style createThemeContract");
@@ -389,7 +432,9 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
-        import {button, contractedButton, brand} from "./button.css";
+        import {button} from "./button.css";
+        import {contractedButton} from "./packages/ui/button.css";
+        import {brand} from "./packages/brand/branded-button.css";
 
         if (typeof NativeStylesDiagnosticCode.UnsupportedSelector !== "string") throw new Error("missing root diagnostic code");
         if (typeof createThemeContract !== "function") throw new Error("missing style createThemeContract");

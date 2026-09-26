@@ -91,6 +91,54 @@ describe("component recipe authoring", () => {
     expect("contract" in privateRecipe).toBe(false)
   })
 
+  it("keeps the public contract stable when the owner changes private implementation", () => {
+    const ownerRecipe = (privateSlot: "statusLabel" | "leadingIcon", privateWidth: number) =>
+      inFileScope(() => componentRecipe({
+        contract: {
+          identity: {owner: "@acme/ui", name: "M74PrivateEvolution", version: 1},
+          public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+          extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+        },
+        slots: {root: "view", [privateSlot]: privateSlot === "statusLabel" ? "text" : "image"} as const,
+        base: {root: {opacity: 1}, [privateSlot]: {width: privateWidth}},
+        variants: {
+          tone: {
+            primary: {root: {opacity: 1}},
+            quiet: {root: {opacity: 0.8}},
+          },
+          density: {compact: {[privateSlot]: {width: privateWidth}}},
+        },
+        defaultVariants: {tone: "primary", density: "compact"},
+      }))
+
+    const before = ownerRecipe("statusLabel", 12)
+    const after = ownerRecipe("leadingIcon", 20)
+
+    expect(after.contract).toEqual(before.contract)
+    expect(Object.keys(after.slots)).not.toEqual(Object.keys(before.slots))
+    expect(after.variants.density.compact).not.toEqual(before.variants.density.compact)
+  })
+
+  it("detects a declared public slot or variant value removed from the implementation", () => {
+    expect(() => inFileScope(() => componentRecipe({
+      contract: {
+        identity: {owner: "@acme/ui", name: "M74RemovedSlot", version: 1},
+        public: {slots: ["root", "label"], variants: {}},
+      },
+      slots: {root: "view"},
+      variants: {},
+    } as never))).toThrow(/unknown public slot "label"/)
+
+    expect(() => inFileScope(() => componentRecipe({
+      contract: {
+        identity: {owner: "@acme/ui", name: "M74RemovedVariant", version: 1},
+        public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+      },
+      slots: {root: "view"},
+      variants: {tone: {primary: {root: {opacity: 1}}}},
+    } as never))).toThrow(/unknown public value "quiet" for variant "tone"/)
+  })
+
   it("rejects changed public surfaces for one component identity", () => {
     const create = (publicTone: "primary" | "quiet") => inFileScope(() => componentRecipe({
       contract: {

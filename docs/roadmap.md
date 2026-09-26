@@ -213,7 +213,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M7.1: Add typed slots with one shared variant selection and view/text/image-specific outputs. Preserve existing single-style recipe use through an explicit migration-compatible interface.
 - [x] M7.2: Add exhaustive discriminated state recipes and prohibited-combination checking. Normalize defaults consistently; avoid generating all possible state products eagerly. [Assessment](assessments/2026-09-22-m7-2-discriminated-component-states.md)
 - [x] M7.3: Declare public/private tokens, slots, variants, and extension points. Specify the complete ordering of inherited defaults, local variants, states, compounds, and permitted consumer overrides before freezing the public API. [Assessment](assessments/2026-09-23-m7-3-public-private-component-contracts.md)
-- [ ] M7.4: Demonstrate product-team extension without copying component implementation. Verify a private implementation change leaves the public contract intact; a removed public slot/variant is detectable.
+- [x] M7.4: Demonstrate product-team extension without copying component implementation. Verify a private implementation change leaves the public contract intact; a removed public slot/variant is detectable. [Assessment](assessments/2026-09-26-m7-4-product-team-extension.md)
 - [ ] M7.5: Connect reference component visual and accessibility state to the same owner while keeping behavior-library integration separate from style evaluation.
 
 **Exit:** slot kinds and allowed selections are enforced; extension behavior has executable conflict examples; public/private contracts are serializable into the manifest; the initial reference components use only public APIs.
@@ -224,9 +224,16 @@ enforce declared permissions across literal and union shapes. Package,
 Storybook type, and documentation gates pass. One Minor remains deferred:
 changed themed output can retain mutable compiled contract metadata.
 
-Next recommended roadmap item: **M7.4** — demonstrate product-team extension
-without copying component implementation and prove that private implementation
-changes preserve the public contract while removed public surface is detectable.
+M7.4's 2026-09-26 packed-consumer assessment verifies owner/brand recipe
+extension across separate `@acme/ui` and `@acme/brand` modules, private
+implementation evolution under a stable public contract, and authoring failures
+when declared public slots or variant values disappear. Package and full checks
+pass; no device or Android acceptance is claimed.
+
+Next recommended roadmap item: **M7.5** — connect reference component visual
+and accessibility state to the same owner while keeping behavior-library
+integration separate from style evaluation. Android remains parked for the
+final native step.
 
 ## M8 — Qualify distributed packages and artifact evolution
 
