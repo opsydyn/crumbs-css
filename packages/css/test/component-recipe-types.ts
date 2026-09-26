@@ -347,6 +347,16 @@ const extensionDefaultStateCanBeExplicit: LoadingDefaultSelection = {status: "lo
 // @ts-expect-error Extension defaults make loading the implicit state; ready now requires its quiet tone.
 const ownerDefaultIsNoLongerImplicit: LoadingDefaultSelection = {status: "ready"}
 void [extensionDefaultsNeedNoSelection, extensionDefaultStateCanBeExplicit, ownerDefaultIsNoLongerImplicit]
+const readyDefaultLeaf = extendComponentRecipe(defaultableStateButton, {
+  identity: {owner: "@acme/brand", name: "ReadyDefaultLeaf", version: 1},
+  defaultVariants: {status: "ready", tone: "quiet"},
+}, [loadingDefaultExtension])
+type ReadyDefaultLeafSelection = NativeComponentPublicProps<typeof readyDefaultLeaf>
+const leafDefaultsReplacePriorDefaults: ReadyDefaultLeafSelection = {}
+const leafDefaultStateCanBeExplicit: ReadyDefaultLeafSelection = {status: "ready"}
+// @ts-expect-error The leaf extension restores ready as the default state.
+const intermediateDefaultWasReplaced: ReadyDefaultLeafSelection = {status: "loading"}
+void [leafDefaultsReplacePriorDefaults, leafDefaultStateCanBeExplicit, intermediateDefaultWasReplaced]
 
 const publiclyConstrainedButton = componentRecipe({
   contract: {
