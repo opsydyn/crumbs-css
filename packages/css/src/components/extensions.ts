@@ -39,6 +39,15 @@ type DefaultVariantAxes<TBase> = ContractOf<TBase> extends {
 type AddVariantAxes<TBase> = ContractOf<TBase> extends {
   readonly extensionPoints?: {readonly variantValues?: ReadonlyArray<infer TAxis>}
 } ? Extract<TAxis, string> : never
+type HasCompoundVariantPermission<TBase> = ContractOf<TBase> extends {
+  readonly extensionPoints: infer TExtensionPoints
+} ? TExtensionPoints extends {readonly compoundVariants: true} ? true : false : false
+type ExtensionCompoundVariants<TBase> = HasCompoundVariantPermission<TBase> extends true
+  ? ReadonlyArray<{
+    readonly variants: Partial<Record<PublicVariantAxes<TBase>, string | boolean>>
+    readonly styles: NativeComponentSlotStyles<PermittedExtensionSlots<TBase>>
+  }>
+  : never
 
 export type NativeComponentRecipeExtensionConfig<
   TBase extends NativeComponentRecipeDescriptor = NativeComponentRecipeDescriptor,
@@ -49,12 +58,54 @@ export type NativeComponentRecipeExtensionConfig<
     AddVariantAxes<TBase>,
     Readonly<Record<string, NativeComponentSlotStyles<PermittedExtensionSlots<TBase>>>>
   >>
-  readonly compoundVariants?: ReadonlyArray<{
-    readonly variants: Partial<Record<PublicVariantAxes<TBase>, string | boolean>>
-    readonly styles: NativeComponentSlotStyles<PermittedExtensionSlots<TBase>>
-  }>
+  readonly compoundVariants?: ExtensionCompoundVariants<TBase>
   readonly slotOverrides?: NativeComponentSlotStyles<PermittedExtensionSlots<TBase>>
 }
+
+type ExtraKeys<TValue, TAllowed extends PropertyKey> = TValue extends object
+  ? Exclude<keyof TValue, TAllowed>
+  : never
+type ExactKeys<TValue, TAllowed extends PropertyKey> = [ExtraKeys<TValue, TAllowed>] extends [never]
+  ? unknown
+  : never
+type ExtensionVariantStyleBranches<TVariants> = TVariants extends object
+  ? {
+    [TAxis in keyof TVariants]: TVariants[TAxis] extends object
+      ? TVariants[TAxis][keyof TVariants[TAxis]]
+      : never
+  }[keyof TVariants]
+  : never
+type ExtensionCompoundAxisKeys<TCompound, TAllowed extends PropertyKey> = TCompound extends {readonly variants: infer TSelection}
+  ? ExtraKeys<TSelection, TAllowed>
+  : never
+type ExtensionCompoundSlotKeys<TCompound, TAllowed extends PropertyKey> = TCompound extends {readonly styles: infer TStyles}
+  ? ExtraKeys<TStyles, TAllowed>
+  : never
+type ExtensionCompoundRecordKeys<TCompound> = TCompound extends object
+  ? Exclude<keyof TCompound, "variants" | "styles">
+  : never
+type ExtensionConfigExtraKeys<TBase extends NativeComponentRecipeDescriptor, TConfig> =
+  | ExtraKeys<TConfig, keyof NativeComponentRecipeExtensionConfig<TBase>>
+  | (TConfig extends {readonly identity: infer TIdentity}
+    ? ExtraKeys<TIdentity, keyof NativeComponentContractIdentity>
+    : never)
+  | (TConfig extends {readonly defaultVariants: infer TDefaults}
+    ? ExtraKeys<TDefaults, DefaultVariantAxes<TBase>>
+    : never)
+  | (TConfig extends {readonly variants: infer TVariants}
+    ? ExtraKeys<TVariants, AddVariantAxes<TBase>>
+      | ExtraKeys<ExtensionVariantStyleBranches<TVariants>, keyof PermittedExtensionSlots<TBase>>
+    : never)
+  | (TConfig extends {readonly compoundVariants: infer TCompounds extends ReadonlyArray<unknown>}
+    ? ExtensionCompoundAxisKeys<TCompounds[number], PublicVariantAxes<TBase>>
+      | ExtensionCompoundSlotKeys<TCompounds[number], keyof PermittedExtensionSlots<TBase>>
+      | ExtensionCompoundRecordKeys<TCompounds[number]>
+    : never)
+  | (TConfig extends {readonly slotOverrides: infer TOverrides}
+    ? ExtraKeys<TOverrides, keyof PermittedExtensionSlots<TBase>>
+    : never)
+type ExtensionConfigExactness<TBase extends NativeComponentRecipeDescriptor, TConfig> =
+  [ExtensionConfigExtraKeys<TBase, TConfig>] extends [never] ? unknown : never
 
 type AddedVariantsOf<TConfig> = TConfig extends {readonly variants: infer TVariants extends NativeComponentExtensionVariants}
   ? TVariants
@@ -105,7 +156,7 @@ export function extendComponentRecipe<
   const TPrior extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor<TBase, any, any, any>> = readonly [],
 >(
   base: TBase,
-  config: TConfig,
+  config: TConfig & ExtensionConfigExactness<TBase, TConfig>,
   priorExtensions: TPrior = [] as unknown as TPrior,
 ): NativeComponentRecipeExtensionDescriptor<
   TBase,

@@ -309,16 +309,65 @@ extendComponentRecipe(contractedButton, {
   // @ts-expect-error Defaults may only be changed on the declared tone axis.
   defaultVariants: {density: "compact"},
 })
+// @ts-expect-error Every default key must be permitted, including in a mixed valid/private map.
+extendComponentRecipe(contractedButton, {
+  identity: {owner: "@acme/brand", name: "InvalidMixedDefaults", version: 1},
+  defaultVariants: {tone: "primary", density: "compact"},
+})
+type MixedDefaultExtensionConfig =
+  | {
+    readonly identity: {readonly owner: "@acme/brand"; readonly name: "ValidBranch"; readonly version: 1}
+    readonly defaultVariants: {readonly tone: "primary"}
+  }
+  | {
+    readonly identity: {readonly owner: "@acme/brand"; readonly name: "InvalidBranch"; readonly version: 1}
+    readonly defaultVariants: {readonly tone: "primary"; readonly density: "compact"}
+  }
+declare const mixedDefaultConfigUnion: MixedDefaultExtensionConfig
+// @ts-expect-error A union config is invalid if any branch includes a private default axis.
+extendComponentRecipe(contractedButton, mixedDefaultConfigUnion)
 extendComponentRecipe(contractedButton, {
   identity: {owner: "@acme/brand", name: "InvalidSizeValue", version: 1},
   // @ts-expect-error New values may only be added to the declared tone axis.
   variants: {size: {large: {root: {opacity: 1}}}},
 })
+const malformedExtensionIdentityConfig = {
+  identity: {owner: "@acme/brand", name: "ExtraIdentityKey", version: 1, surprise: true},
+  defaultVariants: {tone: "primary"},
+} as const
+// @ts-expect-error Extension identities expose only owner, name, and version.
+extendComponentRecipe(contractedButton, malformedExtensionIdentityConfig)
 extendComponentRecipe(contractedButton, {
   identity: {owner: "@acme/brand", name: "InvalidPrivateSlot", version: 1},
   // @ts-expect-error Extensions may style only the root slot in this contract.
   slotOverrides: {internalIcon: {width: 16}},
 })
+extendComponentRecipe(contractedButton, {
+  identity: {owner: "@acme/brand", name: "UnpermittedCompoundType", version: 1},
+  // @ts-expect-error Compound authoring requires an explicit contract permission.
+  compoundVariants: [{variants: {tone: "primary"}, styles: {root: {opacity: 0.2}}}],
+})
+
+const compoundableButton = componentRecipe({
+  contract: {
+    identity: {owner: "@acme/ui", name: "CompoundableButton", version: 1},
+    public: {slots: ["root"], variants: {tone: ["primary"]}},
+    extensionPoints: {compoundVariants: true, slotStyles: ["root"]},
+  },
+  slots: {root: "view"} as const,
+  variants: {tone: {primary: {root: {opacity: 1}}}},
+})
+const permittedCompoundExtension = extendComponentRecipe(compoundableButton, {
+  identity: {owner: "@acme/brand", name: "PermittedCompound", version: 1},
+  compoundVariants: [{variants: {tone: "primary"}, styles: {root: {opacity: 0.8}}}],
+})
+const malformedCompoundExtensionConfig = {
+  identity: {owner: "@acme/brand", name: "MalformedCompound", version: 1},
+  compoundVariants: [{variants: {tone: "primary"}, styles: {root: {opacity: 0.8}}, surprise: true}],
+} as const
+// @ts-expect-error Compound records expose only variants and styles.
+extendComponentRecipe(compoundableButton, malformedCompoundExtensionConfig)
+void permittedCompoundExtension
 
 const defaultableStateButton = componentRecipe({
   contract: {
