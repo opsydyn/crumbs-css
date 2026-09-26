@@ -10,6 +10,9 @@ bun run playground --ios
 bun run playground --android
 bun run playground:check
 bun run playground:packed --check
+bun run playground:distribution --artifacts-only
+bun run playground:distribution --prepare-only
+bun run playground:distribution --check
 bun run playground:published --version=alpha --check
 bun run playground:sdk-candidate docs/evidence/YYYY-MM-DD-expo-sdk-candidate/qualification.json
 ```
@@ -19,6 +22,8 @@ Workspace mode resolves Crumbs' exported `dist` files. The runner builds first, 
 The focused `bun run measure:metro-incremental <output.json>` workload uses a dedicated playground entry to record direct `.css.ts` edit-to-bundle latency. It makes reversible fixture edits and restores them even when the run fails. The retained dependency-only control currently demonstrates that Metro 0.84 updates an imported module without rebuilding an importing cached `.css.ts` transform whose emitted values were baked. Restart Metro after changing a token or constant dependency until M2.7 introduces and qualifies complete dependency invalidation.
 
 Packed mode builds, runs `npm pack` against the working tree and installs the tarball into a new temporary app outside the monorepo. Published mode defaults to `alpha`, resolves the requested registry version or tag to one exact version and installs it into a separate temporary app. Neither mode links workspace Crumbs. `--prepare-only` installs and prints the directory without launching. Keep the printed directory and its npm lockfile for reproducing feedback; delete it when finished. The separate packed-artifact directory and temporary npm cache can also be removed after use.
+
+Packed design-system mode builds three separate tarballs for Crumbs, a token package and a component package, then installs those local artifacts into a standalone Expo app outside the monorepo. `--artifacts-only` prints the three artifact identities and hashes. `--prepare-only` keeps the staged app and artifacts and prints their paths. `--check` additionally typechecks the app, exports production JavaScript bundles and source maps for iOS and web, and verifies that both maps reference the installed packages without repository or authored `.css.ts` paths. The receipt is written to `docs/evidence/2026-09-26-m8-1-packed-design-system/qualification.json`. This is separate-package and bundle-provenance qualification; it does not claim device rendering, Android, accessibility or performance acceptance. The existing `playground:packed` mode still qualifies one Crumbs tarball with the full playground app.
 
 The [nested SDK upgrade configuration](upgrade/README.md) is excluded from the monorepo workspaces and never changes the supported app implicitly. Its runner verifies npm's live `latest` and official blank-template versions, packs the current Crumbs source, and exercises npm resolution without peer overrides. A recorded `peer-blocked` result means the newest SDK remains unsupported and the isolation contract passed; it is not a successful consumer qualification.
 

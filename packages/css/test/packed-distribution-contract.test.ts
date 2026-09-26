@@ -5,6 +5,7 @@ import { dirname, isAbsolute, join, relative, sep } from "node:path"
 import {
   assertNoWorkspaceOrLinkDependencies,
   assertPrecompiledComponentFiles,
+  verifyExpoBundleInventory,
   verifyInstalledArtifact,
 } from "../../../scripts/packed-distribution-contract"
 
@@ -183,4 +184,196 @@ test("assertPrecompiledComponentFiles rejects authored stylesheet sources and ma
     ...compiledFiles,
     "package/dist/ActionCard.styles.native.js.map",
   ])).toThrow(/source map/i)
+})
+
+
+type BundleFixture = Readonly<{
+  consumerRoot: string
+  repositoryRoot: string
+  targets: ReadonlyArray<Readonly<{ platform: "ios" | "web"; directory: string }>>
+  packageSources: Readonly<Record<string, string>>
+  repositorySource: string
+  authoredStyleSource: string
+}>
+
+const expectedBundlePackages = ["@opsydyn/crumbs-css", "@acme/design-tokens", "@acme/ui"]
+
+async function createBundleFixture(options: Readonly<{ includeUi?: boolean }> = {}): Promise<BundleFixture> {
+  const consumerRoot = await createConsumer()
+  const repositoryRoot = await createTemporaryRoot("crumbs-packed-contract-repository-")
+  const packageSources: Record<string, string> = {}
+  const packageIdentities = [
+    { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" },
+    { name: "@acme/design-tokens", version: "1.0.0" },
+    { name: "@acme/ui", version: "1.0.0" },
+  ]
+  for (const identity of packageIdentities) {
+    if (identity.name === "@acme/ui" && options.includeUi === false) continue
+    const packageRoot = join(consumerRoot, "node_modules", ...identity.name.split("/"))
+    await writePackage(packageRoot, identity)
+    packageSources[identity.name] = await realpath(join(packageRoot, "dist/index.js"))
+  }
+
+  const repositorySource = join(repositoryRoot, "src", "authoring-helper.js")
+  const authoredStyleSource = join(repositoryRoot, "src", "ActionCard.css.ts")
+  await mkdir(join(repositoryRoot, "src"), { recursive: true })
+  await writeFile(repositorySource, "export const helper = true\n")
+  await writeFile(authoredStyleSource, "export const authored = true\n")
+
+  const iosDirectory = join(consumerRoot, "dist", "ios")
+  const webDirectory = join(consumerRoot, "dist", "web")
+  const packageFiles = Object.values(packageSources)
+  await writeBundleMap(join(iosDirectory, "index.js.map"), [...packageFiles, "\0polyfill:external-require"])
+  await writeBundleMap(join(webDirectory, "index.js.map"), [...packageFiles, "\0polyfill:external-require"], { indexed: true })
+
+  return {
+    consumerRoot,
+    repositoryRoot,
+    targets: [
+      { platform: "ios", directory: iosDirectory },
+      { platform: "web", directory: webDirectory },
+    ],
+    packageSources,
+    repositorySource,
+    authoredStyleSource,
+  }
+}
+
+async function writeBundleMap(
+  mapPath: string,
+  sources: ReadonlyArray<string>,
+  options: Readonly<{ indexed?: boolean }> = {},
+): Promise<void> {
+  await mkdir(dirname(mapPath), { recursive: true })
+  const mapDirectory = await realpath(dirname(mapPath))
+  const relativeSources = sources.map((source) => source.includes("\0")
+    ? source
+    : relative(mapDirectory, source).split(sep).join("/"))
+  const regularMap = {
+    version: 3,
+    sources: relativeSources,
+    names: [],
+    mappings: "",
+  }
+  const map = options.indexed
+    ? { version: 3, sections: [{ offset: { line: 0, column: 0 }, map: regularMap }] }
+    : regularMap
+  await writeFile(mapPath, JSON.stringify(map))
+}
+
+test("verifyExpoBundleInventory inventories installed sources in regular and indexed iOS/web maps", async () => {
+  const fixture = await createBundleFixture()
+  const inventory = await verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )
+
+  expect(inventory.map((item) => item.platform)).toEqual(["ios", "web"])
+  for (const item of inventory) {
+    expect(item.sourceMapFiles).toHaveLength(1)
+    for (const packageName of expectedBundlePackages) {
+      expect(item.packageSources[packageName]).toContain(fixture.packageSources[packageName])
+    }
+  }
+})
+
+test("verifyExpoBundleInventory requires both iOS and web source maps", async () => {
+  const fixture = await createBundleFixture()
+  await expect(verifyExpoBundleInventory(
+    [fixture.targets[0]!],
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/web.*source map/i)
+})
+
+test("verifyExpoBundleInventory rejects a repository or authored stylesheet source", async () => {
+  const fixture = await createBundleFixture()
+  await writeBundleMap(
+    join(fixture.targets[0]!.directory, "worktree.js.map"),
+    [...Object.values(fixture.packageSources), fixture.repositorySource],
+  )
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/repository|worktree/i)
+
+  await writeBundleMap(
+    join(fixture.targets[0]!.directory, "authored-style.js.map"),
+    [...Object.values(fixture.packageSources), fixture.authoredStyleSource],
+  )
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/\.css\.ts/i)
+})
+
+test("verifyExpoBundleInventory requires source evidence from every packed package", async () => {
+  const fixture = await createBundleFixture({ includeUi: false })
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/@acme\/ui/)
+})
+
+test("verifyExpoBundleInventory rejects undecodable source maps", async () => {
+  const fixture = await createBundleFixture()
+  await writeFile(join(fixture.targets[0]!.directory, "broken.js.map"), "not-json")
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/source map.*decode|parse/i)
+})
+
+test("verifyExpoBundleInventory resolves Metro root-relative package sources", async () => {
+  const fixture = await createBundleFixture()
+  const canonicalConsumerRoot = await realpath(fixture.consumerRoot)
+  for (const target of fixture.targets) {
+    const mapPath = join(target.directory, "index.js.map")
+    const sources = Object.values(fixture.packageSources).map((source) =>
+      `/${relative(canonicalConsumerRoot, source).split(sep).join("/")}`,
+    )
+    await writeFile(mapPath, JSON.stringify({ version: 3, sources, names: [], mappings: "" }))
+  }
+
+  const inventory = await verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )
+  expect(inventory).toHaveLength(2)
+  for (const item of inventory) {
+    for (const packageName of expectedBundlePackages) {
+      expect(item.packageSources[packageName]).toContain(fixture.packageSources[packageName])
+    }
+  }
+})
+
+
+test("verifyExpoBundleInventory rejects repository paths encoded in virtual source URLs", async () => {
+  const fixture = await createBundleFixture()
+  const mapPath = join(fixture.targets[0]!.directory, "virtual-repository.js.map")
+  const sources = [
+    ...Object.values(fixture.packageSources),
+    `webpack:///${fixture.repositoryRoot.slice(1)}/src/authoring-helper.js`,
+  ]
+  await writeFile(mapPath, JSON.stringify({ version: 3, sources, names: [], mappings: "" }))
+
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/repository|worktree/i)
 })
