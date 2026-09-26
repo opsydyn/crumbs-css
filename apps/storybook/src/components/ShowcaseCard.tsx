@@ -6,20 +6,25 @@ import { Pressable, Text, View } from "react-native"
 import * as s from "./ShowcaseCard.css"
 
 type ActionSelection = NativeComponentPublicProps<typeof s.action>
-const idleActionSelection: ActionSelection = { pressed: false }
-const pressedActionSelection: ActionSelection = { pressed: true }
+const idleActionSelection: ActionSelection = { disabled: false, pressed: false }
+const pressedActionSelection: ActionSelection = { disabled: false, pressed: true }
+const disabledActionSelection: ActionSelection = { disabled: true, pressed: false }
 
 type ShowcaseCardProps = {
   readonly actionLabel?: string
   readonly body?: string
+  readonly disabled?: boolean
   readonly eyebrow?: string
+  readonly onActionPress: () => void
   readonly title?: string
 }
 
 export function ShowcaseCard({
   actionLabel = "Open stories",
   body = "A tiny Expo app showing how @opsydyn/crumbs-css themes, tokens, and native style authoring can feel bold without leaking browser CSS assumptions into React Native.",
+  disabled = false,
   eyebrow = "Crumbs CSS showcase",
+  onActionPress,
   title = "Dark and light themes with one native styling pipeline.",
 }: ShowcaseCardProps) {
   const styles = useThemedStyles(s)
@@ -30,10 +35,13 @@ export function ShowcaseCard({
   const actionStyles = useMemo(() => {
     const idle = resolveAction(idleActionSelection)
     const pressed = resolveAction(pressedActionSelection)
+    const disabled = resolveAction(disabledActionSelection)
     return {
       root: [...idle.root],
       pressedRoot: [...pressed.root],
+      disabledRoot: [...disabled.root],
       label: [...idle.label],
+      disabledLabel: [...disabled.label],
     }
   }, [resolveAction])
 
@@ -56,8 +64,19 @@ export function ShowcaseCard({
           <Text style={styles.metaPillLabel}>Metro web + native</Text>
         </View>
       </View>
-      <Pressable style={({ pressed }) => pressed ? actionStyles.pressedRoot : actionStyles.root}>
-        <Text style={actionStyles.label}>{actionLabel}</Text>
+      <Pressable
+        accessible
+        accessibilityLabel={actionLabel}
+        accessibilityRole="button"
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onActionPress}
+        style={({ pressed }) => {
+          if (disabled) return actionStyles.disabledRoot
+          return pressed ? actionStyles.pressedRoot : actionStyles.root
+        }}
+      >
+        <Text style={disabled ? actionStyles.disabledLabel : actionStyles.label}>{actionLabel}</Text>
       </Pressable>
     </View>
   )

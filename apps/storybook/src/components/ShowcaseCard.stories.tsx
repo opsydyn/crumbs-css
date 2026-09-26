@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-native"
+import { fn } from "storybook/test"
 import { ShowcaseCard } from "./ShowcaseCard"
 
 const meta = {
@@ -8,6 +9,9 @@ const meta = {
     },
     body: {
       control: "text",
+    },
+    disabled: {
+      control: "boolean",
     },
     eyebrow: {
       control: "text",
@@ -25,7 +29,7 @@ export default meta
 type Story = StoryObj<typeof meta>
 
 export const Dark: Story = {
-  args: {},
+  args: { onActionPress: fn() },
   globals: {
     themeMode: "dark",
   },
@@ -35,8 +39,17 @@ export const Light: Story = {
   args: {
     actionLabel: "Inspect tokens",
     eyebrow: "Light theme surface",
+    onActionPress: fn(),
   },
   globals: {
     themeMode: "light",
+  },
+}
+
+export const Disabled: Story = {
+  args: {
+    actionLabel: "Unavailable action",
+    disabled: true,
+    onActionPress: fn(),
   },
 }

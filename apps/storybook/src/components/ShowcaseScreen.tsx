@@ -1,3 +1,4 @@
+import { useRef } from "react"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { ScrollView, Text, View } from "react-native"
 import { labelOfThemeMode } from "../styles/theme"
@@ -8,11 +9,12 @@ import * as s from "./ShowcaseScreen.css"
 import { ThemeModePicker } from "./ThemeModePicker"
 
 export function ShowcaseScreen() {
+  const scrollView = useRef<ScrollView>(null)
   const styles = useThemedStyles(s)
   const { mode } = useAppTheme()
 
   return (
-    <ScrollView contentContainerStyle={styles.content} style={styles.screen}>
+    <ScrollView ref={scrollView} contentContainerStyle={styles.content} style={styles.screen}>
       <View style={styles.stack}>
         <View style={styles.headingRow}>
           <Text style={styles.kicker}>Crumbs CSS app scaffold</Text>
@@ -26,6 +28,7 @@ export function ShowcaseScreen() {
         <ShowcaseCard
           actionLabel="Live primitive gallery"
           body="This screen now groups the installed rn-primitives suite into one scan-friendly surface, with a live example for each package and matching focused stories in Storybook."
+          onActionPress={() => scrollView.current?.scrollToEnd({ animated: true })}
           title="A native primitives gallery that doubles as the Storybook index surface."
         />
         <PrimitiveGallery />

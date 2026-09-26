@@ -214,7 +214,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M7.2: Add exhaustive discriminated state recipes and prohibited-combination checking. Normalize defaults consistently; avoid generating all possible state products eagerly. [Assessment](assessments/2026-09-22-m7-2-discriminated-component-states.md)
 - [x] M7.3: Declare public/private tokens, slots, variants, and extension points. Specify the complete ordering of inherited defaults, local variants, states, compounds, and permitted consumer overrides before freezing the public API. [Assessment](assessments/2026-09-23-m7-3-public-private-component-contracts.md)
 - [x] M7.4: Demonstrate product-team extension without copying component implementation. Verify a private implementation change leaves the public contract intact; a removed public slot/variant is detectable. [Assessment](assessments/2026-09-26-m7-4-product-team-extension.md)
-- [ ] M7.5: Connect reference component visual and accessibility state to the same owner while keeping behavior-library integration separate from style evaluation.
+- [x] M7.5: Connect reference component visual and accessibility state to the same owner while keeping behavior-library integration separate from style evaluation. [Assessment](assessments/2026-09-26-m7-5-reference-state-ownership.md)
 
 **Exit:** slot kinds and allowed selections are enforced; extension behavior has executable conflict examples; public/private contracts are serializable into the manifest; the initial reference components use only public APIs.
 
@@ -230,10 +230,16 @@ implementation evolution under a stable public contract, and authoring failures
 when declared public slots or variant values disappear. Package and full checks
 pass; no device or Android acceptance is claimed.
 
-Next recommended roadmap item: **M7.5** — connect reference component visual
-and accessibility state to the same owner while keeping behavior-library
-integration separate from style evaluation. Android remains parked for the
-final native step.
+M7.5's 2026-09-26 assessment connects `ShowcaseCard`'s required action callback,
+public disabled recipe state, and native `Pressable` accessibility/interaction
+props. Type-level and runtime regressions reject disabled-plus-pressed state;
+the Storybook app typechecks and package checks pass. No device, screen-reader,
+or Android acceptance is claimed.
+
+Next recommended roadmap item: **M8.1** — package tokens and components
+separately, then consume only packed artifacts from an independent Expo
+application and verify it has no unpublished source-tree requirement. Android
+remains parked for the final native step.
 
 ## M8 — Qualify distributed packages and artifact evolution
 

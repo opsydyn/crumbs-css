@@ -74,8 +74,11 @@ export const metaPillLabel = textStyle({
 
 export const action = componentRecipe({
   contract: {
-    identity: { owner: "@crumbs/storybook", name: "ShowcaseCardAction", version: 1 },
-    public: { slots: ["root", "label"], variants: { pressed: ["false", "true"] } },
+    identity: { owner: "@crumbs/storybook", name: "ShowcaseCardAction", version: 2 },
+    public: {
+      slots: ["root", "label"],
+      variants: { disabled: ["false", "true"], pressed: ["false", "true"] },
+    },
   },
   slots: { root: "view", label: "text" } as const,
   base: {
@@ -98,10 +101,23 @@ export const action = componentRecipe({
     },
   },
   variants: {
+    disabled: {
+      false: {},
+      true: {
+        root: { backgroundColor: vars.color.panelRaised, opacity: 0.55 },
+        label: { color: vars.color.muted },
+      },
+    },
     pressed: {
-      false: { root: { opacity: 1 } },
+      false: {},
       true: { root: { opacity: 0.88 } },
     },
   },
-  defaultVariants: { pressed: false },
+  defaultVariants: { disabled: false, pressed: false },
+  stateVariants: {
+    disabled: {
+      false: { pressed: [false, true] },
+      true: { pressed: [false] },
+    },
+  },
 }, "showcaseCardAction")
