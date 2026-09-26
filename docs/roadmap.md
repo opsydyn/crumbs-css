@@ -218,6 +218,16 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 
 **Exit:** slot kinds and allowed selections are enforced; extension behavior has executable conflict examples; public/private contracts are serializable into the manifest; the initial reference components use only public APIs.
 
+M7.3's 2026-09-26 final review confirms that private owner values cannot be
+replaced or selected through extensions and that inferred extension configs
+enforce declared permissions across literal and union shapes. Package,
+Storybook type, and documentation gates pass. One Minor remains deferred:
+changed themed output can retain mutable compiled contract metadata.
+
+Next recommended roadmap item: **M7.4** — demonstrate product-team extension
+without copying component implementation and prove that private implementation
+changes preserve the public contract while removed public surface is detectable.
+
 ## M8 — Qualify distributed packages and artifact evolution
 
 **Decisions:** D3, D5, D11.\

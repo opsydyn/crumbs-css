@@ -236,7 +236,12 @@ The owner can select private implementation variants through
 contract's public axes and values, plus values added through the extension
 chain. Extension defaults, new values, compounds, and slot styles each require
 the matching `extensionPoints` permission; extension identities form one
-validated base-to-leaf chain.
+validated base-to-leaf chain. Extension resolvers reject explicit selections
+of private owner values before cache lookup. Unknown public values retain the
+resolver's warn-and-skip behavior. TypeScript checks inferred extension configs
+against the same permissions, including mixed and union-shaped maps, compound
+records, and identity keys; runtime validation also protects JavaScript and
+widened inputs.
 
 Defaults merge from owner to extensions in base-to-leaf order, then caller
 selection wins:
