@@ -212,7 +212,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 
 - [x] M7.1: Add typed slots with one shared variant selection and view/text/image-specific outputs. Preserve existing single-style recipe use through an explicit migration-compatible interface.
 - [x] M7.2: Add exhaustive discriminated state recipes and prohibited-combination checking. Normalize defaults consistently; avoid generating all possible state products eagerly. [Assessment](assessments/2026-09-22-m7-2-discriminated-component-states.md)
-- [ ] M7.3: Declare public/private tokens, slots, variants, and extension points. Specify the complete ordering of inherited defaults, local variants, states, compounds, and permitted consumer overrides before freezing the public API.
+- [x] M7.3: Declare public/private tokens, slots, variants, and extension points. Specify the complete ordering of inherited defaults, local variants, states, compounds, and permitted consumer overrides before freezing the public API. [Assessment](assessments/2026-09-23-m7-3-public-private-component-contracts.md)
 - [ ] M7.4: Demonstrate product-team extension without copying component implementation. Verify a private implementation change leaves the public contract intact; a removed public slot/variant is detectable.
 - [ ] M7.5: Connect reference component visual and accessibility state to the same owner while keeping behavior-library integration separate from style evaluation.
 
