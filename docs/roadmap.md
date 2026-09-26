@@ -241,9 +241,16 @@ JavaScript consumer baseline. The packed token and component packages resolve
 from an independent app; iOS and web bundle maps contain the installed package
 sources and no repository or authored `.css.ts` paths. See the [assessment](assessments/2026-09-26-m8-1-packed-design-system.md) and [qualification evidence](evidence/2026-09-26-m8-1-packed-design-system/qualification.json). Android and device acceptance remain parked.
 
-Next recommended roadmap item: **M8.3** — audit ESM/CommonJS/Metro resolution
-and tree shaking, including the dedicated decoding entrypoint; keep compiler-only
-dependencies out of runtime paths.
+M8.2 and M8.3 are complete for their exact recorded package and app versions.
+M8.3 resolves all 13 packed export paths, audits 25 runtime graphs, and qualifies
+the ordinary, focused decoder and positive-control Expo bundles on iOS and web.
+The clean [M8.3 qualification receipt](evidence/2026-09-26-m8-3-runtime-resolution/qualification.json)
+records Android as `not-run`; Android/device acceptance and publishing remain
+deferred.
+
+Next recommended roadmap item: **M8.4** — exercise actual hot reload and
+dependency invalidation for shared packages and configuration changes; verify
+output values after edits, not just dependency-import text.
 
 ## M8 — Qualify distributed packages and artifact evolution
 
@@ -252,7 +259,7 @@ dependencies out of runtime paths.
 
 - [x] M8.1: Package tokens and components separately, consume only packed artifacts from an independent Expo application, and verify no unpublished source-tree requirement. iOS/web export and provenance evidence: [assessment](assessments/2026-09-26-m8-1-packed-design-system.md) and [receipt](evidence/2026-09-26-m8-1-packed-design-system/qualification.json).
 - [x] M8.2: Publish compiler/artifact/runtime compatibility rules and test supported version combinations, unsupported versions, duplicate package copies, provider identity, and lazy-loaded modules. See the [package compatibility matrix](../packages/css/COMPATIBILITY.md) and [clean-source qualification receipt](evidence/2026-09-26-m8-2-compatibility-matrix/qualification.json).
-- [ ] M8.3: Audit ESM/CommonJS/Metro resolution and tree shaking, including the dedicated decoding entrypoint. No runtime path may accidentally load compiler-only dependencies.
+- [x] M8.3: Audit every packed ESM/CommonJS/types export target and runtime dependency graph; prove ordinary runtime isolation and focused `tokens/schema/value` entry-graph isolation through Expo production exports on iOS/web. See the [M8.3 qualification receipt](evidence/2026-09-26-m8-3-runtime-resolution/qualification.json) and [compatibility matrix](../packages/css/COMPATIBILITY.md). Android/device acceptance and publishing remain parked.
 - [ ] M8.4: Exercise actual hot reload and dependency invalidation for shared packages and configuration changes. Cache tests must verify output values after edits, not just dependency-import text.
 - [ ] M8.5: Reconcile the documented publication policy with `.github/workflows/release-please.yml` and `publish.yml` under a separately confirmed policy. Record release compatibility and deprecation obligations; do not publish as part of the milestone.
 - [ ] M8.6: Gate declared Expo/RN versions in CI. Restore full consumer checks for app changes, use reproducible installs, and make missing required platform fixtures visible failures.

@@ -45,10 +45,10 @@ exports isolated production Expo surfaces for iOS and web: ordinary runtime,
 the focused `tokens/schema/value` decoder, and the full `tokens/schema`
 positive control. It verifies packed-source maps and the raw JavaScript
 `external-token-theme` canary pair. A dirty-source run writes interim evidence
-under its temporary build directory; only a clean-source run writes
-`docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json` and can
-qualify the M8.3 matrix row. Until then the published row remains pending.
-Android export, Android/device acceptance, physical-device acceptance and
+under its temporary build directory; the clean-source result is retained at
+`docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json` and
+qualifies only the exact recorded package and app versions. The receipt marks
+Android `not-run`; Android/device acceptance, physical-device acceptance and
 publishing remain deferred.
 
 The [nested SDK upgrade configuration](upgrade/README.md) is excluded from the monorepo workspaces and never changes the supported app implicitly. Its runner verifies npm's live `latest` and official blank-template versions, packs the current Crumbs source, and exercises npm resolution without peer overrides. A recorded `peer-blocked` result means the newest SDK remains unsupported and the isolation contract passed; it is not a successful consumer qualification.

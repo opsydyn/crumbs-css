@@ -214,13 +214,13 @@ git commit -m "docs: document M8.3 runtime resolution policy"
 - Create: `docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json`
 - Modify: `docs/roadmap.md`
 
-- [ ] **Step 1: Run packed qualification from the clean Task 4 commit**
+- [x] **Step 1: Run packed qualification from the clean Task 4 commit**
 
 Run: `bun run playground:distribution --m8-3-check`
 
 Expected: the packed qualification records the tarball hash, resolved ESM/CommonJS/types targets, runtime dependency classes, Node/Bun/npm and installed dependency versions, tree-shaking flags, iOS/web source inventories, and decoder/positive-control canary outcomes. The receipt's source snapshot is clean before the receipt is written.
 
-- [ ] **Step 2: Validate evidence, publish the result, and close the roadmap item**
+- [x] **Step 2: Validate evidence, publish the result, and close the roadmap item**
 
 Inspect the receipt. Require every manifest export target and condition, both advanced runtime graphs, all six platform/surface exports, packed-source inventories, no forbidden ordinary/decoder graph sources, decoder canary absence, positive-control canary presence, exact dependency versions, and Android marked `not-run`. If any gate fails, do not mark M8.3 complete; fix the owning task and repeat qualification.
 

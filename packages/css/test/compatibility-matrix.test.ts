@@ -10,6 +10,42 @@ const publicReference = readFileSync(
   "utf8",
 )
 const playgroundReadme = readFileSync(resolve(repoRoot, "apps/playground/README.md"), "utf8")
+type M8_3Qualification = Readonly<{
+  source: Readonly<{revision: string; dirty: boolean}>
+  crumbsArtifact: Readonly<{
+    tarballSha256: string
+    exportResolutions: ReadonlyArray<Readonly<{subpath: string}>>
+    runtimeGraphs: ReadonlyArray<Readonly<{
+      subpath: string
+      classification: string
+      externalSpecifiers: ReadonlyArray<string>
+    }>>
+  }>
+  treeShaking: Readonly<{
+    platforms: ReadonlyArray<string>
+    surfaces: Readonly<Record<string, Readonly<{
+      bundles: ReadonlyArray<Readonly<{platform: string; path: string}>>
+      inventory: ReadonlyArray<Readonly<{packageSources: Readonly<Record<string, ReadonlyArray<string>>>}>>
+    }>>>
+    canary: Readonly<{
+      literal: string
+      ordinary: string
+      decoder: ReadonlyArray<string>
+      positiveControl: ReadonlyArray<string>
+    }>
+  }>
+  results: Readonly<{
+    packedExports: string
+    packedRuntimeGraphs: string
+    consumerTypecheck: string
+    productionExports: Readonly<{ios: string; web: string; android: string}>
+    pairedTreeShakingCanary: string
+  }>
+}>
+const m8_3Qualification = JSON.parse(readFileSync(
+  resolve(repoRoot, "docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json"),
+  "utf8",
+)) as M8_3Qualification
 
 describe("M8.2 compiler, artifact, and runtime compatibility policy", () => {
   it("publishes the exact qualified package and host row", () => {
@@ -70,9 +106,10 @@ describe("M8.2 compiler, artifact, and runtime compatibility policy", () => {
     expect(playgroundReadme).toContain("device")
   })
 
-  it("publishes the M8.3 runtime-resolution policy as pending until its receipt exists", () => {
+  it("publishes M8.3 as qualified only with a clean receipt and explicit platform status", () => {
     for (const value of [
       "M8.3 runtime-resolution qualification",
+      "Qualified",
       "Pending qualification",
       "tokens/schema/value",
       "tokens/schema",
@@ -93,7 +130,35 @@ describe("M8.2 compiler, artifact, and runtime compatibility policy", () => {
     }
     expect(playgroundReadme).toContain("bun run playground:distribution --m8-3-check")
     expect(playgroundReadme).toContain("docs/evidence/2026-09-26-m8-3-runtime-resolution/qualification.json")
-    expect(publicReference).toContain("M8.3")
-    expect(publicReference).toContain("Pending qualification")
+    expect(publicReference).toContain("M8.3 packed export and production Metro row is **Qualified**")
+
+    const m8_3Section = packageMatrix.split("### M8.3 runtime-resolution qualification")[1]?.split("\n### ")[0] ?? ""
+    expect(m8_3Section).toContain("**Qualified**")
+    expect(m8_3Section).not.toContain("Pending qualification")
+    expect(m8_3Qualification.source.dirty).toBe(false)
+    expect(m8_3Qualification.source.revision.length).toBeGreaterThan(0)
+    expect(m8_3Qualification.crumbsArtifact.tarballSha256).toMatch(/^[a-f0-9]{64}$/)
+    expect(m8_3Qualification.crumbsArtifact.exportResolutions).toHaveLength(13)
+    expect(m8_3Qualification.crumbsArtifact.exportResolutions.map(({subpath}) => subpath))
+      .toContain("./tokens/schema/value")
+    expect(m8_3Qualification.crumbsArtifact.runtimeGraphs).toHaveLength(25)
+    expect(m8_3Qualification.treeShaking.platforms).toEqual(["ios", "web"])
+    expect(m8_3Qualification.treeShaking.canary).toEqual({
+      literal: "external-token-theme",
+      ordinary: "omitted",
+      decoder: ["ios", "web"],
+      positiveControl: ["ios", "web"],
+    })
+    const decoderSources = m8_3Qualification.treeShaking.surfaces["schema-decoder"]!.inventory
+      .flatMap(({packageSources}) => packageSources["@opsydyn/crumbs-css"] ?? [])
+    expect(decoderSources.some((source) => source.endsWith("/tokens-schema-value.mjs"))).toBe(true)
+    expect(decoderSources.some((source) => source.endsWith("/tokens-schema.mjs"))).toBe(false)
+    expect(m8_3Qualification.results).toMatchObject({
+      packedExports: "passed",
+      packedRuntimeGraphs: "passed",
+      consumerTypecheck: "passed",
+      productionExports: {ios: "passed", web: "passed", android: "not-run"},
+      pairedTreeShakingCanary: "passed",
+    })
   })
 })
