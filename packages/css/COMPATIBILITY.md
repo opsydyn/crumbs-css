@@ -20,6 +20,69 @@ The package currently declares `react-native` peer compatibility as
 `>=0.85 <0.86`. Earlier React Native baselines should not be assumed supported
 unless they are exercised explicitly in a future compatibility pass.
 
+## Compiler, artifact and runtime matrix (M8.2)
+
+Compatibility has separate package, artifact and host dimensions. A successful
+runtime format test does not qualify every package pair that can emit or consume
+that format.
+
+### Evidence states
+
+| State | Meaning |
+| --- | --- |
+| **Qualified** | This exact packed package and host combination completed the checks named by its retained receipt. |
+| **Runtime-supported** | Focused runtime tests accept the listed current format; the complete packed package combination is not qualified by that status alone. |
+| **Rejected** | The owning runtime or decoder fails closed for this unsupported version. |
+| **Unqualified** | The package, host or platform combination has not completed the named compatibility checks; no compatibility claim is made. |
+
+### Qualified packed package row
+
+| Dimension | Qualified value |
+| --- | --- |
+| Crumbs compiler/runtime | `@opsydyn/crumbs-css@0.1.1-alpha.1` |
+| Token consumer | `@acme/design-tokens@1.0.0` |
+| Component consumer | `@acme/ui@1.0.0` |
+| Expo | `56.0.4` |
+| React | `19.2.5` |
+| React Native | `0.85.3` |
+| Packed JavaScript exports | iOS and web |
+| Evidence | **Qualified** for the exact versions above; see the [M8.2 qualification receipt](../../docs/evidence/2026-09-26-m8-2-compatibility-matrix/qualification.json). |
+
+The receipt installs one Crumbs tarball as the app dependency and a second
+physical copy beneath the packed component package. A Node consumer probe checks
+that both Crumbs roots resolve the same React instance, that an asynchronously
+loaded consumer reads two identified themes across those copies, and that
+unsupported payload versions fail at their owning boundary. It also records the
+generated native metadata and dependency-plan versions, packed app typecheck,
+and iOS/web source-map inventories. This does not qualify a mixed Crumbs release
+pair.
+
+### Artifact boundaries
+
+| Boundary | Current format and evidence | Rejected or excluded cases |
+| --- | --- | --- |
+| Component recipe | **Runtime-supported:** v1–v3. | **Rejected:** recipe v4. |
+| Component recipe extension | **Runtime-supported:** extension v1. | **Rejected:** extension v2. |
+| Sprinkles lookup plan | **Runtime-supported:** Sprinkles v1. | **Rejected:** Sprinkles v2. |
+| Generated native module | **Qualified:** native-module metadata v2 with theme dependency plan v1 in the packed `@acme/ui` artifact. | **Rejected:** theme dependency plan v2. Other producer/runtime pairs are **Unqualified**. |
+| External token-theme payload | **Runtime-supported:** external token-theme payload v1 through `@opsydyn/crumbs-css/tokens/schema`. | **Rejected:** external token-theme payload v2. |
+| `NativeArtifact` / Native IR | Internal-only compiler contracts; excluded from published package compatibility claims. | `NativeArtifact` v1 and Native IR v1 are not consumer-facing artifact ABIs. |
+
+Recipe v1–v3, extension v1, Sprinkles v1 and external token-theme v1 are
+runtime-supported by focused contract checks; this does not claim that arbitrary
+compiler and runtime releases interoperate. Unknown versions fail closed rather
+than being treated as the newest known version. The initial row uses one Crumbs
+package for compiler and runtime, so separately versioned compiler/runtime
+release pairs remain **Unqualified**.
+
+The exact host row is limited to Expo `56.0.4`, React `19.2.5` and React Native
+`0.85.3`. Android exports and all Android/device behavior remain unqualified and
+were not run in M8.2; physical-device rendering, startup, accessibility and
+performance are separate acceptance work. This matrix does not broaden the
+supported SDK range, claim ESM/CommonJS/Metro graph completeness, or publish
+packages. Effect 4 remains an implementation dependency; application consumers
+do not add an Effect peer dependency or use an Effect runner.
+
 ## Coverage and qualification
 
 | Check | Coverage | Absence / limitation |
