@@ -121,6 +121,21 @@ test("verifyInstalledArtifact rejects a package symlink resolving outside node_m
   })).rejects.toThrow(/@acme\/design-tokens.*node_modules/i)
 })
 
+test("verifyInstalledArtifact rejects a package symlink within node_modules", async () => {
+  const consumerRoot = await createConsumer()
+  const nodeModules = join(consumerRoot, "node_modules")
+  const packageLink = join(nodeModules, "@acme", "design-tokens")
+  const packageStore = join(nodeModules, ".store", "design-tokens")
+  await writePackage(packageStore, { name: "@acme/design-tokens", version: "1.0.0" })
+  await mkdir(dirname(packageLink), { recursive: true })
+  await symlink(packageStore, packageLink, "dir")
+
+  await expect(verifyInstalledArtifact(consumerRoot, {
+    name: "@acme/design-tokens",
+    version: "1.0.0",
+  })).rejects.toThrow(/@acme\/design-tokens.*symlink/i)
+})
+
 test("verifyInstalledArtifact rejects a node_modules directory symlink escaping the consumer", async () => {
   const consumerRoot = await createConsumer()
   const externalNodeModules = await createTemporaryRoot("crumbs-packed-contract-node-modules-")
@@ -247,6 +262,7 @@ async function writeBundleMap(
   await mkdir(dirname(mapPath), { recursive: true })
   const mapDirectory = await realpath(dirname(mapPath))
   const relativeSources = sources.map((source) => source.includes("\0")
+    || source === "__prelude__"
     ? source
     : relative(mapDirectory, source).split(sep).join("/"))
   const regularMap = {
@@ -324,6 +340,87 @@ test("verifyExpoBundleInventory requires source evidence from every packed packa
   )).rejects.toThrow(/@acme\/ui/)
 })
 
+test("verifyExpoBundleInventory rejects a packed package symlink within node_modules", async () => {
+  const fixture = await createBundleFixture()
+  const nodeModules = join(fixture.consumerRoot, "node_modules")
+  const packagePath = join(nodeModules, "@acme", "ui")
+  const packageStore = join(nodeModules, ".store", "ui")
+  await rm(packagePath, { recursive: true, force: true })
+  await writePackage(packageStore, { name: "@acme/ui", version: "1.0.0" })
+  await symlink(packageStore, packagePath, "dir")
+
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/@acme\/ui.*symlink/i)
+})
+
+test("verifyExpoBundleInventory rejects ordinary sources outside the staged consumer", async () => {
+  const fixture = await createBundleFixture()
+  const externalRoot = await createTemporaryRoot("crumbs-packed-contract-external-source-")
+  const externalSource = join(externalRoot, "unpublished-source", "helper.js")
+  await mkdir(dirname(externalSource), { recursive: true })
+  await writeFile(externalSource, "export const helper = true\n")
+  await writeBundleMap(
+    join(fixture.targets[0]!.directory, "external-source.js.map"),
+    [...Object.values(fixture.packageSources), externalSource],
+  )
+
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/source.*outside.*consumer/i)
+})
+
+test("verifyExpoBundleInventory does not count a missing package path as provenance", async () => {
+  const fixture = await createBundleFixture()
+  const sourcesWithoutUi = Object.entries(fixture.packageSources)
+    .filter(([packageName]) => packageName !== "@acme/ui")
+    .map(([, source]) => source)
+  const missingUiSource = join(
+    fixture.consumerRoot,
+    "node_modules",
+    "@acme",
+    "ui",
+    "dist",
+    "does-not-exist.js",
+  )
+  for (const target of fixture.targets) {
+    await writeBundleMap(
+      join(target.directory, "missing-package-source.js.map"),
+      [...sourcesWithoutUi, missingUiSource],
+    )
+  }
+
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/source.*does not exist|cannot canonicalize/i)
+})
+
+test("verifyExpoBundleInventory rejects directory sources", async () => {
+  const fixture = await createBundleFixture()
+  const directorySource = join(fixture.consumerRoot, "src")
+  await mkdir(directorySource, { recursive: true })
+  await writeBundleMap(
+    join(fixture.targets[0]!.directory, "directory-source.js.map"),
+    [...Object.values(fixture.packageSources), directorySource],
+  )
+
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/not a regular file/i)
+})
+
 test("verifyExpoBundleInventory rejects undecodable source maps", async () => {
   const fixture = await createBundleFixture()
   await writeFile(join(fixture.targets[0]!.directory, "broken.js.map"), "not-json")
@@ -358,6 +455,44 @@ test("verifyExpoBundleInventory resolves Metro root-relative package sources", a
       expect(item.packageSources[packageName]).toContain(fixture.packageSources[packageName])
     }
   }
+})
+
+test("verifyExpoBundleInventory accepts Metro's virtual web prelude source", async () => {
+  const fixture = await createBundleFixture()
+  await writeBundleMap(
+    join(fixture.targets[1]!.directory, "metro-prelude.js.map"),
+    [...Object.values(fixture.packageSources), "__prelude__"],
+  )
+
+  const inventory = await verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )
+  expect(inventory[1]!.packageSources["@acme/ui"]).toContain(fixture.packageSources["@acme/ui"])
+})
+
+test("verifyExpoBundleInventory does not count Metro's virtual web prelude as package provenance", async () => {
+  const fixture = await createBundleFixture()
+  const sourcesWithoutUi = Object.entries(fixture.packageSources)
+    .filter(([packageName]) => packageName !== "@acme/ui")
+    .map(([, source]) => source)
+  for (const target of fixture.targets) {
+    await writeBundleMap(
+      join(target.directory, "index.js.map"),
+      target.platform === "web"
+        ? [...sourcesWithoutUi, "__prelude__"]
+        : Object.values(fixture.packageSources),
+    )
+  }
+
+  await expect(verifyExpoBundleInventory(
+    fixture.targets,
+    fixture.consumerRoot,
+    fixture.repositoryRoot,
+    expectedBundlePackages,
+  )).rejects.toThrow(/No web source map includes installed package source @acme\/ui/)
 })
 
 

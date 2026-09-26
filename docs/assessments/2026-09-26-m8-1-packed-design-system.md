@@ -1,10 +1,10 @@
 # M8.1 separately packed design-system qualification
 
-M8.1 qualifies the distribution boundary for a token package and a component package that consume Crumbs only through installed tarballs. The standalone Expo app installed three local npm artifacts from outside the monorepo, typechecked its public component usage, and exported production JavaScript bundles with source maps for iOS and web. Both source maps resolved the required files under the staged app's `node_modules`; the inventory rejected repository and authored `.css.ts` sources.
+M8.1 qualifies the distribution boundary for a token package and a component package that consume Crumbs only through installed tarballs. The standalone Expo app installed three local npm artifacts from outside the monorepo, typechecked its public component usage, and exported production JavaScript bundles with source maps for iOS and web. Both source maps resolved the required files under the staged app's `node_modules`; the inventory rejects repository or external sources, missing files, symlinked packages, and authored `.css.ts` sources. A final review found and closed those three fail-open cases before acceptance.
 
 ## Artifact identity
 
-The qualification used source revision `367c9c8dd616a65765a764ffb5dcb450198b543f` with a dirty working tree. This was the Task 2 commit plus the uncommitted M8.1 Task 3 implementation; exact package tarball hashes identify the tested artifacts. The retained app and package artifacts are under `/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-packed-distribution-nZav4p`.
+The final qualification ran from source revision `390c0c1800949763c99cc987817143f6b52a430d` with a dirty working tree containing the final-review guard fixes. Exact package tarball hashes identify the tested artifacts. The retained app and package artifacts are under `/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-packed-distribution-FYtuGA`.
 
 | Package | Version | SHA-256 |
 | --- | --- | --- |
@@ -16,11 +16,11 @@ The app used Expo `56.0.4`, React `19.2.5`, React Native `0.85.3`, React DOM `19
 
 ## Checks and evidence
 
-`bun run playground:distribution --check` passed. It built and packed all three packages, installed them into a fresh temporary Expo app, verified package names, versions and real install paths, typechecked the app, and ran separate Expo production exports for iOS and web. Each platform produced one source map containing installed Crumbs, token and UI sources. The native map included `ActionCard.styles.native.js`; the web map included `ActionCard.styles.web.js`. No Android export ran.
+`bun run playground:distribution --check` passed after the final-review fixes. It built and packed all three packages, installed them into a fresh temporary Expo app, verified package names, versions and materialized install paths, typechecked the app, and ran separate Expo production exports for iOS and web. Each platform produced one source map containing installed Crumbs, token and UI sources. The native map included `ActionCard.styles.native.js`; the web map included `ActionCard.styles.web.js`. Metro's web-only `__prelude__` identifier is treated as a virtual source and cannot satisfy package provenance. No Android export ran.
 
-`bun test packages/css/test/packed-distribution-contract.test.ts` passed with 16 tests and 40 assertions. The suite covers package identity/path checks, required style outputs, regular and indexed maps, Metro root-relative sources, missing platform/package evidence, malformed maps, repository/worktree leakage, virtual URL leakage and authored stylesheet source leakage.
+`bun test packages/css/test/packed-distribution-contract.test.ts` passed with 23 tests and 47 assertions. The suite covers package identity/path checks, same-root package symlinks, required style outputs, regular and indexed maps, Metro root-relative and virtual sources, external, missing, and directory paths, missing platform/package evidence, malformed maps, repository/worktree leakage, virtual URL leakage and authored stylesheet source leakage.
 
-`bun run check` passed: the Crumbs build and typecheck passed, 857 CSS tests passed with 0 failures, and the Storybook test passed. `bun run app:typecheck` and `bun run docs:build` also passed.
+`bun run check` passed: the Crumbs build and typecheck passed, 864 CSS tests passed with 0 failures, and the Storybook test passed. The packed Expo check includes the staged consumer app typecheck.
 
 The machine-readable hashes, resolved versions, installed package paths, map inventories, source revision and dirty status are in [`qualification.json`](../evidence/2026-09-26-m8-1-packed-design-system/qualification.json). `apps/playground/README.md` now distinguishes this three-package qualification from the existing single-Crumbs-tarball mode.
 

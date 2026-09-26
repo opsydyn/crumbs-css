@@ -1,4 +1,4 @@
-import { readFile, readdir, realpath } from "node:fs/promises"
+import { lstat, readFile, readdir, realpath, stat } from "node:fs/promises"
 import { createRequire } from "node:module"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { fileURLToPath } from "node:url"
@@ -132,7 +132,7 @@ function resolveSourcePath(
   source: string,
   consumerRoot: string,
 ): string | undefined {
-  if (source.includes("\0") || sourceRoot.includes("\0")) return undefined
+  if (source.includes("\0") || sourceRoot.includes("\0") || source === "__prelude__") return undefined
   const cleanSource = stripSourceSuffix(source.replaceAll("\\", "/"))
   const cleanRoot = stripSourceSuffix(sourceRoot.replaceAll("\\", "/"))
   if (cleanSource.startsWith("file://")) {
@@ -167,11 +167,44 @@ function resolveSourcePath(
 }
 
 async function canonicalizeSourcePath(sourcePath: string, mapPath: string): Promise<string> {
+  let canonicalSourcePath: string
   try {
-    return await realpath(sourcePath)
+    canonicalSourcePath = await realpath(sourcePath)
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") return resolve(sourcePath)
-    throw new Error(`Could not canonicalize source ${sourcePath} from ${mapPath}: ${messageOf(error)}`, { cause: error })
+    throw new Error(`Cannot canonicalize source ${sourcePath} from ${mapPath}: ${messageOf(error)}`, { cause: error })
+  }
+  let sourceInfo: Awaited<ReturnType<typeof stat>>
+  try {
+    sourceInfo = await stat(canonicalSourcePath)
+  } catch (error) {
+    throw new Error(`Could not inspect source ${canonicalSourcePath} from ${mapPath}: ${messageOf(error)}`, { cause: error })
+  }
+  if (!sourceInfo.isFile()) {
+    throw new Error(`Source map reference is not a regular file: ${sourcePath} in ${mapPath}`)
+  }
+  return canonicalSourcePath
+}
+
+async function assertNoSymlinkPathComponents(root: string, packagePath: string, packageName: string): Promise<void> {
+  if (!pathIsInside(root, packagePath)) {
+    throw new Error(`Packed package ${packageName} path is outside consumer node_modules: ${packagePath}`)
+  }
+
+  let currentPath = root
+  for (const component of relative(root, packagePath).split(sep)) {
+    currentPath = join(currentPath, component)
+    let pathInfo: Awaited<ReturnType<typeof lstat>>
+    try {
+      pathInfo = await lstat(currentPath)
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+        throw new Error(`Packed package ${packageName} was not found at ${currentPath}`, { cause: error })
+      }
+      throw new Error(`Cannot inspect packed package ${packageName} at ${currentPath}: ${messageOf(error)}`, { cause: error })
+    }
+    if (pathInfo.isSymbolicLink()) {
+      throw new Error(`Packed package ${packageName} resolves through a symlink at ${currentPath}`)
+    }
   }
 }
 
@@ -211,6 +244,9 @@ async function inspectSourcePath(
     )
   ) {
     throw new Error(`Expo source map includes repository/worktree source ${source} at ${canonicalSourcePath}`)
+  }
+  if (!pathIsWithinOrEqual(state.consumerRoot, canonicalSourcePath)) {
+    throw new Error(`Expo source map includes filesystem source outside the staged consumer: ${source} at ${canonicalSourcePath}`)
   }
 
   for (const [packageName, packageRoot] of Object.entries(state.packageRoots)) {
@@ -359,6 +395,7 @@ async function resolveInstalledBundlePackages(
   const packageRoots: Record<string, string> = {}
   for (const packageName of expectedPackages) {
     const packagePath = join(canonicalNodeModules, ...packageName.split("/"))
+    await assertNoSymlinkPathComponents(canonicalNodeModules, packagePath, packageName)
     let packageRoot: string
     try {
       packageRoot = await realpath(packagePath)
@@ -544,6 +581,8 @@ export async function verifyInstalledArtifact(
   }
 
   const consumerManifest = join(canonicalConsumerRoot, "package.json")
+  const requestedPackagePath = join(canonicalNodeModules, ...expected.name.split("/"))
+  await assertNoSymlinkPathComponents(canonicalNodeModules, requestedPackagePath, `${expected.name}@${expected.version}`)
   const requireFromConsumer = createRequire(consumerManifest)
   let entryPath: string
   try {
