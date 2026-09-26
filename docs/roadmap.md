@@ -241,9 +241,9 @@ JavaScript consumer baseline. The packed token and component packages resolve
 from an independent app; iOS and web bundle maps contain the installed package
 sources and no repository or authored `.css.ts` paths. See the [assessment](assessments/2026-09-26-m8-1-packed-design-system.md) and [qualification evidence](evidence/2026-09-26-m8-1-packed-design-system/qualification.json). Android and device acceptance remain parked.
 
-Next recommended roadmap item: **M8.2** — publish compiler/artifact/runtime
-compatibility rules and test supported combinations, unsupported versions,
-duplicate package copies, provider identity and lazy-loaded modules.
+Next recommended roadmap item: **M8.3** — audit ESM/CommonJS/Metro resolution
+and tree shaking, including the dedicated decoding entrypoint; keep compiler-only
+dependencies out of runtime paths.
 
 ## M8 — Qualify distributed packages and artifact evolution
 
@@ -251,7 +251,7 @@ duplicate package copies, provider identity and lazy-loaded modules.
 **Affected paths:** package exports/build settings, `test/pack-consumer-contract.test.ts`, new independent token/component/app fixtures, Metro integration fixtures, CI and release documentation/workflows.
 
 - [x] M8.1: Package tokens and components separately, consume only packed artifacts from an independent Expo application, and verify no unpublished source-tree requirement. iOS/web export and provenance evidence: [assessment](assessments/2026-09-26-m8-1-packed-design-system.md) and [receipt](evidence/2026-09-26-m8-1-packed-design-system/qualification.json).
-- [ ] M8.2: Publish compiler/artifact/runtime compatibility rules and test supported version combinations, unsupported versions, duplicate package copies, provider identity, and lazy-loaded modules.
+- [x] M8.2: Publish compiler/artifact/runtime compatibility rules and test supported version combinations, unsupported versions, duplicate package copies, provider identity, and lazy-loaded modules. See the [package compatibility matrix](../packages/css/COMPATIBILITY.md) and [clean-source qualification receipt](evidence/2026-09-26-m8-2-compatibility-matrix/qualification.json).
 - [ ] M8.3: Audit ESM/CommonJS/Metro resolution and tree shaking, including the dedicated decoding entrypoint. No runtime path may accidentally load compiler-only dependencies.
 - [ ] M8.4: Exercise actual hot reload and dependency invalidation for shared packages and configuration changes. Cache tests must verify output values after edits, not just dependency-import text.
 - [ ] M8.5: Reconcile the documented publication policy with `.github/workflows/release-please.yml` and `publish.yml` under a separately confirmed policy. Record release compatibility and deprecation obligations; do not publish as part of the milestone.
