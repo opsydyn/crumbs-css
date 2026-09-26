@@ -6,6 +6,7 @@ import {
   assertNoWorkspaceOrLinkDependencies,
   assertPrecompiledComponentFiles,
   verifyExpoBundleInventory,
+  verifyDistinctInstalledArtifactCopies,
   verifyInstalledArtifact,
 } from "../../../scripts/packed-distribution-contract"
 
@@ -67,6 +68,60 @@ test("verifyInstalledArtifact accepts the expected package under consumer node_m
   expect(installed.version).toBe("1.0.0")
   expect(isPathWithin(nodeModulesRoot, installed.packageRoot)).toBe(true)
   expect(installed.entryPath).toBe(await realpath(join(packageRoot, "dist/index.js")))
+})
+
+test("verifyDistinctInstalledArtifactCopies accepts two physical copies of the expected package", async () => {
+  const directConsumerRoot = await createConsumer()
+  const nestedConsumerRoot = await createConsumer()
+  const expected = { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" }
+  const directPackageRoot = join(directConsumerRoot, "node_modules", "@opsydyn", "crumbs-css")
+  const nestedPackageRoot = join(nestedConsumerRoot, "node_modules", "@opsydyn", "crumbs-css")
+  await writePackage(directPackageRoot, expected)
+  await writePackage(nestedPackageRoot, expected)
+
+  const copies = await verifyDistinctInstalledArtifactCopies(
+    directConsumerRoot,
+    nestedConsumerRoot,
+    expected,
+  )
+
+  expect(copies.direct.packageRoot).toBe(await realpath(directPackageRoot))
+  expect(copies.nested.packageRoot).toBe(await realpath(nestedPackageRoot))
+  expect(copies.direct.packageRoot).not.toBe(copies.nested.packageRoot)
+})
+
+test("verifyDistinctInstalledArtifactCopies rejects one physical copy supplied twice", async () => {
+  const consumerRoot = await createConsumer()
+  const expected = { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" }
+  await writePackage(join(consumerRoot, "node_modules", "@opsydyn", "crumbs-css"), expected)
+
+  await expect(verifyDistinctInstalledArtifactCopies(
+    consumerRoot,
+    consumerRoot,
+    expected,
+  )).rejects.toThrow(/same physical package copy/i)
+})
+
+test("verifyDistinctInstalledArtifactCopies rejects a nested package symlink", async () => {
+  const directConsumerRoot = await createConsumer()
+  const nestedConsumerRoot = await createConsumer()
+  const expected = { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" }
+  await writePackage(
+    join(directConsumerRoot, "node_modules", "@opsydyn", "crumbs-css"),
+    expected,
+  )
+  const nestedNodeModules = join(nestedConsumerRoot, "node_modules")
+  const nestedPackageLink = join(nestedNodeModules, "@opsydyn", "crumbs-css")
+  const nestedPackageStore = join(nestedNodeModules, ".store", "crumbs-css")
+  await writePackage(nestedPackageStore, expected)
+  await mkdir(dirname(nestedPackageLink), { recursive: true })
+  await symlink(nestedPackageStore, nestedPackageLink, "dir")
+
+  await expect(verifyDistinctInstalledArtifactCopies(
+    directConsumerRoot,
+    nestedConsumerRoot,
+    expected,
+  )).rejects.toThrow(/@opsydyn\/crumbs-css.*symlink/i)
 })
 
 test("verifyInstalledArtifact rejects a missing package", async () => {

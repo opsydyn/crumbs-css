@@ -614,3 +614,20 @@ export async function verifyInstalledArtifact(
     packageRoot,
   }
 }
+
+export async function verifyDistinctInstalledArtifactCopies(
+  directConsumerRoot: string,
+  nestedConsumerRoot: string,
+  expected: PackageIdentity,
+): Promise<Readonly<{ direct: InstalledPackage; nested: InstalledPackage }>> {
+  const direct = await verifyInstalledArtifact(directConsumerRoot, expected)
+  const nested = await verifyInstalledArtifact(nestedConsumerRoot, expected)
+
+  if (direct.packageRoot === nested.packageRoot) {
+    throw new Error(
+      `Expected distinct physical copies of ${expected.name}@${expected.version}, but direct and nested consumers resolve to the same physical package copy at ${direct.packageRoot}`,
+    )
+  }
+
+  return { direct, nested }
+}
