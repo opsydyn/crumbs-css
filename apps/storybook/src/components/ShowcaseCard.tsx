@@ -1,6 +1,13 @@
+import { useMemo } from "react"
+import { createComponentRecipeResolver } from "@opsydyn/crumbs-css/theme"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
+import type { NativeComponentPublicProps } from "@opsydyn/crumbs-css/style"
 import { Pressable, Text, View } from "react-native"
 import * as s from "./ShowcaseCard.css"
+
+type ActionSelection = NativeComponentPublicProps<typeof s.action>
+const idleActionSelection: ActionSelection = { pressed: false }
+const pressedActionSelection: ActionSelection = { pressed: true }
 
 type ShowcaseCardProps = {
   readonly actionLabel?: string
@@ -16,6 +23,19 @@ export function ShowcaseCard({
   title = "Dark and light themes with one native styling pipeline.",
 }: ShowcaseCardProps) {
   const styles = useThemedStyles(s)
+  const resolveAction = useMemo(
+    () => createComponentRecipeResolver(styles.action),
+    [styles.action],
+  )
+  const actionStyles = useMemo(() => {
+    const idle = resolveAction(idleActionSelection)
+    const pressed = resolveAction(pressedActionSelection)
+    return {
+      root: [...idle.root],
+      pressedRoot: [...pressed.root],
+      label: [...idle.label],
+    }
+  }, [resolveAction])
 
   return (
     <View style={styles.card}>
@@ -36,8 +56,8 @@ export function ShowcaseCard({
           <Text style={styles.metaPillLabel}>Metro web + native</Text>
         </View>
       </View>
-      <Pressable style={({ pressed }) => [styles.action, pressed && styles.actionPressed]}>
-        <Text style={styles.actionLabel}>{actionLabel}</Text>
+      <Pressable style={({ pressed }) => pressed ? actionStyles.pressedRoot : actionStyles.root}>
+        <Text style={actionStyles.label}>{actionLabel}</Text>
       </Pressable>
     </View>
   )

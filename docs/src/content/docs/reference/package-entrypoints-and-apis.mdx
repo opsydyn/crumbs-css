@@ -19,14 +19,14 @@ Use this entrypoint in `.css.ts` authoring modules for:
 - `style`
 - `styleVariants`
 - `recipe`
-- `componentRecipe` and `componentRecipeFromRecipe`
+- `componentRecipe`, `componentRecipeFromRecipe`, and `extendComponentRecipe`
 - `defineProperties`, `createSprinkles`, and `createSprinklesLookupPlan` for finite, primitive-scoped utility scales
 - `createThemeContract`
 - `createTheme`
 - `viewStyle`
 - `textStyle`
 - `imageStyle`
-- type exports such as `NativeRecipeProps`, `NativeComponentRecipeProps`, and `NativeComponentResolvedStyles`
+- type exports such as `NativeRecipeProps`, `NativeComponentRecipeProps`, `NativeComponentPublicProps`, and `NativeComponentResolvedStyles`
 
 ### Typed component recipes
 
@@ -146,6 +146,126 @@ resolver-local least-recently-used cache for every slot. The default cache is
 values are warned about and skipped. `componentRecipeFromRecipe(recipe,
 { slot })` wraps a legacy recipe in one named **view** slot; it preserves that
 recipe's variant selection and cannot relabel the style as text or image.
+
+### Public tokens, component contracts, and extensions
+
+Token visibility is declared by the token contract that owns each path. An
+omitted `visibility` option keeps identified tokens public for compatibility;
+when a list is supplied, every other definition token is private. Aliases
+inherit visibility from their terminal definition.
+
+```ts
+import { createTokenContract, defineAlias, defineToken } from "@opsydyn/crumbs-css/tokens"
+
+export const tokens = createTokenContract({
+  color: {
+    accent: defineToken("color"),
+    implementation: defineToken("color"),
+  },
+  semantic: {
+    foreground: defineAlias("color.accent"),
+  },
+}, {
+  identity: { owner: "@acme/tokens", name: "brand", version: 1 },
+  visibility: { public: [["color", "accent"]] },
+})
+```
+
+The public path set participates in the stable contract identity. Keep it
+unchanged for that identity or increment its version when the published
+surface changes. Visibility is compatibility metadata, not secrecy or an
+authorization boundary: runtime values and descriptors are inspectable.
+
+A component contract publishes the slots and variant values that consumers
+may select, and opts in to each extension operation. Omitted extension points
+are sealed. The owner keeps a richer selection type than consumers receive:
+
+```ts
+import {
+  componentRecipe,
+  extendComponentRecipe,
+  type NativeComponentPublicProps,
+  type NativeComponentRecipeProps,
+} from "@opsydyn/crumbs-css/style"
+import { tokens } from "./tokens"
+
+export const button = componentRecipe({
+  contract: {
+    identity: { owner: "@acme/ui", name: "Button", version: 1 },
+    public: {
+      slots: ["root", "label"],
+      variants: { tone: ["primary", "quiet"] },
+    },
+    extensionPoints: {
+      defaults: ["tone"],
+      variantValues: ["tone"],
+      compoundVariants: true,
+      slotStyles: ["root"],
+    },
+  },
+  slots: { root: "view", label: "text", internalIcon: "image" } as const,
+  variants: {
+    tone: {
+      primary: { root: { backgroundColor: tokens.color.accent } },
+      quiet: { root: { opacity: 0.8 } },
+      dangerInternal: { root: { opacity: 0.4 } },
+    },
+    density: { compact: { internalIcon: { width: 12 } } },
+  },
+  defaultVariants: { tone: "primary", density: "compact" },
+}, "button")
+
+type OwnerSelection = NativeComponentRecipeProps<typeof button>
+type ConsumerSelection = NativeComponentPublicProps<typeof button>
+const ownerSelection: OwnerSelection = { density: "compact", tone: "dangerInternal" }
+const consumerSelection: ConsumerSelection = { tone: "quiet" }
+
+export const brandedButton = extendComponentRecipe(button, {
+  identity: { owner: "@acme/brand", name: "BrandedButton", version: 1 },
+  defaultVariants: { tone: "brand" },
+  variants: { tone: { brand: { root: { backgroundColor: tokens.semantic.foreground } } } },
+  slotOverrides: { root: { borderRadius: 12 } },
+})
+
+type BrandedSelection = NativeComponentPublicProps<typeof brandedButton>
+const brandedSelection: BrandedSelection = { tone: "brand" }
+```
+
+The owner can select private implementation variants through
+`NativeComponentRecipeProps`. `NativeComponentPublicProps` contains only the
+contract's public axes and values, plus values added through the extension
+chain. Extension defaults, new values, compounds, and slot styles each require
+the matching `extensionPoints` permission; extension identities form one
+validated base-to-leaf chain.
+
+Defaults merge from owner to extensions in base-to-leaf order, then caller
+selection wins:
+
+```ts
+const selected = { ...ownerDefaults, ...baseExtensionDefaults, ...leafExtensionDefaults, ...caller }
+```
+
+For a valid v3 selection, every slot receives styles in this order:
+
+1. Owner base slot styles.
+2. Ordinary variant branches in the owner's authored axis order, including
+   permitted extension values on those axes.
+3. The state-discriminator branch, after ordinary variants.
+4. Matching compounds: owner first, then each extension base-to-leaf.
+5. Permitted slot overrides, extension base-to-leaf.
+
+If a state case rejects the normalized selection, resolution returns only the
+owner's base slot styles and skips variants, compounds, and overrides. This
+behavior applies to typed and untyped callers. Existing v1 descriptors retain
+their unconstrained behavior, v2 descriptors retain state constraints, and
+contract-bearing recipes use v3. Unsupported future versions fail closed.
+
+`createComponentRecipeResolver` validates the complete extension chain and
+builds its plan once. It stores authored branches and constraints rather than
+materializing every variant combination; selection caching remains bounded and
+resolver-local. Manifest generation, policy checks, and automated public
+surface impact tooling belong to M9 and are not part of the runtime contract
+API.
 
 ### Native sprinkles
 

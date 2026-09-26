@@ -1,4 +1,4 @@
-import { textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
+import { componentRecipe, textStyle, viewStyle } from "@opsydyn/crumbs-css/style"
 import { vars } from "../styles/theme"
 
 export const card = viewStyle({
@@ -72,25 +72,36 @@ export const metaPillLabel = textStyle({
   fontWeight: "700",
 })
 
-export const action = viewStyle({
-  alignItems: "center",
-  alignSelf: "flex-start",
-  backgroundColor: vars.color.accent,
-  borderRadius: vars.radius.pill,
-  justifyContent: "center",
-  minHeight: 48,
-  paddingLeft: vars.space.lg,
-  paddingRight: vars.space.lg,
-})
-
-export const actionPressed = viewStyle({
-  opacity: 0.88,
-})
-
-export const actionLabel = textStyle({
-  color: vars.color.accentText,
-  fontSize: 14,
-  fontWeight: "900",
-  letterSpacing: 0.8,
-  textTransform: "uppercase",
-})
+export const action = componentRecipe({
+  contract: {
+    identity: { owner: "@crumbs/storybook", name: "ShowcaseCardAction", version: 1 },
+    public: { slots: ["root", "label"], variants: { pressed: ["false", "true"] } },
+  },
+  slots: { root: "view", label: "text" } as const,
+  base: {
+    root: {
+      alignItems: "center",
+      alignSelf: "flex-start",
+      backgroundColor: vars.color.accent,
+      borderRadius: vars.radius.pill,
+      justifyContent: "center",
+      minHeight: 48,
+      paddingLeft: vars.space.lg,
+      paddingRight: vars.space.lg,
+    },
+    label: {
+      color: vars.color.accentText,
+      fontSize: 14,
+      fontWeight: "900",
+      letterSpacing: 0.8,
+      textTransform: "uppercase",
+    },
+  },
+  variants: {
+    pressed: {
+      false: { root: { opacity: 1 } },
+      true: { root: { opacity: 0.88 } },
+    },
+  },
+  defaultVariants: { pressed: false },
+}, "showcaseCardAction")

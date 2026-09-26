@@ -3,6 +3,7 @@ import fc from "fast-check"
 import type {NativeComponentRecipeDescriptor} from "../src/components"
 import type {NativeStyle} from "../src/native-style"
 import {
+  createComponentRecipeResolutionPlan,
   createComponentRecipeResolver,
   resolveComponentRecipeStyles,
 } from "../src/theme-runtime"
@@ -146,6 +147,208 @@ describe("component recipe runtime properties", () => {
       }),
       {numRuns: PROPERTY_RUNS, seed: PROPERTY_SEED},
     )
+  })
+
+  it("matches an independent two-layer v3 composition oracle over public partial selections", () => {
+    type Selection = {readonly tone?: string; readonly size?: string; readonly pressed?: boolean}
+    const ownerDefaults = {tone: "neutral", size: "small", pressed: false} as const
+    const baseExtensionDefaults = {tone: "brand"} as const
+    const leafExtensionDefaults = {tone: "seasonal"} as const
+    const ownerBase = {root: {padding: 4}}
+    type OracleBranch = Readonly<{root: NativeStyle}>
+    const authoredBranches = {
+      tone: {
+        neutral: {root: {backgroundColor: "white"}},
+        brand: {root: {backgroundColor: "navy"}},
+        seasonal: {root: {backgroundColor: "plum"}},
+      },
+      size: {small: {root: {minHeight: 32}}, large: {root: {minHeight: 44}}},
+      pressed: {false: {root: {opacity: 1}}, true: {root: {opacity: 0.8}}},
+    } satisfies Readonly<{
+      tone: Readonly<Record<string, OracleBranch>>
+      size: Readonly<Record<string, OracleBranch>>
+      pressed: Readonly<Record<string, OracleBranch>>
+    }>
+    const stateRules: Readonly<Record<string, {readonly size: ReadonlyArray<string>}>> = {
+      false: {size: ["small", "large"]},
+      true: {size: ["large"]},
+    }
+    const authoredCompounds = [
+      {matches: (selected: Readonly<Record<string, unknown>>) => selected.tone === "neutral" && selected.size === "large", style: {root: {borderColor: "gray"}}},
+      {matches: (selected: Readonly<Record<string, unknown>>) => selected.tone === "brand" && selected.size === "large", style: {root: {borderWidth: 1}}},
+      {matches: (selected: Readonly<Record<string, unknown>>) => selected.tone === "seasonal" && selected.pressed === true, style: {root: {borderRadius: 12}}},
+    ]
+    const baseSlotOverride = {root: {borderColor: "navy"}}
+    const leafSlotOverride = {root: {borderColor: "plum"}}
+    const identity = {owner: "@acme/ui", name: "PropertyOracleButton", version: 1} as const
+    const ownerRecipe = {
+      $$type: "crumbs.css.component-recipe",
+      version: 3,
+      contract: {
+        identity,
+        public: {slots: ["root"], variants: {tone: ["neutral"], size: ["small", "large"], pressed: ["false", "true"]}},
+        extensionPoints: {defaults: ["tone"], variantValues: ["tone"], compoundVariants: true, slotStyles: ["root"]},
+      },
+      slots: {root: "view"},
+      base: ownerBase,
+      variants: {
+        tone: {neutral: authoredBranches.tone.neutral},
+        size: authoredBranches.size,
+        pressed: authoredBranches.pressed,
+      },
+      defaultVariants: ownerDefaults,
+      stateVariants: {pressed: {false: {size: ["small", "large"]}, true: {size: ["large"]}}},
+      compoundVariants: [{variants: {tone: "neutral", size: "large"}, styles: authoredCompounds[0]!.style}],
+    } as unknown as NativeComponentRecipeDescriptor
+    const baseExtension = {
+      $$type: "crumbs.css.component-recipe-extension",
+      version: 1,
+      identity: {owner: "@acme/brand", name: "PropertyOracleBrand", version: 1},
+      componentIdentity: identity,
+      defaultVariants: baseExtensionDefaults,
+      variants: {tone: {brand: authoredBranches.tone.brand}},
+      compoundVariants: [{variants: {tone: "brand", size: "large"}, styles: authoredCompounds[1]!.style}],
+      slotOverrides: baseSlotOverride,
+    } as const
+    const leafExtension = {
+      $$type: "crumbs.css.component-recipe-extension",
+      version: 1,
+      identity: {owner: "@acme/product", name: "PropertyOracleSeasonal", version: 1},
+      componentIdentity: identity,
+      parentExtensionIdentity: baseExtension.identity,
+      defaultVariants: leafExtensionDefaults,
+      variants: {tone: {seasonal: authoredBranches.tone.seasonal}},
+      compoundVariants: [{variants: {tone: "seasonal", pressed: true}, styles: authoredCompounds[2]!.style}],
+      slotOverrides: leafSlotOverride,
+    } as const
+
+    const referenceResolve = (input: Selection): Readonly<{root: ReadonlyArray<NativeStyle>}> => {
+      const selected = {...ownerDefaults, ...baseExtensionDefaults, ...leafExtensionDefaults, ...input}
+      const stateRule = stateRules[String(selected.pressed)]
+      if (stateRule === undefined || !stateRule.size.includes(String(selected.size))) {
+        return {root: Object.freeze([ownerBase.root as NativeStyle])}
+      }
+
+      const root: NativeStyle[] = [ownerBase.root as NativeStyle]
+      for (const axis of ["tone", "size"] as const) {
+        const branches = authoredBranches[axis] as Readonly<Record<string, OracleBranch>>
+        const branch = branches[String(selected[axis])]
+        if (branch !== undefined) root.push(branch.root)
+      }
+      const pressedBranch = (authoredBranches.pressed as Readonly<Record<string, OracleBranch>>)[String(selected.pressed)]!
+      root.push(pressedBranch.root)
+      for (const compound of authoredCompounds) {
+        if (compound.matches(selected)) root.push(compound.style.root)
+      }
+      for (const override of [baseSlotOverride, leafSlotOverride]) root.push(override.root)
+      return {root: Object.freeze(root)}
+    }
+
+    const partialSelection = fc.record({
+      tone: fc.option(fc.constantFrom("neutral", "brand", "seasonal"), {nil: undefined}),
+      size: fc.option(fc.constantFrom("small", "large"), {nil: undefined}),
+      pressed: fc.option(fc.boolean(), {nil: undefined}),
+    }).map(fields => Object.fromEntries(Object.entries(fields).filter(([, value]) => value !== undefined)))
+    const selection = fc.oneof(partialSelection, fc.constant({pressed: true, size: "small"}))
+    const resolver = createComponentRecipeResolver(ownerRecipe, {extensions: [baseExtension, leafExtension]})
+
+    expect(resolver.plan.defaultSelection).toEqual({
+      ...ownerDefaults,
+      ...baseExtensionDefaults,
+      ...leafExtensionDefaults,
+    })
+    fc.assert(fc.property(selection, input => {
+      expect(withoutWarnings(() => resolver(input as never))).toEqual(referenceResolve(input as Selection))
+    }), {seed: 20260923, numRuns: 200})
+  })
+
+  it("keeps resolution plans proportional to authored branches rather than variant products", () => {
+    const createSizingCase = (axisCount: number, valueCount: number, compoundCount: number) => {
+      const axes = Array.from({length: axisCount}, (_, index) => `axis${index}`)
+      const values = Object.fromEntries(axes.map(axis => [
+        axis,
+        Array.from({length: valueCount}, (_, index) => `value${index}`),
+      ]))
+      const variants = Object.fromEntries(axes.map(axis => [axis, Object.fromEntries(
+        values[axis]!.map((value, index) => [value, {root: {opacity: index / (valueCount + 1)}}]),
+      )]))
+      const recipe = {
+        $$type: "crumbs.css.component-recipe",
+        version: 3,
+        contract: {
+          identity: {owner: "@acme/ui", name: `PlanSize${axisCount}x${valueCount}`, version: 1},
+          public: {slots: ["root"], variants: values},
+          extensionPoints: {defaults: ["axis0"], variantValues: ["axis0"], compoundVariants: true, slotStyles: ["root"]},
+        },
+        slots: {root: "view"},
+        base: {root: {padding: 1}},
+        variants,
+        defaultVariants: Object.fromEntries(axes.map(axis => [axis, values[axis]![0]])),
+        compoundVariants: Array.from({length: compoundCount}, (_, index) => {
+          const axis = axes[index % axisCount]!
+          return {variants: {[axis]: values[axis]![index % valueCount]}, styles: {root: {borderWidth: index + 1}}}
+        }),
+      } as unknown as NativeComponentRecipeDescriptor
+      const componentIdentity = recipe.contract!.identity
+      const extensions = [0, 1].map(index => {
+        const extensionIdentity = {owner: index === 0 ? "@acme/brand" : "@acme/product", name: `PlanSizeExtension${index}`, version: 1}
+        const extension = {
+          $$type: "crumbs.css.component-recipe-extension",
+          version: 1,
+          identity: extensionIdentity,
+          componentIdentity,
+          ...(index === 0 ? {} : {parentExtensionIdentity: {owner: "@acme/brand", name: "PlanSizeExtension0", version: 1}}),
+          defaultVariants: {axis0: `extension${index}`},
+          variants: {axis0: {[`extension${index}`]: {root: {opacity: 0.8 + index / 10}}}},
+          compoundVariants: [{variants: {axis0: `extension${index}`}, styles: {root: {borderRadius: index + 1}}}],
+          slotOverrides: {root: {padding: index + 2}},
+        }
+        return extension
+      })
+      return {recipe, extensions, axes, valueCount, compoundCount}
+    }
+    const containerSizes = (
+      value: unknown,
+      path = "plan",
+      sizes: Array<{readonly path: string; readonly size: number}> = [],
+      visited = new Set<object>(),
+    ): Array<{readonly path: string; readonly size: number}> => {
+      if (typeof value !== "object" || value === null || visited.has(value)) return sizes
+      visited.add(value)
+      if (Array.isArray(value)) {
+        sizes.push({path, size: value.length})
+        value.forEach((entry, index) => containerSizes(entry, `${path}[${index}]`, sizes, visited))
+      } else {
+        const entries = Object.entries(value)
+        if (!/^plan\.extensionPlan\.extensions\[\d+\]$/.test(path)) {
+          sizes.push({path, size: entries.length})
+        }
+        for (const [key, entry] of entries) containerSizes(entry, `${path}.${key}`, sizes, visited)
+      }
+      return sizes
+    }
+
+    for (const {recipe, extensions, axes, valueCount, compoundCount} of [
+      createSizingCase(2, 3, 2),
+      createSizingCase(4, 5, 4),
+    ]) {
+      const plan = createComponentRecipeResolutionPlan(recipe, {extensions: extensions as never})
+      const expectedProduct = valueCount ** axes.length
+      const expectedBranchCounts = axes.map((_, index) => valueCount + (index === 0 ? extensions.length : 0))
+      const plannedBranchCount = plan.variants.reduce((count, variant) => count + Object.keys(variant.values).length, 0)
+      const authoredBranchCount = axes.length * valueCount + extensions.length
+      const authoredCompoundCount = compoundCount + extensions.length
+
+      expect(plan.variants.map(variant => Object.keys(variant.values).length)).toEqual(expectedBranchCounts)
+      expect(plannedBranchCount).toBe(authoredBranchCount)
+      expect(plan.compoundMatchers).toHaveLength(authoredCompoundCount)
+      expect(plan.compoundMatchers.reduce((count, matcher) => count + matcher.requirements.length, 0))
+        .toBe(authoredCompoundCount)
+      expect(plan.extensionPlan?.extensions).toHaveLength(extensions.length)
+      expect(plan.extensionPlan?.compoundVariants).toHaveLength(extensions.length)
+      expect(plan.extensionPlan?.slotOverrides).toHaveLength(extensions.length)
+      expect(containerSizes(plan).filter(({size}) => size === expectedProduct)).toEqual([])
+    }
   })
 
   it("treats a numeric selection as invalid when its string form is a declared value", () => {
