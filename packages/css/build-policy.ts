@@ -4,7 +4,8 @@ const sharedExternals = [
   "metro-transform-worker", "react", "react-native",
 ]
 export const compilerDependencies = {
-  neverBundle: sharedExternals,
+  // tsdown's CommonJS createRequire shim uses the unprefixed Node `url` builtin.
+  neverBundle: [...sharedExternals, "url"],
   alwaysBundle: [/^effect(?:\/|$)/],
 }
 // Runtime denial tests remain authoritative: externalizing is not admission.
