@@ -30,15 +30,27 @@ type CompiledComponent = {
   readonly stateVariants?: Record<string, Record<string, Record<string, ReadonlyArray<string | boolean>>>>
 }
 
-async function compile(source: string): Promise<Record<string, CompiledComponent>> {
+type CompiledExtension = {
+  readonly $$type: "crumbs.css.component-recipe-extension"
+  readonly version: 1
+  readonly identity: {readonly owner: string; readonly name: string; readonly version: number}
+  readonly componentIdentity: {readonly owner: string; readonly name: string; readonly version: number}
+  readonly parentExtensionIdentity?: {readonly owner: string; readonly name: string; readonly version: number}
+  readonly defaultVariants: Record<string, string | boolean>
+  readonly variants: Record<string, Record<string, Record<string, unknown>>>
+  readonly compoundVariants: Array<{readonly variants: Record<string, string | boolean>; readonly styles: Record<string, unknown>}>
+  readonly slotOverrides: Record<string, unknown>
+}
+
+async function compile<TExport = CompiledComponent>(source: string): Promise<Record<string, TExport>> {
   const dir = mkdtempSync(path.join(root, "fixtures/.component-recipe-compiler-"))
   try {
     const file = path.join(dir, "case.css.ts")
-    writeFileSync(file, `import {componentRecipe, createThemeContract, viewStyle} from '@opsydyn/crumbs-css/style';\n${source}`)
+    writeFileSync(file, `import {componentRecipe, createThemeContract, extendComponentRecipe, viewStyle} from '@opsydyn/crumbs-css/style';\n${source}`)
     const code = await transformCssTsToStyleSheet(file, root, {useStyleSheet: false, strictDiagnostics: true})
     const exports: Record<string, unknown> = {}
     runInNewContext(code.replace(/^import .*;$/gm, "").replace(/export const (\w+) =/g, "exports.$1 ="), {exports})
-    return JSON.parse(JSON.stringify(exports)) as Record<string, CompiledComponent>
+    return JSON.parse(JSON.stringify(exports)) as Record<string, TExport>
   } finally {
     rmSync(dir, {recursive: true, force: true})
   }
@@ -169,6 +181,84 @@ describe("component recipe compiler artifacts", () => {
     expect(resolved.base?.label).toEqual({color: "#fff"})
     expect(resolved.variants.tone?.primary?.label).toEqual({fontWeight: "700", color: "#fff"})
     expect(resolved.variants.tone?.quiet?.label).toEqual({fontWeight: "400"})
+  })
+
+  it("captures v3 owner and extension DTOs with operations and style class references", async () => {
+    const exports = await compile<CompiledComponent | CompiledExtension>(`
+      const vars = createThemeContract({color: {brand: null, label: null}});
+      export const button = componentRecipe({
+        contract: {
+          identity: {owner: "@acme/ui", name: "CompiledExtensionButton", version: 1},
+          public: {slots: ["root", "label"], variants: {tone: ["primary", "quiet"]}},
+          extensionPoints: {defaults: ["tone"], variantValues: ["tone"], compoundVariants: true, slotStyles: ["root", "label"]},
+        },
+        slots: {root: "view", label: "text", internalIcon: "image"},
+        base: {root: {padding: 8}, label: {color: vars.color.label}},
+        variants: {
+          tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}},
+          density: {compact: {internalIcon: {width: 12}}},
+        },
+        defaultVariants: {tone: "primary", density: "compact"},
+      }, "button");
+      export const legacy = componentRecipe({
+        slots: {root: "view"},
+        variants: {size: {small: {root: {padding: 4}}}},
+        defaultVariants: {size: "small"},
+      }, "legacy");
+      const baseBrand = extendComponentRecipe(button, {
+        identity: {owner: "@acme/brand", name: "BaseButtonBrand", version: 1},
+        slotOverrides: {root: {opacity: 0.9}},
+      });
+      export const branded = extendComponentRecipe(button, {
+        identity: {owner: "@acme/brand", name: "CompiledButtonBrand", version: 1},
+        defaultVariants: {tone: "brand"},
+        variants: {tone: {brand: {root: {backgroundColor: vars.color.brand}, label: {color: vars.color.label}}}},
+        compoundVariants: [{variants: {tone: "brand"}, styles: {root: {borderWidth: 1}}}],
+        slotOverrides: {root: {borderColor: vars.color.brand}},
+      }, [baseBrand]);
+    `)
+
+    const button = exports.button as CompiledComponent
+    const legacy = exports.legacy as CompiledComponent
+    const branded = exports.branded as CompiledExtension
+    expect(legacy.$$type).toBe("crumbs.css.component-recipe")
+    expect(legacy.version).toBe(2)
+    expect(legacy).not.toHaveProperty("contract")
+    expect(button.version).toBe(3)
+    expect(button.contract?.identity).toEqual({owner: "@acme/ui", name: "CompiledExtensionButton", version: 1})
+    expect(button.contract?.public).toEqual({slots: ["root", "label"], variants: {tone: ["primary", "quiet"]}})
+    expect(branded.$$type).toBe("crumbs.css.component-recipe-extension")
+    expect(branded.version).toBe(1)
+    expect(branded.identity).toEqual({owner: "@acme/brand", name: "CompiledButtonBrand", version: 1})
+    expect(branded.componentIdentity).toEqual({owner: "@acme/ui", name: "CompiledExtensionButton", version: 1})
+    expect(branded.parentExtensionIdentity).toEqual({owner: "@acme/brand", name: "BaseButtonBrand", version: 1})
+    expect(branded.defaultVariants).toEqual({tone: "brand"})
+    expect(branded.variants.tone?.brand).toBeDefined()
+    expect(Object.values(branded.variants.tone?.brand ?? {})).toEqual(expect.arrayContaining([
+      expect.objectContaining({color: expect.objectContaining({$$type: "crumbs.css.theme-token"})}),
+    ]))
+    expect(branded.compoundVariants).toHaveLength(1)
+    expect(branded.compoundVariants[0]?.variants).toEqual({tone: "brand"})
+    expect(branded.slotOverrides.root).toBeDefined()
+    expect(button.variants.density?.compact?.internalIcon).toEqual({width: 12})
+
+    const resolved = resolveThemeTokens(branded as never, {contract: {}, values: {}, tokens: {
+      "--crumbs-color-brand": "#336699",
+      "--crumbs-color-label": "#ffffff",
+    }}) as unknown as CompiledExtension
+    expect(resolved.variants.tone?.brand?.root).toMatchObject({backgroundColor: "#336699"})
+    expect(resolved.compoundVariants[0]?.styles.root).toMatchObject({
+      borderTopWidth: 1,
+      borderRightWidth: 1,
+      borderBottomWidth: 1,
+      borderLeftWidth: 1,
+    })
+    expect(resolved.slotOverrides.root).toMatchObject({
+      borderTopColor: "#336699",
+      borderRightColor: "#336699",
+      borderBottomColor: "#336699",
+      borderLeftColor: "#336699",
+    })
   })
 
   it("reports an escaped primitive mismatch with the component slot path", async () => {

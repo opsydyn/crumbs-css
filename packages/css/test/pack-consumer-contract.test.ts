@@ -82,8 +82,8 @@ function createPackedConsumer(): string {
 async function writePackedStatefulFixture(consumerRoot: string): Promise<void> {
   const filename = resolve(consumerRoot, "button.css.ts")
   writeFileSync(filename, `
-    import {componentRecipe, createThemeContract} from "@opsydyn/crumbs-css/style";
-    const vars = createThemeContract({color: {label: null}});
+    import {componentRecipe, createThemeContract, extendComponentRecipe} from "@opsydyn/crumbs-css/style";
+    const vars = createThemeContract({color: {label: null, brand: null}});
     export const button = componentRecipe({
       slots: {root: "view", label: "text"},
       base: {
@@ -112,6 +112,31 @@ async function writePackedStatefulFixture(consumerRoot: string): Promise<void> {
         },
       },
     }, "button");
+    export const contractedButton = componentRecipe({
+      contract: {
+        identity: {owner: "@acme/ui", name: "PackedContractButton", version: 1},
+        public: {slots: ["root", "label"], variants: {tone: ["primary", "quiet"]}},
+        extensionPoints: {defaults: ["tone"], variantValues: ["tone"], compoundVariants: true, slotStyles: ["root", "label"]},
+      },
+      slots: {root: "view", label: "text", internalIcon: "image"},
+      base: {root: {opacity: 0.25}, label: {color: vars.color.label}},
+      variants: {
+        tone: {
+          primary: {root: {opacity: 0.6}},
+          quiet: {root: {opacity: 0.4}},
+          dangerInternal: {root: {opacity: 0.1}},
+        },
+        density: {compact: {internalIcon: {width: 12}}},
+      },
+      defaultVariants: {tone: "primary", density: "compact"},
+    }, "contractedButton");
+    export const brand = extendComponentRecipe(contractedButton, {
+      identity: {owner: "@acme/brand", name: "PackedButtonBrand", version: 1},
+      defaultVariants: {tone: "brand"},
+      variants: {tone: {brand: {root: {backgroundColor: vars.color.brand}}}},
+      compoundVariants: [{variants: {tone: "brand"}, styles: {label: {color: vars.color.brand}}}],
+      slotOverrides: {root: {opacity: 0.95}},
+    });
   `)
 
   const requireFromConsumer = createRequire(resolve(consumerRoot, "package.json"))
@@ -145,11 +170,21 @@ const statefulConsumerAssertions = `
   if (JSON.stringify(prohibitedStyles.root) !== JSON.stringify([{opacity: 0.25}])) throw new Error("prohibited state input did not fall back to base styles");
 `
 
+const extensionConsumerAssertions = `
+  if (contractedButton.version !== 3 || contractedButton.contract.identity.name !== "PackedContractButton") throw new Error("v3 component contract was not preserved");
+  if (brand.$$type !== "crumbs.css.component-recipe-extension" || brand.version !== 1 || brand.componentIdentity.name !== "PackedContractButton") throw new Error("extension descriptor metadata was not preserved");
+  const themedContractedButton = THEME.resolveThemeTokens(contractedButton, {contract: {}, values: {}, tokens: {"--crumbs-color-label": "#ffffff", "--crumbs-color-brand": "#336699"}});
+  const themedBrand = THEME.resolveThemeTokens(brand, {contract: {}, values: {}, tokens: {"--crumbs-color-label": "#ffffff", "--crumbs-color-brand": "#336699"}});
+  const extendedStyles = THEME.createComponentRecipeResolver(themedContractedButton, {extensions: [themedBrand]})();
+  const expected = {root: [{opacity: 0.25}, {backgroundColor: "#336699"}, {opacity: 0.95}], label: [{color: "#ffffff"}, {color: "#336699"}], internalIcon: [{width: 12}]};
+  if (JSON.stringify(extendedStyles) !== JSON.stringify(expected)) throw new Error("extension styles did not resolve in exact base/variant/compound/override order: " + JSON.stringify(extendedStyles));
+`
+
 const consumerTypeSource = `
   import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
-  import { componentRecipe, createNativeNormalizeValueFn, createSprinklesLookupPlan, createTheme, createThemeContract, defineProperties, NATIVE_RESPONSIVE_CONDITION_NAMES, type NativeComponentRecipeProps, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
+  import { componentRecipe, createNativeNormalizeValueFn, createSprinklesLookupPlan, createTheme, createThemeContract, defineProperties, extendComponentRecipe, NATIVE_RESPONSIVE_CONDITION_NAMES, type NativeComponentPublicProps, type NativeComponentRecipeExtensionDescriptor, type NativeComponentRecipeProps, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
   import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
-  import { createComponentRecipeResolver, createRecipeResolver, createSprinklesResolver, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
+  import { createComponentRecipeResolver, createRecipeResolver, createSprinklesResolver, resolveThemeStyles, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
   import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens";
   import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
   import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
@@ -186,6 +221,35 @@ const consumerTypeSource = `
   });
   type ComponentButtonProps = NativeComponentRecipeProps<typeof componentButton>;
   const componentSelection: ComponentButtonProps = {tone: "primary"};
+
+  const contractedButton = componentRecipe({
+    contract: {
+      identity: {owner: "@acme/ui", name: "PackedTypeButton", version: 1},
+      public: {slots: ["root"], variants: {tone: ["primary", "quiet"]}},
+      extensionPoints: {defaults: ["tone"], variantValues: ["tone"], slotStyles: ["root"]},
+    },
+    slots: {root: "view", internalIcon: "image"} as const,
+    variants: {
+      tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}, dangerInternal: {root: {opacity: 0.1}}},
+      density: {compact: {internalIcon: {width: 12}}},
+    },
+  });
+  const brand = extendComponentRecipe(contractedButton, {
+    identity: {owner: "@acme/brand", name: "PackedTypeBrand", version: 1},
+    variants: {tone: {brand: {root: {opacity: 0.9}}}},
+  });
+  type BrandedSelection = NativeComponentPublicProps<typeof brand>;
+  const publicBrandSelection: BrandedSelection = {tone: "brand"};
+  const typedExtension: NativeComponentRecipeExtensionDescriptor = brand;
+  const themedExtension: typeof brand = resolveThemeTokens(brand, activeTheme)!;
+  const themedCoreExtension: typeof brand = resolveCoreThemeTokens(brand, activeTheme)!;
+  const mappedExtension: typeof brand = resolveThemeStyles({brand}, activeTheme).brand;
+  createComponentRecipeResolver(contractedButton, {extensions: [brand]})(publicBrandSelection);
+  // @ts-expect-error private owner axes stay unavailable through extension selection.
+  const privateAxisSelection: BrandedSelection = {density: "compact"};
+  // @ts-expect-error private owner values stay unavailable through extension selection.
+  const privateValueSelection: BrandedSelection = {tone: "dangerInternal"};
+  void [privateAxisSelection, privateValueSelection, typedExtension, themedExtension, themedCoreExtension, mappedExtension];
 
   resolveThemeTokens({ color: vars.color.text }, activeTheme);
   resolveCoreThemeTokens({ color: vars.color.text }, activeTheme);
@@ -291,11 +355,12 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
           const source = require("node:fs").readFileSync(filename, "utf8").replace(/^export const (\\w+) =/gm, "exports.$1 =");
           module._compile(source, filename);
         };
-        const {button} = require("./button.css");
+        const {button, contractedButton, brand} = require("./button.css");
 
         if (typeof root.withNativeStyles !== "function") throw new Error("missing root withNativeStyles");
         if (typeof style.createThemeContract !== "function") throw new Error("missing style createThemeContract");
         if (typeof style.componentRecipe !== "function") throw new Error("missing style componentRecipe");
+        if (typeof style.extendComponentRecipe !== "function") throw new Error("missing style extendComponentRecipe");
         if (typeof style.createSprinklesLookupPlan !== "function") throw new Error("missing style createSprinklesLookupPlan");
         if (typeof style.createNativeNormalizeValueFn !== "function") throw new Error("missing style createNativeNormalizeValueFn");
         if (typeof theme.createRecipeResolver !== "function") throw new Error("missing theme createRecipeResolver");
@@ -309,6 +374,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof metro.withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformer.transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
         ${statefulConsumerAssertions.replaceAll("THEME", "theme")}
+        ${extensionConsumerAssertions.replaceAll("THEME", "theme")}
       `,
     )
     run(["node", "runtime.cjs"], consumerRoot)
@@ -317,17 +383,18 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
       resolve(consumerRoot, "runtime.mjs"),
       `
         import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
-        import { componentRecipe, createNativeNormalizeValueFn, createSprinklesLookupPlan, createThemeContract, defineProperties, NATIVE_RESPONSIVE_CONDITION_NAMES } from "@opsydyn/crumbs-css/style";
+        import { componentRecipe, createNativeNormalizeValueFn, createSprinklesLookupPlan, createThemeContract, defineProperties, extendComponentRecipe, NATIVE_RESPONSIVE_CONDITION_NAMES } from "@opsydyn/crumbs-css/style";
         import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
         import { createComponentRecipeResolver, createRecipeResolver, createSprinklesResolver, createThemeTokenReference, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
-        import {button} from "./button.css";
+        import {button, contractedButton, brand} from "./button.css";
 
         if (typeof NativeStylesDiagnosticCode.UnsupportedSelector !== "string") throw new Error("missing root diagnostic code");
         if (typeof createThemeContract !== "function") throw new Error("missing style createThemeContract");
         if (typeof componentRecipe !== "function") throw new Error("missing style componentRecipe");
+        if (typeof extendComponentRecipe !== "function") throw new Error("missing style extendComponentRecipe");
         if (typeof createSprinklesLookupPlan !== "function") throw new Error("missing style createSprinklesLookupPlan");
         if (typeof createNativeNormalizeValueFn !== "function") throw new Error("missing style createNativeNormalizeValueFn");
         createNativeNormalizeValueFn(NATIVE_RESPONSIVE_CONDITION_NAMES)([8, 12, 16, 24]);
@@ -342,6 +409,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
         ${statefulConsumerAssertions.replaceAll("THEME", "({resolveThemeTokens, createComponentRecipeResolver})")}
+        ${extensionConsumerAssertions.replaceAll("THEME", "({resolveThemeTokens, createComponentRecipeResolver})")}
       `,
     )
     run(["node", "--loader", "./css-loader.mjs", "runtime.mjs"], consumerRoot)

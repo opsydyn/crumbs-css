@@ -26,11 +26,16 @@ import type {
   NativeTheme,
 } from "./native-style"
 import type {NativeComponentRecipeDescriptor} from "./components"
-import type {NativeComponentRecipeExtensionDescriptor} from "./components/extension-contract"
+import {
+  validateNativeComponentRecipeExtensionDescriptor,
+  type NativeComponentRecipeExtensionDescriptor,
+} from "./components/extension-contract"
 import {validateNativeComponentContract} from "./components/contracts"
 import type { NativePrimitiveDomain } from "./compiler/native-capture"
 import {
   NativeComponentRecipeContractVersion,
+  NativeComponentRecipeExtensionType,
+  NativeComponentRecipeExtensionVersion,
   NativeComponentRecipeType,
   NativeComponentRecipeLegacyVersion,
   NativeComponentRecipeVersion,
@@ -301,7 +306,7 @@ const TokenThemeContext: Context<TokenThemeContextValue | null> = sharedRegistry
   () => createContext<TokenThemeContextValue | null>(null),
 )
 const recipeDiagnosticWarnings = new Set<string>()
-type ThemeResolutionCacheKind = "tokens" | "styles" | "recipe" | "component-recipe"
+type ThemeResolutionCacheKind = "tokens" | "styles" | "recipe" | "component-recipe" | "component-recipe-extension"
 type ThemeResolutionCacheEntry = {
   readonly value: unknown
 }
@@ -505,7 +510,7 @@ type RecursiveStyleLeaf<TInput> = [Extract<TInput, NativePrimitiveStyle>] extend
   ? NativeStyle : Extract<TInput, NativePrimitiveStyle>
 type ResolvedNativeStyleInput<TInput, TSeen = never> = TInput extends false | null | undefined
   ? undefined
-  : TInput extends NativeComponentRecipeDescriptor
+  : TInput extends NativeComponentRecipeDescriptor | NativeComponentRecipeExtensionDescriptor
     ? TInput
   : TInput extends NativePrimitiveStyle
     ? TInput
@@ -524,7 +529,7 @@ export function useThemedStyle<TInput>(style: TInput): ResolvedNativeStyleInput<
 }
 
 export type ResolvedThemeStyles<TStyles extends Readonly<Record<string, unknown>>> = {
-  readonly [K in keyof TStyles]: TStyles[K] extends NativeComponentRecipeDescriptor
+  readonly [K in keyof TStyles]: TStyles[K] extends NativeComponentRecipeDescriptor | NativeComponentRecipeExtensionDescriptor
     ? TStyles[K]
     : TStyles[K] extends NativeRecipe<infer TVariants>
     ? NativeRecipe<TVariants>
@@ -746,6 +751,11 @@ export function resolveThemeTokens<TInput>(
 
   if (isNativeComponentRecipe(style)) {
     const resolved = resolveComponentRecipeThemeTokens(style, theme)
+    setCachedResolution(theme, style, "tokens", resolved)
+    return resolved as ResolvedNativeStyleInput<TInput>
+  }
+  if (isNativeComponentRecipeExtension(style)) {
+    const resolved = resolveComponentRecipeExtensionThemeTokens(style, theme)
     setCachedResolution(theme, style, "tokens", resolved)
     return resolved as ResolvedNativeStyleInput<TInput>
   }
@@ -1172,6 +1182,60 @@ function resolveComponentRecipeThemeTokens<TRecipe extends NativeComponentRecipe
   return resolved
 }
 
+function resolveComponentRecipeExtensionThemeTokens<TExtension extends NativeComponentRecipeExtensionDescriptor>(
+  extension: TExtension,
+  theme: NativeTheme<Record<string, unknown>>,
+): TExtension {
+  const cached = getCachedResolution(theme, extension, "component-recipe-extension")
+  if (cached.hit) return cached.value as TExtension
+  if (extension.version !== NativeComponentRecipeExtensionVersion) {
+    throw new TypeError(`Unsupported component recipe extension version ${String(extension.version)}`)
+  }
+  const normalized = validateNativeComponentRecipeExtensionDescriptor(extension)
+  let changed = false
+  const variants = Object.fromEntries(Object.entries(normalized.variants).map(([axis, values]) => [
+    axis,
+    Object.fromEntries(Object.entries(values).map(([value, styles]) => [
+      value,
+      resolveComponentSlotStyles(styles, theme,
+        `extension variant ${JSON.stringify(axis)} value ${JSON.stringify(value)}`,
+        () => { changed = true }),
+    ])),
+  ]))
+  const compoundVariants = normalized.compoundVariants.map((compound, index) => Object.freeze({
+    variants: compound.variants,
+    styles: resolveComponentSlotStyles(compound.styles, theme,
+      `extension compound variant ${index}`,
+      () => { changed = true }),
+  }))
+  const slotOverrides = resolveComponentSlotStyles(normalized.slotOverrides, theme,
+    "extension slot overrides",
+    () => { changed = true })
+  if (!changed) {
+    setCachedResolution(theme, extension, "component-recipe-extension", extension)
+    return extension
+  }
+
+  const resolved = Object.freeze({
+    ...normalized,
+    defaultVariants: cloneAndFreezeComponentStyle(normalized.defaultVariants),
+    variants: Object.freeze(Object.fromEntries(Object.entries(variants).map(([axis, values]) => [
+      axis,
+      Object.freeze(Object.fromEntries(Object.entries(values).map(([value, styles]) => [
+        value,
+        freezeComponentSlotStyles(styles as Readonly<Record<string, unknown>>),
+      ]))),
+    ]))),
+    compoundVariants: Object.freeze(compoundVariants.map(compound => Object.freeze({
+      variants: cloneAndFreezeComponentStyle(compound.variants),
+      styles: freezeComponentSlotStyles(compound.styles),
+    }))),
+    slotOverrides: freezeComponentSlotStyles(slotOverrides),
+  }) as TExtension
+  setCachedResolution(theme, extension, "component-recipe-extension", resolved)
+  return resolved
+}
+
 function resolveComponentSlotStyles(
   styles: unknown,
   theme: NativeTheme<Record<string, unknown>>,
@@ -1372,6 +1436,11 @@ function isNativeRecipe(value: unknown): value is NativeRecipe<NativeRecipeVaria
     "$$type" in value &&
     value.$$type === NativeRecipeType
   )
+}
+
+function isNativeComponentRecipeExtension(value: unknown): value is NativeComponentRecipeExtensionDescriptor {
+  return typeof value === "object" && value !== null &&
+    "$$type" in value && value.$$type === NativeComponentRecipeExtensionType
 }
 
 function isNativeComponentRecipe(value: unknown): value is NativeComponentRecipeDescriptor {

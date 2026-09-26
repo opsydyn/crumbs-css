@@ -10,6 +10,7 @@ import {
   resolveThemeTokens,
 } from "@opsydyn/crumbs-css/theme"
 import type {NativeComponentRecipeDescriptor} from "../src/components"
+import type {NativeComponentRecipeExtensionDescriptor} from "../src/components/extension-contract"
 
 type Slots = Readonly<{root: "view"; label: "text"; icon: "image"}>
 type Variants = Readonly<{
@@ -167,6 +168,73 @@ describe("component recipe theme resolution", () => {
     expect(Object.isFrozen(resolved.contract)).toBe(true)
     expect(Object.isFrozen(resolved.contract?.identity)).toBe(true)
     expect(resolved.base).toMatchObject({root: {backgroundColor: "#101820"}})
+  })
+
+  it("resolves extension slot tokens and preserves frozen contract identities", () => {
+    const componentIdentity = {owner: "@acme/ui", name: "ThemedExtensionButton", version: 1}
+    const identity = {owner: "@acme/brand", name: "ThemedButtonExtension", version: 1}
+    const parentExtensionIdentity = {owner: "@acme/brand", name: "BaseBrandExtension", version: 1}
+    const extension = deepFreeze({
+      $$type: "crumbs.css.component-recipe-extension",
+      version: 1,
+      identity,
+      componentIdentity,
+      parentExtensionIdentity,
+      defaultVariants: {tone: "brand"},
+      variants: {
+        tone: {brand: {root: {backgroundColor: createThemeTokenReference("--crumbs-color-canvas")}}},
+      },
+      compoundVariants: [{
+        variants: {tone: "brand"},
+        styles: {root: {borderColor: createThemeTokenReference("--crumbs-color-text")}},
+      }],
+      slotOverrides: {root: {opacity: 0.5, backgroundColor: createThemeTokenReference("--crumbs-color-canvas")}},
+    }) as unknown as NativeComponentRecipeExtensionDescriptor
+
+    const resolved = resolveThemeTokens(extension, theme) as NativeComponentRecipeExtensionDescriptor
+    expect(resolved).not.toBe(extension)
+    expect(resolved.$$type).toBe("crumbs.css.component-recipe-extension")
+    expect(resolved.version).toBe(1)
+    expect(resolved.identity).toEqual(identity)
+    expect(resolved.componentIdentity).toEqual(componentIdentity)
+    expect(resolved.parentExtensionIdentity).toEqual(parentExtensionIdentity)
+    expect(resolved.variants).toMatchObject({tone: {brand: {root: {backgroundColor: "#101820"}}}})
+    expect(resolved.compoundVariants[0]?.styles).toMatchObject({root: {borderColor: "#f0f4f8"}})
+    expect(resolved.slotOverrides).toMatchObject({root: {opacity: 0.5, backgroundColor: "#101820"}})
+    expect(isDeeplyFrozen(resolved)).toBe(true)
+
+    const tokenFree = deepFreeze({
+      ...extension,
+      identity: {owner: "@acme/brand", name: "TokenFreeButtonExtension", version: 1},
+      variants: {tone: {brand: {root: {opacity: 0.7}}}},
+      compoundVariants: [],
+      slotOverrides: {},
+    }) as unknown as NativeComponentRecipeExtensionDescriptor
+    expect(resolveThemeTokens(tokenFree, theme)).toBe(tokenFree)
+  })
+
+  it("rejects malformed v3 contracts and unsupported extension versions", () => {
+    const malformed = deepFreeze({
+      ...button,
+      version: 3,
+      contract: {
+        identity: {owner: "@acme/ui", name: "MalformedThemedV3Button", version: 1},
+        public: {slots: ["missingSlot"], variants: {tone: ["primary", "quiet"]}},
+      },
+    }) as unknown as NativeComponentRecipeDescriptor
+    expect(() => resolveThemeTokens(malformed, theme)).toThrow(/unknown public slot/i)
+
+    const unsupported = {
+      $$type: "crumbs.css.component-recipe-extension",
+      version: 2,
+      identity: {owner: "@acme/brand", name: "FutureExtension", version: 1},
+      componentIdentity: {owner: "@acme/ui", name: "ThemedExtensionButton", version: 1},
+      defaultVariants: {},
+      variants: {},
+      compoundVariants: [],
+      slotOverrides: {},
+    }
+    expect(() => resolveThemeTokens(unsupported, theme)).toThrow(/unsupported.*extension.*version/i)
   })
 
   it("rejects an unsupported component descriptor version instead of treating it as a style map", () => {

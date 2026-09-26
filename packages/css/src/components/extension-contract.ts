@@ -109,6 +109,13 @@ export function validateNativeComponentRecipeExtensionChain(
   return validateExtensionChain(baseValue, extensionValues, "descriptor")
 }
 
+/** Validate and normalize one standalone serialized extension descriptor. */
+export function validateNativeComponentRecipeExtensionDescriptor(
+  value: unknown,
+): NativeComponentRecipeExtensionDescriptor {
+  return normalizeExtensionDescriptor(value, 0, "descriptor")
+}
+
 /** Validate authoring operations before any vanilla-extract style is captured. */
 export function validateNativeComponentRecipeExtensionDraft(
   base: unknown,
@@ -473,7 +480,7 @@ function validateSlotStyles(
       throw new TypeError(`${context} slot ${JSON.stringify(slot)} is not permitted by extensionPoints.slotStyles`)
     }
     normalized.push([slot, mode === "descriptor"
-      ? normalizeClassReference(style, context + ` style for ${JSON.stringify(slot)}`)
+      ? normalizeDescriptorStyle(style, context + ` style for ${JSON.stringify(slot)}`)
       : assertStyleInputData(style, context + ` style for ${JSON.stringify(slot)}`)])
   }
   return Object.freeze(Object.fromEntries(normalized))
@@ -487,9 +494,40 @@ function validateRawSlotStyleRecord(
   const entries = dataRecordEntries(value, context + " slot styles")
   return Object.freeze(Object.fromEntries(entries.map(([slot, style]) => [
     slot,
-    mode === "descriptor" ? normalizeClassReference(style, context + ` style for ${JSON.stringify(slot)}`)
+    mode === "descriptor" ? normalizeDescriptorStyle(style, context + ` style for ${JSON.stringify(slot)}`)
       : assertStyleInputData(style, context + ` style for ${JSON.stringify(slot)}`),
   ])))
+}
+
+function normalizeDescriptorStyle(value: unknown, context: string): unknown {
+  if (isNativeClassReference(value as object)) return normalizeClassReference(value, context)
+  return cloneAndFreezeDescriptorStyle(value, context)
+}
+
+function cloneAndFreezeDescriptorStyle(value: unknown, context: string, ancestors = new Set<object>()): unknown {
+  if (typeof value === "function" || typeof value === "symbol" || typeof value === "bigint") {
+    throw new TypeError(`${context} must contain only plain data values`)
+  }
+  if (typeof value === "number" && !Number.isFinite(value)) {
+    throw new TypeError(`${context} cannot contain non-finite numbers`)
+  }
+  if (typeof value !== "object" || value === null) return value
+  if (isNativeClassReference(value)) return normalizeClassReference(value, context)
+  if (ancestors.has(value)) throw new TypeError(`${context} cannot contain a cycle`)
+  ancestors.add(value)
+  try {
+    if (Array.isArray(value)) {
+      return Object.freeze(dataArray(value, context).map((entry, index) =>
+        cloneAndFreezeDescriptorStyle(entry, `${context}[${index}]`, ancestors)))
+    }
+    const entries = dataRecordEntries(value, context)
+    return Object.freeze(Object.fromEntries(entries.map(([key, entry]) => [
+      key,
+      cloneAndFreezeDescriptorStyle(entry, `${context}.${key}`, ancestors),
+    ])))
+  } finally {
+    ancestors.delete(value)
+  }
 }
 
 function normalizeClassReference(value: unknown, context: string): Readonly<Record<string, unknown>> {
@@ -528,6 +566,9 @@ function normalizeClassReference(value: unknown, context: string): Readonly<Reco
 function assertStyleInputData(value: unknown, context: string, ancestors = new Set<object>()): unknown {
   if (typeof value === "function" || typeof value === "symbol" || typeof value === "bigint") {
     throw new TypeError(`${context} must contain only plain data values`)
+  }
+  if (typeof value === "number" && !Number.isFinite(value)) {
+    throw new TypeError(`${context} cannot contain non-finite numbers`)
   }
   if (typeof value !== "object" || value === null) return value
   if (isNativeClassReference(value)) return value
