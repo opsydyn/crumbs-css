@@ -12,6 +12,7 @@ import {
 import { createRequire } from "node:module"
 import { tmpdir } from "node:os"
 import { dirname, resolve } from "node:path"
+import { verifyPackedExportMap } from "../../../scripts/packed-export-contract"
 
 const PACKAGE_ROOT = resolve(import.meta.dir, "..")
 const requireFromPackage = createRequire(resolve(PACKAGE_ROOT, "package.json"))
@@ -70,6 +71,7 @@ function createPackedConsumer(): string {
     "@vanilla-extract/css",
     "@vanilla-extract/integration",
     "css-to-react-native",
+    "effect",
     "metro",
     "react",
     "react-native",
@@ -226,6 +228,7 @@ const consumerTypeSource = `
   import { createComponentRecipeResolver, createRecipeResolver, createSprinklesResolver, resolveThemeStyles, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
   import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens";
   import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
+  import { decodeExternalTokenTheme, decodeTokenValue, type ExternalTokenTheme } from "@opsydyn/crumbs-css/tokens/schema";
   import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
   import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
 
@@ -306,6 +309,13 @@ const consumerTypeSource = `
   const tokenFocus = createTokenThemeFocus(tokenVars, tokenVars.color.text);
   const focusedValue: string = tokenFocus.get(tokenTheme);
   tokenFocus.replace("#000000", tokenTheme);
+  const decodedColor: string = decodeTokenValue({kind: "color"}, "#ffffff");
+  const externalTheme: ExternalTokenTheme = {_tag: "CrumbsTokenTheme", version: 1, contract: {owner: "@acme/ui", name: "Theme", version: 1}, values: {"color.text": decodedColor}};
+  const decodedTheme = decodeExternalTokenTheme(externalTheme);
+  if (decodedTheme.ok) {
+    const publicTheme: ExternalTokenTheme = decodedTheme.value;
+    void publicTheme;
+  }
   withNativeStyles({} as never);
   void transformCssTsToStyleSheet;
   void focusedValue;
@@ -361,9 +371,26 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
     ) as {
       readonly name: string
       readonly private?: boolean
+      readonly peerDependencies?: Readonly<Record<string, string>>
+      readonly engines?: Readonly<{node?: string}>
+      readonly exports: Readonly<Record<string, unknown>>
     }
     expect(packedPackageJson.name).toBe("@opsydyn/crumbs-css")
     expect(packedPackageJson.private).not.toBe(true)
+    expect(packedPackageJson.peerDependencies?.effect).toBeUndefined()
+    expect(packedPackageJson.engines?.node).toBe(">=22.0.0")
+
+    const nodeVersionOutput = run(["node", "-p", "process.versions.node"], consumerRoot).stdout
+    const nodeMajor = Number.parseInt(nodeVersionOutput?.toString().trim().split(".")[0] ?? "0", 10)
+    expect(nodeMajor).toBeGreaterThanOrEqual(22)
+    const exportResolutions = await verifyPackedExportMap(packageRoot, consumerRoot)
+    expect(exportResolutions.map((entry) => entry.subpath)).toEqual(Object.keys(packedPackageJson.exports))
+    expect(exportResolutions.find((entry) => entry.subpath === "./dist/theme")?.import)
+      .toBe("./dist/theme.mjs")
+    expect(exportResolutions.find((entry) => entry.subpath === "./dist/metro-plugin")?.require)
+      .toBe("./dist/metro-plugin.cjs")
+    expect(exportResolutions.find((entry) => entry.subpath === "./package.json")?.import)
+      .toBe("./package.json")
 
     writeFileSync(
       resolve(consumerRoot, "package.json"),
@@ -388,6 +415,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const theme = require("@opsydyn/crumbs-css/theme");
         const themeCore = require("@opsydyn/crumbs-css/theme/core");
         const tokenOptic = require("@opsydyn/crumbs-css/tokens/optic");
+        const tokenSchema = require("@opsydyn/crumbs-css/tokens/schema");
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
         require.extensions[".css"] = (module, filename) => {
@@ -414,6 +442,9 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (typeof theme.createSprinklesResolver !== "function") throw new Error("missing theme createSprinklesResolver");
         if (typeof themeCore.resolveThemeTokens !== "function") throw new Error("missing theme/core resolveThemeTokens");
         if (typeof tokenOptic.createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
+        if (tokenSchema.decodeTokenValue({kind: "color"}, "#ffffff") !== "#ffffff") throw new Error("token schema color decode failed");
+        const decodedExternalTheme = tokenSchema.decodeExternalTokenTheme({_tag: "CrumbsTokenTheme", version: 1, contract: {owner: "@acme/ui", name: "Theme", version: 1}, values: {"color.text": "#ffffff"}});
+        if (!decodedExternalTheme.ok || decodedExternalTheme.value.values["color.text"] !== "#ffffff") throw new Error("external token theme decode failed");
         if (typeof metro.withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformer.transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
         ${statefulConsumerAssertions.replaceAll("THEME", "theme")}
@@ -430,6 +461,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
         import { createComponentRecipeResolver, createRecipeResolver, createSprinklesResolver, createThemeTokenReference, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
         import { createTokenThemeFocus } from "@opsydyn/crumbs-css/tokens/optic";
+        import { decodeExternalTokenTheme, decodeTokenValue } from "@opsydyn/crumbs-css/tokens/schema";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
         import {button} from "./button.css";
@@ -451,6 +483,9 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (resolveThemeTokens(component, {contract: {}, values: {}, tokens: {"--crumbs-component-width": 24}}).base.root.width !== 24) throw new Error("component theme resolution failed");
         if (typeof createSprinklesResolver !== "function") throw new Error("missing theme createSprinklesResolver");
         if (typeof createTokenThemeFocus !== "function") throw new Error("missing token optic focus");
+        if (decodeTokenValue({kind: "color"}, "#ffffff") !== "#ffffff") throw new Error("token schema color decode failed");
+        const decodedExternalTheme = decodeExternalTokenTheme({_tag: "CrumbsTokenTheme", version: 1, contract: {owner: "@acme/ui", name: "Theme", version: 1}, values: {"color.text": "#ffffff"}});
+        if (!decodedExternalTheme.ok || decodedExternalTheme.value.values["color.text"] !== "#ffffff") throw new Error("external token theme decode failed");
         if (typeof withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
         ${statefulConsumerAssertions.replaceAll("THEME", "({resolveThemeTokens, createComponentRecipeResolver})")}
