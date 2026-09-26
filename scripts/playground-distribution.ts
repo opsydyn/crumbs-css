@@ -576,7 +576,7 @@ async function qualifyM8_3Consumer(repositoryRoot: string): Promise<void> {
       packedExports: "passed",
       packedRuntimeGraphs: "passed",
       consumerTypecheck: "passed",
-      productionExports: {ios: "passed", web: "passed"},
+      productionExports: {ios: "passed", web: "passed", android: "not-run"},
       pairedTreeShakingCanary: "passed",
     },
     limitations: [
