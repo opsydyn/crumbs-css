@@ -1,0 +1,32 @@
+{
+  "name": "@acme/ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "files": ["dist"],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "react-native": "./dist/index.js",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "bun build.ts"
+  },
+  "dependencies": {
+    "@acme/design-tokens": "^1.0.0",
+    "@opsydyn/crumbs-css": "^0.1.1-alpha.1"
+  },
+  "peerDependencies": {
+    "react": ">=19 <20",
+    "react-native": ">=0.85 <0.86"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.10",
+    "react": "19.2.5",
+    "react-native": "0.85.3",
+    "typescript": "~5.9.2"
+  }
+}

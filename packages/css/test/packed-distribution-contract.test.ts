@@ -4,6 +4,7 @@ import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, relative, sep } from "node:path"
 import {
   assertNoWorkspaceOrLinkDependencies,
+  assertPrecompiledComponentFiles,
   verifyInstalledArtifact,
 } from "../../../scripts/packed-distribution-contract"
 
@@ -143,4 +144,43 @@ test("assertNoWorkspaceOrLinkDependencies rejects workspace and link protocols",
   ]) {
     expect(() => assertNoWorkspaceOrLinkDependencies(manifest)).toThrow(/workspace:|link:/)
   }
+})
+
+
+test("assertPrecompiledComponentFiles requires native, web, declaration, and entrypoint outputs", () => {
+  const completeFiles = [
+    "package/dist/ActionCard.styles.native.js",
+    "package/dist/ActionCard.styles.web.js",
+    "package/dist/ActionCard.styles.d.ts",
+    "package/dist/ActionCard.js",
+    "package/dist/ActionCard.d.ts",
+    "package/dist/index.js",
+    "package/dist/index.d.ts",
+  ]
+  expect(() => assertPrecompiledComponentFiles(completeFiles)).not.toThrow()
+  expect(() => assertPrecompiledComponentFiles(
+    completeFiles.filter((file) => !file.endsWith("ActionCard.styles.web.js")),
+  )).toThrow(/web.*style/i)
+  expect(() => assertPrecompiledComponentFiles(
+    completeFiles.filter((file) => !file.endsWith("dist/index.js")),
+  )).toThrow(/index.*entry/i)
+})
+
+test("assertPrecompiledComponentFiles rejects authored stylesheet sources and maps", () => {
+  const compiledFiles = [
+    "package/dist/ActionCard.styles.native.js",
+    "package/dist/ActionCard.styles.web.js",
+    "package/dist/ActionCard.styles.d.ts",
+    "package/dist/ActionCard.js",
+    "package/dist/ActionCard.d.ts",
+    "package/dist/index.js",
+    "package/dist/index.d.ts",
+  ]
+  for (const source of ["package/src/ActionCard.css.ts", "package/src/ActionCard.css.ts.map"]) {
+    expect(() => assertPrecompiledComponentFiles([...compiledFiles, source])).toThrow(/\.css\.ts/)
+  }
+  expect(() => assertPrecompiledComponentFiles([
+    ...compiledFiles,
+    "package/dist/ActionCard.styles.native.js.map",
+  ])).toThrow(/source map/i)
 })

@@ -53,6 +53,39 @@ export function assertNoWorkspaceOrLinkDependencies(manifest: PackageManifest): 
   }
 }
 
+
+export function assertPrecompiledComponentFiles(files: ReadonlyArray<string>): void {
+  const normalizedFiles = files.map((file) => file.replaceAll("\\", "/"))
+  const requiredFiles = [
+    { path: "dist/ActionCard.styles.native.js", description: "native style module" },
+    { path: "dist/ActionCard.styles.web.js", description: "web style module" },
+    { path: "dist/ActionCard.styles.d.ts", description: "style declaration" },
+    { path: "dist/ActionCard.js", description: "component module" },
+    { path: "dist/ActionCard.d.ts", description: "component declaration" },
+    { path: "dist/index.js", description: "index JavaScript entrypoint" },
+    { path: "dist/index.d.ts", description: "index declaration entrypoint" },
+  ] as const
+
+  for (const required of requiredFiles) {
+    const present = normalizedFiles.some((file) =>
+      file === required.path || file.endsWith(`/${required.path}`),
+    )
+    if (!present) {
+      throw new Error(`Missing required component ${required.description}: ${required.path}`)
+    }
+  }
+
+  const authoredStyleSource = normalizedFiles.find((file) => /\.css\.ts(?:\.map)?$/i.test(file))
+  if (authoredStyleSource !== undefined) {
+    throw new Error(`Packed component includes authored Crumbs stylesheet source: ${authoredStyleSource}`)
+  }
+
+  const sourceMap = normalizedFiles.find((file) => /\.map$/i.test(file))
+  if (sourceMap !== undefined) {
+    throw new Error(`Packed component includes a source map: ${sourceMap}`)
+  }
+}
+
 async function findPackageManifest(
   entryPath: string,
   expected: PackageIdentity,
