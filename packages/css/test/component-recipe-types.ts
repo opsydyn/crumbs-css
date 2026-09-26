@@ -320,6 +320,34 @@ extendComponentRecipe(contractedButton, {
   slotOverrides: {internalIcon: {width: 16}},
 })
 
+const defaultableStateButton = componentRecipe({
+  contract: {
+    identity: {owner: "@acme/ui", name: "DefaultableStateButton", version: 1},
+    public: {
+      slots: ["root"],
+      variants: {status: ["ready", "loading"], tone: ["primary", "quiet"]},
+    },
+    extensionPoints: {defaults: ["status", "tone"], variantValues: ["tone"], slotStyles: ["root"]},
+  },
+  slots: {root: "view"} as const,
+  variants: {
+    status: {ready: {root: {opacity: 1}}, loading: {root: {opacity: 0.5}}},
+    tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}},
+  },
+  defaultVariants: {status: "ready", tone: "quiet"},
+  stateVariants: {status: {ready: {tone: ["quiet"]}, loading: {tone: ["primary"]}}},
+})
+const loadingDefaultExtension = extendComponentRecipe(defaultableStateButton, {
+  identity: {owner: "@acme/brand", name: "LoadingDefault", version: 1},
+  defaultVariants: {status: "loading", tone: "primary"},
+})
+type LoadingDefaultSelection = NativeComponentPublicProps<typeof loadingDefaultExtension>
+const extensionDefaultsNeedNoSelection: LoadingDefaultSelection = {}
+const extensionDefaultStateCanBeExplicit: LoadingDefaultSelection = {status: "loading"}
+// @ts-expect-error Extension defaults make loading the implicit state; ready now requires its quiet tone.
+const ownerDefaultIsNoLongerImplicit: LoadingDefaultSelection = {status: "ready"}
+void [extensionDefaultsNeedNoSelection, extensionDefaultStateCanBeExplicit, ownerDefaultIsNoLongerImplicit]
+
 const publiclyConstrainedButton = componentRecipe({
   contract: {
     identity: {owner: "@acme/ui", name: "PublicStateButton", version: 1},
@@ -357,6 +385,24 @@ componentRecipe({
   },
   defaultVariants: {status: "ready", density: "compact"},
   stateVariants: {status: {ready: {density: ["compact"]}, loading: {density: ["roomy"]}}},
+})
+
+// @ts-expect-error A complete public state projection cannot require a value hidden by the token contract.
+componentRecipe({
+  contract: {
+    identity: {owner: "@acme/ui", name: "PrivateRequiredStateValue", version: 1},
+    public: {
+      slots: ["root"],
+      variants: {status: ["ready", "loading"], tone: ["primary"]},
+    },
+  },
+  slots: {root: "view"} as const,
+  variants: {
+    status: {ready: {root: {opacity: 1}}, loading: {root: {opacity: 0.5}}},
+    tone: {primary: {root: {opacity: 1}}, quiet: {root: {opacity: 0.8}}},
+  },
+  defaultVariants: {status: "ready", tone: "primary"},
+  stateVariants: {status: {ready: {tone: ["primary"]}, loading: {tone: ["quiet"]}}},
 })
 
 componentRecipe({

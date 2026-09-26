@@ -482,7 +482,10 @@ type PublicComponentSelection<TVariants extends NativeComponentVariantsShape, TS
       : NativeComponentStateRecipeSelection<TPublicVariants, Exclude<TStates, undefined>, TDefaults>
     : never
 
-type NativeComponentPublicPropsFromBase<TRecipe, TAdded> =
+type ApplyExtensionDefaults<TBaseDefaults, TExtensionDefaults> =
+  Omit<TBaseDefaults, keyof TExtensionDefaults> & TExtensionDefaults
+
+type NativeComponentPublicPropsFromBase<TRecipe, TAdded, TExtensionDefaults = {}> =
   TRecipe extends NativeComponentRecipe<
     infer _TSlots,
     infer TVariants,
@@ -491,7 +494,13 @@ type NativeComponentPublicPropsFromBase<TRecipe, TAdded> =
     infer TContract
   >
     ? TContract extends NativeComponentContract
-      ? PublicComponentSelection<TVariants, TStateVariants, TDefaults, TContract, TAdded>
+      ? PublicComponentSelection<
+        TVariants,
+        TStateVariants,
+        ApplyExtensionDefaults<TDefaults, TExtensionDefaults>,
+        TContract,
+        TAdded
+      >
       : never
     : never
 
@@ -502,8 +511,9 @@ export type NativeComponentPublicProps<TRecipe> =
     : NativeComponentRecipeExtensionTypeDetails<TRecipe> extends {
         readonly base: infer TBase
         readonly variants: infer TAdded
+        readonly defaultVariants: infer TExtensionDefaults
       }
-      ? NativeComponentPublicPropsFromBase<TBase, TAdded>
+      ? NativeComponentPublicPropsFromBase<TBase, TAdded, TExtensionDefaults>
       : never
 
 export type NativeComponentResolvedStyles<TSlots extends NativeComponentSlots> = Readonly<{

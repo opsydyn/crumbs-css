@@ -289,6 +289,12 @@ export function validateComponentRecipeExtensionSelection(
     if (!plan.selectionKeys.includes(key)) {
       throw new TypeError(`Component recipe extension resolver received unknown or private selection key ${JSON.stringify(key)}`)
     }
+    const selectedValue = selection[key]
+    const privateValues = plan.extensionPlan?.privateOwnerValues[key]
+    if ((typeof selectedValue === "string" || typeof selectedValue === "boolean") &&
+      privateValues !== undefined && Object.hasOwn(privateValues, String(selectedValue))) {
+      throw new TypeError(`Component recipe extension resolver received private owner value ${JSON.stringify(selectedValue)} for selection key ${JSON.stringify(key)}`)
+    }
   }
 }
 

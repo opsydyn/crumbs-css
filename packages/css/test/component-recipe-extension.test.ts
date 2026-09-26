@@ -27,6 +27,7 @@ function inFileScope<T>(run: () => T, packageName = "@crumbs/test"): T {
 
 function makeButton(options: {
   readonly stateful?: boolean
+  readonly privateToneValue?: boolean
   readonly compoundPermission?: boolean
   readonly stateValuePermission?: boolean
 } = {}) {
@@ -37,6 +38,7 @@ function makeButton(options: {
         tone: {
           primary: {root: {opacity: 1}},
           quiet: {root: {opacity: 0.8}},
+          ...(options.privateToneValue ? {internal: {root: {opacity: 0.1}}} : {}),
         },
         status: {
           ready: {root: {borderWidth: 1}},
@@ -49,6 +51,7 @@ function makeButton(options: {
         tone: {
           primary: {root: {opacity: 1}},
           quiet: {root: {opacity: 0.8}},
+          ...(options.privateToneValue ? {internal: {root: {opacity: 0.1}}} : {}),
         },
         density: {compact: {}},
       }
@@ -276,6 +279,24 @@ describe("component recipe extensions", () => {
     }
     expect(() => createComponentRecipeResolver(base, {extensions: [first, mismatchedParent] as never}))
       .toThrow(/parent.*identity|identity.*parent/i)
+
+    const secondValue = authorExtension(base, extensionConfig("NonImmediateValue", "partner"), [first])
+    expect(() => extendComponentRecipe(base as never, extensionConfig("RepeatsNonImmediateValue", "brand") as never,
+      [first, secondValue] as never)).toThrow(/already exists|duplicate.*value/i)
+  })
+
+  it("does not allow extension authors to replace private owner values", () => {
+    const base = makeButton({privateToneValue: true})
+    expect(() => authorExtension(base, extensionConfig("CannotReplacePrivateValue", "internal")))
+      .toThrow(/already exists|duplicate.*value/i)
+  })
+
+  it("rejects private owner values from untyped extension selections", () => {
+    const base = makeButton({privateToneValue: true})
+    const extension = authorExtension(base, extensionConfig("PrivateSelectionGuard", "brand"))
+    const resolver = createComponentRecipeResolver(base, {extensions: [extension] as never, cacheSize: 0})
+
+    expect(() => resolver({tone: "internal"} as never)).toThrow(/private|unknown.*value|invalid.*value/i)
   })
 
   it("rejects malformed extension DTOs and extension-only selection keys", () => {

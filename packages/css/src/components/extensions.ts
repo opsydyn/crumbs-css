@@ -65,11 +65,27 @@ type AddedVariantsFromPrior<TPrior extends ReadonlyArray<unknown>> =
       ? TVariants
       : Readonly<Record<never, never>>
     : never>
+type EmptyExtensionDefaults = Readonly<Record<never, never>>
+type AddedDefaultsOf<TConfig> = TConfig extends {
+  readonly defaultVariants: infer TDefaults extends Readonly<Record<string, string | boolean>>
+} ? TDefaults : EmptyExtensionDefaults
+type AddedDefaultsFromPrior<TPrior extends ReadonlyArray<unknown>> =
+  TPrior extends readonly [...ReadonlyArray<unknown>, infer TLast]
+    ? NativeComponentRecipeExtensionTypeDetails<TLast> extends {
+      readonly defaultVariants: infer TDefaults extends Readonly<Record<string, string | boolean>>
+    }
+      ? TDefaults
+      : EmptyExtensionDefaults
+    : EmptyExtensionDefaults
 type MergeVariantMaps<TLeft, TRight> = Simplify<{
   readonly [TAxis in keyof TLeft | keyof TRight]:
     (TAxis extends keyof TLeft ? TLeft[TAxis] : Readonly<Record<never, never>>) &
     (TAxis extends keyof TRight ? TRight[TAxis] : Readonly<Record<never, never>>)
 }>
+type MergeDefaultMaps<
+  TLeft extends Readonly<Record<string, string | boolean>>,
+  TRight extends Readonly<Record<string, string | boolean>>,
+> = Simplify<Omit<TLeft, keyof TRight> & TRight>
 type UnionToIntersection<TUnion> =
   (TUnion extends unknown ? (value: TUnion) => void : never) extends (value: infer TIntersection) => void
     ? TIntersection
@@ -86,7 +102,7 @@ export function extendComponentRecipe<
     readonly contract: NativeComponentContract
   },
   const TConfig extends NativeComponentRecipeExtensionConfig<TBase>,
-  const TPrior extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor<TBase, any, any>> = readonly [],
+  const TPrior extends ReadonlyArray<NativeComponentRecipeExtensionDescriptor<TBase, any, any, any>> = readonly [],
 >(
   base: TBase,
   config: TConfig,
@@ -94,7 +110,8 @@ export function extendComponentRecipe<
 ): NativeComponentRecipeExtensionDescriptor<
   TBase,
   AddedVariantsOf<TConfig>,
-  MergeVariantMaps<AddedVariantsFromPrior<TPrior>, AddedVariantsOf<TConfig>>
+  MergeVariantMaps<AddedVariantsFromPrior<TPrior>, AddedVariantsOf<TConfig>>,
+  MergeDefaultMaps<AddedDefaultsFromPrior<TPrior>, AddedDefaultsOf<TConfig>>
 > {
   const draft = validateNativeComponentRecipeExtensionDraft(base, config, priorExtensions)
   assertExtensionStyleTokensArePublic(draft)
@@ -128,7 +145,8 @@ export function extendComponentRecipe<
   }) as unknown as NativeComponentRecipeExtensionDescriptor<
     TBase,
     AddedVariantsOf<TConfig>,
-    MergeVariantMaps<AddedVariantsFromPrior<TPrior>, AddedVariantsOf<TConfig>>
+    MergeVariantMaps<AddedVariantsFromPrior<TPrior>, AddedVariantsOf<TConfig>>,
+    MergeDefaultMaps<AddedDefaultsFromPrior<TPrior>, AddedDefaultsOf<TConfig>>
   >
 
   validateNativeComponentRecipeExtensionChain(base, [...priorExtensions, descriptor])

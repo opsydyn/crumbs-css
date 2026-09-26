@@ -169,7 +169,7 @@ describe("component recipe authoring", () => {
       expect(() => componentRecipe({
         contract: {
           identity: {owner: "@acme/ui", name: "PrivateStateValue", version: 1},
-          public: {slots: ["root"], variants: {status: ["ready"], tone: ["primary"]}},
+          public: {slots: ["root"], variants: {status: ["ready", "loading"], tone: ["primary"]}},
         },
         slots: {root: "view"},
         variants: {
@@ -178,7 +178,7 @@ describe("component recipe authoring", () => {
         },
         defaultVariants: {status: "ready", tone: "primary"},
         stateVariants: {status: {ready: {tone: ["primary"]}, loading: {tone: ["quiet"]}}},
-      } as never)).toThrow(/public state.*case|state case.*public/i)
+      } as never)).toThrow(/public state.*private value|requires private value/i)
     })
   })
 

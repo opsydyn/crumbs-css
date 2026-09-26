@@ -29,6 +29,7 @@ export type NativeComponentRecipeExtensionDescriptor<
   TBase = unknown,
   TAddedVariants extends NativeComponentExtensionVariants = NativeComponentExtensionVariants,
   TAllAddedVariants = TAddedVariants,
+  TAllDefaultVariants = Readonly<Record<never, never>>,
 > = {
   readonly $$type: typeof NativeComponentRecipeExtensionType
   readonly version: typeof NativeComponentRecipeExtensionVersion
@@ -47,6 +48,7 @@ export type NativeComponentRecipeExtensionDescriptor<
   readonly [NativeComponentRecipeExtensionTypeInfo]?: {
     readonly base: TBase
     readonly variants: TAllAddedVariants
+    readonly defaultVariants: TAllDefaultVariants
   }
 }
 
@@ -78,6 +80,8 @@ export type NativeComponentRecipeExtensionPlan = {
   }>
   readonly slotOverrides: ReadonlyArray<NativeComponentExtensionSlotStyles>
   readonly selectionKeys: ReadonlyArray<string>
+  /** Owner-only values are never admitted by extension consumer selections. */
+  readonly privateOwnerValues: Readonly<Record<string, Readonly<Record<string, true>>>>
 }
 
 type ComponentBase = {
@@ -99,6 +103,7 @@ const EMPTY_EXTENSION_PLAN: NativeComponentRecipeExtensionPlan = Object.freeze({
   compoundVariants: Object.freeze([]),
   slotOverrides: Object.freeze([]),
   selectionKeys: Object.freeze([]),
+  privateOwnerValues: Object.freeze({}),
 })
 
 /** Validate a complete base-to-leaf chain and precompute immutable merge data. */
@@ -165,8 +170,11 @@ function validateExtensionChain(
   const variantAxes = new Set(extensionPoints?.variantValues ?? [])
   const permittedSlots = new Set(extensionPoints?.slotStyles ?? [])
   const availableValues = new Map<string, Set<string>>()
+  const occupiedValues = new Map<string, Set<string>>()
   for (const [axis, values] of Object.entries(contract.public.variants)) {
     availableValues.set(axis, new Set(values))
+    occupiedValues.set(axis, new Set(dataRecordEntries(base.variants[axis],
+      `component recipe variant ${JSON.stringify(axis)}`).map(([value]) => value)))
   }
 
   const seenIdentities = new Set([nativeComponentContractIdentityKey(componentIdentity)])
@@ -209,6 +217,7 @@ function validateExtensionChain(
       permittedSlots,
       stateDiscriminator,
       availableValues,
+      occupiedValues,
       addedVariantEntries,
       `extension ${JSON.stringify(extensionKey)}`,
     )
@@ -264,6 +273,12 @@ function validateExtensionChain(
     axis,
     Object.freeze(Object.fromEntries(entries)),
   ]))
+  const privateOwnerValues = Object.fromEntries([...occupiedValues.entries()].map(([axis, values]) => [
+    axis,
+    Object.freeze(Object.fromEntries([...values]
+      .filter(value => !availableValues.get(axis)!.has(value))
+      .map(value => [value, true as const]))),
+  ]))
   return Object.freeze({
     extensions: Object.freeze(normalizedExtensions),
     defaultVariants: Object.freeze(extensionDefaults),
@@ -271,6 +286,7 @@ function validateExtensionChain(
     compoundVariants: Object.freeze(compounds),
     slotOverrides: Object.freeze(slotOverrides),
     selectionKeys: Object.freeze([...publicAxes].sort(compareText)),
+    privateOwnerValues: Object.freeze(privateOwnerValues),
   })
 }
 
@@ -374,6 +390,7 @@ function validateAddedVariants(
   permittedSlots: ReadonlySet<string>,
   stateDiscriminator: string | undefined,
   availableValues: Map<string, Set<string>>,
+  occupiedValues: Map<string, Set<string>>,
   addedVariantEntries: Map<string, Array<readonly [string, NativeComponentExtensionSlotStyles]>>,
   context: string,
 ): NativeComponentExtensionVariants {
@@ -391,7 +408,7 @@ function validateAddedVariants(
     }
     const values = dataRecordEntries(rawValues, context + ` variant ${JSON.stringify(axis)}`)
     if (values.length === 0) throw new TypeError(`${context} must add at least one value to variant ${JSON.stringify(axis)}`)
-    const seenValues = availableValues.get(axis)!
+    const seenValues = occupiedValues.get(axis)!
     const normalizedValues: Array<readonly [string, NativeComponentExtensionSlotStyles]> = []
     const targetEntries = addedVariantEntries.get(axis) ?? []
     for (const [valueName, rawStyles] of values) {
@@ -401,6 +418,7 @@ function validateAddedVariants(
       const styles = validateSlotStyles(rawStyles, publicSlots, permittedSlots, mode,
         `${context} variant ${JSON.stringify(axis)} value ${JSON.stringify(valueName)}`)
       seenValues.add(valueName)
+      availableValues.get(axis)!.add(valueName)
       normalizedValues.push([valueName, styles])
       targetEntries.push([valueName, styles])
     }
