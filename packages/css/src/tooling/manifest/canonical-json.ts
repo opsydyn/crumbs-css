@@ -5,8 +5,8 @@ import type { DesignSystemManifest } from "./model"
  * Compare strings by Unicode code units, independent of the host locale.
  * Set-like values use this ordinal order: token, component and module records by
  * identity; dependencies, capabilities and coverage records by canonical bytes;
- * enum values, slots, variant axes/values, extension points, state constraints,
- * module exports, record keys and all JSON object keys by key/value text.
+ * enum values, slots, variant axes/values, extension points, state-constraint
+ * axes/values, module exports, record keys and all JSON object keys by key text.
  * Token paths, alias target paths and other semantic sequences keep authored order.
  */
 function compareOrdinal(left: string, right: string): number {
@@ -29,6 +29,23 @@ function byCanonicalValue<T>(items: ReadonlyArray<T>): ReadonlyArray<T> {
   return [...items].sort((left, right) => compareOrdinal(canonicalJsonForSort(left), canonicalJsonForSort(right)))
 }
 
+function compareStateValue(left: string | boolean, right: string | boolean): number {
+  if (typeof left !== typeof right) return typeof left === "string" ? -1 : 1
+  if (typeof left === "string" && typeof right === "string") return compareOrdinal(left, right)
+  return Number(left) - Number(right)
+}
+
+function normalizeStateConstraints(constraints: DesignSystemManifest["components"][number]["stateConstraints"]) {
+  return constraints.map(constraint => ({
+    ...constraint,
+    axes: Object.fromEntries(Object.keys(constraint.axes).sort(compareOrdinal).map(axis => [
+      axis,
+      [...constraint.axes[axis]!].sort(compareStateValue),
+    ])),
+  })).sort((left, right) => compareOrdinal(left.discriminator, right.discriminator) ||
+    compareOrdinal(left.case, right.case) || compareOrdinal(canonicalJsonForSort(left), canonicalJsonForSort(right)))
+}
+
 function normalizeManifest(manifest: DesignSystemManifest): DesignSystemManifest {
   const tokens = manifest.tokens.map(token => ({
     ...token,
@@ -41,7 +58,7 @@ function normalizeManifest(manifest: DesignSystemManifest): DesignSystemManifest
     slots: [...component.slots].sort(compareOrdinal),
     variants: sortRecord(component.variants),
     extensionPoints: [...component.extensionPoints].sort(compareOrdinal),
-    stateConstraints: sortRecord(component.stateConstraints),
+    stateConstraints: normalizeStateConstraints(component.stateConstraints),
     defaults: Object.fromEntries(Object.keys(component.defaults).sort(compareOrdinal).map(key => [key, component.defaults[key]!])),
   }))
   const modules = manifest.modules.map(module => ({ ...module, exports: [...module.exports].sort(compareOrdinal) }))

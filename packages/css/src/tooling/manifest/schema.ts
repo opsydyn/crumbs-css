@@ -4,7 +4,12 @@ import {
   DESIGN_SYSTEM_MANIFEST_FORMAT,
   DESIGN_SYSTEM_MANIFEST_VERSION,
   type DesignSystemManifest,
+  type ManifestContractIdentity,
+  type ManifestLifecycleAnnotation,
+  type ManifestSourceOrigin,
+  type ManifestUnresolvedReference,
 } from "./model"
+import type { DataCodec } from "../../contracts/data-codec"
 
 const IdentifierText = Schema.NonEmptyString.check(Schema.makeFilter<string>(value =>
   value === value.trim() && !/[\u0000-\u001f\u007f]/u.test(value)))
@@ -34,14 +39,17 @@ const SourceOriginSchema = Schema.Struct({
   path: PackageRelativePath,
   exportPath: Schema.optionalKey(IdentifierText),
 })
-const LifecycleSchema = Schema.Struct({
-  deprecatedSince: IdentifierText,
-  reason: Schema.optionalKey(IdentifierText),
-  replacement: Schema.optionalKey(Schema.Struct({
-    id: IdentifierText,
-    resolution: Schema.Literals(["declared", "external"]),
-  })),
+const ReplacementSchema = Schema.Struct({
+  id: IdentifierText,
+  resolution: Schema.Literals(["declared", "external"]),
 })
+const LifecycleFields = {
+  deprecatedSince: SemVer,
+  reason: Schema.optionalKey(IdentifierText),
+  replacement: Schema.optionalKey(ReplacementSchema),
+}
+const LifecycleSchema = Schema.Struct(LifecycleFields)
+const LifecycleAnnotationSchema = Schema.Struct({ entityId: IdentifierText, ...LifecycleFields })
 const TokenDomainSchema = Schema.Union([
   Schema.Struct({ kind: Schema.Literal("color") }),
   Schema.Struct({ kind: Schema.Literal("length"), allowNegative: Schema.Boolean }),
@@ -69,6 +77,11 @@ const TokenSchema = Schema.Struct({
   ? token.alias !== undefined
   : token.alias === undefined))
 const StringSetRecordSchema = Schema.Record(IdentifierText, SetTextArray)
+const StateConstraintSchema = Schema.Struct({
+  discriminator: IdentifierText,
+  case: IdentifierText,
+  axes: Schema.Record(IdentifierText, Schema.Array(Schema.Union([Schema.String, Schema.Boolean]))),
+})
 const ComponentSchema = Schema.Struct({
   id: IdentifierText,
   contract: ContractIdentitySchema,
@@ -76,7 +89,7 @@ const ComponentSchema = Schema.Struct({
   slots: SetTextArray,
   variants: StringSetRecordSchema,
   extensionPoints: SetTextArray,
-  stateConstraints: StringSetRecordSchema,
+  stateConstraints: Schema.Array(StateConstraintSchema),
   defaults: Schema.Record(IdentifierText, JsonScalar),
   lifecycle: Schema.optionalKey(LifecycleSchema),
 })
@@ -132,14 +145,38 @@ export const designSystemManifestSchema = Schema.Struct({
 })
 
 const manifestDataCodec = makeDataCodec("design-system-manifest-v1", designSystemManifestSchema)
+const contractIdentityCodec = makeDataCodec("manifest-contract-identity", ContractIdentitySchema)
+const sourceOriginCodec = makeDataCodec("manifest-source-origin", SourceOriginSchema)
+const lifecycleAnnotationCodec = makeDataCodec("manifest-lifecycle-annotation", LifecycleAnnotationSchema)
+const unresolvedReferenceCodec = makeDataCodec("manifest-unresolved-reference", UnresolvedReferenceSchema)
 
-/** Validate unknown input and return an ordinary, detached JSON-data record. */
-export function decodeManifest(input: unknown): DesignSystemManifest {
-  const result = manifestDataCodec.decode(input)
-  if (result.ok) return result.value as DesignSystemManifest
+function decodeToolingInput<T>(codec: DataCodec<T>, input: unknown, boundary: string): T {
+  const result = codec.decode(input)
+  if (result.ok) return result.value
   const detail = result.issues.map(issue => {
     const path = issue.path.length === 0 ? "<root>" : issue.path.join(".")
     return `${path}: ${issue.message}`
   }).join("; ")
-  throw new TypeError(`Invalid Crumbs design-system manifest v1: ${detail}`)
+  throw new TypeError(`Invalid ${boundary}: ${detail}`)
+}
+
+/** Validate unknown input and return an ordinary, detached JSON-data record. */
+export function decodeManifest(input: unknown): DesignSystemManifest {
+  return decodeToolingInput(manifestDataCodec, input, "Crumbs design-system manifest v1") as DesignSystemManifest
+}
+
+export function decodeManifestContractIdentity(input: unknown): ManifestContractIdentity {
+  return decodeToolingInput(contractIdentityCodec, input, "manifest contract identity") as ManifestContractIdentity
+}
+
+export function decodeManifestSourceOrigin(input: unknown): ManifestSourceOrigin {
+  return decodeToolingInput(sourceOriginCodec, input, "manifest source origin") as ManifestSourceOrigin
+}
+
+export function decodeManifestLifecycleAnnotation(input: unknown): ManifestLifecycleAnnotation {
+  return decodeToolingInput(lifecycleAnnotationCodec, input, "manifest lifecycle annotation") as ManifestLifecycleAnnotation
+}
+
+export function decodeManifestUnresolvedReference(input: unknown): ManifestUnresolvedReference {
+  return decodeToolingInput(unresolvedReferenceCodec, input, "manifest unresolved reference") as ManifestUnresolvedReference
 }

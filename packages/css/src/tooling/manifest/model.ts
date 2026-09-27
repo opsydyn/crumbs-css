@@ -53,6 +53,10 @@ export type ManifestLifecycle = {
   }
 }
 
+export type ManifestLifecycleAnnotation = ManifestLifecycle & {
+  readonly entityId: string
+}
+
 export type ManifestTokenAlias = {
   readonly targetId?: string
   readonly targetPath: ReadonlyArray<string>
@@ -72,14 +76,21 @@ export type ManifestToken = {
   readonly lifecycle?: ManifestLifecycle
 }
 
+export type ManifestStateConstraint = {
+  readonly discriminator: string
+  readonly case: string
+  readonly axes: Readonly<Record<string, ReadonlyArray<string | boolean>>>
+}
+
 export type ManifestComponent = {
   readonly id: string
   readonly contract: ManifestContractIdentity
   readonly origin: ManifestSourceOrigin
   readonly slots: ReadonlyArray<string>
   readonly variants: Readonly<Record<string, ReadonlyArray<string>>>
+  /** Namespaced permissions such as `defaults:tone` and `slotStyles:root`. */
   readonly extensionPoints: ReadonlyArray<string>
-  readonly stateConstraints: Readonly<Record<string, ReadonlyArray<string>>>
+  readonly stateConstraints: ReadonlyArray<ManifestStateConstraint>
   readonly defaults: Readonly<Record<string, string | number | boolean>>
   readonly lifecycle?: ManifestLifecycle
 }

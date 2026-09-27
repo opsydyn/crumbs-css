@@ -53,7 +53,7 @@ describe("canonical design-system manifest JSON", () => {
           slots: ["root", "label"],
           variants: { tone: ["quiet", "loud"], size: ["small", "large"] },
           extensionPoints: ["before", "after"],
-          stateConstraints: { pressed: ["true", "false"] },
+          stateConstraints: [{ discriminator: "status", case: "ready", axes: { tone: ["quiet", "loud"] } }],
           defaults: { tone: "quiet", size: "small" },
         }
         const module = { id: "src/主题/按钮.css.ts", origin: { path: "src/主题/按钮.css.ts" }, exports: ["Button", "Button.icon"] }
@@ -67,7 +67,7 @@ describe("canonical design-system manifest JSON", () => {
         const second = reverseObjectKeys({
           ...emptyManifest,
           tokens: arranged.map(token).reverse(),
-          components: [{ ...component, slots: [...component.slots].reverse(), extensionPoints: [...component.extensionPoints].reverse(), variants: { tone: [...component.variants.tone].reverse(), size: [...component.variants.size].reverse() }, stateConstraints: { pressed: [...component.stateConstraints.pressed].reverse() } }],
+          components: [{ ...component, slots: [...component.slots].reverse(), extensionPoints: [...component.extensionPoints].reverse(), variants: { tone: [...component.variants.tone].reverse(), size: [...component.variants.size].reverse() }, stateConstraints: [{ ...component.stateConstraints[0]!, axes: { tone: [...component.stateConstraints[0]!.axes.tone!].reverse() } }] }],
           modules: [{ ...module, exports: [...module.exports].reverse() }],
           coverage: { roots: [{ kind: "token-contract", id: "@acme/design-system#foundation@1" }, { kind: "style-module", id: module.id }], unresolved: [] },
         })
