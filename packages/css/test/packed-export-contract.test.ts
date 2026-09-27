@@ -40,6 +40,11 @@ async function writeFixturePackage(packageRoot: string): Promise<void> {
         },
         types: "./types/conditional.d.ts",
       },
+      "./tooling/manifest": {
+        types: "./dist/tooling-manifest.d.mts",
+        import: "./dist/tooling-manifest.mjs",
+        require: "./dist/tooling-manifest.cjs",
+      },
       "./package.json": "./package.json",
     },
   }
@@ -52,6 +57,9 @@ async function writeFixturePackage(packageRoot: string): Promise<void> {
     "./types/conditional.d.ts",
     "./dist/conditional.mjs",
     "./dist/conditional.cjs",
+    "./dist/tooling-manifest.d.mts",
+    "./dist/tooling-manifest.mjs",
+    "./dist/tooling-manifest.cjs",
   ]) {
     await writeTarget(packageRoot, target)
   }
@@ -100,6 +108,12 @@ test("verifyPackedExportMap checks every target and Node import/require selectio
       import: "./dist/conditional.mjs",
       require: "./dist/conditional.cjs",
       types: "./types/conditional.d.ts",
+    },
+    {
+      subpath: "./tooling/manifest",
+      import: "./dist/tooling-manifest.mjs",
+      require: "./dist/tooling-manifest.cjs",
+      types: "./dist/tooling-manifest.d.mts",
     },
     {
       subpath: "./package.json",

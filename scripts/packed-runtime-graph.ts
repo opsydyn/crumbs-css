@@ -36,6 +36,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./tokens/schema/value": "advanced-runtime",
   "./tokens/optic": "advanced-runtime",
   "./style": "compiler-tooling",
+  "./tooling/manifest": "compiler-tooling",
   "./metro-plugin": "compiler-tooling",
   "./dist/transformer": "compiler-tooling",
   "./dist/metro-plugin": "compiler-tooling",
@@ -45,7 +46,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
 const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
   subpath: string
   format: "esm" | "cjs"
-  importer: string
+  importer: string | RegExp
   callee: "require" | "__require"
   specifier: string
   rationale: string
@@ -53,7 +54,7 @@ const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
   {
     subpath: "./dist/transformer",
     format: "esm",
-    importer: "dist/transformer.mjs",
+    importer: /^dist\/transformer(?:-[A-Za-z0-9_-]+)?\.mjs$/u,
     callee: "__require",
     specifier: "upstreamPath",
     rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
@@ -61,7 +62,23 @@ const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
   {
     subpath: "./dist/transformer",
     format: "cjs",
-    importer: "dist/transformer.cjs",
+    importer: /^dist\/transformer(?:-[A-Za-z0-9_-]+)?\.cjs$/u,
+    callee: "require",
+    specifier: "upstreamPath",
+    rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
+  },
+  {
+    subpath: "./tooling/manifest",
+    format: "esm",
+    importer: /^dist\/transformer-[A-Za-z0-9_-]+\.mjs$/u,
+    callee: "__require",
+    specifier: "upstreamPath",
+    rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
+  },
+  {
+    subpath: "./tooling/manifest",
+    format: "cjs",
+    importer: /^dist\/transformer-[A-Za-z0-9_-]+\.cjs$/u,
     callee: "require",
     specifier: "upstreamPath",
     rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
@@ -95,13 +112,17 @@ export async function auditPackedRuntimeEntrypoints(
   }
 
   const advancedEntryFiles = new Set<string>()
+  const compilerEntryFiles = new Set<string>()
   for (const [subpath, classification] of classifications) {
-    if (classification !== "advanced-runtime") continue
+    if (classification !== "advanced-runtime" && classification !== "compiler-tooling") continue
     for (const format of ["import", "require"] as const) {
       const target = selectRuntimeTarget(targets, subpath, format)
       if (target !== undefined) {
         const absolute = validatedTargets.get(target.target)
-        if (absolute !== undefined) advancedEntryFiles.add(absolute)
+        if (absolute !== undefined) {
+          if (classification === "advanced-runtime") advancedEntryFiles.add(absolute)
+          else compilerEntryFiles.add(absolute)
+        }
       }
     }
   }
@@ -142,6 +163,7 @@ export async function auditPackedRuntimeEntrypoints(
         subpath,
         graphFormat,
         advancedEntryFiles,
+        compilerEntryFiles,
         files,
         externalSpecifiers,
         dynamicLoaderExceptions,
@@ -167,6 +189,7 @@ async function visit(
   subpath: string,
   format: "esm" | "cjs",
   advancedEntryFiles: ReadonlySet<string>,
+  compilerEntryFiles: ReadonlySet<string>,
   visited: Set<string>,
   externals: Set<string>,
   dynamicLoaderExceptions: Map<string, PackedDynamicLoaderException>,
@@ -177,6 +200,9 @@ async function visit(
   }
   if (classification === "ordinary-runtime" && advancedEntryFiles.has(file)) {
     throw new Error(`ordinary-runtime entry reaches advanced-runtime entry target ${toPackageRelative(packageRoot, file)}`)
+  }
+  if (classification === "ordinary-runtime" && compilerEntryFiles.has(file)) {
+    throw new Error(`ordinary-runtime entry reaches compiler-tooling entry target ${toPackageRelative(packageRoot, file)}`)
   }
 
   visited.add(file)
@@ -222,7 +248,9 @@ async function visit(
           const exception = dynamicLoaderAllowlist.find((entry) =>
             entry.subpath === subpath &&
             entry.format === format &&
-            entry.importer === toPackageRelative(packageRoot, file) &&
+            (typeof entry.importer === "string"
+              ? entry.importer === toPackageRelative(packageRoot, file)
+              : entry.importer.test(toPackageRelative(packageRoot, file))) &&
             entry.callee === callee &&
             entry.specifier === expression
           )
@@ -255,6 +283,7 @@ async function visit(
         subpath,
         format,
         advancedEntryFiles,
+        compilerEntryFiles,
         visited,
         externals,
         dynamicLoaderExceptions,

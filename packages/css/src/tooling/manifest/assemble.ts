@@ -5,10 +5,13 @@ import {
   decodeManifestUnresolvedReference,
 } from "./schema"
 import { projectComponentRecipe, projectTokenContract, type ComponentRecipeRoot, type TokenContractRoot } from "./contracts"
+import type { CompilerManifestSidecar } from "../../compiler/manifest-sidecar"
 import type {
   DesignSystemManifest,
   ManifestComponent,
+  ManifestCoverageRoot,
   ManifestDependency,
+  ManifestModule,
   ManifestLifecycle,
   ManifestLifecycleAnnotation,
   ManifestPackage,
@@ -24,16 +27,19 @@ export type ManifestAssemblyInput = {
   readonly tokenContracts?: ReadonlyArray<TokenContractRoot>
   /** Explicit component recipe roots; no recipe registry is inspected. */
   readonly componentRecipes?: ReadonlyArray<ComponentRecipeRoot>
+  /** Explicit compiler sidecars for selected style modules; no source-tree discovery is performed. */
+  readonly styleSidecars?: ReadonlyArray<CompilerManifestSidecar>
   readonly lifecycleAnnotations?: ReadonlyArray<ManifestLifecycleAnnotation>
   readonly unresolvedReferences?: ReadonlyArray<ManifestUnresolvedReference>
 }
 
-/** Assemble a v1 manifest from only the token and component roots supplied by the caller. */
+/** Assemble a v1 manifest from only the token, component and style roots supplied by the caller. */
 export function assembleManifest(input: ManifestAssemblyInput): DesignSystemManifest {
-  const roots: Array<{ readonly kind: "token-contract" | "component-recipe"; readonly id: string }> = []
+  const roots: ManifestCoverageRoot[] = []
   const rootIds = new Set<string>()
   const tokens: ManifestToken[] = []
   const components: ManifestComponent[] = []
+  const modules: ManifestModule[] = []
 
   for (const root of input.tokenContracts ?? []) {
     const identity = getTokenContractIdentity(root.contract)
@@ -79,6 +85,51 @@ export function assembleManifest(input: ManifestAssemblyInput): DesignSystemMani
     }
   }
 
+  for (const sidecar of input.styleSidecars ?? []) {
+    const module = sidecar.module
+    const expectedId = `${input.package.name}#${module.origin.path}`
+    if (module.id !== expectedId) {
+      throw new TypeError(`Style module ${JSON.stringify(module.id)} does not match package-relative identity ${JSON.stringify(expectedId)}.`)
+    }
+    addRoot(rootIds, roots, "style-module", module.id)
+    const exportPaths = [...new Set(module.exports)].sort(compareOrdinal)
+    const exportSet = new Set(exportPaths)
+    modules.push({ ...module, exports: exportPaths })
+
+    for (const dependency of sidecar.dependencies) {
+      if (dependency.kind !== "style-token" || dependency.from !== module.id) {
+        throw new TypeError(`Style module ${JSON.stringify(module.id)} contains a dependency with an invalid source or kind.`)
+      }
+      assertSidecarOrigin(dependency.origin, module.id, exportSet, "dependency")
+      if (dependency.resolution === "unresolved") {
+        if (dependency.to !== undefined) {
+          throw new TypeError(`Unresolved style dependency from ${JSON.stringify(module.id)} cannot claim a stable target ID.`)
+        }
+        dependencies.push(dependency)
+        continue
+      }
+      if (dependency.to === undefined) {
+        throw new TypeError(`Resolved style dependency from ${JSON.stringify(module.id)} requires a stable target ID.`)
+      }
+      dependencies.push({
+        ...dependency,
+        resolution: tokenIds.has(dependency.to) ? "internal" : "external",
+      })
+    }
+
+    for (const capability of sidecar.capabilities) {
+      if (capability.moduleId !== module.id || !exportSet.has(capability.exportPath)) {
+        throw new TypeError(`Compiler capability for ${JSON.stringify(module.id)} must reference one of its declared exports.`)
+      }
+    }
+
+    for (const rawReference of sidecar.unresolved) {
+      const reference = decodeManifestUnresolvedReference(rawReference)
+      assertSidecarOrigin(reference.origin, module.id, exportSet, "unresolved reference")
+      unresolved.push(reference)
+    }
+  }
+
   const lifecycleById = new Map<string, ManifestLifecycle>()
   for (const rawAnnotation of input.lifecycleAnnotations ?? []) {
     const annotation = decodeManifestLifecycleAnnotation(rawAnnotation)
@@ -102,9 +153,9 @@ export function assembleManifest(input: ManifestAssemblyInput): DesignSystemMani
     producer: input.producer,
     tokens: tokens.map(token => attachLifecycle(token, lifecycleById.get(token.id))),
     components: components.map(component => attachLifecycle(component, lifecycleById.get(component.id))),
-    modules: [],
+    modules,
     dependencies,
-    capabilities: [],
+    capabilities: (input.styleSidecars ?? []).flatMap(sidecar => sidecar.capabilities),
     coverage: { roots, unresolved },
   }
   return decodeManifest(manifest)
@@ -112,13 +163,28 @@ export function assembleManifest(input: ManifestAssemblyInput): DesignSystemMani
 
 function addRoot(
   seen: Set<string>,
-  roots: Array<{ readonly kind: "token-contract" | "component-recipe"; readonly id: string }>,
-  kind: "token-contract" | "component-recipe",
+  roots: Array<ManifestCoverageRoot>,
+  kind: ManifestCoverageRoot["kind"],
   id: string,
 ): void {
   if (seen.has(id)) throw new TypeError(`Duplicate manifest root identity ${JSON.stringify(id)}.`)
   seen.add(id)
   roots.push({ kind, id })
+}
+
+function assertSidecarOrigin(
+  origin: ManifestDependency["origin"] | ManifestUnresolvedReference["origin"],
+  moduleId: string,
+  exports: ReadonlySet<string>,
+  label: string,
+): void {
+  if (origin === undefined || origin.moduleId !== moduleId || !exports.has(origin.exportPath)) {
+    throw new TypeError(`Compiler ${label} for ${JSON.stringify(moduleId)} must reference one of its declared exports.`)
+  }
+}
+
+function compareOrdinal(left: string, right: string): number {
+  return left < right ? -1 : left > right ? 1 : 0
 }
 
 function addEntity(seen: Set<string>, id: string): void {

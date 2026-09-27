@@ -25,6 +25,7 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "./tokens/schema/value": runtimeExport("tokens-schema-value"),
     "./tokens/optic": runtimeExport("tokens-optic"),
     "./style": runtimeExport("style"),
+    "./tooling/manifest": runtimeExport("tooling-manifest"),
     "./metro-plugin": runtimeExport("metro-plugin"),
     "./dist/transformer": runtimeExport("transformer"),
     "./dist/metro-plugin": runtimeExport("metro-plugin"),
@@ -54,6 +55,10 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "dist/tokens-optic.cjs": 'exports.focus = value => value;\n',
     "dist/style.mjs": 'import "node:path"; import "@vanilla-extract/css"; export const style = true;\n',
     "dist/style.cjs": 'require("node:path"); require("@vanilla-extract/css"); exports.style = true;\n',
+    "dist/tooling-manifest.mjs": 'import "./tooling-leaf.mjs"; export const tooling = true;\n',
+    "dist/tooling-manifest.cjs": 'require("./tooling-leaf.cjs"); exports.tooling = true;\n',
+    "dist/tooling-leaf.mjs": 'export const leaf = true;\n',
+    "dist/tooling-leaf.cjs": 'module.exports = true;\n',
     "dist/metro-plugin.mjs": 'export const plugin = true;\n',
     "dist/metro-plugin.cjs": 'exports.plugin = true;\n',
     "dist/transformer.mjs": 'import "node:fs"; export const transformer = true;\n',
@@ -106,9 +111,30 @@ test("auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and c
     .toBe("advanced-runtime")
   expect(graphs.find((graph) => graph.subpath === "./tokens/schema/value" && graph.format === "esm")?.classification)
     .toBe("advanced-runtime")
+  expect(graphs.find((graph) => graph.subpath === "./tooling/manifest" && graph.format === "esm"))
+    .toMatchObject({
+      classification: "compiler-tooling",
+      files: ["dist/tooling-leaf.mjs", "dist/tooling-manifest.mjs"],
+      externalSpecifiers: [],
+    })
+  expect(graphs.find((graph) => graph.subpath === "./tooling/manifest" && graph.format === "cjs"))
+    .toMatchObject({
+      classification: "compiler-tooling",
+      files: ["dist/tooling-leaf.cjs", "dist/tooling-manifest.cjs"],
+      externalSpecifiers: [],
+    })
   expect(graphs.find((graph) => graph.subpath === "./package.json" && graph.format === "metadata"))
     .toMatchObject({classification: "metadata", files: ["package.json"], externalSpecifiers: []})
-  expect(graphs).toHaveLength(25)
+  expect(graphs).toHaveLength(27)
+})
+
+test("ordinary runtime entrypoints cannot reach compiler tooling targets", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: { "dist/theme.mjs": 'import "./tooling-manifest.mjs"; export {};\n' },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/ordinary-runtime.*reaches compiler-tooling/i)
 })
 
 test("auditPackedRuntimeEntrypoints fails when an exported local file is missing", async () => {
@@ -173,6 +199,50 @@ test("only the configured Metro transformer can use its runtime-supplied upstrea
     .rejects.toThrow(/non-literal require.*pathFromConfig/i)
 })
 
+test("the manifest tooling graph allows the transformer’s approved Metro loader in emitted chunks", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/tooling-manifest.mjs": 'import "./transformer-AbC123.mjs"; export {};\n',
+      "dist/tooling-manifest.cjs": 'require("./transformer-AbC123.cjs"); module.exports = {};\n',
+      "dist/transformer-AbC123.mjs": 'const upstreamPath = "runtime-selected"; __require(upstreamPath); export {};\n',
+      "dist/transformer-AbC123.cjs": 'const upstreamPath = "runtime-selected"; require(upstreamPath); module.exports = {};\n',
+    },
+  })
+
+  const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
+
+  expect(graphs.find((graph) => graph.subpath === "./tooling/manifest" && graph.format === "esm")?.dynamicLoaderExceptions)
+    .toEqual([{
+      callee: "__require",
+      specifier: "upstreamPath",
+      rationale: expect.stringMatching(/configured upstream transformer path/i),
+    }])
+  expect(graphs.find((graph) => graph.subpath === "./tooling/manifest" && graph.format === "cjs")?.dynamicLoaderExceptions)
+    .toEqual([{
+      callee: "require",
+      specifier: "upstreamPath",
+      rationale: expect.stringMatching(/configured upstream transformer path/i),
+    }])
+})
+
+test("the direct transformer export allows its approved Metro loader in emitted chunks", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.mjs": 'import "./transformer-AbC123.mjs"; export {};\n',
+      "dist/transformer.cjs": 'require("./transformer-AbC123.cjs"); module.exports = {};\n',
+      "dist/transformer-AbC123.mjs": 'const upstreamPath = "runtime-selected"; __require(upstreamPath); export {};\n',
+      "dist/transformer-AbC123.cjs": 'const upstreamPath = "runtime-selected"; require(upstreamPath); module.exports = {};\n',
+    },
+  })
+
+  const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
+
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.dynamicLoaderExceptions)
+    .toHaveLength(1)
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "cjs")?.dynamicLoaderExceptions)
+    .toHaveLength(1)
+})
+
 test("ordinary runtime entrypoints cannot reach an advanced entry target", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {"dist/theme.mjs": 'import "./tokens-schema.mjs"; export {};\n'},
@@ -210,7 +280,7 @@ test("compiler entries allow only build-policy externals and reject Effect", asy
   })
 
   const allowedGraphs = await auditPackedRuntimeEntrypoints(allowedPackage)
-  expect(allowedGraphs).toHaveLength(25)
+  expect(allowedGraphs).toHaveLength(27)
   expect(allowedGraphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.externalSpecifiers)
     .toEqual(["metro", "node:fs", "url"])
   await expect(auditPackedRuntimeEntrypoints(deniedPackage)).rejects.toThrow(/compiler-tooling.*not-in-build-policy/i)
