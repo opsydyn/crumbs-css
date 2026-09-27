@@ -16,6 +16,10 @@ config.resolver.useWatchman = false
 config.transformer = {
   ...config.transformer,
   upstreamTransformerPath: config.transformerPath,
-  nativeStyles: { strictDiagnostics: true },
+  nativeStyles: {
+    strictDiagnostics: process.env.CRUMBS_INCREMENTAL_BENCH === "1"
+      ? process.env.CRUMBS_INCREMENTAL_STRICT_DIAGNOSTICS !== "0"
+      : true,
+  },
 }
 module.exports = withNativeStyles(config)

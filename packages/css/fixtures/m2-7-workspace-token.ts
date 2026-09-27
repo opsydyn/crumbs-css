@@ -1,1 +1,1 @@
-export const workspaceBorderWidth = 32000 + 1
+export const sharedThemeTokens = { borderWidth: 32000 + 1 }

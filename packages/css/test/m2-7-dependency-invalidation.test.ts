@@ -12,6 +12,7 @@ import { createNativeStylesCacheStore } from "../src/metro-plugin"
 import { createNativeTransformResultKey } from "../src/transform-cache"
 import {
   admitDependencyControls,
+  admitConfigurationControl,
   createIncrementalBaseStyleSource,
   createIncrementalStyleSource,
   createIncrementalTokenSource,
@@ -33,7 +34,7 @@ function context(overrides: Partial<Parameters<typeof createDependencyCacheIdent
   }
 }
 
-describe("M2.7 dependency invalidation", () => {
+describe("M2.7 dependency invalidation and M8.4 configuration changes", () => {
   it("fingerprints nested and workspace source inputs while excluding third-party and generated files", () => {
     const workspace = mkdtempSync(path.join(packageRoot, "fixtures/.m2-7-workspace-"))
     try {
@@ -152,8 +153,11 @@ describe("M2.7 dependency invalidation", () => {
   it("generates nested and workspace dependency fixtures without baking values into source", () => {
     expect(createIncrementalTokenSource(7)).toContain("30000 + 7")
     expect(createIncrementalBaseStyleSource(8)).toContain("31000 + 8")
+    expect(createWorkspaceTokenSource(9)).toContain("sharedThemeTokens")
     expect(createWorkspaceTokenSource(9)).toContain("32000 + 9")
     expect(createIncrementalStyleSource(10)).toContain("incrementalBase")
+    expect(createIncrementalStyleSource(10)).toContain("sharedThemeTokens.borderWidth")
+    expect(createIncrementalStyleSource(11, { includeDroppedDeclaration: true })).toContain('transition: "all 0.3s"')
     expect(createIncrementalStyleSource(10)).not.toContain("30100")
   })
 
@@ -165,6 +169,60 @@ describe("M2.7 dependency invalidation", () => {
     ]
     expect(admitDependencyControls(controls)).toEqual(controls)
     expect(() => admitDependencyControls(controls.map(control => ({ ...control, receipt: { ...control.receipt, previousCompiledValueAbsent: false } })))).toThrow(/plain-token/)
+  })
+
+  it("M8.4 admits strictDiagnostics changes only when same-cache restart outputs reflect each config", () => {
+    const control = {
+      setting: "strictDiagnostics" as const,
+      cacheState: "persistent-across-restarts" as const,
+      serverStarts: [
+        { strictDiagnostics: true, clearCache: true },
+        { strictDiagnostics: false, clearCache: false },
+        { strictDiagnostics: true, clearCache: false },
+        { strictDiagnostics: false, clearCache: false },
+      ],
+      previousCompiledValue: 30001,
+      compiledValue: 30901,
+      permissive: {
+        status: 200,
+        bundleSha256: "a".repeat(64),
+        compiledValuePresent: true,
+        previousCompiledValueAbsent: true,
+      },
+      strict: {
+        status: 500,
+        responseSha256: "b".repeat(64),
+        diagnosticPresent: true,
+      },
+      restored: {
+        status: 200,
+        bundleSha256: "a".repeat(64),
+        compiledValuePresent: true,
+        previousCompiledValueAbsent: true,
+      },
+    }
+
+    expect(admitConfigurationControl(control)).toEqual(control)
+    expect(() => admitConfigurationControl({
+      ...control,
+      cacheState: "cleared-on-restart",
+    })).toThrow(/persistent.*cache/)
+    expect(() => admitConfigurationControl({
+      ...control,
+      strict: { ...control.strict, diagnosticPresent: false },
+    })).toThrow(/strictDiagnostics/)
+    expect(() => admitConfigurationControl({
+      ...control,
+      restored: { ...control.restored, bundleSha256: "d".repeat(64) },
+    })).toThrow(/strictDiagnostics/)
+    expect(() => admitConfigurationControl({
+      ...control,
+      serverStarts: control.serverStarts.map((server, index) => index === 2 ? { ...server, clearCache: true } : server),
+    })).toThrow(/persistent.*cache/)
+    expect(() => admitConfigurationControl({
+      ...control,
+      permissive: { ...control.permissive, previousCompiledValueAbsent: false },
+    })).toThrow(/strictDiagnostics/)
   })
 
   it("turns a cached Crumbs transform into a miss only after a dependency edit", async () => {

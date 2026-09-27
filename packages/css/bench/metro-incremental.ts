@@ -34,6 +34,31 @@ export type DependencyControl = {
   receipt: { compiledValuePresent: boolean; previousCompiledValueAbsent: boolean }
 }
 
+export type ConfigurationControl = {
+  setting: "strictDiagnostics"
+  cacheState: "persistent-across-restarts"
+  serverStarts: Array<{ strictDiagnostics: boolean; clearCache: boolean }>
+  previousCompiledValue: number
+  compiledValue: number
+  permissive: {
+    status: number
+    bundleSha256: string
+    compiledValuePresent: boolean
+    previousCompiledValueAbsent: boolean
+  }
+  strict: {
+    status: number
+    responseSha256: string
+    diagnosticPresent: boolean
+  }
+  restored: {
+    status: number
+    bundleSha256: string
+    compiledValuePresent: boolean
+    previousCompiledValueAbsent: boolean
+  }
+}
+
 type MetroIncrementalEvidence = {
   formatVersion: number
   status: string
@@ -44,6 +69,7 @@ type MetroIncrementalEvidence = {
   warmup: IncrementalRun & { excluded: boolean }
   runs: IncrementalRun[]
   dependencyControls?: DependencyControl[]
+  configurationControl?: ConfigurationControl
 }
 
 export function incrementalCompiledValue(addend: number): number {
@@ -63,12 +89,16 @@ export function createIncrementalBaseStyleSource(addend: number): string {
 
 export function createWorkspaceTokenSource(addend: number): string {
   incrementalCompiledValue(addend)
-  return `// Rewritten by the Metro incremental measurement and restored after the run.\nexport const workspaceBorderWidth = 32000 + ${addend}\n`
+  return `// Shared workspace theme configuration; rewritten by the Metro measurement and restored after the run.\nexport const sharedThemeTokens = { borderWidth: 32000 + ${addend} }\n`
 }
 
-export function createIncrementalStyleSource(addend: number): string {
+export function createIncrementalStyleSource(
+  addend: number,
+  options: { readonly includeDroppedDeclaration?: boolean } = {},
+): string {
   incrementalCompiledValue(addend)
-  return `import { viewStyle } from "@opsydyn/crumbs-css/style"\nimport { incrementalPadding } from "./incremental-token"\nimport { incrementalBase } from "./incremental-base.css"\nimport { workspaceBorderWidth } from "../../../packages/css/fixtures/m2-7-workspace-token"\n\nconst directIncrementalPadding = incrementalPadding + ${addend} - 1\nexport const incrementalProbe = viewStyle([incrementalBase, { padding: directIncrementalPadding, borderWidth: workspaceBorderWidth }])\n`
+  const unsupported = options.includeDroppedDeclaration ? ', transition: "all 0.3s"' : ""
+  return `import { viewStyle } from "@opsydyn/crumbs-css/style"\nimport { incrementalPadding } from "./incremental-token"\nimport { incrementalBase } from "./incremental-base.css"\nimport { sharedThemeTokens } from "../../../packages/css/fixtures/m2-7-workspace-token"\n\nconst directIncrementalPadding = incrementalPadding + ${addend} - 1\nexport const incrementalProbe = viewStyle([incrementalBase, { padding: directIncrementalPadding, borderWidth: sharedThemeTokens.borderWidth${unsupported} }])\n`
 }
 
 export function admitDependencyControls(input: unknown): DependencyControl[] {
@@ -97,10 +127,38 @@ export function admitDependencyControls(input: unknown): DependencyControl[] {
   return controls
 }
 
-export function admitMetroIncrementalReport(input: unknown, minimumRepetitions = 5): number[] {
+export function admitConfigurationControl(input: unknown): ConfigurationControl {
+  if (typeof input !== "object" || input === null) throw Error("strictDiagnostics configuration evidence is missing")
+  const control = input as ConfigurationControl
+  if (control.setting !== "strictDiagnostics" || control.cacheState !== "persistent-across-restarts") {
+    throw Error("strictDiagnostics configuration evidence did not reuse the persistent Metro cache")
+  }
+  const expectedServerStarts = [true, false, true, false]
+  if (!Array.isArray(control.serverStarts) || control.serverStarts.length !== expectedServerStarts.length ||
+    control.serverStarts.some((server, index) => server.strictDiagnostics !== expectedServerStarts[index] || server.clearCache !== (index === 0))) {
+    throw Error("strictDiagnostics configuration evidence did not preserve the persistent Metro cache across restarts")
+  }
+  if (!Number.isSafeInteger(control.previousCompiledValue) || !Number.isSafeInteger(control.compiledValue) || control.previousCompiledValue === control.compiledValue) {
+    throw Error("strictDiagnostics configuration output values are invalid")
+  }
+  const admitsBundle = (receipt: ConfigurationControl["permissive"] | ConfigurationControl["restored"]) =>
+    Number.isSafeInteger(receipt.status) && receipt.status >= 200 && receipt.status < 300 &&
+    /^[a-f0-9]{64}$/.test(receipt.bundleSha256) && receipt.compiledValuePresent && receipt.previousCompiledValueAbsent
+  if (!admitsBundle(control.permissive) || !admitsBundle(control.restored) ||
+    control.permissive.bundleSha256 !== control.restored.bundleSha256 ||
+    !Number.isSafeInteger(control.strict?.status) || control.strict.status < 400 || control.strict.status > 599 ||
+    !/^[a-f0-9]{64}$/.test(control.strict.responseSha256) || !control.strict.diagnosticPresent) {
+    throw Error("strictDiagnostics configuration receipts do not prove changed output and the expected diagnostic")
+  }
+  return control
+}
+
+export function admitMetroIncrementalReport(input: unknown, minimumRepetitions = 5, requireConfigurationControl = false): number[] {
   const report = input as MetroIncrementalEvidence
   if (report?.formatVersion !== 1 || report.status !== "complete") throw Error("Metro incremental evidence is incomplete or has an unsupported version")
   if (report.dependencyControls !== undefined) admitDependencyControls(report.dependencyControls)
+  if (requireConfigurationControl && report.configurationControl === undefined) throw Error("M8.4 Metro evidence is missing its configuration invalidation control")
+  if (report.configurationControl !== undefined) admitConfigurationControl(report.configurationControl)
   if (!Number.isSafeInteger(minimumRepetitions) || minimumRepetitions < 1 || report.protocol?.editKind !== "direct-css-source" || report.protocol.repetitions !== report.runs?.length || report.runs.length < minimumRepetitions) {
     throw Error("Metro incremental evidence has insufficient repetitions")
   }
@@ -147,21 +205,14 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
   let restoredBaseStyleSha256 = "not-restored"
   let restoredWorkspaceTokenSha256 = "not-restored"
   let child: ReturnType<typeof Bun.spawn> | undefined
+  let configurationControl: ConfigurationControl | undefined
+  const serverStarts: ConfigurationControl["serverStarts"] = []
   try {
     await assertPortUnused(port)
-    const startupStarted = performance.now()
-    const metroEnvironment: Record<string, string | undefined> = { ...process.env, EXPO_NO_INTERACTIVE: "1", EXPO_NO_METRO_WORKSPACE_ROOT: "1", CRUMBS_INCREMENTAL_BENCH: "1" }
-    delete metroEnvironment.CI
-    child = Bun.spawn([expoBin, "start", "--offline", "--port", String(port), "--clear", "--max-workers", "1"], {
-      cwd: appRoot,
-      env: metroEnvironment,
-      stdout: "pipe",
-      stderr: "pipe",
-    })
-    capture(child.stdout, logs)
-    capture(child.stderr, logs)
-    await waitForMetro(port, child, logs, 120_000)
-    const startupMs = performance.now() - startupStarted
+    const firstServer = await startMetro({ expoBin, appRoot, port, logs, strictDiagnostics: true, clearCache: true })
+    child = firstServer.child
+    serverStarts.push({ strictDiagnostics: firstServer.strictDiagnostics, clearCache: firstServer.clearCache })
+    const startupMs = firstServer.startupMs
     const initialBundle = await fetchBundle(requestUrl, 120_000)
     const initialValue = incrementalCompiledValue(1)
     if (!hasCompiledValue(initialBundle, initialValue)) throw Error("Initial Metro bundle lacks the compiled fixture value")
@@ -187,6 +238,58 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     dependencyControls.push(makeDependencyControl("workspace-source", 32001, 32004, workspaceStarted, workspaceReceipt, hasBorderWidthValue))
     await writeFile(workspaceTokenFile, originalWorkspaceToken)
     await waitForBundle(requestUrl, bundle => hasBorderWidthValue(bundle, 32001) && !hasBorderWidthValue(bundle, 32004), performance.now())
+
+    await stop(child)
+    const permissiveServer = await startMetro({ expoBin, appRoot, port, logs, strictDiagnostics: false, clearCache: false })
+    child = permissiveServer.child
+    serverStarts.push({ strictDiagnostics: permissiveServer.strictDiagnostics, clearCache: permissiveServer.clearCache })
+    const configurationValue = incrementalCompiledValue(901)
+    await writeFile(styleFile, createIncrementalStyleSource(901, { includeDroppedDeclaration: true }))
+    const permissiveUpdate = await waitForBundle(requestUrl, bundle => hasCompiledValue(bundle, configurationValue) && !hasCompiledValue(bundle, initialValue), performance.now())
+
+    await stop(child)
+    const strictServer = await startMetro({ expoBin, appRoot, port, logs, strictDiagnostics: true, clearCache: false })
+    child = strictServer.child
+    serverStarts.push({ strictDiagnostics: strictServer.strictDiagnostics, clearCache: strictServer.clearCache })
+    const strictResponse = await fetchBundleResult(requestUrl, 120_000)
+    configurationControl = {
+      setting: "strictDiagnostics",
+      cacheState: "persistent-across-restarts",
+      serverStarts,
+      previousCompiledValue: initialValue,
+      compiledValue: configurationValue,
+      permissive: {
+        status: 200,
+        bundleSha256: sha256(permissiveUpdate.bundle),
+        compiledValuePresent: hasCompiledValue(permissiveUpdate.bundle, configurationValue),
+        previousCompiledValueAbsent: !hasCompiledValue(permissiveUpdate.bundle, initialValue),
+      },
+      strict: {
+        status: strictResponse.status,
+        responseSha256: sha256(strictResponse.body),
+        diagnosticPresent: strictResponse.body.includes("CRUMBS_CSS_DROPPED_DECLARATION"),
+      },
+      restored: {
+        status: 0,
+        bundleSha256: "",
+        compiledValuePresent: false,
+        previousCompiledValueAbsent: false,
+      },
+    }
+
+    await stop(child)
+    const restoredConfigServer = await startMetro({ expoBin, appRoot, port, logs, strictDiagnostics: false, clearCache: false })
+    child = restoredConfigServer.child
+    serverStarts.push({ strictDiagnostics: restoredConfigServer.strictDiagnostics, clearCache: restoredConfigServer.clearCache })
+    const restoredConfigResponse = await fetchBundleResult(requestUrl, 120_000)
+    configurationControl.restored = {
+      status: restoredConfigResponse.status,
+      bundleSha256: sha256(restoredConfigResponse.body),
+      compiledValuePresent: hasCompiledValue(restoredConfigResponse.body, configurationValue),
+      previousCompiledValueAbsent: !hasCompiledValue(restoredConfigResponse.body, initialValue),
+    }
+    admitConfigurationControl(configurationControl)
+
     const warmupStarted = performance.now()
     await writeFile(styleFile, createIncrementalStyleSource(100))
     await delay(75)
@@ -222,18 +325,21 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
       status: "complete",
       recordedAt: new Date().toISOString(),
       sourceRevision: Bun.spawnSync(["git", "rev-parse", "HEAD"], { cwd: repoRoot }).stdout.toString().trim(),
+      sourceTreeDirty: Bun.spawnSync(["git", "diff", "--quiet"], { cwd: repoRoot }).exitCode !== 0 ||
+        Bun.spawnSync(["git", "diff", "--cached", "--quiet"], { cwd: repoRoot }).exitCode !== 0,
       environment: { platform: process.platform, architecture: process.arch, osRelease: release(), cpu: cpus()[0]?.model ?? "unknown",
         expo: requireFromApp("expo/package.json").version as string, metro: requireFromApp("metro/package.json").version as string,
         reactNative: requireFromApp("react-native/package.json").version as string },
-      protocol: { requestUrl: requestPath, repetitions, editKind: "direct-css-source", cacheState: "One cleared Metro server and warm initial graph; three dependency-only controls (plain token, nested .css.ts and workspace source) prove parent rebuilds before one excluded direct-edit warmup and five retained direct .css.ts edits; dependency receipts require the new baked value and absence of the old value" },
+      protocol: { requestUrl: requestPath, repetitions, editKind: "direct-css-source", cacheState: "One initially cleared Metro cache; dependency controls run warm; strictDiagnostics switches across server restarts without clearing the cache and require the same edited source to change from successful compiled output to a strict declaration diagnostic, then back to successful output; direct-edit samples follow" },
       fixture: { entrySha256: sha256(await readFile(entryFile)), originalStyleSha256, restoredStyleSha256, originalTokenSha256, restoredTokenSha256, originalBaseStyleSha256, restoredBaseStyleSha256, originalWorkspaceTokenSha256, restoredWorkspaceTokenSha256 },
       server: { startupMs, logs },
       initial,
       dependencyControls,
+      configurationControl,
       warmup: { ...warmup, excluded: true },
       runs,
     }
-    admitMetroIncrementalReport(report)
+    admitMetroIncrementalReport(report, 5, true)
     await writeFile(outputFile, JSON.stringify(report, null, 2) + "\n")
     return report
   } finally {
@@ -242,6 +348,43 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     if (sha256(await readFile(workspaceTokenFile)) !== originalWorkspaceTokenSha256) await writeFile(workspaceTokenFile, originalWorkspaceToken)
     if (sha256(await readFile(styleFile)) !== originalStyleSha256) await writeFile(styleFile, originalStyle)
     if (child) await stop(child)
+  }
+}
+
+async function startMetro(input: {
+  expoBin: string
+  appRoot: string
+  port: number
+  logs: string[]
+  strictDiagnostics: boolean
+  clearCache: boolean
+}) {
+  const started = performance.now()
+  const metroEnvironment: Record<string, string | undefined> = {
+    ...process.env,
+    EXPO_NO_INTERACTIVE: "1",
+    EXPO_NO_METRO_WORKSPACE_ROOT: "1",
+    CRUMBS_INCREMENTAL_BENCH: "1",
+    CRUMBS_INCREMENTAL_STRICT_DIAGNOSTICS: input.strictDiagnostics ? "1" : "0",
+  }
+  delete metroEnvironment.CI
+  const args = [input.expoBin, "start", "--offline", "--port", String(input.port)]
+  if (input.clearCache) args.push("--clear")
+  args.push("--max-workers", "1")
+  const child = Bun.spawn(args, {
+    cwd: input.appRoot,
+    env: metroEnvironment,
+    stdout: "pipe",
+    stderr: "pipe",
+  })
+  capture(child.stdout, input.logs)
+  capture(child.stderr, input.logs)
+  await waitForMetro(input.port, child, input.logs, 120_000)
+  return {
+    child,
+    startupMs: performance.now() - started,
+    strictDiagnostics: input.strictDiagnostics,
+    clearCache: input.clearCache,
   }
 }
 
@@ -297,10 +440,13 @@ function makeDependencyControl(
 function sha256(value: string | Buffer) { return createHash("sha256").update(value).digest("hex") }
 function delay(ms: number) { return new Promise(resolveDelay => setTimeout(resolveDelay, ms)) }
 async function fetchBundle(url: string, timeout: number) {
+  const response = await fetchBundleResult(url, timeout)
+  if (response.status < 200 || response.status >= 300) throw Error(`Metro bundle request failed (${response.status}): ${response.body.slice(0, 500)}`)
+  return response.body
+}
+async function fetchBundleResult(url: string, timeout: number) {
   const response = await fetch(url, { signal: AbortSignal.timeout(timeout), headers: { Accept: "application/javascript" } })
-  const body = await response.text()
-  if (!response.ok) throw Error(`Metro bundle request failed (${response.status}): ${body.slice(0, 500)}`)
-  return body
+  return { status: response.status, body: await response.text() }
 }
 async function assertPortUnused(port: number) {
   try { await fetch(`http://127.0.0.1:${port}/status`, { signal: AbortSignal.timeout(300) }) }
