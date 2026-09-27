@@ -31,6 +31,7 @@ describe("public runtime dependency isolation", () => {
     expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name !== 'react')).toEqual([])
     expect(result.files.filter(file => /\/(?:style|index|transformer|metro-plugin)\.(?:mjs|cjs)$/.test(file))).toEqual([])
     expect(result.files.filter(file => /\/(?:native-style|native-capture|compiler)(?:[-.]|\/)/.test(file))).toEqual([])
+    expect(result.files.some(file => file.includes("/devtools/") || /\/devtools\.(?:mjs|cjs)$/.test(file))).toBe(false)
     expect(result.externals).toEqual(['react'])
    })
   }
@@ -95,8 +96,27 @@ describe("public runtime dependency isolation", () => {
  for (const format of ['mjs', 'cjs']) {
   it(`keeps token contract runtime free of authoring modules in ${format}`, () => {
    const result = graph(`tokens.${format}`)
-   expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name.startsWith('@vanilla-extract/') || name === 'css-to-react-native' || name === 'effect')).toEqual([])
-   expect(result.files.filter(file => /\/(?:native-style|native-capture|style|index|transformer|metro-plugin)(?:[-.]|\.(?:mjs|cjs)$)/.test(file))).toEqual([])
+  expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name.startsWith('@vanilla-extract/') || name === 'css-to-react-native' || name === 'effect' || name.startsWith('effect/'))).toEqual([])
+  expect(result.files.filter(file => /\/(?:native-style|native-capture|style|index|transformer|metro-plugin)(?:[-.]|\.(?:mjs|cjs)$)/.test(file))).toEqual([])
+  expect(result.files.some(file => file.includes("/devtools/") || /\/devtools\.(?:mjs|cjs)$/.test(file))).toBe(false)
+ })
+}
+for (const format of ['mjs', 'cjs']) {
+ it(`limits the isolated devtools ${format} graph to Effect Schema and React`, () => {
+  const result = graph(`devtools.${format}`)
+  expect(result.externals).toContain('effect/Schema')
+  expect(result.externals.filter(name => !(name === 'react' || name.startsWith('react/') || name === 'effect' || name.startsWith('effect/')))).toEqual([])
+  expect(result.files.some(file => /\/devtools\.(?:mjs|cjs)$/.test(file))).toBe(true)
+  expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name.startsWith('@vanilla-extract/') || name === 'css-to-react-native' || name === 'metro' || name.startsWith('metro/'))).toEqual([])
+ })
+}
+for (const entry of ['index', 'style', 'theme', 'theme-core', 'tokens', 'tooling-manifest']) {
+ for (const format of ['mjs', 'cjs']) {
+  it(`keeps ${entry} ${format} outside the devtools and Effect Schema graph`, () => {
+   const result = graph(`${entry}.${format}`)
+   expect(result.files.some(file => file.includes('/devtools/') || /\/devtools\.(?:mjs|cjs)$/.test(file))).toBe(false)
+   expect(result.externals).not.toContain('effect/Schema')
   })
  }
+}
 })

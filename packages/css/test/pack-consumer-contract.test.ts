@@ -223,6 +223,7 @@ const extensionConsumerAssertions = `
 
 const consumerTypeSource = `
   import { NativeStylesDiagnosticCode } from "@opsydyn/crumbs-css";
+  import { explainStyle, type ExplainStyleInput, type StyleExplanationBranchDecision, type StyleExplanationCoverage, type StyleExplanationMetadata, type StyleExplanationReport, type StyleExplanationSnapshot, type StyleExplanationTransitionStatus, type StyleExplanationValue } from "@opsydyn/crumbs-css/devtools";
   import { componentRecipe, createNativeNormalizeValueFn, createSprinklesLookupPlan, createTheme, createThemeContract, defineProperties, extendComponentRecipe, NATIVE_RESPONSIVE_CONDITION_NAMES, type NativeComponentPublicProps, type NativeComponentRecipeExtensionDescriptor, type NativeComponentRecipeProps, type NativeRecipeProps, recipe } from "@opsydyn/crumbs-css/style";
   import { resolveThemeTokens as resolveCoreThemeTokens } from "@opsydyn/crumbs-css/theme/core";
   import { createComponentRecipeResolver, createRecipeResolver, createSprinklesResolver, resolveThemeStyles, resolveThemeTokens } from "@opsydyn/crumbs-css/theme";
@@ -319,6 +320,14 @@ const consumerTypeSource = `
     const publicTheme: ExternalTokenTheme = decodedTheme.value;
     void publicTheme;
   }
+  const explanationInput: ExplainStyleInput = {
+    module: {card: {opacity: 0.5}},
+    exportPath: ["card"],
+    current: {theme: {contract: {}, tokens: {}, values: {}}},
+  };
+  const explanation: StyleExplanationReport = explainStyle(explanationInput);
+  type ExplanationTypeSurface = [StyleExplanationSnapshot, StyleExplanationMetadata, StyleExplanationValue, StyleExplanationBranchDecision, StyleExplanationCoverage, StyleExplanationTransitionStatus];
+  void explanation;
   withNativeStyles({} as never);
   void transformCssTsToStyleSheet;
   void focusedValue;
@@ -420,6 +429,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const tokenOptic = require("@opsydyn/crumbs-css/tokens/optic");
         const tokenSchema = require("@opsydyn/crumbs-css/tokens/schema");
         const tokenValueSchema = require("@opsydyn/crumbs-css/tokens/schema/value");
+        const devtools = require("@opsydyn/crumbs-css/devtools");
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
         require.extensions[".css"] = (module, filename) => {
@@ -452,6 +462,9 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (!decodedExternalTheme.ok || decodedExternalTheme.value.values["color.text"] !== "#ffffff") throw new Error("external token theme decode failed");
         if (typeof metro.withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformer.transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
+        const explanation = devtools.explainStyle({module: {card: {width: theme.createThemeTokenReference("--crumbs-packed-width")}}, exportPath: ["card"], current: {theme: {contract: {}, values: {}, tokens: {"--crumbs-packed-width": 24}}}});
+        const explainedWidth = explanation.resolution.value.width;
+        if (explanation.$$type !== "crumbs.css.style-explanation" || explanation.version !== 1 || explainedWidth.kind !== "theme-token" || explainedWidth.resolvedValue !== 24) throw new Error("CommonJS devtools explanation contract failed");
         ${statefulConsumerAssertions.replaceAll("THEME", "theme")}
         ${extensionConsumerAssertions.replaceAll("THEME", "theme")}
       `,
@@ -470,6 +483,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { decodeTokenValue as decodeTokenValueFocused } from "@opsydyn/crumbs-css/tokens/schema/value";
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
+        import { explainStyle } from "@opsydyn/crumbs-css/devtools";
         import {button} from "./button.css";
         import {contractedButton} from "./packages/ui/button.css";
         import {brand} from "./packages/brand/branded-button.css";
@@ -495,6 +509,9 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (!decodedExternalTheme.ok || decodedExternalTheme.value.values["color.text"] !== "#ffffff") throw new Error("external token theme decode failed");
         if (typeof withNativeStyles !== "function") throw new Error("missing metro-plugin withNativeStyles");
         if (typeof transformCssTsToStyleSheet !== "function") throw new Error("missing transformer");
+        const explanation = explainStyle({module: {card: {width: createThemeTokenReference("--crumbs-packed-width")}}, exportPath: ["card"], current: {theme: {contract: {}, values: {}, tokens: {"--crumbs-packed-width": 24}}}});
+        const explainedWidth = explanation.resolution.value.width;
+        if (explanation.$$type !== "crumbs.css.style-explanation" || explanation.version !== 1 || explainedWidth.kind !== "theme-token" || explainedWidth.resolvedValue !== 24) throw new Error("ESM devtools explanation contract failed");
         ${statefulConsumerAssertions.replaceAll("THEME", "({resolveThemeTokens, createComponentRecipeResolver})")}
         ${extensionConsumerAssertions.replaceAll("THEME", "({resolveThemeTokens, createComponentRecipeResolver})")}
       `,

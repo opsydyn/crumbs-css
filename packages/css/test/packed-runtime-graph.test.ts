@@ -26,6 +26,7 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "./tokens/optic": runtimeExport("tokens-optic"),
     "./style": runtimeExport("style"),
     "./tooling/manifest": runtimeExport("tooling-manifest"),
+    "./devtools": runtimeExport("devtools"),
     "./metro-plugin": runtimeExport("metro-plugin"),
     "./dist/transformer": runtimeExport("transformer"),
     "./dist/metro-plugin": runtimeExport("metro-plugin"),
@@ -59,6 +60,8 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "dist/tooling-manifest.cjs": 'require("./tooling-leaf.cjs"); exports.tooling = true;\n',
     "dist/tooling-leaf.mjs": 'export const leaf = true;\n',
     "dist/tooling-leaf.cjs": 'module.exports = true;\n',
+    "dist/devtools.mjs": 'import "effect/Result"; import "effect/Schema"; import "effect/SchemaIssue"; import "react"; export const explainStyle = value => value;\n',
+    "dist/devtools.cjs": 'require("effect/Result"); require("effect/Schema"); require("effect/SchemaIssue"); require("react"); exports.explainStyle = value => value;\n',
     "dist/metro-plugin.mjs": 'export const plugin = true;\n',
     "dist/metro-plugin.cjs": 'exports.plugin = true;\n',
     "dist/transformer.mjs": 'import "node:fs"; export const transformer = true;\n',
@@ -123,9 +126,15 @@ test("auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and c
       files: ["dist/tooling-leaf.cjs", "dist/tooling-manifest.cjs"],
       externalSpecifiers: [],
     })
+  expect(graphs.find((graph) => graph.subpath === "./devtools" && graph.format === "esm"))
+    .toMatchObject({
+      classification: "advanced-runtime",
+      files: ["dist/devtools.mjs"],
+      externalSpecifiers: ["effect/Result", "effect/Schema", "effect/SchemaIssue", "react"],
+    })
   expect(graphs.find((graph) => graph.subpath === "./package.json" && graph.format === "metadata"))
     .toMatchObject({classification: "metadata", files: ["package.json"], externalSpecifiers: []})
-  expect(graphs).toHaveLength(27)
+  expect(graphs).toHaveLength(29)
 })
 
 test("ordinary runtime entrypoints cannot reach compiler tooling targets", async () => {
@@ -135,6 +144,15 @@ test("ordinary runtime entrypoints cannot reach compiler tooling targets", async
 
   await expect(auditPackedRuntimeEntrypoints(packageRoot))
     .rejects.toThrow(/ordinary-runtime.*reaches compiler-tooling/i)
+})
+
+test("ordinary runtime entrypoints cannot reach the isolated devtools graph", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: { "dist/theme.mjs": 'import "./devtools.mjs"; export {};\n' },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/ordinary-runtime.*reaches advanced-runtime.*devtools/i)
 })
 
 test("auditPackedRuntimeEntrypoints fails when an exported local file is missing", async () => {
@@ -268,6 +286,19 @@ test("ordinary and advanced runtime classes reject unauthorized external imports
   await expect(auditPackedRuntimeEntrypoints(advancedPackage)).rejects.toThrow(/advanced-runtime.*effect\/Schema/i)
 })
 
+test("the devtools graph admits Effect and React but rejects Node and authoring imports", async () => {
+  const allowedPackage = await createFixturePackage()
+  const deniedPackage = await createFixturePackage({
+    overrides: { "dist/devtools.mjs": 'import "node:fs"; import "@vanilla-extract/css"; export {};\n' },
+  })
+
+  const graphs = await auditPackedRuntimeEntrypoints(allowedPackage)
+  expect(graphs.find((graph) => graph.subpath === "./devtools" && graph.format === "esm")?.externalSpecifiers)
+    .toEqual(["effect/Result", "effect/Schema", "effect/SchemaIssue", "react"])
+  await expect(auditPackedRuntimeEntrypoints(deniedPackage))
+    .rejects.toThrow(/advanced-runtime.*unauthorized external (node:fs|@vanilla-extract\/css)/i)
+})
+
 test("compiler entries allow only build-policy externals and reject Effect", async () => {
   const allowedPackage = await createFixturePackage({
     overrides: {"dist/transformer.mjs": 'import "node:fs"; import "url"; import "metro"; export {};\n'},
@@ -280,7 +311,7 @@ test("compiler entries allow only build-policy externals and reject Effect", asy
   })
 
   const allowedGraphs = await auditPackedRuntimeEntrypoints(allowedPackage)
-  expect(allowedGraphs).toHaveLength(27)
+  expect(allowedGraphs).toHaveLength(29)
   expect(allowedGraphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.externalSpecifiers)
     .toEqual(["metro", "node:fs", "url"])
   await expect(auditPackedRuntimeEntrypoints(deniedPackage)).rejects.toThrow(/compiler-tooling.*not-in-build-policy/i)

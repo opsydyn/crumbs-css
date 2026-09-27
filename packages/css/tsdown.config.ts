@@ -36,6 +36,8 @@ export default defineConfig([
     entry: toolEntries,
     deps: compilerDependencies,
   },
+  // Explanations depend on Effect Schema; keep that cost behind its own opt-in subpath.
+  { ...common, clean: false, dts: false, entry: { devtools: "src/devtools/index.ts" } },
   // One declaration graph preserves nominal token brands across public entries.
   {
     ...common,
@@ -46,13 +48,14 @@ export default defineConfig([
       ...toolEntries,
       theme: "src/theme-runtime.ts",
       "theme-core": "src/theme-core.ts",
+      devtools: "src/devtools/index.ts",
     },
     hooks: {
       "build:done": () => {
         // A dual-format declaration-only build emits CJS JavaScript when its
         // re-export optimization disables the second DTS pass. Write the same
         // canonical re-export stubs without rebuilding that JavaScript graph.
-        for (const name of [...Object.keys(toolEntries), "theme", "theme-core"]) {
+        for (const name of [...Object.keys(toolEntries), "theme", "theme-core", "devtools"]) {
           writeFileSync(`dist/${name}.d.cts`, `export * from "./${name}.mjs";\n`)
         }
       },

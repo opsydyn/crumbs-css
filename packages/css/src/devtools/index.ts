@@ -1,0 +1,40 @@
+export { StyleExplanationInputError, explainStyle } from "./explain-style"
+export type { StyleExplanationInputErrorCode } from "./explain-style"
+
+export {
+  STYLE_EXPLANATION_METADATA_TYPE,
+  STYLE_EXPLANATION_REPORT_TYPE,
+  STYLE_EXPLANATION_VALUE_TYPE,
+  STYLE_EXPLANATION_VERSION,
+} from "./style-explanation-model"
+export type {
+  ExplainStyleInput,
+  StyleExplanationBranchDecision,
+  StyleExplanationBranchKind,
+  StyleExplanationBranchMetadata,
+  StyleExplanationBranchReason,
+  StyleExplanationChangedInput,
+  StyleExplanationConditionDecision,
+  StyleExplanationCoverage,
+  StyleExplanationCoverageReason,
+  StyleExplanationDeclaration,
+  StyleExplanationExportMetadata,
+  StyleExplanationExpressionDecision,
+  StyleExplanationJsonValue,
+  StyleExplanationMetadata,
+  StyleExplanationNegativeZero,
+  StyleExplanationOpaqueReason,
+  StyleExplanationOpaqueValue,
+  StyleExplanationPath,
+  StyleExplanationPathSegment,
+  StyleExplanationPropertyExplanation,
+  StyleExplanationReport,
+  StyleExplanationSnapshot,
+  StyleExplanationThemeToken,
+  StyleExplanationThemeTokenIdentity,
+  StyleExplanationTransitionStatus,
+  StyleExplanationUndefined,
+  StyleExplanationValue,
+  StyleExplanationValueArray,
+  StyleExplanationValueRecord,
+} from "./style-explanation-model"
