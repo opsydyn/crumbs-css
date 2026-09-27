@@ -22,6 +22,7 @@ import { captureNativeExports } from "./export-values"
 import { parseCssClassRules } from "./parse-virtual-css"
 import { splitStructuredNativeValues } from "./structured-native-values"
 import { getNativeCaptureMetadata } from "./compiler/native-capture"
+import { createThemeTokenReference } from "./theme-token"
 import { captureCompatibilityIntoNativeIr } from "./compiler/compatibility-adapter"
 import { emitStyleSheetModule, type BuildStyleSheetCodeOptions } from "./compiler/code-emission"
 import {
@@ -29,6 +30,12 @@ import {
   createDependencyCacheIdentity,
 } from "./compiler/dependency-analysis"
 import { indexStyleExportOwnership } from "./compiler/export-ownership"
+import {
+  createNativeStyleExplanationMetadata,
+  encodeStyleExplanationValue,
+} from "./compiler/style-explanation-metadata"
+import type { StyleExplanationDeclaration } from "./devtools/style-explanation-model"
+import { createNativeModuleMetadata } from "./compiler/native-module-metadata"
 import {
   captureManifestSidecar,
   type CompilerManifestSidecar,
@@ -64,6 +71,7 @@ export type TransformCssTsOptions = {
   readonly useStyleSheet?: boolean
   readonly platform?: string | null
   readonly dev?: boolean
+  readonly includeStyleExplanations?: boolean
 }
 type NativeTransformResult = {
   readonly code: string
@@ -343,6 +351,7 @@ async function transformCssTsToStyleSheetWithMetadata(
   manifestSidecarOptions?: TransformCssTsManifestSidecarOptions,
 ): Promise<NativeTransformResult> {
   const identOption = process.env.NODE_ENV === "production" ? "short" : "debug"
+  const includeStyleExplanations = options.includeStyleExplanations ?? options.dev ?? process.env.NODE_ENV !== "production"
   const absoluteFilePath = path.isAbsolute(filePath) ? filePath : path.resolve(cwd, filePath)
 
   // Capture esbuild's resolved inputs via an onEnd plugin so we know which
@@ -415,6 +424,9 @@ async function transformCssTsToStyleSheetWithMetadata(
   for (const [cls, block] of nativeStructuredIrByClass) {
     classStyles.set(cls, { ...classStyles.get(cls), ...lowerStructuredBlock(block) })
   }
+  const classCandidates = includeStyleExplanations
+    ? collectStyleExplanationCandidates(nativeIrByClass, nativeStructuredIrByClass)
+    : undefined
 
   // Resolve composed class names (space-separated) by merging their styles.
   // Crumbs captures each inline rule and base in authored native order.
@@ -466,7 +478,7 @@ async function transformCssTsToStyleSheetWithMetadata(
   })
   const depRelativePaths = dependencyInputs.map(({ importPath }) => importPath)
   const cacheIdentity = createDependencyCacheIdentity(dependencyInputs, {
-    compilerKey: getCacheKey(),
+    compilerKey: `${getCacheKey()}:style-explanations=${includeStyleExplanations ? "1" : "0"}`,
     platform: options.platform ?? null,
     dev: options.dev ?? process.env.NODE_ENV !== "production",
     strictDiagnostics: options.strictDiagnostics === true,
@@ -474,12 +486,25 @@ async function transformCssTsToStyleSheetWithMetadata(
     identOption: String(identOption),
   })
 
+  const moduleIdentity = includeStyleExplanations ? sourceIdentity(absoluteFilePath, cwd) : undefined
+  const styleExplanationMetadata = includeStyleExplanations && classCandidates !== undefined && moduleIdentity !== undefined
+    ? createNativeStyleExplanationMetadata({
+      moduleId: `${moduleIdentity.packageOwner}#${moduleIdentity.sourceId}`,
+      exportMap,
+      classStyles,
+      classCandidates,
+      dependencyPlan: createNativeModuleMetadata(resolvedClassStyles, exportMap).dependencyPlan,
+    })
+    : undefined
+
   const code = buildStyleSheetCode(
     exportMap,
     resolvedClassStyles,
     depRelativePaths,
     {
       ...(options.useStyleSheet === undefined ? {} : { useStyleSheet: options.useStyleSheet }),
+      includeStyleExplanations,
+      ...(styleExplanationMetadata === undefined ? {} : { styleExplanationMetadata }),
       cacheIdentity,
     },
   )
@@ -502,6 +527,68 @@ async function transformCssTsToStyleSheetWithMetadata(
     },
     ...(manifestSidecar === undefined ? {} : { manifestSidecar }),
   }
+}
+
+function collectStyleExplanationCandidates(
+  scalarByClass: ReadonlyMap<string, ScalarDeclarationBlock>,
+  structuredByClass: ReadonlyMap<string, StructuredDeclarationBlock>,
+): ReadonlyMap<string, ReadonlyArray<StyleExplanationDeclaration>> {
+  const result = new Map<string, ReadonlyArray<StyleExplanationDeclaration>>()
+  const classNames = new Set([...scalarByClass.keys(), ...structuredByClass.keys()])
+  for (const className of [...classNames].sort((left, right) => left.localeCompare(right))) {
+    const candidates: StyleExplanationDeclaration[] = []
+    const scalar = scalarByClass.get(className)
+    for (const declaration of scalar?.declarations ?? []) {
+      const provenance = declaration.provenance
+      if (provenance.origin !== "crumbs-native") continue
+      const order = candidates.length
+      candidates.push({
+        id: styleExplanationDeclarationId(provenance.packageOwner, provenance.sourceId, provenance.logicalPath, provenance.canonicalProperty, order),
+        sourceId: provenance.sourceId,
+        packageOwner: provenance.packageOwner,
+        logicalPath: provenance.logicalPath,
+        authoredProperty: provenance.authoredProperty,
+        canonicalProperty: provenance.canonicalProperty,
+        shorthandExpansionPath: provenance.shorthandExpansionPath,
+        primitiveDomain: scalar?.primitiveDomain ?? ["view"],
+        order,
+        value: encodeStyleExplanationValue(typeof declaration.value === "object"
+          ? createThemeTokenReference(declaration.value.varName)
+          : declaration.value),
+      })
+    }
+    const structured = structuredByClass.get(className)
+    for (const declaration of structured?.declarations ?? []) {
+      const provenance = declaration.provenance
+      if (provenance.origin !== "crumbs-native") continue
+      const order = candidates.length
+      candidates.push({
+        id: styleExplanationDeclarationId(provenance.packageOwner, provenance.sourceId, provenance.logicalPath, provenance.property, order),
+        sourceId: provenance.sourceId,
+        packageOwner: provenance.packageOwner,
+        logicalPath: provenance.logicalPath,
+        authoredProperty: provenance.property,
+        canonicalProperty: provenance.property,
+        shorthandExpansionPath: [],
+        primitiveDomain: structured?.primitiveDomain ?? ["view"],
+        order,
+        value: encodeStyleExplanationValue(declaration.value),
+      })
+    }
+    if (candidates.length > 0) result.set(className, Object.freeze(candidates))
+  }
+  return result
+}
+
+function styleExplanationDeclarationId(
+  packageOwner: string,
+  sourceId: string,
+  logicalPath: ReadonlyArray<string | number>,
+  property: string,
+  order: number,
+): string {
+  const sourcePath = logicalPath.map(segment => `${typeof segment === "number" ? "n" : "s"}${String(segment).length}:${segment}`).join("/")
+  return `${packageOwner}#${sourceId}:${sourcePath}:${property}:${order}`
 }
 
 function collectClassIrOrigins(
@@ -580,7 +667,10 @@ export async function transform(
     return defaultTransform(config, projectRoot, filename, data, options)
   }
 
-  const nativeStylesConfig = config.nativeStyles as { strictDiagnostics?: boolean } | undefined
+  const nativeStylesConfig = config.nativeStyles as {
+    strictDiagnostics?: boolean
+    includeStyleExplanations?: boolean
+  } | undefined
   const transformed = await transformCssTsToStyleSheetWithMetadata(filename, projectRoot, {
     strictDiagnostics:
       nativeStylesConfig?.strictDiagnostics === true ||
@@ -588,6 +678,7 @@ export async function transform(
     useStyleSheet: options.platform !== "web",
     platform: options.platform ?? null,
     dev: options.dev,
+    includeStyleExplanations: nativeStylesConfig?.includeStyleExplanations ?? options.dev,
   })
   const result = await defaultTransform(config, projectRoot, filename, Buffer.from(transformed.code), options) as Record<string, unknown>
   const upstreamKey = typeof result.unstable_transformResultKey === "string" ? result.unstable_transformResultKey : "crumbs"

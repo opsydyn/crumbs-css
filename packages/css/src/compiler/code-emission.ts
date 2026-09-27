@@ -1,11 +1,15 @@
 import { ExportNegativeZeroType, ExportRecordType, ExportStringType, ExportUndefinedType } from "../export-values"
 import { NativeStyleMapType } from "../native-style-map"
 import { emitNativeModuleMetadata, NativeModuleMetadataExportName } from "./native-module-metadata"
+import { emitNativeStyleExplanationMetadata } from "./style-explanation-metadata"
+import type { StyleExplanationMetadata } from "../devtools/style-explanation-model"
 import { sortedOwnEnumerableDataEntries } from "./record-admission"
 
 export type BuildStyleSheetCodeOptions = {
   readonly useStyleSheet?: boolean
   readonly cacheIdentity?: string
+  readonly includeStyleExplanations?: boolean
+  readonly styleExplanationMetadata?: StyleExplanationMetadata
 }
 
 /**
@@ -21,6 +25,12 @@ export function emitStyleSheetModule(
 ): string {
   if (exportMap.has(NativeModuleMetadataExportName)) {
     throw new TypeError(`Native module export "${NativeModuleMetadataExportName}" is reserved for generated metadata`)
+  }
+  if (exportMap.has("__crumbsDev")) {
+    throw new TypeError('Native module export "__crumbsDev" is reserved for generated style explanation metadata')
+  }
+  if (options.includeStyleExplanations === true && options.styleExplanationMetadata === undefined) {
+    throw new TypeError("Style explanation metadata must be supplied when includeStyleExplanations is enabled")
   }
 
   const useStyleSheet = options.useStyleSheet ?? true
@@ -50,6 +60,9 @@ export function emitStyleSheetModule(
       ? `const _s = StyleSheet.create({\n${createEntries}\n});`
       : `const _s = {\n${createEntries}\n};`,
     emitNativeModuleMetadata(classStyles, exportMap),
+    ...(options.includeStyleExplanations === true && options.styleExplanationMetadata !== undefined
+      ? [emitNativeStyleExplanationMetadata(options.styleExplanationMetadata)]
+      : []),
     exports,
   ].filter(Boolean)
 

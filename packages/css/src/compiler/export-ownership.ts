@@ -13,6 +13,9 @@ export type StyleExportOwnershipIndex = {
 export function indexStyleExportOwnership(
   exportMap: ReadonlyMap<string, unknown>,
 ): StyleExportOwnershipIndex {
+  if (exportMap.has("__crumbsDev")) {
+    throw new TypeError('Native module export "__crumbsDev" is reserved for generated style explanation metadata')
+  }
   const exportNameByClass = new Map<string, string>()
   const classNames = new Set<string>()
 

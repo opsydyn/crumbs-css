@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { consumerFixtures } from "../test-support/consumer-fixtures"
 import * as path from "node:path"
 import { runInNewContext } from "node:vm"
-import { buildStyleSheetCode, transform } from "../src/transformer"
+import { buildStyleSheetCode, transform, transformCssTsToStyleSheet } from "../src/transformer"
 
 const PKG_ROOT = path.resolve(__dirname, "..")
 const FIXTURE = path.resolve(PKG_ROOT, "fixtures/simple.css.ts")
@@ -111,6 +111,50 @@ describe("buildStyleSheetCode", () => {
 })
 
 describe("Metro transformer", () => {
+  it("defaults the explanation sidecar from Metro dev and honors nativeStyles overrides", async () => {
+    const transformWithSetting = async (dev: boolean, includeStyleExplanations?: boolean) => {
+      const result = await transform({
+        upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER,
+        nativeStyles: includeStyleExplanations === undefined ? {} : { includeStyleExplanations },
+      }, PKG_ROOT, FIXTURE, Buffer.from(""), { dev, platform: "web" }) as { readonly code: string }
+      return result.code
+    }
+    const developmentDefault = await transformWithSetting(true)
+    const developmentDisabled = await transformWithSetting(true, false)
+    const productionDefault = await transformWithSetting(false)
+    const productionEnabled = await transformWithSetting(false, true)
+
+    expect(developmentDefault).toContain("export const __crumbsDev")
+    expect(developmentDisabled).not.toContain("export const __crumbsDev")
+    expect(productionDefault).not.toContain("export const __crumbsDev")
+    expect(productionEnabled).toContain("export const __crumbsDev")
+    expect(developmentDefault).not.toEqual(developmentDisabled)
+  })
+
+  it("uses direct transform dev defaults, explicit overrides, and distinct cache identities", async () => {
+    const options = { useStyleSheet: false } as const
+    const developmentDefault = await transformCssTsToStyleSheet(FIXTURE, PKG_ROOT, { ...options, dev: true })
+    const developmentDisabled = await transformCssTsToStyleSheet(FIXTURE, PKG_ROOT, {
+      ...options,
+      dev: true,
+      includeStyleExplanations: false,
+    })
+    const productionDefault = await transformCssTsToStyleSheet(FIXTURE, PKG_ROOT, { ...options, dev: false })
+    const productionEnabled = await transformCssTsToStyleSheet(FIXTURE, PKG_ROOT, {
+      ...options,
+      dev: false,
+      includeStyleExplanations: true,
+    })
+    const cacheIdentity = (code: string) => /@crumbs-native-cache ([a-f0-9]+)/u.exec(code)?.[1]
+
+    expect(developmentDefault).toContain("export const __crumbsDev")
+    expect(developmentDisabled).not.toContain("export const __crumbsDev")
+    expect(productionDefault).not.toContain("export const __crumbsDev")
+    expect(productionEnabled).toContain("export const __crumbsDev")
+    expect(cacheIdentity(developmentDefault)).not.toBe(cacheIdentity(developmentDisabled))
+    expect(cacheIdentity(productionDefault)).not.toBe(cacheIdentity(productionEnabled))
+  })
+
   it("transforms native .css.ts files on web so Storybook never evaluates vanilla-extract authoring code", async () => {
     const result = (await transform(
       { upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER },

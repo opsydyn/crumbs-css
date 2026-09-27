@@ -5,6 +5,7 @@ import { runInNewContext } from "node:vm"
 import { createThemeTokenReference } from "../src/theme-token"
 import { createThemeDependencyResolver } from "../src/theme-runtime"
 import { buildStyleSheetCode, transformCssTsToStyleSheet } from "../src/transformer"
+import type { StyleExplanationMetadata } from "../src/devtools/style-explanation-model"
 
 const packageRoot = path.resolve(import.meta.dir, "..")
 
@@ -29,6 +30,49 @@ async function compile(source: string): Promise<Record<string, unknown>> {
 }
 
 describe("M2.6 direct native module emission", () => {
+  it("emits only explicit development metadata as a deeply frozen __crumbsDev sidecar", () => {
+    const metadata = {
+      $$type: "crumbs.css.style-explanation-metadata",
+      version: 1,
+      moduleId: "@acme/ui/src/Button.css.ts",
+      exports: [{
+        path: ["Button"],
+        candidates: [],
+        branches: [],
+        tokenDependencies: [],
+        coverage: { status: "complete", reasons: [] },
+      }],
+    } as const satisfies StyleExplanationMetadata
+    const baseArgs = [new Map([["button", "button"]]), new Map([["button", { opacity: 0.5 }]])] as const
+    const ordinary = evaluateModule(buildStyleSheetCode(...baseArgs, [], { useStyleSheet: false }))
+    const disabled = evaluateModule(buildStyleSheetCode(...baseArgs, [], {
+      useStyleSheet: false,
+      includeStyleExplanations: false,
+      styleExplanationMetadata: metadata,
+    }))
+    const enabled = evaluateModule(buildStyleSheetCode(...baseArgs, [], {
+      useStyleSheet: false,
+      includeStyleExplanations: true,
+      styleExplanationMetadata: metadata,
+    }))
+
+    expect(ordinary.__crumbsDev).toBeUndefined()
+    expect(disabled.__crumbsDev).toBeUndefined()
+    expect(enabled.__crumbsDev).toEqual(metadata)
+    expect(enabled.__crumbsModule).toEqual(ordinary.__crumbsModule)
+    expect(Object.isFrozen(enabled.__crumbsDev)).toBe(true)
+    expect(Object.isFrozen((enabled.__crumbsDev as typeof metadata).exports)).toBe(true)
+    expect(Object.isFrozen((enabled.__crumbsDev as typeof metadata).exports[0])).toBe(true)
+    expect(Object.isFrozen((enabled.__crumbsDev as typeof metadata).exports[0]?.coverage)).toBe(true)
+  })
+
+  it("reserves the generated devtools metadata binding at the final emitter boundary", () => {
+    expect(() => buildStyleSheetCode(
+      new Map([["__crumbsDev", "user value"]]),
+      new Map(),
+    )).toThrow(/__crumbsDev.*reserved/)
+  })
+
   it("emits immutable minimal token and condition metadata from final native styles", () => {
     const code = buildStyleSheetCode(
       new Map([["panel", "panel"], ["empty", "empty"]]),
