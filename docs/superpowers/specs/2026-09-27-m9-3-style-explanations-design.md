@@ -1,6 +1,6 @@
 # M9.3 Development Style Explanations
 
-**Status:** Conversational design approved; written specification awaiting review
+**Status:** Written specification approved
 **Date:** 2026-09-27
 **Roadmap:** M9.3 in [roadmap.md](../../roadmap.md)
 **Governing decisions:** D5, D9, D10, D11, and D12 in the [design-system compiler ADR](../../decisions/adopt-native-design-system-compiler.md)
