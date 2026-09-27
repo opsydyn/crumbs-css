@@ -1,0 +1,69 @@
+{
+  "format": "crumbs.design-system-manifest",
+  "schemaVersion": 1,
+  "package": {
+    "name": "@acme/design-system",
+    "version": "1.2.0"
+  },
+  "producer": {
+    "compiler": {
+      "name": "@opsydyn/crumbs-css",
+      "version": "0.1.1-alpha.1"
+    },
+    "artifact": {
+      "name": "crumbs-native-style-artifact",
+      "version": 1
+    }
+  },
+  "tokens": [
+    {
+      "id": "@acme/design-system#token:color.legacy",
+      "contract": { "owner": "@acme/design-system", "name": "foundation", "version": 1 },
+      "path": ["color", "legacy"],
+      "visibility": "public",
+      "domain": { "kind": "color" },
+      "kind": "definition",
+      "origin": { "path": "src/tokens/color-legacy.css.ts" }
+    },
+    {
+      "id": "@acme/design-system#token:color.surface",
+      "contract": { "owner": "@acme/design-system", "name": "foundation", "version": 1 },
+      "path": ["color", "surface"],
+      "visibility": "public",
+      "domain": { "kind": "color" },
+      "kind": "definition",
+      "origin": { "path": "src/tokens/color-surface.css.ts" }
+    },
+    {
+      "id": "@acme/design-system#token:space.internal",
+      "contract": { "owner": "@acme/design-system", "name": "foundation", "version": 1 },
+      "path": ["space", "internal"],
+      "visibility": "private",
+      "domain": { "kind": "length", "allowNegative": false },
+      "kind": "definition",
+      "origin": { "path": "src/tokens/space-internal.css.ts" }
+    }
+  ],
+  "components": [
+    {
+      "id": "@acme/design-system#component:button",
+      "contract": { "owner": "@acme/design-system", "name": "Button", "version": 1 },
+      "origin": { "path": "src/Button.css.ts", "exportPath": "Button" },
+      "slots": ["root", "label"],
+      "variants": { "tone": ["quiet", "primary"] },
+      "extensionPoints": [],
+      "stateConstraints": [],
+      "defaults": { "tone": "quiet" }
+    }
+  ],
+  "modules": [],
+  "dependencies": [],
+  "capabilities": [],
+  "coverage": {
+    "roots": [
+      { "kind": "token-contract", "id": "@acme/design-system#foundation@1" },
+      { "kind": "component-recipe", "id": "@acme/design-system#component:button" }
+    ],
+    "unresolved": []
+  }
+}

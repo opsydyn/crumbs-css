@@ -47,3 +47,20 @@ export {
   type TransformCssTsWithManifestSidecarResult,
 } from "../transformer"
 export type { CompilerManifestSidecar, ManifestSidecarPropertyOrigin } from "../compiler/manifest-sidecar"
+export { checkManifestConsumers } from "./manifest/consumer-check"
+export { compareManifests } from "./manifest/comparison"
+export { decodeManifestCompatibilityReport } from "./manifest/comparison-report-schema"
+export { encodeCanonicalManifestCompatibilityReport } from "./manifest/comparison-report-canonical-json"
+export {
+  MANIFEST_COMPATIBILITY_REPORT_FORMAT,
+  MANIFEST_COMPATIBILITY_REPORT_VERSION,
+  type ManifestAnalysisLimit,
+  type ManifestAnalysisLimitCode,
+  type ManifestCompatibilityFinding,
+  type ManifestCompatibilityFindingCode,
+  type ManifestCompatibilityFindingLevel,
+  type ManifestCompatibilityReport,
+  type ManifestCompatibilityReportMode,
+  type ManifestConsumerReference,
+  type ManifestReportJson,
+} from "./manifest/comparison-report-model"

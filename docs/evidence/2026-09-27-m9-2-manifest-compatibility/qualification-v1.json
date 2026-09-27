@@ -1,0 +1,61 @@
+{
+  "format": "crumbs.design-system-compatibility-qualification",
+  "schemaVersion": 1,
+  "reportPath": "docs/evidence/2026-09-27-m9-2-manifest-compatibility/manifest-compatibility-report-v1.json",
+  "reportSha256": "00b4a7b1233b70c007505bc663480e2ffc86ae8d9947116668ca115986646842",
+  "checkReportSha256": "38ef8c8e2a6fda4caeaf773f7a9a87f34e29a6572a5ede066a131d340b8e3e0e",
+  "fixtureSha256": [
+    {
+      "path": "packages/css/fixtures/m9-2-manifest/baseline.json",
+      "sha256": "3c839367ebe35d7d21c5a55c72e3008b207eefc821452b959dd4f4dcbe0dff33"
+    },
+    {
+      "path": "packages/css/fixtures/m9-2-manifest/current.json",
+      "sha256": "cf35ba78af57f885a466111d2d45e3862148ecb6268830fd873f44dd51aee19e"
+    },
+    {
+      "path": "packages/css/fixtures/m9-2-manifest/consumer.json",
+      "sha256": "eb07abfb2db2fea319fd84eef0d432427bf2ae9b76e1bddac338ed9295f69fbc"
+    },
+    {
+      "path": "packages/css/fixtures/m9-2-manifest/consumer-mobile.json",
+      "sha256": "5516bb811a847031645f9b139c9a26e262c90401de0e1434f5265ec71b7a3304"
+    }
+  ],
+  "commandModes": [
+    "check",
+    "compare"
+  ],
+  "findingCounts": {
+    "check": {
+      "error": 1,
+      "warning": 0,
+      "info": 0
+    },
+    "compare": {
+      "error": 3,
+      "warning": 1,
+      "info": 0
+    }
+  },
+  "suppliedConsumerIdentities": [
+    {
+      "name": "@acme/mobile-app",
+      "version": "2.1.0"
+    },
+    {
+      "name": "@acme/web-app",
+      "version": "2.0.0"
+    }
+  ],
+  "analysisLimitCodes": {
+    "check": [
+      "component-use-unavailable",
+      "explicit-coverage"
+    ],
+    "compare": [
+      "component-use-unavailable",
+      "explicit-coverage"
+    ]
+  }
+}
