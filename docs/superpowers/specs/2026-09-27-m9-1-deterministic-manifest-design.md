@@ -1,6 +1,6 @@
 # M9.1 Deterministic Design-System Manifest
 
-**Status:** Written design pending user review
+**Status:** Architecture and written spec approved
 
 **Date:** 2026-09-27
 
