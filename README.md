@@ -40,6 +40,7 @@ At runtime, `ThemeProvider` and `useThemedStyles` resolve token references into 
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
 | `bun run release:check` | Build, typecheck, test, bench, and pack the package. |
+| `bun run release:preflight --tag v<version>` | Verify a release tag matches the package version and checked-out commit; print its npm dist-tag without publishing. |
 
 ### Workspace layout
 
@@ -67,17 +68,21 @@ Runs the Expo Storybook app. Use it for visual checks, component examples, and E
 ### Releasing
 
 - [release-please](https://github.com/googleapis/release-please) manages version PRs, changelog updates, tags, and GitHub releases.
-- npm publication is a **separate workflow gate**, not an automatic consequence of merging a release PR.
+- release-please never publishes to npm. npm publication is a separate, manually dispatched workflow after a published GitHub Release exists.
+- The package is pre-1.0 alpha; prerelease versions publish under their named channel (for example, `alpha`), while stable versions publish to `latest`.
 - Release operations require repository secrets and permissions:
   - `RELEASE_PLEASE_TOKEN` for reliable release PR creation
-  - `NPM_TOKEN` for npm publication
-- Before publishing, run:
+  - `NPM_TOKEN` for the manual npm publish workflow
+- On the exact release tag checkout, run:
 
 ```sh
+bun install --frozen-lockfile
 bun run release:check
+PACKAGE_VERSION=$(node -p "require('./packages/css/package.json').version")
+bun run release:preflight --tag "v$PACKAGE_VERSION"
 ```
 
-Then trigger the dedicated publish workflow in GitHub Actions for the release tag or approved ref.
+Then, from the `main` branch, trigger the `publish` workflow in GitHub Actions and enter that exact `v<version>` tag. The workflow verifies the published GitHub Release, checks that the tag matches the package version and checked-out commit, repeats the frozen install and release checks, and publishes with npm provenance. Branches, raw SHAs, draft releases, and arbitrary refs are not publish targets.
 
 ## Acknowledgements
 

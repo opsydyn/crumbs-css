@@ -38,8 +38,22 @@ remain unqualified. It also records the Android/device acceptance boundary.
 The M8.3 packed export and production Metro row is **Qualified** for the exact
 versions in its retained clean-source receipt. It covers the recorded Expo
 56.0.4 / React Native 0.85.3 / React 19.2.5 baseline for iOS and web;
-Android/device acceptance and publishing remain deferred. Consumers that only
-need token-value decoding can use the focused
+Android/device acceptance remains deferred; M8.3 did not publish. Consumers
+that only need token-value decoding can use the focused
 `@opsydyn/crumbs-css/tokens/schema/value` entry. The existing
 `@opsydyn/crumbs-css/tokens/schema` API remains available for external theme
 payloads.
+
+## Release lifecycle and deprecations
+
+The current package version, `0.1.1-alpha.1`, is pre-1.0 alpha. Breaking
+changes may occur between alpha releases, with a changelog entry, an updated
+compatibility matrix, and migration guidance. Once Crumbs reaches `1.0.0`,
+public APIs and published artifact formats follow SemVer. Stable APIs and
+artifact fields receive a documented replacement and at least one minor
+release of deprecation before removal in a major release. Alpha removals have
+no fixed deprecation window but still require migration guidance.
+
+Release-please creates GitHub releases and tags but never publishes to npm.
+Publishing is a separate manual workflow gated on a completed, version-matched
+GitHub Release. See the [full package compatibility and release policy](https://github.com/opsydyn/crumbs-css/blob/main/packages/css/COMPATIBILITY.md).

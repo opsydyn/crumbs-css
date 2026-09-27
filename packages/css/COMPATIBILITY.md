@@ -112,6 +112,32 @@ supported SDK range, claim ESM/CommonJS/Metro graph completeness, or publish
 packages. Effect 4 remains an implementation dependency; application consumers
 do not add an Effect peer dependency or use an Effect runner.
 
+## Release, compatibility, and deprecation policy (M8.5)
+
+The current package version is `0.1.1-alpha.1`, a pre-1.0 alpha. Crumbs makes
+no backward-compatibility promise between alpha releases for public APIs or
+generated artifacts. Breaking changes are allowed on this line only with a
+Conventional Commit breaking-change notice, a changelog entry, an update to
+this compatibility matrix, and actionable migration guidance. Artifact/runtime
+compatibility claims remain limited to the exact combinations with retained
+qualification evidence; unknown artifact versions continue to fail closed.
+
+Once Crumbs reaches `1.0.0`, public APIs and published artifact formats follow
+SemVer: compatible fixes use patch releases, additive compatible changes use
+minor releases, and breaking changes or removals use major releases. Deprecate
+a stable API or artifact field in a minor release with its replacement and
+migration path documented, and retain it for at least one minor release before
+removing it in a major release. Alpha removals have no fixed deprecation window,
+but still require release notes and migration guidance.
+
+Release-please creates release pull requests, tags, and GitHub Releases; it
+never publishes to npm. The separate manual publish workflow accepts only a
+published GitHub Release tag matching `v<packages/css/package.json version>`
+and pointing at the checked-out commit. `bun run release:preflight --tag
+v<version>` applies the same local tag and npm dist-tag checks without
+publishing. Prerelease versions use their first named prerelease identifier as
+the npm dist-tag (`alpha` for the current line); stable versions use `latest`.
+
 ## Coverage and qualification
 
 | Check | Coverage | Absence / limitation |
