@@ -201,6 +201,29 @@ Runtime theme resolution preserves supplied native structured arrays/objects, th
 
 Static transform arrays and numeric `shadowOffset` / `textShadowOffset` now compile directly as native values, preserving transform order and whole-value composition replacement. Animated values, nested tokens and other unsupported structured shapes fail explicitly; pass them through React Native's runtime `style` prop. See the exact supported operations and migration notes in [compatibility](./COMPATIBILITY.md#static-structured-compiler-boundary).
 
+## Style explanations
+
+For development debugging, import `explainStyle` and its report types from the
+isolated `@opsydyn/crumbs-css/devtools` subpath. It explains one explicit
+export path from a transformed module using the current and optional previous
+theme, selection, condition, and component-extension inputs. Reports include
+resolved values, branch decisions, declaration winners and overridden
+declarations, token dependencies, coverage, and plan-derived input changes.
+
+Development transforms include the versioned `__crumbsDev` provenance sidecar
+by default. Production transforms omit it unless explicitly enabled. To set
+the Metro behavior, add `includeStyleExplanations` under
+`config.transformer.nativeStyles`; `false` disables development metadata and
+`true` opts production transforms in. Production inclusion increases emitted
+module data, so enable it only for builds that need those explanations.
+
+`explainStyle` returns typed ordinary data and uses Effect 4 Schema internally;
+consumers do not need an Effect import. Missing provenance is reported as
+unavailable coverage, compatibility and opaque values remain partial, and
+malformed metadata fails with a stable input error. A transition compares only
+the explicit snapshots and dependency plan. It does not report a React render,
+cache hit, or device observation. See the [style explanation guide](https://opsydyn.github.io/crumbs-css/how-to/explain-native-styles/) for examples and limits.
+
 ## Design-system manifests
 
 Packages can build a deterministic JSON manifest from explicitly selected token

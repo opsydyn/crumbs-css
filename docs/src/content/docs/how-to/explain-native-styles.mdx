@@ -1,0 +1,114 @@
+---
+title: Explain native styles
+description: Inspect resolved style values and the explicit inputs that selected them.
+---
+
+`explainStyle` creates a structured explanation for one export from a compiled
+`.css.ts` module. The API is opt-in and lives at
+`@opsydyn/crumbs-css/devtools`, so ordinary theme and styling imports do not
+load the explanation implementation or Effect Schema.
+
+## Control metadata emission
+
+Metro development transforms include the `__crumbsDev` provenance sidecar by
+default. Production transforms omit it. Set
+`transformer.nativeStyles.includeStyleExplanations` to override either default:
+
+```js
+const config = getDefaultConfig(__dirname)
+config.transformer = {
+  ...config.transformer,
+  nativeStyles: {
+    ...config.transformer?.nativeStyles,
+    includeStyleExplanations: false,
+  },
+}
+
+module.exports = withNativeStyles(config)
+```
+
+Use `false` to disable metadata in development, or `true` to include it in a
+production transform. Production inclusion adds provenance to emitted modules;
+choose it only for a build that needs style explanations. Direct calls to
+`transformCssTsToStyleSheet` use the same `includeStyleExplanations` option and
+otherwise follow `dev` (or `NODE_ENV` when `dev` is omitted).
+
+## Explain an explicit export
+
+Pass the compiled module namespace and the exact export path. Supply concrete
+inputs instead of relying on ambient render state:
+
+```ts
+import { explainStyle, type StyleExplanationReport } from "@opsydyn/crumbs-css/devtools"
+import * as cardStyles from "./card.css"
+
+const report: StyleExplanationReport = explainStyle({
+  module: cardStyles,
+  exportPath: ["card"],
+  current: { theme: activeTheme },
+  previous: { theme: previousTheme },
+})
+
+const opacity = report.composition.properties.find(property => property.property === "opacity")
+console.log(opacity?.winner, opacity?.overridden)
+console.log(report.dependencies.changedTokens, report.transition)
+```
+
+For recipe exports, pass the runtime selection in `current.selection`. Add a
+condition snapshot in `current.conditions` when the style depends on native
+conditions. Component recipe extensions are explicit and ordered; provide the
+descriptors in `current.extensions` so the explanation uses the same extension
+chain as the resolver:
+
+```ts
+const report = explainStyle({
+  module: componentStyles,
+  exportPath: ["button"],
+  current: {
+    theme: activeTheme,
+    selection: { tone: "brand", disabled: false },
+    conditions: currentConditions,
+    extensions: [brandButtonExtension],
+  },
+})
+```
+
+`previous` is optional. Without it, `transition.status` is `not-compared`. With
+it, the report compares the explicit snapshots and the compiled dependency
+plan. A relevant token, selection, condition, or extension change can identify
+affected export paths; an unrelated token change can be reported without
+claiming that the style changed.
+
+## Read the report and its coverage
+
+The report separates the final resolved value from the decisions that produced
+it. `composition.properties` records the winning declaration and overridden
+declarations in source order, including authored and canonical properties for
+native aliases. `resolution.branches`, `conditions.decisions`, and
+`conditions.expressionMatches` show selected and rejected branches for recipes,
+component recipes, Sprinkles, native conditions, and expressions.
+
+Theme-token values retain their token identity and carry the value resolved
+from the supplied theme. `undefined` and negative zero use explicit tagged
+values. Unsupported values are represented as opaque values with a reason and
+reduce coverage rather than being invoked or silently treated as ordinary
+JSON.
+
+Check `coverage` before relying on provenance:
+
+- `complete` means the report has the captured metadata for this export.
+- `partial` identifies limitations such as compatibility-only metadata,
+  opaque values, or a mismatch between style values and dependency metadata.
+- `unavailable` with `metadata-missing` means the module did not contain a
+  development sidecar.
+
+The API explains only the supplied module, export path, and snapshots. It does
+not inspect other files, observe React renders or cache hits, or read device
+state. `explainStyle` returns ordinary typed data; Effect 4 Schema is an
+internal validation boundary and is not part of the consumer call pattern.
+
+## Related guides
+
+- [Configure Metro](/crumbs-css/how-to/configure-metro/)
+- [Use themes](/crumbs-css/how-to/use-themes/)
+- [Generate design-system manifests](/crumbs-css/how-to/generate-design-system-manifests/)

@@ -1,0 +1,74 @@
+{
+  "format": "crumbs.m9-3-style-explanation-qualification",
+  "schemaVersion": 1,
+  "roadmapItem": "M9.3",
+  "status": "qualified",
+  "reportPath": "docs/evidence/2026-09-27-m9-3-style-explanations/style-explanation-report-v1.json",
+  "reportSha256": "f476fe5eb0e3c064d4bce3014adc48db9905b34b4e29014a29a00b6fdd3c0a2f",
+  "fixturePath": "packages/css/fixtures/m9-3-style-explanations.css.ts",
+  "fixtureSha256": "0250de1527b5c015d943a6160662f3caa830cb8b984f5499721b8bd50762be83",
+  "coverage": {
+    "status": "complete",
+    "reasons": []
+  },
+  "verification": [
+    {
+      "command": "bun run check",
+      "result": "passed",
+      "details": {
+        "packageBuild": "passed",
+        "typescript": "passed",
+        "cssTests": 1014,
+        "cssExpectations": 43403,
+        "cssFiles": 165,
+        "storybookTests": 1,
+        "storybookExpectations": 7
+      }
+    },
+    {
+      "command": "bun run docs:build",
+      "result": "passed",
+      "details": {
+        "pages": 22
+      }
+    },
+    {
+      "command": "bun scripts/m9-3-style-explanations-qualification.ts",
+      "result": "passed",
+      "details": {
+        "reportSha256": "f476fe5eb0e3c064d4bce3014adc48db9905b34b4e29014a29a00b6fdd3c0a2f",
+        "fixtureSha256": "0250de1527b5c015d943a6160662f3caa830cb8b984f5499721b8bd50762be83",
+        "coverageReasons": []
+      }
+    },
+    {
+      "command": "bun run playground:distribution --m8-3-check",
+      "result": "passed",
+      "details": {
+        "sourceRevision": "7b57b368c103cd73f15dc7c281adf4c0e8ca3b4e",
+        "exportTargets": 15,
+        "runtimeGraphs": 29,
+        "consumerTypecheck": "passed",
+        "pairedTreeShaking": "passed",
+        "productionExports": {
+          "ios": "passed",
+          "web": "passed",
+          "android": "not-run"
+        }
+      }
+    },
+    {
+      "command": "bun test packages/css/test/style-explanation-*.test.ts packages/css/test/packed-export-contract.test.ts packages/css/test/pack-consumer-contract.test.ts packages/css/test/runtime-isolation.test.ts",
+      "result": "passed",
+      "details": {
+        "tests": 66,
+        "expectations": 2366,
+        "files": 12
+      }
+    },
+    {
+      "command": "git diff --check",
+      "result": "passed"
+    }
+  ]
+}
