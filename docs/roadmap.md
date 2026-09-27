@@ -262,9 +262,15 @@ and release-policy tests cover tag/version matching, commit identity, workflow
 gates and developer preflight. No package was published and the current release
 was not modified.
 
-Next recommended roadmap item: **M8.6** — gate declared Expo/RN versions in CI,
-restore full consumer checks for app changes, use reproducible installs, and
-make missing required platform fixtures visible failures.
+M8.6 now gates app changes through locked workspace installation, package and
+Storybook checks, Storybook typechecking, and packed Expo consumer qualification
+for iOS and web. Required compiler fixtures and consumer maps remain fail-closed.
+See the [M8.6 CI assessment](assessments/2026-09-27-m8-6-ci-consumer-qualification.md).
+Android and device acceptance remain parked.
+
+Next recommended roadmap item: **M9.1** — emit deterministic, versioned
+manifests for public identities, contracts, aliases, capabilities, defaults,
+and deprecation/replacement metadata.
 
 ## M8 — Qualify distributed packages and artifact evolution
 
@@ -276,7 +282,7 @@ make missing required platform fixtures visible failures.
 - [x] M8.3: Audit every packed ESM/CommonJS/types export target and runtime dependency graph; prove ordinary runtime isolation and focused `tokens/schema/value` entry-graph isolation through Expo production exports on iOS/web. See the [M8.3 qualification receipt](evidence/2026-09-26-m8-3-runtime-resolution/qualification.json) and [compatibility matrix](../packages/css/COMPATIBILITY.md). Android/device acceptance and publishing remain parked.
 - [x] M8.4: Exercise warm Metro dependency invalidation for shared workspace theme configuration and prove `strictDiagnostics` output changes across cache-preserving restarts using compiled values and a diagnostic response. See the [M8.4 assessment](assessments/2026-09-27-m8-4-hot-reload.md) and [live receipt](evidence/2026-09-27-m8-4-hot-reload/metro-incremental.json). Android/device and performance qualification remain separate.
 - [x] M8.5: Reconcile the manual npm publication policy with `.github/workflows/release-please.yml` and `publish.yml`; document alpha breaking-change and migration rules, stable SemVer/deprecation obligations, and a local tag preflight. No publication or existing release mutation. See [assessment](assessments/2026-09-27-m8-5-release-policy.md).
-- [ ] M8.6: Gate declared Expo/RN versions in CI. Restore full consumer checks for app changes, use reproducible installs, and make missing required platform fixtures visible failures.
+- [x] M8.6: Gate declared Expo/RN versions in CI. Restore full consumer checks for app changes, use reproducible installs, and make missing required platform fixtures visible failures. See [assessment](assessments/2026-09-27-m8-6-ci-consumer-qualification.md); Android/device acceptance remains parked.
 
 **Exit:** three independently packaged layers work in the declared matrix; artifact migrations and mismatch errors are tested; package graphs and invalidation are verified; release automation/docs agree with the explicitly selected policy.
 

@@ -3,7 +3,6 @@ name: ci
 on:
   pull_request:
     paths-ignore:
-      - "apps/**"
       - "docs/**"
   push:
     branches:
@@ -42,17 +41,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-bun-css-
 
-      - name: Scope workspaces to packages only
-        run: |
-          node -e "
-            const fs = require('fs');
-            const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'));
-            pkg.workspaces = pkg.workspaces.filter(w => w.startsWith('packages'));
-            fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2));
-          "
-
-      - name: Install packages/css dependencies
-        run: bun install
+      - name: Install locked workspace dependencies
+        run: bun install --frozen-lockfile
 
       - name: Build
         run: bun run build
@@ -60,5 +50,11 @@ jobs:
       - name: Typecheck
         run: bun run typecheck
 
-      - name: Test
+      - name: Test package, Storybook, and Expo/RN compatibility contracts
         run: bun run test
+
+      - name: Typecheck Storybook consumer
+        run: bun run app:typecheck
+
+      - name: Qualify packed Expo consumer on iOS and web
+        run: bun run playground:distribution --check

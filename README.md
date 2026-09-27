@@ -29,13 +29,15 @@ At runtime, `ThemeProvider` and `useThemedStyles` resolve token references into 
 
 | Command | Purpose |
 | --- | --- |
-| `bun install` | Install workspace dependencies. |
+| `bun install --frozen-lockfile` | Reproduce the committed workspace dependency graph. |
 | `bun run build` | Build the published package. |
-| `bun run test` | Run the package test suite. |
+| `bun run test` | Run the package and Storybook test suites. |
 | `bun run typecheck` | Typecheck the published package. |
 | `bun run app:storybook` | Start the Expo Storybook app for component development. |
+| `bun run app:typecheck` | Typecheck the Storybook consumer against the workspace package. |
 | `bun run playground` | Run the Expo consumer with Crumbs build watching and Metro restarts. |
 | `bun run playground:packed --check` | Typecheck and bundle an isolated consumer of the working-tree tarball. |
+| `bun run playground:distribution --check` | Qualify packed Crumbs, token, and component packages in Expo on iOS and web. |
 | `bun run playground:published --version=alpha --check` | Qualify an exact registry artifact in an isolated consumer. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
@@ -45,6 +47,17 @@ At runtime, `ThemeProvider` and `useThemedStyles` resolve token references into 
 ### Workspace layout
 
 See the [Expo playground guide](apps/playground/README.md) for consumer modes and feedback journeys.
+
+### CI checks
+
+Pull requests that change `apps/` run the same CI workflow as package changes;
+docs-only pull requests remain path-ignored. CI uses Bun 1.3.11, Node 24, and
+`bun install --frozen-lockfile` across all workspaces. `bun run test` covers the
+package and Storybook test suites, `bun run app:typecheck` checks the Storybook
+consumer, and `bun run playground:distribution --check` builds packed package
+artifacts, typechecks an independent Expo consumer, and requires iOS and web
+bundle provenance. Missing required compiler fixtures or consumer maps fail
+the gate. This CI coverage does not include Android or device acceptance.
 
 ```
 packages/
