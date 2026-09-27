@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
-import { compareManifestContracts } from "../src/tooling/manifest/comparison"
+import { checkManifestConsumers } from "../src/tooling/manifest/consumer-check"
+import { compareManifestContracts, compareManifests } from "../src/tooling/manifest/comparison"
 
 const packageName = "@acme/design-system"
 
@@ -8,10 +9,14 @@ function manifest(input: {
   readonly version?: string
   readonly tokens?: ReadonlyArray<Record<string, unknown>>
   readonly components?: ReadonlyArray<Record<string, unknown>>
+  readonly modules?: ReadonlyArray<Record<string, unknown>>
+  readonly dependencies?: ReadonlyArray<Record<string, unknown>>
+  readonly unresolved?: ReadonlyArray<Record<string, unknown>>
 }) {
   const name = input.name ?? packageName
   const tokens = input.tokens ?? []
   const components = input.components ?? []
+  const modules = input.modules ?? []
   const contractRoots = tokens.length === 0
     ? []
     : [{ kind: "token-contract", id: `${name}#foundation@1` }]
@@ -25,16 +30,17 @@ function manifest(input: {
     },
     tokens,
     components,
-    modules: [],
-    dependencies: [],
     capabilities: [],
     coverage: {
       roots: [
         ...contractRoots,
         ...components.map(component => ({ kind: "component-recipe", id: component.id as string })),
+        ...modules.map(module => ({ kind: "style-module", id: module.id as string })),
       ],
-      unresolved: [],
+      unresolved: input.unresolved ?? [],
     },
+    modules,
+    dependencies: input.dependencies ?? [],
   }
 }
 
@@ -70,6 +76,21 @@ function component(input: {
     stateConstraints: [],
     defaults: input.defaults ?? {},
   }
+}
+
+function externalConsumer(targets: ReadonlyArray<string>, includeUnresolved = false) {
+  const name = "@acme/app"
+  const moduleId = `${name}#src/styles.css.ts`
+  return manifest({
+    name,
+    version: "2.0.0",
+    modules: [{ id: moduleId, origin: { path: "src/styles.css.ts" }, exports: ["Card"] }],
+    dependencies: [
+      ...targets.map(to => ({ from: moduleId, to, kind: "style-token", resolution: "external", origin: { moduleId, exportPath: "Card", property: "color" } })),
+      ...(includeUnresolved ? [{ from: moduleId, kind: "style-token", resolution: "unresolved", origin: { moduleId, exportPath: "Card", property: "borderColor" } }] : []),
+    ],
+    unresolved: includeUnresolved ? [{ reference: "color.missing", reason: "consumer edge unresolved" }] : [],
+  })
 }
 
 describe("manifest contract comparison", () => {
@@ -169,5 +190,62 @@ describe("manifest contract comparison", () => {
     const valid = manifest({})
     expect(() => compareManifestContracts(valid, manifest({ name: "@acme/other" }))).toThrow(/package.*name|name.*package/i)
     expect(() => compareManifestContracts(valid, { ...valid, schemaVersion: 2 })).toThrow(/schemaVersion|version/i)
+  })
+
+  it("attaches direct consumer references to removed and changed token findings", () => {
+    const removed = `${packageName}#token:color.removed`
+    const changed = `${packageName}#token:color.changed`
+    const baseline = manifest({ tokens: [token({ name: "color.removed" }), token({ name: "color.changed" })] })
+    const current = manifest({ version: "1.3.0", tokens: [token({ name: "color.changed", domain: { kind: "length", allowNegative: false } })] })
+    const consumer = externalConsumer([removed, changed])
+
+    const report = compareManifests({ baseline, current, consumers: [consumer] })
+    expect(report.mode).toBe("compare")
+    expect(report.findings.find(finding => finding.entityId === removed)?.affectedConsumers[0]).toMatchObject({
+      package: { name: "@acme/app", version: "2.0.0" },
+      dependency: { to: removed, kind: "style-token", origin: { property: "color" } },
+    })
+    expect(report.findings.find(finding => finding.entityId === changed)?.affectedConsumers[0]?.dependency.to).toBe(changed)
+    expect(report.analysisLimits.map(limit => limit.code)).toContain("explicit-coverage")
+    expect(report.analysisLimits.map(limit => limit.code)).toContain("component-use-unavailable")
+    expect(report.analysisLimits.map(limit => limit.code)).not.toContain("consumer-manifests-not-supplied")
+  })
+
+  it("does not attribute unresolved or unrelated edges and reports the analysis limits in both modes", () => {
+    const removed = `${packageName}#token:color.removed`
+    const baseline = manifest({ tokens: [token({ name: "color.removed" })] })
+    const current = manifest({ version: "1.3.0" })
+    const consumer = externalConsumer(["@acme/other#token:color.unrelated"], true)
+    const compared = compareManifests({ baseline, current, consumers: [consumer] })
+    const removedFinding = compared.findings.find(finding => finding.entityId === removed)!
+    expect(removedFinding.affectedConsumers).toEqual([])
+    expect(compared.analysisLimits.map(limit => limit.code)).toContain("unresolved-references")
+
+    const checked = checkManifestConsumers({ current, consumers: [consumer] })
+    expect(checked.mode).toBe("check")
+    expect(checked.analysisLimits.map(limit => limit.code)).toContain("explicit-coverage")
+    expect(checked.analysisLimits.map(limit => limit.code)).toContain("unresolved-references")
+    expect(checked.analysisLimits.map(limit => limit.code)).not.toContain("consumer-manifests-not-supplied")
+    expect(compareManifests({ baseline, current }).analysisLimits.map(limit => limit.code)).toContain("consumer-manifests-not-supplied")
+  })
+
+  it("reports private-token findings in compare mode and never fabricates component-use attribution", () => {
+    const privateId = `${packageName}#token:color.private`
+    const baseline = manifest({
+      tokens: [token({ name: "color.private" })],
+      components: [component({ name: "Card", slots: ["root", "icon"] })],
+    })
+    const current = manifest({ version: "1.3.0",
+      tokens: [token({ name: "color.private", visibility: "private" })],
+      components: [component({ name: "Card", slots: ["root"] })],
+    })
+    const cardId = `${packageName}#component:Card`
+    const consumer = externalConsumer([privateId, cardId])
+    const report = compareManifests({ baseline, current, consumers: [consumer] })
+
+    expect(report.findings.find(finding => finding.code === "token.visibility-reduced")?.affectedConsumers[0]?.dependency.to).toBe(privateId)
+    expect(report.findings.find(finding => finding.code === "consumer.private-token-dependency")?.entityId).toBe(privateId)
+    expect(report.findings.find(finding => finding.code === "component.slot-removed")?.affectedConsumers).toEqual([])
+    expect(report.analysisLimits.map(limit => limit.code)).toContain("component-use-unavailable")
   })
 })

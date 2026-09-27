@@ -1,4 +1,10 @@
 import { decodeManifest } from "./schema"
+import { analyzeManifestConsumerEvidence } from "./consumer-check"
+import { decodeManifestCompatibilityReport } from "./comparison-report-schema"
+import {
+  MANIFEST_COMPATIBILITY_REPORT_FORMAT,
+  MANIFEST_COMPATIBILITY_REPORT_VERSION,
+} from "./comparison-report-model"
 import type {
   DesignSystemManifest,
   ManifestComponent,
@@ -7,6 +13,7 @@ import type {
 import type {
   ManifestAnalysisLimit,
   ManifestCompatibilityFinding,
+  ManifestCompatibilityReport,
   ManifestReportJson,
 } from "./comparison-report-model"
 
@@ -339,4 +346,41 @@ export function compareManifestContracts(baselineInput: unknown, currentInput: u
     findings,
     analysisLimits: buildAnalysisLimits(baseline, current),
   }
+}
+
+function mergeAnalysisLimits(
+  ...groups: ReadonlyArray<ReadonlyArray<ManifestAnalysisLimit>>
+): ReadonlyArray<ManifestAnalysisLimit> {
+  const byCode = new Map<ManifestAnalysisLimit["code"], ManifestAnalysisLimit>()
+  for (const limit of groups.flat()) if (!byCode.has(limit.code)) byCode.set(limit.code, limit)
+  return [...byCode.values()].sort((left, right) => compareAnalysisLimits(left, right))
+}
+
+/** Compare two provider manifests and attach only explicitly supplied consumer edges. */
+export function compareManifests(input: {
+  readonly baseline: unknown
+  readonly current: unknown
+  readonly consumers?: ReadonlyArray<unknown>
+}): ManifestCompatibilityReport {
+  const comparison = compareManifestContracts(input.baseline, input.current)
+  const consumerAnalysis = analyzeManifestConsumerEvidence(input.consumers === undefined
+    ? { current: input.current }
+    : { current: input.current, consumers: input.consumers })
+  const structuralFindings = comparison.findings.map(finding => {
+    if (!finding.code.startsWith("token.")) return finding
+    return {
+      ...finding,
+      affectedConsumers: consumerAnalysis.referencesByTarget.get(finding.entityId) ?? [],
+    }
+  })
+  const findings = [...structuralFindings, ...consumerAnalysis.report.findings].sort(compareFindings)
+  return decodeManifestCompatibilityReport({
+    format: MANIFEST_COMPATIBILITY_REPORT_FORMAT,
+    schemaVersion: MANIFEST_COMPATIBILITY_REPORT_VERSION,
+    mode: "compare",
+    provider: comparison.provider,
+    suppliedConsumers: consumerAnalysis.report.suppliedConsumers,
+    findings,
+    analysisLimits: mergeAnalysisLimits(comparison.analysisLimits, consumerAnalysis.report.analysisLimits),
+  })
 }
