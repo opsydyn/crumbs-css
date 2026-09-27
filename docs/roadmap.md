@@ -37,7 +37,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
 | M7 | Typed component slots, states, and extension contracts | M5, M6 | Not started |
 | M8 | Distributed package/artifact compatibility | M2, M3, M7 | Not started |
-| M9 | Manifests, change impact, policy, migrations, and DTCG | M7, M8 | Not started |
+| M9 | Manifests, change impact, policy, migrations, and DTCG | M7, M8 | In progress; M9.1 complete |
 | M10 | Qualify a reference design system and enterprise journeys | M8, M9 | Not started |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Deferred |
 
@@ -268,9 +268,9 @@ for iOS and web. Required compiler fixtures and consumer maps remain fail-closed
 See the [M8.6 CI assessment](assessments/2026-09-27-m8-6-ci-consumer-qualification.md).
 Android and device acceptance remain parked.
 
-Next recommended roadmap item: **M9.1** — emit deterministic, versioned
-manifests for public identities, contracts, aliases, capabilities, defaults,
-and deprecation/replacement metadata.
+Next recommended roadmap item: **M9.2** — compare manifests locally and at
+release time to detect contract changes, forbidden private dependencies, and
+statically known affected consumers. Keep Android/device acceptance parked.
 
 ## M8 — Qualify distributed packages and artifact evolution
 
@@ -291,7 +291,7 @@ and deprecation/replacement metadata.
 **Decisions:** D5, D9, D10, D11.\
 **Affected paths:** new tooling/manifest/policy/adapter modules and entrypoints; diagnostic codes; CLI, manifest-diff, codemod, and DTCG fixtures; team documentation.
 
-- [ ] M9.1: Emit deterministic versioned manifests for identities, public contracts, aliases/dependencies, source origins, capabilities, defaults, and deprecation/replacement metadata.
+- [x] M9.1: Emit deterministic versioned manifests for identities, public contracts, aliases/dependencies, source origins, capabilities, defaults, and deprecation/replacement metadata. Qualified with [receipt](evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json) and [assessment](assessments/2026-09-27-m9-1-deterministic-manifest.md).
 - [ ] M9.2: Provide local checking and release-comparison tooling. Detect token/slot/variant removal, domain changes, changed defaults, and forbidden private dependencies; report affected statically known consumers and analysis limits.
 - [ ] M9.3: Add development-only style explanations for resolved values, matching conditions, override winners, dependencies, and recomputation causes. Exclude detailed provenance from production output unless deliberately requested.
 - [ ] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports.
@@ -300,6 +300,30 @@ and deprecation/replacement metadata.
 - [ ] M9.7: Support ownership metadata in local reports. Optional editor/design-tool adapters consume manifests and schemas; neither hosted accounts nor external telemetry is required.
 
 **Exit:** release-impact fixtures identify expected consumers; reports distinguish proven breaks from potential visual impact; migrations preserve valid usage; DTCG support/limitations are explicit; tooling stays outside ordinary runtime bundles.
+
+### 2026-09-27 — M9.1 deterministic design-system manifest
+
+- [x] Added the opt-in `@opsydyn/crumbs-css/tooling/manifest` entrypoint for
+  canonical schema-v1 JSON generated from explicit token, component, and
+  compiled-style roots. Token/component records derive from their descriptors;
+  compiler sidecars report final style dependencies, package-relative origins,
+  and compiler-observed capabilities.
+- [x] Qualified public/private token visibility, aliases, component defaults
+  and state constraints, lifecycle metadata, unresolved legacy references,
+  root reordering, and distinct temporary package roots. The packed export and
+  ordinary runtime graph checks remain separate from app/device claims.
+- [x] Documented the explicit-root workflow and the tooling-only Effect 4
+  Schema boundary. The receipt and manifest artifact hash-link fixture inputs
+  to the output digest.
+- [x] Android remains `not-run` and parked; no device, publication, or release
+  acceptance is claimed.
+
+See the [M9.1 qualification receipt](evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json)
+and [assessment](assessments/2026-09-27-m9-1-deterministic-manifest.md).
+
+Next recommended roadmap item: **M9.2** — compare manifests locally and at
+release time for breaking contract changes, private-surface policy violations,
+and statically known affected consumers. Keep Android/device gates parked.
 
 ## M10 — Qualify the reference design system and North Star journeys
 

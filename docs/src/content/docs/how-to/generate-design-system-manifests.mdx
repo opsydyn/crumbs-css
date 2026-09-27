@@ -1,0 +1,94 @@
+---
+title: Generate design-system manifests
+description: Assemble a deterministic manifest from explicitly selected Crumbs token, component, and compiled style roots.
+---
+
+Crumbs can emit a versioned JSON manifest for local compatibility, policy, and
+design-system tooling. The manifest includes only the roots you explicitly
+provide; it does not crawl a repository or imply complete package coverage.
+
+## Assemble selected roots
+
+Use the tooling-only entrypoint from a build script. Pass stable package and
+compiler/artifact identities, package-relative source origins, and the style
+sidecar captured by the compiler:
+
+```ts
+import { writeFile } from "node:fs/promises"
+import {
+  assembleManifest,
+  encodeCanonicalManifest,
+  projectTokenContract,
+  transformCssTsToStyleSheetWithManifestSidecar,
+} from "@opsydyn/crumbs-css/tooling/manifest"
+import { button } from "./components/button.css"
+import { tokens } from "./tokens.css"
+
+const packageRoot = process.cwd()
+const tokenOrigin = { path: "src/tokens.css.ts", exportPath: "tokens" }
+const componentOrigin = { path: "src/components/button.css.ts", exportPath: "button" }
+const tokenRecords = projectTokenContract(tokens, tokenOrigin)
+const { sidecar } = await transformCssTsToStyleSheetWithManifestSidecar(
+  `${packageRoot}/src/components/button.css.ts`,
+  packageRoot,
+  { declaredTokenIds: new Set(tokenRecords.map((token) => token.id)) },
+)
+
+const manifest = assembleManifest({
+  package: { name: "@acme/design-system", version: "1.0.0" },
+  producer: {
+    compiler: { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" },
+    artifact: { name: "crumbs.native-styles", version: 1 },
+  },
+  tokenContracts: [{ contract: tokens, origin: tokenOrigin }],
+  componentRecipes: [{ recipe: button, origin: componentOrigin }],
+  styleSidecars: [sidecar],
+  lifecycleAnnotations: [
+    {
+      entityId: "@acme/ui#Button@1",
+      deprecatedSince: "2.0.0",
+      reason: "Use the refreshed component contract.",
+      replacement: { id: "@acme/ui#ActionButton@1", resolution: "external" },
+    },
+  ],
+})
+
+await writeFile("design-system-manifest.json", encodeCanonicalManifest(manifest))
+```
+
+Use the token and component descriptors as the source of contract metadata.
+Provide only the style modules relevant to the report. If a style references a
+token outside those contracts, retain its stable external identity where
+available; legacy or unknown references appear under
+`manifest.coverage.unresolved`. Do not convert an unresolved reference into an
+invented token ID.
+
+Source origins must be package-relative and include their logical export path.
+Lifecycle annotations are separate assembly inputs keyed by stable entity ID;
+declared replacements must resolve within the supplied roots, while external
+replacements require an explicit stable ID.
+
+## Read the result accurately
+
+`manifest.coverage.roots` describes the selected contracts, recipes, and style
+modules, not every file in a package. The manifest carries token visibility,
+domains, aliases, public component surfaces, defaults, lifecycle records,
+dependencies and provenance. It never includes resolved theme values.
+
+Style capability records are labeled `compiler-observed`: they mean the
+compiler admitted a primitive/property pair from the final composed output.
+They do not prove device rendering, accessibility acceptance, or platform
+behavior. Keep those claims tied to the separate native/device qualification
+matrix.
+
+The tooling subpath validates and encodes data through Effect 4 Schema, but its
+public surface and output are plain TypeScript records and JSON. Ordinary app
+imports from the package root, `theme`, `theme/core`, `tokens`, or `style` do
+not need an Effect import. Do not re-export the manifest tooling API from an
+application runtime entrypoint.
+
+To repeat Crumbs' fixture, determinism, packed ESM/CommonJS/types, runtime-graph
+and Expo iOS/web checks in this repository, run `bun run manifest:qualify`.
+The generated receipt is stored at
+`docs/evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json`;
+Android remains a separate parked device gate.

@@ -201,6 +201,27 @@ Runtime theme resolution preserves supplied native structured arrays/objects, th
 
 Static transform arrays and numeric `shadowOffset` / `textShadowOffset` now compile directly as native values, preserving transform order and whole-value composition replacement. Animated values, nested tokens and other unsupported structured shapes fail explicitly; pass them through React Native's runtime `style` prop. See the exact supported operations and migration notes in [compatibility](./COMPATIBILITY.md#static-structured-compiler-boundary).
 
+## Design-system manifests
+
+Packages can build a deterministic JSON manifest from explicitly selected token
+contracts, component recipes, and compiled style modules. Import the opt-in
+tooling API from `@opsydyn/crumbs-css/tooling/manifest`; it is not re-exported
+from the package root or runtime theme entrypoints. Supply package-relative
+source origins and lifecycle annotations with the roots you own. The manifest
+records unresolved references and compiler-observed capabilities without
+including resolved theme values or machine paths. Effect 4 Schema stays behind
+the tooling entrypoint, so ordinary consumers do not need an Effect import.
+
+The repository fixture and packed-export/runtime qualification can be repeated
+with:
+
+```sh
+bun run manifest:qualify
+```
+
+See the [manifest generation guide](https://opsydyn.github.io/crumbs-css/how-to/generate-design-system-manifests/)
+for the assembly workflow, lifecycle metadata, and interpretation limits.
+
 ## Minimal recipe example
 
 ```ts

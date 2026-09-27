@@ -1,0 +1,509 @@
+{
+  "format": "crumbs.m9-1-qualification",
+  "status": "qualified",
+  "identity": {
+    "package": {
+      "name": "@acme/m9-1-manifest-fixture",
+      "version": "1.0.0"
+    },
+    "compiler": {
+      "name": "@opsydyn/crumbs-css",
+      "version": "0.1.1-alpha.1"
+    },
+    "artifact": {
+      "name": "crumbs.native-styles",
+      "version": 1
+    },
+    "manifestSchemaVersion": 1
+  },
+  "fixture": {
+    "files": [
+      {
+        "path": "fixtures/m9-1-manifest/components.ts",
+        "sha256": "2f76ff39edd7e5f4d6f823c8e8c6800445474e2506ac210feea163959cbf8c51"
+      },
+      {
+        "path": "fixtures/m9-1-manifest/package.json",
+        "sha256": "bad03d51ac9603c4d65835bd86b192ebb3e94ae6f1a1ffeb88ff30430509015c"
+      },
+      {
+        "path": "fixtures/m9-1-manifest/styles.css.ts",
+        "sha256": "fbbec9468df15a9d987aed84eefb31478fad878de86ca7b6b707888b2649e2f5"
+      },
+      {
+        "path": "fixtures/m9-1-manifest/tokens-supplement.ts",
+        "sha256": "8dc0cdc96d0be8e2b5c338ccc39b3b71b384b7844a8d208f0c01c5945dd6a2c3"
+      },
+      {
+        "path": "fixtures/m9-1-manifest/tokens.ts",
+        "sha256": "c90471100f43b862c5fec6f8699355b39c3402fc533902f68e6adecb454d3d01"
+      }
+    ]
+  },
+  "manifest": {
+    "path": "manifest.json",
+    "sha256": "fa0b0a9592fb8cf630d2360c8db249d1f80bdffb19544c21e3726a495aef185f",
+    "declaredRoots": [
+      {
+        "kind": "token-contract",
+        "id": "@acme/tokens#manifestFixture@1"
+      },
+      {
+        "kind": "token-contract",
+        "id": "@acme/tokens#manifestFixtureSupplement@1"
+      },
+      {
+        "kind": "component-recipe",
+        "id": "@acme/ui#ManifestButton@1"
+      },
+      {
+        "kind": "style-module",
+        "id": "@acme/m9-1-manifest-fixture#styles.css.ts"
+      }
+    ],
+    "unresolvedReferences": [
+      {
+        "reference": "@acme/tokens/manifestFixture@1#8:semantic/13:legacySurface -> legacy.palette.surface",
+        "reason": "The alias target is outside the declared roots or has no stable contract identity."
+      },
+      {
+        "reference": "legacy:--crumbs-legacy-missing",
+        "reason": "The style token reference has no registered stable contract identity.",
+        "origin": {
+          "moduleId": "@acme/m9-1-manifest-fixture#styles.css.ts",
+          "exportPath": "legacy",
+          "property": "borderBottomColor"
+        }
+      },
+      {
+        "reference": "legacy:--crumbs-legacy-missing",
+        "reason": "The style token reference has no registered stable contract identity.",
+        "origin": {
+          "moduleId": "@acme/m9-1-manifest-fixture#styles.css.ts",
+          "exportPath": "legacy",
+          "property": "borderLeftColor"
+        }
+      },
+      {
+        "reference": "legacy:--crumbs-legacy-missing",
+        "reason": "The style token reference has no registered stable contract identity.",
+        "origin": {
+          "moduleId": "@acme/m9-1-manifest-fixture#styles.css.ts",
+          "exportPath": "legacy",
+          "property": "borderRightColor"
+        }
+      },
+      {
+        "reference": "legacy:--crumbs-legacy-missing",
+        "reason": "The style token reference has no registered stable contract identity.",
+        "origin": {
+          "moduleId": "@acme/m9-1-manifest-fixture#styles.css.ts",
+          "exportPath": "legacy",
+          "property": "borderTopColor"
+        }
+      }
+    ],
+    "capabilityEvidence": [
+      "compiler-observed"
+    ]
+  },
+  "determinism": {
+    "absoluteRootCount": 2,
+    "byteIdentical": true,
+    "digestIdentical": true,
+    "rootsReordered": true
+  },
+  "packedPackage": {
+    "resolvedExports": [
+      {
+        "subpath": ".",
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.cjs",
+        "types": "./dist/index.d.mts"
+      },
+      {
+        "subpath": "./style",
+        "import": "./dist/style.mjs",
+        "require": "./dist/style.cjs",
+        "types": "./dist/style.d.mts"
+      },
+      {
+        "subpath": "./theme",
+        "import": "./dist/theme.mjs",
+        "require": "./dist/theme.cjs",
+        "types": "./dist/theme.d.mts"
+      },
+      {
+        "subpath": "./theme/core",
+        "import": "./dist/theme-core.mjs",
+        "require": "./dist/theme-core.cjs",
+        "types": "./dist/theme-core.d.mts"
+      },
+      {
+        "subpath": "./tokens",
+        "import": "./dist/tokens.mjs",
+        "require": "./dist/tokens.cjs",
+        "types": "./dist/tokens.d.mts"
+      },
+      {
+        "subpath": "./tokens/optic",
+        "import": "./dist/tokens-optic.mjs",
+        "require": "./dist/tokens-optic.cjs",
+        "types": "./dist/tokens-optic.d.mts"
+      },
+      {
+        "subpath": "./tokens/schema",
+        "import": "./dist/tokens-schema.mjs",
+        "require": "./dist/tokens-schema.cjs",
+        "types": "./dist/tokens-schema.d.mts"
+      },
+      {
+        "subpath": "./tokens/schema/value",
+        "import": "./dist/tokens-schema-value.mjs",
+        "require": "./dist/tokens-schema-value.cjs",
+        "types": "./dist/tokens-schema-value.d.mts"
+      },
+      {
+        "subpath": "./tooling/manifest",
+        "import": "./dist/tooling-manifest.mjs",
+        "require": "./dist/tooling-manifest.cjs",
+        "types": "./dist/tooling-manifest.d.mts"
+      },
+      {
+        "subpath": "./metro-plugin",
+        "import": "./dist/metro-plugin.mjs",
+        "require": "./dist/metro-plugin.cjs",
+        "types": "./dist/metro-plugin.d.mts"
+      },
+      {
+        "subpath": "./dist/transformer",
+        "import": "./dist/transformer.mjs",
+        "require": "./dist/transformer.cjs",
+        "types": "./dist/transformer.d.mts"
+      },
+      {
+        "subpath": "./dist/metro-plugin",
+        "import": "./dist/metro-plugin.mjs",
+        "require": "./dist/metro-plugin.cjs",
+        "types": "./dist/metro-plugin.d.mts"
+      },
+      {
+        "subpath": "./dist/theme",
+        "import": "./dist/theme.mjs",
+        "require": "./dist/theme.cjs",
+        "types": "./dist/theme.d.mts"
+      },
+      {
+        "subpath": "./package.json",
+        "import": "./package.json",
+        "require": "./package.json"
+      }
+    ],
+    "runtimeGraphClasses": [
+      {
+        "subpath": ".",
+        "classification": "compiler-tooling",
+        "format": "esm",
+        "fileCount": 8,
+        "externalSpecifiers": [
+          "@vanilla-extract/css",
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/fileScope",
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path"
+        ]
+      },
+      {
+        "subpath": ".",
+        "classification": "compiler-tooling",
+        "format": "cjs",
+        "fileCount": 8,
+        "externalSpecifiers": [
+          "@vanilla-extract/css",
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/fileScope",
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path",
+          "url"
+        ]
+      },
+      {
+        "subpath": "./style",
+        "classification": "compiler-tooling",
+        "format": "esm",
+        "fileCount": 6,
+        "externalSpecifiers": [
+          "@vanilla-extract/css",
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/fileScope"
+        ]
+      },
+      {
+        "subpath": "./style",
+        "classification": "compiler-tooling",
+        "format": "cjs",
+        "fileCount": 7,
+        "externalSpecifiers": [
+          "@vanilla-extract/css",
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/fileScope",
+          "node:crypto",
+          "node:fs"
+        ]
+      },
+      {
+        "subpath": "./theme",
+        "classification": "ordinary-runtime",
+        "format": "esm",
+        "fileCount": 1,
+        "externalSpecifiers": [
+          "react"
+        ]
+      },
+      {
+        "subpath": "./theme",
+        "classification": "ordinary-runtime",
+        "format": "cjs",
+        "fileCount": 1,
+        "externalSpecifiers": [
+          "react"
+        ]
+      },
+      {
+        "subpath": "./theme/core",
+        "classification": "ordinary-runtime",
+        "format": "esm",
+        "fileCount": 1,
+        "externalSpecifiers": [
+          "react"
+        ]
+      },
+      {
+        "subpath": "./theme/core",
+        "classification": "ordinary-runtime",
+        "format": "cjs",
+        "fileCount": 1,
+        "externalSpecifiers": [
+          "react"
+        ]
+      },
+      {
+        "subpath": "./tokens",
+        "classification": "ordinary-runtime",
+        "format": "esm",
+        "fileCount": 4,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tokens",
+        "classification": "ordinary-runtime",
+        "format": "cjs",
+        "fileCount": 4,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tokens/optic",
+        "classification": "advanced-runtime",
+        "format": "esm",
+        "fileCount": 5,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tokens/optic",
+        "classification": "advanced-runtime",
+        "format": "cjs",
+        "fileCount": 5,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tokens/schema",
+        "classification": "advanced-runtime",
+        "format": "esm",
+        "fileCount": 6,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tokens/schema",
+        "classification": "advanced-runtime",
+        "format": "cjs",
+        "fileCount": 6,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tokens/schema/value",
+        "classification": "advanced-runtime",
+        "format": "esm",
+        "fileCount": 3,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tokens/schema/value",
+        "classification": "advanced-runtime",
+        "format": "cjs",
+        "fileCount": 3,
+        "externalSpecifiers": []
+      },
+      {
+        "subpath": "./tooling/manifest",
+        "classification": "compiler-tooling",
+        "format": "esm",
+        "fileCount": 11,
+        "externalSpecifiers": [
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/transformCss",
+          "@vanilla-extract/integration",
+          "metro-transform-worker",
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path",
+          "node:url",
+          "node:vm"
+        ]
+      },
+      {
+        "subpath": "./tooling/manifest",
+        "classification": "compiler-tooling",
+        "format": "cjs",
+        "fileCount": 11,
+        "externalSpecifiers": [
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/transformCss",
+          "@vanilla-extract/integration",
+          "metro-transform-worker",
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path",
+          "node:vm",
+          "url"
+        ]
+      },
+      {
+        "subpath": "./metro-plugin",
+        "classification": "compiler-tooling",
+        "format": "esm",
+        "fileCount": 2,
+        "externalSpecifiers": [
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path"
+        ]
+      },
+      {
+        "subpath": "./metro-plugin",
+        "classification": "compiler-tooling",
+        "format": "cjs",
+        "fileCount": 2,
+        "externalSpecifiers": [
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path",
+          "url"
+        ]
+      },
+      {
+        "subpath": "./dist/transformer",
+        "classification": "compiler-tooling",
+        "format": "esm",
+        "fileCount": 7,
+        "externalSpecifiers": [
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/transformCss",
+          "@vanilla-extract/integration",
+          "metro-transform-worker",
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path",
+          "node:url",
+          "node:vm"
+        ]
+      },
+      {
+        "subpath": "./dist/transformer",
+        "classification": "compiler-tooling",
+        "format": "cjs",
+        "fileCount": 7,
+        "externalSpecifiers": [
+          "@vanilla-extract/css/adapter",
+          "@vanilla-extract/css/transformCss",
+          "@vanilla-extract/integration",
+          "metro-transform-worker",
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path",
+          "node:vm",
+          "url"
+        ]
+      },
+      {
+        "subpath": "./dist/metro-plugin",
+        "classification": "compiler-tooling",
+        "format": "esm",
+        "fileCount": 2,
+        "externalSpecifiers": [
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path"
+        ]
+      },
+      {
+        "subpath": "./dist/metro-plugin",
+        "classification": "compiler-tooling",
+        "format": "cjs",
+        "fileCount": 2,
+        "externalSpecifiers": [
+          "node:crypto",
+          "node:fs",
+          "node:module",
+          "node:path",
+          "url"
+        ]
+      },
+      {
+        "subpath": "./dist/theme",
+        "classification": "ordinary-runtime",
+        "format": "esm",
+        "fileCount": 1,
+        "externalSpecifiers": [
+          "react"
+        ]
+      },
+      {
+        "subpath": "./dist/theme",
+        "classification": "ordinary-runtime",
+        "format": "cjs",
+        "fileCount": 1,
+        "externalSpecifiers": [
+          "react"
+        ]
+      },
+      {
+        "subpath": "./package.json",
+        "classification": "metadata",
+        "format": "metadata",
+        "fileCount": 1,
+        "externalSpecifiers": []
+      }
+    ],
+    "ordinaryRuntimeBoundary": "passed"
+  },
+  "distribution": {
+    "command": "bun run playground:distribution --m8-3-check",
+    "status": "passed",
+    "esmCommonJsTypes": "passed",
+    "ios": "passed",
+    "web": "passed",
+    "android": "not-run",
+    "androidStatus": "parked; no Android device is available"
+  }
+}
