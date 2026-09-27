@@ -145,8 +145,11 @@
 - Create: packages/css/test/style-explanation-branches.test.ts
 - Create: packages/css/test/style-explanation-branches.property.test.ts
 - Modify: packages/css/src/devtools/explain-style.ts
+- Modify: packages/css/src/devtools/style-explanation-model.ts (optional component slot attribution on property explanations)
+- Modify: packages/css/src/devtools/style-explanation-schema.ts (decode the optional component slot field)
 - Modify: packages/css/src/conditions/index.ts
 - Modify: packages/css/src/expressions/index.ts
+- Modify: packages/css/src/runtime/component-recipe-resolution-plan.ts (share the state-match predicate with explanation tracing)
 - Reuse: packages/css/src/runtime/recipe-resolution-plan.ts
 - Reuse: packages/css/src/runtime/component-recipe-resolution-plan.ts
 - Reuse: packages/css/src/runtime/sprinkles-resolution-plan.ts
@@ -154,6 +157,8 @@
 **Interfaces:**
 - The explanation engine consumes current selection, conditions, and ordered component extension descriptors from StyleExplanationSnapshot.
 - Branch decisions report kind, path, identity, order, matched/selected state, and rejection reason where applicable.
+- Component property explanations include their slot to keep same-named properties unambiguous.
+- Recognized dynamic exports allow nested compiler sidecar paths without requiring a synthetic root metadata entry.
 - Condition decisions report the explicit snapshot, matcher, matched axes, specificity, declaration order, and winning candidate.
 - Add an internal trace helper that shares branch matching with createNativeConditionResolver; ordinary resolver calls do not allocate explanation records.
 - Expression match evidence records the evaluated condition value and selected case/default while preserving evaluateNativeExpression output.

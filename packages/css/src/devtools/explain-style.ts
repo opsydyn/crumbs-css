@@ -1,4 +1,10 @@
-import type { NativeConditionSnapshot } from "../conditions"
+import {
+  traceNativeConditionBranches,
+  type NativeConditionBranch,
+  type NativeConditionMatcher,
+  type NativeConditionSnapshot,
+} from "../conditions"
+import { isNativeExpression, evaluateNativeExpressionWithTrace } from "../expressions"
 import {
   createThemeDependencyResolver,
   resolveThemeTokens,
@@ -10,6 +16,20 @@ import {
 } from "../runtime/theme-dependency-plan"
 import { getThemeContractIdentity, NativeThemeTokenReferenceType } from "../theme-token"
 import type { NativeTheme } from "../native-style"
+import { nativeComponentContractIdentityKey } from "../components/contracts"
+import {
+  createRecipeResolutionPlan,
+  resolveRecipeResolutionPlan,
+} from "../runtime/recipe-resolution-plan"
+import {
+  createComponentRecipeResolutionPlan,
+  matchesComponentRecipeSelectedState,
+  resolveComponentRecipeResolutionPlan,
+} from "../runtime/component-recipe-resolution-plan"
+import {
+  createSprinklesResolutionPlan,
+  resolveSprinklesLookupPlan,
+} from "../runtime/sprinkles-resolution-plan"
 import {
   STYLE_EXPLANATION_REPORT_TYPE,
   STYLE_EXPLANATION_VALUE_TYPE,
@@ -18,7 +38,10 @@ import {
   type StyleExplanationCoverage,
   type StyleExplanationCoverageReason,
   type StyleExplanationDeclaration,
+  type StyleExplanationBranchDecision,
+  type StyleExplanationConditionDecision,
   type StyleExplanationExportMetadata,
+  type StyleExplanationExpressionDecision,
   type StyleExplanationMetadata,
   type StyleExplanationPath,
   type StyleExplanationReport,
@@ -56,6 +79,13 @@ type FlattenedStyle = {
   readonly style: Record<string, unknown>
   readonly rootOpaque?: StyleExplanationValue
 }
+type TargetResolution = {
+  readonly flattened: FlattenedStyle
+  readonly slots?: ReadonlyArray<string>
+  readonly branches: ReadonlyArray<StyleExplanationBranchDecision>
+  readonly conditionDecisions: ReadonlyArray<StyleExplanationConditionDecision>
+  readonly expressionMatches: ReadonlyArray<StyleExplanationExpressionDecision>
+}
 
 /** Explain one explicit exported style from a transformed module namespace. */
 export function explainStyle(input: ExplainStyleInput): StyleExplanationReport {
@@ -78,7 +108,7 @@ export function explainStyle(input: ExplainStyleInput): StyleExplanationReport {
     try {
       metadata = decodeStyleExplanationMetadata(sidecar.value)
       exportMetadata = metadata.exports.find(entry => samePath(entry.path, normalizedPath))
-      if (exportMetadata === undefined) {
+      if (exportMetadata === undefined && !isDynamicStyleDescriptor(sourceStyle)) {
         throw new StyleExplanationInputError(
           "CRUMBS_EXPLANATION_EXPORT_PATH_INVALID",
           `The style explanation sidecar does not contain export path ${formatPath(normalizedPath)}.`,
@@ -94,49 +124,60 @@ export function explainStyle(input: ExplainStyleInput): StyleExplanationReport {
   }
 
   const context: EncodingContext = { generatedNodes: new WeakSet(), opaqueFound: false }
-  const flattened = flattenStyle(sourceStyle, context)
   const currentTheme = readSnapshotTheme(currentSnapshot)
   const previousSnapshotField = readOptionalOwnData(input, "previous")
   const previousSnapshot = previousSnapshotField.present ? previousSnapshotField.value : undefined
   const previousTheme = previousSnapshot === undefined ? undefined : readSnapshotTheme(previousSnapshot)
+  const currentResolution = resolveStyleTarget(sourceStyle, currentSnapshot, normalizedPath, metadata, context)
+  const flattened = currentResolution.flattened
+  const currentMetadata = composeExportMetadata(metadata, normalizedPath, currentResolution)
   const dependencyPlan = readDependencyPlan(module)
-  const declaredTokens = [...(exportMetadata?.tokenDependencies ?? [])].sort()
-  const activeTokens = collectActiveTokens(flattened.style)
-  const dependencyEntry = dependencyPlan?.entries.find(entry => samePath(entry.path, normalizedPath))
+  const declaredTokens = [...(currentMetadata?.tokenDependencies ?? [])].sort()
+  const activeTokens = collectActiveTokens(flattened.style, context)
+  const selectedDependencyEntries = dependencyPlan?.entries.filter(entry =>
+    samePath(entry.path, normalizedPath) || currentResolution.branches.some(branch =>
+      branch.selected && isPathPrefix(branch.path, entry.path))) ?? []
+  const dependencyTokens = [...new Set(selectedDependencyEntries.flatMap(entry => entry.tokens))].sort()
+  const dependencyEntry = selectedDependencyEntries.length === 0 ? undefined : {
+    path: normalizedPath,
+    tokens: dependencyTokens,
+  }
   const dependencyMetadataMissing = metadata !== undefined && (
     activeTokens.some(token => !declaredTokens.includes(token)) ||
     (declaredTokens.length > 0 && dependencyEntry === undefined) ||
-    (dependencyEntry !== undefined && !sameStrings(dependencyEntry.tokens, declaredTokens))
+    (dependencyEntry !== undefined && !sameStrings(dependencyTokens, declaredTokens))
   )
   const coverage = combineCoverage(
     metadata === undefined
       ? { status: "unavailable", reasons: ["metadata-missing"] }
-      : exportMetadata!.coverage,
+      : currentMetadata?.coverage ?? { status: "partial", reasons: ["compatibility-only"] },
     [
       ...(context.opaqueFound ? ["opaque-value" as const] : []),
       ...(dependencyMetadataMissing ? ["dependency-metadata-missing" as const] : []),
     ],
   )
 
-  let resolvedStyle: unknown = flattened.rootOpaque ?? flattened.style
-  if (flattened.rootOpaque === undefined && currentTheme !== undefined) {
-    resolvedStyle = resolveThemeTokens(flattened.style, currentTheme) ?? emptyRecord()
-  }
+  const resolvedStyle = resolveStyleOutput(flattened, currentResolution.slots, currentTheme)
 
-  const encodedResolution = encodeResolvedStyle(
+  const encodedResolution = encodeStyleOutput(
     resolvedStyle,
     flattened.style,
+    currentResolution.slots,
     currentTheme,
     context,
   )
-  const propertyExplanations = createPropertyExplanations(
+  const propertyExplanations = createStylePropertyExplanations(
     flattened.style,
     resolvedStyle,
-    exportMetadata,
+    currentResolution.slots,
+    currentMetadata,
+    metadata,
+    normalizedPath,
+    currentResolution,
     currentTheme,
     context,
   )
-  const transition = createThemeTransition({
+  const themeTransition = createThemeTransition({
     exportPath: normalizedPath,
     currentTheme,
     previousTheme,
@@ -144,8 +185,22 @@ export function explainStyle(input: ExplainStyleInput): StyleExplanationReport {
     dependencyEntry,
     dependencyMetadataMissing,
     metadataAvailable: metadata !== undefined,
-    style: flattened.style,
+    style: flattenSlotsForDependencyResolution(flattened.style, currentResolution.slots),
   }, context)
+
+  const transition = createExplicitInputTransition({
+    exportPath: normalizedPath,
+    sourceStyle,
+    metadata,
+    currentSnapshot,
+    previousSnapshot,
+    currentResolution,
+    currentResolvedStyle: encodedResolution,
+    previousTheme,
+    metadataAvailable: metadata !== undefined,
+    themeTransition,
+    context,
+  })
 
   const conditions = readSnapshotConditions(currentSnapshot)
 
@@ -156,19 +211,19 @@ export function explainStyle(input: ExplainStyleInput): StyleExplanationReport {
       ...(metadata === undefined ? {} : { moduleId: metadata.moduleId }),
       exportPath: normalizedPath,
     },
-    resolution: { value: encodedResolution, branches: [] },
+    resolution: { value: encodedResolution, branches: currentResolution.branches },
     conditions: {
       ...(conditions === undefined ? {} : { snapshot: conditions }),
-      decisions: [],
-      expressionMatches: [],
+      decisions: currentResolution.conditionDecisions,
+      expressionMatches: currentResolution.expressionMatches,
     },
     composition: { properties: propertyExplanations },
     dependencies: {
       declaredTokens,
       activeTokens,
-      changedTokens: transition.changedTokens,
+      changedTokens: themeTransition.changedTokens,
     },
-    transition: transition.report,
+    transition,
     coverage,
   }
 
@@ -182,6 +237,615 @@ export function explainStyle(input: ExplainStyleInput): StyleExplanationReport {
         : "The style explanation report could not be encoded.",
     )
   }
+}
+
+function resolveStyleTarget(
+  source: unknown,
+  snapshot: unknown,
+  exportPath: StyleExplanationPath,
+  metadata: StyleExplanationMetadata | undefined,
+  context: EncodingContext,
+): TargetResolution {
+  const tag = readOptionalOwnData(source, "$$type")
+  let flattened: FlattenedStyle
+  let slots: ReadonlyArray<string> | undefined
+  let branches: StyleExplanationBranchDecision[] = []
+
+  if (tag.present && tag.value === "crumbs.css.recipe") {
+    const recipe = cloneRuntimeValue(source, context, new Set(), 0)
+    if (!isPlainRecord(recipe)) return emptyTargetResolution(source, exportPath, metadata, snapshot, context)
+    const plan = createRecipeResolutionPlan(recipe as never)
+    const selection = readSnapshotSelection(snapshot)
+    const selected = { ...plan.defaultSelection, ...selection }
+    const styles = resolveRecipeResolutionPlan(plan, selection)
+    flattened = flattenStyle(styles, context)
+    branches = recipeBranchDecisions(plan, selected, exportPath, metadata?.moduleId)
+  } else if (tag.present && tag.value === "crumbs.css.component-recipe") {
+    const recipe = cloneRuntimeValue(source, context, new Set(), 0)
+    if (!isPlainRecord(recipe)) return emptyTargetResolution(source, exportPath, metadata, snapshot, context)
+    const extensions = readSnapshotExtensions(snapshot)
+    const plan = createComponentRecipeResolutionPlan(recipe as never, { extensions: extensions as never })
+    const selection = readSnapshotSelection(snapshot)
+    const selected = { ...plan.defaultSelection, ...selection }
+    const resolved = resolveComponentRecipeResolutionPlan(plan, selection)
+    slots = plan.slotOrder
+    const slotStyles = emptyRecord()
+    for (const slot of slots) {
+      const styles = readOptionalOwnData(resolved, slot)
+      setOwn(slotStyles, slot, flattenStyle(styles.present ? styles.value : [], context).style)
+    }
+    flattened = { style: slotStyles }
+    branches = componentBranchDecisions(plan, selected, exportPath, metadata?.moduleId)
+  } else if (tag.present && tag.value === "crumbs.css.sprinkles-lookup-plan") {
+    const lookup = cloneRuntimeValue(source, context, new Set(), 0)
+    if (!isPlainRecord(lookup)) return emptyTargetResolution(source, exportPath, metadata, snapshot, context)
+    const plan = createSprinklesResolutionPlan(lookup as never)
+    const selection = readSnapshotSelection(snapshot)
+    const styles = resolveSprinklesLookupPlan(plan, selection as never)
+    flattened = flattenStyle(styles, context)
+    branches = sprinklesBranchDecisions(plan, selection, exportPath, metadata?.moduleId)
+  } else {
+    flattened = flattenStyle(source, context)
+  }
+
+  const conditions = readSnapshotConditions(snapshot)
+  const conditionTrace = createConditionTrace(metadata, exportPath, conditions)
+  const conditionBranches = conditionTrace.branches
+  const expressionMatches = collectExpressionMatches(
+    flattened.style,
+    exportPath,
+    conditions,
+    readSnapshotTheme(snapshot),
+    context,
+  )
+  branches = [...branches, ...conditionBranches, ...expressionMatches.map((match, order) => ({
+    kind: "expression" as const,
+    path: match.path,
+    identity: `expression:${formatPath(match.path)}:${order}`,
+    order,
+    matched: true,
+    selected: true,
+  }))]
+  return {
+    flattened,
+    ...(slots === undefined ? {} : { slots }),
+    branches,
+    conditionDecisions: conditionTrace.decisions,
+    expressionMatches,
+  }
+}
+
+function isDynamicStyleDescriptor(value: unknown): boolean {
+  const tag = readOptionalOwnData(value, "$$type")
+  return tag.present && (tag.value === "crumbs.css.recipe" ||
+    tag.value === "crumbs.css.component-recipe" ||
+    tag.value === "crumbs.css.sprinkles-lookup-plan")
+}
+
+function composeExportMetadata(
+  metadata: StyleExplanationMetadata | undefined,
+  exportPath: StyleExplanationPath,
+  resolution: TargetResolution,
+): StyleExplanationExportMetadata | undefined {
+  if (metadata === undefined) return undefined
+  const root = metadata.exports.find(entry => samePath(entry.path, exportPath))
+  const related: StyleExplanationExportMetadata[] = []
+  const seen = new Set<string>()
+  const add = (entry: StyleExplanationExportMetadata): void => {
+    const key = JSON.stringify(entry.path)
+    if (seen.has(key)) return
+    seen.add(key)
+    related.push(entry)
+  }
+  if (root !== undefined) add(root)
+  for (const branch of resolution.branches) {
+    if (!branch.selected) continue
+    const branchEntries = metadata.exports.filter(entry => isPathPrefix(branch.path, entry.path))
+      .sort((left, right) => comparePath(left.path, right.path))
+    for (const entry of branchEntries) add(entry)
+  }
+  const candidates = related.flatMap(entry => entry.candidates)
+    .map((candidate, order) => ({ ...candidate, order }))
+  const tokenDependencies = [...new Set(related.flatMap(entry => entry.tokenDependencies))].sort()
+  const coverage = root?.coverage ?? { status: "partial" as const, reasons: ["compatibility-only" as const] }
+  return {
+    path: exportPath,
+    candidates,
+    branches: root?.branches ?? [],
+    tokenDependencies,
+    coverage,
+  }
+}
+
+function emptyTargetResolution(
+  source: unknown,
+  exportPath: StyleExplanationPath,
+  metadata: StyleExplanationMetadata | undefined,
+  snapshot: unknown,
+  context: EncodingContext,
+): TargetResolution {
+  const flattened = flattenStyle(source, context)
+  const conditions = readSnapshotConditions(snapshot)
+  const conditionTrace = createConditionTrace(metadata, exportPath, conditions)
+  return {
+    flattened,
+    branches: conditionTrace.branches,
+    conditionDecisions: conditionTrace.decisions,
+    expressionMatches: collectExpressionMatches(flattened.style, exportPath, conditions, readSnapshotTheme(snapshot), context),
+  }
+}
+
+function recipeBranchDecisions(
+  plan: ReturnType<typeof createRecipeResolutionPlan>,
+  selection: Readonly<Record<string, unknown>>,
+  exportPath: StyleExplanationPath,
+  moduleId: string | undefined,
+): StyleExplanationBranchDecision[] {
+  const decisions: StyleExplanationBranchDecision[] = []
+  const add = (path: StyleExplanationPath, order: number, matched: boolean, reason?: StyleExplanationBranchDecision["reason"]) => {
+    decisions.push({
+      kind: "recipe", path, identity: branchIdentity(moduleId, path), order, matched, selected: matched,
+      ...(reason === undefined ? {} : { reason }),
+    })
+  }
+  if (plan.recipe.base !== undefined) add([...exportPath, "base"], 0, true)
+  let order = decisions.length
+  for (const variant of plan.variants) {
+    const selectedValue = selection[variant.name]
+    for (const value of Object.keys(variant.values)) {
+      const matched = selectedValue !== undefined && String(selectedValue) === value
+      add([...exportPath, "variants", variant.name, value], order++, matched,
+        matched ? undefined : selectedValue === undefined ? "not-selected" : "selection-mismatch")
+    }
+  }
+  for (let index = 0; index < plan.compoundMatchers.length; index += 1) {
+    const matched = plan.compoundMatchers[index]!.matches(selection)
+    add([...exportPath, "compoundVariants", index, "style"], order++, matched,
+      matched ? undefined : "compound-mismatch")
+  }
+  return decisions
+}
+
+function componentBranchDecisions(
+  plan: ReturnType<typeof createComponentRecipeResolutionPlan>,
+  selection: Readonly<Record<string, unknown>>,
+  exportPath: StyleExplanationPath,
+  moduleId: string | undefined,
+): StyleExplanationBranchDecision[] {
+  const decisions: StyleExplanationBranchDecision[] = []
+  let order = 0
+  const stateRejected = plan.stateConstraint !== undefined &&
+    !matchesComponentRecipeSelectedState(plan.stateConstraint, selection)
+  for (const slot of plan.slotOrder) {
+    if (plan.base[slot] !== undefined) {
+      const path = [...exportPath, "base", slot]
+      decisions.push({ kind: "component-recipe", path, identity: branchIdentity(moduleId, path), order: order++, matched: true, selected: true })
+    }
+  }
+  for (const variant of plan.variants) {
+    const selectedValue = selection[variant.name]
+    for (const value of Object.keys(variant.values)) {
+      const valid = (typeof selectedValue === "string" || typeof selectedValue === "boolean") &&
+        String(selectedValue) === value
+      const matched = valid && !stateRejected
+      const path = [...exportPath, "variants", variant.name, value]
+      decisions.push({
+        kind: "component-recipe", path, identity: branchIdentity(moduleId, path), order: order++, matched,
+        selected: matched,
+        ...(!matched ? { reason: stateRejected ? "state-rejected" as const : selectedValue === undefined ? "not-selected" as const : "selection-mismatch" as const } : {}),
+      })
+    }
+  }
+  for (let index = 0; index < plan.compoundMatchers.length; index += 1) {
+    const matched = !stateRejected && plan.compoundMatchers[index]!.matches(selection)
+    const path = [...exportPath, "compoundVariants", index]
+    decisions.push({
+      kind: "component-recipe", path, identity: branchIdentity(moduleId, path), order: order++, matched, selected: matched,
+      ...(!matched ? { reason: stateRejected ? "state-rejected" as const : "compound-mismatch" as const } : {}),
+    })
+  }
+  for (let index = 0; index < (plan.extensionPlan?.extensions.length ?? 0); index += 1) {
+    const extension = plan.extensionPlan!.extensions[index]!
+    const identity = nativeComponentContractIdentityKey(extension.identity)
+    const path = [...exportPath, "extensions", index]
+    decisions.push({ kind: "extension", path, identity, order: order++, matched: true, selected: true })
+  }
+  if (stateRejected) {
+    const path = [...exportPath, "state"]
+    decisions.push({ kind: "component-recipe", path, identity: branchIdentity(moduleId, path), order: order++, matched: false, selected: false, reason: "state-rejected" })
+  }
+  return decisions
+}
+
+function sprinklesBranchDecisions(
+  plan: ReturnType<typeof createSprinklesResolutionPlan>,
+  selection: Readonly<Record<string, unknown>>,
+  exportPath: StyleExplanationPath,
+  moduleId: string | undefined,
+): StyleExplanationBranchDecision[] {
+  const decisions: StyleExplanationBranchDecision[] = []
+  let order = 0
+  for (const name of Object.keys(selection)) {
+    const value = selection[name]
+    if (value === undefined || value === null || value === false) continue
+    const targets = Object.hasOwn(plan.properties, name)
+      ? [name]
+      : Object.hasOwn(plan.shorthands, name) ? plan.shorthands[name] ?? [] : []
+    for (const target of targets) {
+      const path = [...exportPath, "sprinkles", name, target]
+      decisions.push({ kind: "sprinkles", path, identity: branchIdentity(moduleId, path), order: order++, matched: true, selected: true })
+    }
+  }
+  return decisions
+}
+
+function createConditionTrace(
+  metadata: StyleExplanationMetadata | undefined,
+  exportPath: StyleExplanationPath,
+  conditions: NativeConditionSnapshot | undefined,
+): {
+  readonly branches: ReadonlyArray<StyleExplanationBranchDecision>
+  readonly decisions: ReadonlyArray<StyleExplanationConditionDecision>
+} {
+  if (metadata === undefined || conditions === undefined) return { branches: [], decisions: [] }
+  const entries = metadata.exports.flatMap(entry => entry.branches)
+    .filter(branch => isPathPrefix(exportPath, branch.path))
+    .filter(branch => branch.kind === "condition")
+    .sort((left, right) => left.order - right.order)
+  const localEntries = entries.length > 0 ? entries : []
+  const candidates: Array<NativeConditionBranch<number>> = localEntries.map((entry, index) => ({
+    when: conditionMatcher(entry.selector),
+    value: index,
+  }))
+  if (candidates.length === 0) return { branches: [], decisions: [] }
+  const trace = traceNativeConditionBranches(candidates, conditions, -1)
+  const decisions = trace.decisions.map((decision, index) => {
+    const entry = localEntries[index]!
+    const matchedAxes = Object.keys(decision.matcher).filter(axis =>
+      (decision.matcher as Record<string, unknown>)[axis] === conditions[axis as keyof NativeConditionSnapshot]) as Array<keyof NativeConditionSnapshot>
+    return {
+      path: entry.path,
+      identity: entry.identity,
+      matcher: decision.matcher,
+      matchedAxes,
+      specificity: decision.specificity,
+      declarationOrder: entry.order,
+      matched: decision.matched,
+      selected: decision.selected,
+    }
+  })
+  const branches = decisions.map((decision, index) => {
+    const entry = localEntries[index]!
+    return {
+      kind: "condition" as const,
+      path: entry.path,
+      identity: entry.identity,
+      order: entry.order,
+      matched: decision.matched,
+      selected: decision.selected,
+      ...(!decision.matched ? { reason: "condition-unmatched" as const } : !decision.selected ? { reason: "superseded" as const } : {}),
+    }
+  })
+  return { branches, decisions }
+}
+
+function conditionMatcher(selector: Readonly<Record<string, StyleExplanationValue>>): NativeConditionMatcher {
+  const matcher = emptyRecord()
+  for (const [key, value] of Object.entries(selector)) {
+    if (typeof value === "string") setOwn(matcher, key, value)
+  }
+  return matcher as NativeConditionMatcher
+}
+
+function collectExpressionMatches(
+  value: unknown,
+  basePath: StyleExplanationPath,
+  conditions: NativeConditionSnapshot | undefined,
+  theme: SafeTheme | undefined,
+  context: EncodingContext,
+): StyleExplanationExpressionDecision[] {
+  if (conditions === undefined) return []
+  const matches: StyleExplanationExpressionDecision[] = []
+  const visited = new Set<object>()
+  const visit = (candidate: unknown, path: StyleExplanationPath): void => {
+    if (!isObject(candidate) || visited.has(candidate)) return
+    if (isNativeExpression(candidate)) {
+      try {
+        const traced = evaluateNativeExpressionWithTrace(candidate, {
+          conditions,
+          ...(theme === undefined ? {} : { tokens: theme.tokens as Readonly<Record<string, unknown>> }),
+        })
+        for (const result of traced.matches) {
+          matches.push({ path, ...result })
+        }
+      } catch {
+        context.opaqueFound = true
+      }
+      return
+    }
+    visited.add(candidate)
+    try {
+      for (const key of Reflect.ownKeys(candidate)) {
+        if (typeof key !== "string") continue
+        const descriptor = Object.getOwnPropertyDescriptor(candidate, key)
+        if (descriptor !== undefined && descriptor.enumerable && "value" in descriptor) {
+          visit(descriptor.value, [...path, key])
+        }
+      }
+    } catch {
+      context.opaqueFound = true
+    }
+  }
+  visit(value, basePath)
+  return matches
+}
+
+function readSnapshotSelection(snapshot: unknown): Readonly<Record<string, unknown>> {
+  const field = readOptionalOwnData(snapshot, "selection")
+  if (!field.present || field.value === undefined) return emptyRecord()
+  if (!isPlainRecord(field.value)) throw new TypeError("Style explanation selection must be a plain data record")
+  const selection = emptyRecord()
+  for (const key of Reflect.ownKeys(field.value)) {
+    if (typeof key !== "string") throw new TypeError("Style explanation selection keys must be strings")
+    const descriptor = Object.getOwnPropertyDescriptor(field.value, key)
+    if (descriptor === undefined || !descriptor.enumerable || !("value" in descriptor)) {
+      throw new TypeError("Style explanation selection must contain enumerable data properties")
+    }
+    if (descriptor.value !== null && descriptor.value !== undefined &&
+      typeof descriptor.value !== "string" && typeof descriptor.value !== "boolean" && typeof descriptor.value !== "number") {
+      throw new TypeError("Style explanation selection values must be primitive variant values")
+    }
+    setOwn(selection, key, descriptor.value)
+  }
+  return selection
+}
+
+function readSnapshotExtensions(snapshot: unknown): ReadonlyArray<unknown> {
+  const field = readOptionalOwnData(snapshot, "extensions")
+  if (!field.present || field.value === undefined) return []
+  const extensions = readSafeArray(field.value)
+  if (extensions === undefined) throw new TypeError("Style explanation extensions must be a dense data array")
+  return extensions
+}
+
+function branchIdentity(moduleId: string | undefined, path: StyleExplanationPath): string {
+  return `${moduleId ?? "export"}#${formatPath(path)}`
+}
+
+function resolveStyleOutput(
+  flattened: FlattenedStyle,
+  slots: ReadonlyArray<string> | undefined,
+  theme: SafeTheme | undefined,
+): unknown {
+  if (flattened.rootOpaque !== undefined) return flattened.rootOpaque
+  if (slots === undefined) {
+    return theme === undefined ? flattened.style : resolveThemeTokens(flattened.style, theme) ?? emptyRecord()
+  }
+  const output = emptyRecord()
+  for (const slot of slots) {
+    const style = readOptionalOwnData(flattened.style, slot)
+    const slotStyle = style.present && isPlainRecord(style.value) ? style.value : emptyRecord()
+    setOwn(output, slot, theme === undefined ? slotStyle : resolveThemeTokens(slotStyle, theme) ?? emptyRecord())
+  }
+  return output
+}
+
+function flattenSlotsForDependencyResolution(
+  style: Readonly<Record<string, unknown>>,
+  slots: ReadonlyArray<string> | undefined,
+): Readonly<Record<string, unknown>> {
+  if (slots === undefined) return style
+  const flattened = emptyRecord()
+  for (const slot of slots) {
+    const slotField = readOptionalOwnData(style, slot)
+    if (!slotField.present || !isPlainRecord(slotField.value)) continue
+    for (const property of Object.keys(slotField.value)) {
+      const descriptor = Object.getOwnPropertyDescriptor(slotField.value, property)
+      if (descriptor !== undefined && "value" in descriptor) {
+        setOwn(flattened, `${slot}.${property}`, descriptor.value)
+      }
+    }
+  }
+  return flattened
+}
+
+function encodeStyleOutput(
+  resolvedStyle: unknown,
+  originalStyle: Readonly<Record<string, unknown>>,
+  slots: ReadonlyArray<string> | undefined,
+  theme: SafeTheme | undefined,
+  context: EncodingContext,
+): StyleExplanationValue {
+  if (slots === undefined || !isPlainRecord(resolvedStyle)) {
+    return encodeResolvedStyle(resolvedStyle, originalStyle, theme, context)
+  }
+  const output = emptyRecord() as Record<string, StyleExplanationValue>
+  for (const slot of slots) {
+    const original = readOptionalOwnData(originalStyle, slot)
+    const resolved = readOptionalOwnData(resolvedStyle, slot)
+    setOwn(output, slot, encodeResolvedStyle(
+      resolved.present ? resolved.value : emptyRecord(),
+      original.present && isPlainRecord(original.value) ? original.value : emptyRecord(),
+      theme,
+      context,
+    ))
+  }
+  return output
+}
+
+function createStylePropertyExplanations(
+  originalStyle: Readonly<Record<string, unknown>>,
+  resolvedStyle: unknown,
+  slots: ReadonlyArray<string> | undefined,
+  metadata: StyleExplanationExportMetadata | undefined,
+  allMetadata: StyleExplanationMetadata | undefined,
+  exportPath: StyleExplanationPath,
+  resolution: TargetResolution,
+  theme: SafeTheme | undefined,
+  context: EncodingContext,
+): StyleExplanationReport["composition"]["properties"] {
+  if (slots === undefined || !isPlainRecord(resolvedStyle)) {
+    return createPropertyExplanations(originalStyle, resolvedStyle, metadata, theme, context)
+  }
+  return slots.flatMap(slot => {
+    const original = readOptionalOwnData(originalStyle, slot)
+    const resolved = readOptionalOwnData(resolvedStyle, slot)
+    if (!resolved.present || !isPlainRecord(resolved.value)) return []
+    const slotMetadata = composeSlotMetadata(allMetadata, exportPath, slot, resolution)
+    return createPropertyExplanations(
+      original.present && isPlainRecord(original.value) ? original.value : emptyRecord(),
+      resolved.value,
+      slotMetadata ?? metadata,
+      theme,
+      context,
+    ).map(property => ({ ...property, slot }))
+  })
+}
+
+function composeSlotMetadata(
+  metadata: StyleExplanationMetadata | undefined,
+  exportPath: StyleExplanationPath,
+  slot: string,
+  resolution: TargetResolution,
+): StyleExplanationExportMetadata | undefined {
+  if (metadata === undefined) return undefined
+  const selectedEntries: StyleExplanationExportMetadata[] = []
+  const seen = new Set<string>()
+  for (const branch of resolution.branches) {
+    if (!branch.selected) continue
+    const entries = metadata.exports.filter(entry =>
+      isPathPrefix(branch.path, entry.path) && entry.path.slice(exportPath.length).includes(slot))
+      .sort((left, right) => comparePath(left.path, right.path))
+    for (const entry of entries) {
+      const key = JSON.stringify(entry.path)
+      if (seen.has(key)) continue
+      seen.add(key)
+      selectedEntries.push(entry)
+    }
+  }
+  const root = metadata.exports.find(entry => samePath(entry.path, exportPath))
+  return {
+    path: [...exportPath, slot],
+    candidates: selectedEntries.flatMap(entry => entry.candidates)
+      .map((candidate, order) => ({ ...candidate, order })),
+    branches: [],
+    tokenDependencies: [...new Set(selectedEntries.flatMap(entry => entry.tokenDependencies))].sort(),
+    coverage: root?.coverage ?? { status: "partial", reasons: ["compatibility-only"] },
+  }
+}
+
+function createExplicitInputTransition(args: {
+  readonly exportPath: StyleExplanationPath
+  readonly sourceStyle: unknown
+  readonly metadata: StyleExplanationMetadata | undefined
+  readonly currentSnapshot: unknown
+  readonly previousSnapshot: unknown
+  readonly currentResolution: TargetResolution
+  readonly currentResolvedStyle: StyleExplanationValue
+  readonly previousTheme: SafeTheme | undefined
+  readonly metadataAvailable: boolean
+  readonly themeTransition: ReturnType<typeof createThemeTransition>
+  readonly context: EncodingContext
+}): StyleExplanationReport["transition"] {
+  if (args.previousSnapshot === undefined) return args.themeTransition.report
+  const changedInputs = compareExplicitInputs(args.previousSnapshot, args.currentSnapshot, args.context)
+  if (changedInputs.length === 0) return args.themeTransition.report
+  if (!args.metadataAvailable) return { status: "unavailable", changedInputs: [], affectedPaths: [] }
+  const previousResolution = resolveStyleTarget(
+    args.sourceStyle,
+    args.previousSnapshot,
+    args.exportPath,
+    args.metadata,
+    args.context,
+  )
+  const previousStyle = resolveStyleOutput(previousResolution.flattened, previousResolution.slots, args.previousTheme)
+  const previousEncoded = encodeStyleOutput(previousStyle, previousResolution.flattened.style, previousResolution.slots, args.previousTheme, args.context)
+  const previousFingerprint = resolutionFingerprint(previousEncoded, previousResolution)
+  const currentFingerprint = resolutionFingerprint(args.currentResolvedStyle, args.currentResolution)
+  const effectiveChange = previousFingerprint !== currentFingerprint
+  const combined = [...args.themeTransition.report.changedInputs, ...changedInputs].sort(compareChangedInputs)
+  return {
+    status: effectiveChange ? "relevant-input-change" : "no-effective-change",
+    changedInputs: combined,
+    affectedPaths: effectiveChange ? [Object.freeze([...args.exportPath])] : [],
+  }
+}
+
+function compareExplicitInputs(
+  previous: unknown,
+  current: unknown,
+  context: EncodingContext,
+): StyleExplanationReport["transition"]["changedInputs"] {
+  const changes: StyleExplanationReport["transition"]["changedInputs"][number][] = []
+  for (const [kind, field] of [["selection", "selection"], ["condition", "conditions"]] as const) {
+    const before = readSnapshotRecord(previous, field)
+    const after = readSnapshotRecord(current, field)
+    for (const key of [...new Set([...Object.keys(before), ...Object.keys(after)])].sort()) {
+      const previousValue = readOptionalOwnData(before, key)
+      const currentValue = readOptionalOwnData(after, key)
+      if ((!previousValue.present && !currentValue.present) ||
+        (previousValue.present && currentValue.present && Object.is(previousValue.value, currentValue.value))) continue
+      changes.push({
+        kind,
+        path: [key],
+        previous: encodeValue(previousValue.present ? previousValue.value : undefined, context, new Set(), 0),
+        current: encodeValue(currentValue.present ? currentValue.value : undefined, context, new Set(), 0),
+      })
+    }
+  }
+  const beforeExtensions = extensionIdentities(previous)
+  const afterExtensions = extensionIdentities(current)
+  if (JSON.stringify(beforeExtensions) !== JSON.stringify(afterExtensions)) {
+    changes.push({
+      kind: "extension",
+      path: ["extensions"],
+      previous: encodeValue(beforeExtensions, context, new Set(), 0),
+      current: encodeValue(afterExtensions, context, new Set(), 0),
+    })
+  }
+  return changes.sort(compareChangedInputs)
+}
+
+function readSnapshotRecord(snapshot: unknown, fieldName: string): Readonly<Record<string, unknown>> {
+  const field = readOptionalOwnData(snapshot, fieldName)
+  if (!field.present || !isPlainRecord(field.value)) return emptyRecord()
+  const result = emptyRecord()
+  for (const key of Object.keys(field.value)) {
+    const entry = readOptionalOwnData(field.value, key)
+    if (entry.present) setOwn(result, key, entry.value)
+  }
+  return result
+}
+
+function extensionIdentities(snapshot: unknown): ReadonlyArray<string> {
+  return readSnapshotExtensions(snapshot).map((extension, index) => {
+    const identity = readOptionalOwnData(extension, "identity")
+    if (!identity.present) return `invalid-extension-${index}`
+    const owner = readOptionalOwnData(identity.value, "owner")
+    const name = readOptionalOwnData(identity.value, "name")
+    const version = readOptionalOwnData(identity.value, "version")
+    if (!owner.present || !name.present || !version.present ||
+      typeof owner.value !== "string" || typeof name.value !== "string" || typeof version.value !== "number") {
+      return `invalid-extension-${index}`
+    }
+    return nativeComponentContractIdentityKey({ owner: owner.value, name: name.value, version: version.value })
+  })
+}
+
+function compareChangedInputs(
+  left: StyleExplanationReport["transition"]["changedInputs"][number],
+  right: StyleExplanationReport["transition"]["changedInputs"][number],
+): number {
+  return left.kind.localeCompare(right.kind) || formatPath(left.path).localeCompare(formatPath(right.path))
+}
+
+function resolutionFingerprint(value: StyleExplanationValue, resolution: TargetResolution): string {
+  return JSON.stringify({
+    value,
+    branches: resolution.branches.map(branch => [branch.kind, branch.identity, branch.selected]),
+    conditions: resolution.conditionDecisions.map(decision => [decision.identity, decision.selected]),
+    expressions: resolution.expressionMatches.map(match => [match.path, match.value, match.selectedBranch, match.selectedCaseValue]),
+  })
 }
 
 function readInputField(input: unknown, key: string): unknown {
@@ -487,17 +1151,36 @@ function readDependencyPlan(module: unknown): ThemeDependencyPlan | undefined {
   }
 }
 
-function collectActiveTokens(style: Readonly<Record<string, unknown>>): ReadonlyArray<string> {
+function collectActiveTokens(
+  style: Readonly<Record<string, unknown>>,
+  context: EncodingContext,
+): ReadonlyArray<string> {
   const tokens = new Set<string>()
-  for (const key of Object.keys(style)) {
-    const descriptor = Object.getOwnPropertyDescriptor(style, key)
-    if (descriptor === undefined || !("value" in descriptor)) continue
-    const token = readTokenReference(descriptor.value)
+  const visited = new Set<object>()
+  const visit = (value: unknown): void => {
+    if (!isObject(value) || visited.has(value)) return
+    const token = readTokenReference(value)
     if (token.kind === "valid") {
       const name = readOptionalOwnData(token.reference, "varName")
       if (name.present && typeof name.value === "string") tokens.add(name.value)
+      return
+    }
+    visited.add(value)
+    try {
+      for (const key of Reflect.ownKeys(value)) {
+        if (typeof key !== "string") {
+          context.opaqueFound = true
+          continue
+        }
+        const descriptor = Object.getOwnPropertyDescriptor(value, key)
+        if (descriptor !== undefined && descriptor.enumerable && "value" in descriptor) visit(descriptor.value)
+      }
+    } catch {
+      context.opaqueFound = true
+      return
     }
   }
+  visit(style)
   return [...tokens].sort()
 }
 
@@ -785,6 +1468,23 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
 
 function samePath(left: ReadonlyArray<string | number>, right: ReadonlyArray<string | number>): boolean {
   return left.length === right.length && left.every((segment, index) => segment === right[index])
+}
+
+function comparePath(left: ReadonlyArray<string | number>, right: ReadonlyArray<string | number>): number {
+  const length = Math.min(left.length, right.length)
+  for (let index = 0; index < length; index += 1) {
+    const a = left[index]!
+    const b = right[index]!
+    const order = typeof a === "number" && typeof b === "number"
+      ? a - b
+      : String(a).localeCompare(String(b))
+    if (order !== 0) return order
+  }
+  return left.length - right.length
+}
+
+function isPathPrefix(prefix: ReadonlyArray<string | number>, path: ReadonlyArray<string | number>): boolean {
+  return prefix.length <= path.length && prefix.every((segment, index) => segment === path[index])
 }
 
 function sameStrings(left: ReadonlyArray<string>, right: ReadonlyArray<string>): boolean {

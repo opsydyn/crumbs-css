@@ -179,6 +179,7 @@ export type StyleExplanationExpressionDecision = {
 }
 
 export type StyleExplanationPropertyExplanation = {
+  readonly slot?: string
   readonly property: string
   readonly value: StyleExplanationValue
   readonly winner?: StyleExplanationDeclaration

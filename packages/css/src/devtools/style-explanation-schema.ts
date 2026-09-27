@@ -183,6 +183,7 @@ const ExpressionDecision = Schema.Struct({
   selectedCaseValue: Schema.optionalKey(SafeText),
 })
 const PropertyExplanation = Schema.Struct({
+  slot: Schema.optionalKey(SafeText),
   property: PropertyName,
   value: StyleExplanationValueSchema,
   winner: Schema.optionalKey(Declaration),

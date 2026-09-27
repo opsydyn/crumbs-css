@@ -22,7 +22,7 @@ export const ComponentRecipeResolutionPlanType = "crumbs.css.component-recipe-re
 export const ComponentRecipeResolutionPlanVersion = 1 as const
 
 type ComponentSlotRecord = NativeComponentResolvedSlotStyles<NativeComponentSlots>
-type ComponentRecipeStateConstraint = {
+export type ComponentRecipeStateConstraint = {
   readonly discriminator: string
   readonly cases: ReadonlyArray<{
     readonly value: string
@@ -229,7 +229,7 @@ export function resolveComponentRecipeResolutionPlan<
     if (baseStyle !== undefined) collected[slot]!.push(baseStyle as NativeStyle)
   }
 
-  if (plan.stateConstraint !== undefined && !matchesSelectedState(plan.stateConstraint, selected)) {
+  if (plan.stateConstraint !== undefined && !matchesComponentRecipeSelectedState(plan.stateConstraint, selected)) {
     reportInvalidState?.(plan.stateConstraint.discriminator, selected, plan.stateConstraint)
     return freezeCollectedSlotStyles(plan.slotOrder, collected) as NativeComponentResolvedStyles<TRecipe["slots"]>
   }
@@ -406,7 +406,8 @@ function validateStateConstraintValues(
   return Object.freeze(values)
 }
 
-function matchesSelectedState(
+/** @internal Shared state gate for resolution and explanation traces. */
+export function matchesComponentRecipeSelectedState(
   constraint: ComponentRecipeStateConstraint,
   selection: Readonly<Record<string, unknown>>,
 ): boolean {

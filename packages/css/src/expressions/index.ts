@@ -877,9 +877,17 @@ function tokenValue(
   return tokens[expression.token]
 }
 
+export type NativeExpressionMatchTrace = Readonly<{
+  readonly condition: NativeConditionKey
+  readonly value: string
+  readonly selectedBranch: "case" | "fallback"
+  readonly selectedCaseValue?: string
+}>
+
 function evaluateNode<TDomain extends NativeExpressionDomain>(
   expression: NativeExpression<TDomain>,
   state: NativeExpressionEvaluationState,
+  matches?: Array<NativeExpressionMatchTrace>,
 ): NativeExpressionValue<TDomain> {
   switch (expression.kind) {
     case "literal": {
@@ -929,24 +937,24 @@ function evaluateNode<TDomain extends NativeExpressionDomain>(
       return value as NativeExpressionValue<TDomain>
     }
     case "alias":
-      return evaluateNode(expression.expression, state) as NativeExpressionValue<TDomain>
+      return evaluateNode(expression.expression, state, matches) as NativeExpressionValue<TDomain>
     case "fallback":
       try {
-        return evaluateNode(expression.primary, state) as NativeExpressionValue<TDomain>
+        return evaluateNode(expression.primary, state, matches) as NativeExpressionValue<TDomain>
       } catch (error) {
         if (error instanceof NativeExpressionEvaluationError && error.code === "missing-input") {
-          return evaluateNode(expression.fallback, state) as NativeExpressionValue<TDomain>
+          return evaluateNode(expression.fallback, state, matches) as NativeExpressionValue<TDomain>
         }
         throw error
       }
     case "compose": {
       let value: unknown
-      for (const entry of expression.expressions) value = evaluateNode(entry, state)
+      for (const entry of expression.expressions) value = evaluateNode(entry, state, matches)
       return value as NativeExpressionValue<TDomain>
     }
     case "add": {
-      const value = (evaluateNode(expression.left, state) as number) +
-        (evaluateNode(expression.right, state) as number)
+      const value = (evaluateNode(expression.left, state, matches) as number) +
+        (evaluateNode(expression.right, state, matches) as number)
       try {
         assertLiteralValue(expression.domain, value)
       } catch (error) {
@@ -958,8 +966,8 @@ function evaluateNode<TDomain extends NativeExpressionDomain>(
       return value as NativeExpressionValue<TDomain>
     }
     case "subtract": {
-      const value = (evaluateNode(expression.left, state) as number) -
-        (evaluateNode(expression.right, state) as number)
+      const value = (evaluateNode(expression.left, state, matches) as number) -
+        (evaluateNode(expression.right, state, matches) as number)
       try {
         assertLiteralValue(expression.domain, value)
       } catch (error) {
@@ -971,7 +979,7 @@ function evaluateNode<TDomain extends NativeExpressionDomain>(
       return value as NativeExpressionValue<TDomain>
     }
     case "scale": {
-      const value = (evaluateNode(expression.expression, state) as number) * expression.factor
+      const value = (evaluateNode(expression.expression, state, matches) as number) * expression.factor
       try {
         assertLiteralValue(expression.domain, value)
       } catch (error) {
@@ -983,7 +991,7 @@ function evaluateNode<TDomain extends NativeExpressionDomain>(
       return value as NativeExpressionValue<TDomain>
     }
     case "clamp": {
-      const input = evaluateNode(expression.expression, state) as number
+      const input = evaluateNode(expression.expression, state, matches) as number
       const value = Math.min(expression.maximum, Math.max(expression.minimum, input))
       try {
         assertLiteralValue(expression.domain, value)
@@ -998,9 +1006,18 @@ function evaluateNode<TDomain extends NativeExpressionDomain>(
     case "match": {
       const conditionValue = state.conditions[expression.condition]
       const selected = expression.cases.find((entry) => entry.value === conditionValue)
-      if (selected !== undefined) return evaluateNode(selected.expression, state) as NativeExpressionValue<TDomain>
+      if (selected !== undefined) {
+        matches?.push({
+          condition: expression.condition,
+          value: String(conditionValue),
+          selectedBranch: "case",
+          selectedCaseValue: String(selected.value),
+        })
+        return evaluateNode(selected.expression, state, matches) as NativeExpressionValue<TDomain>
+      }
       if (expression.fallback !== undefined) {
-        return evaluateNode(expression.fallback, state) as NativeExpressionValue<TDomain>
+        matches?.push({ condition: expression.condition, value: String(conditionValue), selectedBranch: "fallback" })
+        return evaluateNode(expression.fallback, state, matches) as NativeExpressionValue<TDomain>
       }
       throw evaluationError(
         "invalid-input",
@@ -1017,6 +1034,17 @@ export function evaluateNativeExpression<TDomain extends NativeExpressionDomain>
 ): NativeExpressionValue<TDomain> {
   assertExpression(expression)
   return evaluateNode(expression, normalizeEvaluationState(state))
+}
+
+/** @internal Evaluate with opt-in match evidence; the value uses the same evaluator as the ordinary API. */
+export function evaluateNativeExpressionWithTrace<TDomain extends NativeExpressionDomain>(
+  expression: NativeExpression<TDomain>,
+  state?: NativeExpressionEvaluationState,
+): Readonly<{ readonly value: NativeExpressionValue<TDomain>; readonly matches: ReadonlyArray<NativeExpressionMatchTrace> }> {
+  assertExpression(expression)
+  const matches: Array<NativeExpressionMatchTrace> = []
+  const value = evaluateNode(expression, normalizeEvaluationState(state), matches)
+  return Object.freeze({ value, matches: Object.freeze(matches.map(match => Object.freeze(match))) })
 }
 
 function foldNode<TDomain extends NativeExpressionDomain>(

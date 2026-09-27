@@ -245,6 +245,19 @@ export type NativeConditionBranch<TValue> = Readonly<{
   readonly value: TValue
 }>
 
+export type NativeConditionBranchDecision = Readonly<{
+  readonly matcher: NativeConditionMatcher
+  readonly declarationOrder: number
+  readonly specificity: number
+  readonly matched: boolean
+  readonly selected: boolean
+}>
+
+export type NativeConditionBranchTrace<TValue> = Readonly<{
+  readonly value: TValue
+  readonly decisions: ReadonlyArray<NativeConditionBranchDecision>
+}>
+
 type ConditionKey = (typeof CONDITION_KEYS)[number]
 
 function assertMatcherValue(key: ConditionKey, value: unknown): void {
@@ -274,6 +287,62 @@ function prepareMatcher(matcher: NativeConditionMatcher): Readonly<NativeConditi
   return Object.freeze({...matcher})
 }
 
+type PreparedConditionBranch<TValue> = Readonly<{
+  readonly matcher: Readonly<NativeConditionMatcher>
+  readonly value: TValue
+}>
+
+function prepareBranches<TValue>(
+  branches: readonly NativeConditionBranch<TValue>[],
+): ReadonlyArray<PreparedConditionBranch<TValue>> {
+  return branches.map((branch) => {
+    if (!isRecord(branch)) throw new TypeError("native condition branch must be an object")
+    const matcher = prepareMatcher(branch.when ?? {})
+    return Object.freeze({matcher, value: branch.value})
+  })
+}
+
+function matchingBranchIndex<TValue>(
+  prepared: ReadonlyArray<PreparedConditionBranch<TValue>>,
+  snapshot: NativeConditionSnapshot,
+): number {
+  let winner = -1
+  let winnerSpecificity = -1
+  for (let index = 0; index < prepared.length; index += 1) {
+    const matcher = prepared[index]!.matcher
+    const keys = Object.keys(matcher) as ConditionKey[]
+    if (keys.every((key) => snapshot[key] === matcher[key]) && keys.length >= winnerSpecificity) {
+      winner = index
+      winnerSpecificity = keys.length
+    }
+  }
+  return winner
+}
+
+/** @internal Collect branch evidence using the condition resolver's selection rules. */
+export function traceNativeConditionBranches<TValue>(
+  branches: readonly NativeConditionBranch<TValue>[],
+  snapshot: NativeConditionSnapshot,
+  fallback: TValue,
+): NativeConditionBranchTrace<TValue> {
+  const prepared = prepareBranches(branches)
+  const selectedIndex = matchingBranchIndex(prepared, snapshot)
+  return Object.freeze({
+    value: selectedIndex < 0 ? fallback : prepared[selectedIndex]!.value,
+    decisions: Object.freeze(prepared.map(({matcher}, declarationOrder) => {
+      const keys = Object.keys(matcher) as ConditionKey[]
+      const matched = keys.every((key) => snapshot[key] === matcher[key])
+      return Object.freeze({
+        matcher,
+        declarationOrder,
+        specificity: keys.length,
+        matched,
+        selected: declarationOrder === selectedIndex,
+      })
+    })),
+  })
+}
+
 /**
  * Resolve finite condition branches by specificity. A branch matching more
  * axes wins; branches with equal specificity use later declaration order.
@@ -284,24 +353,10 @@ export function createNativeConditionResolver<TValue>(
   branches: readonly NativeConditionBranch<TValue>[],
   fallback: TValue,
 ): (snapshot: NativeConditionSnapshot) => TValue {
-  const prepared = branches.map((branch) => {
-    if (!isRecord(branch)) throw new TypeError("native condition branch must be an object")
-    const matcher = prepareMatcher(branch.when ?? {})
-    return Object.freeze({matcher, value: branch.value})
-  })
+  const prepared = prepareBranches(branches)
   return (snapshot) => {
-    let winner: TValue = fallback
-    let winnerSpecificity = -1
-    for (const branch of prepared) {
-      const keys = Object.keys(branch.matcher) as ConditionKey[]
-      if (keys.every((key) => snapshot[key] === branch.matcher[key])) {
-        if (keys.length >= winnerSpecificity) {
-          winner = branch.value
-          winnerSpecificity = keys.length
-        }
-      }
-    }
-    return winner
+    const selectedIndex = matchingBranchIndex(prepared, snapshot)
+    return selectedIndex < 0 ? fallback : prepared[selectedIndex]!.value
   }
 }
 
