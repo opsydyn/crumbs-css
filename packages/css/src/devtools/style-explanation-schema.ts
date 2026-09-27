@@ -18,7 +18,7 @@ const SafeText = Schema.NonEmptyString.check(Schema.makeFilter<string>(value =>
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0))
 const PathSegment = Schema.Union([SafeText, Index])
 const Path = Schema.Array(PathSegment)
-const PropertyName = Schema.String.check(Schema.isPattern(/^[A-Za-z][A-Za-z0-9]*$/))
+const PropertyName = Schema.String.check(Schema.isPattern(/^[A-Za-z][A-Za-z0-9_]*$/))
 const TokenName = Schema.String.check(Schema.isPattern(/^--crumbs-[A-Za-z0-9_-]+$/))
 const PackageName = Schema.String.check(Schema.isPattern(/^(?:@[a-z0-9][a-z0-9._-]*\/)?[a-z0-9][a-z0-9._-]*$/))
 const RelativeIdentity = SafeText.check(Schema.makeFilter<string>(value => {

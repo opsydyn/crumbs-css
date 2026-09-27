@@ -234,6 +234,22 @@ describe("style explanation version-1 schemas", () => {
     expect(() => decodeStyleExplanationReport(report({ opacity: -0 }))).toThrow()
   })
 
+  it("accepts React Native property identifiers containing underscores", () => {
+    const experimentalProperty = "experimental_backgroundImage"
+    const candidate = {
+      ...declaration(),
+      authoredProperty: experimentalProperty,
+      canonicalProperty: experimentalProperty,
+    }
+    const input = {
+      ...metadata(),
+      exports: [{ ...metadata().exports[0]!, candidates: [candidate] }],
+    }
+
+    expect(decodeStyleExplanationMetadata(input).exports[0]?.candidates[0]?.canonicalProperty)
+      .toBe(experimentalProperty)
+  })
+
   it("rejects accessor and cyclic input without invoking an accessor", () => {
     let getterCalls = 0
     const accessorInput = metadata()

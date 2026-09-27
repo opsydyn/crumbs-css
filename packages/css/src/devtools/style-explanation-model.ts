@@ -1,6 +1,8 @@
 import type { NativeConditionMatcher, NativeConditionSnapshot } from "../conditions"
 import type { NativeConditionKey } from "../expressions"
 import type { NativePrimitiveDomain, NativePrimitiveKind } from "../compiler/native-capture"
+import type { NativeComponentRecipeExtensionDescriptor } from "../components/extension-contract"
+import type { NativeTheme } from "../native-style"
 import type { TokenContractIdentity } from "../tokens/identity"
 
 export const STYLE_EXPLANATION_METADATA_TYPE = "crumbs.css.style-explanation-metadata" as const
@@ -10,6 +12,21 @@ export const STYLE_EXPLANATION_VERSION = 1 as const
 
 export type StyleExplanationPathSegment = string | number
 export type StyleExplanationPath = ReadonlyArray<StyleExplanationPathSegment>
+
+/** Explicit inputs used for one on-demand style explanation. */
+export type StyleExplanationSnapshot = {
+  readonly theme?: NativeTheme<Record<string, unknown>>
+  readonly selection?: Readonly<Record<string, unknown>>
+  readonly conditions?: NativeConditionSnapshot
+  readonly extensions?: ReadonlyArray<NativeComponentRecipeExtensionDescriptor>
+}
+
+export type ExplainStyleInput = {
+  readonly module: Readonly<Record<string, unknown>>
+  readonly exportPath: StyleExplanationPath
+  readonly current: StyleExplanationSnapshot
+  readonly previous?: StyleExplanationSnapshot
+}
 
 export type StyleExplanationOpaqueReason =
   | "accessor"
