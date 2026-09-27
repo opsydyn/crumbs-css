@@ -12,6 +12,7 @@ import {
 } from "node:fs"
 import { tmpdir } from "node:os"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
+import { pathToFileURL } from "node:url"
 import { NativeArtifactVersion } from "../packages/css/src/contracts/payloads"
 import {
   assembleManifest,
@@ -19,13 +20,13 @@ import {
   projectComponentRecipe,
   projectTokenContract,
   transformCssTsToStyleSheetWithManifestSidecar,
+  type ComponentRecipeRoot,
   type DesignSystemManifest,
+  type ManifestPackage,
+  type TokenContractRoot,
 } from "../packages/css/src/tooling/manifest"
 import { auditPackedRuntimeEntrypoints } from "./packed-runtime-graph"
 import { verifyPackedExportMap } from "./packed-export-contract"
-import { button } from "../packages/css/fixtures/m9-1-manifest/components"
-import { tokens } from "../packages/css/fixtures/m9-1-manifest/tokens"
-import { supplementalTokens } from "../packages/css/fixtures/m9-1-manifest/tokens-supplement"
 
 const REPOSITORY_ROOT = resolve(import.meta.dir, "..")
 const PACKAGE_ROOT = resolve(REPOSITORY_ROOT, "packages/css")
@@ -47,12 +48,28 @@ export type DeterministicManifestEvidence = Readonly<{
   canonicalManifest: string
   canonicalManifestSha256: string
   fixtureSha256: ReadonlyArray<FixtureDigest>
+  sourceRootCounts: Readonly<{
+    absolutePackageRoots: number
+    tokenContractsLoaded: number
+    componentRecipesLoaded: number
+    styleModulesCompiled: number
+  }>
   determinism: Readonly<{
     absoluteRootCount: 2
     byteIdentical: true
     digestIdentical: true
     rootsReordered: true
   }>
+}>
+
+type QualifiedFixtureInputs = Readonly<{
+  packageMetadata: ManifestPackage
+  tokenRoots: ReadonlyArray<TokenContractRoot>
+  componentRoot: ComponentRecipeRoot
+  declaredTokenIds: ReadonlySet<string>
+  componentId: string
+  tokenLifecycleTargetId: string
+  replacementTokenId: string
 }>
 
 type PackedQualification = Readonly<{
@@ -74,58 +91,44 @@ export async function createDeterministicManifestEvidence(): Promise<Determinist
       throw new Error("M9.1 qualification requires two distinct absolute temporary package roots.")
     }
 
-    const tokenRoots = [
-      { contract: tokens, origin: { path: `${FIXTURE_RELATIVE_ROOT}/tokens.ts`, exportPath: "tokens" } },
-      { contract: supplementalTokens, origin: { path: `${FIXTURE_RELATIVE_ROOT}/tokens-supplement.ts`, exportPath: "supplementalTokens" } },
-    ] as const
-    const declaredTokenIds = new Set([
-      ...projectTokenContract(tokens, tokenRoots[0].origin).map(token => token.id),
-      ...projectTokenContract(supplementalTokens, tokenRoots[1].origin).map(token => token.id),
-    ])
-    const sidecars = await Promise.all(roots.map(async root => {
+    const fixtureInputs = await Promise.all(roots.map(loadFixtureInputs))
+    const sidecars = await Promise.all(fixtureInputs.map(async (fixture, index) => {
+      const root = roots[index]
+      if (root === undefined) throw new Error(`M9.1 fixture root ${index} is missing.`)
       const result = await transformCssTsToStyleSheetWithManifestSidecar(
         resolve(root, FIXTURE_RELATIVE_ROOT, "styles.css.ts"),
         root,
-        { declaredTokenIds, useStyleSheet: false, dev: false },
+        { declaredTokenIds: fixture.declaredTokenIds, useStyleSheet: false, dev: false },
       )
       return result.sidecar
     }))
-    const componentOrigin = { path: `${FIXTURE_RELATIVE_ROOT}/components.ts`, exportPath: "button" }
-    const component = projectComponentRecipe(button, componentOrigin)
-    const tokenLifecycleTarget = projectTokenContract(tokens, tokenRoots[0].origin)
-      .find(token => token.path.join(".") === "color.label")
-    if (tokenLifecycleTarget === undefined) throw new Error("M9.1 fixture token lifecycle target is missing.")
-
-    const packageMetadata = JSON.parse(readFileSync(resolve(FIXTURE_ROOT, "package.json"), "utf8")) as {
-      readonly name: string
-      readonly version: string
-    }
     const producer = {
       compiler: { name: "@opsydyn/crumbs-css", version: readPackageVersion() },
       artifact: { name: "crumbs.native-styles", version: NativeArtifactVersion },
     } as const
-    const assemble = (rootOrder: ReadonlyArray<typeof tokenRoots[number]>, sidecarIndex: 0 | 1): DesignSystemManifest => {
-      const sidecar = sidecars[sidecarIndex]
-      if (sidecar === undefined) throw new Error(`M9.1 sidecar ${sidecarIndex} is missing.`)
+    const assemble = (rootOrder: ReadonlyArray<TokenContractRoot>, rootIndex: 0 | 1): DesignSystemManifest => {
+      const sidecar = sidecars[rootIndex]
+      const fixture = fixtureInputs[rootIndex]
+      if (sidecar === undefined || fixture === undefined) throw new Error(`M9.1 fixture root ${rootIndex} is incomplete.`)
       return assembleManifest({
-        package: packageMetadata,
+        package: fixture.packageMetadata,
         producer,
         tokenContracts: rootOrder,
-        componentRecipes: [{ recipe: button, origin: componentOrigin }],
+        componentRecipes: [fixture.componentRoot],
         styleSidecars: [sidecar],
         lifecycleAnnotations: [
           {
-            entityId: component.id,
+            entityId: fixture.componentId,
             deprecatedSince: "2.0.0",
             reason: "The reference fixture demonstrates explicit component lifecycle metadata.",
             replacement: { id: "@acme/ui#ActionButton@1", resolution: "external" },
           },
           {
-            entityId: tokenLifecycleTarget.id,
+            entityId: fixture.tokenLifecycleTargetId,
             deprecatedSince: "2.0.0",
             reason: "Use the semantic surface alias.",
             replacement: {
-              id: projectTokenContract(tokens, tokenRoots[0].origin).find(token => token.path.join(".") === "semantic.surface")!.id,
+              id: fixture.replacementTokenId,
               resolution: "declared",
             },
           },
@@ -133,8 +136,13 @@ export async function createDeterministicManifestEvidence(): Promise<Determinist
       })
     }
 
-    const firstManifest = assemble(tokenRoots, 0)
-    const secondManifest = assemble([...tokenRoots].reverse(), 1)
+    const firstFixture = fixtureInputs[0]
+    const secondFixture = fixtureInputs[1]
+    if (firstFixture === undefined || secondFixture === undefined) {
+      throw new Error("M9.1 qualification requires two independently loaded package roots.")
+    }
+    const firstManifest = assemble(firstFixture.tokenRoots, 0)
+    const secondManifest = assemble([...secondFixture.tokenRoots].reverse(), 1)
     const canonicalFirst = encodeCanonicalManifest(firstManifest)
     const canonicalSecond = encodeCanonicalManifest(secondManifest)
     if (canonicalFirst !== canonicalSecond) {
@@ -154,6 +162,12 @@ export async function createDeterministicManifestEvidence(): Promise<Determinist
       canonicalManifest: canonicalFirst,
       canonicalManifestSha256,
       fixtureSha256,
+      sourceRootCounts: {
+        absolutePackageRoots: fixtureInputs.length,
+        tokenContractsLoaded: fixtureInputs.reduce((count, fixture) => count + fixture.tokenRoots.length, 0),
+        componentRecipesLoaded: fixtureInputs.length,
+        styleModulesCompiled: sidecars.length,
+      },
       determinism: {
         absoluteRootCount: 2,
         byteIdentical: true,
@@ -163,6 +177,43 @@ export async function createDeterministicManifestEvidence(): Promise<Determinist
     }
   } finally {
     roots.forEach(root => rmSync(root, { recursive: true, force: true }))
+  }
+}
+
+async function loadFixtureInputs(packageRoot: string): Promise<QualifiedFixtureInputs> {
+  const fixtureRoot = resolve(packageRoot, FIXTURE_RELATIVE_ROOT)
+  const tokenModule = await import(pathToFileURL(resolve(fixtureRoot, "tokens.ts")).href) as {
+    readonly tokens: TokenContractRoot["contract"]
+  }
+  const supplementalTokenModule = await import(pathToFileURL(resolve(fixtureRoot, "tokens-supplement.ts")).href) as {
+    readonly supplementalTokens: TokenContractRoot["contract"]
+  }
+  const componentModule = await import(pathToFileURL(resolve(fixtureRoot, "components.ts")).href) as {
+    readonly button: ComponentRecipeRoot["recipe"]
+  }
+  const tokenRoots: ReadonlyArray<TokenContractRoot> = [
+    { contract: tokenModule.tokens, origin: { path: "tokens.ts", exportPath: "tokens" } },
+    { contract: supplementalTokenModule.supplementalTokens, origin: { path: "tokens-supplement.ts", exportPath: "supplementalTokens" } },
+  ]
+  const componentRoot: ComponentRecipeRoot = {
+    recipe: componentModule.button,
+    origin: { path: "components.ts", exportPath: "button" },
+  }
+  const projectedTokens = tokenRoots.flatMap(root => projectTokenContract(root.contract, root.origin))
+  const tokenLifecycleTarget = projectedTokens.find(token => token.path.join(".") === "color.label")
+  const replacementToken = projectedTokens.find(token => token.path.join(".") === "semantic.surface")
+  if (tokenLifecycleTarget === undefined || replacementToken === undefined) {
+    throw new Error("M9.1 fixture token lifecycle references are missing from the relocated contracts.")
+  }
+  const packageMetadata = JSON.parse(readFileSync(resolve(fixtureRoot, "package.json"), "utf8")) as ManifestPackage
+  return {
+    packageMetadata,
+    tokenRoots,
+    componentRoot,
+    declaredTokenIds: new Set(projectedTokens.map(token => token.id)),
+    componentId: projectComponentRecipe(componentRoot.recipe, componentRoot.origin).id,
+    tokenLifecycleTargetId: tokenLifecycleTarget.id,
+    replacementTokenId: replacementToken.id,
   }
 }
 
@@ -251,7 +302,7 @@ async function main(): Promise<void> {
       artifact: evidence.manifest.producer.artifact,
       manifestSchemaVersion: evidence.manifest.schemaVersion,
     },
-    fixture: { files: evidence.fixtureSha256 },
+    fixture: { files: evidence.fixtureSha256, sourceRootCounts: evidence.sourceRootCounts },
     manifest: {
       path: "manifest.json",
       sha256: evidence.canonicalManifestSha256,

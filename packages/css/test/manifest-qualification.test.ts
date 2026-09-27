@@ -24,6 +24,12 @@ describe("M9.1 manifest qualification evidence", () => {
       digestIdentical: true,
       rootsReordered: true,
     })
+    expect(evidence.sourceRootCounts).toEqual({
+      absolutePackageRoots: 2,
+      tokenContractsLoaded: 4,
+      componentRecipesLoaded: 2,
+      styleModulesCompiled: 2,
+    })
     expect(evidence.canonicalManifestSha256).toBe(
       createHash("sha256").update(evidence.canonicalManifest, "utf8").digest("hex"),
     )
@@ -34,5 +40,15 @@ describe("M9.1 manifest qualification evidence", () => {
     }
     expect(JSON.stringify(evidence)).not.toContain(process.cwd())
     expect(JSON.stringify(evidence)).not.toContain("/tmp/")
+  })
+
+  it("records descriptor origins relative to the owning fixture package", async () => {
+    const evidence = await createDeterministicManifestEvidence()
+    expect([...new Set(evidence.manifest.tokens.map(token => token.origin.path))].sort()).toEqual([
+      "tokens-supplement.ts",
+      "tokens.ts",
+    ])
+    expect(evidence.manifest.components[0]?.origin.path).toBe("components.ts")
+    expect(evidence.manifest.modules[0]?.origin.path).toBe("styles.css.ts")
   })
 })

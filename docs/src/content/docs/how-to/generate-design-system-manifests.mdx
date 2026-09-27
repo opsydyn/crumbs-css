@@ -87,8 +87,12 @@ imports from the package root, `theme`, `theme/core`, `tokens`, or `style` do
 not need an Effect import. Do not re-export the manifest tooling API from an
 application runtime entrypoint.
 
-To repeat Crumbs' fixture, determinism, packed ESM/CommonJS/types, runtime-graph
-and Expo iOS/web checks in this repository, run `bun run manifest:qualify`.
+To repeat Crumbs' fixture and determinism check, resolve the packed export map,
+audit the packed runtime graphs, and run the Expo iOS/web checks in this
+repository, run `bun run manifest:qualify`. It resolves the declared ESM and
+CommonJS targets and confirms the types target exists. The packed consumer
+execution and declaration typecheck are covered by the separate
+`manifest-export.test.ts` test in `bun run check`.
 The generated receipt is stored at
 `docs/evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json`;
 Android remains a separate parked device gate.

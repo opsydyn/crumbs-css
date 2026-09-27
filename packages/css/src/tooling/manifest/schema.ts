@@ -162,7 +162,210 @@ function decodeToolingInput<T>(codec: DataCodec<T>, input: unknown, boundary: st
 
 /** Validate unknown input and return an ordinary, detached JSON-data record. */
 export function decodeManifest(input: unknown): DesignSystemManifest {
-  return decodeToolingInput(manifestDataCodec, input, "Crumbs design-system manifest v1") as DesignSystemManifest
+  const manifest = decodeToolingInput(manifestDataCodec, input, "Crumbs design-system manifest v1") as DesignSystemManifest
+  validateManifestGraph(manifest)
+  return manifest
+}
+
+/** Validate cross-record links that cannot be expressed by the structural Schema alone. */
+function validateManifestGraph(manifest: DesignSystemManifest): void {
+  const tokenById = new Map<string, DesignSystemManifest["tokens"][number]>()
+  const moduleById = new Map<string, DesignSystemManifest["modules"][number]>()
+  const entityIds = new Set<string>()
+  const componentIds = new Set<string>()
+  const addEntity = (id: string, kind: string): void => {
+    if (entityIds.has(id)) throw new TypeError(`Duplicate or conflicting manifest ${kind} identity ${JSON.stringify(id)}.`)
+    entityIds.add(id)
+  }
+
+  for (const token of manifest.tokens) {
+    addEntity(token.id, "token")
+    tokenById.set(token.id, token)
+  }
+  for (const component of manifest.components) {
+    addEntity(component.id, "component")
+    componentIds.add(component.id)
+  }
+  for (const module of manifest.modules) {
+    addEntity(module.id, "style module")
+    const expectedId = `${manifest.package.name}#${module.origin.path}`
+    if (module.id !== expectedId) {
+      throw new TypeError(`Style module identity ${JSON.stringify(module.id)} must match package-relative origin ${JSON.stringify(expectedId)}.`)
+    }
+    moduleById.set(module.id, module)
+  }
+
+  const coverageRootById = new Map<string, DesignSystemManifest["coverage"]["roots"][number]["kind"]>()
+  for (const root of manifest.coverage.roots) {
+    if (coverageRootById.has(root.id)) {
+      throw new TypeError(`Duplicate manifest coverage root ${JSON.stringify(root.id)}.`)
+    }
+    if (root.kind === "component-recipe" && !componentIds.has(root.id)) {
+      throw new TypeError(`Component-recipe coverage root ${JSON.stringify(root.id)} has no declared component.`)
+    }
+    if (root.kind === "style-module" && !moduleById.has(root.id)) {
+      throw new TypeError(`Style-module coverage root ${JSON.stringify(root.id)} has no declared module.`)
+    }
+    if (root.kind === "token-contract") assertTokenContractCoverageRootId(root.id)
+    // A token-contract root can represent an explicitly selected empty contract;
+    // v1 has no separate contract table from which to resolve that identity.
+    coverageRootById.set(root.id, root.kind)
+  }
+  for (const token of manifest.tokens) {
+    const rootId = `${token.contract.owner}#${token.contract.name}@${token.contract.version}`
+    if (coverageRootById.get(rootId) !== "token-contract") {
+      throw new TypeError(`Token ${JSON.stringify(token.id)} is missing its token-contract coverage root ${JSON.stringify(rootId)}.`)
+    }
+  }
+  for (const component of manifest.components) {
+    if (coverageRootById.get(component.id) !== "component-recipe") {
+      throw new TypeError(`Component ${JSON.stringify(component.id)} is missing its component-recipe coverage root.`)
+    }
+  }
+  for (const module of manifest.modules) {
+    if (coverageRootById.get(module.id) !== "style-module") {
+      throw new TypeError(`Style module ${JSON.stringify(module.id)} is missing its style-module coverage root.`)
+    }
+  }
+
+  for (const token of manifest.tokens) {
+    const alias = token.alias
+    if (alias === undefined) continue
+    if (alias.resolution === "internal") {
+      if (alias.targetId === undefined) {
+        throw new TypeError(`Internal token alias ${JSON.stringify(token.id)} requires a target ID.`)
+      }
+      const target = tokenById.get(alias.targetId)
+      if (target === undefined) {
+        throw new TypeError(`Internal token alias ${JSON.stringify(token.id)} targets undeclared token ${JSON.stringify(alias.targetId)}.`)
+      }
+      if (target.path.length !== alias.targetPath.length ||
+        target.path.some((segment, index) => segment !== alias.targetPath[index])) {
+        throw new TypeError(`Internal token alias ${JSON.stringify(token.id)} target path disagrees with token ${JSON.stringify(alias.targetId)}.`)
+      }
+    } else if (alias.resolution === "external") {
+      if (alias.targetId === undefined) {
+        throw new TypeError(`External token alias ${JSON.stringify(token.id)} requires a stable target ID.`)
+      }
+      if (entityIds.has(alias.targetId)) {
+        throw new TypeError(`External token alias ${JSON.stringify(token.id)} targets a token declared in this manifest.`)
+      }
+    } else if (alias.targetId !== undefined) {
+      throw new TypeError(`Unresolved token alias ${JSON.stringify(token.id)} cannot claim a target ID.`)
+    }
+  }
+
+  const aliasDependencyCount = new Map<string, number>()
+  for (const dependency of manifest.dependencies) {
+    if (dependency.resolution === "unresolved" && dependency.to !== undefined) {
+      throw new TypeError(`Unresolved manifest dependency from ${JSON.stringify(dependency.from)} cannot include a target ID.`)
+    }
+    if (dependency.resolution !== "unresolved" && dependency.to === undefined) {
+      throw new TypeError(`Resolved manifest dependency from ${JSON.stringify(dependency.from)} requires a target ID.`)
+    }
+
+    if (dependency.kind === "token-alias") {
+      const source = tokenById.get(dependency.from)
+      if (source?.alias === undefined) {
+        throw new TypeError(`Token-alias dependency source ${JSON.stringify(dependency.from)} is not a declared alias token.`)
+      }
+      if (dependency.resolution === "internal" && !tokenById.has(dependency.to!)) {
+        throw new TypeError(`Internal token-alias dependency from ${JSON.stringify(dependency.from)} targets an undeclared token.`)
+      }
+      if (dependency.resolution === "external" && entityIds.has(dependency.to!)) {
+        throw new TypeError(`External token-alias dependency from ${JSON.stringify(dependency.from)} targets a declared manifest entity.`)
+      }
+      if (source.alias.resolution !== dependency.resolution || source.alias.targetId !== dependency.to) {
+        throw new TypeError(`Token-alias dependency from ${JSON.stringify(dependency.from)} disagrees with its alias record.`)
+      }
+      aliasDependencyCount.set(dependency.from, (aliasDependencyCount.get(dependency.from) ?? 0) + 1)
+      continue
+    }
+
+    const source = moduleById.get(dependency.from)
+    if (source === undefined) {
+      throw new TypeError(`Style-token dependency source ${JSON.stringify(dependency.from)} is not a declared style module.`)
+    }
+    if (dependency.resolution === "internal" && !tokenById.has(dependency.to!)) {
+      throw new TypeError(`Internal style-token dependency from ${JSON.stringify(dependency.from)} targets an undeclared token.`)
+    }
+    if (dependency.resolution === "external" && entityIds.has(dependency.to!)) {
+      throw new TypeError(`External style-token dependency from ${JSON.stringify(dependency.from)} targets a declared manifest entity.`)
+    }
+    if (dependency.origin === undefined) {
+      throw new TypeError(`Style-token dependency from ${JSON.stringify(dependency.from)} requires a compiler source origin.`)
+    }
+    assertManifestDependencyOrigin(dependency.origin, dependency.from, source.exports, "style-token dependency")
+  }
+
+  for (const token of manifest.tokens) {
+    if (token.alias === undefined) continue
+    if (aliasDependencyCount.get(token.id) !== 1) {
+      throw new TypeError(`Alias token ${JSON.stringify(token.id)} must have exactly one matching token-alias dependency.`)
+    }
+  }
+
+  const aliasVisitState = new Map<string, "visiting" | "visited">()
+  const visitAlias = (id: string): void => {
+    const state = aliasVisitState.get(id)
+    if (state === "visiting") throw new TypeError(`Token alias cycle includes ${JSON.stringify(id)}.`)
+    if (state === "visited") return
+    aliasVisitState.set(id, "visiting")
+    const alias = tokenById.get(id)?.alias
+    if (alias?.resolution === "internal" && alias.targetId !== undefined) visitAlias(alias.targetId)
+    aliasVisitState.set(id, "visited")
+  }
+  for (const token of manifest.tokens) if (token.alias !== undefined) visitAlias(token.id)
+
+  for (const capability of manifest.capabilities) {
+    const module = moduleById.get(capability.moduleId)
+    if (module === undefined || !module.exports.includes(capability.exportPath)) {
+      throw new TypeError(`Compiler capability for ${JSON.stringify(capability.moduleId)} must reference a declared style-module export.`)
+    }
+  }
+  for (const entity of [...manifest.tokens, ...manifest.components]) {
+    const replacement = entity.lifecycle?.replacement
+    if (replacement?.resolution === "declared" && !entityIds.has(replacement.id)) {
+      throw new TypeError(`Declared lifecycle replacement ${JSON.stringify(replacement.id)} does not resolve to a manifest entity.`)
+    }
+  }
+  for (const unresolved of manifest.coverage.unresolved) {
+    if (unresolved.origin === undefined) continue
+    const module = moduleById.get(unresolved.origin.moduleId)
+    if (module === undefined || !module.exports.includes(unresolved.origin.exportPath)) {
+      throw new TypeError(`Unresolved reference origin for ${JSON.stringify(unresolved.reference)} must reference a declared style-module export.`)
+    }
+  }
+}
+
+function assertManifestDependencyOrigin(
+  origin: DesignSystemManifest["dependencies"][number]["origin"],
+  moduleId: string,
+  exports: ReadonlyArray<string>,
+  label: string,
+): void {
+  if (origin === undefined) return
+  if (origin.moduleId !== moduleId || !exports.includes(origin.exportPath)) {
+    throw new TypeError(`${label} origin for ${JSON.stringify(moduleId)} must reference one of its declared exports.`)
+  }
+}
+
+function assertTokenContractCoverageRootId(id: string): void {
+  const identitySeparator = id.lastIndexOf("#")
+  const versionSeparator = id.lastIndexOf("@")
+  if (identitySeparator <= 0 || versionSeparator <= identitySeparator + 1) {
+    throw new TypeError(`Token-contract coverage root ${JSON.stringify(id)} must encode a stable contract identity.`)
+  }
+  const versionText = id.slice(versionSeparator + 1)
+  const version = Number(versionText)
+  if (!Number.isSafeInteger(version) || version <= 0 || String(version) !== versionText) {
+    throw new TypeError(`Token-contract coverage root ${JSON.stringify(id)} must encode a positive contract version.`)
+  }
+  decodeToolingInput(contractIdentityCodec, {
+    owner: id.slice(0, identitySeparator),
+    name: id.slice(identitySeparator + 1, versionSeparator),
+    version,
+  }, `token-contract coverage root ${JSON.stringify(id)}`)
 }
 
 export function decodeManifestContractIdentity(input: unknown): ManifestContractIdentity {
