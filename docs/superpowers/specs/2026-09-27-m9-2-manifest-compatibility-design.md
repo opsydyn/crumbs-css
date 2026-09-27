@@ -1,6 +1,6 @@
 # M9.2 Local Manifest Compatibility Checks
 
-**Status:** In-chat design approved; written spec review pending
+**Status:** Architecture and written spec approved
 **Date:** 2026-09-27
 **Roadmap:** M9.2 in [roadmap.md](../../roadmap.md)
 **Governing decisions:** D5, D9, D10, D11 and D12 in the [design-system ADR](../../decisions/adopt-native-design-system-compiler.md)
