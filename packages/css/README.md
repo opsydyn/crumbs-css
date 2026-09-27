@@ -212,12 +212,48 @@ records unresolved references and compiler-observed capabilities without
 including resolved theme values or machine paths. Effect 4 Schema stays behind
 the tooling entrypoint, so ordinary consumers do not need an Effect import.
 
-The repository fixture and packed-export/runtime qualification can be repeated
-with:
+The M9.1 repository fixture and packed-export/runtime qualification can be
+repeated with:
 
 ```sh
 bun run manifest:qualify
 ```
+
+### Check and compare manifests
+
+`manifest:check` reads only the files you name. Without a baseline it checks
+the current provider manifest for references to private tokens. Add a baseline
+to compare public token and component contracts:
+
+```sh
+bun run manifest:check -- --current design-system-manifest.json
+bun run manifest:check -- --current design-system-manifest.json \
+  --consumer apps/web/design-system-manifest.json \
+  --consumer apps/mobile/design-system-manifest.json --format json
+bun run manifest:check -- --baseline releases/1.2.0/design-system-manifest.json \
+  --current design-system-manifest.json \
+  --consumer apps/web/design-system-manifest.json --format text
+```
+
+Pass one `--consumer` for each consumer manifest you want considered. The
+checker does not discover workspaces or infer omitted consumers. It attributes
+token findings only from explicitly supplied external dependency edges with a
+stable target ID. Reports use `error`, `warning`, and `info` finding levels;
+they do not assign a SemVer version or make a release decision. Exit status is
+`0` when there are no error-level findings, `1` when the report contains an
+error, and `2` for invalid arguments, unreadable files, or invalid manifests.
+
+Every report states its analysis limits. Coverage is restricted to the roots
+declared in the supplied manifests, and manifest v1 cannot attribute consumer
+usage of component slots or variants. With no consumer files, the report marks
+consumer impact unknown; unresolved references are also called out. Treat a
+clean report as evidence about those inputs only, not proof that every consumer
+or visual impact was analyzed.
+
+Repository maintainers can regenerate the deterministic M9.2 fixture report
+and receipt with `bun scripts/m9-2-manifest-qualification.ts`. This command is
+specific to the checked-in qualification fixtures; it is not the general
+consumer command.
 
 See the [manifest generation guide](https://opsydyn.github.io/crumbs-css/how-to/generate-design-system-manifests/)
 for the assembly workflow, lifecycle metadata, and interpretation limits.

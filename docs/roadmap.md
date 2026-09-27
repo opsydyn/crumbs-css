@@ -268,9 +268,9 @@ for iOS and web. Required compiler fixtures and consumer maps remain fail-closed
 See the [M8.6 CI assessment](assessments/2026-09-27-m8-6-ci-consumer-qualification.md).
 Android and device acceptance remain parked.
 
-Next recommended roadmap item: **M9.2** — compare manifests locally and at
-release time to detect contract changes, forbidden private dependencies, and
-statically known affected consumers. Keep Android/device acceptance parked.
+Next recommended roadmap item: **M9.3** — add development-only explanations
+for resolved values, matching conditions, override winners, dependencies, and
+recomputation causes. Keep Android/device acceptance parked.
 
 ## M8 — Qualify distributed packages and artifact evolution
 
@@ -292,7 +292,7 @@ statically known affected consumers. Keep Android/device acceptance parked.
 **Affected paths:** new tooling/manifest/policy/adapter modules and entrypoints; diagnostic codes; CLI, manifest-diff, codemod, and DTCG fixtures; team documentation.
 
 - [x] M9.1: Emit deterministic versioned manifests for identities, public contracts, aliases/dependencies, source origins, capabilities, defaults, and deprecation/replacement metadata. Qualified with [receipt](evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json) and [assessment](assessments/2026-09-27-m9-1-deterministic-manifest.md).
-- [ ] M9.2: Provide local checking and release-comparison tooling. Detect token/slot/variant removal, domain changes, changed defaults, and forbidden private dependencies; report affected statically known consumers and analysis limits.
+- [x] M9.2: Provide local explicit-file checking and manifest comparison. Detect token/slot/variant contract changes, domain changes, changed defaults, and forbidden private dependencies; report affected supplied consumers and analysis limits. See the [qualification receipt](evidence/2026-09-27-m9-2-manifest-compatibility/qualification-v1.json) and [assessment](assessments/2026-09-27-m9-2-manifest-compatibility.md).
 - [ ] M9.3: Add development-only style explanations for resolved values, matching conditions, override winners, dependencies, and recomputation causes. Exclude detailed provenance from production output unless deliberately requested.
 - [ ] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports.
 - [ ] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries.
@@ -321,9 +321,9 @@ statically known affected consumers. Keep Android/device acceptance parked.
 See the [M9.1 qualification receipt](evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json)
 and [assessment](assessments/2026-09-27-m9-1-deterministic-manifest.md).
 
-Next recommended roadmap item: **M9.2** — compare manifests locally and at
-release time for breaking contract changes, private-surface policy violations,
-and statically known affected consumers. Keep Android/device gates parked.
+Next recommended roadmap item: **M9.3** — explain resolved styles, matching
+conditions, override winners, dependencies, and recomputation causes during
+development. Keep Android/device gates parked.
 
 ## M10 — Qualify the reference design system and North Star journeys
 

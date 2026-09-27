@@ -87,8 +87,58 @@ imports from the package root, `theme`, `theme/core`, `tokens`, or `style` do
 not need an Effect import. Do not re-export the manifest tooling API from an
 application runtime entrypoint.
 
-To repeat Crumbs' fixture and determinism check, resolve the packed export map,
-audit the packed runtime graphs, and run the Expo iOS/web checks in this
+## Check and compare explicit inputs
+
+Use `manifest:check` to inspect the provider manifest for dependencies on its
+private tokens. Supplying a baseline switches the command to compatibility
+comparison. Each known consumer must be passed explicitly:
+
+```sh
+# Check the current provider contract for private-token dependencies.
+bun run manifest:check -- --current design-system-manifest.json
+
+# Check private-token edges and include these consumers in the report.
+bun run manifest:check -- --current design-system-manifest.json \
+  --consumer apps/web/design-system-manifest.json \
+  --consumer apps/mobile/design-system-manifest.json --format json
+
+# Compare against a previous provider contract and attribute known token use.
+bun run manifest:check -- --baseline releases/1.2.0/design-system-manifest.json \
+  --current design-system-manifest.json \
+  --consumer apps/web/design-system-manifest.json --format text
+```
+
+`--consumer` is repeatable. Crumbs reads only the named files: it does not scan
+the repository, discover packages, or assume the supplied manifests are the
+complete consumer set. Consumer impact is attached when a supplied consumer
+contains an external dependency edge with a stable `to` identity matching a
+provider token. Unresolved or internal edges are not treated as proven consumer
+references.
+
+Reports are deterministic schema-v1 JSON (`--format json`) or readable text
+(`--format text`, the default). Findings carry `error`, `warning`, or `info`
+levels. An error-level finding returns exit status `1`; a report without errors
+returns `0`. Invalid arguments, unreadable input, and invalid or incompatible
+manifests return `2`. These levels describe findings; they do not calculate a
+SemVer recommendation or authorize a release.
+
+Read `analysisLimits` with the findings. `explicit-coverage` means analysis is
+limited to the declared roots in the files provided. `consumer-manifests-not-supplied`
+means consumer impact is unknown because no consumer files were passed.
+`component-use-unavailable` means manifest v1 cannot say which supplied
+consumers use a component slot or variant, so component contract changes do not
+have statically known consumer attribution. Unresolved references, when
+present, are also reported. A report therefore describes the evidence supplied
+to it; it does not prove complete package coverage or visual impact.
+
+In this repository, `bun scripts/m9-2-manifest-qualification.ts` regenerates
+the fixed M9.2 fixture report and receipt under
+`docs/evidence/2026-09-27-m9-2-manifest-compatibility/`. It accepts only the
+checked-in qualification fixture contents and is intended for repository
+qualification, not arbitrary consumer manifests.
+
+To repeat Crumbs' M9.1 fixture and determinism check, resolve the packed export
+map, audit the packed runtime graphs, and run the Expo iOS/web checks in this
 repository, run `bun run manifest:qualify`. It resolves the declared ESM and
 CommonJS targets and confirms the types target exists. The packed consumer
 execution and declaration typecheck are covered by the separate
