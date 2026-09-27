@@ -30,6 +30,11 @@ import {
 } from "./compiler/dependency-analysis"
 import { indexStyleExportOwnership } from "./compiler/export-ownership"
 import {
+  captureManifestSidecar,
+  type CompilerManifestSidecar,
+  type ManifestSidecarPropertyOrigin,
+} from "./compiler/manifest-sidecar"
+import {
   captureScalarIntoNativeIr,
   lowerScalarBlock,
   type ScalarDeclarationBlock,
@@ -63,6 +68,14 @@ export type TransformCssTsOptions = {
 type NativeTransformResult = {
   readonly code: string
   readonly cacheMetadata: NativeTransformCacheMetadata
+  readonly manifestSidecar?: CompilerManifestSidecar
+}
+export type TransformCssTsManifestSidecarOptions = {
+  readonly declaredTokenIds?: ReadonlySet<string>
+}
+export type TransformCssTsWithManifestSidecarResult = {
+  readonly code: string
+  readonly sidecar: CompilerManifestSidecar
 }
 const originalNodeEnv = process.env.NODE_ENV
 
@@ -301,10 +314,33 @@ export async function transformCssTsToStyleSheet(
   return (await transformCssTsToStyleSheetWithMetadata(filePath, cwd, options)).code
 }
 
+/**
+ * Tooling-only variant that returns the manifest projection from this same
+ * compiler pass. The sidecar is never serialized into the generated module.
+ */
+export async function transformCssTsToStyleSheetWithManifestSidecar(
+  filePath: string,
+  cwd: string,
+  options: TransformCssTsOptions & TransformCssTsManifestSidecarOptions = {},
+): Promise<TransformCssTsWithManifestSidecarResult> {
+  const { declaredTokenIds, ...transformOptions } = options
+  const result = await transformCssTsToStyleSheetWithMetadata(
+    filePath,
+    cwd,
+    transformOptions,
+    { ...(declaredTokenIds === undefined ? {} : { declaredTokenIds }) },
+  )
+  if (result.manifestSidecar === undefined) {
+    throw new Error("The compiler did not return the requested manifest sidecar.")
+  }
+  return { code: result.code, sidecar: result.manifestSidecar }
+}
+
 async function transformCssTsToStyleSheetWithMetadata(
   filePath: string,
   cwd: string,
   options: TransformCssTsOptions = {},
+  manifestSidecarOptions?: TransformCssTsManifestSidecarOptions,
 ): Promise<NativeTransformResult> {
   const identOption = process.env.NODE_ENV === "production" ? "short" : "debug"
   const absoluteFilePath = path.isAbsolute(filePath) ? filePath : path.resolve(cwd, filePath)
@@ -386,15 +422,36 @@ async function transformCssTsToStyleSheetWithMetadata(
   // Raw vanilla-extract compositions retain upstream class-list semantics;
   // browser class-list order itself does not describe a CSS cascade.
   const resolvedClassStyles = new Map<string, Record<string, unknown>>()
+  const resolvedClassOrigins = manifestSidecarOptions === undefined
+    ? undefined
+    : new Map<string, ReadonlyMap<string, ManifestSidecarPropertyOrigin>>()
+  const classIrOrigins = manifestSidecarOptions === undefined
+    ? undefined
+    : collectClassIrOrigins(nativeIrByClass, nativeStructuredIrByClass)
   for (const compositeName of exportOwnership.classNames) {
     if (resolvedClassStyles.has(compositeName)) continue
     const classNames = compositeName.trim().split(/\s+/)
     const merged: Record<string, unknown> = {}
+    const mergedOrigins = manifestSidecarOptions === undefined
+      ? undefined
+      : new Map<string, ManifestSidecarPropertyOrigin>()
     for (const cls of classNames) {
-      Object.assign(merged, classStyles.get(cls) ?? {})
+      const classStyle = classStyles.get(cls)
+      if (classStyle === undefined) continue
+      Object.assign(merged, classStyle)
+      if (mergedOrigins !== undefined) {
+        for (const property of Object.keys(classStyle)) {
+          const origin = classIrOrigins?.get(cls)?.get(property)
+          if (origin === undefined) mergedOrigins.delete(property)
+          else mergedOrigins.set(property, origin)
+        }
+      }
     }
     if (Object.keys(merged).length > 0) {
       resolvedClassStyles.set(compositeName, merged)
+      if (resolvedClassOrigins !== undefined && mergedOrigins !== undefined) {
+        resolvedClassOrigins.set(compositeName, mergedOrigins)
+      }
     }
   }
 
@@ -426,13 +483,57 @@ async function transformCssTsToStyleSheetWithMetadata(
       cacheIdentity,
     },
   )
+  const manifestSidecar = manifestSidecarOptions === undefined || resolvedClassOrigins === undefined
+    ? undefined
+    : captureManifestSidecar({
+      ...sourceIdentity(absoluteFilePath, cwd),
+      exportMap,
+      resolvedClassStyles,
+      resolvedClassOrigins,
+      ...(manifestSidecarOptions.declaredTokenIds === undefined
+        ? {}
+        : { declaredTokenIds: manifestSidecarOptions.declaredTokenIds }),
+    })
   return {
     code,
     cacheMetadata: {
       $$type: NativeTransformCacheMetadataType,
       dependencies: Object.freeze(dependencyInputs.map(({ sourcePath, sourceHash }) => ({ sourcePath, sourceHash }))),
     },
+    ...(manifestSidecar === undefined ? {} : { manifestSidecar }),
   }
+}
+
+function collectClassIrOrigins(
+  scalarByClass: ReadonlyMap<string, ScalarDeclarationBlock>,
+  structuredByClass: ReadonlyMap<string, StructuredDeclarationBlock>,
+): ReadonlyMap<string, ReadonlyMap<string, ManifestSidecarPropertyOrigin>> {
+  const result = new Map<string, Map<string, ManifestSidecarPropertyOrigin>>()
+  const add = (
+    className: string,
+    packageOwner: string,
+    sourceId: string,
+    primitiveDomain: ReadonlyArray<string>,
+    property: string,
+  ): void => {
+    const properties = result.get(className) ?? new Map<string, ManifestSidecarPropertyOrigin>()
+    properties.set(property, { packageOwner, sourceId, primitiveDomain })
+    result.set(className, properties)
+  }
+
+  for (const [className, block] of scalarByClass) {
+    for (const declaration of block.declarations) {
+      add(className, declaration.provenance.packageOwner, declaration.provenance.sourceId,
+        block.primitiveDomain, declaration.property)
+    }
+  }
+  for (const [className, block] of structuredByClass) {
+    for (const declaration of block.declarations) {
+      add(className, declaration.provenance.packageOwner, declaration.provenance.sourceId,
+        block.primitiveDomain, declaration.property)
+    }
+  }
+  return result
 }
 
 function nativeStylesDistRoot(): string {
