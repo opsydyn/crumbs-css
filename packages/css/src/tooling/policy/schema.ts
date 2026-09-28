@@ -122,6 +122,7 @@ const AnalysisLimitCodeSchema = Schema.Literals([
   "style-metadata-incomplete",
   "token-identity-unknown",
   "target-profile-missing",
+  "capability-evidence-missing",
   "measurement-missing",
 ] satisfies ReadonlyArray<PolicyAnalysisLimitCode>)
 const AnalysisLimitSchema = Schema.Struct({

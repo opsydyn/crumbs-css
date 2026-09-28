@@ -115,6 +115,7 @@ export type PolicyAnalysisLimitCode =
   | "style-metadata-incomplete"
   | "token-identity-unknown"
   | "target-profile-missing"
+  | "capability-evidence-missing"
   | "measurement-missing"
 
 export type PolicyAnalysisLimit = {
