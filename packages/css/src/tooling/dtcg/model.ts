@@ -42,6 +42,7 @@ export type DtcgOrigin = {
 export type DtcgTokenMetadata = {
   readonly description?: string
   readonly deprecated?: boolean
+  readonly deprecationMessage?: string
   readonly extensions?: DtcgJsonObject
 }
 

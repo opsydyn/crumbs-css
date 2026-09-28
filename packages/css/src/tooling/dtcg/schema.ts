@@ -53,6 +53,9 @@ const resolverStructureSchema = Schema.Struct({
   modifiers: Schema.optionalKey(Schema.Record(Schema.String, resolverModifierSchema)),
   resolutionOrder: Schema.Array(resolverOrderEntrySchema),
 }).check(Schema.makeFilter(value => isResolverStructure(value)))
+const dtcgFormatDocumentSchema = Schema.Json.check(
+  Schema.makeFilter(value => isDtcgFormatDocument(value)),
+)
 const importRequestSchema = Schema.Struct({
   resolver: jsonObjectSchema,
   resolverUri: absoluteUriSchema,
@@ -69,6 +72,9 @@ const decodeResolverVersion = Schema.decodeUnknownResult(resolverVersionSchema, 
 const decodeResolverStructure = Schema.decodeUnknownResult(resolverStructureSchema, {
   errors: "all",
   onExcessProperty: "error",
+})
+const decodeDtcgFormatDocument = Schema.decodeUnknownResult(dtcgFormatDocumentSchema, {
+  errors: "all",
 })
 const decodeImportRequest = Schema.decodeUnknownResult(importRequestSchema, {
   errors: "all",
@@ -177,6 +183,62 @@ function isResolverStructure(input: unknown): boolean {
     }
   }
   return true
+}
+
+const TOKEN_METADATA_KEYS = ["$type", "$description", "$deprecated", "$extensions"] as const
+const GROUP_METADATA_KEYS = ["$type", "$description", "$deprecated", "$extensions", "$extends", "$ref"] as const
+
+function isFormatMetadata(input: UnknownRecord, keys: ReadonlyArray<string>): boolean {
+  for (const key of keys) {
+    if (!Object.hasOwn(input, key)) continue
+    const value = input[key]
+    if (key === "$type" && typeof value !== "string") return false
+    if (key === "$description" && typeof value !== "string") return false
+    if (key === "$deprecated" && typeof value !== "boolean" && typeof value !== "string") return false
+    if (key === "$extensions" && !isRecord(value)) return false
+    if ((key === "$extends" || key === "$ref") && typeof value !== "string") return false
+  }
+  return true
+}
+
+function isDtcgToken(input: UnknownRecord): boolean {
+  const keys = Reflect.ownKeys(input)
+  const allowed = new Set([...TOKEN_METADATA_KEYS, "$value", "$ref"])
+  if (keys.some(key => typeof key !== "string" || !allowed.has(key))) return false
+  if (!isFormatMetadata(input, TOKEN_METADATA_KEYS)) return false
+  if (Object.hasOwn(input, "$value")) return !Object.hasOwn(input, "$ref")
+  return Object.hasOwn(input, "$ref")
+}
+
+function isDtcgGroup(input: unknown, root = false): input is UnknownRecord {
+  if (!isRecord(input) || isDtcgToken(input)) return false
+  const allowedMetadata = root ? [...GROUP_METADATA_KEYS, "$schema"] : GROUP_METADATA_KEYS
+  const allowed = new Set(allowedMetadata)
+  if (Reflect.ownKeys(input).some(key => typeof key !== "string" || (key.startsWith("$") && !allowed.has(key) && key !== "$root"))) return false
+  if (!isFormatMetadata(input, GROUP_METADATA_KEYS)) return false
+  if (root && Object.hasOwn(input, "$schema") && typeof input.$schema !== "string") return false
+  if (Object.hasOwn(input, "$extends") && Object.hasOwn(input, "$ref")) return false
+
+  for (const key of Object.keys(input)) {
+    if (key.startsWith("$")) {
+      if (key === "$root") {
+        if (!isRecord(input[key]) || !isDtcgToken(input[key] as UnknownRecord)) return false
+      }
+      continue
+    }
+    if (!isDtcgGroupOrToken(input[key])) return false
+  }
+  return true
+}
+
+function isDtcgGroupOrToken(input: unknown): boolean {
+  if (!isRecord(input)) return false
+  if (isDtcgToken(input)) return true
+  return isDtcgGroup(input)
+}
+
+function isDtcgFormatDocument(input: unknown): boolean {
+  return isDtcgGroup(input, true)
 }
 
 /** Copy plain JSON without invoking accessors or passing caller-owned objects to Schema. */
@@ -310,6 +372,41 @@ export function decodeDtcgResolverStructure(
         message: "Invalid DTCG Resolver structure.",
         documentUri: resolverUri,
         jsonPointer: "",
+      }],
+    }
+  }
+  return { ok: true, value: parsed.success as DtcgJsonObject, diagnostics: [] }
+}
+
+/** Safely snapshot and validate one selected DTCG Format token-set source. */
+export function decodeDtcgFormatSource(
+  input: unknown,
+  origin: { readonly documentUri: string; readonly jsonPointer: string },
+): DtcgOperationResult<DtcgJsonObject> {
+  const snapshot = snapshotJson(input)
+  if (!snapshot.ok) {
+    return {
+      ok: false,
+      diagnostics: [{
+        code: snapshot.diagnostics[0]!.code === "resource.limit-exceeded" ? "resource.limit-exceeded" : "format.structure-invalid",
+        severity: "error",
+        message: snapshot.diagnostics[0]!.message,
+        documentUri: origin.documentUri,
+        jsonPointer: origin.jsonPointer,
+      }],
+    }
+  }
+
+  const parsed = decodeDtcgFormatDocument(snapshot.value)
+  if (Result.isFailure(parsed)) {
+    return {
+      ok: false,
+      diagnostics: [{
+        code: "format.structure-invalid",
+        severity: "error",
+        message: "Invalid DTCG Format source structure.",
+        documentUri: origin.documentUri,
+        jsonPointer: origin.jsonPointer,
       }],
     }
   }

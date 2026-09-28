@@ -15,6 +15,7 @@ type DtcgSource = {
   readonly setName: string
   readonly documentUri: string
   readonly jsonPointer: string
+  readonly sourceChain?: ReadonlyArray<DtcgOrigin>
 }
 
 export type DtcgSourceSelection = {
@@ -31,6 +32,7 @@ type Definition = {
   readonly value: DtcgJsonObject
   readonly documentUri: string
   readonly jsonPointer: string
+  readonly sourceChain: ReadonlyArray<DtcgOrigin>
 }
 
 function compareText(left: string, right: string): number {
@@ -210,6 +212,7 @@ export function selectDtcgSources(
     sourceOrigin: DtcgOrigin,
     setName: string,
     activeSets: ReadonlyArray<string>,
+    sourceTrail: ReadonlyArray<DtcgOrigin>,
   ): DtcgOperationResult<void> {
     steps += 1
     if (steps > MAX_RESOLVER_STEPS) {
@@ -232,29 +235,40 @@ export function selectDtcgSources(
         return makeFailure("resolver.selection-invalid", "A modifier context may reference a set, not another modifier.", sourceOrigin, [source.$ref])
       }
       if (isRecord(target) && isSetDefinition(target) && (declaredKind === "set" || declaredKind === undefined)) {
+        const nestedSourceChain = [...sourceTrail, sourceOrigin, targetOrigin]
         return expandSet({
           kind: "set",
           name: definitionNameAtOrigin(targetOrigin, setName),
           value: target as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
-        }, activeSets)
+          sourceChain: nestedSourceChain,
+        }, activeSets, nestedSourceChain)
       }
       if (isRecord(target) && Object.hasOwn(target, "$ref")) {
         return makeFailure("format.structure-invalid", "Resolved DTCG source contains an invalid $ref object.", sourceOrigin, [source.$ref])
       }
-      sources.push({ setName, documentUri: targetOrigin.documentUri, jsonPointer: targetOrigin.jsonPointer })
+      sources.push({
+        setName,
+        documentUri: targetOrigin.documentUri,
+        jsonPointer: targetOrigin.jsonPointer,
+        sourceChain: [...sourceTrail, sourceOrigin, targetOrigin],
+      })
       return { ok: true, value: undefined, diagnostics: [] }
     }
 
     if (!isPlainSource(source)) {
       return makeFailure("format.structure-invalid", "DTCG Resolver sources must be objects or $ref objects.", sourceOrigin)
     }
-    sources.push({ setName, documentUri: sourceOrigin.documentUri, jsonPointer: sourceOrigin.jsonPointer })
+    sources.push({ setName, documentUri: sourceOrigin.documentUri, jsonPointer: sourceOrigin.jsonPointer, sourceChain: [...sourceTrail, sourceOrigin] })
     return { ok: true, value: undefined, diagnostics: [] }
   }
 
-  function expandSet(definition: Definition, activeSets: ReadonlyArray<string>): DtcgOperationResult<void> {
+  function expandSet(
+    definition: Definition,
+    activeSets: ReadonlyArray<string>,
+    sourceTrail: ReadonlyArray<DtcgOrigin> = definition.sourceChain,
+  ): DtcgOperationResult<void> {
     const identity = `${definition.documentUri}#${definition.jsonPointer}`
     if (activeSets.includes(identity)) {
       return makeFailure(
@@ -271,7 +285,7 @@ export function selectDtcgSources(
     const setSources = sourceArray(definition.value, "sources")
     for (let index = 0; index < setSources.length; index += 1) {
       const sourceOrigin = { documentUri: definition.documentUri, jsonPointer: pointerChild(pointerChild(definition.jsonPointer, "sources"), index) }
-      const result = appendResolvedSource(setSources[index], sourceOrigin, definition.name, nextActive)
+      const result = appendResolvedSource(setSources[index], sourceOrigin, definition.name, nextActive, sourceTrail)
       if (!result.ok) return result
     }
     return { ok: true, value: undefined, diagnostics: [] }
@@ -319,7 +333,7 @@ export function selectDtcgSources(
         documentUri: definition.documentUri,
         jsonPointer: `${pointerChild(pointerChild(definition.jsonPointer, "contexts"), contextName)}/${index}`,
       }
-      const result = appendResolvedSource(contextSources[index], sourceOrigin, definition.name, [])
+      const result = appendResolvedSource(contextSources[index], sourceOrigin, definition.name, [], definition.sourceChain)
       if (!result.ok) return result
     }
     return { ok: true, value: undefined, diagnostics: [] }
@@ -347,6 +361,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
+          sourceChain: [target.value.referringOrigin, targetOrigin],
         }
       } else if (kind === "modifier" && isModifierDefinition(target.value.value)) {
         definition = {
@@ -355,6 +370,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
+          sourceChain: [target.value.referringOrigin, targetOrigin],
         }
       } else if (kind === undefined && isSetDefinition(target.value.value)) {
         definition = {
@@ -363,6 +379,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
+          sourceChain: [target.value.referringOrigin, targetOrigin],
         }
       } else if (kind === undefined && isModifierDefinition(target.value.value)) {
         definition = {
@@ -371,6 +388,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
+          sourceChain: [target.value.referringOrigin, targetOrigin],
         }
       } else {
         return makeFailure("resolver.selection-invalid", "Resolution order references must target a set or modifier.", entryOrigin, [entry.$ref])
@@ -382,6 +400,7 @@ export function selectDtcgSources(
         value: entry as DtcgJsonObject,
         documentUri: canonicalResolverUri,
         jsonPointer: entryOrigin.jsonPointer,
+        sourceChain: [entryOrigin],
       }
     } else {
       return makeFailure("format.structure-invalid", "Invalid DTCG Resolver resolution-order entry.", entryOrigin)
@@ -389,7 +408,7 @@ export function selectDtcgSources(
 
     orderNames.push(`${definition.kind}:${definition.name}`)
     if (definition.kind === "set") {
-      const result = expandSet(definition, [])
+      const result = expandSet(definition, [], definition.sourceChain)
       if (!result.ok) return result
     } else {
       const result = selectModifier(definition)

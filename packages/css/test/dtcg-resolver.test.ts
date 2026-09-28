@@ -122,6 +122,14 @@ describe("DTCG Resolver source selection", () => {
         ],
       },
     })
+    if (result.ok) {
+      expect(result.value.sources[0]?.sourceChain).toEqual([
+        { documentUri: resolverUri, jsonPointer: "/resolutionOrder/0" },
+        { documentUri: resolverUri, jsonPointer: "/sets/foundation" },
+        { documentUri: resolverUri, jsonPointer: "/sets/foundation/sources/0" },
+        { documentUri: "https://example.test/base.json", jsonPointer: "/color" },
+      ])
+    }
   })
 
   it("uses an explicit context instead of the modifier default", () => {
