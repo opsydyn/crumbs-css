@@ -1,7 +1,7 @@
 # M9.6 DTCG 2025.10 Format and Resolver Adapter
 
 Date: 2026-09-28
-Status: Draft for written-spec review; conversational design approved.
+Status: Approved by user for planning; implementation awaits plan approval.
 Roadmap: [M9.6 in roadmap.md](../../roadmap.md)
 Architecture: [Adopt a native design-system compiler](../../decisions/adopt-native-design-system-compiler.md)
 
