@@ -234,6 +234,8 @@ describe("DTCG Format token graph", () => {
     const result = resolve(docs, source(baseUri))
     expect(token(result, ["semantic", "accent"])).toMatchObject({ value: "blue", type: "color" })
     expect(token(result, ["semantic", "link"])).toMatchObject({ value: "blue", type: "color" })
+    expect(token(result, ["semantic", "accent"])?.aliasTargetPath).toEqual(["base", "primary"])
+    expect(token(result, ["semantic", "link"])?.aliasTargetPath).toEqual(["semantic", "accent"])
     expect(token(result, ["semantic", "link"])?.sourceChain).toContainEqual({
       documentUri: baseUri,
       jsonPointer: "/base/primary",
@@ -253,6 +255,7 @@ describe("DTCG Format token graph", () => {
     const result = resolve(docs, source(baseUri))
     expect(token(result, ["aliases", "escaped"])).toMatchObject({ value: 0.4, type: "number" })
     expect(token(result, ["aliases", "escaped"])?.origin).toEqual({ documentUri: baseUri, jsonPointer: "/aliases/escaped" })
+    expect(token(result, ["aliases", "escaped"])?.aliasTargetPath).toEqual(["tone/shade~"])
   })
 
   it("resolves property-level JSON Pointers and inherits types from external token targets", () => {

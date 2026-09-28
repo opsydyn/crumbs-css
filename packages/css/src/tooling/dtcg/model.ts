@@ -57,6 +57,8 @@ export type DtcgTokenProvenance = {
   readonly visibility: "public" | "private"
   readonly origin: DtcgOrigin
   readonly sourceChain: ReadonlyArray<DtcgOrigin>
+  /** Resolved DTCG `$value`, retained for audit and optional fallback preservation. */
+  readonly sourceValue: DtcgJsonValue
   readonly metadata: DtcgTokenMetadata
   readonly groupMetadata: ReadonlyArray<DtcgGroupMetadata>
 }

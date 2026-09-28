@@ -20,6 +20,8 @@ export type DtcgResolvedToken = {
   readonly type?: string
   readonly origin: DtcgOrigin
   readonly sourceChain: ReadonlyArray<DtcgOrigin>
+  /** Immediate DTCG token path referenced by this token, when it aliases a token. */
+  readonly aliasTargetPath?: ReadonlyArray<string>
   readonly metadata: DtcgTokenMetadata
   readonly groupMetadata: ReadonlyArray<DtcgGroupMetadata>
 }
@@ -53,6 +55,7 @@ type ResolvedTokenValue = {
   readonly value: DtcgJsonValue
   readonly type?: string
   readonly sourceChain: ReadonlyArray<DtcgOrigin>
+  readonly aliasTargetPath?: ReadonlyArray<string>
 }
 type RecordValue = Record<string, DtcgJsonValue>
 type SourcePrefix = { readonly documentUri: string; readonly segments: ReadonlyArray<string> }
@@ -589,12 +592,14 @@ export function resolveDtcgTokenIndex(
     let targetType: string | undefined
     let targetSourceChain: ReadonlyArray<DtcgOrigin>
     let targetLabel: string
+    let aliasTargetPath: ReadonlyArray<string> | undefined
 
     if (draft.alias.kind === "curly") {
       const targetPath = parseCurlyPath(draft.alias.reference)
       if (targetPath === undefined) {
         return makeFailure("token.alias-unresolved", "Invalid DTCG curly-brace token reference.", draft.origin, draft.path, [pathLabel(draft.path), draft.alias.reference])
       }
+      aliasTargetPath = targetPath
       const targetKey = pathKey(targetPath)
       const target = resolveToken(targetKey, nextActive, depth + 1)
       if (!target.ok) {
@@ -617,6 +622,7 @@ export function resolveDtcgTokenIndex(
       const targetKey = originToToken.get(`${resolvedTarget.documentUri}#${resolvedTarget.jsonPointer}`)
         ?? sourcePathForPointer(resolvedTarget.documentUri, resolvedTarget.jsonPointer, prefixes, drafts)
       if (targetKey !== undefined && targetKey !== key) {
+        aliasTargetPath = drafts.get(targetKey)?.path
         const linked = resolveToken(targetKey, nextActive, depth + 1)
         if (!linked.ok) return passFailure(linked)
         targetValue = linked.value.value
@@ -657,6 +663,7 @@ export function resolveDtcgTokenIndex(
       value: targetValue,
       ...(type === undefined ? {} : { type }),
       sourceChain: [...draft.sourceChain, ...targetSourceChain],
+      ...(aliasTargetPath === undefined ? {} : { aliasTargetPath }),
     }
     resolvedTokenMemo.set(key, resolvedValue)
     return {
@@ -677,6 +684,7 @@ export function resolveDtcgTokenIndex(
       ...(resolved.value.type === undefined ? {} : { type: resolved.value.type }),
       origin: draft.origin,
       sourceChain: resolved.value.sourceChain,
+      ...(resolved.value.aliasTargetPath === undefined ? {} : { aliasTargetPath: resolved.value.aliasTargetPath }),
       metadata: draft.metadata,
       groupMetadata: draft.groupMetadata,
     })
