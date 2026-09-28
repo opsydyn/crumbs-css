@@ -354,11 +354,16 @@ function visitRecipeConfig(
   }
 }
 
-function apiLocalNames(parsed: ParsedMigrationSource, importedExport: "componentRecipe" | "extendComponentRecipe"): ReadonlyArray<string> {
+function apiLocalNames(
+  parsed: ParsedMigrationSource,
+  importedExport: string,
+  moduleSpecifiers: ReadonlyArray<string> = [STYLE_MODULE],
+): ReadonlyArray<string> {
   const names: string[] = []
+  const allowedModules = new Set(moduleSpecifiers)
   const visit = (node: ts.Node): void => {
     const namedBindings = ts.isImportDeclaration(node) ? node.importClause?.namedBindings : undefined
-    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && node.moduleSpecifier.text === STYLE_MODULE &&
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) && allowedModules.has(node.moduleSpecifier.text) &&
       node.importClause !== undefined && !node.importClause.isTypeOnly && namedBindings !== undefined && ts.isNamedImports(namedBindings)) {
       for (const specifier of namedBindings.elements) {
         if (!specifier.isTypeOnly && (specifier.propertyName?.text ?? specifier.name.text) === importedExport) names.push(specifier.name.text)
@@ -368,6 +373,17 @@ function apiLocalNames(parsed: ParsedMigrationSource, importedExport: "component
   }
   visit(parsed.sourceFile)
   return names
+}
+
+
+function isWithinNamedCall(node: ts.Node, names: ReadonlySet<string>): boolean {
+  let current: ts.Node = node
+  while (current.parent !== undefined) {
+    const parent = current.parent
+    if (ts.isCallExpression(parent) && ts.isIdentifier(parent.expression) && names.has(parent.expression.text)) return true
+    current = parent
+  }
+  return false
 }
 
 function exportedVariables(parsed: ParsedMigrationSource, exportName: string): ReadonlyArray<ts.VariableDeclaration> {
@@ -646,6 +662,7 @@ export function planComponentExtensionEdits(input: {
   addImportRewriteEdits(parsed, imports, edits, diagnostics, seen)
 
   const extensionNames = new Set(apiLocalNames(parsed, "extendComponentRecipe"))
+  const useThemedStylesNames = new Set(apiLocalNames(parsed, "useThemedStyles", ["@opsydyn/crumbs-css/theme", "@opsydyn/crumbs-css/theme/core"]))
   const recognizedReferences = new Set<ts.Identifier>()
   const visit = (node: ts.Node): void => {
     if (ts.isCallExpression(node) && ts.isIdentifier(node.expression) && extensionNames.has(node.expression.text)) {
@@ -678,7 +695,8 @@ export function planComponentExtensionEdits(input: {
       addDiagnostic(parsed, matched[0]!.specifier, "source.ambiguous-binding", "One component import binding maps to multiple baseline component IDs.", matched[0]!.mapping.from.id, diagnostics, seen)
     }
     const inspectUses = (node: ts.Node): void => {
-      if (ts.isIdentifier(node) && node.text === localName && !isBindingDeclaration(node) && !isNonReferenceName(node) && !recognizedReferences.has(node)) {
+      if (ts.isIdentifier(node) && node.text === localName && !isBindingDeclaration(node) && !isNonReferenceName(node) &&
+        !recognizedReferences.has(node) && !isWithinNamedCall(node, useThemedStylesNames)) {
         addDiagnostic(parsed, node, "source.unsupported-syntax", "Mapped recipe import is used outside a recognized component extension call.", matched[0]!.mapping.from.id, diagnostics, seen)
       }
       ts.forEachChild(node, inspectUses)
@@ -688,5 +706,513 @@ export function planComponentExtensionEdits(input: {
 
   diagnostics.sort((left, right) => compareOrdinal(left.path ?? "", right.path ?? "") ||
     (left.line ?? 0) - (right.line ?? 0) || (left.column ?? 0) - (right.column ?? 0) || compareOrdinal(left.code, right.code))
+  return diagnostics.length === 0 ? { edits, diagnostics } : { edits: [], diagnostics }
+}
+
+type ApiImportBinding = {
+  readonly localName: string
+  readonly specifier: ts.ImportSpecifier
+}
+
+type ThemedRecipeProperty = {
+  readonly mapping: ValidatedComponentMigration
+  readonly holder: string
+  readonly property: string
+  readonly declaration: ts.VariableDeclaration
+  readonly propertyNode: ts.Node
+}
+
+type ResolverCreation = {
+  readonly call: ts.CallExpression
+  readonly holder: string
+  readonly property: string
+}
+
+function apiImportBindings(
+  parsed: ParsedMigrationSource,
+  importedExport: string,
+  moduleSpecifiers: ReadonlyArray<string>,
+): ReadonlyArray<ApiImportBinding> {
+  const allowedModules = new Set(moduleSpecifiers)
+  const bindings: ApiImportBinding[] = []
+  const visit = (node: ts.Node): void => {
+    const namedBindings = ts.isImportDeclaration(node) ? node.importClause?.namedBindings : undefined
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier) &&
+      allowedModules.has(node.moduleSpecifier.text) && node.importClause !== undefined &&
+      !node.importClause.isTypeOnly && namedBindings !== undefined && ts.isNamedImports(namedBindings)) {
+      for (const specifier of namedBindings.elements) {
+        if (!specifier.isTypeOnly && (specifier.propertyName?.text ?? specifier.name.text) === importedExport) {
+          bindings.push({ localName: specifier.name.text, specifier })
+        }
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(parsed.sourceFile)
+  return bindings
+}
+
+function findOtherBinding(
+  parsed: ParsedMigrationSource,
+  localName: string,
+  allowed: ReadonlySet<ts.Identifier>,
+): ts.Identifier | undefined {
+  let result: ts.Identifier | undefined
+  const visit = (node: ts.Node): void => {
+    if (result !== undefined) return
+    if (ts.isIdentifier(node) && node.text === localName && isBindingDeclaration(node) && !allowed.has(node)) {
+      result = node
+      return
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(parsed.sourceFile)
+  return result
+}
+
+function nodeContains(root: ts.Node, target: ts.Node): boolean {
+  if (root === target) return true
+  let found = false
+  const visit = (node: ts.Node): void => {
+    if (found) return
+    if (node === target) {
+      found = true
+      return
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(root)
+  return found
+}
+
+function hasWriteToLocal(parsed: ParsedMigrationSource, localName: string): ts.Identifier | undefined {
+  let result: ts.Identifier | undefined
+  const visit = (node: ts.Node): void => {
+    if (result !== undefined) return
+    if (ts.isIdentifier(node) && node.text === localName && !isBindingDeclaration(node) && !isNonReferenceName(node)) {
+      let current: ts.Node = node
+      while (current.parent !== undefined) {
+        const parent = current.parent
+        if (ts.isBinaryExpression(parent) &&
+          (parent.operatorToken.kind === ts.SyntaxKind.EqualsToken ||
+            (parent.operatorToken.kind >= ts.SyntaxKind.FirstCompoundAssignment &&
+              parent.operatorToken.kind <= ts.SyntaxKind.LastCompoundAssignment)) &&
+          nodeContains(parent.left, node)) {
+          result = node
+          return
+        }
+        if (ts.isDeleteExpression(parent) && nodeContains(parent.expression, node)) {
+          result = node
+          return
+        }
+        if (((ts.isPrefixUnaryExpression(parent) &&
+            (parent.operator === ts.SyntaxKind.PlusPlusToken || parent.operator === ts.SyntaxKind.MinusMinusToken)) ||
+          (ts.isPostfixUnaryExpression(parent) &&
+            (parent.operator === ts.SyntaxKind.PlusPlusToken || parent.operator === ts.SyntaxKind.MinusMinusToken))) &&
+          nodeContains(parent.operand, node)) {
+          result = node
+          return
+        }
+        current = parent
+      }
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(parsed.sourceFile)
+  return result
+}
+
+function variableDeclarations(parsed: ParsedMigrationSource): ReadonlyArray<ts.VariableDeclaration> {
+  const declarations: ts.VariableDeclaration[] = []
+  const visit = (node: ts.Node): void => {
+    if (ts.isVariableDeclaration(node)) declarations.push(node)
+    ts.forEachChild(node, visit)
+  }
+  visit(parsed.sourceFile)
+  return declarations
+}
+
+function isConstVariable(declaration: ts.VariableDeclaration): boolean {
+  return ts.isVariableDeclarationList(declaration.parent) &&
+    (declaration.parent.flags & ts.NodeFlags.Const) !== 0
+}
+
+function namedCall(expression: ts.Expression, names: ReadonlySet<string>): ts.CallExpression | undefined {
+  const unwrapped = unwrap(expression)
+  return ts.isCallExpression(unwrapped) && ts.isIdentifier(unwrapped.expression) && names.has(unwrapped.expression.text)
+    ? unwrapped
+    : undefined
+}
+
+function directThemedProperty(
+  reference: ts.Identifier,
+  localName: string,
+  useThemedStylesNames: ReadonlySet<string>,
+  declarations: ReadonlyArray<ts.VariableDeclaration>,
+): { readonly call: ts.CallExpression; readonly property: string; readonly propertyNode: ts.Node } | undefined {
+  const parent = reference.parent
+  let propertyName: string | undefined
+  let propertyNode: ts.Node
+  let object: ts.ObjectLiteralExpression
+  if (ts.isShorthandPropertyAssignment(parent) && parent.name === reference &&
+    parent.objectAssignmentInitializer === undefined && ts.isObjectLiteralExpression(parent.parent)) {
+    propertyName = localName
+    propertyNode = parent
+    object = parent.parent
+  } else if (ts.isPropertyAssignment(parent) && parent.initializer === reference &&
+    !ts.isComputedPropertyName(parent.name) && ts.isObjectLiteralExpression(parent.parent)) {
+    propertyName = propertyNameText(parent.name)
+    propertyNode = parent
+    object = parent.parent
+  } else {
+    return undefined
+  }
+  if (propertyName === undefined) return undefined
+
+  const properties = object.properties
+  const propertyKeys = properties.map(property => {
+    if (ts.isPropertyAssignment(property) && !ts.isComputedPropertyName(property.name)) {
+      return propertyNameText(property.name)
+    }
+    if (ts.isShorthandPropertyAssignment(property) && property.objectAssignmentInitializer === undefined) {
+      return property.name.text
+    }
+    return undefined
+  })
+  if (propertyKeys.some(key => key === undefined) ||
+    new Set(propertyKeys).size !== propertyKeys.length) return undefined
+  const matchingProperties = properties.filter((_property, index) => propertyKeys[index] === propertyName)
+  if (matchingProperties.length !== 1 || matchingProperties[0] !== propertyNode) return undefined
+
+  let current: ts.Node = object
+  while (current.parent !== undefined) {
+    const parentNode = current.parent
+    if (ts.isCallExpression(parentNode) && parentNode.arguments.length === 1 &&
+      unwrap(parentNode.arguments[0]!) === object && ts.isIdentifier(parentNode.expression) &&
+      useThemedStylesNames.has(parentNode.expression.text)) {
+      const declaration = declarations.find(candidate =>
+        candidate.initializer !== undefined && unwrap(candidate.initializer) === parentNode)
+      if (declaration === undefined || !isConstVariable(declaration) || !ts.isIdentifier(declaration.name)) return undefined
+      return { call: parentNode, property: propertyName, propertyNode }
+    }
+    if (ts.isParenthesizedExpression(parentNode) || ts.isAsExpression(parentNode) ||
+      ts.isTypeAssertionExpression(parentNode) || ts.isSatisfiesExpression(parentNode)) {
+      current = parentNode
+      continue
+    }
+    return undefined
+  }
+  return undefined
+}
+
+function resolverCreation(
+  expression: ts.Expression,
+  resolverNames: ReadonlySet<string>,
+  useMemoNames: ReadonlySet<string>,
+): ResolverCreation | undefined {
+  let call = namedCall(expression, resolverNames)
+  if (call === undefined) {
+    const memo = namedCall(expression, useMemoNames)
+    if (memo === undefined || memo.arguments.length !== 2) return undefined
+    const callback = unwrap(memo.arguments[0]!)
+    const isAsync = ts.canHaveModifiers(callback) &&
+      (ts.getModifiers(callback)?.some(modifier => modifier.kind === ts.SyntaxKind.AsyncKeyword) ?? false)
+    if (!ts.isArrowFunction(callback) || ts.isBlock(callback.body) || callback.parameters.length !== 0 || isAsync) return undefined
+    call = namedCall(callback.body, resolverNames)
+  }
+  if (call === undefined || call.arguments.length < 1 || call.arguments.length > 2) return undefined
+  const recipe = unwrap(call.arguments[0]!)
+  if (!ts.isPropertyAccessExpression(recipe) || recipe.questionDotToken !== undefined ||
+    !ts.isIdentifier(recipe.expression)) return undefined
+  return { call, holder: recipe.expression.text, property: recipe.name.text }
+}
+
+function isExtensionBaseReference(node: ts.Identifier, extensionNames: ReadonlySet<string>): boolean {
+  const parent = node.parent
+  return ts.isCallExpression(parent) && ts.isIdentifier(parent.expression) &&
+    extensionNames.has(parent.expression.text) && parent.arguments[0] === node
+}
+
+/**
+ * Trace only direct, immutable useThemedStyles -> recipe resolver flows.
+ * Unsupported references fail closed so the aggregator can suppress every file in the invocation.
+ */
+export function planComponentResolverEdits(input: {
+  readonly parsed: ParsedMigrationSource
+  readonly validated: ValidatedSourceMigration
+}): SourceEditResult {
+  const { parsed, validated } = input
+  if (parsed.diagnostics.length > 0) return { edits: [], diagnostics: [...parsed.diagnostics] }
+  const edits: SourceEdit[] = []
+  const diagnostics: SourceMigrationDiagnostic[] = []
+  const seen = new Set<string>()
+  diagnoseAmbiguousComponentImports(parsed, validated, diagnostics, seen)
+
+  const declarations = variableDeclarations(parsed)
+  const imports = componentImports(parsed, validated)
+  const importsByLocal = new Map<string, MatchedComponentImport[]>()
+  for (const item of imports) {
+    const entries = importsByLocal.get(item.localName) ?? []
+    entries.push(item)
+    importsByLocal.set(item.localName, entries)
+  }
+
+  const useBindings = apiImportBindings(parsed, "useThemedStyles", [
+    "@opsydyn/crumbs-css/theme",
+    "@opsydyn/crumbs-css/theme/core",
+  ])
+  const resolverBindings = apiImportBindings(parsed, "createComponentRecipeResolver", ["@opsydyn/crumbs-css/theme"])
+  const memoBindings = apiImportBindings(parsed, "useMemo", ["react"])
+  const extensionNames = new Set(apiLocalNames(parsed, "extendComponentRecipe"))
+  const useNames = new Set(useBindings.map(binding => binding.localName))
+  const resolverNames = new Set(resolverBindings.map(binding => binding.localName))
+  const memoNames = new Set(memoBindings.map(binding => binding.localName))
+
+  const calledHelperNames = new Set<string>()
+  const collectCalledHelpers = (node: ts.Node): void => {
+    if (ts.isCallExpression(node) && ts.isIdentifier(node.expression)) {
+      calledHelperNames.add(node.expression.text)
+    }
+    ts.forEachChild(node, collectCalledHelpers)
+  }
+  collectCalledHelpers(parsed.sourceFile)
+  for (const [bindings, label] of [
+    [useBindings, "useThemedStyles"],
+    [resolverBindings, "createComponentRecipeResolver"],
+    [memoBindings, "useMemo"],
+  ] as const) {
+    const byLocal = new Map<string, ApiImportBinding[]>()
+    for (const binding of bindings) {
+      const entries = byLocal.get(binding.localName) ?? []
+      entries.push(binding)
+      byLocal.set(binding.localName, entries)
+    }
+    for (const [localName, entries] of byLocal) {
+      if (!calledHelperNames.has(localName)) continue
+      if (entries.length > 1) {
+        addDiagnostic(parsed, entries[1]!.specifier, "source.ambiguous-binding",
+          "A resolver-flow helper local name is imported more than once (" + label + ").",
+          undefined, diagnostics, seen)
+      }
+      const shadow = findOtherBinding(parsed, localName, new Set(entries.map(entry => entry.specifier.name)))
+      if (shadow !== undefined) {
+        addDiagnostic(parsed, shadow, "source.ambiguous-binding",
+          "A resolver-flow helper import is shadowed by another local binding.",
+          undefined, diagnostics, seen)
+      }
+    }
+  }
+
+  const recipeProperties: ThemedRecipeProperty[] = []
+  for (const [localName, matched] of importsByLocal) {
+    const mappingIds = new Set(matched.map(item => item.mapping.from.id))
+    if (mappingIds.size !== 1) continue
+    const references: ts.Identifier[] = []
+    const visit = (node: ts.Node): void => {
+      if (ts.isIdentifier(node) && node.text === localName && !isBindingDeclaration(node) && !isNonReferenceName(node)) {
+        references.push(node)
+      }
+      ts.forEachChild(node, visit)
+    }
+    visit(parsed.sourceFile)
+
+    const expectedImports = new Set(matched.map(item => item.specifier))
+    const shadow = hasShadowedBinding(parsed, localName, expectedImports)
+    if (shadow !== undefined) {
+      addDiagnostic(parsed, shadow, "source.ambiguous-binding",
+        "Mapped recipe import is shadowed by another local binding.",
+        matched[0]!.mapping.from.id, diagnostics, seen)
+    }
+
+    for (const reference of references) {
+      if (isExtensionBaseReference(reference, extensionNames)) continue
+      const flow = directThemedProperty(reference, localName, useNames, declarations)
+      if (flow === undefined) {
+        addDiagnostic(parsed, reference, "component.resolver-unresolved",
+          "Mapped recipe import must be a direct property value of an immutable useThemedStyles result.",
+          matched[0]!.mapping.from.id, diagnostics, seen)
+        continue
+      }
+      const declaration = declarations.find(candidate =>
+        candidate.initializer !== undefined && unwrap(candidate.initializer) === flow.call)
+      if (declaration === undefined || !isConstVariable(declaration) || !ts.isIdentifier(declaration.name)) {
+        addDiagnostic(parsed, flow.propertyNode, "source.unsupported-syntax",
+          "useThemedStyles resolver flows require a const identifier result.",
+          matched[0]!.mapping.from.id, diagnostics, seen)
+        continue
+      }
+      const holder = declaration.name.text
+      const holderShadow = findOtherBinding(parsed, holder, new Set([declaration.name]))
+      if (holderShadow !== undefined) {
+        addDiagnostic(parsed, holderShadow, "source.ambiguous-binding",
+          "The useThemedStyles result binding is shadowed.",
+          matched[0]!.mapping.from.id, diagnostics, seen)
+      }
+      const holderWrite = hasWriteToLocal(parsed, holder)
+      if (holderWrite !== undefined) {
+        addDiagnostic(parsed, holderWrite, "source.unsupported-syntax",
+          "The useThemedStyles result binding is reassigned or mutated.",
+          matched[0]!.mapping.from.id, diagnostics, seen)
+      }
+      recipeProperties.push({
+        mapping: matched[0]!.mapping,
+        holder,
+        property: flow.property,
+        declaration,
+        propertyNode: flow.propertyNode,
+      })
+    }
+  }
+
+  const propertiesByKey = new Map<string, ThemedRecipeProperty[]>()
+  for (const property of recipeProperties) {
+    const key = property.holder + "\u0000" + property.property
+    const entries = propertiesByKey.get(key) ?? []
+    entries.push(property)
+    propertiesByKey.set(key, entries)
+  }
+  for (const properties of propertiesByKey.values()) {
+    const mappingIds = new Set(properties.map(property => property.mapping.from.id))
+    if (mappingIds.size > 1) {
+      addDiagnostic(parsed, properties[0]!.propertyNode, "source.ambiguous-binding",
+        "One themed recipe property resolves to multiple baseline component IDs.",
+        properties[0]!.mapping.from.id, diagnostics, seen)
+    }
+  }
+
+  const mappedPropertyKeys = new Set(propertiesByKey.keys())
+  const resolverVariables: Array<{
+    readonly mapping: ValidatedComponentMigration
+    readonly localName: string
+    readonly declaration: ts.VariableDeclaration
+  }> = []
+  for (const declaration of declarations) {
+    if (declaration.initializer === undefined) continue
+    const creation = resolverCreation(declaration.initializer, resolverNames, memoNames)
+    if (creation === undefined) continue
+    const key = creation.holder + "\u0000" + creation.property
+    const properties = propertiesByKey.get(key)
+    if (properties === undefined) continue
+    const mappingIds = new Set(properties.map(property => property.mapping.from.id))
+    if (mappingIds.size !== 1) continue
+    mappedPropertyKeys.delete(key)
+    if (!isConstVariable(declaration) || !ts.isIdentifier(declaration.name)) {
+      addDiagnostic(parsed, declaration, "source.unsupported-syntax",
+        "Recipe resolver values must be stored in a const identifier binding.",
+        properties[0]!.mapping.from.id, diagnostics, seen)
+      continue
+    }
+    const localName = declaration.name.text
+    const shadow = findOtherBinding(parsed, localName, new Set([declaration.name]))
+    if (shadow !== undefined) {
+      addDiagnostic(parsed, shadow, "source.ambiguous-binding",
+        "Recipe resolver binding is shadowed.", properties[0]!.mapping.from.id, diagnostics, seen)
+    }
+    const write = hasWriteToLocal(parsed, localName)
+    if (write !== undefined) {
+      addDiagnostic(parsed, write, "source.unsupported-syntax",
+        "Recipe resolver binding is reassigned or mutated.", properties[0]!.mapping.from.id, diagnostics, seen)
+    }
+    resolverVariables.push({ mapping: properties[0]!.mapping, localName, declaration })
+  }
+
+  for (const key of mappedPropertyKeys) {
+    const properties = propertiesByKey.get(key)!
+    addDiagnostic(parsed, properties[0]!.propertyNode, "component.resolver-unresolved",
+      "Mapped themed recipe property is not passed directly to a component recipe resolver.",
+      properties[0]!.mapping.from.id, diagnostics, seen)
+  }
+
+  const resultsByLocal = new Map<string, Array<{
+    readonly mapping: ValidatedComponentMigration
+    readonly declaration: ts.VariableDeclaration
+  }>>()
+  for (const resolver of resolverVariables) {
+    const references: ts.Identifier[] = []
+    const visit = (node: ts.Node): void => {
+      if (ts.isIdentifier(node) && node.text === resolver.localName &&
+        !isBindingDeclaration(node) && !isNonReferenceName(node)) references.push(node)
+      ts.forEachChild(node, visit)
+    }
+    visit(parsed.sourceFile)
+    for (const reference of references) {
+      const parent = reference.parent
+      if (!ts.isCallExpression(parent) || parent.expression !== reference) {
+        addDiagnostic(parsed, reference, "source.unsupported-syntax",
+          "Recipe resolver bindings may only be invoked directly for static result analysis.",
+          resolver.mapping.from.id, diagnostics, seen)
+        continue
+      }
+      const resultDeclaration = declarations.find(candidate =>
+        candidate.initializer !== undefined && unwrap(candidate.initializer) === parent)
+      if (resultDeclaration === undefined) {
+        addDiagnostic(parsed, parent, "source.unsupported-syntax",
+          "Resolver calls must initialize a local const result binding.",
+          resolver.mapping.from.id, diagnostics, seen)
+        continue
+      }
+      if (!isConstVariable(resultDeclaration) || !ts.isIdentifier(resultDeclaration.name) || parent.arguments.length > 1) {
+        addDiagnostic(parsed, resultDeclaration, "source.unsupported-syntax",
+          "Resolver results must use a const identifier and at most one selection argument.",
+          resolver.mapping.from.id, diagnostics, seen)
+        continue
+      }
+      const resultLocal = resultDeclaration.name.text
+      const resultShadow = findOtherBinding(parsed, resultLocal, new Set([resultDeclaration.name]))
+      if (resultShadow !== undefined) {
+        addDiagnostic(parsed, resultShadow, "source.ambiguous-binding",
+          "Resolver result binding is shadowed.", resolver.mapping.from.id, diagnostics, seen)
+      }
+      const resultWrite = hasWriteToLocal(parsed, resultLocal)
+      if (resultWrite !== undefined) {
+        addDiagnostic(parsed, resultWrite, "source.unsupported-syntax",
+          "Resolver result binding is reassigned or mutated.", resolver.mapping.from.id, diagnostics, seen)
+      }
+      const entries = resultsByLocal.get(resultLocal) ?? []
+      entries.push({ mapping: resolver.mapping, declaration: resultDeclaration })
+      resultsByLocal.set(resultLocal, entries)
+    }
+  }
+
+  for (const [resultLocal, results] of resultsByLocal) {
+    const mappingIds = new Set(results.map(result => result.mapping.from.id))
+    if (mappingIds.size !== 1) {
+      addDiagnostic(parsed, results[0]!.declaration, "source.ambiguous-binding",
+        "One resolver result binding is associated with multiple baseline component IDs.",
+        results[0]!.mapping.from.id, diagnostics, seen)
+      continue
+    }
+    const mapping = results[0]!.mapping
+    const references: ts.Identifier[] = []
+    const visit = (node: ts.Node): void => {
+      if (ts.isIdentifier(node) && node.text === resultLocal &&
+        !isBindingDeclaration(node) && !isNonReferenceName(node)) references.push(node)
+      ts.forEachChild(node, visit)
+    }
+    visit(parsed.sourceFile)
+
+    for (const reference of references) {
+      const parent = reference.parent
+      if (ts.isPropertyAccessExpression(parent) && parent.expression === reference &&
+        parent.questionDotToken === undefined) {
+        const replacement = mapping.mapping.slots[parent.name.text]
+        if (replacement === undefined) {
+          addDiagnostic(parsed, parent, "component.resolver-unresolved",
+            "Static resolver result member is not present in the migration slot map.",
+            mapping.from.id, diagnostics, seen)
+        } else if (replacement !== parent.name.text) {
+          edits.push(makeEdit(parent.name.getStart(parsed.sourceFile), parent.name.end, replacement))
+        }
+      } else {
+        addDiagnostic(parsed, reference, "source.unsupported-syntax",
+          "Resolver results may only be read through static result.slot member access.",
+          mapping.from.id, diagnostics, seen)
+      }
+    }
+  }
+
+  diagnostics.sort((left, right) => compareOrdinal(left.path ?? "", right.path ?? "") ||
+    (left.line ?? 0) - (right.line ?? 0) || (left.column ?? 0) - (right.column ?? 0) ||
+    compareOrdinal(left.code, right.code) || compareOrdinal(left.entityId ?? "", right.entityId ?? ""))
   return diagnostics.length === 0 ? { edits, diagnostics } : { edits: [], diagnostics }
 }
