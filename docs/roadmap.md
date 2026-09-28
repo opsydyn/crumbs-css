@@ -37,7 +37,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
 | M7 | Typed component slots, states, and extension contracts | M5, M6 | Not started |
 | M8 | Distributed package/artifact compatibility | M2, M3, M7 | Not started |
-| M9 | Manifests, change impact, policy, migrations, and DTCG | M7, M8 | In progress; M9.1–M9.3 complete |
+| M9 | Manifests, change impact, policy, migrations, and DTCG | M7, M8 | In progress; M9.1–M9.4 complete |
 | M10 | Qualify a reference design system and enterprise journeys | M8, M9 | Not started |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Deferred |
 
@@ -268,9 +268,8 @@ for iOS and web. Required compiler fixtures and consumer maps remain fail-closed
 See the [M8.6 CI assessment](assessments/2026-09-27-m8-6-ci-consumer-qualification.md).
 Android and device acceptance remain parked.
 
-Next recommended roadmap item: **M9.3** — add development-only explanations
-for resolved values, matching conditions, override winners, dependencies, and
-recomputation causes. Keep Android/device acceptance parked.
+Next recommended roadmap item: **M9.5** — add replacement metadata and safe
+token/recipe-slot codemods. Keep Android/device acceptance parked.
 
 ## M8 — Qualify distributed packages and artifact evolution
 
@@ -294,7 +293,7 @@ recomputation causes. Keep Android/device acceptance parked.
 - [x] M9.1: Emit deterministic versioned manifests for identities, public contracts, aliases/dependencies, source origins, capabilities, defaults, and deprecation/replacement metadata. Qualified with [receipt](evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json) and [assessment](assessments/2026-09-27-m9-1-deterministic-manifest.md).
 - [x] M9.2: Provide local explicit-file checking and manifest comparison. Detect token/slot/variant contract changes, domain changes, changed defaults, and forbidden private dependencies; report affected supplied consumers and analysis limits. See the [qualification receipt](evidence/2026-09-27-m9-2-manifest-compatibility/qualification-v1.json) and [assessment](assessments/2026-09-27-m9-2-manifest-compatibility.md).
 - [x] M9.3: Add development-only style explanations for resolved values, matching conditions, override winners, dependencies, and recomputation causes. Exclude detailed provenance from production output unless deliberately requested. Qualified with the [receipt](evidence/2026-09-27-m9-3-style-explanations/qualification.json) and [assessment](assessments/2026-09-27-m9-3-style-explanations.md); Android/device acceptance remains not-run and parked.
-- [ ] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports.
+- [x] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports. Qualified with the [policy report](evidence/2026-09-28-m9-4-design-system-policies/policy-report-v1.json), [receipt](evidence/2026-09-28-m9-4-design-system-policies/qualification.json), and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md); Android/device acceptance remains not-run and parked.
 - [ ] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries.
 - [ ] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context.
 - [ ] M9.7: Support ownership metadata in local reports. Optional editor/design-tool adapters consume manifests and schemas; neither hosted accounts nor external telemetry is required.
@@ -342,6 +341,31 @@ and [assessment](assessments/2026-09-27-m9-3-style-explanations.md).
 
 Next recommended roadmap item: **M9.4** — add versioned policy presets and
 incremental adoption with explicit escape-hatch reasons and optional expiry.
+
+### 2026-09-28 — M9.4 versioned design-system policies
+
+- [x] Added the tooling-only `@opsydyn/crumbs-css/tooling/policy` API, local
+  explicit-file CLI, independently versioned migration/enforce presets, and
+  canonical schema-v1 reports for all six planned policy rules.
+- [x] Qualified deterministic report/fixture digests, exact reasoned
+  exceptions, visible unused-exception diagnostics, retained consumer coverage
+  limits, packed package exports, runtime isolation, and iOS/web production
+  export/tree-shaking checks. The 11,000-byte fixture measurement exercises a
+  budget; it is not application bundle evidence.
+- [x] Documented adoption, severity migration, explicit evidence, exceptions,
+  and report limitations. `bun run check`, the documentation build, the
+  qualification script, the distribution gate, focused regressions, and
+  `git diff --check` passed.
+- [x] Android and physical-device acceptance remain not-run and parked; no
+  release or publication acceptance is claimed.
+
+See the [M9.4 qualification receipt](evidence/2026-09-28-m9-4-design-system-policies/qualification.json),
+[policy report](evidence/2026-09-28-m9-4-design-system-policies/policy-report-v1.json),
+and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md).
+
+Next recommended roadmap item: **M9.5** — add replacement metadata and safe
+codemods for token, recipe, and slot migrations. Keep Android/device acceptance
+parked.
 
 ## M10 — Qualify the reference design system and North Star journeys
 

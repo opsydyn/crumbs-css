@@ -281,6 +281,30 @@ consumer command.
 See the [manifest generation guide](https://opsydyn.github.io/crumbs-css/how-to/generate-design-system-manifests/)
 for the assembly workflow, lifecycle metadata, and interpretation limits.
 
+### Check design-system policy
+
+The tooling-only `@opsydyn/crumbs-css/tooling/policy` API checks explicitly
+supplied manifests, style metadata, policy, and measurement files. Start with
+`migration@1` warnings, then promote rules with severity overrides or use
+`enforce@1` errors when your evidence is ready. The six rules cover scoped
+literals, semantic tokens, supplied-consumer private-token edges, explicit
+target capabilities, deprecations, and measured output budgets. Findings stay
+visible when their level changes or an exact exception applies.
+
+```sh
+bun run policy:check -- --policy policy.json --current manifest.json \
+  --consumer apps/mobile/manifest.json \
+  --style-metadata .crumbs/card.style-metadata.json \
+  --measurement .crumbs/output-measurements.json --format json
+```
+
+Inputs are never discovered. Missing evidence appears as an analysis limit; a
+budget uses only a measurement matching its metric, scope, and unit. Expiring
+exceptions use a caller-supplied `--evaluated-on` date. Policy reports do not
+make release decisions, and Android/device support is not inferred. See the
+[policy guide](https://opsydyn.github.io/crumbs-css/how-to/check-design-system-policy/)
+for rule behavior, exception handling, and report limits.
+
 ## Minimal recipe example
 
 ```ts

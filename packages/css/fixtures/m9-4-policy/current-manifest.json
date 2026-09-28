@@ -1,0 +1,159 @@
+{
+  "format": "crumbs.design-system-manifest",
+  "schemaVersion": 1,
+  "package": {
+    "name": "@acme/design-system",
+    "version": "2.0.0"
+  },
+  "producer": {
+    "compiler": {
+      "name": "@opsydyn/crumbs-css",
+      "version": "0.1.1-alpha.1"
+    },
+    "artifact": {
+      "name": "crumbs-native-style-artifact",
+      "version": 1
+    }
+  },
+  "tokens": [
+    {
+      "id": "@acme/design-system/foundation@1#5:color/6:canvas",
+      "contract": {
+        "owner": "@acme/design-system",
+        "name": "foundation",
+        "version": 1
+      },
+      "path": [
+        "color",
+        "canvas"
+      ],
+      "visibility": "public",
+      "domain": {
+        "kind": "color"
+      },
+      "kind": "definition",
+      "origin": {
+        "path": "src/tokens/color-canvas.css.ts",
+        "exportPath": "tokens"
+      },
+      "lifecycle": {
+        "deprecatedSince": "2.0.0",
+        "reason": "Use the semantic canvas token.",
+        "replacement": {
+          "id": "@acme/semantic-tokens#token:color.canvas",
+          "resolution": "external"
+        }
+      }
+    },
+    {
+      "id": "@acme/design-system/foundation@1#5:space/10:privateGap",
+      "contract": {
+        "owner": "@acme/design-system",
+        "name": "foundation",
+        "version": 1
+      },
+      "path": [
+        "space",
+        "privateGap"
+      ],
+      "visibility": "private",
+      "domain": {
+        "kind": "length",
+        "allowNegative": false
+      },
+      "kind": "definition",
+      "origin": {
+        "path": "src/tokens/space-private-gap.css.ts",
+        "exportPath": "tokens"
+      }
+    },
+    {
+      "id": "@acme/design-system/foundation@1#5:color/8:semantic",
+      "contract": {
+        "owner": "@acme/design-system",
+        "name": "foundation",
+        "version": 1
+      },
+      "path": [
+        "color",
+        "semantic"
+      ],
+      "visibility": "public",
+      "domain": {
+        "kind": "color"
+      },
+      "kind": "definition",
+      "origin": {
+        "path": "src/tokens/color-semantic.css.ts",
+        "exportPath": "tokens"
+      }
+    }
+  ],
+  "components": [
+    {
+      "id": "@acme/design-system#component:LegacyCard",
+      "contract": {
+        "owner": "@acme/design-system",
+        "name": "components",
+        "version": 1
+      },
+      "origin": {
+        "path": "src/components/legacy-card.css.ts",
+        "exportPath": "LegacyCard"
+      },
+      "slots": [
+        "root"
+      ],
+      "variants": {},
+      "extensionPoints": [],
+      "stateConstraints": [],
+      "defaults": {},
+      "lifecycle": {
+        "deprecatedSince": "2.0.0",
+        "reason": "Use ActionCard.",
+        "replacement": {
+          "id": "@acme/design-system#component:ActionCard",
+          "resolution": "external"
+        }
+      }
+    }
+  ],
+  "modules": [
+    {
+      "id": "@acme/design-system#src/card.css.ts",
+      "origin": {
+        "path": "src/card.css.ts"
+      },
+      "exports": [
+        "card"
+      ]
+    }
+  ],
+  "dependencies": [],
+  "capabilities": [
+    {
+      "moduleId": "@acme/design-system#src/card.css.ts",
+      "exportPath": "card",
+      "property": "boxShadow",
+      "primitive": "view",
+      "evidence": "compiler-observed"
+    }
+  ],
+  "coverage": {
+    "roots": [
+      {
+        "kind": "token-contract",
+        "id": "@acme/design-system#foundation@1"
+      },
+      {
+        "kind": "component-recipe",
+        "id": "@acme/design-system#component:LegacyCard"
+      },
+      {
+        "kind": "style-module",
+        "id": "@acme/design-system#src/card.css.ts"
+      }
+    ],
+    "unresolved": []
+  }
+}

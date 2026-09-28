@@ -1,0 +1,105 @@
+---
+title: Check design-system policy
+description: Adopt versioned style, token, capability, lifecycle, and output-budget rules from explicit Crumbs evidence.
+---
+
+The tooling-only `@opsydyn/crumbs-css/tooling/policy` API evaluates a versioned
+policy against the manifest, style metadata, consumer manifests, and numeric
+measurements that you explicitly supply. The local command reads only named
+files. It does not scan source or discover workspaces, consumers, build output,
+or policy files.
+
+## Start in migration mode
+
+A policy selects the independently versioned `migration@1` or `enforce@1`
+preset. Migration gives each finding a warning level; enforce gives each a
+error level. Both retain all findings. A `severityOverrides` entry changes the
+reported level for that rule without removing the finding.
+
+The six rules cover:
+
+- `style.literal-value`: non-token values in configured property and primitive
+  scopes.
+- `style.semantic-token-required`: values in configured scopes must resolve to
+  a token ID explicitly listed in `semanticTokenIds`. Mapping requires both
+  the token's stable contract identity and variable name to match.
+- `consumer.private-token`: private-token references found in explicitly
+  supplied consumer manifests.
+- `capability.not-supported`: compiler-observed property/primitive pairs that
+  are absent from an explicitly configured target profile.
+- `entity.deprecated`: token and component lifecycle metadata in the provider
+  manifest.
+- `output.budget-exceeded`: an explicit measurement above a budget with the
+  same metric ID, scope ID, and unit.
+
+Start with the migration preset, review findings and coverage limits, then
+promote selected rules with severity overrides or move to enforce after the
+team has supplied the evidence it needs. Policy output describes those inputs;
+it does not make a release or SemVer decision.
+
+## Check named evidence files
+
+The policy and current provider manifest are required. Consumer manifests,
+style metadata sidecars, and measurement-list files can be repeated:
+
+```sh
+bun run policy:check -- \
+  --policy design-system-policy.json \
+  --current design-system-manifest.json \
+  --consumer apps/mobile/design-system-manifest.json \
+  --consumer apps/web/design-system-manifest.json \
+  --style-metadata .crumbs/card.style-metadata.json \
+  --measurement .crumbs/output-measurements.json \
+  --evaluated-on 2026-09-28 \
+  --format json
+```
+
+`--format` accepts `text` or `json`; JSON uses the canonical schema-v1 report.
+Each measurement file contains a JSON array of `{ metricId, scopeId, unit,
+value }` records. `--evaluated-on` is needed when the policy contains an expiring
+exception. It supplies the date used by the check; the command does not read the
+system clock. Exit status is `0` when there are no active error findings, `1`
+when at least one active error remains, and `2` for invalid arguments,
+unreadable files, or invalid/incompatible input.
+
+## Keep exceptions visible
+
+An exception matches one rule and one stable subject ID. It requires a reason
+and may include `expiresOn`. The finding remains in the report with an
+`excepted` disposition and the exception reason. A date is inclusive through
+its expiry day; after that date the finding is active and an
+`exception.expired` diagnostic is added. Exceptions matching no finding produce
+an `exception.unused` diagnostic. Neither kind of diagnostic can be suppressed
+by policy severity overrides.
+
+## Read findings with coverage
+
+Supply the current manifest, consumer manifests, and style sidecars for the
+roots relevant to the review. A manifest describes selected roots, not a whole
+package. Private-token consumer findings require explicit external dependency
+edges. Manifest v1 cannot attribute consumer use of component slots or
+variants, so that limitation remains visible in `analysisLimits`.
+
+Capability checks compare only `compiler-observed` evidence with the target
+profiles you name; an `ios` profile does not imply Android support or vice
+versa. Budget checks use only supplied numeric measurements. Missing or
+mismatched measurements, missing style metadata, and unknown token identities
+reduce coverage rather than count as passes. A semantic token is never guessed
+from its name or resolved value.
+
+Effect 4 Schema validates these tooling records behind the tooling subpath. The
+API returns ordinary TypeScript records and JSON; consumers do not need an
+Effect dependency. Keep policy tooling out of application runtime entrypoints.
+
+Repository maintainers can regenerate the fixed qualification fixtures and
+receipt with:
+
+```sh
+bun scripts/m9-4-policy-qualification.ts
+```
+
+This command reads only the five checked-in M9.4 fixture files and writes the
+canonical report and hash-linked receipt under
+`docs/evidence/2026-09-28-m9-4-design-system-policies/`. It is repository
+qualification, not a replacement for checking a team's own explicitly named
+inputs. Android and device acceptance remain separate gates.

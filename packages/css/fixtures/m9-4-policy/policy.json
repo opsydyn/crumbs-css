@@ -1,0 +1,62 @@
+{
+  "format": "crumbs.css.design-system-policy",
+  "schemaVersion": 1,
+  "policyId": "acme.native-policy-fixture",
+  "version": 1,
+  "preset": {
+    "name": "migration",
+    "version": 1
+  },
+  "severityOverrides": {},
+  "literalValueScopes": [
+    {
+      "property": "backgroundColor",
+      "domain": [
+        "view"
+      ]
+    }
+  ],
+  "semanticTokenScopes": [
+    {
+      "property": "color",
+      "domain": [
+        "text"
+      ]
+    }
+  ],
+  "semanticTokenIds": [
+    "@acme/design-system/foundation@1#5:color/8:semantic"
+  ],
+  "targetProfiles": [
+    {
+      "id": "ios",
+      "supportedCapabilities": [
+        {
+          "property": "backgroundColor",
+          "primitive": "view"
+        }
+      ]
+    }
+  ],
+  "outputBudgets": [
+    {
+      "metricId": "compiled-style-bytes",
+      "scopeId": "mobile-entry",
+      "unit": "bytes",
+      "maximum": 10000
+    }
+  ],
+  "exceptions": [
+    {
+      "ruleId": "entity.deprecated",
+      "subjectId": "@acme/design-system#component:LegacyCard",
+      "reason": "Migration is scheduled for the next component release.",
+      "expiresOn": "2026-12-31"
+    },
+    {
+      "ruleId": "entity.deprecated",
+      "subjectId": "@acme/design-system#component:FutureCard",
+      "reason": "Keep this exception visible as an unused-policy diagnostic."
+    }
+  ]
+}
