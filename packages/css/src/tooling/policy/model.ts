@@ -123,6 +123,20 @@ export type PolicyAnalysisLimit = {
   readonly subjectId?: string
 }
 
+/** A rule result before policy severity and exception disposition are applied. */
+export type PolicyRuleCandidate = {
+  readonly ruleId: PolicyRuleId
+  readonly subjectId: string
+  readonly fieldPath: string
+  readonly message: string
+  readonly evidence: PolicyReportJson
+}
+
+export type PolicyRuleEvaluation = {
+  readonly findings: ReadonlyArray<PolicyRuleCandidate>
+  readonly analysisLimits: ReadonlyArray<PolicyAnalysisLimit>
+}
+
 export type DesignSystemPolicyReport = {
   readonly format: typeof DESIGN_SYSTEM_POLICY_REPORT_FORMAT
   readonly schemaVersion: typeof DESIGN_SYSTEM_POLICY_REPORT_VERSION
