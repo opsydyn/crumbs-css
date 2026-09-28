@@ -110,11 +110,12 @@ for (const format of ['mjs', 'cjs']) {
   expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')) || name.startsWith('@vanilla-extract/') || name === 'css-to-react-native' || name === 'metro' || name.startsWith('metro/'))).toEqual([])
  })
 }
-for (const entry of ['index', 'style', 'theme', 'theme-core', 'tokens', 'tooling-manifest']) {
+for (const entry of ['index', 'style', 'theme', 'theme-core', 'tokens', 'tokens-optic', 'tooling-manifest']) {
  for (const format of ['mjs', 'cjs']) {
   it(`keeps ${entry} ${format} outside the devtools and Effect Schema graph`, () => {
    const result = graph(`${entry}.${format}`)
    expect(result.files.some(file => file.includes('/devtools/') || /\/devtools\.(?:mjs|cjs)$/.test(file))).toBe(false)
+   expect(result.files.some(file => file.includes('/tooling/policy/') || /\/tooling-policy\.(?:mjs|cjs)$/.test(file))).toBe(false)
    expect(result.externals).not.toContain('effect/Schema')
   })
  }

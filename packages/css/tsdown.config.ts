@@ -24,6 +24,7 @@ const toolEntries = {
   "tokens-schema-value": "src/tokens/schema-value.ts",
   transformer: "src/transformer.ts",
   "tooling-manifest": "src/tooling/manifest.ts",
+  "tooling-policy": "src/tooling/policy.ts",
 }
 
 export default defineConfig([

@@ -233,6 +233,27 @@ const consumerTypeSource = `
   import { decodeTokenValue as decodeTokenValueFocused } from "@opsydyn/crumbs-css/tokens/schema/value";
   import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
   import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
+  import { checkDesignSystemPolicy, decodeDesignSystemPolicy, decodeDesignSystemPolicyReport, decodePolicyMeasurements, encodeCanonicalDesignSystemPolicyReport, getBuiltInPolicyPreset } from "@opsydyn/crumbs-css/tooling/policy";
+  import type { DesignSystemManifest, DesignSystemPolicy, DesignSystemPolicyReport, PolicyMeasurement, StyleExplanationMetadata as PolicyStyleExplanationMetadata } from "@opsydyn/crumbs-css/tooling/policy";
+
+  const policyForTypes: DesignSystemPolicy = {
+    format: "crumbs.css.design-system-policy", schemaVersion: 1, policyId: "@acme/policy", version: 1,
+    preset: {name: "migration", version: 1}, severityOverrides: {}, literalValueScopes: [],
+    semanticTokenScopes: [], semanticTokenIds: [], targetProfiles: [], outputBudgets: [], exceptions: [],
+  };
+  const manifestForTypes: DesignSystemManifest = {
+    format: "crumbs.design-system-manifest", schemaVersion: 1,
+    package: {name: "@acme/design-system", version: "1.0.0"},
+    producer: {compiler: {name: "@opsydyn/crumbs-css", version: "1.0.0"}, artifact: {name: "crumbs-native-style-artifact", version: 1}},
+    tokens: [], components: [], modules: [], dependencies: [], capabilities: [], coverage: {roots: [], unresolved: []},
+  };
+  const typedMeasurements: ReadonlyArray<PolicyMeasurement> = decodePolicyMeasurements([]);
+  const typedMetadata: ReadonlyArray<PolicyStyleExplanationMetadata> = [];
+  const decodedPolicyForTypes = decodeDesignSystemPolicy(policyForTypes);
+  const typedReport: DesignSystemPolicyReport = checkDesignSystemPolicy({policy: decodedPolicyForTypes, current: manifestForTypes, styleMetadata: typedMetadata, measurements: typedMeasurements});
+  decodeDesignSystemPolicyReport(typedReport);
+  encodeCanonicalDesignSystemPolicyReport(typedReport);
+  getBuiltInPolicyPreset("migration");
 
   const vars = createThemeContract({
     color: {
@@ -333,6 +354,7 @@ const consumerTypeSource = `
   void focusedValue;
   const diagnostic: NativeStylesDiagnosticCode = NativeStylesDiagnosticCode.UnsupportedSelector;
   void diagnostic;
+  void typedReport;
 `
 
 function writeConsumerTsconfig(
@@ -432,6 +454,13 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const devtools = require("@opsydyn/crumbs-css/devtools");
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
+        const policyTools = require("@opsydyn/crumbs-css/tooling/policy");
+        const policyInput = {format:"crumbs.css.design-system-policy",schemaVersion:1,policyId:"@acme/policy",version:1,preset:{name:"migration",version:1},severityOverrides:{},literalValueScopes:[],semanticTokenScopes:[],semanticTokenIds:[],targetProfiles:[],outputBudgets:[],exceptions:[]};
+        const policyCurrent = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs-native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
+        const policyReport = policyTools.checkDesignSystemPolicy({policy:policyTools.decodeDesignSystemPolicy(policyInput),current:policyCurrent});
+        if (policyReport.format !== "crumbs.css.design-system-policy-report" || policyReport.schemaVersion !== 1) throw new Error("CommonJS policy report contract failed");
+        if (JSON.parse(policyTools.encodeCanonicalDesignSystemPolicyReport(policyReport)).policy.policyId !== "@acme/policy") throw new Error("CommonJS canonical policy report failed");
+        if (Object.keys(policyTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from the policy API");
         require.extensions[".css"] = (module, filename) => {
           const source = require("node:fs").readFileSync(filename, "utf8")
             .replace(/^import (["'][^"']+["']);$/gm, "require($1);")
@@ -484,6 +513,11 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { withNativeStyles } from "@opsydyn/crumbs-css/metro-plugin";
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
         import { explainStyle } from "@opsydyn/crumbs-css/devtools";
+        import { checkDesignSystemPolicy, decodeDesignSystemPolicy, encodeCanonicalDesignSystemPolicyReport } from "@opsydyn/crumbs-css/tooling/policy";
+        const policyInput = {format:"crumbs.css.design-system-policy",schemaVersion:1,policyId:"@acme/policy",version:1,preset:{name:"migration",version:1},severityOverrides:{},literalValueScopes:[],semanticTokenScopes:[],semanticTokenIds:[],targetProfiles:[],outputBudgets:[],exceptions:[]};
+        const policyCurrent = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs-native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
+        const policyReport = checkDesignSystemPolicy({policy:decodeDesignSystemPolicy(policyInput),current:policyCurrent});
+        if (policyReport.format !== "crumbs.css.design-system-policy-report" || JSON.parse(encodeCanonicalDesignSystemPolicyReport(policyReport)).policy.policyId !== "@acme/policy") throw new Error("ESM policy API contract failed");
         import {button} from "./button.css";
         import {contractedButton} from "./packages/ui/button.css";
         import {brand} from "./packages/brand/branded-button.css";
