@@ -28,6 +28,7 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "./tooling/manifest": runtimeExport("tooling-manifest"),
     "./tooling/policy": runtimeExport("tooling-policy"),
     "./tooling/migrations": runtimeExport("tooling-migrations"),
+    "./tooling/dtcg": runtimeExport("tooling-dtcg"),
     "./devtools": runtimeExport("devtools"),
     "./metro-plugin": runtimeExport("metro-plugin"),
     "./dist/transformer": runtimeExport("transformer"),
@@ -64,6 +65,8 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "dist/tooling-policy.cjs": 'require("./policy-leaf.cjs"); exports.policy = true;\n',
     "dist/tooling-migrations.mjs": 'import "node:crypto"; import "typescript"; export const migrate = true;',
     "dist/tooling-migrations.cjs": 'require("node:crypto"); require("typescript"); exports.migrate = true;',
+    "dist/tooling-dtcg.mjs": 'const bundledEffectSchema = true; export const importDtcgTheme = value => bundledEffectSchema && value;',
+    "dist/tooling-dtcg.cjs": 'const bundledEffectSchema = true; exports.importDtcgTheme = value => bundledEffectSchema && value;',
     "dist/policy-leaf.mjs": 'export const leaf = true;\n',
     "dist/policy-leaf.cjs": 'module.exports = true;\n',
     "dist/tooling-leaf.mjs": 'export const leaf = true;\n',
@@ -152,6 +155,10 @@ test("auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and c
       files: ["dist/tooling-migrations.mjs"],
       externalSpecifiers: ["node:crypto", "typescript"],
     })
+  expect(graphs.find((graph) => graph.subpath === "./tooling/dtcg" && graph.format === "esm"))
+    .toMatchObject({classification: "compiler-tooling", files: ["dist/tooling-dtcg.mjs"], externalSpecifiers: []})
+  expect(graphs.find((graph) => graph.subpath === "./tooling/dtcg" && graph.format === "cjs"))
+    .toMatchObject({classification: "compiler-tooling", files: ["dist/tooling-dtcg.cjs"], externalSpecifiers: []})
   expect(graphs.find((graph) => graph.subpath === "./tooling/migrations" && graph.format === "cjs"))
     .toMatchObject({
       classification: "compiler-tooling",
@@ -166,7 +173,7 @@ test("auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and c
     })
   expect(graphs.find((graph) => graph.subpath === "./package.json" && graph.format === "metadata"))
     .toMatchObject({classification: "metadata", files: ["package.json"], externalSpecifiers: []})
-  expect(graphs).toHaveLength(33)
+  expect(graphs).toHaveLength(35)
 })
 
 test("ordinary runtime entrypoints cannot reach compiler tooling targets", async () => {
@@ -176,6 +183,21 @@ test("ordinary runtime entrypoints cannot reach compiler tooling targets", async
 
   await expect(auditPackedRuntimeEntrypoints(packageRoot))
     .rejects.toThrow(/ordinary-runtime.*reaches compiler-tooling/i)
+})
+
+test("no runtime or existing tooling entrypoint can reach the isolated DTCG tooling graph", async () => {
+  const importers = [
+    ["root.mjs", 'import "./tooling-dtcg.mjs"; export {};'],
+    ["style.cjs", 'require("./tooling-dtcg.cjs"); exports.style = true;'],
+    ["theme.mjs", 'import "./tooling-dtcg.mjs"; export {};'],
+    ["theme-core.cjs", 'require("./tooling-dtcg.cjs"); exports.core = true;'],
+    ["tokens.mjs", 'import "./tooling-dtcg.mjs"; export {};'],
+    ["tokens-schema.mjs", 'import "./tooling-dtcg.mjs"; export {};'],
+  ] as const
+  for (const [entry, source] of importers) {
+    const packageRoot = await createFixturePackage({overrides: {[`dist/${entry}`]: source}})
+    await expect(auditPackedRuntimeEntrypoints(packageRoot)).rejects.toThrow(/isolated DTCG tooling/i)
+  }
 })
 
 test("runtime entrypoints cannot reach isolated migration tooling", async () => {
@@ -383,7 +405,7 @@ test("compiler entries allow only build-policy externals and reject Effect", asy
   })
 
   const allowedGraphs = await auditPackedRuntimeEntrypoints(allowedPackage)
-  expect(allowedGraphs).toHaveLength(33)
+  expect(allowedGraphs).toHaveLength(35)
   expect(allowedGraphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.externalSpecifiers)
     .toEqual(["metro", "node:fs", "url"])
   await expect(auditPackedRuntimeEntrypoints(deniedPackage)).rejects.toThrow(/compiler-tooling.*not-in-build-policy/i)

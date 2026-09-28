@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test"
 import { verifyTreeShakingCanary } from "../../../scripts/metro-tree-shaking-contract"
+import { CRUMBS_DTCG_IMPORT_FORMAT } from "../src/tooling/dtcg/model"
 
 const canary = "external-token-theme"
 
@@ -78,4 +79,23 @@ test("verifyTreeShakingCanary rejects source maps as canary inputs", () => {
     ],
     canary,
   )).toThrow(/source map.*not.*javascript bundle/i)
+})
+
+
+test("the DTCG public format marker detects accidental tooling retention in app bundles", () => {
+  const cleanDecoderBundles = [
+    { platform: "ios" as const, path: "ios.jsbundle", javascript: "decodeExternalTokenTheme()" },
+    { platform: "web" as const, path: "web.js", javascript: "decodeExternalTokenTheme()" },
+  ]
+  const positiveControlBundles = [
+    { platform: "ios" as const, path: "positive-ios.jsbundle", javascript: `importDtcgTheme('${CRUMBS_DTCG_IMPORT_FORMAT}')` },
+    { platform: "web" as const, path: "positive-web.js", javascript: `importDtcgTheme('${CRUMBS_DTCG_IMPORT_FORMAT}')` },
+  ]
+  expect(verifyTreeShakingCanary(cleanDecoderBundles, positiveControlBundles, CRUMBS_DTCG_IMPORT_FORMAT))
+    .toEqual({ decoder: ["ios", "web"], positiveControl: ["ios", "web"] })
+  expect(() => verifyTreeShakingCanary(
+    [{ ...cleanDecoderBundles[0]!, javascript: `decodeExternalTokenTheme(); '${CRUMBS_DTCG_IMPORT_FORMAT}'` }, cleanDecoderBundles[1]!],
+    positiveControlBundles,
+    CRUMBS_DTCG_IMPORT_FORMAT,
+  )).toThrow(/decoder.*ios\.jsbundle.*canary/i)
 })

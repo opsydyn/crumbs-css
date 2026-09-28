@@ -40,6 +40,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./tooling/manifest": "compiler-tooling",
   "./tooling/policy": "compiler-tooling",
   "./tooling/migrations": "compiler-tooling",
+  "./tooling/dtcg": "compiler-tooling",
   "./metro-plugin": "compiler-tooling",
   "./dist/transformer": "compiler-tooling",
   "./dist/metro-plugin": "compiler-tooling",
@@ -117,6 +118,7 @@ export async function auditPackedRuntimeEntrypoints(
   const advancedEntryFiles = new Set<string>()
   const compilerEntryFiles = new Set<string>()
   const migrationEntryFiles = new Set<string>()
+  const dtcgEntryFiles = new Set<string>()
   for (const [subpath, classification] of classifications) {
     if (classification !== "advanced-runtime" && classification !== "compiler-tooling") continue
     for (const format of ["import", "require"] as const) {
@@ -127,6 +129,7 @@ export async function auditPackedRuntimeEntrypoints(
           if (classification === "advanced-runtime") advancedEntryFiles.add(absolute)
           else compilerEntryFiles.add(absolute)
           if (subpath === "./tooling/migrations") migrationEntryFiles.add(absolute)
+          if (subpath === "./tooling/dtcg") dtcgEntryFiles.add(absolute)
         }
       }
     }
@@ -170,6 +173,7 @@ export async function auditPackedRuntimeEntrypoints(
         advancedEntryFiles,
         compilerEntryFiles,
         migrationEntryFiles,
+        dtcgEntryFiles,
         files,
         externalSpecifiers,
         dynamicLoaderExceptions,
@@ -197,6 +201,7 @@ async function visit(
   advancedEntryFiles: ReadonlySet<string>,
   compilerEntryFiles: ReadonlySet<string>,
   migrationEntryFiles: ReadonlySet<string>,
+  dtcgEntryFiles: ReadonlySet<string>,
   visited: Set<string>,
   externals: Set<string>,
   dynamicLoaderExceptions: Map<string, PackedDynamicLoaderException>,
@@ -204,6 +209,9 @@ async function visit(
   if (visited.has(file)) return
   if (!isPathWithin(packageRoot, file)) {
     throw new Error(`Local dependency ${file} resolves outside the installed package`)
+  }
+  if (subpath !== "./tooling/dtcg" && dtcgEntryFiles.has(file)) {
+    throw new Error(`${classification} export reaches isolated DTCG tooling target ${toPackageRelative(packageRoot, file)}`)
   }
   if (subpath !== "./tooling/migrations" && migrationEntryFiles.has(file)) {
     throw new Error(`${classification} export reaches isolated compiler-tooling migration target ${toPackageRelative(packageRoot, file)}`)
@@ -295,6 +303,7 @@ async function visit(
         advancedEntryFiles,
         compilerEntryFiles,
         migrationEntryFiles,
+        dtcgEntryFiles,
         visited,
         externals,
         dynamicLoaderExceptions,

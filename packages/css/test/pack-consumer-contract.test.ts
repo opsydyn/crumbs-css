@@ -240,6 +240,16 @@ const consumerTypeSource = `
   import type { DesignSystemManifest, DesignSystemPolicy, DesignSystemPolicyReport, PolicyMeasurement, StyleExplanationMetadata as PolicyStyleExplanationMetadata } from "@opsydyn/crumbs-css/tooling/policy";
   import { decodeSourceMigration, planSourceMigration, SOURCE_MIGRATION_FORMAT } from "@opsydyn/crumbs-css/tooling/migrations";
   import type { SourceMigration, SourceMigrationPlan, SourceMigrationReport } from "@opsydyn/crumbs-css/tooling/migrations";
+  import { CRUMBS_DTCG_FORMAT_PROFILE, CRUMBS_DTCG_IMPORT_FORMAT, CRUMBS_DTCG_IMPORT_VERSION, importDtcgTheme } from "@opsydyn/crumbs-css/tooling/dtcg";
+  import type { CrumbsDtcgDiagnostic, CrumbsDtcgImportRequest, CrumbsDtcgImportResult, DtcgImportSidecar } from "@opsydyn/crumbs-css/tooling/dtcg";
+  declare const dtcgRequestForTypes: CrumbsDtcgImportRequest;
+  const dtcgResultForTypes: CrumbsDtcgImportResult = importDtcgTheme(dtcgRequestForTypes);
+  const dtcgDiagnosticForTypes: CrumbsDtcgDiagnostic | undefined = dtcgResultForTypes.diagnostics[0];
+  const dtcgSidecarForTypes: DtcgImportSidecar | undefined = dtcgResultForTypes.ok ? dtcgResultForTypes.value.sidecar : undefined;
+  const dtcgFormatForTypes: "crumbs.dtcg-theme-import" = CRUMBS_DTCG_IMPORT_FORMAT;
+  const dtcgVersionForTypes: 1 = CRUMBS_DTCG_IMPORT_VERSION;
+  const dtcgProfileForTypes: "2025.10" = CRUMBS_DTCG_FORMAT_PROFILE;
+  void [dtcgDiagnosticForTypes, dtcgSidecarForTypes, dtcgFormatForTypes, dtcgVersionForTypes, dtcgProfileForTypes];
 
   const migrationForTypes: SourceMigration = {
     format: SOURCE_MIGRATION_FORMAT, schemaVersion: 1, id: "@acme/migration", revision: 1, provider: "@acme/design-system",
@@ -437,6 +447,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
     expect(nodeMajor).toBeGreaterThanOrEqual(22)
     const exportResolutions = await verifyPackedExportMap(packageRoot, consumerRoot)
     expect(exportResolutions.map((entry) => entry.subpath)).toEqual(Object.keys(packedPackageJson.exports))
+    expect(exportResolutions.find((entry) => entry.subpath === "./tooling/dtcg")).toEqual({ subpath: "./tooling/dtcg", import: "./dist/tooling-dtcg.mjs", require: "./dist/tooling-dtcg.cjs", types: "./dist/tooling-dtcg.d.mts" })
     expect(exportResolutions.find((entry) => entry.subpath === "./dist/theme")?.import)
       .toBe("./dist/theme.mjs")
     expect(exportResolutions.find((entry) => entry.subpath === "./dist/metro-plugin")?.require)
@@ -474,6 +485,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
         const policyTools = require("@opsydyn/crumbs-css/tooling/policy");
         const migrationTools = require("@opsydyn/crumbs-css/tooling/migrations");
+        const dtcgTools = require("@opsydyn/crumbs-css/tooling/dtcg");
         const consumerTypeScript = require("typescript");
         if (!consumerTypeScript.version.startsWith("6.")) throw new Error("Packed migration tooling must be exercised with the TypeScript 6 consumer");
         const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
@@ -492,6 +504,8 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (policyReport.format !== "crumbs.css.design-system-policy-report" || policyReport.schemaVersion !== 1) throw new Error("CommonJS policy report contract failed");
         if (JSON.parse(policyTools.encodeCanonicalDesignSystemPolicyReport(policyReport)).policy.policyId !== "@acme/policy") throw new Error("CommonJS canonical policy report failed");
         if (Object.keys(policyTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from the policy API");
+        if (typeof dtcgTools.importDtcgTheme !== "function" || dtcgTools.CRUMBS_DTCG_IMPORT_FORMAT !== "crumbs.dtcg-theme-import" || dtcgTools.CRUMBS_DTCG_FORMAT_PROFILE !== "2025.10") throw new Error("CommonJS DTCG tooling API failed");
+        if (Object.keys(dtcgTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from the DTCG API");
         require.extensions[".css"] = (module, filename) => {
           const source = require("node:fs").readFileSync(filename, "utf8")
             .replace(/^import (["'][^"']+["']);$/gm, "require($1);")
@@ -546,10 +560,12 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { explainStyle } from "@opsydyn/crumbs-css/devtools";
         import { checkDesignSystemPolicy, decodeDesignSystemPolicy, encodeCanonicalDesignSystemPolicyReport } from "@opsydyn/crumbs-css/tooling/policy";
         import { decodeSourceMigration, planSourceMigration, SOURCE_MIGRATION_FORMAT } from "@opsydyn/crumbs-css/tooling/migrations";
+        import { CRUMBS_DTCG_FORMAT_PROFILE, CRUMBS_DTCG_IMPORT_FORMAT, importDtcgTheme } from "@opsydyn/crumbs-css/tooling/dtcg";
         import * as consumerTypeScript from "typescript";
         if (!consumerTypeScript.version.startsWith("6.")) throw new Error("Packed migration tooling must be exercised with the TypeScript 6 consumer");
         const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
         if (decodeSourceMigration(migrationMap).format !== SOURCE_MIGRATION_FORMAT || typeof planSourceMigration !== "function") throw new Error("ESM migration tooling API failed");
+        if (typeof importDtcgTheme !== "function" || CRUMBS_DTCG_IMPORT_FORMAT !== "crumbs.dtcg-theme-import" || CRUMBS_DTCG_FORMAT_PROFILE !== "2025.10") throw new Error("ESM DTCG tooling API failed");
         const fromTokenId = "@example/design-system/tokens@1#5:color/6:accent";
         const toTokenId = "@example/design-system/tokens@2#5:color/5:brand";
         const migrationForConsumer = {format:"crumbs.source-migration",schemaVersion:1,id:"example/no-op",revision:1,provider:"@example/design-system",tokens:[{fromId:fromTokenId,toId:toTokenId,fromImport:{moduleSpecifier:"../tokens-v1.css",importedName:"tokens"},toImport:{moduleSpecifier:"../tokens.css",importedName:"tokens"}}],components:[]};
