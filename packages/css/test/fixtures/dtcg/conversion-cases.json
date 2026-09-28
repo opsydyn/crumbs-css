@@ -1,0 +1,38 @@
+{
+  "profile": {
+    "formatVersion": "2025.10",
+    "colorVersion": "2025.10",
+    "resolverVersions": ["2025-10-01", "2025-11-01", "2025.10"]
+  },
+  "accepted": [
+    { "id": "dimension-rem", "path": ["spacing", "font-size"], "domain": { "kind": "length", "allowNegative": false }, "source": "format.tokens.json", "expectedValue": 48 },
+    { "id": "official-color-srgb", "path": ["Hot pink"], "domain": { "kind": "color" }, "source": "color.tokens.json", "expectedValue": "rgb(255, 0, 255)" },
+    { "id": "official-color-srgb-alpha", "path": ["Translucent shadow"], "domain": { "kind": "color" }, "source": "color.tokens.json", "expectedValue": "rgba(0, 0, 0, 0.5)" },
+    { "id": "dimension-px", "path": ["space", "eight"], "domain": { "kind": "length", "allowNegative": false }, "source": "conversions.tokens.json", "expectedValue": 8 },
+    { "id": "dimension-rem-conversion", "path": ["space", "root"], "domain": { "kind": "length", "allowNegative": false }, "source": "conversions.tokens.json", "expectedValue": 20 },
+    { "id": "duration-ms", "path": ["motion", "quick"], "domain": { "kind": "duration" }, "source": "conversions.tokens.json", "expectedValue": 125 },
+    { "id": "duration-s", "path": ["motion", "slow"], "domain": { "kind": "duration" }, "source": "conversions.tokens.json", "expectedValue": 250 },
+    { "id": "opacity-number", "path": ["opacity", "disabled"], "domain": { "kind": "opacity" }, "source": "conversions.tokens.json", "expectedValue": 0.45 },
+    { "id": "enum-font-family", "path": ["font", "family"], "domain": { "kind": "enum", "values": ["System", "Display"] }, "source": "conversions.tokens.json", "expectedValue": "System" },
+    { "id": "enum-stroke-style", "path": ["line", "style"], "domain": { "kind": "enum", "values": ["solid", "dashed"] }, "source": "conversions.tokens.json", "expectedValue": "dashed" }
+  ],
+  "rejected": [
+    { "id": "color-display-p3", "path": ["color", "p3"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "color-alpha-out-of-range", "path": ["color", "alpha"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "dimension-negative", "path": ["space", "negative"], "domain": { "kind": "length", "allowNegative": false }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "dimension-unsupported-unit", "path": ["space", "unsupportedUnit"], "domain": { "kind": "length", "allowNegative": false }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "duration-negative", "path": ["motion", "negative"], "domain": { "kind": "duration" }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "unsupported-font-weight", "path": ["unsupported", "fontWeight"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "unsupported-cubic-bezier", "path": ["unsupported", "cubicBezier"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "unsupported-border", "path": ["unsupported", "border"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "unsupported-transition", "path": ["unsupported", "transition"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "unsupported-shadow", "path": ["unsupported", "shadow"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "unsupported-gradient", "path": ["unsupported", "gradient"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "unsupported-typography-composite", "path": ["unsupported", "typography"], "domain": { "kind": "color" }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "number-outside-opacity", "path": ["space", "number"], "domain": { "kind": "length", "allowNegative": false }, "source": "rejected.tokens.json", "diagnosticCode": "token.type-unsupported" },
+    { "id": "opacity-out-of-range", "path": ["opacity", "outOfRange"], "domain": { "kind": "opacity" }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "font-family-array", "path": ["font", "familyArray"], "domain": { "kind": "enum", "values": ["System", "Display"] }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "stroke-style-object", "path": ["line", "styleObject"], "domain": { "kind": "enum", "values": ["solid", "dashed"] }, "source": "rejected.tokens.json", "diagnosticCode": "token.domain-invalid" },
+    { "id": "rem-without-base", "path": ["space", "root"], "domain": { "kind": "length", "allowNegative": false }, "source": "conversions.tokens.json", "diagnosticCode": "conversion.option-invalid", "scenario": "omit-rem-base" }
+  ]
+}

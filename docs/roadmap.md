@@ -37,7 +37,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
 | M7 | Typed component slots, states, and extension contracts | M5, M6 | Not started |
 | M8 | Distributed package/artifact compatibility | M2, M3, M7 | Not started |
-| M9 | Manifests, change impact, policy, migrations, and DTCG | M7, M8 | In progress; M9.1–M9.4 complete |
+| M9 | Manifests, change impact, policy, migrations, and DTCG | M7, M8 | In progress; M9.1–M9.6 complete; M9.7 next |
 | M10 | Qualify a reference design system and enterprise journeys | M8, M9 | Not started |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Deferred |
 
@@ -295,7 +295,7 @@ token/recipe-slot codemods. Keep Android/device acceptance parked.
 - [x] M9.3: Add development-only style explanations for resolved values, matching conditions, override winners, dependencies, and recomputation causes. Exclude detailed provenance from production output unless deliberately requested. Qualified with the [receipt](evidence/2026-09-27-m9-3-style-explanations/qualification.json) and [assessment](assessments/2026-09-27-m9-3-style-explanations.md); Android/device acceptance remains not-run and parked.
 - [x] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports. Qualified with the [policy report](evidence/2026-09-28-m9-4-design-system-policies/policy-report-v1.json), [receipt](evidence/2026-09-28-m9-4-design-system-policies/qualification.json), and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md); Android/device acceptance remains not-run and parked.
 - [x] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries. See the [qualification receipt](evidence/2026-09-28-m9-5-safe-migrations/qualification.json) and [assessment](assessments/2026-09-28-m9-5-safe-migrations.md).
-- [ ] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context.
+- [x] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context. See the [qualification receipt](evidence/2026-09-28-m9-6-dtcg/qualification.json) and [assessment](assessments/2026-09-28-m9-6-dtcg-adapter.md); 10k and 50k generated workloads remain bounded by the 100,000-node guards.
 - [ ] M9.7: Support ownership metadata in local reports. Optional editor/design-tool adapters consume manifests and schemas; neither hosted accounts nor external telemetry is required.
 
 **Exit:** release-impact fixtures identify expected consumers; reports distinguish proven breaks from potential visual impact; migrations preserve valid usage; DTCG support/limitations are explicit; tooling stays outside ordinary runtime bundles.
@@ -391,6 +391,36 @@ See the [M9.5 assessment](assessments/2026-09-28-m9-5-safe-migrations.md).
 Next recommended roadmap item: **M9.6** — implement a DTCG 2025.10
 format/resolver adapter with a documented native subset. Keep Android/device
 acceptance parked.
+
+### 2026-09-28 — M9.6 DTCG import adapter
+
+- [x] Added the isolated `@opsydyn/crumbs-css/tooling/dtcg` API for an explicit
+  DTCG document snapshot and manifest contract identity. Imports preserve
+  token/source/group provenance, enforce Resolver context precedence, convert
+  the documented native subset, and return stable diagnostics without partial
+  payloads. Effect 4 remains bundled inside the tooling boundary; application
+  consumers do not add an Effect dependency or runner.
+- [x] Qualified the pinned Format/Color/Resolver fixture profile with 10
+  accepted and 17 rejected conversion cases, exact document origins and JSON
+  pointers, default modifier selection, metadata retention, fixture digests,
+  and repeatable canonical evidence. See the [receipt](evidence/2026-09-28-m9-6-dtcg/qualification.json)
+  and [assessment](assessments/2026-09-28-m9-6-dtcg-adapter.md).
+- [x] Added the DTCG import guide, package-entrypoint and compatibility
+  documentation, a separate 1k/10k/50k source benchmark, and a
+  `dtcg:qualify` maintainer command. The 1k workload imported; 10k and 50k
+  workloads were rejected by the 100,000-node budgets. Those times measure
+  time-to-rejection and do not claim large-theme throughput.
+- [x] `bun run check`, `bun run docs:build`, fixture qualification, the packed
+  M8.3 distribution gate, focused DTCG/packed-consumer/runtime-graph tests,
+  and `git diff --check` passed. The distribution run was dirty-source interim
+  evidence; no release or publication acceptance is claimed.
+- [x] Android/device, visual, native runtime-performance, package publication,
+  and release acceptance remain not-run; Android stays parked.
+
+Next recommended roadmap item: **M9.7** — support ownership metadata in local
+reports and evaluate optional editor/design-tool adapters. The DTCG node-budget
+capacity remains a separate follow-up requiring workload-derived memory and
+adversarial-input limits.
 
 ## M10 — Qualify the reference design system and North Star journeys
 

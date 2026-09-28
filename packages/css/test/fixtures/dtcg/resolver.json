@@ -1,0 +1,28 @@
+{
+  "$schema": "https://www.designtokens.org/schemas/2025.10/resolver.json",
+  "version": "2025.10",
+  "name": "Crumbs M9.6 qualification resolver",
+  "sets": {
+    "foundation": {
+      "sources": [
+        { "$ref": "format.tokens.json" },
+        { "$ref": "color.tokens.json" },
+        { "$ref": "conversions.tokens.json" },
+        { "$ref": "rejected.tokens.json" }
+      ]
+    }
+  },
+  "modifiers": {
+    "theme": {
+      "contexts": {
+        "light": [{ "$ref": "theme-light.tokens.json" }],
+        "dark": [{ "$ref": "theme-dark.tokens.json" }]
+      },
+      "default": "light"
+    }
+  },
+  "resolutionOrder": [
+    { "$ref": "#/sets/foundation" },
+    { "$ref": "#/modifiers/theme" }
+  ]
+}

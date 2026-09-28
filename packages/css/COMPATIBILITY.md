@@ -112,6 +112,25 @@ supported SDK range, claim ESM/CommonJS/Metro graph completeness, or publish
 packages. Effect 4 remains an implementation dependency; application consumers
 do not add an Effect peer dependency or use an Effect runner.
 
+## DTCG import tooling (M9.6)
+
+`@opsydyn/crumbs-css/tooling/dtcg` is an opt-in, synchronous source/tooling API
+for an explicitly supplied DTCG Format/Color/Resolver 2025.10 profile. It
+requires an exact manifest contract identity and an in-memory absolute-URI
+document map. Successful imports return the version-1 Crumbs theme payload
+with token provenance; failures return stable diagnostics and no partial
+payload. The supported conversions and resolver profile are documented in the
+[DTCG import guide](https://opsydyn.github.io/crumbs-css/how-to/import-dtcg-tokens/).
+
+The adapter uses Effect 4 Schema internally, bundled inside the tooling
+artifact. Effect is not a userland dependency or an ordinary runtime entry.
+Import qualification covers checked-in Format/Color/Resolver/conversion
+fixtures. The importer has 100,000-node input and traversal guards; the host
+benchmark completed 1,000 generated tokens and rejected 10,000 and 50,000
+tokens with `resource.limit-exceeded`. These are tooling-host observations,
+not device/runtime measurements. Package publication, visual acceptance,
+Android, and physical-device acceptance remain unqualified; Android is parked.
+
 ## Release, compatibility, and deprecation policy (M8.5)
 
 The current package version is `0.1.1-alpha.1`, a pre-1.0 alpha. Crumbs makes
@@ -145,6 +164,7 @@ the npm dist-tag (`alpha` for the current line); stable versions use `latest`.
 | Required package-owned consumer fixtures | Themed styles, variant maps, recipes, web object emission, project-relative filenames and local theme imports; emitted native values are evaluated in the transformer tests. | Missing fixture projects/files or directory impostors fail with the required fixture path. These checks never depend on an optional application checkout. |
 | Host Bun benchmarks | Six runtime scenarios and first/warm transforms for two required fixtures; five retained host runs. | Explicit batch-mean quantiles/raw samples; seven retained host smoke ceilings, three new unbudgeted scenarios. Pre-resolved theme selection is not a recipe cache hit; React memo reuse/lifecycle and device tails remain unmeasured. See [measurement repair](../../docs/assessments/2026-09-14-benchmark-workloads.md). |
 | Production Expo bundle qualification | Workspace and isolated packed consumers retain iOS, Android and web source maps and reject compiler code and Effect sources in ordinary runtime bundles. | This is JavaScript bundle/type qualification, separate from native startup and device rendering. See the M0.7 retained evidence in the repository roadmap. |
+| DTCG source fixture qualification | M9.6 exercises the public generated DTCG/manifest/token ESM entry artifacts against pinned checked-in documents, selected defaults, and accepted/rejected conversions. | 1,000 generated tokens imported on the recorded host; 10,000 and 50,000 stopped at the 100,000-node guard. Host timings are not runtime/device budgets; publication, visuals, and Android remain unqualified. |
 | iOS native functional acceptance | Retained playground/Maestro reports cover the documented simulator journeys. | Not rerun by package tests or host benchmarks; no physical-device or release-performance claim. |
 | Android native acceptance | Not run; user deferred it until last. | Android production JavaScript exports do not qualify native Android behavior. |
 | Expo list lifecycle/memo workloads | Five-cycle static/themed mount/rerender/local-theme-switch/unmount probes at 25/100/1,000 rows; actual web receipts. | Instrumented effect/reference checks and optional React Profiler work; not scroll, native rendering, frame, leak or release-budget qualification. [Protocol](../../docs/assessments/2026-09-14-expo-list-workloads.md). |
@@ -155,11 +175,14 @@ Compiler fixtures live under `packages/css/fixtures/consumer`, with a shared req
 
 ## Internal Effect dependency
 
-The package pins `effect@4.0.0-rc.115` as its own implementation dependency; consumers do not add an Effect peer dependency or use services/runners. This is an ESM prerelease. Effect Schema powers the explicit `tokens/schema` and focused `tokens/schema/value` decoder entries; the ordinary runtime entries remain isolated from it. The focused decoder subpath was added after the packed Metro probe showed the combined schema artifact retained the external-theme codec even when only the value decoder was imported. M8.3 qualifies packed graphs and iOS/web bundles for the recorded versions; no device or publishing result is implied. [Initial contract policies](../../docs/assessments/2026-09-14-internal-payload-contracts.md) distinguish shape validation from native property/token-domain admission and published artifact compatibility. [Exact selection and limits](../../docs/assessments/2026-09-14-effect4-api-selection.md) distinguish installed dependency size, current Node interoperability, and the [emitted boundary audit](../../docs/assessments/2026-09-14-effect-boundary-audit.md) and remaining decoder/device measurements.
+The package pins `effect@4.0.0-rc.115` as its own implementation dependency; consumers do not add an Effect peer dependency or use services/runners. This is an ESM prerelease. Effect Schema powers the explicit `tokens/schema`, focused `tokens/schema/value`, and isolated `tooling/dtcg` entries; the ordinary runtime entries remain isolated from it. The focused decoder subpath was added after the packed Metro probe showed the combined schema artifact retained the external-theme codec even when only the value decoder was imported. M8.3 qualifies packed graphs and iOS/web bundles for the recorded versions; no device or publishing result is implied. [Initial contract policies](../../docs/assessments/2026-09-14-internal-payload-contracts.md) distinguish shape validation from native property/token-domain admission and published artifact compatibility. [Exact selection and limits](../../docs/assessments/2026-09-14-effect4-api-selection.md) distinguish installed dependency size, current Node interoperability, and the [emitted boundary audit](../../docs/assessments/2026-09-14-effect-boundary-audit.md) and remaining decoder/device measurements.
 
 ## Runtime dependency boundary
 
 Import common application runtime APIs from `@opsydyn/crumbs-css/theme/core`. Its ESM and CommonJS graphs contain the provider, hooks and token-resolution helpers and depend externally only on React. Use `@opsydyn/crumbs-css/theme` (or its existing `dist/theme` alias) for token scopes, dependency plans and recipe resolver controls. Use `@opsydyn/crumbs-css/tokens` for domain-aware contracts, themes and atomic patches; its ordinary graph is runtime-safe and contains no Node built-ins, authoring entrypoints, Effect, esbuild, vanilla-extract integration or CSS conversion code. Use `/tokens/schema/value` when only domain-aware token-value decoding is needed; use `/tokens/schema` for external theme payload codecs and `/tokens/optic` for Optic updates. These are explicit advanced Effect boundaries. Shared tags are pure data. One declaration graph preserves nominal token types across authoring and runtime entries.
+
+`@opsydyn/crumbs-css/tooling/dtcg` is a compiler/build-time import boundary and
+must not be added to application runtime graphs.
 
 The package root, `/style`, Metro plugin and transformer are build-time entrypoints and can require Node/compiler dependencies. Runtime isolation does not remove those installed package dependencies or make authoring modules safe to import into application bundles. Regenerate compiled styles and use the theme subpath in runtime code. Production Expo checks inspect retained iOS, Android and web source maps; native/device performance remains separate qualification.
 

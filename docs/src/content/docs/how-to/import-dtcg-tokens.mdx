@@ -1,0 +1,174 @@
+---
+title: Import DTCG tokens
+description: Import an explicitly selected Design Tokens Community Group token set into a Crumbs theme payload.
+---
+
+Crumbs provides an opt-in, synchronous adapter for a documented subset of the
+DTCG Format, Color, and Resolver specifications. It produces the existing
+version-1 Crumbs theme payload plus a provenance sidecar. It is a design-system
+tooling API, not an application runtime styling API.
+
+The pinned inputs correspond to the [Format Module 2025.10](https://www.designtokens.org/TR/2025.10/format/),
+[Color Module 2025.10](https://www.designtokens.org/TR/2025.10/color/), and
+[Resolver final report](https://www.w3.org/community/reports/design-tokens/CG-FINAL-resolver-20251028/)
+with its [published Resolver schema](https://www.designtokens.org/schemas/2025.10/resolver.json).
+
+## Import with the pure API
+
+Build or load the manifest for the token contract you intend to fill. The
+identity passed to the importer must match exactly one token-contract root in
+that manifest. Give the resolver a stable absolute URI and provide every
+referenced token document in the in-memory `documents` map:
+
+```ts
+import { importDtcgTheme, type DtcgJsonObject } from "@opsydyn/crumbs-css/tooling/dtcg"
+import { assembleManifest } from "@opsydyn/crumbs-css/tooling/manifest"
+import { createTokenContract, token } from "@opsydyn/crumbs-css/tokens"
+
+const contractIdentity = {
+  owner: "@acme/design-system",
+  name: "foundation",
+  version: 1,
+} as const
+
+const contract = createTokenContract({
+  color: { brand: token.color() },
+  space: { small: token.length() },
+  motion: { quick: token.duration() },
+}, contractIdentity)
+
+const manifest = assembleManifest({
+  package: { name: contractIdentity.owner, version: "1.0.0" },
+  producer: {
+    compiler: { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" },
+    artifact: { name: "crumbs.native-style-artifact", version: 1 },
+  },
+  tokenContracts: [{ contract, origin: { path: "src/tokens.css.ts", exportPath: "tokens" } }],
+})
+
+const resolverUri = "https://design-system.example/tokens/resolver.json"
+const tokenDocumentUri = new URL("foundation.tokens.json", resolverUri).href
+
+const resolver: DtcgJsonObject = {
+  version: "2025.10",
+  sets: { foundation: { sources: [{ $ref: "foundation.tokens.json" }] } },
+  modifiers: {
+    theme: {
+      contexts: { light: [], dark: [] },
+      default: "light",
+    },
+  },
+  resolutionOrder: [{ $ref: "#/sets/foundation" }, { $ref: "#/modifiers/theme" }],
+}
+
+const documents: Readonly<Record<string, DtcgJsonObject>> = {
+  [tokenDocumentUri]: {
+    color: {
+      brand: {
+        $type: "color",
+        $value: { colorSpace: "srgb", components: [0.15, 0.4, 0.8], alpha: 1 },
+      },
+    },
+    space: { small: { $type: "dimension", $value: { value: 8, unit: "px" } } },
+    motion: { quick: { $type: "duration", $value: { value: 125, unit: "ms" } } },
+  },
+}
+
+const imported = importDtcgTheme({
+  resolver,
+  resolverUri,
+  documents,
+  manifest,
+  contractIdentity,
+  modifiers: { theme: "dark" },
+  remBasePx: 16,
+})
+
+if (!imported.ok) {
+  throw new Error(imported.diagnostics.map(diagnostic => `${diagnostic.code}: ${diagnostic.message}`).join("\n"))
+}
+
+const { payload, sidecar } = imported.value
+```
+
+`importDtcgTheme` reads no files and makes no network requests. Resolver
+references are resolved only against the supplied absolute-URI map and the
+resolver document itself. The caller controls which documents and manifest
+contract enter the operation.
+
+The returned `payload` can be passed to the existing external-theme ingress.
+The `sidecar` records the selected Resolver version and modifiers, rem base,
+token source values, origins, descriptions, deprecation data, extensions, and
+group metadata. Keep it with the payload when your build or review flow needs
+to trace imported values back to their DTCG documents.
+
+## Resolver selection and manifest matching
+
+The manifest is the target contract. Crumbs does not infer token identity or
+path mappings from DTCG names. Each definition path must match the manifest's
+path segments exactly, including case. A DTCG alias at a Crumbs alias path must
+resolve to the same target path declared by the manifest.
+
+DTCG token type is read from the token's direct `$type`, the resolved alias
+target, or the nearest parent group type, in that order. Crumbs does not infer
+token types from a value's shape.
+
+Resolver sources and `resolutionOrder` retain their declared order. If a
+modifier is omitted from `modifiers`, its valid declared default is selected.
+An explicit modifier selection takes precedence over that default. A missing
+selection without a default, an unknown context, or a malformed declared
+default fails with a stable diagnostic. The selected values are copied into
+`sidecar.modifiers`.
+
+Resolver documents use an explicitly selected profile. Crumbs accepts the
+Resolver version literals `2025-10-01`, `2025-11-01`, and `2025.10`. The
+published 2025.10 Resolver report and schema do not use one consistent version
+literal, so the adapter supports both report date forms and the schema
+profile's dotted form. The Format and Color profile is pinned to 2025.10.
+
+## Supported conversion matrix
+
+| DTCG type | Crumbs domain | Conversion |
+| --- | --- | --- |
+| `color` | `color` | Normalized sRGB components in `[0, 1]`; optional alpha in `[0, 1]`; optional six-digit CSS hex is retained as provenance, not used as the converted value. |
+| `dimension` | `length` | `px` is preserved as a number. `rem` requires an explicit positive finite `remBasePx` and is multiplied by that base. Negative output is accepted only when the manifest length domain allows it. |
+| `duration` | `duration` | `ms` is preserved; `s` is converted to milliseconds. The result must be finite and non-negative. |
+| `number` | `opacity` | Finite values in `[0, 1]` map to opacity. Generic numbers do not map to other Crumbs domains. |
+| `fontFamily` | string enum | One exact string value must be in the manifest enum. Arrays are rejected. |
+| `strokeStyle` | string enum | One exact string value must be in the manifest enum. Object forms and unknown members are rejected. |
+
+The adapter rejects unsupported or unmappable values rather than dropping
+them. This includes `fontWeight`, `cubicBezier`, `border`, `transition`,
+`shadow`, `gradient`, and `typography`, plus non-sRGB colors and malformed
+values. The supported subset is an interoperability boundary, not the full
+DTCG type system.
+
+## Diagnostics and limits
+
+Failures return `{ ok: false, diagnostics }` with stable codes such as
+`reference.missing`, `format.structure-invalid`, `token.alias-cycle`,
+`contract.definition-missing`, `contract.alias-mismatch`,
+`token.type-unsupported`, `token.domain-invalid`, and
+`conversion.option-invalid`. When a token or reference is known, diagnostics
+include its source document URI and JSON pointer, DTCG path, Crumbs token ID,
+and reference chain where applicable. A failed import has no partial payload.
+
+The current importer caps an input snapshot at 100,000 JSON nodes and Format
+traversal at 100,000 nodes. This is a node budget, not a guaranteed token
+count. The checked-in host benchmark imported its 1,000-token workload; its
+generated 10,000- and 50,000-token manifest/document workloads were rejected
+with `resource.limit-exceeded`. Those timings are time-to-rejection, not
+successful large-theme import performance. Increasing these budgets needs
+separate memory and adversarial-input qualification.
+
+The adapter is a synchronous tooling boundary. Effect 4 Schema is an internal
+implementation detail bundled by the tooling artifact; consumers do not add
+Effect as a userland dependency, import an Effect runner, or pay this boundary
+from ordinary runtime entrypoints. Source/Node timing does not measure React
+Native rendering, device memory, startup, frame time, or Android/iOS behavior.
+Android/device acceptance remains parked.
+
+Repository maintainers can regenerate the deterministic fixture receipt with
+`bun run dtcg:qualify`. Host import timings are reported separately with
+`bun run bench:dtcg-import` from `packages/css`; timings never enter the
+deterministic receipt.

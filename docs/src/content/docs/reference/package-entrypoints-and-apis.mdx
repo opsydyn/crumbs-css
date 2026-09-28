@@ -430,6 +430,21 @@ input; primitives are the simplest choice. The hook is intended for focused
 token or derived-style reads when a component should not observe unrelated
 theme changes.
 
+### `@opsydyn/crumbs-css/tooling/dtcg`
+
+Use this synchronous, opt-in tooling entrypoint to import an explicitly
+selected DTCG Format/Resolver snapshot into a manifest-backed Crumbs theme
+payload. It accepts an in-memory absolute-URI document map, a selected
+manifest contract identity, optional modifier selections, and an explicit
+`remBasePx` when the selected sources contain `rem` dimensions. It returns the
+version-1 theme payload with a provenance sidecar or stable diagnostics; it
+does not read files or fetch URLs.
+
+The supported DTCG profile and native conversion matrix are deliberately
+narrow. Effect 4 is bundled inside this tooling boundary; consumers do not add
+an Effect dependency or use an Effect runner. The adapter is not re-exported
+from ordinary runtime entrypoints. See the [DTCG import guide](../how-to/import-dtcg-tokens/).
+
 ### `@opsydyn/crumbs-css/metro-plugin`
 
 Use this entrypoint in `metro.config.js` for:

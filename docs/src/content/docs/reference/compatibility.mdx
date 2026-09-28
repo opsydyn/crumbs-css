@@ -44,6 +44,22 @@ that only need token-value decoding can use the focused
 `@opsydyn/crumbs-css/tokens/schema` API remains available for external theme
 payloads.
 
+## DTCG import tooling (M9.6)
+
+`@opsydyn/crumbs-css/tooling/dtcg` provides a synchronous, opt-in import API for
+the documented 2025.10 Format/Color/Resolver profile. It accepts only explicit
+in-memory documents and one manifest contract identity, and returns a v1 theme
+payload with provenance or stable diagnostics. Effect 4 is bundled inside this
+tooling artifact; applications do not need an Effect import or runner. See the
+[DTCG conversion matrix and workflow](../how-to/import-dtcg-tokens/).
+
+M9.6 qualification covers checked-in source fixtures and generated host
+workloads. A 1,000-token workload completed on the recorded Bun host; 10,000
+and 50,000-token workloads stopped at the 100,000 JSON-node resource guard.
+Those are tooling-side observations, not runtime or device performance
+measurements. Package publication, visual acceptance, Android and physical
+device acceptance remain unqualified; Android remains parked.
+
 ## Release lifecycle and deprecations
 
 The current package version, `0.1.1-alpha.1`, is pre-1.0 alpha. Breaking

@@ -1,0 +1,386 @@
+{
+  "boundaries": [
+    "Source/tooling import only; runtime and device performance are unmeasured.",
+    "Android/device acceptance is not run and remains parked.",
+    "Package publication and consumer release acceptance are not run.",
+    "Visual design-system acceptance is not run."
+  ],
+  "coverage": {
+    "acceptedConversions": [
+      {
+        "id": "dimension-rem",
+        "jsonPointer": "/spacing/font-size",
+        "path": [
+          "spacing",
+          "font-size"
+        ],
+        "source": "format.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#7:spacing/9:font-size",
+        "value": 48
+      },
+      {
+        "id": "official-color-srgb",
+        "jsonPointer": "/Hot pink",
+        "path": [
+          "Hot pink"
+        ],
+        "source": "color.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#8:Hot pink",
+        "value": "rgb(255, 0, 255)"
+      },
+      {
+        "id": "official-color-srgb-alpha",
+        "jsonPointer": "/Translucent shadow",
+        "path": [
+          "Translucent shadow"
+        ],
+        "source": "color.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#18:Translucent shadow",
+        "value": "rgba(0, 0, 0, 0.5)"
+      },
+      {
+        "id": "dimension-px",
+        "jsonPointer": "/space/eight",
+        "path": [
+          "space",
+          "eight"
+        ],
+        "source": "conversions.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#5:space/5:eight",
+        "value": 8
+      },
+      {
+        "id": "dimension-rem-conversion",
+        "jsonPointer": "/space/root",
+        "path": [
+          "space",
+          "root"
+        ],
+        "source": "conversions.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#5:space/4:root",
+        "value": 20
+      },
+      {
+        "id": "duration-ms",
+        "jsonPointer": "/motion/quick",
+        "path": [
+          "motion",
+          "quick"
+        ],
+        "source": "conversions.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#6:motion/5:quick",
+        "value": 125
+      },
+      {
+        "id": "duration-s",
+        "jsonPointer": "/motion/slow",
+        "path": [
+          "motion",
+          "slow"
+        ],
+        "source": "conversions.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#6:motion/4:slow",
+        "value": 250
+      },
+      {
+        "id": "opacity-number",
+        "jsonPointer": "/opacity/disabled",
+        "path": [
+          "opacity",
+          "disabled"
+        ],
+        "source": "conversions.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#7:opacity/8:disabled",
+        "value": 0.45
+      },
+      {
+        "id": "enum-font-family",
+        "jsonPointer": "/font/family",
+        "path": [
+          "font",
+          "family"
+        ],
+        "source": "conversions.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#4:font/6:family",
+        "value": "System"
+      },
+      {
+        "id": "enum-stroke-style",
+        "jsonPointer": "/line/style",
+        "path": [
+          "line",
+          "style"
+        ],
+        "source": "conversions.tokens.json",
+        "tokenId": "@example/crumbs-qualification/accepted@1#4:line/5:style",
+        "value": "dashed"
+      }
+    ],
+    "acceptedCount": 10,
+    "defaultModifier": "light",
+    "provenance": {
+      "groupMetadata": [
+        {
+          "metadata": {
+            "description": "Root-level inherited dimension type for the qualification fixture.",
+            "extensions": {
+              "com.example": {
+                "layer": "foundation"
+              }
+            }
+          },
+          "path": []
+        },
+        {
+          "metadata": {
+            "description": "Source-tooling spacing conversion cases.",
+            "extensions": {
+              "com.example": {
+                "group": "spacing"
+              }
+            }
+          },
+          "path": [
+            "space"
+          ]
+        }
+      ],
+      "id": "dimension-px",
+      "jsonPointer": "/space/eight",
+      "metadata": {
+        "deprecated": true,
+        "deprecationMessage": "Prefer the root-scaled token where appropriate.",
+        "description": "Eight-pixel baseline spacing token.",
+        "extensions": {
+          "com.example": {
+            "category": "spacing"
+          }
+        }
+      },
+      "source": "conversions.tokens.json"
+    },
+    "rejectedConversions": [
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "color-alpha-out-of-range",
+        "path": [
+          "color",
+          "alpha"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "color-display-p3",
+        "path": [
+          "color",
+          "p3"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "dimension-negative",
+        "path": [
+          "space",
+          "negative"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "dimension-unsupported-unit",
+        "path": [
+          "space",
+          "unsupportedUnit"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "duration-negative",
+        "path": [
+          "motion",
+          "negative"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "font-family-array",
+        "path": [
+          "font",
+          "familyArray"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "number-outside-opacity",
+        "path": [
+          "space",
+          "number"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "opacity-out-of-range",
+        "path": [
+          "opacity",
+          "outOfRange"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "conversion.option-invalid",
+        "id": "rem-without-base",
+        "path": [
+          "space",
+          "root"
+        ],
+        "source": "conversions.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.domain-invalid",
+        "id": "stroke-style-object",
+        "path": [
+          "line",
+          "styleObject"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "unsupported-border",
+        "path": [
+          "unsupported",
+          "border"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "unsupported-cubic-bezier",
+        "path": [
+          "unsupported",
+          "cubicBezier"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "unsupported-font-weight",
+        "path": [
+          "unsupported",
+          "fontWeight"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "unsupported-gradient",
+        "path": [
+          "unsupported",
+          "gradient"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "unsupported-shadow",
+        "path": [
+          "unsupported",
+          "shadow"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "unsupported-transition",
+        "path": [
+          "unsupported",
+          "transition"
+        ],
+        "source": "rejected.tokens.json"
+      },
+      {
+        "diagnosticCode": "token.type-unsupported",
+        "id": "unsupported-typography-composite",
+        "path": [
+          "unsupported",
+          "typography"
+        ],
+        "source": "rejected.tokens.json"
+      }
+    ],
+    "rejectedCount": 17
+  },
+  "fixtures": [
+    {
+      "bytes": 418,
+      "path": "packages/css/test/fixtures/dtcg/color.tokens.json",
+      "sha256": "aa557f7ff9b265b84e82ead110bab09ff9597a2556cd3bcf0ef6b297ff018131"
+    },
+    {
+      "bytes": 5158,
+      "path": "packages/css/test/fixtures/dtcg/conversion-cases.json",
+      "sha256": "866fdce15b78990adb8a9484498405a85575d73a4c57a008758ec75aac117517"
+    },
+    {
+      "bytes": 1001,
+      "path": "packages/css/test/fixtures/dtcg/conversions.tokens.json",
+      "sha256": "29ab2d4798d000ec9fd05d02f3937f633057753f15e6bffa9a589eeadd2442df"
+    },
+    {
+      "bytes": 461,
+      "path": "packages/css/test/fixtures/dtcg/format.tokens.json",
+      "sha256": "6012d8dad7329d9ff48312c18c54844a914cc0d799849c3ce6d5e235b03402b1"
+    },
+    {
+      "bytes": 1338,
+      "path": "packages/css/test/fixtures/dtcg/rejected.tokens.json",
+      "sha256": "2c643c7137a2974c3f3dcb9482057130c42831e9e592ab3d8e6c1b2295e5ffda"
+    },
+    {
+      "bytes": 704,
+      "path": "packages/css/test/fixtures/dtcg/resolver.json",
+      "sha256": "6c25d143b0f76a36d705cde0c029bc762171793f52c70832dce9756f6e51c67e"
+    },
+    {
+      "bytes": 3,
+      "path": "packages/css/test/fixtures/dtcg/theme-dark.tokens.json",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    },
+    {
+      "bytes": 3,
+      "path": "packages/css/test/fixtures/dtcg/theme-light.tokens.json",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356"
+    }
+  ],
+  "format": "crumbs.dtcg-import-qualification",
+  "gates": [
+    "public-api-import",
+    "accepted-conversions",
+    "rejected-conversions",
+    "source-provenance-and-metadata",
+    "missing-rem-base",
+    "repeatable-receipt",
+    "fixture-digests"
+  ],
+  "profile": {
+    "colorVersion": "2025.10",
+    "format": "2025.10",
+    "formatVersion": "2025.10",
+    "resolverFixtureVersion": "2025.10",
+    "resolverVersionNote": "The Resolver final report and published schema use inconsistent date literals; Crumbs supports both report dates and the schema profile literal.",
+    "resolverVersions": [
+      "2025-10-01",
+      "2025-11-01",
+      "2025.10"
+    ]
+  },
+  "roadmapItem": "M9.6",
+  "schemaVersion": 1,
+  "status": "qualified-source-tooling"
+}

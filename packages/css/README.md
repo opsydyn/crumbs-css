@@ -319,6 +319,24 @@ for the v1 map format, recognized syntax, optional TypeScript peer, and
 qualification limits. Repository maintainers can run `bun run migrations:qualify`
 to regenerate the checked-in fixture evidence.
 
+## Import DTCG tokens
+
+The opt-in `@opsydyn/crumbs-css/tooling/dtcg` API imports an explicitly supplied
+DTCG Format/Resolver snapshot into the version-1 Crumbs theme payload. It
+requires the target manifest and contract identity, uses only the in-memory
+absolute-URI document map you provide, and returns stable source diagnostics
+plus a provenance sidecar. Its sRGB, dimension, duration, opacity, font-family,
+and stroke-style conversions are documented in the [DTCG import guide](https://opsydyn.github.io/crumbs-css/how-to/import-dtcg-tokens/).
+
+The adapter is synchronous and tooling-only; Effect 4 is an internal bundled
+implementation detail and is not a userland import requirement. Its 100,000
+JSON-node input/traversal guards are not a token-count promise. On the retained
+host run, 1,000 generated tokens imported successfully while 10,000 and 50,000
+were rejected by the guard. Device performance and Android acceptance remain
+unmeasured/parked. Regenerate the deterministic fixture receipt with
+`bun run dtcg:qualify` and run host timings from `packages/css` with
+`bun run bench:dtcg-import`.
+
 ## Minimal recipe example
 
 ```ts
