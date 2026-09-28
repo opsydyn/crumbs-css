@@ -44,20 +44,36 @@ of the deterministic receipt.
 
 | Tokens | DTCG document bytes | Samples (warmup) | Outcome | Median | Range |
 | ---: | ---: | ---: | --- | ---: | ---: |
-| 1,000 | 69,914 | 5 (1) | Complete; 1,000 payload values | 12.353 ms | 11.258–12.853 ms |
-| 10,000 | 699,068 | 3 (1) | `resource.limit-exceeded` | 7.054 ms | 6.994–7.289 ms |
-| 50,000 | 3,495,324 | 1 (0) | `resource.limit-exceeded` | 7.771 ms | 7.771 ms |
+| 1,000 | 69,914 | 5 (1) | Complete; 1,000 payload values | 13.982 ms | 11.801–14.382 ms |
+| 10,000 | 699,068 | 3 (1) | `resource.limit-exceeded` | 7.552 ms | 7.242–8.922 ms |
+| 50,000 | 3,495,324 | 1 (0) | `resource.limit-exceeded` | 6.945 ms | 6.945 ms |
 
 The importer has a 100,000-node request snapshot budget and a separate
-100,000-node Format traversal budget. Node count is not token count. The 10,000
-and 50,000 measurements are time-to-rejection and do not establish successful
-large-theme throughput. Raising the guards needs a separate workload-derived
-memory and adversarial-input review.
+100,000-node Format traversal budget. Resolver expansion and emitted Resolver
+provenance each have a separate 100,000-step/origin budget. Node count is not
+token count. The 10,000 and 50,000 measurements are time-to-rejection and do
+not establish successful large-theme throughput. Raising the guards needs a
+separate workload-derived memory and adversarial-input review.
+
+A targeted Resolver stress case exposed repeated copies of the growing
+reference trail and active-set path. On Bun 1.4.2, a 15,000-document acyclic
+chain returned its 30,003-origin source chain in 8.113 seconds before the
+persistent-trail and constant-time active-set changes. A separate review then
+identified recursive set expansion: a 49,998-document selector chain threw
+`RangeError` despite remaining under the 100,000-step and 100,000-origin
+budgets. Resolver expansion now uses an explicit depth-first frame stack,
+retaining declared source order and active-path cycle detection. The selector
+regression resolves that chain and verifies 99,999 origins in order.
+
+The end-to-end import benchmark includes a 15,000-document chain (513,961
+bytes) and one token, now after the 1k/10k/50k token workloads. Three samples
+after one warmup completed with a 38.332 ms median (36.661–39.702 ms). This is
+a tooling-host result; it does not establish runtime or device performance.
 
 ## Verification
 
-- `bun run check` — passed: build and typecheck; 1,208 package tests across 195
-  files with 46,773 assertions; the Storybook test passed with 7 assertions.
+- `bun run check` — passed: build and typecheck; 1,211 package tests across 195
+  files with 46,795 assertions; the Storybook test passed with 7 assertions.
 - `bun run docs:build` — passed; 25 documentation pages built, including the
   DTCG how-to guide.
 - `bun run dtcg:qualify` and `bun scripts/m9-6-dtcg-qualification.ts` — passed;

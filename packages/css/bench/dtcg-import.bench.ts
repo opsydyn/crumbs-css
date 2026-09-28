@@ -15,6 +15,14 @@ type Workload = Readonly<{
   readonly documentBytes: number
 }>
 
+type ImportRequest = Parameters<typeof importDtcgTheme>[0]
+
+type ResolverChainWorkload = Readonly<{
+  readonly depth: number
+  readonly request: ImportRequest
+  readonly documentBytes: number
+}>
+
 function domainForToken(_: number): ManifestTokenDomain {
   return { kind: "length", allowNegative: false }
 }
@@ -54,6 +62,60 @@ function buildWorkload(tokenCount: number): Workload {
     manifest,
     documentBytes: Buffer.byteLength(JSON.stringify(document)),
   }
+}
+
+function buildResolverChainWorkload(depth: number): ResolverChainWorkload {
+  const identity = { owner: IDENTITY_OWNER, name: `resolver-chain-${depth}`, version: 1 } as const
+  const contract = createTokenContract({ color: { leaf: token.color() } }, identity)
+  const manifest = assembleManifest({
+    package: { name: identity.owner, version: "1.0.0" },
+    producer: {
+      compiler: { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" },
+      artifact: { name: "crumbs.native-style-artifact", version: 1 },
+    },
+    tokenContracts: [{ contract, origin: { path: "src/tokens.css.ts", exportPath: "tokens" } }],
+  })
+  const resolverUri = "https://bench.example.test/crumbs/dtcg/resolver-chain/resolver.json"
+  const firstDocumentUri = new URL("0.json", resolverUri).href
+  const documents = Object.create(null) as Record<string, DtcgJsonObject>
+  let documentBytes = 0
+  for (let index = 0; index < depth; index += 1) {
+    const uri = new URL(`${index}.json`, resolverUri).href
+    const document: DtcgJsonObject = {
+      sources: index + 1 < depth
+        ? [{ $ref: `${index + 1}.json` }]
+        : [{ color: { leaf: { $type: "color", $value: { colorSpace: "srgb", components: [0, 0, 0] } } } }],
+    }
+    documents[uri] = document
+    documentBytes += Buffer.byteLength(JSON.stringify(document))
+  }
+  const resolver: DtcgJsonObject = {
+    version: "2025.10",
+    sets: { root: { sources: [{ $ref: firstDocumentUri }] } },
+    resolutionOrder: [{ $ref: "#/sets/root" }],
+  }
+  return {
+    depth,
+    request: { resolver, resolverUri, documents, manifest, contractIdentity: identity },
+    documentBytes,
+  }
+}
+
+function importResolverChainOnce(workload: ResolverChainWorkload): Readonly<{
+  readonly status: "complete"
+  readonly payloadTokenCount: number
+  readonly durationMs: number
+}> {
+  const start = performance.now()
+  const result = importDtcgTheme(workload.request)
+  const durationMs = Number((performance.now() - start).toFixed(3))
+  if (!result.ok) {
+    const codes = [...new Set(result.diagnostics.map(diagnostic => diagnostic.code))].sort()
+    throw new Error(`DTCG resolver-chain benchmark failed: ${codes.join(", ")}.`)
+  }
+  const payloadTokenCount = Object.keys(result.value.payload.values).length
+  if (payloadTokenCount !== 1) throw new Error("DTCG resolver-chain benchmark did not import its token.")
+  return { status: "complete", payloadTokenCount, durationMs }
 }
 
 function importOnce(workload: Workload): Readonly<{
@@ -132,10 +194,30 @@ const samples = COUNTS.map(tokenCount => {
   }
 })
 
+const resolverChainWorkload = buildResolverChainWorkload(15_000)
+const resolverChainWarmups = 1
+const resolverChainSampleCount = 3
+for (let index = 0; index < resolverChainWarmups; index += 1) importResolverChainOnce(resolverChainWorkload)
+const resolverChainObservations = Array.from({ length: resolverChainSampleCount }, () => importResolverChainOnce(resolverChainWorkload))
+const resolverChainDurations = resolverChainObservations.map(observation => observation.durationMs)
+const resolverChain = {
+  depth: resolverChainWorkload.depth,
+  documentBytes: resolverChainWorkload.documentBytes,
+  sampleCount: resolverChainSampleCount,
+  warmupCount: resolverChainWarmups,
+  status: "complete",
+  payloadTokenCount: resolverChainObservations[0]!.payloadTokenCount,
+  medianImportMs: Number(median(resolverChainDurations).toFixed(3)),
+  minImportMs: Math.min(...resolverChainDurations),
+  maxImportMs: Math.max(...resolverChainDurations),
+  timingsAreSeparateFromQualificationReceipt: true,
+}
+
 process.stdout.write(`${JSON.stringify({
   format: "crumbs.dtcg-import-benchmark",
   schemaVersion: 1,
   timingScope: "Bun/Node tooling importDtcgTheme call through success or deterministic resource rejection; workload generation and manifest assembly are excluded.",
   samples,
+  resolverChain,
   unmeasured: ["React Native runtime", "device rendering", "Android", "iOS", "release consumer performance"],
 }, null, 2)}\n`)

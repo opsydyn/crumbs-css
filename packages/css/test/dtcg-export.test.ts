@@ -84,6 +84,66 @@ test("loads the public DTCG API through ESM and CommonJS without private schema 
   expectSuccessfulRun(["node", "runtime.cjs"], consumerRoot)
 })
 
+test("imports a deep acyclic Resolver set chain through the bundled public API", async () => {
+  const [{ importDtcgTheme }, { createTokenContract, token }, { assembleManifest }] = await Promise.all([
+    import("../dist/tooling-dtcg.mjs"),
+    import("../dist/tokens.mjs"),
+    import("../dist/tooling-manifest.mjs"),
+  ])
+  const depth = 15_000
+  const identity = { owner: "@example/deep-resolver", name: "tokens", version: 1 } as const
+  const contract = createTokenContract({ color: { leaf: token.color() } }, identity)
+  const manifest = assembleManifest({
+    package: { name: identity.owner, version: "1.0.0" },
+    producer: {
+      compiler: { name: "@opsydyn/crumbs-css", version: "0.1.1-alpha.1" },
+      artifact: { name: "crumbs.native-style-artifact", version: 1 },
+    },
+    tokenContracts: [{ contract, origin: { path: "src/tokens.css.ts", exportPath: "tokens" } }],
+  })
+  const resolverUri = "https://example.test/resolver.json"
+  const documents = Object.create(null) as Record<string, Parameters<typeof importDtcgTheme>[0]["documents"][string]>
+  for (let index = 0; index < depth; index += 1) {
+    const uri = `https://example.test/chain/${index}.json`
+    documents[uri] = {
+      sources: index + 1 < depth
+        ? [{ $ref: `${index + 1}.json` }]
+        : [{
+            color: {
+              leaf: {
+                $type: "color",
+                $value: { colorSpace: "srgb", components: [0, 0, 0] },
+              },
+            },
+          }],
+    }
+  }
+
+  const result = importDtcgTheme({
+    resolver: {
+      version: "2025.10",
+      sets: { root: { sources: [{ $ref: "https://example.test/chain/0.json" }] } },
+      resolutionOrder: [{ $ref: "#/sets/root" }],
+    },
+    resolverUri,
+    documents,
+    manifest,
+    contractIdentity: identity,
+  })
+
+  expect(result.ok).toBe(true)
+  if (result.ok) {
+    expect(result.value.payload.values).toEqual({ [manifest.tokens[0]!.id]: "rgb(0, 0, 0)" })
+    const sourceChain = result.value.sidecar.tokens[0]?.sourceChain ?? []
+    expect(sourceChain).toHaveLength(30_005)
+    expect(sourceChain[0]).toEqual({ documentUri: resolverUri, jsonPointer: "/resolutionOrder/0" })
+    expect(sourceChain[1]).toEqual({ documentUri: resolverUri, jsonPointer: "/sets/root" })
+    expect(sourceChain[15_002]).toEqual({ documentUri: "https://example.test/chain/7499.json", jsonPointer: "/sources/0" })
+    expect(sourceChain[15_003]).toEqual({ documentUri: "https://example.test/chain/7500.json", jsonPointer: "" })
+    expect(sourceChain[30_002]).toEqual({ documentUri: "https://example.test/chain/14999.json", jsonPointer: "/sources/0" })
+  }
+})
+
 test("supports consumer declaration use under Node16 and Bundler resolution", () => {
   const declarations = readFileSync(resolve(PACKAGE_ROOT, "dist/tooling-dtcg.d.mts"), "utf8")
   expect(declarations).not.toContain("effect/Schema")

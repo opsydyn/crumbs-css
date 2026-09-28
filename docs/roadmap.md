@@ -295,7 +295,7 @@ token/recipe-slot codemods. Keep Android/device acceptance parked.
 - [x] M9.3: Add development-only style explanations for resolved values, matching conditions, override winners, dependencies, and recomputation causes. Exclude detailed provenance from production output unless deliberately requested. Qualified with the [receipt](evidence/2026-09-27-m9-3-style-explanations/qualification.json) and [assessment](assessments/2026-09-27-m9-3-style-explanations.md); Android/device acceptance remains not-run and parked.
 - [x] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports. Qualified with the [policy report](evidence/2026-09-28-m9-4-design-system-policies/policy-report-v1.json), [receipt](evidence/2026-09-28-m9-4-design-system-policies/qualification.json), and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md); Android/device acceptance remains not-run and parked.
 - [x] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries. See the [qualification receipt](evidence/2026-09-28-m9-5-safe-migrations/qualification.json) and [assessment](assessments/2026-09-28-m9-5-safe-migrations.md).
-- [x] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context. See the [qualification receipt](evidence/2026-09-28-m9-6-dtcg/qualification.json) and [assessment](assessments/2026-09-28-m9-6-dtcg-adapter.md); 10k and 50k generated workloads remain bounded by the 100,000-node guards.
+- [x] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context. See the [qualification receipt](evidence/2026-09-28-m9-6-dtcg/qualification.json) and [assessment](assessments/2026-09-28-m9-6-dtcg-adapter.md); input/format nodes, resolver steps, and emitted provenance each have explicit 100,000-unit guards.
 - [ ] M9.7: Support ownership metadata in local reports. Optional editor/design-tool adapters consume manifests and schemas; neither hosted accounts nor external telemetry is required.
 
 **Exit:** release-impact fixtures identify expected consumers; reports distinguish proven breaks from potential visual impact; migrations preserve valid usage; DTCG support/limitations are explicit; tooling stays outside ordinary runtime bundles.
@@ -410,6 +410,11 @@ acceptance parked.
   `dtcg:qualify` maintainer command. The 1k workload imported; 10k and 50k
   workloads were rejected by the 100,000-node budgets. Those times measure
   time-to-rejection and do not claim large-theme throughput.
+- [x] Review follow-up replaced depth-growing Resolver path copies with
+  persistent provenance trails and constant-time active-set membership, added
+  a 100,000-origin output guard, and made set expansion iterative. A 49,998-link
+  selector chain resolves with 99,999 ordered origins; the end-to-end 15,000-
+  document benchmark also passes after the 1k/10k/50k token workloads.
 - [x] `bun run check`, `bun run docs:build`, fixture qualification, the packed
   M8.3 distribution gate, focused DTCG/packed-consumer/runtime-graph tests,
   and `git diff --check` passed. The distribution run was dirty-source interim

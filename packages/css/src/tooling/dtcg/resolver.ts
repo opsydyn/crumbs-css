@@ -10,6 +10,7 @@ import { resolveDtcgReference } from "./documents"
 import { decodeCrumbsDtcgResolverVersion, decodeDtcgResolverStructure } from "./schema"
 
 const MAX_RESOLVER_STEPS = 100_000
+const MAX_RESOLVER_PROVENANCE_ORIGINS = 100_000
 
 type DtcgSource = {
   readonly setName: string
@@ -26,13 +27,39 @@ export type DtcgSourceSelection = {
 }
 
 type RecordValue = Record<string, DtcgJsonValue>
+type SourceTrail = {
+  readonly origin: DtcgOrigin
+  readonly previous: SourceTrail | undefined
+  readonly length: number
+}
+
 type Definition = {
   readonly kind: "set" | "modifier"
   readonly name: string
   readonly value: DtcgJsonObject
   readonly documentUri: string
   readonly jsonPointer: string
-  readonly sourceChain: ReadonlyArray<DtcgOrigin>
+  readonly sourceTrail: SourceTrail | undefined
+}
+
+type SourceFrame = {
+  readonly sources: ReadonlyArray<unknown>
+  readonly sourcePointerBase: string
+  readonly documentUri: string
+  readonly setName: string
+  readonly sourceTrail: SourceTrail | undefined
+  readonly activeSetIdentity: string | undefined
+  index: number
+}
+
+function extendSourceTrail(trail: SourceTrail | undefined, origin: DtcgOrigin): SourceTrail {
+  return { origin, previous: trail, length: (trail?.length ?? 0) + 1 }
+}
+
+function sourceTrailFrom(origins: ReadonlyArray<DtcgOrigin>): SourceTrail | undefined {
+  let trail: SourceTrail | undefined
+  for (const origin of origins) trail = extendSourceTrail(trail, origin)
+  return trail
 }
 
 function compareText(left: string, right: string): number {
@@ -206,71 +233,43 @@ export function selectDtcgSources(
   const selectedModifiers: Record<string, string> = Object.create(null) as Record<string, string>
   const orderNames: Array<string> = []
   let steps = 0
+  let provenanceOrigins = 0
 
-  function appendResolvedSource(
-    source: unknown,
-    sourceOrigin: DtcgOrigin,
-    setName: string,
-    activeSets: ReadonlyArray<string>,
-    sourceTrail: ReadonlyArray<DtcgOrigin>,
-  ): DtcgOperationResult<void> {
-    steps += 1
-    if (steps > MAX_RESOLVER_STEPS) {
-      return makeFailure("resource.limit-exceeded", "DTCG Resolver expansion exceeds the 100,000-step limit.", sourceOrigin)
+  function materializeSourceTrail(
+    trail: SourceTrail | undefined,
+    suffix: ReadonlyArray<DtcgOrigin>,
+    failureOrigin: DtcgOrigin,
+  ): DtcgOperationResult<ReadonlyArray<DtcgOrigin>> {
+    const trailLength = trail?.length ?? 0
+    const length = trailLength + suffix.length
+    if (provenanceOrigins + length > MAX_RESOLVER_PROVENANCE_ORIGINS) {
+      return makeFailure(
+        "resource.limit-exceeded",
+        "DTCG Resolver provenance exceeds the 100,000-origin limit.",
+        failureOrigin,
+      )
     }
+    provenanceOrigins += length
 
-    if (isSourceReference(source)) {
-      const resolved = resolveDtcgReference(source.$ref, sourceOrigin.documentUri, resolverDocuments, sourceOrigin)
-      if (!resolved.ok) return resolved
-      const target = resolved.value.value
-      const targetOrigin: DtcgOrigin = {
-        documentUri: resolved.value.documentUri,
-        jsonPointer: resolved.value.jsonPointer,
-      }
-      if (targetOrigin.documentUri === canonicalResolverUri && pointerSegments(targetOrigin.jsonPointer)[0] === "resolutionOrder") {
-        return makeFailure("resolver.selection-invalid", "DTCG references must not target resolutionOrder entries.", sourceOrigin, [source.$ref])
-      }
-      const declaredKind = definitionKindAtOrigin(targetOrigin, canonicalResolverUri)
-      if (declaredKind === "modifier") {
-        return makeFailure("resolver.selection-invalid", "A modifier context may reference a set, not another modifier.", sourceOrigin, [source.$ref])
-      }
-      if (isRecord(target) && isSetDefinition(target) && (declaredKind === "set" || declaredKind === undefined)) {
-        const nestedSourceChain = [...sourceTrail, sourceOrigin, targetOrigin]
-        return expandSet({
-          kind: "set",
-          name: definitionNameAtOrigin(targetOrigin, setName),
-          value: target as DtcgJsonObject,
-          documentUri: targetOrigin.documentUri,
-          jsonPointer: targetOrigin.jsonPointer,
-          sourceChain: nestedSourceChain,
-        }, activeSets, nestedSourceChain)
-      }
-      if (isRecord(target) && Object.hasOwn(target, "$ref")) {
-        return makeFailure("format.structure-invalid", "Resolved DTCG source contains an invalid $ref object.", sourceOrigin, [source.$ref])
-      }
-      sources.push({
-        setName,
-        documentUri: targetOrigin.documentUri,
-        jsonPointer: targetOrigin.jsonPointer,
-        sourceChain: [...sourceTrail, sourceOrigin, targetOrigin],
-      })
-      return { ok: true, value: undefined, diagnostics: [] }
+    const sourceChain = new Array<DtcgOrigin>(length)
+    let current = trail
+    for (let index = trailLength - 1; index >= 0; index -= 1) {
+      sourceChain[index] = current!.origin
+      current = current!.previous
     }
-
-    if (!isPlainSource(source)) {
-      return makeFailure("format.structure-invalid", "DTCG Resolver sources must be objects or $ref objects.", sourceOrigin)
+    for (let index = 0; index < suffix.length; index += 1) {
+      sourceChain[trailLength + index] = suffix[index]!
     }
-    sources.push({ setName, documentUri: sourceOrigin.documentUri, jsonPointer: sourceOrigin.jsonPointer, sourceChain: [...sourceTrail, sourceOrigin] })
-    return { ok: true, value: undefined, diagnostics: [] }
+    return { ok: true, value: sourceChain, diagnostics: [] }
   }
 
-  function expandSet(
+  function makeSetFrame(
     definition: Definition,
-    activeSets: ReadonlyArray<string>,
-    sourceTrail: ReadonlyArray<DtcgOrigin> = definition.sourceChain,
-  ): DtcgOperationResult<void> {
+    activeSets: Set<string>,
+    sourceTrail: SourceTrail | undefined = definition.sourceTrail,
+  ): DtcgOperationResult<SourceFrame> {
     const identity = `${definition.documentUri}#${definition.jsonPointer}`
-    if (activeSets.includes(identity)) {
+    if (activeSets.has(identity)) {
       return makeFailure(
         "format.cycle",
         "DTCG Resolver set references contain a cycle.",
@@ -281,14 +280,112 @@ export function selectDtcgSources(
     if (!isSetDefinition(definition.value)) {
       return makeFailure("format.structure-invalid", "Invalid DTCG Resolver set definition.", { documentUri: definition.documentUri, jsonPointer: definition.jsonPointer })
     }
-    const nextActive = [...activeSets, identity]
-    const setSources = sourceArray(definition.value, "sources")
-    for (let index = 0; index < setSources.length; index += 1) {
-      const sourceOrigin = { documentUri: definition.documentUri, jsonPointer: pointerChild(pointerChild(definition.jsonPointer, "sources"), index) }
-      const result = appendResolvedSource(setSources[index], sourceOrigin, definition.name, nextActive, sourceTrail)
-      if (!result.ok) return result
+    activeSets.add(identity)
+    return {
+      ok: true,
+      value: {
+        sources: sourceArray(definition.value, "sources"),
+        sourcePointerBase: pointerChild(definition.jsonPointer, "sources"),
+        documentUri: definition.documentUri,
+        setName: definition.name,
+        sourceTrail,
+        activeSetIdentity: identity,
+        index: 0,
+      },
+      diagnostics: [],
     }
-    return { ok: true, value: undefined, diagnostics: [] }
+  }
+
+  function expandSources(initialFrame: SourceFrame, activeSets: Set<string>): DtcgOperationResult<void> {
+    const frames = [initialFrame]
+    try {
+      while (frames.length > 0) {
+        const frame = frames[frames.length - 1]!
+        if (frame.index >= frame.sources.length) {
+          frames.pop()
+          if (frame.activeSetIdentity !== undefined) activeSets.delete(frame.activeSetIdentity)
+          continue
+        }
+
+        const sourceIndex = frame.index
+        frame.index += 1
+        const source = frame.sources[sourceIndex]
+        const sourceOrigin = {
+          documentUri: frame.documentUri,
+          jsonPointer: pointerChild(frame.sourcePointerBase, sourceIndex),
+        }
+        steps += 1
+        if (steps > MAX_RESOLVER_STEPS) {
+          return makeFailure("resource.limit-exceeded", "DTCG Resolver expansion exceeds the 100,000-step limit.", sourceOrigin)
+        }
+
+        if (isSourceReference(source)) {
+          const resolved = resolveDtcgReference(source.$ref, sourceOrigin.documentUri, resolverDocuments, sourceOrigin)
+          if (!resolved.ok) return resolved
+          const target = resolved.value.value
+          const targetOrigin: DtcgOrigin = {
+            documentUri: resolved.value.documentUri,
+            jsonPointer: resolved.value.jsonPointer,
+          }
+          if (targetOrigin.documentUri === canonicalResolverUri && pointerSegments(targetOrigin.jsonPointer)[0] === "resolutionOrder") {
+            return makeFailure("resolver.selection-invalid", "DTCG references must not target resolutionOrder entries.", sourceOrigin, [source.$ref])
+          }
+          const declaredKind = definitionKindAtOrigin(targetOrigin, canonicalResolverUri)
+          if (declaredKind === "modifier") {
+            return makeFailure("resolver.selection-invalid", "A modifier context may reference a set, not another modifier.", sourceOrigin, [source.$ref])
+          }
+          if (isRecord(target) && isSetDefinition(target) && (declaredKind === "set" || declaredKind === undefined)) {
+            const nestedSourceTrail = extendSourceTrail(extendSourceTrail(frame.sourceTrail, sourceOrigin), targetOrigin)
+            const nestedFrame = makeSetFrame({
+              kind: "set",
+              name: definitionNameAtOrigin(targetOrigin, frame.setName),
+              value: target as DtcgJsonObject,
+              documentUri: targetOrigin.documentUri,
+              jsonPointer: targetOrigin.jsonPointer,
+              sourceTrail: nestedSourceTrail,
+            }, activeSets, nestedSourceTrail)
+            if (!nestedFrame.ok) return nestedFrame
+            frames.push(nestedFrame.value)
+            continue
+          }
+          if (isRecord(target) && Object.hasOwn(target, "$ref")) {
+            return makeFailure("format.structure-invalid", "Resolved DTCG source contains an invalid $ref object.", sourceOrigin, [source.$ref])
+          }
+          const sourceChain = materializeSourceTrail(frame.sourceTrail, [sourceOrigin, targetOrigin], sourceOrigin)
+          if (!sourceChain.ok) return sourceChain
+          sources.push({
+            setName: frame.setName,
+            documentUri: targetOrigin.documentUri,
+            jsonPointer: targetOrigin.jsonPointer,
+            sourceChain: sourceChain.value,
+          })
+          continue
+        }
+
+        if (!isPlainSource(source)) {
+          return makeFailure("format.structure-invalid", "DTCG Resolver sources must be objects or $ref objects.", sourceOrigin)
+        }
+        const sourceChain = materializeSourceTrail(frame.sourceTrail, [sourceOrigin], sourceOrigin)
+        if (!sourceChain.ok) return sourceChain
+        sources.push({
+          setName: frame.setName,
+          documentUri: frame.documentUri,
+          jsonPointer: sourceOrigin.jsonPointer,
+          sourceChain: sourceChain.value,
+        })
+      }
+      return { ok: true, value: undefined, diagnostics: [] }
+    } finally {
+      for (const frame of frames) {
+        if (frame.activeSetIdentity !== undefined) activeSets.delete(frame.activeSetIdentity)
+      }
+    }
+  }
+
+  function expandSet(definition: Definition, activeSets: Set<string>): DtcgOperationResult<void> {
+    const frame = makeSetFrame(definition, activeSets)
+    if (!frame.ok) return frame
+    return expandSources(frame.value, activeSets)
   }
 
   const selectModifier = (definition: Definition): DtcgOperationResult<void> => {
@@ -328,15 +425,16 @@ export function selectDtcgSources(
         jsonPointer: pointerChild(pointerChild(pointerChild(definition.jsonPointer, "contexts"), contextName), ""),
       })
     }
-    for (let index = 0; index < contextSources.length; index += 1) {
-      const sourceOrigin = {
-        documentUri: definition.documentUri,
-        jsonPointer: `${pointerChild(pointerChild(definition.jsonPointer, "contexts"), contextName)}/${index}`,
-      }
-      const result = appendResolvedSource(contextSources[index], sourceOrigin, definition.name, [], definition.sourceChain)
-      if (!result.ok) return result
-    }
-    return { ok: true, value: undefined, diagnostics: [] }
+    const activeSets = new Set<string>()
+    return expandSources({
+      sources: contextSources,
+      sourcePointerBase: pointerChild(pointerChild(definition.jsonPointer, "contexts"), contextName),
+      documentUri: definition.documentUri,
+      setName: definition.name,
+      sourceTrail: definition.sourceTrail,
+      activeSetIdentity: undefined,
+      index: 0,
+    }, activeSets)
   }
 
   for (let orderIndex = 0; orderIndex < resolutionOrder.length; orderIndex += 1) {
@@ -361,7 +459,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
-          sourceChain: [target.value.referringOrigin, targetOrigin],
+          sourceTrail: sourceTrailFrom([target.value.referringOrigin, targetOrigin]),
         }
       } else if (kind === "modifier" && isModifierDefinition(target.value.value)) {
         definition = {
@@ -370,7 +468,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
-          sourceChain: [target.value.referringOrigin, targetOrigin],
+          sourceTrail: sourceTrailFrom([target.value.referringOrigin, targetOrigin]),
         }
       } else if (kind === undefined && isSetDefinition(target.value.value)) {
         definition = {
@@ -379,7 +477,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
-          sourceChain: [target.value.referringOrigin, targetOrigin],
+          sourceTrail: sourceTrailFrom([target.value.referringOrigin, targetOrigin]),
         }
       } else if (kind === undefined && isModifierDefinition(target.value.value)) {
         definition = {
@@ -388,7 +486,7 @@ export function selectDtcgSources(
           value: target.value.value as DtcgJsonObject,
           documentUri: targetOrigin.documentUri,
           jsonPointer: targetOrigin.jsonPointer,
-          sourceChain: [target.value.referringOrigin, targetOrigin],
+          sourceTrail: sourceTrailFrom([target.value.referringOrigin, targetOrigin]),
         }
       } else {
         return makeFailure("resolver.selection-invalid", "Resolution order references must target a set or modifier.", entryOrigin, [entry.$ref])
@@ -400,7 +498,7 @@ export function selectDtcgSources(
         value: entry as DtcgJsonObject,
         documentUri: canonicalResolverUri,
         jsonPointer: entryOrigin.jsonPointer,
-        sourceChain: [entryOrigin],
+        sourceTrail: sourceTrailFrom([entryOrigin]),
       }
     } else {
       return makeFailure("format.structure-invalid", "Invalid DTCG Resolver resolution-order entry.", entryOrigin)
@@ -408,7 +506,7 @@ export function selectDtcgSources(
 
     orderNames.push(`${definition.kind}:${definition.name}`)
     if (definition.kind === "set") {
-      const result = expandSet(definition, [], definition.sourceChain)
+      const result = expandSet(definition, new Set<string>())
       if (!result.ok) return result
     } else {
       const result = selectModifier(definition)

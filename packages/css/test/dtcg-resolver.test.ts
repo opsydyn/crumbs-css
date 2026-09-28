@@ -220,6 +220,34 @@ describe("DTCG Resolver source selection", () => {
     })
   })
 
+  it("expands deep acyclic set references without overflowing and preserves provenance order", () => {
+    const depth = 49_998
+    const entries = Object.create(null) as Record<string, DtcgJsonObject>
+    for (let index = 0; index < depth; index += 1) {
+      entries[`https://example.test/chain/${index}.json`] = {
+        sources: index + 1 < depth
+          ? [{ $ref: `${index + 1}.json` }]
+          : [{ color: { leaf: "#000000" } }],
+      }
+    }
+    const result = select({
+      version: "2025.10",
+      sets: { root: { sources: [{ $ref: "https://example.test/chain/0.json" }] } },
+      resolutionOrder: [{ $ref: "#/sets/root" }],
+    }, undefined, documentMap(entries))
+
+    expect(result.ok).toBe(true)
+    if (result.ok) {
+      const sourceChain = result.value.sources[0]?.sourceChain ?? []
+      expect(sourceChain).toHaveLength(99_999)
+      expect(sourceChain[0]).toEqual({ documentUri: resolverUri, jsonPointer: "/resolutionOrder/0" })
+      expect(sourceChain[1]).toEqual({ documentUri: resolverUri, jsonPointer: "/sets/root" })
+      expect(sourceChain[50_002]).toEqual({ documentUri: "https://example.test/chain/24999.json", jsonPointer: "/sources/0" })
+      expect(sourceChain[50_003]).toEqual({ documentUri: "https://example.test/chain/25000.json", jsonPointer: "" })
+      expect(sourceChain[99_998]).toEqual({ documentUri: "https://example.test/chain/49997.json", jsonPointer: "/sources/0" })
+    }
+  })
+
   it("rejects a duplicate Resolver URI in the explicit document map", () => {
     const documents = documentMap({ [resolverUri]: { version: "2025.10" } })
     const result = select({
@@ -330,5 +358,28 @@ describe("DTCG Resolver source selection", () => {
 
     expectFailure(result, "resolver.selection-invalid")
     expect(result.diagnostics[0]).toMatchObject({ documentUri: resolverUri, jsonPointer: "/resolutionOrder/0" })
+  })
+
+  it("bounds expanded Resolver provenance independently of source steps", () => {
+    const depth = 300
+    const leafCount = 200
+    const inputs: Record<string, DtcgJsonObject> = Object.create(null) as Record<string, DtcgJsonObject>
+    for (let index = 0; index < depth; index += 1) {
+      const uri = `https://example.test/chain/${index}.json`
+      inputs[uri] = {
+        sources: index + 1 < depth
+          ? [{ $ref: `${index + 1}.json` }]
+          : Array.from({ length: leafCount }, (_, leaf) => ({ color: { [`leaf-${leaf}`]: leaf } })),
+      }
+    }
+
+    const result = select({
+      version: "2025.10",
+      sets: { root: { sources: [{ $ref: "https://example.test/chain/0.json" }] } },
+      resolutionOrder: [{ $ref: "#/sets/root" }],
+    }, undefined, documentMap(inputs))
+
+    expectFailure(result, "resource.limit-exceeded")
+    expect(result.diagnostics[0]?.message).toBe("DTCG Resolver provenance exceeds the 100,000-origin limit.")
   })
 })

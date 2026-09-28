@@ -125,11 +125,15 @@ payload. The supported conversions and resolver profile are documented in the
 The adapter uses Effect 4 Schema internally, bundled inside the tooling
 artifact. Effect is not a userland dependency or an ordinary runtime entry.
 Import qualification covers checked-in Format/Color/Resolver/conversion
-fixtures. The importer has 100,000-node input and traversal guards; the host
-benchmark completed 1,000 generated tokens and rejected 10,000 and 50,000
-tokens with `resource.limit-exceeded`. These are tooling-host observations,
-not device/runtime measurements. Package publication, visual acceptance,
-Android, and physical-device acceptance remain unqualified; Android is parked.
+fixtures. Input and Format traversal each have a 100,000-node guard; Resolver
+expansion and materialized provenance each have a separate 100,000-step/origin
+guard. Resolver set expansion uses an iterative traversal to avoid JavaScript
+call-stack limits. The host benchmark completed 1,000 generated tokens and
+rejected 10,000 and 50,000 tokens with `resource.limit-exceeded`; a separate
+15,000-document Resolver chain imported one token. These are tooling-host
+observations, not device/runtime measurements. Package publication, visual
+acceptance, Android, and physical-device acceptance remain unqualified;
+Android is parked.
 
 ## Release, compatibility, and deprecation policy (M8.5)
 

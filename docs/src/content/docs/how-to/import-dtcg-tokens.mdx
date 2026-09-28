@@ -153,13 +153,18 @@ Failures return `{ ok: false, diagnostics }` with stable codes such as
 include its source document URI and JSON pointer, DTCG path, Crumbs token ID,
 and reference chain where applicable. A failed import has no partial payload.
 
-The current importer caps an input snapshot at 100,000 JSON nodes and Format
-traversal at 100,000 nodes. This is a node budget, not a guaranteed token
-count. The checked-in host benchmark imported its 1,000-token workload; its
-generated 10,000- and 50,000-token manifest/document workloads were rejected
-with `resource.limit-exceeded`. Those timings are time-to-rejection, not
-successful large-theme import performance. Increasing these budgets needs
-separate memory and adversarial-input qualification.
+The current importer caps an input snapshot and Format traversal at 100,000
+JSON nodes each. Resolver expansion is capped at 100,000 source steps, and
+materialized Resolver provenance at 100,000 source-chain origins. These are
+separate resource budgets, not guaranteed token counts. Resolver set expansion
+is iterative, so valid deep references do not depend on the JavaScript
+call-stack limit. The checked-in host benchmark completed a 1,000-token import
+and a one-token theme through a 15,000-document Resolver chain. Its generated
+10,000- and 50,000-token manifest/document workloads were rejected with
+`resource.limit-exceeded`.
+Those timings are time-to-rejection, not successful large-theme import
+performance. Increasing these budgets needs separate memory and
+adversarial-input qualification.
 
 The adapter is a synchronous tooling boundary. Effect 4 Schema is an internal
 implementation detail bundled by the tooling artifact; consumers do not add

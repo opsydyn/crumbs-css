@@ -339,6 +339,7 @@ function evaluateFixtureSet() {
     },
     boundaries: [
       "Source/tooling import only; runtime and device performance are unmeasured.",
+      "Resolver expansion and materialized provenance are each bounded at 100,000 steps or origins.",
       "Android/device acceptance is not run and remains parked.",
       "Package publication and consumer release acceptance are not run.",
       "Visual design-system acceptance is not run.",
