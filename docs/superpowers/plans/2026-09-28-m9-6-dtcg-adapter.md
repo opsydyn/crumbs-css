@@ -50,7 +50,6 @@
 | `packages/css/package.json`, `packages/css/tsdown.config.ts` | Register isolated `./tooling/dtcg` ESM, CommonJS, and declaration outputs in the compiler/tooling graph. |
 | `packages/css/test/pack-consumer-contract.test.ts`, `packages/css/test/metro-tree-shaking-contract.test.ts` | Prove packed subpath usability and that ordinary runtime graphs do not gain the DTCG adapter. |
 | `packages/css/bench/dtcg-import.bench.ts` | Measure bounded 1,000-, 10,000-, and 50,000-token tooling workloads without making runtime/device performance claims. |
-
 | `scripts/m9-6-dtcg-qualification.ts` | Run deterministic checked-in fixture qualification and emit a stable receipt without file/network access in the library API. |
 | `docs/src/content/docs/how-to/import-dtcg-tokens.mdx`, `docs/src/content/docs/index.mdx` | User guide and documentation index entry with an import example and supported subset. |
 | `docs/src/content/docs/reference/package-entrypoints-and-apis.mdx`, `docs/src/content/docs/reference/compatibility.mdx`, `packages/css/README.md`, `packages/css/COMPATIBILITY.md` | Tooling entrypoint, support matrix, limitations, performance boundary, and compatibility documentation. |
@@ -72,13 +71,14 @@
 - `DtcgTokenProvenance` is { readonly tokenId: string; readonly path: ReadonlyArray<string>; readonly visibility: "public" | "private"; readonly origin: DtcgOrigin; readonly sourceChain: ReadonlyArray<DtcgOrigin>; readonly metadata: DtcgTokenMetadata; readonly groupMetadata: ReadonlyArray<DtcgGroupMetadata> }.
 - `DtcgImportSidecar` is { readonly format: "crumbs.dtcg-theme-import-metadata"; readonly schemaVersion: 1; readonly contract: ManifestContractIdentity; readonly formatProfile: "2025.10"; readonly resolverVersion: CrumbsDtcgResolverVersion; readonly resolverUri: string; readonly modifiers: Readonly<Record<string, string>>; readonly remBasePx?: number; readonly tokens: ReadonlyArray<DtcgTokenProvenance> }.
 - `CrumbsDtcgImportRequest` contains `resolver`, absolute `resolverUri`, `documents: Readonly<Record<string, DtcgJsonObject>>`, one `DesignSystemManifest`, `contractIdentity: ManifestContractIdentity`, optional `modifiers: Readonly<Record<string, string>>`, and optional `remBasePx`.
+- Internal `decodeCrumbsDtcgResolverVersion(input: unknown): DtcgOperationResult<CrumbsDtcgResolverVersion>` and `decodeDtcgImportRequest(input: unknown): DtcgOperationResult<CrumbsDtcgImportRequest>` live in schema.ts for validation/tests; neither is re-exported.
 - `CrumbsDtcgDiagnostic` contains `code`, `severity`, `message`, optional `documentUri`, `jsonPointer`, `dtcgPath`, `crumbsTokenId`, and `referenceChain`.
 - `CrumbsDtcgThemeImport` contains format `crumbs.dtcg-theme-import`, schema version `1`, the unchanged `ExternalTokenThemePayload`, and a `DtcgImportSidecar` tagged `crumbs.dtcg-theme-import-metadata` version `1`. The sidecar carries contract identity, format profile, supplied Resolver version/URI, modifiers/options, matched token visibility/metadata, and document origins.
 - `DtcgOperationResult<T>` is `{ readonly ok: true; readonly value: T; readonly diagnostics: ReadonlyArray<CrumbsDtcgDiagnostic> }` or `{ readonly ok: false; readonly diagnostics: ReadonlyArray<CrumbsDtcgDiagnostic> }`; `CrumbsDtcgImportResult` aliases `DtcgOperationResult<CrumbsDtcgThemeImport>`. Internal operations do not appear in the public barrel.
 - `importDtcgTheme(input: CrumbsDtcgImportRequest): CrumbsDtcgImportResult` is the only operation. Schema/codecs remain private.
 - Pin stable diagnostic codes in this task: `input.invalid`, `resolver.version-unsupported`, `resolver.selection-invalid`, `reference.missing`, `format.structure-invalid`, `format.cycle`, `token.alias-unresolved`, `token.alias-cycle`, `token.alias-domain-mismatch`, `contract.definition-missing`, `contract.alias-mismatch`, `token.unmapped`, `token.type-unsupported`, `token.domain-invalid`, `conversion.option-invalid`, and `resource.limit-exceeded`.
 
-- [ ] **Step 1: Write failing tests** for all three accepted Resolver literals, one rejected literal, stable malformed-input diagnostics, and caller objects with inherited fields, accessor properties, sparse arrays, cycles, non-finite values, non-JSON extension data, and inputs exceeding either fixed resource bound. Assert accessors are never invoked and failures have no `value`.
+- [ ] **Step 1: Write failing tests** for all three accepted Resolver literals, one rejected literal, stable malformed-input diagnostics from decodeDtcgImportRequest, and caller objects with inherited fields, accessor properties, sparse arrays, cycles, non-finite values, non-JSON extension data, and inputs exceeding either fixed resource bound. Assert accessors are never invoked and failures have no `value`.
 - [ ] **Step 2: Run** `bun test packages/css/test/dtcg-schema.test.ts`. Expected: FAIL because the request/result types and decoder are absent.
 - [ ] **Step 3: Implement** the plain model and private Effect 4 Schema boundary. Snapshot only own data properties before decoding; require dense arrays and finite JSON numbers; cap document node count at 100,000 and traversal depth at 256, returning `resource.limit-exceeded` rather than truncating or overflowing.
 - [ ] **Step 4: Run** `bun test packages/css/test/dtcg-schema.test.ts`. Expected: PASS, including no getter execution.
@@ -106,6 +106,7 @@
 **Files:**
 - Create: `packages/css/src/tooling/dtcg/resolver.ts`
 - Test: `packages/css/test/dtcg-resolver.test.ts`
+- Modify: `packages/css/src/tooling/dtcg/schema.ts`
 - Test: `packages/css/test/dtcg-resolver.property.test.ts`
 
 **Interfaces:**
@@ -125,6 +126,7 @@
 **Files:**
 - Create: `packages/css/src/tooling/dtcg/format.ts`
 - Test: `packages/css/test/dtcg-format.test.ts`
+- Modify: `packages/css/src/tooling/dtcg/schema.ts`
 - Test: `packages/css/test/dtcg-format.property.test.ts`
 
 **Interfaces:**
