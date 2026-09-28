@@ -65,6 +65,11 @@
       "import": "./dist/tooling-policy.mjs",
       "require": "./dist/tooling-policy.cjs"
     },
+    "./tooling/migrations": {
+      "types": "./dist/tooling-migrations.d.mts",
+      "import": "./dist/tooling-migrations.mjs",
+      "require": "./dist/tooling-migrations.cjs"
+    },
     "./devtools": {
       "types": "./dist/devtools.d.mts",
       "import": "./dist/devtools.mjs",
@@ -146,6 +151,12 @@
   "peerDependencies": {
     "metro": ">=0.83 <1",
     "react": ">=19 <20",
-    "react-native": ">=0.85 <0.86"
+    "react-native": ">=0.85 <0.86",
+    "typescript": ">=5.9 <6"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
   }
 }

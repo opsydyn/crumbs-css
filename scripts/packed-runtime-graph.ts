@@ -39,6 +39,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./style": "compiler-tooling",
   "./tooling/manifest": "compiler-tooling",
   "./tooling/policy": "compiler-tooling",
+  "./tooling/migrations": "compiler-tooling",
   "./metro-plugin": "compiler-tooling",
   "./dist/transformer": "compiler-tooling",
   "./dist/metro-plugin": "compiler-tooling",
@@ -115,6 +116,7 @@ export async function auditPackedRuntimeEntrypoints(
 
   const advancedEntryFiles = new Set<string>()
   const compilerEntryFiles = new Set<string>()
+  const migrationEntryFiles = new Set<string>()
   for (const [subpath, classification] of classifications) {
     if (classification !== "advanced-runtime" && classification !== "compiler-tooling") continue
     for (const format of ["import", "require"] as const) {
@@ -124,6 +126,7 @@ export async function auditPackedRuntimeEntrypoints(
         if (absolute !== undefined) {
           if (classification === "advanced-runtime") advancedEntryFiles.add(absolute)
           else compilerEntryFiles.add(absolute)
+          if (subpath === "./tooling/migrations") migrationEntryFiles.add(absolute)
         }
       }
     }
@@ -166,6 +169,7 @@ export async function auditPackedRuntimeEntrypoints(
         graphFormat,
         advancedEntryFiles,
         compilerEntryFiles,
+        migrationEntryFiles,
         files,
         externalSpecifiers,
         dynamicLoaderExceptions,
@@ -192,6 +196,7 @@ async function visit(
   format: "esm" | "cjs",
   advancedEntryFiles: ReadonlySet<string>,
   compilerEntryFiles: ReadonlySet<string>,
+  migrationEntryFiles: ReadonlySet<string>,
   visited: Set<string>,
   externals: Set<string>,
   dynamicLoaderExceptions: Map<string, PackedDynamicLoaderException>,
@@ -199,6 +204,9 @@ async function visit(
   if (visited.has(file)) return
   if (!isPathWithin(packageRoot, file)) {
     throw new Error(`Local dependency ${file} resolves outside the installed package`)
+  }
+  if (subpath !== "./tooling/migrations" && migrationEntryFiles.has(file)) {
+    throw new Error(`${classification} export reaches isolated compiler-tooling migration target ${toPackageRelative(packageRoot, file)}`)
   }
   if (classification === "ordinary-runtime" && advancedEntryFiles.has(file)) {
     throw new Error(`ordinary-runtime entry reaches advanced-runtime entry target ${toPackageRelative(packageRoot, file)}`)
@@ -286,6 +294,7 @@ async function visit(
         format,
         advancedEntryFiles,
         compilerEntryFiles,
+        migrationEntryFiles,
         visited,
         externals,
         dynamicLoaderExceptions,
@@ -373,8 +382,11 @@ function assertExternalAllowed(
   } else if (classification === "compiler-tooling") {
     const neverBundle = toPatterns(compilerDependencies.neverBundle)
     const alwaysBundle = toPatterns(compilerDependencies.alwaysBundle)
-    allowed = neverBundle.some((pattern) => matchesPattern(specifier, pattern)) &&
+    const migrationTypeScriptPeer = subpath === "./tooling/migrations" && specifier === "typescript"
+    allowed = migrationTypeScriptPeer || (
+      neverBundle.some((pattern) => matchesPattern(specifier, pattern)) &&
       !alwaysBundle.some((pattern) => matchesPattern(specifier, pattern))
+    )
   } else if (classification === "advanced-runtime" && subpath === "./devtools") {
     allowed = specifier === "effect" || specifier.startsWith("effect/") || specifier === "react" || specifier.startsWith("react/")
   }

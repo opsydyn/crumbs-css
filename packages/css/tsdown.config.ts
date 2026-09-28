@@ -25,6 +25,7 @@ const toolEntries = {
   transformer: "src/transformer.ts",
   "tooling-manifest": "src/tooling/manifest.ts",
   "tooling-policy": "src/tooling/policy.ts",
+  "tooling-migrations": "src/tooling/migrations.ts",
 }
 
 export default defineConfig([

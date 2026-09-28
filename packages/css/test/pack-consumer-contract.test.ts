@@ -75,6 +75,7 @@ function createPackedConsumer(): string {
     "metro",
     "react",
     "react-native",
+    "typescript",
   ]) {
     linkRootDependency(resolve(tempRoot, "consumer"), dependency)
   }
@@ -235,6 +236,18 @@ const consumerTypeSource = `
   import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
   import { checkDesignSystemPolicy, decodeDesignSystemPolicy, decodeDesignSystemPolicyReport, decodePolicyMeasurements, encodeCanonicalDesignSystemPolicyReport, getBuiltInPolicyPreset } from "@opsydyn/crumbs-css/tooling/policy";
   import type { DesignSystemManifest, DesignSystemPolicy, DesignSystemPolicyReport, PolicyMeasurement, StyleExplanationMetadata as PolicyStyleExplanationMetadata } from "@opsydyn/crumbs-css/tooling/policy";
+  import { decodeSourceMigration, planSourceMigration, SOURCE_MIGRATION_FORMAT } from "@opsydyn/crumbs-css/tooling/migrations";
+  import type { SourceMigration, SourceMigrationPlan, SourceMigrationReport } from "@opsydyn/crumbs-css/tooling/migrations";
+
+  const migrationForTypes: SourceMigration = {
+    format: SOURCE_MIGRATION_FORMAT, schemaVersion: 1, id: "@acme/migration", revision: 1, provider: "@acme/design-system",
+    tokens: [{fromId: "@acme/design-system#token:old", toId: "@acme/design-system#token:new", fromImport: {moduleSpecifier: "./tokens", importedName: "old"}, toImport: {moduleSpecifier: "./tokens", importedName: "new"}}], components: [],
+  };
+  const decodedMigrationForTypes: SourceMigration = decodeSourceMigration(migrationForTypes);
+  const migrationPlannerForTypes: typeof planSourceMigration = planSourceMigration;
+  const migrationPlanForTypes: SourceMigrationPlan | undefined = undefined;
+  const migrationReportForTypes: SourceMigrationReport | undefined = undefined;
+  void [decodedMigrationForTypes, migrationPlannerForTypes, migrationPlanForTypes, migrationReportForTypes];
 
   const policyForTypes: DesignSystemPolicy = {
     format: "crumbs.css.design-system-policy", schemaVersion: 1, policyId: "@acme/policy", version: 1,
@@ -406,12 +419,15 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
       readonly name: string
       readonly private?: boolean
       readonly peerDependencies?: Readonly<Record<string, string>>
+      readonly peerDependenciesMeta?: Readonly<Record<string, {readonly optional?: boolean}>>
       readonly engines?: Readonly<{node?: string}>
       readonly exports: Readonly<Record<string, unknown>>
     }
     expect(packedPackageJson.name).toBe("@opsydyn/crumbs-css")
     expect(packedPackageJson.private).not.toBe(true)
     expect(packedPackageJson.peerDependencies?.effect).toBeUndefined()
+    expect(packedPackageJson.peerDependencies?.typescript).toBe(">=5.9 <6")
+    expect(packedPackageJson.peerDependenciesMeta?.typescript?.optional).toBe(true)
     expect(packedPackageJson.engines?.node).toBe(">=22.0.0")
 
     const nodeVersionOutput = run(["node", "-p", "process.versions.node"], consumerRoot).stdout
@@ -455,6 +471,10 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const metro = require("@opsydyn/crumbs-css/metro-plugin");
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
         const policyTools = require("@opsydyn/crumbs-css/tooling/policy");
+        const migrationTools = require("@opsydyn/crumbs-css/tooling/migrations");
+        const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
+        if (migrationTools.decodeSourceMigration(migrationMap).format !== migrationTools.SOURCE_MIGRATION_FORMAT || typeof migrationTools.planSourceMigration !== "function") throw new Error("CommonJS migration tooling API failed");
+        if (Object.keys(migrationTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from migration API");
         const policyInput = {format:"crumbs.css.design-system-policy",schemaVersion:1,policyId:"@acme/policy",version:1,preset:{name:"migration",version:1},severityOverrides:{},literalValueScopes:[],semanticTokenScopes:[],semanticTokenIds:[],targetProfiles:[],outputBudgets:[],exceptions:[]};
         const policyCurrent = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs-native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
         const policyReport = policyTools.checkDesignSystemPolicy({policy:policyTools.decodeDesignSystemPolicy(policyInput),current:policyCurrent});
@@ -514,6 +534,9 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { transformCssTsToStyleSheet } from "@opsydyn/crumbs-css/dist/transformer";
         import { explainStyle } from "@opsydyn/crumbs-css/devtools";
         import { checkDesignSystemPolicy, decodeDesignSystemPolicy, encodeCanonicalDesignSystemPolicyReport } from "@opsydyn/crumbs-css/tooling/policy";
+        import { decodeSourceMigration, planSourceMigration, SOURCE_MIGRATION_FORMAT } from "@opsydyn/crumbs-css/tooling/migrations";
+        const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
+        if (decodeSourceMigration(migrationMap).format !== SOURCE_MIGRATION_FORMAT || typeof planSourceMigration !== "function") throw new Error("ESM migration tooling API failed");
         const policyInput = {format:"crumbs.css.design-system-policy",schemaVersion:1,policyId:"@acme/policy",version:1,preset:{name:"migration",version:1},severityOverrides:{},literalValueScopes:[],semanticTokenScopes:[],semanticTokenIds:[],targetProfiles:[],outputBudgets:[],exceptions:[]};
         const policyCurrent = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs-native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
         const policyReport = checkDesignSystemPolicy({policy:decodeDesignSystemPolicy(policyInput),current:policyCurrent});

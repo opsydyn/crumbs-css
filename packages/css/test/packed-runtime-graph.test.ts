@@ -27,6 +27,7 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "./style": runtimeExport("style"),
     "./tooling/manifest": runtimeExport("tooling-manifest"),
     "./tooling/policy": runtimeExport("tooling-policy"),
+    "./tooling/migrations": runtimeExport("tooling-migrations"),
     "./devtools": runtimeExport("devtools"),
     "./metro-plugin": runtimeExport("metro-plugin"),
     "./dist/transformer": runtimeExport("transformer"),
@@ -61,6 +62,8 @@ async function createFixturePackage(options: FixtureOptions = {}): Promise<strin
     "dist/tooling-manifest.cjs": 'require("./tooling-leaf.cjs"); exports.tooling = true;\n',
     "dist/tooling-policy.mjs": 'import "./policy-leaf.mjs"; export const policy = true;\n',
     "dist/tooling-policy.cjs": 'require("./policy-leaf.cjs"); exports.policy = true;\n',
+    "dist/tooling-migrations.mjs": 'import "node:crypto"; import "typescript"; export const migrate = true;',
+    "dist/tooling-migrations.cjs": 'require("node:crypto"); require("typescript"); exports.migrate = true;',
     "dist/policy-leaf.mjs": 'export const leaf = true;\n',
     "dist/policy-leaf.cjs": 'module.exports = true;\n',
     "dist/tooling-leaf.mjs": 'export const leaf = true;\n',
@@ -143,6 +146,18 @@ test("auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and c
       files: ["dist/policy-leaf.cjs", "dist/tooling-policy.cjs"],
       externalSpecifiers: [],
     })
+  expect(graphs.find((graph) => graph.subpath === "./tooling/migrations" && graph.format === "esm"))
+    .toMatchObject({
+      classification: "compiler-tooling",
+      files: ["dist/tooling-migrations.mjs"],
+      externalSpecifiers: ["node:crypto", "typescript"],
+    })
+  expect(graphs.find((graph) => graph.subpath === "./tooling/migrations" && graph.format === "cjs"))
+    .toMatchObject({
+      classification: "compiler-tooling",
+      files: ["dist/tooling-migrations.cjs"],
+      externalSpecifiers: ["node:crypto", "typescript"],
+    })
   expect(graphs.find((graph) => graph.subpath === "./devtools" && graph.format === "esm"))
     .toMatchObject({
       classification: "advanced-runtime",
@@ -151,7 +166,7 @@ test("auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and c
     })
   expect(graphs.find((graph) => graph.subpath === "./package.json" && graph.format === "metadata"))
     .toMatchObject({classification: "metadata", files: ["package.json"], externalSpecifiers: []})
-  expect(graphs).toHaveLength(31)
+  expect(graphs).toHaveLength(33)
 })
 
 test("ordinary runtime entrypoints cannot reach compiler tooling targets", async () => {
@@ -161,6 +176,34 @@ test("ordinary runtime entrypoints cannot reach compiler tooling targets", async
 
   await expect(auditPackedRuntimeEntrypoints(packageRoot))
     .rejects.toThrow(/ordinary-runtime.*reaches compiler-tooling/i)
+})
+
+test("runtime entrypoints cannot reach isolated migration tooling", async () => {
+  const ordinaryPackage = await createFixturePackage({
+    overrides: { "dist/theme.mjs": 'import "./tooling-migrations.mjs"; export {};' },
+  })
+  const rootPackage = await createFixturePackage({
+    overrides: { "dist/root.mjs": 'import "./tooling-migrations.mjs"; export {};' },
+  })
+  const stylePackage = await createFixturePackage({
+    overrides: { "dist/style.cjs": 'require("./tooling-migrations.cjs"); exports.style = true;' },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(ordinaryPackage))
+    .rejects.toThrow(/ordinary-runtime.*migration/i)
+  await expect(auditPackedRuntimeEntrypoints(rootPackage))
+    .rejects.toThrow(/compiler-tooling.*migration/i)
+  await expect(auditPackedRuntimeEntrypoints(stylePackage))
+    .rejects.toThrow(/compiler-tooling.*migration/i)
+})
+
+test("TypeScript is admitted only for the isolated migration subpath", async () => {
+  const deniedPackage = await createFixturePackage({
+    overrides: { "dist/tooling-policy.mjs": 'import "typescript"; export {};' },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(deniedPackage))
+    .rejects.toThrow(/compiler-tooling.*unauthorized external typescript/i)
 })
 
 test("ordinary runtime entrypoints cannot reach the policy tooling graph", async () => {
@@ -340,7 +383,7 @@ test("compiler entries allow only build-policy externals and reject Effect", asy
   })
 
   const allowedGraphs = await auditPackedRuntimeEntrypoints(allowedPackage)
-  expect(allowedGraphs).toHaveLength(31)
+  expect(allowedGraphs).toHaveLength(33)
   expect(allowedGraphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.externalSpecifiers)
     .toEqual(["metro", "node:fs", "url"])
   await expect(auditPackedRuntimeEntrypoints(deniedPackage)).rejects.toThrow(/compiler-tooling.*not-in-build-policy/i)

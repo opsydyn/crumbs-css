@@ -50,6 +50,11 @@ async function writeFixturePackage(packageRoot: string): Promise<void> {
         import: "./dist/tooling-policy.mjs",
         require: "./dist/tooling-policy.cjs",
       },
+      "./tooling/migrations": {
+        types: "./dist/tooling-migrations.d.mts",
+        import: "./dist/tooling-migrations.mjs",
+        require: "./dist/tooling-migrations.cjs",
+      },
       "./devtools": {
         types: "./dist/devtools.d.mts",
         import: "./dist/devtools.mjs",
@@ -73,6 +78,9 @@ async function writeFixturePackage(packageRoot: string): Promise<void> {
     "./dist/tooling-policy.d.mts",
     "./dist/tooling-policy.mjs",
     "./dist/tooling-policy.cjs",
+    "./dist/tooling-migrations.d.mts",
+    "./dist/tooling-migrations.mjs",
+    "./dist/tooling-migrations.cjs",
     "./dist/devtools.d.mts",
     "./dist/devtools.mjs",
     "./dist/devtools.cjs",
@@ -136,6 +144,12 @@ test("verifyPackedExportMap checks every target and Node import/require selectio
       import: "./dist/tooling-policy.mjs",
       require: "./dist/tooling-policy.cjs",
       types: "./dist/tooling-policy.d.mts",
+    },
+    {
+      subpath: "./tooling/migrations",
+      import: "./dist/tooling-migrations.mjs",
+      require: "./dist/tooling-migrations.cjs",
+      types: "./dist/tooling-migrations.d.mts",
     },
     {
       subpath: "./devtools",
