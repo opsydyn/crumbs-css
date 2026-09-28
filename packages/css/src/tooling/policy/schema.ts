@@ -146,6 +146,7 @@ const PolicyReportSchema = Schema.Struct({
 const policyCodec = makeDataCodec("design-system-policy-v1", PolicySchema)
 const policyReportCodec = makeDataCodec("design-system-policy-report-v1", PolicyReportSchema)
 const measurementsCodec = makeDataCodec("design-system-policy-measurements-v1", Schema.Array(MeasurementSchema))
+const evaluationDateCodec = makeDataCodec("design-system-policy-evaluation-date", ExceptionDateSchema)
 
 function isCalendarDate(value: string): boolean {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(value)
@@ -229,6 +230,11 @@ export function decodeDesignSystemPolicy(input: unknown): DesignSystemPolicy {
   const policy = decodeWith(policyCodec, input, "design-system policy v1") as DesignSystemPolicy
   validatePolicyIdentities(policy)
   return policy
+}
+
+/** Validate an explicit calendar date for deterministic policy evaluation. */
+export function decodePolicyEvaluationDate(input: unknown): string {
+  return decodeWith(evaluationDateCodec, input, "design-system policy evaluation date")
 }
 
 /** Validate and detach explicit numeric output measurements. */
