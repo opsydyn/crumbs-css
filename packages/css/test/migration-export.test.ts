@@ -85,7 +85,7 @@ describe("isolated migration tooling export", () => {
       readonly peerDependencies?: Readonly<Record<string, string>>
       readonly peerDependenciesMeta?: Readonly<Record<string, { readonly optional?: boolean }>>
     }
-    expect(packageJson.peerDependencies?.typescript).toBe(">=5.9 <6")
+    expect(packageJson.peerDependencies?.typescript).toBe(">=5.9 <7")
     expect(packageJson.peerDependenciesMeta?.typescript?.optional).toBe(true)
   })
 

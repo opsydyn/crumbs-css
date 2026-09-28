@@ -58,7 +58,7 @@ bun add @opsydyn/crumbs-css
 npm install @opsydyn/crumbs-css
 ```
 
-Peer dependencies: `react`, `react-native`, and `metro`.
+Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.
 
 Current `react-native` peer range: `>=0.85 <0.86`.
 
@@ -304,6 +304,20 @@ exceptions use a caller-supplied `--evaluated-on` date. Policy reports do not
 make release decisions, and Android/device support is not inferred. See the
 [policy guide](https://opsydyn.github.io/crumbs-css/how-to/check-design-system-policy/)
 for rule behavior, exception handling, and report limits.
+
+## Safe design-system source migrations
+
+The local `migrate:source` command plans explicit token and recipe-slot source
+migrations from a versioned map and baseline/current manifests. It defaults to
+dry-run; `--write` applies only reviewed edits to explicitly named files. One
+blocking or ambiguous edit prevents writes to every file in that invocation.
+The tool does not scan for consumers, so teams must supply and review the full
+file list they intend to migrate.
+
+See the [source migration guide](https://opsydyn.github.io/crumbs-css/how-to/migrate-design-system-sources/)
+for the v1 map format, recognized syntax, optional TypeScript peer, and
+qualification limits. Repository maintainers can run `bun run migrations:qualify`
+to regenerate the checked-in fixture evidence.
 
 ## Minimal recipe example
 

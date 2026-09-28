@@ -294,7 +294,7 @@ token/recipe-slot codemods. Keep Android/device acceptance parked.
 - [x] M9.2: Provide local explicit-file checking and manifest comparison. Detect token/slot/variant contract changes, domain changes, changed defaults, and forbidden private dependencies; report affected supplied consumers and analysis limits. See the [qualification receipt](evidence/2026-09-27-m9-2-manifest-compatibility/qualification-v1.json) and [assessment](assessments/2026-09-27-m9-2-manifest-compatibility.md).
 - [x] M9.3: Add development-only style explanations for resolved values, matching conditions, override winners, dependencies, and recomputation causes. Exclude detailed provenance from production output unless deliberately requested. Qualified with the [receipt](evidence/2026-09-27-m9-3-style-explanations/qualification.json) and [assessment](assessments/2026-09-27-m9-3-style-explanations.md); Android/device acceptance remains not-run and parked.
 - [x] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports. Qualified with the [policy report](evidence/2026-09-28-m9-4-design-system-policies/policy-report-v1.json), [receipt](evidence/2026-09-28-m9-4-design-system-policies/qualification.json), and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md); Android/device acceptance remains not-run and parked.
-- [ ] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries.
+- [x] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries. See the [qualification receipt](evidence/2026-09-28-m9-5-safe-migrations/qualification.json) and [assessment](assessments/2026-09-28-m9-5-safe-migrations.md).
 - [ ] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context.
 - [ ] M9.7: Support ownership metadata in local reports. Optional editor/design-tool adapters consume manifests and schemas; neither hosted accounts nor external telemetry is required.
 
@@ -366,6 +366,31 @@ and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md).
 Next recommended roadmap item: **M9.5** — add replacement metadata and safe
 codemods for token, recipe, and slot migrations. Keep Android/device acceptance
 parked.
+
+### 2026-09-28 — M9.5 safe source migrations
+
+- [x] Added versioned replacement maps, manifest validation, pure source
+  planning, explicit-file dry-run/write CLI behavior, and an isolated packed
+  `tooling/migrations` API for token and recipe/slot migrations.
+- [x] Qualified deterministic fixtures for dry-run, successful write, unlisted
+  source preservation, repeatability, and whole-invocation blocking. See the
+  [receipt](evidence/2026-09-28-m9-5-safe-migrations/qualification.json) and
+  [canonical dry-run report](evidence/2026-09-28-m9-5-safe-migrations/dry-run-report-v1.json).
+- [x] Documented migration maps, explicit inputs, supported syntax and limits.
+  `bun run check`, the documentation build, fixture qualification, the packed
+  distribution check, focused regressions, and `git diff --check` passed.
+- [x] Expanded the optional TypeScript peer to `>=5.9 <7` after the packed
+  Expo consumer exposed npm `ERESOLVE` for TypeScript 6; packed ESM/CommonJS
+  planner checks now execute under TypeScript 6.0.3. TypeScript remains outside
+  ordinary runtime graphs.
+- [x] Android and physical-device acceptance remain not-run and parked; no
+  release or package publication acceptance is claimed.
+
+See the [M9.5 assessment](assessments/2026-09-28-m9-5-safe-migrations.md).
+
+Next recommended roadmap item: **M9.6** — implement a DTCG 2025.10
+format/resolver adapter with a documented native subset. Keep Android/device
+acceptance parked.
 
 ## M10 — Qualify the reference design system and North Star journeys
 

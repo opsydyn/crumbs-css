@@ -43,7 +43,9 @@ function resolveInstalledPackageRoot(packageName: string): string {
 }
 
 function linkRootDependency(consumerRoot: string, packageName: string): void {
-  const source = resolveInstalledPackageRoot(packageName)
+  const source = packageName === "typescript"
+    ? resolve(PACKAGE_ROOT, "../..", "node_modules", packageName)
+    : resolveInstalledPackageRoot(packageName)
   if (!existsSync(source)) {
     throw new Error(`Missing root dependency required by consumer contract: ${packageName}`)
   }
@@ -426,7 +428,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
     expect(packedPackageJson.name).toBe("@opsydyn/crumbs-css")
     expect(packedPackageJson.private).not.toBe(true)
     expect(packedPackageJson.peerDependencies?.effect).toBeUndefined()
-    expect(packedPackageJson.peerDependencies?.typescript).toBe(">=5.9 <6")
+    expect(packedPackageJson.peerDependencies?.typescript).toBe(">=5.9 <7")
     expect(packedPackageJson.peerDependenciesMeta?.typescript?.optional).toBe(true)
     expect(packedPackageJson.engines?.node).toBe(">=22.0.0")
 
@@ -472,8 +474,17 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const transformer = require("@opsydyn/crumbs-css/dist/transformer");
         const policyTools = require("@opsydyn/crumbs-css/tooling/policy");
         const migrationTools = require("@opsydyn/crumbs-css/tooling/migrations");
+        const consumerTypeScript = require("typescript");
+        if (!consumerTypeScript.version.startsWith("6.")) throw new Error("Packed migration tooling must be exercised with the TypeScript 6 consumer");
         const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
         if (migrationTools.decodeSourceMigration(migrationMap).format !== migrationTools.SOURCE_MIGRATION_FORMAT || typeof migrationTools.planSourceMigration !== "function") throw new Error("CommonJS migration tooling API failed");
+        const fromTokenId = "@example/design-system/tokens@1#5:color/6:accent";
+        const toTokenId = "@example/design-system/tokens@2#5:color/5:brand";
+        const migrationForConsumer = {format:"crumbs.source-migration",schemaVersion:1,id:"example/no-op",revision:1,provider:"@example/design-system",tokens:[{fromId:fromTokenId,toId:toTokenId,fromImport:{moduleSpecifier:"../tokens-v1.css",importedName:"tokens"},toImport:{moduleSpecifier:"../tokens.css",importedName:"tokens"}}],components:[]};
+        const tokenForConsumer = (id,version,path) => ({id,contract:{owner:"@example/design-system",name:"tokens",version},path,visibility:"public",domain:{kind:"color"},kind:"definition",origin:{path:version === 1 ? "src/tokens-v1.css.ts" : "src/tokens.css.ts",exportPath:"tokens"}});
+        const emptyManifest = (version,tokens=[]) => ({format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@example/design-system",version},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"0.1.1-alpha.1"},artifact:{name:"native-style-ir",version:1}},tokens,components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:tokens.map(token => ({kind:"token-contract",id:token.contract.owner+"#"+token.contract.name+"@"+token.contract.version})),unresolved:[]}});
+        const migrationPlan = migrationTools.planSourceMigration({migration:migrationTools.decodeSourceMigration(migrationForConsumer),baseline:emptyManifest("1.0.0",[tokenForConsumer(fromTokenId,1,["color","accent"])]),current:emptyManifest("2.0.0",[tokenForConsumer(toTokenId,2,["color","brand"])]),files:[{path:"src/noop.ts",source:"export const stable = true;\\n"}]});
+        if (migrationPlan.report.files[0]?.status !== "unchanged" || migrationPlan.outputs[0]?.source !== "export const stable = true;\\n") throw new Error("CommonJS migration planner failed with the packed TypeScript consumer");
         if (Object.keys(migrationTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from migration API");
         const policyInput = {format:"crumbs.css.design-system-policy",schemaVersion:1,policyId:"@acme/policy",version:1,preset:{name:"migration",version:1},severityOverrides:{},literalValueScopes:[],semanticTokenScopes:[],semanticTokenIds:[],targetProfiles:[],outputBudgets:[],exceptions:[]};
         const policyCurrent = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs-native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
@@ -535,8 +546,17 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { explainStyle } from "@opsydyn/crumbs-css/devtools";
         import { checkDesignSystemPolicy, decodeDesignSystemPolicy, encodeCanonicalDesignSystemPolicyReport } from "@opsydyn/crumbs-css/tooling/policy";
         import { decodeSourceMigration, planSourceMigration, SOURCE_MIGRATION_FORMAT } from "@opsydyn/crumbs-css/tooling/migrations";
+        import * as consumerTypeScript from "typescript";
+        if (!consumerTypeScript.version.startsWith("6.")) throw new Error("Packed migration tooling must be exercised with the TypeScript 6 consumer");
         const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
         if (decodeSourceMigration(migrationMap).format !== SOURCE_MIGRATION_FORMAT || typeof planSourceMigration !== "function") throw new Error("ESM migration tooling API failed");
+        const fromTokenId = "@example/design-system/tokens@1#5:color/6:accent";
+        const toTokenId = "@example/design-system/tokens@2#5:color/5:brand";
+        const migrationForConsumer = {format:"crumbs.source-migration",schemaVersion:1,id:"example/no-op",revision:1,provider:"@example/design-system",tokens:[{fromId:fromTokenId,toId:toTokenId,fromImport:{moduleSpecifier:"../tokens-v1.css",importedName:"tokens"},toImport:{moduleSpecifier:"../tokens.css",importedName:"tokens"}}],components:[]};
+        const tokenForConsumer = (id,version,path) => ({id,contract:{owner:"@example/design-system",name:"tokens",version},path,visibility:"public",domain:{kind:"color"},kind:"definition",origin:{path:version === 1 ? "src/tokens-v1.css.ts" : "src/tokens.css.ts",exportPath:"tokens"}});
+        const emptyManifest = (version,tokens=[]) => ({format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@example/design-system",version},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"0.1.1-alpha.1"},artifact:{name:"native-style-ir",version:1}},tokens,components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:tokens.map(token => ({kind:"token-contract",id:token.contract.owner+"#"+token.contract.name+"@"+token.contract.version})),unresolved:[]}});
+        const migrationPlan = planSourceMigration({migration:decodeSourceMigration(migrationForConsumer),baseline:emptyManifest("1.0.0",[tokenForConsumer(fromTokenId,1,["color","accent"])]),current:emptyManifest("2.0.0",[tokenForConsumer(toTokenId,2,["color","brand"])]),files:[{path:"src/noop.ts",source:"export const stable = true;\\n"}]});
+        if (migrationPlan.report.files[0]?.status !== "unchanged" || migrationPlan.outputs[0]?.source !== "export const stable = true;\\n") throw new Error("ESM migration planner failed with the packed TypeScript consumer");
         const policyInput = {format:"crumbs.css.design-system-policy",schemaVersion:1,policyId:"@acme/policy",version:1,preset:{name:"migration",version:1},severityOverrides:{},literalValueScopes:[],semanticTokenScopes:[],semanticTokenIds:[],targetProfiles:[],outputBudgets:[],exceptions:[]};
         const policyCurrent = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs-native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
         const policyReport = checkDesignSystemPolicy({policy:decodeDesignSystemPolicy(policyInput),current:policyCurrent});

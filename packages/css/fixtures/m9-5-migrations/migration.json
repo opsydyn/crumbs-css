@@ -1,0 +1,24 @@
+{
+  "format": "crumbs.source-migration",
+  "schemaVersion": 1,
+  "id": "design-system/2026-09-source-migration",
+  "revision": 1,
+  "provider": "@example/design-system",
+  "tokens": [
+    {
+      "fromId": "@example/design-system/tokens@1#5:color/6:accent",
+      "toId": "@example/design-system/tokens@2#5:color/5:brand",
+      "fromImport": { "moduleSpecifier": "../tokens-v1.css", "importedName": "tokens" },
+      "toImport": { "moduleSpecifier": "../tokens.css", "importedName": "tokens" }
+    }
+  ],
+  "components": [
+    {
+      "fromId": "@example/design-system#button@1",
+      "toId": "@example/design-system#action-button@2",
+      "fromImport": { "moduleSpecifier": "../button.css", "importedName": "button" },
+      "toImport": { "moduleSpecifier": "../action-button.css", "importedName": "actionButton" },
+      "slots": { "root": "container", "label": "label" }
+    }
+  ]
+}

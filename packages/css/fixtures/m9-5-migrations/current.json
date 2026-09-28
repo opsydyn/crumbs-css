@@ -1,0 +1,42 @@
+{
+  "format": "crumbs.design-system-manifest",
+  "schemaVersion": 1,
+  "package": { "name": "@example/design-system", "version": "2.0.0" },
+  "producer": {
+    "compiler": { "name": "@opsydyn/crumbs-css", "version": "0.1.1-alpha.1" },
+    "artifact": { "name": "native-style-ir", "version": 1 }
+  },
+  "tokens": [
+    {
+      "id": "@example/design-system/tokens@2#5:color/5:brand",
+      "contract": { "owner": "@example/design-system", "name": "tokens", "version": 2 },
+      "path": ["color", "brand"],
+      "visibility": "public",
+      "domain": { "kind": "color" },
+      "kind": "definition",
+      "origin": { "path": "src/tokens.css.ts", "exportPath": "tokens" }
+    }
+  ],
+  "components": [
+    {
+      "id": "@example/design-system#action-button@2",
+      "contract": { "owner": "@example/design-system", "name": "components", "version": 2 },
+      "origin": { "path": "src/action-button.css.ts", "exportPath": "actionButton" },
+      "slots": ["container", "label"],
+      "variants": {},
+      "extensionPoints": [],
+      "stateConstraints": [],
+      "defaults": {}
+    }
+  ],
+  "modules": [],
+  "dependencies": [],
+  "capabilities": [],
+  "coverage": {
+    "roots": [
+      { "kind": "token-contract", "id": "@example/design-system#tokens@2" },
+      { "kind": "component-recipe", "id": "@example/design-system#action-button@2" }
+    ],
+    "unresolved": []
+  }
+}

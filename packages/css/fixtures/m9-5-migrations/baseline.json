@@ -1,0 +1,42 @@
+{
+  "format": "crumbs.design-system-manifest",
+  "schemaVersion": 1,
+  "package": { "name": "@example/design-system", "version": "1.0.0" },
+  "producer": {
+    "compiler": { "name": "@opsydyn/crumbs-css", "version": "0.1.1-alpha.1" },
+    "artifact": { "name": "native-style-ir", "version": 1 }
+  },
+  "tokens": [
+    {
+      "id": "@example/design-system/tokens@1#5:color/6:accent",
+      "contract": { "owner": "@example/design-system", "name": "tokens", "version": 1 },
+      "path": ["color", "accent"],
+      "visibility": "public",
+      "domain": { "kind": "color" },
+      "kind": "definition",
+      "origin": { "path": "src/tokens-v1.css.ts", "exportPath": "tokens" }
+    }
+  ],
+  "components": [
+    {
+      "id": "@example/design-system#button@1",
+      "contract": { "owner": "@example/design-system", "name": "components", "version": 1 },
+      "origin": { "path": "src/button.css.ts", "exportPath": "button" },
+      "slots": ["root", "label"],
+      "variants": {},
+      "extensionPoints": [],
+      "stateConstraints": [],
+      "defaults": {}
+    }
+  ],
+  "modules": [],
+  "dependencies": [],
+  "capabilities": [],
+  "coverage": {
+    "roots": [
+      { "kind": "token-contract", "id": "@example/design-system#tokens@1" },
+      { "kind": "component-recipe", "id": "@example/design-system#button@1" }
+    ],
+    "unresolved": []
+  }
+}

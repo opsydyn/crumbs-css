@@ -1,0 +1,139 @@
+---
+title: Migrate design-system sources
+description: Plan explicit token and recipe-slot source edits from versioned design-system manifests.
+---
+
+Crumbs source migrations apply an explicit, versioned map from one design-system
+manifest to another. The tool edits only source files passed with repeated
+`--file` flags. It does not search a repository, discover consumers, or infer
+replacements from token names.
+
+## Prepare the manifests and migration map
+
+Create baseline and current schema-v1 manifests for the same provider package.
+The migration's `provider` must match both manifests. Each mapped token and
+component ID must exist in the corresponding manifest. Token domains must stay
+compatible, and every baseline component slot must have an explicit mapping to
+a slot in the current component.
+
+A migration map uses `format: "crumbs.source-migration"` and
+`schemaVersion: 1`. For example:
+
+```json
+{
+  "format": "crumbs.source-migration",
+  "schemaVersion": 1,
+  "id": "acme/design-system-v2",
+  "revision": 1,
+  "provider": "@acme/design-system",
+  "tokens": [
+    {
+      "fromId": "@acme/design-system/tokens@1#5:color/6:accent",
+      "toId": "@acme/design-system/tokens@2#5:color/5:brand",
+      "fromImport": { "moduleSpecifier": "../tokens-v1.css", "importedName": "tokens" },
+      "toImport": { "moduleSpecifier": "../tokens.css", "importedName": "tokens" }
+    }
+  ],
+  "components": [
+    {
+      "fromId": "@acme/design-system#button@1",
+      "toId": "@acme/design-system#action-button@2",
+      "fromImport": { "moduleSpecifier": "../button.css", "importedName": "button" },
+      "toImport": { "moduleSpecifier": "../action-button.css", "importedName": "actionButton" },
+      "slots": { "root": "container", "label": "label" }
+    }
+  ]
+}
+```
+
+`fromImport` and `toImport` identify the exact module specifier and exported
+name in each version. The IDs bind those source mappings to manifest entities;
+matching names alone is not enough.
+
+## Review the dry run
+
+Pass every source file you intend to analyze. The default command plans edits and
+prints a report without writing files:
+
+```sh
+bun run migrate:source -- \
+  --migration migrations/design-system-v2.json \
+  --baseline .crumbs/baseline-manifest.json \
+  --current .crumbs/current-manifest.json \
+  --file apps/mobile/src/Theme.tsx \
+  --file apps/mobile/src/components/ActionButton.tsx \
+  --format json
+```
+
+The report records each supplied path, its before and proposed after SHA-256,
+proposed and applied edit counts, diagnostics, and the `explicit-files-only`
+analysis limit. JSON output uses the canonical schema-v1 report. Exit status is
+`0` for a clean plan, `1` when valid inputs produce blocking diagnostics, and
+`2` for invalid arguments or unreadable, invalid, or unparsable input.
+
+Review the complete report and source diff. The tool does not claim that
+unlisted files are free of old references. Supply all known consumers, then
+review the consumer set yourself.
+
+## Apply a clean plan
+
+Only add `--write` after reviewing the dry run:
+
+```sh
+bun run migrate:source -- \
+  --migration migrations/design-system-v2.json \
+  --baseline .crumbs/baseline-manifest.json \
+  --current .crumbs/current-manifest.json \
+  --file apps/mobile/src/Theme.tsx \
+  --file apps/mobile/src/components/ActionButton.tsx \
+  --write \
+  --format json
+```
+
+Crumbs reads and plans every named file before the first write. If any supplied
+file has an unsupported or ambiguous edit, the entire invocation is blocked and
+none of its files are changed. Successful replacements are written atomically
+per file. A filesystem failure during the write phase is reported; review the
+reported statuses and repository diff before retrying.
+
+## Recognized syntax and limits
+
+The current recognizer handles named token imports with static property paths;
+component recipes and extensions identified by manifest source origin; static
+slot keys in recipe slots and slot-style branches; and direct immutable consumer
+flows from `useThemedStyles` to `createComponentRecipeResolver`, followed by
+static slot-property reads. It preserves local aliases and unrelated source
+bytes where edits are safe.
+
+Computed token or slot access, computed variant axes, shadowed or reassigned
+bindings, unresolved recipe origins, and unsupported wrapper flows produce
+diagnostics instead of guessed edits. For example, `result[slot]` cannot be
+mapped safely because the selected slot is not statically known. A blocker in
+one explicitly supplied file prevents writes to every file in that invocation.
+
+The current tool does not find all component consumers, trace arbitrary
+TypeScript control flow, migrate CSS semantics, or establish that a design
+system is compatible on every platform. Its evidence is limited to the
+manifests and source files supplied by the caller.
+
+## API and TypeScript peer
+
+The tooling-only `@opsydyn/crumbs-css/tooling/migrations` subpath exports plain
+migration/report data types, version tags, decoders, canonical report encoding,
+and `planSourceMigration`. Effect Schema and TypeScript AST objects are not
+part of that API. Consumers that import this tooling subpath must provide the
+optional TypeScript peer, `>=5.9 <7`; ordinary React Native runtime consumers
+do not need it.
+
+Repository maintainers can regenerate the fixed qualification report and
+receipt from the checked-in fixtures with:
+
+```sh
+bun run migrations:qualify
+```
+
+The receipt and dry-run report are under
+`docs/evidence/2026-09-28-m9-5-safe-migrations/`. This fixed fixture run
+qualifies the source tooling contract; it does not replace review of a team's
+own explicitly supplied inputs or prove runtime, release, publication, or
+device behavior.
