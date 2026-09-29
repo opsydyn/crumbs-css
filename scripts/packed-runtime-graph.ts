@@ -41,6 +41,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./tooling/policy": "compiler-tooling",
   "./tooling/migrations": "compiler-tooling",
   "./tooling/dtcg": "compiler-tooling",
+  "./tooling/ownership": "compiler-tooling",
   "./metro-plugin": "compiler-tooling",
   "./dist/transformer": "compiler-tooling",
   "./dist/metro-plugin": "compiler-tooling",

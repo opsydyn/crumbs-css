@@ -115,39 +115,49 @@ function diagnosticReferences(report: CrumbsDtcgImportResult): ReadonlyArray<Rep
 }
 
 /** Validate a DTCG operation result and extract exact token/diagnostic references. */
+export function decodeDtcgImportResult(input: unknown): CrumbsDtcgImportResult {
+  const inputReferenceCount = preflightReferenceCount(input)
+  if (inputReferenceCount !== undefined) assertOwnershipReferenceLimit(inputReferenceCount)
+  const decoded = dtcgImportResultCodec.decode(input)
+  if (!decoded.ok) throw decodeError(decoded.issues)
+  const report = decoded.value as CrumbsDtcgImportResult
+  if (report.ok) {
+    const { payload, sidecar } = report.value
+    if (!sameContract(payload.contract, sidecar.contract)) {
+      throw new TypeError("DTCG payload contract does not match its sidecar contract.")
+    }
+    const tokenIds = new Set<string>()
+    for (const token of sidecar.tokens) {
+      if (tokenIds.has(token.tokenId)) {
+        throw new TypeError(`DTCG sidecar contains duplicate token ID ${JSON.stringify(token.tokenId)}.`)
+      }
+      tokenIds.add(token.tokenId)
+    }
+    for (const tokenId of Object.keys(payload.values)) {
+      if (!tokenIds.has(tokenId)) {
+        throw new TypeError(`DTCG payload token ID ${JSON.stringify(tokenId)} has no sidecar provenance record.`)
+      }
+    }
+  }
+  return report
+}
+
 export function adaptDtcgImportResult(input: unknown, manifests: ReadonlyArray<DesignSystemManifest>): {
   readonly format: "crumbs.dtcg-import-result"
   readonly schemaVersion: 1
   readonly data: CrumbsDtcgImportResult
   readonly references: ReadonlyArray<ReportReference>
 } {
-  const inputReferenceCount = preflightReferenceCount(input)
-  if (inputReferenceCount !== undefined) assertOwnershipReferenceLimit(inputReferenceCount)
-  const decoded = dtcgImportResultCodec.decode(input)
-  if (!decoded.ok) throw decodeError(decoded.issues)
-  const report = decoded.value as CrumbsDtcgImportResult
+  const report = decodeDtcgImportResult(input)
   const tokenCount = report.ok ? report.value.sidecar.tokens.length : 0
   assertOwnershipReferenceLimit(tokenCount + report.diagnostics.length)
 
   const references: ReportReference[] = []
   if (report.ok) {
-    const { payload, sidecar } = report.value
-    if (!sameContract(payload.contract, sidecar.contract)) {
-      throw new TypeError("DTCG payload contract does not match its sidecar contract.")
-    }
+    const { sidecar } = report.value
     assertCoveredContract(sidecar.contract, manifests)
-    const tokenIds = new Set<string>()
     for (const [index, token] of sidecar.tokens.entries()) {
-      if (tokenIds.has(token.tokenId)) {
-        throw new TypeError(`DTCG sidecar contains duplicate token ID ${JSON.stringify(token.tokenId)}.`)
-      }
-      tokenIds.add(token.tokenId)
       references.push({ jsonPointer: `/value/sidecar/tokens/${index}/tokenId`, entityId: token.tokenId })
-    }
-    for (const tokenId of Object.keys(payload.values)) {
-      if (!tokenIds.has(tokenId)) {
-        throw new TypeError(`DTCG payload token ID ${JSON.stringify(tokenId)} has no sidecar provenance record.`)
-      }
     }
   }
   references.push(...diagnosticReferences(report))

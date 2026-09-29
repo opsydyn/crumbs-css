@@ -1,5 +1,17 @@
 import * as Schema from "effect/Schema"
 import { makeDataCodec } from "../../contracts/data-codec"
+import { decodeStyleExplanationReport } from "../../devtools/style-explanation-schema"
+import { STYLE_EXPLANATION_REPORT_TYPE, STYLE_EXPLANATION_VERSION } from "../../devtools/style-explanation-model"
+import { decodeManifestCompatibilityReport } from "../manifest/comparison-report-schema"
+import {
+  MANIFEST_COMPATIBILITY_REPORT_FORMAT,
+  MANIFEST_COMPATIBILITY_REPORT_VERSION,
+} from "../manifest/comparison-report-model"
+import { decodeDesignSystemPolicyReport } from "../policy/schema"
+import { DESIGN_SYSTEM_POLICY_REPORT_FORMAT, DESIGN_SYSTEM_POLICY_REPORT_VERSION } from "../policy/model"
+import { decodeSourceMigrationReport } from "../migrations/schema"
+import { SOURCE_MIGRATION_REPORT_FORMAT, SOURCE_MIGRATION_REPORT_VERSION } from "../migrations/model"
+import { decodeDtcgImportResult } from "./dtcg-adapter"
 import {
   DESIGN_SYSTEM_OWNED_REPORT_FORMAT,
   DESIGN_SYSTEM_OWNED_REPORT_VERSION,
@@ -13,6 +25,7 @@ import {
   type OwnershipAttribution,
   type OwnershipAnalysisLimit,
   type OwnershipOwner,
+  type SupportedSourceReport,
 } from "./model"
 import { assertOwnershipReferenceLimit, readOwnArrayLength } from "./resource-limit"
 
@@ -76,6 +89,60 @@ const OwnedReportSchema = Schema.Struct({
 })
 const ownedReportCodec = makeDataCodec("design-system-owned-report-v1", OwnedReportSchema)
 
+function decodeSourceData(source: OwnedReport["source"]): SupportedSourceReport {
+  if (source.format === MANIFEST_COMPATIBILITY_REPORT_FORMAT) {
+    if (source.schemaVersion !== MANIFEST_COMPATIBILITY_REPORT_VERSION) {
+      throw new TypeError("Owned-report source compatibility report descriptor does not match source.data.")
+    }
+    return decodeManifestCompatibilityReport(source.data)
+  }
+  if (source.format === DESIGN_SYSTEM_POLICY_REPORT_FORMAT) {
+    if (source.schemaVersion !== DESIGN_SYSTEM_POLICY_REPORT_VERSION) {
+      throw new TypeError("Owned-report source policy report descriptor does not match source.data.")
+    }
+    return decodeDesignSystemPolicyReport(source.data)
+  }
+  if (source.format === SOURCE_MIGRATION_REPORT_FORMAT) {
+    if (source.schemaVersion !== SOURCE_MIGRATION_REPORT_VERSION) {
+      throw new TypeError("Owned-report source migration report descriptor does not match source.data.")
+    }
+    return decodeSourceMigrationReport(source.data)
+  }
+  if (source.format === "crumbs.dtcg-import-result") {
+    if (source.schemaVersion !== 1) {
+      throw new TypeError("Owned-report source DTCG import result descriptor does not match source.data.")
+    }
+    return decodeDtcgImportResult(source.data)
+  }
+  if (source.format === STYLE_EXPLANATION_REPORT_TYPE) {
+    if (source.schemaVersion !== STYLE_EXPLANATION_VERSION) {
+      throw new TypeError("Owned-report source style explanation descriptor does not match source.data.")
+    }
+    return decodeStyleExplanationReport(source.data)
+  }
+  throw new TypeError(`Invalid Crumbs design-system owned report v1: unsupported source format ${JSON.stringify(source.format)}.`)
+}
+
+function hasJsonPointerTarget(root: unknown, pointer: string): boolean {
+  if (pointer === "") return true
+  let current = root
+  for (const encodedSegment of pointer.slice(1).split("/")) {
+    const segment = encodedSegment.replace(/~1/gu, "/").replace(/~0/gu, "~")
+    if (Array.isArray(current)) {
+      if (!/^(0|[1-9]\d*)$/u.test(segment)) return false
+      const descriptor = Object.getOwnPropertyDescriptor(current, segment)
+      if (descriptor === undefined || !("value" in descriptor)) return false
+      current = descriptor.value
+      continue
+    }
+    if (typeof current !== "object" || current === null) return false
+    const descriptor = Object.getOwnPropertyDescriptor(current, segment)
+    if (descriptor === undefined || !("value" in descriptor)) return false
+    current = descriptor.value
+  }
+  return true
+}
+
 function decodeError(
   boundary: string,
   issues: ReadonlyArray<{ readonly path: ReadonlyArray<string | number>; readonly message: string }>,
@@ -122,7 +189,14 @@ export function decodeOwnedReport(input: unknown): OwnedReport {
   const decoded = ownedReportCodec.decode(input)
   if (!decoded.ok) throw decodeError("Crumbs design-system owned report v1", decoded.issues)
 
-  const report = decoded.value as OwnedReport
+  const decodedReport = decoded.value as OwnedReport
+  const report: OwnedReport = {
+    ...decodedReport,
+    source: {
+      ...decodedReport.source,
+      data: decodeSourceData(decodedReport.source),
+    },
+  }
   assertOwnershipReferenceLimit(report.attributions.length)
   const pointers = new Set<string>()
   for (const attribution of report.attributions as ReadonlyArray<OwnershipAttribution>) {
@@ -130,6 +204,12 @@ export function decodeOwnedReport(input: unknown): OwnedReport {
       throw new TypeError(`Invalid Crumbs design-system owned report v1: duplicate attribution pointer ${JSON.stringify(attribution.jsonPointer)}.`)
     }
     pointers.add(attribution.jsonPointer)
+  }
+
+  for (const attribution of report.attributions as ReadonlyArray<OwnershipAttribution>) {
+    if (!hasJsonPointerTarget(report.source.data, attribution.jsonPointer)) {
+      throw new TypeError(`Invalid Crumbs design-system owned report v1: attribution pointer ${JSON.stringify(attribution.jsonPointer)} does not resolve in source.data.`)
+    }
   }
 
   const limitCodes = new Set<string>()

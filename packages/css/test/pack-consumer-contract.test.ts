@@ -242,6 +242,8 @@ const consumerTypeSource = `
   import type { SourceMigration, SourceMigrationPlan, SourceMigrationReport } from "@opsydyn/crumbs-css/tooling/migrations";
   import { CRUMBS_DTCG_FORMAT_PROFILE, CRUMBS_DTCG_IMPORT_FORMAT, CRUMBS_DTCG_IMPORT_VERSION, importDtcgTheme } from "@opsydyn/crumbs-css/tooling/dtcg";
   import type { CrumbsDtcgDiagnostic, CrumbsDtcgImportRequest, CrumbsDtcgImportResult, DtcgImportSidecar } from "@opsydyn/crumbs-css/tooling/dtcg";
+  import { annotateDesignSystemReport, decodeDesignSystemOwnership, decodeOwnedReport, DESIGN_SYSTEM_OWNED_REPORT_FORMAT, encodeCanonicalOwnedReport, OWNERSHIP_MAX_REPORT_REFERENCES } from "@opsydyn/crumbs-css/tooling/ownership";
+  import type { DesignSystemOwnership, OwnedReport, OwnershipAnalysisLimitCode, OwnershipAttribution, SupportedSourceReport } from "@opsydyn/crumbs-css/tooling/ownership";
   declare const dtcgRequestForTypes: CrumbsDtcgImportRequest;
   const dtcgResultForTypes: CrumbsDtcgImportResult = importDtcgTheme(dtcgRequestForTypes);
   const dtcgDiagnosticForTypes: CrumbsDtcgDiagnostic | undefined = dtcgResultForTypes.diagnostics[0];
@@ -272,6 +274,16 @@ const consumerTypeSource = `
     producer: {compiler: {name: "@opsydyn/crumbs-css", version: "1.0.0"}, artifact: {name: "crumbs-native-style-artifact", version: 1}},
     tokens: [], components: [], modules: [], dependencies: [], capabilities: [], coverage: {roots: [], unresolved: []},
   };
+  const ownershipForTypes: DesignSystemOwnership = decodeDesignSystemOwnership({format: "crumbs.design-system-ownership", schemaVersion: 1, owners: [], assignments: []});
+  const ownershipSourceForTypes: SupportedSourceReport = dtcgResultForTypes;
+  const ownershipReportForTypes: OwnedReport = annotateDesignSystemReport({ownership: ownershipForTypes, manifests: [manifestForTypes], report: ownershipSourceForTypes});
+  const decodedOwnedReportForTypes: OwnedReport = decodeOwnedReport(ownershipReportForTypes);
+  const encodedOwnedReportForTypes: string = encodeCanonicalOwnedReport(decodedOwnedReportForTypes);
+  const ownedReportFormatForTypes: "crumbs.design-system-owned-report" = DESIGN_SYSTEM_OWNED_REPORT_FORMAT;
+  const ownershipLimitForTypes: 100000 = OWNERSHIP_MAX_REPORT_REFERENCES;
+  const attributionForTypes: OwnershipAttribution | undefined = ownershipReportForTypes.attributions[0];
+  const ownershipLimitCodeForTypes: OwnershipAnalysisLimitCode = "explicit-manifests-only";
+  void [encodedOwnedReportForTypes, ownedReportFormatForTypes, ownershipLimitForTypes, attributionForTypes, ownershipLimitCodeForTypes];
   const typedMeasurements: ReadonlyArray<PolicyMeasurement> = decodePolicyMeasurements([]);
   const typedMetadata: ReadonlyArray<PolicyStyleExplanationMetadata> = [];
   const decodedPolicyForTypes = decodeDesignSystemPolicy(policyForTypes);
@@ -448,6 +460,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
     const exportResolutions = await verifyPackedExportMap(packageRoot, consumerRoot)
     expect(exportResolutions.map((entry) => entry.subpath)).toEqual(Object.keys(packedPackageJson.exports))
     expect(exportResolutions.find((entry) => entry.subpath === "./tooling/dtcg")).toEqual({ subpath: "./tooling/dtcg", import: "./dist/tooling-dtcg.mjs", require: "./dist/tooling-dtcg.cjs", types: "./dist/tooling-dtcg.d.mts" })
+    expect(exportResolutions.find((entry) => entry.subpath === "./tooling/ownership")).toEqual({ subpath: "./tooling/ownership", import: "./dist/tooling-ownership.mjs", require: "./dist/tooling-ownership.cjs", types: "./dist/tooling-ownership.d.mts" })
     expect(exportResolutions.find((entry) => entry.subpath === "./dist/theme")?.import)
       .toBe("./dist/theme.mjs")
     expect(exportResolutions.find((entry) => entry.subpath === "./dist/metro-plugin")?.require)
@@ -486,6 +499,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const policyTools = require("@opsydyn/crumbs-css/tooling/policy");
         const migrationTools = require("@opsydyn/crumbs-css/tooling/migrations");
         const dtcgTools = require("@opsydyn/crumbs-css/tooling/dtcg");
+        const ownershipTools = require("@opsydyn/crumbs-css/tooling/ownership");
         const consumerTypeScript = require("typescript");
         if (!consumerTypeScript.version.startsWith("6.")) throw new Error("Packed migration tooling must be exercised with the TypeScript 6 consumer");
         const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
@@ -506,6 +520,12 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         if (Object.keys(policyTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from the policy API");
         if (typeof dtcgTools.importDtcgTheme !== "function" || dtcgTools.CRUMBS_DTCG_IMPORT_FORMAT !== "crumbs.dtcg-theme-import" || dtcgTools.CRUMBS_DTCG_FORMAT_PROFILE !== "2025.10") throw new Error("CommonJS DTCG tooling API failed");
         if (Object.keys(dtcgTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from the DTCG API");
+        const ownershipDocument = ownershipTools.decodeDesignSystemOwnership({format:"crumbs.design-system-ownership",schemaVersion:1,owners:[],assignments:[]});
+        const ownershipManifest = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs.native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
+        const ownedReport = ownershipTools.annotateDesignSystemReport({ownership:ownershipDocument,manifests:[ownershipManifest],report:{ok:false,diagnostics:[]}});
+        const canonicalOwnedReport = ownershipTools.encodeCanonicalOwnedReport(ownershipTools.decodeOwnedReport(ownedReport));
+        if (ownershipTools.DESIGN_SYSTEM_OWNED_REPORT_FORMAT !== "crumbs.design-system-owned-report" || !canonicalOwnedReport.endsWith("\\n")) throw new Error("CommonJS ownership tooling API failed");
+        if (Object.keys(ownershipTools).some(name => name.endsWith("Schema") || name.endsWith("Codec"))) throw new Error("Effect Schema object leaked from the ownership API");
         require.extensions[".css"] = (module, filename) => {
           const source = require("node:fs").readFileSync(filename, "utf8")
             .replace(/^import (["'][^"']+["']);$/gm, "require($1);")
@@ -561,6 +581,7 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         import { checkDesignSystemPolicy, decodeDesignSystemPolicy, encodeCanonicalDesignSystemPolicyReport } from "@opsydyn/crumbs-css/tooling/policy";
         import { decodeSourceMigration, planSourceMigration, SOURCE_MIGRATION_FORMAT } from "@opsydyn/crumbs-css/tooling/migrations";
         import { CRUMBS_DTCG_FORMAT_PROFILE, CRUMBS_DTCG_IMPORT_FORMAT, importDtcgTheme } from "@opsydyn/crumbs-css/tooling/dtcg";
+        import { annotateDesignSystemReport, decodeDesignSystemOwnership, decodeOwnedReport, DESIGN_SYSTEM_OWNED_REPORT_FORMAT, encodeCanonicalOwnedReport } from "@opsydyn/crumbs-css/tooling/ownership";
         import * as consumerTypeScript from "typescript";
         if (!consumerTypeScript.version.startsWith("6.")) throw new Error("Packed migration tooling must be exercised with the TypeScript 6 consumer");
         const migrationMap = {format:"crumbs.source-migration",schemaVersion:1,id:"example/migration",revision:1,provider:"@example/design-system",tokens:[{fromId:"@example/design-system#token:color.old",toId:"@example/design-system#token:color.new",fromImport:{moduleSpecifier:"../tokens.css",importedName:"oldColor"},toImport:{moduleSpecifier:"../tokens.css",importedName:"newColor"}}],components:[]};
@@ -577,6 +598,11 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
         const policyCurrent = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs-native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
         const policyReport = checkDesignSystemPolicy({policy:decodeDesignSystemPolicy(policyInput),current:policyCurrent});
         if (policyReport.format !== "crumbs.css.design-system-policy-report" || JSON.parse(encodeCanonicalDesignSystemPolicyReport(policyReport)).policy.policyId !== "@acme/policy") throw new Error("ESM policy API contract failed");
+        const ownershipDocument = decodeDesignSystemOwnership({format:"crumbs.design-system-ownership",schemaVersion:1,owners:[],assignments:[]});
+        const ownershipManifest = {format:"crumbs.design-system-manifest",schemaVersion:1,package:{name:"@acme/design-system",version:"1.0.0"},producer:{compiler:{name:"@opsydyn/crumbs-css",version:"1.0.0"},artifact:{name:"crumbs.native-style-artifact",version:1}},tokens:[],components:[],modules:[],dependencies:[],capabilities:[],coverage:{roots:[],unresolved:[]}};
+        const ownedReport = annotateDesignSystemReport({ownership:ownershipDocument,manifests:[ownershipManifest],report:{ok:false,diagnostics:[]}});
+        const canonicalOwnedReport = encodeCanonicalOwnedReport(decodeOwnedReport(ownedReport));
+        if (DESIGN_SYSTEM_OWNED_REPORT_FORMAT !== "crumbs.design-system-owned-report" || !canonicalOwnedReport.endsWith("\\n")) throw new Error("ESM ownership tooling API failed");
         import {button} from "./button.css";
         import {contractedButton} from "./packages/ui/button.css";
         import {brand} from "./packages/brand/branded-button.css";

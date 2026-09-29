@@ -27,6 +27,7 @@ const toolEntries = {
   "tooling-policy": "src/tooling/policy.ts",
   "tooling-migrations": "src/tooling/migrations.ts",
   "tooling-dtcg": "src/tooling/dtcg.ts",
+  "tooling-ownership": "src/tooling/ownership.ts",
 }
 
 export default defineConfig([

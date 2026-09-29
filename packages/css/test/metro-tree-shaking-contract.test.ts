@@ -3,6 +3,7 @@ import { verifyTreeShakingCanary } from "../../../scripts/metro-tree-shaking-con
 import { CRUMBS_DTCG_IMPORT_FORMAT } from "../src/tooling/dtcg/model"
 
 const canary = "external-token-theme"
+const ownershipCanary = "crumbs.design-system-owned-report"
 
 test("verifyTreeShakingCanary accepts both iOS and web decoder/positive-control bundles", () => {
   const result = verifyTreeShakingCanary(
@@ -97,5 +98,23 @@ test("the DTCG public format marker detects accidental tooling retention in app 
     [{ ...cleanDecoderBundles[0]!, javascript: `decodeExternalTokenTheme(); '${CRUMBS_DTCG_IMPORT_FORMAT}'` }, cleanDecoderBundles[1]!],
     positiveControlBundles,
     CRUMBS_DTCG_IMPORT_FORMAT,
+  )).toThrow(/decoder.*ios\.jsbundle.*canary/i)
+})
+
+test("the ownership report marker detects accidental tooling retention in app bundles", () => {
+  const cleanDecoderBundles = [
+    { platform: "ios" as const, path: "ios.jsbundle", javascript: "resolveThemeTokens(styles, theme)" },
+    { platform: "web" as const, path: "web.js", javascript: "resolveThemeTokens(styles, theme)" },
+  ]
+  const positiveControlBundles = [
+    { platform: "ios" as const, path: "positive-ios.jsbundle", javascript: `annotateDesignSystemReport('${ownershipCanary}')` },
+    { platform: "web" as const, path: "positive-web.js", javascript: `annotateDesignSystemReport('${ownershipCanary}')` },
+  ]
+  expect(verifyTreeShakingCanary(cleanDecoderBundles, positiveControlBundles, ownershipCanary))
+    .toEqual({ decoder: ["ios", "web"], positiveControl: ["ios", "web"] })
+  expect(() => verifyTreeShakingCanary(
+    [{ ...cleanDecoderBundles[0]!, javascript: `resolveThemeTokens(); '${ownershipCanary}'` }, cleanDecoderBundles[1]!],
+    positiveControlBundles,
+    ownershipCanary,
   )).toThrow(/decoder.*ios\.jsbundle.*canary/i)
 })

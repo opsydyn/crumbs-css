@@ -274,7 +274,14 @@ describe("design-system report ownership annotation", () => {
       source: {
         format: "crumbs.design-system-compatibility-report",
         schemaVersion: 1,
-        data: compatibilityReport([]),
+        data: compatibilityReport([{
+          code: "token.removed",
+          level: "error",
+          entityId: TOKEN_ID,
+          fieldPath: "token",
+          message: "Token removed.",
+          affectedConsumers: [],
+        }]),
       },
       ownership: { format: "crumbs.design-system-ownership", schemaVersion: 1 },
       attributions: [
