@@ -126,6 +126,6 @@ describe("design-system ownership v1 schema", () => {
       "OWNERSHIP_ANALYSIS_LIMIT_CODES",
       "OWNERSHIP_UNRESOLVED_REASON_CODES",
     ])
-    expect(Object.keys(schema!).sort()).toEqual(["decodeDesignSystemOwnership"])
+    expect(Object.keys(schema!).sort()).toEqual(["decodeDesignSystemOwnership", "decodeOwnedReport"])
   })
 })
