@@ -88,7 +88,7 @@ export const action = componentRecipe({
       backgroundColor: vars.color.accent,
       borderRadius: vars.radius.pill,
       justifyContent: "center",
-      minHeight: 48,
+      minHeight: vars.control.height,
       paddingLeft: vars.space.lg,
       paddingRight: vars.space.lg,
     },

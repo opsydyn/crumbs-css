@@ -57,4 +57,26 @@ describe("reference system component recipes", () => {
     expect(styles.indicator).toHaveLength(3)
     expect(styles.label).toHaveLength(2)
   })
+
+  it("keeps dialog overlay, content, copy, and actions in typed slots", async () => {
+    setFileScope("reference-patterns-dialog.test.css.ts", "@crumbs/storybook")
+    let dialog: typeof import("../src/components/ReferencePatterns.css").dialogPanel
+    try {
+      ;({ dialogPanel: dialog } = await import("../src/components/ReferencePatterns.css"))
+    } finally {
+      endFileScope()
+    }
+
+    const styles = resolveComponentRecipeStyles(dialog, {})
+
+    expect(styles.overlay).toHaveLength(1)
+    expect(styles.content).toHaveLength(1)
+    expect(styles.title).toHaveLength(1)
+    expect(styles.description).toHaveLength(1)
+    expect(styles.actions).toHaveLength(1)
+    expect(styles.cancelAction).toHaveLength(1)
+    expect(styles.cancelLabel).toHaveLength(1)
+    expect(styles.confirmAction).toHaveLength(1)
+    expect(styles.confirmLabel).toHaveLength(1)
+  })
 })

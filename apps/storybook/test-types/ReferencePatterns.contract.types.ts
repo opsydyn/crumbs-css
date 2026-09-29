@@ -4,6 +4,7 @@ import type {
 } from "@opsydyn/crumbs-css/style"
 import {
   actionButton,
+  dialogPanel,
   inputField,
   selectionControl,
 } from "../src/components/ReferencePatterns.css"
@@ -12,6 +13,7 @@ type ButtonSelection = NativeComponentPublicProps<typeof actionButton>
 type ButtonSlots = NativeComponentResolvedStyles<typeof actionButton.slots>
 type InputSelection = NativeComponentPublicProps<typeof inputField>
 type SelectionControlSelection = NativeComponentPublicProps<typeof selectionControl>
+type DialogSlots = NativeComponentResolvedStyles<typeof dialogPanel.slots>
 
 const validButton: ButtonSelection = { disabled: false, pressed: true, tone: "neutral" }
 // @ts-expect-error Public tone values come from the component contract.
@@ -42,6 +44,24 @@ const invalidButtonSlots: ButtonSlots = {
     { color: "#ffffff" },
   ],
 }
+const validDialogSlots: DialogSlots = {
+  actions: [{ flexDirection: "row" }],
+  cancelAction: [{ minHeight: 40 }],
+  cancelLabel: [{ fontWeight: "800" }],
+  confirmAction: [{ minHeight: 40 }],
+  confirmLabel: [{ lineHeight: 18 }],
+  content: [{ padding: 16 }],
+  description: [{ lineHeight: 20 }],
+  overlay: [{ justifyContent: "center" }],
+  title: [{ fontSize: 20 }],
+}
+const invalidDialogSlots: DialogSlots = {
+  ...validDialogSlots,
+  overlay: [
+    // @ts-expect-error An overlay view slot does not accept text line height.
+    { lineHeight: 18 },
+  ],
+}
 
 void [
   validButton,
@@ -52,4 +72,6 @@ void [
   validSelection,
   validButtonSlots,
   invalidButtonSlots,
+  validDialogSlots,
+  invalidDialogSlots,
 ]

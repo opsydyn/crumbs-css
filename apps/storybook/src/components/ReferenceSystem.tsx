@@ -1,10 +1,55 @@
+import { TokenThemeScopeProvider } from "@opsydyn/crumbs-css/theme"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
+import * as Dialog from "@rn-primitives/dialog"
 import { useState } from "react"
 import { Text, View } from "react-native"
 import { ReferenceButton } from "./ReferenceButton"
+import { ReferenceDialog } from "./ReferenceDialog"
 import { ReferenceSelections } from "./ReferenceSelections"
 import { ReferenceTextField } from "./ReferenceTextField"
+import { ShowcaseCard } from "./ShowcaseCard"
+import { brandScopes, vars } from "../styles/theme"
 import * as s from "./ReferencePatterns.css"
+
+function PartnerBrandExample() {
+  return (
+    <TokenThemeScopeProvider contract={vars} context="brand" values={brandScopes.signal}>
+      <PartnerBrandExampleContent />
+    </TokenThemeScopeProvider>
+  )
+}
+
+function PartnerBrandExampleContent() {
+  const styles = useThemedStyles(s)
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [status, setStatus] = useState("The Signal brand is scoped to this card subtree.")
+
+  return (
+    <View style={styles.section}>
+      <View style={styles.sectionHeader}>
+        <Text style={styles.eyebrow}>Card + dialog</Text>
+        <Text style={styles.heading}>A second brand reuses the same components</Text>
+        <Text style={styles.body}>
+          The card and its action keep their component recipes. Only the brand token scope changes.
+        </Text>
+      </View>
+      <Dialog.Root onOpenChange={setDialogOpen} open={dialogOpen}>
+        <ShowcaseCard
+          actionLabel="Review partner contract"
+          body="This partner card resolves the shared card and action styles under a nested brand scope."
+          eyebrow="Signal partner scope"
+          onActionPress={() => setDialogOpen(true)}
+          title="One component system, two brands."
+        />
+        <Text style={styles.caption}>{status}</Text>
+        <ReferenceDialog
+          onCancel={() => setStatus("Review dismissed. The brand contract is unchanged.")}
+          onConfirm={() => setStatus("Review recorded for the Signal brand contract.")}
+        />
+      </Dialog.Root>
+    </View>
+  )
+}
 
 export function ReferenceSystem() {
   const styles = useThemedStyles(s)
@@ -57,6 +102,7 @@ export function ReferenceSystem() {
       </View>
 
       <ReferenceSelections fieldLocked={fieldLocked} onFieldLockedChange={setFieldLocked} />
+      <PartnerBrandExample />
     </View>
   )
 }
