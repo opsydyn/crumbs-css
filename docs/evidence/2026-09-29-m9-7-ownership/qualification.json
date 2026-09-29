@@ -1,0 +1,144 @@
+{
+  "boundaries": [
+    "Ownership metadata and reports are local tooling inputs; no hosted account or telemetry service is required.",
+    "Attribution covers only the explicitly supplied manifests and the source references in each report.",
+    "Android/device acceptance is not run and remains parked.",
+    "Package publication, visual acceptance, and release acceptance are not run."
+  ],
+  "coverage": {
+    "reports": [
+      {
+        "attributions": {
+          "assigned": 1,
+          "unassigned": 1,
+          "unresolved": 1
+        },
+        "id": "compatibility",
+        "outputSha256": "b9b82ab199985bb3f6bf87d894d622d37d46baf29752544f74b66d11ece13a6c",
+        "schemaVersion": 1,
+        "sourceFormat": "crumbs.design-system-compatibility-report"
+      },
+      {
+        "attributions": {
+          "assigned": 1,
+          "unassigned": 1,
+          "unresolved": 1
+        },
+        "id": "policy",
+        "outputSha256": "6bb53e3aa9f27e691c8673ca8f03db758412b9113674c7e9ca663b9bb7b5bdb5",
+        "schemaVersion": 1,
+        "sourceFormat": "crumbs.css.design-system-policy-report"
+      },
+      {
+        "attributions": {
+          "assigned": 1,
+          "unassigned": 1,
+          "unresolved": 1
+        },
+        "id": "migration",
+        "outputSha256": "aae524638019a1f1222644c393da0e21ace18daa42e04081b571b761d53b7ad6",
+        "schemaVersion": 1,
+        "sourceFormat": "crumbs.source-migration-report"
+      },
+      {
+        "attributions": {
+          "assigned": 1,
+          "unassigned": 1,
+          "unresolved": 1
+        },
+        "id": "style-explanation",
+        "outputSha256": "02f7af9e620c9bc8a7687b472f790bdd7abc252cf9a52fb7ca6588ae6da97b9d",
+        "schemaVersion": 1,
+        "sourceFormat": "crumbs.css.style-explanation"
+      },
+      {
+        "attributions": {
+          "assigned": 1,
+          "unassigned": 1,
+          "unresolved": 1
+        },
+        "id": "dtcg-success",
+        "outputSha256": "63b723a9c2d6d6148629a565b79fadf079b6bd4593632182e0d50d31d8b680e1",
+        "schemaVersion": 1,
+        "sourceFormat": "crumbs.dtcg-import-result"
+      },
+      {
+        "attributions": {
+          "assigned": 0,
+          "unassigned": 0,
+          "unresolved": 1
+        },
+        "id": "dtcg-failure",
+        "outputSha256": "689b0bdd9006694c886f9e55fa7dd28d764dd3f2e51e5b0510d06fb88f6c7025",
+        "schemaVersion": 1,
+        "sourceFormat": "crumbs.dtcg-import-result"
+      }
+    ],
+    "totals": {
+      "assigned": 5,
+      "unassigned": 5,
+      "unresolved": 6
+    }
+  },
+  "fixtures": [
+    {
+      "bytes": 294,
+      "path": "packages/css/fixtures/m9-7-ownership/ownership.json",
+      "sha256": "275c02f2b8dc20c3a0a9c4f32e000be342777a19a530634fe9146907e5908548"
+    },
+    {
+      "bytes": 1285,
+      "path": "packages/css/fixtures/m9-7-ownership/manifest-v1.json",
+      "sha256": "f362b80331a822c532e6543eeee7af0ea64f03ab35289bb03b5253b9f2046687"
+    },
+    {
+      "bytes": 1285,
+      "path": "packages/css/fixtures/m9-7-ownership/manifest-v2.json",
+      "sha256": "f9887efa5e4580a27be1beade72da2e3ca3876902ae705c32098adc3526ba9f9"
+    },
+    {
+      "bytes": 1106,
+      "path": "packages/css/fixtures/m9-7-ownership/compatibility.json",
+      "sha256": "3425cc5c3824590365e30ff1f4cb5d336b56478d50dd0204c2cdbafd195ca891"
+    },
+    {
+      "bytes": 1230,
+      "path": "packages/css/fixtures/m9-7-ownership/policy.json",
+      "sha256": "014b1f55de0abc3a624df0369729ac9a68dc51916a0ebaab3727c3e6597c086e"
+    },
+    {
+      "bytes": 1137,
+      "path": "packages/css/fixtures/m9-7-ownership/migration.json",
+      "sha256": "4737621e592567049b763f58b0fe4d09460c1b47b336b7c2900c86b67784374b"
+    },
+    {
+      "bytes": 1025,
+      "path": "packages/css/fixtures/m9-7-ownership/style-explanation.json",
+      "sha256": "d5d1725515f40598de04a76bd556dbec2258faa4f977243440f95a939655b796"
+    },
+    {
+      "bytes": 1790,
+      "path": "packages/css/fixtures/m9-7-ownership/dtcg-success.json",
+      "sha256": "58b6f91768fedc6b2f0de41b1acb79d10e92f4e337693c01c268aae6b2ae76f0"
+    },
+    {
+      "bytes": 260,
+      "path": "packages/css/fixtures/m9-7-ownership/dtcg-failure.json",
+      "sha256": "082f8743f3fd5b09bb6dd6af880ca014c21bb2b22e13dc39e44e565ab8e2ee31"
+    }
+  ],
+  "format": "crumbs.design-system-ownership-qualification",
+  "gates": [
+    "versioned-local-ownership-map",
+    "compatibility-policy-and-migration-reports",
+    "style-explanation-exact-variable-lookup",
+    "dtcg-success-and-failure-adapters",
+    "assigned-unassigned-and-unresolved-attributions",
+    "canonical-output-digests",
+    "repeatable-receipt",
+    "fixture-digests"
+  ],
+  "roadmapItem": "M9.7",
+  "schemaVersion": 1,
+  "status": "qualified-source-tooling"
+}

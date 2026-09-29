@@ -1,0 +1,42 @@
+{
+  "format": "crumbs.source-migration-report",
+  "schemaVersion": 1,
+  "migration": { "id": "tokens-v1-to-v2", "revision": 1 },
+  "provider": {
+    "name": "@example/crumbs-owned",
+    "baselineVersion": "1.0.0",
+    "currentVersion": "2.0.0"
+  },
+  "files": [],
+  "diagnostics": [
+    {
+      "code": "token.contract-path-unmapped",
+      "message": "The accent token has a named owner.",
+      "path": "src/tokens.css.ts",
+      "line": 2,
+      "column": 1,
+      "entityId": "@example/crumbs-owned/tokens@1#5:color/6:accent"
+    },
+    {
+      "code": "component.resolver-unresolved",
+      "message": "The surface token has no assignment.",
+      "path": "src/tokens.css.ts",
+      "line": 3,
+      "column": 1,
+      "entityId": "@example/crumbs-owned/tokens@1#5:color/7:surface"
+    },
+    {
+      "code": "source.parse-error",
+      "message": "This diagnostic has no stable entity ID.",
+      "path": "src/Card.tsx",
+      "line": 1,
+      "column": 1
+    }
+  ],
+  "analysisLimits": [
+    {
+      "code": "explicit-files-only",
+      "message": "Only the source files named by the migration operation are covered."
+    }
+  ]
+}

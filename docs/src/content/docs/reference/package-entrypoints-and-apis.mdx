@@ -445,6 +445,19 @@ narrow. Effect 4 is bundled inside this tooling boundary; consumers do not add
 an Effect dependency or use an Effect runner. The adapter is not re-exported
 from ordinary runtime entrypoints. See the [DTCG import guide](../how-to/import-dtcg-tokens/).
 
+### `@opsydyn/crumbs-css/tooling/ownership`
+
+Use this local-only tooling entrypoint to decode a versioned ownership map,
+annotate supported reports against explicitly supplied manifests, and encode a
+canonical owned-report envelope. It exports `decodeDesignSystemOwnership`,
+`annotateDesignSystemReport`, and `encodeCanonicalOwnedReport`, together with
+plain ownership, attribution, and report types. The report adapters cover
+compatibility, policy, source migration, style explanation, and DTCG import
+results. Assignments use exact stable manifest IDs; names and paths are not
+identity fallbacks. Effect 4 Schema is bundled behind this entrypoint, so
+consumers do not add an Effect dependency. See the
+[local ownership guide](../how-to/annotate-design-system-ownership/).
+
 ### `@opsydyn/crumbs-css/metro-plugin`
 
 Use this entrypoint in `metro.config.js` for:

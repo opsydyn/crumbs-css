@@ -1,0 +1,38 @@
+{
+  "format": "crumbs.design-system-compatibility-report",
+  "schemaVersion": 1,
+  "mode": "compare",
+  "provider": {
+    "name": "@example/crumbs-owned",
+    "baselineVersion": "1.0.0",
+    "currentVersion": "2.0.0"
+  },
+  "suppliedConsumers": [],
+  "findings": [
+    {
+      "code": "token.removed",
+      "level": "warning",
+      "entityId": "@example/crumbs-owned/tokens@1#5:color/6:accent",
+      "fieldPath": "color.accent",
+      "message": "The assigned token remains available.",
+      "affectedConsumers": []
+    },
+    {
+      "code": "token.domain-changed",
+      "level": "info",
+      "entityId": "@example/crumbs-owned/tokens@1#5:color/7:surface",
+      "fieldPath": "color.surface",
+      "message": "This token has no local owner assignment.",
+      "affectedConsumers": []
+    },
+    {
+      "code": "token.added",
+      "level": "info",
+      "entityId": "@example/crumbs-owned/tokens@1#5:color/7:missing",
+      "fieldPath": "color.missing",
+      "message": "This reference is not present in the supplied manifests.",
+      "affectedConsumers": []
+    }
+  ],
+  "analysisLimits": []
+}

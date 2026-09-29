@@ -37,7 +37,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
 | M7 | Typed component slots, states, and extension contracts | M5, M6 | Not started |
 | M8 | Distributed package/artifact compatibility | M2, M3, M7 | Not started |
-| M9 | Manifests, change impact, policy, migrations, and DTCG | M7, M8 | In progress; M9.1–M9.6 complete; M9.7 next |
+| M9 | Manifests, change impact, policy, migrations, DTCG, and local ownership | M7, M8 | Complete; M9.1–M9.7 complete |
 | M10 | Qualify a reference design system and enterprise journeys | M8, M9 | Not started |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Deferred |
 
@@ -296,7 +296,7 @@ token/recipe-slot codemods. Keep Android/device acceptance parked.
 - [x] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports. Qualified with the [policy report](evidence/2026-09-28-m9-4-design-system-policies/policy-report-v1.json), [receipt](evidence/2026-09-28-m9-4-design-system-policies/qualification.json), and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md); Android/device acceptance remains not-run and parked.
 - [x] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries. See the [qualification receipt](evidence/2026-09-28-m9-5-safe-migrations/qualification.json) and [assessment](assessments/2026-09-28-m9-5-safe-migrations.md).
 - [x] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context. See the [qualification receipt](evidence/2026-09-28-m9-6-dtcg/qualification.json) and [assessment](assessments/2026-09-28-m9-6-dtcg-adapter.md); input/format nodes, resolver steps, and emitted provenance each have explicit 100,000-unit guards.
-- [ ] M9.7: Support ownership metadata in local reports. Optional editor/design-tool adapters consume manifests and schemas; neither hosted accounts nor external telemetry is required.
+- [x] M9.7: Support versioned local ownership metadata across compatibility, policy, migration, style-explanation, and DTCG reports. Exact manifest IDs, explicit input paths, unresolved coverage, and the tooling-only API are documented and fixture-qualified in the [receipt](evidence/2026-09-29-m9-7-ownership/qualification.json) and [assessment](assessments/2026-09-29-m9-7-local-ownership.md); Android/device acceptance remains not-run and parked.
 
 **Exit:** release-impact fixtures identify expected consumers; reports distinguish proven breaks from potential visual impact; migrations preserve valid usage; DTCG support/limitations are explicit; tooling stays outside ordinary runtime bundles.
 
@@ -426,6 +426,32 @@ Next recommended roadmap item: **M9.7** — support ownership metadata in local
 reports and evaluate optional editor/design-tool adapters. The DTCG node-budget
 capacity remains a separate follow-up requiring workload-derived memory and
 adversarial-input limits.
+
+### 2026-09-29 — M9.7 local ownership reports
+
+- [x] Added the tooling-only `@opsydyn/crumbs-css/tooling/ownership` API and
+  an explicit-file `ownership:annotate` command. The local map stays separate
+  from manifest v1, uses exact stable entity IDs, and reports assigned,
+  unassigned, and unresolved references at source JSON Pointer locations.
+- [x] Qualified compatibility, policy, migration, style-explanation, and both
+  DTCG result branches against checked-in ownership and versioned manifests.
+  The deterministic receipt records fixture/output digests and all three
+  attribution states: [qualification receipt](evidence/2026-09-29-m9-7-ownership/qualification.json).
+- [x] Added the [ownership guide](../docs/src/content/docs/how-to/annotate-design-system-ownership.mdx),
+  package API reference, and README entry. The adapter contract requires no
+  hosted account or telemetry service; Effect 4 Schema remains behind the
+  tooling subpath.
+- [x] `bun run check`, `bun run docs:build`, repeated `bun run ownership:qualify`,
+  the focused ownership/packed-consumer/Metro suite, and the packed M8.3
+  distribution gate passed. The distribution evidence was an interim dirty-
+  source run at the Task 6 commit; it passed packed exports, runtime graphs,
+  consumer typecheck, iOS/web production exports, and paired tree-shaking.
+- [x] Package publication, visual acceptance, device behavior, and Android
+  acceptance remain not-run. Android stays parked.
+
+Next recommended roadmap item: **M10.1** — complete the packed public-API
+reference design-system examples for typography, button, input, selection
+controls, card, and dialog integration. Keep Android/device acceptance parked.
 
 ## M10 — Qualify the reference design system and North Star journeys
 

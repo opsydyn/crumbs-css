@@ -1,0 +1,39 @@
+{
+  "format": "crumbs.css.design-system-policy-report",
+  "schemaVersion": 1,
+  "provider": { "name": "@example/crumbs-owned", "version": "2.0.0" },
+  "policy": { "policyId": "migration-review", "version": 1 },
+  "preset": { "name": "migration", "version": 1 },
+  "suppliedConsumers": [],
+  "findings": [
+    {
+      "ruleId": "entity.deprecated",
+      "level": "warning",
+      "subjectId": "@example/crumbs-owned/tokens@1#5:color/6:accent",
+      "fieldPath": "lifecycle",
+      "message": "Review ownership for this assigned token.",
+      "evidence": null,
+      "disposition": "active"
+    },
+    {
+      "ruleId": "entity.deprecated",
+      "level": "warning",
+      "subjectId": "@example/crumbs-owned/tokens@1#5:color/7:surface",
+      "fieldPath": "lifecycle",
+      "message": "Review ownership for this unassigned token.",
+      "evidence": null,
+      "disposition": "active"
+    },
+    {
+      "ruleId": "style.literal-value",
+      "level": "info",
+      "subjectId": "literal:background-color",
+      "fieldPath": "backgroundColor",
+      "message": "A literal has no stable entity identity.",
+      "evidence": null,
+      "disposition": "active"
+    }
+  ],
+  "exceptionDiagnostics": [],
+  "analysisLimits": []
+}

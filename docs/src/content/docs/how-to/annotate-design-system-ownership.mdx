@@ -1,0 +1,134 @@
+---
+title: Annotate design-system reports with local ownership
+description: Join explicit Crumbs manifests and versioned ownership metadata to supported reports without hosted services or repository discovery.
+---
+
+The opt-in `@opsydyn/crumbs-css/tooling/ownership` API joins a local owner map
+to versioned Crumbs reports using stable manifest IDs. Ownership stays separate
+from the portable design-system manifest, so team assignments do not change
+the published contract.
+
+## Create the ownership map
+
+Save a schema-v1 JSON document with unique owner IDs and at most one assignment
+per entity:
+
+```json
+{
+  "format": "crumbs.design-system-ownership",
+  "schemaVersion": 1,
+  "owners": [
+    { "id": "team:foundations", "displayName": "Foundations" },
+    { "id": "team:mobile-ui", "displayName": "Mobile UI" }
+  ],
+  "assignments": [
+    {
+      "entityId": "@acme/design-system/tokens@1#5:color/6:accent",
+      "ownerId": "team:foundations"
+    },
+    { "entityId": "@acme/ui#Button@1", "ownerId": "team:mobile-ui" }
+  ]
+}
+```
+
+Copy token or component IDs from the manifest. Token IDs encode the contract
+identity and path; component IDs identify the public component contract. Do
+not assign by display name, source path, or a guessed token name. An empty
+`assignments` list is valid when a team is adopting ownership incrementally.
+Owner IDs and display names should be stable organizational labels; v1 has no
+fields for user accounts or contact credentials.
+
+## Annotate a report
+
+Pass the ownership map, every applicable manifest, and one report explicitly:
+
+```sh
+bun run ownership:annotate -- \
+  --ownership .crumbs/design-system-ownership.json \
+  --manifest .crumbs/baseline-manifest.json \
+  --manifest .crumbs/current-manifest.json \
+  --report .crumbs/compatibility-report.json \
+  --format json
+```
+
+The command accepts repeated `--manifest` flags and `--format text|json`; text
+is the default. JSON is a canonical, versioned owned-report envelope. Text
+summarizes status counts and includes the source report's RFC 6901 JSON Pointer
+for each attribution. The command reads only the named files, performs no
+repository or build-output discovery, and does not write an output file. Pipe
+its output to a file only after reviewing the paths and destination yourself.
+
+Supply baseline and current manifests when the report declares both versions.
+The provider package and relevant versions must match the report. A DTCG
+success result also requires its token contract in the supplied manifest set.
+Invalid arguments, unreadable or malformed inputs, unsupported report versions,
+and identity mismatches return actionable errors with exit code `2`. A valid
+report exits `0` even when attribution is partial; unresolved and unassigned
+references remain visible for review.
+
+## Interpret attribution status
+
+- **Assigned** means the exact stable entity ID appears in the supplied
+  manifests and has an ownership assignment.
+- **Unassigned** means the exact entity ID appears in the supplied manifests,
+  but no owner is assigned.
+- **Unresolved** means the source reference cannot be attributed safely. The
+  reason is `stable-id-unavailable`, `entity-not-in-supplied-manifests`, or
+  `variable-name-ambiguous`.
+
+Every attribution points to the source report location. Consumer dependency
+records do not inherit the provider token's owner. Analysis limits retain the
+explicit-manifest boundary and identify unresolved coverage. A clean or fully
+assigned output does not claim that unlisted manifests, files, or consumers
+were examined.
+
+## Supported report sources
+
+The owned-report envelope currently accepts:
+
+| Source | Attributed references |
+| --- | --- |
+| Manifest compatibility v1 | Finding entity IDs |
+| Design-system policy v1 | Entity deprecation and private-token finding subjects; other subjects remain unresolved |
+| Source migration v1 | Diagnostic entity IDs; diagnostics without an ID remain unresolved |
+| Style explanation v1 | Declared, active, and changed token variable names matched exactly against supplied manifest tokens |
+| DTCG import result v1 | Successful sidecar tokens and token diagnostics; document-only diagnostics remain unresolved |
+
+Style variable lookup does not derive identity from a name: the generated
+variable must match exactly one token in the supplied manifests. A missing or
+ambiguous match remains unresolved. The DTCG failure branch has no own format
+tag, so the ownership envelope identifies that adapter profile as
+`crumbs.dtcg-import-result` v1.
+
+## Use the adapter API
+
+An editor or design-tool integration can implement the same contract using the
+plain data API:
+
+```ts
+import {
+  annotateDesignSystemReport,
+  decodeDesignSystemOwnership,
+  encodeCanonicalOwnedReport,
+} from "@opsydyn/crumbs-css/tooling/ownership"
+
+const ownership = decodeDesignSystemOwnership(ownershipJson)
+const owned = annotateDesignSystemReport({ ownership, manifests, report })
+const canonicalJson = encodeCanonicalOwnedReport(owned)
+```
+
+The entrypoint also exports the ownership, attribution, and owned-report types
+and version constants. Effect 4 Schema remains an internal implementation
+detail: this API accepts and returns ordinary TypeScript values and JSON, and
+consumers do not add an Effect dependency or runner. M9.7 provides the local
+adapter contract; it does not choose an editor, require a hosted account, or
+send telemetry.
+
+Repository maintainers can regenerate the fixed fixture receipt with:
+
+```sh
+bun run ownership:qualify
+```
+
+The qualification receipt is at
+[`qualification.json`](../../../../evidence/2026-09-29-m9-7-ownership/qualification.json).

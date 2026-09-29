@@ -29,6 +29,7 @@ export default defineConfig({
 						{ label: 'Use typed helpers', slug: 'how-to/use-typed-helpers' },
 						{ label: 'Use recipes and state variants', slug: 'how-to/use-recipes-and-state-variants' },
 						{ label: 'Enable strict diagnostics', slug: 'how-to/enable-strict-diagnostics' },
+						{ label: 'Annotate design-system ownership', slug: 'how-to/annotate-design-system-ownership' },
 						{ label: 'Use Storybook and Expo Dev Client', slug: 'how-to/use-storybook-and-expo-dev-client' },
 					],
 				},

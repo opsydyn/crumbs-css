@@ -1,0 +1,58 @@
+{
+  "ok": true,
+  "value": {
+    "format": "crumbs.dtcg-theme-import",
+    "schemaVersion": 1,
+    "payload": {
+      "_tag": "CrumbsTokenTheme",
+      "version": 1,
+      "contract": { "owner": "@example/crumbs-owned", "name": "tokens", "version": 1 },
+      "values": {
+        "@example/crumbs-owned/tokens@1#5:color/6:accent": "#ffffff"
+      }
+    },
+    "sidecar": {
+      "format": "crumbs.dtcg-theme-import-metadata",
+      "schemaVersion": 1,
+      "contract": { "owner": "@example/crumbs-owned", "name": "tokens", "version": 1 },
+      "formatProfile": "2025.10",
+      "resolverVersion": "2025.10",
+      "resolverUri": "https://example.test/crumbs/resolver.json",
+      "modifiers": {},
+      "tokens": [
+        {
+          "tokenId": "@example/crumbs-owned/tokens@1#5:color/6:accent",
+          "path": ["color", "accent"],
+          "visibility": "public",
+          "origin": {
+            "documentUri": "https://example.test/crumbs/tokens.json",
+            "jsonPointer": "/color/accent/$value"
+          },
+          "sourceChain": [
+            {
+              "documentUri": "https://example.test/crumbs/tokens.json",
+              "jsonPointer": "/color/accent/$value"
+            }
+          ],
+          "sourceValue": "#ffffff",
+          "metadata": {},
+          "groupMetadata": []
+        }
+      ]
+    }
+  },
+  "diagnostics": [
+    {
+      "code": "token.unmapped",
+      "severity": "warning",
+      "message": "The surface token is not mapped in this import.",
+      "crumbsTokenId": "@example/crumbs-owned/tokens@1#5:color/7:surface"
+    },
+    {
+      "code": "format.structure-invalid",
+      "severity": "error",
+      "message": "A document diagnostic has no token identity.",
+      "documentUri": "https://example.test/crumbs/tokens.json"
+    }
+  ]
+}

@@ -337,6 +337,30 @@ unmeasured/parked. Regenerate the deterministic fixture receipt with
 `bun run dtcg:qualify` and run host timings from `packages/css` with
 `bun run bench:dtcg-import`.
 
+## Local design-system ownership reports
+
+The opt-in `@opsydyn/crumbs-css/tooling/ownership` entrypoint attaches a local
+owner map to compatibility, policy, source-migration, style-explanation, and
+DTCG import reports. The owner map is a separate versioned JSON document keyed
+by exact token or component IDs from explicitly supplied manifests; it does not
+change the portable manifest schema. `ownership:annotate` reads only the
+ownership map, manifests, and report named by its flags. Assigned, unassigned,
+and unresolved references remain visible with source JSON Pointer locations.
+
+```sh
+bun run ownership:annotate -- \
+  --ownership .crumbs/design-system-ownership.json \
+  --manifest .crumbs/current-manifest.json \
+  --report .crumbs/policy-report.json \
+  --format text
+```
+
+Effect 4 Schema stays bundled behind the tooling subpath. Consumers do not
+need an Effect dependency; no editor account or telemetry service is involved.
+See the [ownership guide](https://opsydyn.github.io/crumbs-css/how-to/annotate-design-system-ownership/).
+Repository maintainers can rebuild the package and regenerate fixed qualification
+evidence with `bun run ownership:qualify`.
+
 ## Minimal recipe example
 
 ```ts
