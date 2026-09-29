@@ -463,14 +463,18 @@ controls, card, and dialog integration. Keep Android/device acceptance parked.
   fixtures and recipe resolution tests.
 - [x] Added the [reference design-system guide](../docs/src/content/docs/how-to/build-a-reference-design-system.mdx)
   and linked it from the documentation sidebar and landing page.
-- [x] Storybook tests passed (7 tests, 32 expectations), `bun run app:typecheck`
-  passed, and the Expo iOS-targeted Storybook bundle exported successfully.
-- [ ] Interactive native/device behavior remains unverified: the dedicated
-  iOS simulator was available, but the Mac was locked when UI inspection was
-  attempted. The iOS bundle is compile evidence only. The web smoke also hit
-  an invalid React hook call while this linked worktree resolved app and
-  package imports from separate physical React installations; retry after
-  dependency resolution is normalized. Android remains parked.
+- [x] Storybook tests passed (7 tests, 32 expectations), the app typecheck
+  passed, and Expo's offline SDK compatibility checks matched the local Expo
+  56 matrix. Expo iOS export passed with 1,711 modules (6.2 MB).
+- [x] Expo 56's local compatibility map confirms React and React DOM 19.2.3
+  with React Native 0.85.3; the Expo apps and packed-consumer fixture now use
+  that matrix, and the lockfile is synchronized. Storybook Metro resolves
+  workspace dependencies through the app and monorepo roots consistently.
+- [ ] Live native iOS acceptance remains pending. Expo Go 56.0.4 exposed the
+  prior React 19.2.5 versus renderer 19.2.3 mismatch. The manifests and
+  resolver are corrected and the fresh iOS bundle exports, but the corrected
+  live screen was not observed because the Mac relocked before reload. Android
+  remains parked.
 
 The M10.1 public-API example item is complete; runtime and device acceptance
 remain open under M10.3–M10.5. Next recommended roadmap item: **M10.2** —

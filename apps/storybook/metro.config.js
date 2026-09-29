@@ -15,6 +15,8 @@ config.watchFolders = [
 ]
 
 config.resolver.useWatchman = false
+// Resolve workspace dependencies through the app and monorepo roots consistently.
+config.resolver.disableHierarchicalLookup = true
 config.resolver.nodeModulesPaths = [
   projectNodeModulesRoot,
   path.resolve(monorepoRoot, "node_modules"),
