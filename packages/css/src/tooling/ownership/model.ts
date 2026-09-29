@@ -9,6 +9,7 @@ export const DESIGN_SYSTEM_OWNERSHIP_FORMAT = "crumbs.design-system-ownership" a
 export const DESIGN_SYSTEM_OWNERSHIP_VERSION = 1 as const
 export const DESIGN_SYSTEM_OWNED_REPORT_FORMAT = "crumbs.design-system-owned-report" as const
 export const DESIGN_SYSTEM_OWNED_REPORT_VERSION = 1 as const
+export const OWNERSHIP_MAX_REPORT_REFERENCES = 100_000 as const
 
 export const OWNERSHIP_ANALYSIS_LIMIT_CODES = [
   "explicit-manifests-only",

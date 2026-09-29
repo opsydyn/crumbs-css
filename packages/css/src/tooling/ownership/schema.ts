@@ -14,6 +14,7 @@ import {
   type OwnershipAnalysisLimit,
   type OwnershipOwner,
 } from "./model"
+import { assertOwnershipReferenceLimit, readOwnArrayLength } from "./resource-limit"
 
 const SafeText = Schema.NonEmptyString.check(Schema.makeFilter<string>(value =>
   value === value.trim() && !/[\u0000-\u001f\u007f-\u009f]/u.test(value)))
@@ -116,10 +117,13 @@ export function decodeDesignSystemOwnership(input: unknown): DesignSystemOwnersh
 
 /** Validate and detach the versioned ownership/report envelope. */
 export function decodeOwnedReport(input: unknown): OwnedReport {
+  const inputAttributionCount = readOwnArrayLength(input, "attributions")
+  if (inputAttributionCount !== undefined) assertOwnershipReferenceLimit(inputAttributionCount)
   const decoded = ownedReportCodec.decode(input)
   if (!decoded.ok) throw decodeError("Crumbs design-system owned report v1", decoded.issues)
 
   const report = decoded.value as OwnedReport
+  assertOwnershipReferenceLimit(report.attributions.length)
   const pointers = new Set<string>()
   for (const attribution of report.attributions as ReadonlyArray<OwnershipAttribution>) {
     if (pointers.has(attribution.jsonPointer)) {

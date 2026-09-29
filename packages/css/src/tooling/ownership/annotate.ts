@@ -1,4 +1,5 @@
 import type { DesignSystemManifest } from "../manifest/model"
+import { STYLE_EXPLANATION_REPORT_TYPE } from "../../devtools/style-explanation-model"
 import {
   MANIFEST_COMPATIBILITY_REPORT_FORMAT,
   type ManifestCompatibilityReport,
@@ -19,9 +20,13 @@ import {
   buildOwnershipAssignmentIndex,
   buildOwnershipEntityIndex,
   resolveOwnershipEntity,
+  type OwnershipEntityIndex,
 } from "./entity-index"
 import { adaptCompatibilityReport, adaptMigrationReport, adaptPolicyReport, type ReportReference } from "./report-adapters"
 import { decodeDesignSystemOwnership, decodeOwnedReport } from "./schema"
+import { adaptDtcgImportResult } from "./dtcg-adapter"
+import { adaptStyleExplanationReport } from "./style-explanation-adapter"
+import { assertOwnershipReferenceLimit } from "./resource-limit"
 import {
   DESIGN_SYSTEM_POLICY_REPORT_FORMAT,
   type DesignSystemPolicyReport,
@@ -84,8 +89,10 @@ function resolveReferences(
   references: ReadonlyArray<ReportReference>,
   ownership: DesignSystemOwnership,
   manifests: ReadonlyArray<DesignSystemManifest>,
+  providedEntityIndex?: OwnershipEntityIndex,
 ): ReadonlyArray<OwnershipAttribution> {
-  const entityIndex = buildOwnershipEntityIndex(manifests)
+  assertOwnershipReferenceLimit(references.length)
+  const entityIndex = providedEntityIndex ?? buildOwnershipEntityIndex(manifests)
   const assignmentIndex = buildOwnershipAssignmentIndex(ownership)
   const attributions = references.map((reference): OwnershipAttribution => {
     if ("unresolvedReason" in reference) {
@@ -141,8 +148,9 @@ function makeOwnedReport(
   manifests: ReadonlyArray<DesignSystemManifest>,
   source: { readonly format: string; readonly schemaVersion: number; readonly data: SupportedSourceReport },
   references: ReadonlyArray<ReportReference>,
+  entityIndex?: OwnershipEntityIndex,
 ): OwnedReport {
-  const attributions = resolveReferences(references, ownership, manifests)
+  const attributions = resolveReferences(references, ownership, manifests, entityIndex)
   return decodeOwnedReport({
     format: DESIGN_SYSTEM_OWNED_REPORT_FORMAT,
     schemaVersion: DESIGN_SYSTEM_OWNED_REPORT_VERSION,
@@ -157,8 +165,12 @@ function makeOwnedReport(
 }
 
 function sourceFormat(report: unknown): string | undefined {
-  const value = readOwnDataProperty(report, "format")
+  const value = readOwnDataProperty(report, "format") ?? readOwnDataProperty(report, "$$type")
   return typeof value === "string" ? value : undefined
+}
+
+function hasOwnDataKey(value: unknown, key: string): boolean {
+  return typeof value === "object" && value !== null && Object.getOwnPropertyDescriptor(value, key) !== undefined
 }
 
 /** Purely annotate a supported, versioned source report against explicit manifests. */
@@ -175,9 +187,31 @@ export function annotateDesignSystemReport(input: {
   const ownership = decodeDesignSystemOwnership(rawOwnership)
   const reportFormat = sourceFormat(rawReport)
 
+  // DTCG operation results are discriminated by `ok`; neither branch carries
+  // top-level format/version fields of its own.
+  if (hasOwnDataKey(rawReport, "ok")) {
+    const adapted = adaptDtcgImportResult(rawReport, manifests)
+    return makeOwnedReport(ownership, manifests, {
+      format: adapted.format,
+      schemaVersion: adapted.schemaVersion,
+      data: adapted.data,
+    }, adapted.references)
+  }
+
+  if (reportFormat === STYLE_EXPLANATION_REPORT_TYPE) {
+    const entityIndex = buildOwnershipEntityIndex(manifests)
+    const adapted = adaptStyleExplanationReport(rawReport, entityIndex)
+    return makeOwnedReport(ownership, manifests, {
+      format: adapted.format,
+      schemaVersion: adapted.schemaVersion,
+      data: adapted.data,
+    }, adapted.references, entityIndex)
+  }
+
   if (reportFormat === MANIFEST_COMPATIBILITY_REPORT_FORMAT) {
     const report = decodeManifestCompatibilityReport(rawReport)
     assertCompatibilityProvider(report, manifests)
+    assertOwnershipReferenceLimit(report.findings.length)
     return makeOwnedReport(ownership, manifests, {
       format: report.format,
       schemaVersion: report.schemaVersion,
@@ -188,6 +222,7 @@ export function annotateDesignSystemReport(input: {
   if (reportFormat === DESIGN_SYSTEM_POLICY_REPORT_FORMAT) {
     const report = decodeDesignSystemPolicyReport(rawReport)
     assertPolicyProvider(report, manifests)
+    assertOwnershipReferenceLimit(report.findings.length + report.exceptionDiagnostics.length)
     return makeOwnedReport(ownership, manifests, {
       format: report.format,
       schemaVersion: report.schemaVersion,
@@ -198,6 +233,7 @@ export function annotateDesignSystemReport(input: {
   if (reportFormat === SOURCE_MIGRATION_REPORT_FORMAT) {
     const report = decodeSourceMigrationReport(rawReport)
     assertMigrationProvider(report, manifests)
+    assertOwnershipReferenceLimit(report.diagnostics.length)
     return makeOwnedReport(ownership, manifests, {
       format: report.format,
       schemaVersion: report.schemaVersion,

@@ -7,7 +7,7 @@ export type ReportReference =
   | { readonly jsonPointer: string; readonly entityId: string }
   | {
     readonly jsonPointer: string
-    readonly unresolvedReason: Extract<OwnershipUnresolvedReason, "stable-id-unavailable">
+    readonly unresolvedReason: OwnershipUnresolvedReason
   }
 
 function escapePointerSegment(segment: string | number): string {
