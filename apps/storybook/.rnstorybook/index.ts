@@ -18,8 +18,15 @@ const storybookStorage =
         setItem: AsyncStorage.setItem,
       }
 
+const referencePreviewOnly =
+  process.env.EXPO_PUBLIC_STORYBOOK_REFERENCE_PREVIEW === "true"
+
 const StorybookUIRoot = view.getStorybookUI({
   storage: storybookStorage,
+  onDeviceUI: !referencePreviewOnly,
+  initialSelection: referencePreviewOnly
+    ? { kind: "Design System/Reference Patterns", name: "Interactive" }
+    : undefined,
 })
 
 export default StorybookUIRoot

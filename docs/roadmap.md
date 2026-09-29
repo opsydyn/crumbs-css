@@ -470,22 +470,28 @@ controls, card, and dialog integration. Keep Android/device acceptance parked.
   with React Native 0.85.3; the Expo apps and packed-consumer fixture now use
   that matrix, and the lockfile is synchronized. Storybook Metro resolves
   workspace dependencies through the app and monorepo roots consistently.
-- [ ] Live native iOS acceptance remains pending. Expo Go 56.0.4 exposed the
-  prior React 19.2.5 versus renderer 19.2.3 mismatch. The manifests and
-  resolver are corrected and the fresh iOS bundle exports, but the corrected
-  live screen was not observed because the Mac relocked before reload. Android
-  remains parked.
+- [x] Native iOS smoke: Expo Go 56.0.4 on iOS 26.5 loaded the
+  `Design System/Reference Patterns / Interactive` Storybook story through the
+  opt-in preview route, then loaded the Expo showcase app. The live screen
+  verified Foundry/Signal, dark/light, and comfortable/compact axes; valid and
+  invalid email states; disabled input; checkbox, radio, and switch changes;
+  button actions; and the Signal-scoped ShowcaseCard portal dialog's cancel and
+  confirm paths.
+- [ ] The Storybook on-device navigator remains unqualified: the reference
+  smoke route bypasses its FullUI manager, and the previously observed
+  `queueMicrotask` UI-load error remains unresolved. Android remains parked.
 
-The M10.1 public-API example item is complete; runtime and device acceptance
-remain open under M10.3–M10.5. Next recommended roadmap item: **M10.2** —
-generate useful contract-driven stories and review cases. Keep Android parked.
+The M10.1 public-API examples and direct native interaction smoke are complete;
+compatibility and broader device acceptance remain open under M10.3–M10.5. Next
+recommended roadmap item: **M10.2** — generate useful contract-driven stories
+and review cases. Keep Android parked.
 
 ## M10 — Qualify the reference design system and North Star journeys
 
 **Decisions:** D9–D12.\
 **Affected paths:** `apps/storybook/`, independent packed-consumer fixtures, consumer documentation, native acceptance/benchmark artifacts, CI checks.
 
-- [x] M10.1: Complete public-API examples for typography, button, input, selection controls, card, and dialog integration, with brands, modes, density, scopes, states, and typed slots. Interactive/device acceptance remains open as recorded above.
+- [x] M10.1: Complete public-API examples for typography, button, input, selection controls, card, and dialog integration, with brands, modes, density, scopes, states, and typed slots; complete direct iOS interaction smoke. The normal on-device Storybook navigator remains unqualified as recorded above.
 - [ ] M10.2: Generate useful contract-driven stories and review cases. Combine representative cross-axis coverage with exhaustive tests for critical states; report unreachable or intentionally untested combinations.
 - [ ] M10.3: Verify font scaling, RTL/logical layout, reduced motion, and supported contrast contexts on native consumers. Declared colour-pair analysis reports unknown compositing/background cases; screen-reader and interaction acceptance stays explicit.
 - [ ] M10.4: Run the three North Star journeys below from packed public packages and retain results, artifact versions, screenshots/recordings where useful, diagnostics, and performance reports.
