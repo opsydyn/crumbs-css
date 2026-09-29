@@ -1,0 +1,36 @@
+/** Plain JSON-data contract for local design-system ownership metadata. */
+export const DESIGN_SYSTEM_OWNERSHIP_FORMAT = "crumbs.design-system-ownership" as const
+export const DESIGN_SYSTEM_OWNERSHIP_VERSION = 1 as const
+export const DESIGN_SYSTEM_OWNED_REPORT_FORMAT = "crumbs.design-system-owned-report" as const
+export const DESIGN_SYSTEM_OWNED_REPORT_VERSION = 1 as const
+
+export const OWNERSHIP_ANALYSIS_LIMIT_CODES = [
+  "explicit-manifests-only",
+  "manifest-unresolved-references",
+  "report-subject-unresolved",
+] as const
+export type OwnershipAnalysisLimitCode = typeof OWNERSHIP_ANALYSIS_LIMIT_CODES[number]
+
+export const OWNERSHIP_UNRESOLVED_REASON_CODES = [
+  "stable-id-unavailable",
+  "entity-not-in-supplied-manifests",
+  "variable-name-ambiguous",
+] as const
+export type OwnershipUnresolvedReason = typeof OWNERSHIP_UNRESOLVED_REASON_CODES[number]
+
+export type OwnershipOwner = {
+  readonly id: string
+  readonly displayName: string
+}
+
+export type OwnershipAssignment = {
+  readonly entityId: string
+  readonly ownerId: string
+}
+
+export type DesignSystemOwnership = {
+  readonly format: typeof DESIGN_SYSTEM_OWNERSHIP_FORMAT
+  readonly schemaVersion: typeof DESIGN_SYSTEM_OWNERSHIP_VERSION
+  readonly owners: ReadonlyArray<OwnershipOwner>
+  readonly assignments: ReadonlyArray<OwnershipAssignment>
+}
