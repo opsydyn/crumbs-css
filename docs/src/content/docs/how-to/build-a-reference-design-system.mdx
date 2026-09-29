@@ -1,0 +1,294 @@
+---
+title: Build a reference design system
+description: Compose typed native component recipes with brand, mode, density, and portal scopes.
+---
+
+Crumbs supplies typed style programs and theme resolution. Your design system
+owns the component contracts, interaction behavior, accessibility semantics,
+and the token values that define each brand.
+
+The in-repository Expo reference consumer demonstrates the full pattern at
+`apps/storybook/src/components/ReferenceSystem.tsx`. It uses public Crumbs
+entrypoints and `@rn-primitives` behavior components; it does not add a
+component framework to the package.
+
+## Keep brand, mode, and density independent
+
+Start with one complete base theme, then model changes as sparse layers on
+separate axes. This keeps a mode switch from replacing a brand and lets a
+nested brand scope inherit the active mode and density.
+
+```ts
+import {
+  createTokenContract,
+  createTokenTheme,
+  defineToken,
+  type TokenThemeLayer,
+} from "@opsydyn/crumbs-css/tokens"
+
+const vars = createTokenContract({
+  color: {
+    accent: defineToken("color"),
+    accentText: defineToken("color"),
+    canvas: defineToken("color"),
+    copy: defineToken("color"),
+    panel: defineToken("color"),
+  },
+  control: { height: defineToken("length") },
+  space: { md: defineToken("length") },
+}, {
+  identity: { owner: "@acme/design-system", name: "core", version: 1 },
+})
+
+const baseTheme = createTokenTheme(vars, {
+  color: {
+    accent: "#185adb",
+    accentText: "#ffffff",
+    canvas: "#f5f7fa",
+    copy: "#18202b",
+    panel: "#ffffff",
+  },
+  control: { height: 48 },
+  space: { md: 16 },
+})
+
+type Brand = "acme" | "signal"
+type Mode = "light" | "dark"
+type Density = "compact" | "comfortable"
+
+const brandScopes = {
+  acme: { color: { accent: "#185adb", accentText: "#ffffff" } },
+  signal: { color: { accent: "#087f8c", accentText: "#ffffff" } },
+} as const satisfies Record<Brand, TokenThemeLayer<typeof vars>>
+
+const modeScopes = {
+  light: { color: { canvas: "#f5f7fa", copy: "#18202b", panel: "#ffffff" } },
+  dark: { color: { canvas: "#111820", copy: "#edf3fa", panel: "#1b2733" } },
+} as const satisfies Record<Mode, TokenThemeLayer<typeof vars>>
+
+const densityScopes = {
+  compact: { control: { height: 40 }, space: { md: 12 } },
+  comfortable: { control: { height: 48 }, space: { md: 16 } },
+} as const satisfies Record<Density, TokenThemeLayer<typeof vars>>
+```
+
+Mount the complete theme once and add the selected sparse layers around the
+consumer subtree:
+
+```tsx
+import type { ReactNode } from "react"
+import { TokenThemeProvider, TokenThemeScopeProvider } from "@opsydyn/crumbs-css/theme"
+
+type DesignSystemThemeProps = {
+  readonly brand: Brand
+  readonly children: ReactNode
+  readonly density: Density
+  readonly mode: Mode
+}
+
+function DesignSystemTheme({ brand, children, density, mode }: DesignSystemThemeProps) {
+  return (
+    <TokenThemeProvider contract={vars} theme={baseTheme}>
+      <TokenThemeScopeProvider contract={vars} context="brand" values={brandScopes[brand]}>
+        <TokenThemeScopeProvider contract={vars} context="mode" values={modeScopes[mode]}>
+          <TokenThemeScopeProvider
+            contract={vars}
+            context="density"
+            values={densityScopes[density]}
+          >
+            {children}
+          </TokenThemeScopeProvider>
+        </TokenThemeScopeProvider>
+      </TokenThemeScopeProvider>
+    </TokenThemeProvider>
+  )
+}
+```
+
+Keep the axes in your app state or user preferences. Components consume their
+resolved tokens; they do not need to know why a particular brand, mode, or
+density is active.
+
+## Define semantic typography roles
+
+Use `textStyle` for roles such as display, heading, body, and caption. Colour
+tokens can follow the active brand and mode while the type scale remains
+consistent:
+
+```ts
+import { textStyle } from "@opsydyn/crumbs-css/style"
+
+export const typography = {
+  display: textStyle({
+    color: vars.color.copy,
+    fontSize: 28,
+    fontWeight: "900",
+    lineHeight: 32,
+  }),
+  body: textStyle({
+    color: vars.color.copy,
+    fontSize: 16,
+    lineHeight: 24,
+  }),
+}
+```
+
+Resolve the roles before applying them to native text:
+
+```tsx
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
+import { Text } from "react-native"
+
+function PageTitle() {
+  const styles = useThemedStyles(typography)
+  return <Text style={styles.display}>Workspace</Text>
+}
+```
+
+Use the same `useThemedStyles` call for typography and recipes when they are
+declared in one stable `.css.ts` module.
+
+## Define one public recipe for all component slots
+
+`componentRecipe` gives each slot its own React Native primitive type while
+sharing one public selection. The discriminator below prevents a disabled
+button from also selecting its pressed state.
+
+```ts
+import { componentRecipe } from "@opsydyn/crumbs-css/style"
+
+export const button = componentRecipe({
+  contract: {
+    identity: { owner: "@acme/design-system", name: "Button", version: 1 },
+    public: {
+      slots: ["root", "label"],
+      variants: {
+        disabled: ["false", "true"],
+        pressed: ["false", "true"],
+        tone: ["brand", "neutral"],
+      },
+    },
+  },
+  slots: { root: "view", label: "text" } as const,
+  base: {
+    root: {
+      alignItems: "center",
+      backgroundColor: vars.color.accent,
+      borderRadius: 999,
+      justifyContent: "center",
+      minHeight: vars.control.height,
+      paddingHorizontal: vars.space.md,
+    },
+    label: { color: vars.color.accentText, fontWeight: "800" },
+  },
+  variants: {
+    disabled: { false: {}, true: { root: { opacity: 0.5 } } },
+    pressed: { false: {}, true: { root: { opacity: 0.82 } } },
+    tone: {
+      brand: {},
+      neutral: {
+        root: { backgroundColor: vars.color.panel },
+        label: { color: vars.color.copy },
+      },
+    },
+  },
+  defaultVariants: { disabled: false, pressed: false, tone: "brand" },
+  stateVariants: {
+    disabled: {
+      false: { pressed: [false, true] },
+      true: { pressed: [false] },
+    },
+  },
+}, "acmeButton")
+```
+
+`NativeComponentPublicProps<typeof button>` derives the consumer selection
+from the contract. Keep accessibility and event behavior on the native
+component, and pass its current state to the resolver explicitly:
+
+```tsx
+import { useMemo } from "react"
+import { createComponentRecipeResolver } from "@opsydyn/crumbs-css/theme"
+import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
+import type { NativeComponentPublicProps } from "@opsydyn/crumbs-css/style"
+import { Pressable, Text } from "react-native"
+
+type ButtonSelection = NativeComponentPublicProps<typeof button>
+type ButtonTone = NonNullable<ButtonSelection["tone"]>
+
+function Button({ disabled = false, onPress, tone = "brand" }: {
+  readonly disabled?: boolean
+  readonly onPress: () => void
+  readonly tone?: ButtonTone
+}) {
+  const themed = useThemedStyles({ button })
+  const resolve = useMemo(
+    () => createComponentRecipeResolver(themed.button),
+    [themed.button],
+  )
+  const nativeStyles = useMemo(() => {
+    const selection = (pressed: boolean): ButtonSelection => disabled
+      ? { disabled: true, pressed: false, tone }
+      : { disabled: false, pressed, tone }
+
+    return {
+      idle: [...resolve(selection(false)).root],
+      pressed: [...resolve(selection(true)).root],
+      disabled: [...resolve(selection(false)).root],
+      label: [...resolve(selection(false)).label],
+    }
+  }, [disabled, resolve, tone])
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => disabled
+        ? nativeStyles.disabled
+        : pressed ? nativeStyles.pressed : nativeStyles.idle}
+    >
+      <Text style={nativeStyles.label}>Continue</Text>
+    </Pressable>
+  )
+}
+```
+
+The resolver is created once for the current themed recipe. The component
+memoizes mutable arrays at its React Native boundary because Crumbs resolver
+outputs are readonly. Pressed, focused, invalid, selected, and disabled values
+come from component state or callbacks; native styles do not have CSS
+pseudo-selectors.
+
+## Compose primitives, cards, and dialogs
+
+Use the same slot contract pattern for inputs and selection controls. Keep
+keyboard, checked-state, focus, and accessibility behavior with the native
+control or behavior primitive, and use the recipe to style the named slots.
+This lets checkbox, radio, and switch controls share semantic tokens without
+pretending they have identical interaction models.
+
+Give cards and dialogs their own component contracts. A card action should
+call a typed component callback; it should not make the card own dialog state.
+The consumer can compose the card with a dialog from a behavior primitive such
+as `@rn-primitives/dialog` and control the dialog in application state.
+
+For a nested brand, put the card under a brand scope and keep the same card
+component and recipe. If a portal renders into a host outside that nested
+scope, reapply the selected scope around its content. Keep the shared
+`PortalHost` under the root theme and mode/density providers; an independently
+mounted React root needs its own complete provider chain. See [the runtime
+guarantees](/crumbs-css/reference/runtime-model-and-guarantees/) for the
+provider and portal ownership boundary.
+
+The Expo Storybook consumer exercises typography, button, input, checkbox,
+radio, switch, card, and dialog in one screen. Its recipe declarations,
+primitive adapters, scope bridge, type fixtures, and resolver tests are kept
+in `apps/storybook/src/components/` and `apps/storybook/test/`.
+
+## Related guides
+
+- [Use themes](/crumbs-css/how-to/use-themes/)
+- [Use recipes and state variants](/crumbs-css/how-to/use-recipes-and-state-variants/)
+- [Package entrypoints and APIs](/crumbs-css/reference/package-entrypoints-and-apis/)

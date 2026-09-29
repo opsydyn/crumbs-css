@@ -453,12 +453,35 @@ Next recommended roadmap item: **M10.1** — complete the packed public-API
 reference design-system examples for typography, button, input, selection
 controls, card, and dialog integration. Keep Android/device acceptance parked.
 
+### 2026-09-29 — M10.1 public API reference system
+
+- [x] Added independent brand, mode, and density scopes to the Expo reference
+  consumer, with a typed axis picker and sparse scope-composition tests.
+- [x] Added public-API examples for semantic typography, typed button/input/
+  selection recipes, the shared ShowcaseCard, and a typed dialog whose brand
+  scope is bridged at the portal boundary. Added component selection/slot type
+  fixtures and recipe resolution tests.
+- [x] Added the [reference design-system guide](../docs/src/content/docs/how-to/build-a-reference-design-system.mdx)
+  and linked it from the documentation sidebar and landing page.
+- [x] Storybook tests passed (7 tests, 32 expectations), `bun run app:typecheck`
+  passed, and the Expo iOS-targeted Storybook bundle exported successfully.
+- [ ] Interactive native/device behavior remains unverified: the dedicated
+  iOS simulator was available, but the Mac was locked when UI inspection was
+  attempted. The iOS bundle is compile evidence only. The web smoke also hit
+  an invalid React hook call while this linked worktree resolved app and
+  package imports from separate physical React installations; retry after
+  dependency resolution is normalized. Android remains parked.
+
+The M10.1 public-API example item is complete; runtime and device acceptance
+remain open under M10.3–M10.5. Next recommended roadmap item: **M10.2** —
+generate useful contract-driven stories and review cases. Keep Android parked.
+
 ## M10 — Qualify the reference design system and North Star journeys
 
 **Decisions:** D9–D12.\
 **Affected paths:** `apps/storybook/`, independent packed-consumer fixtures, consumer documentation, native acceptance/benchmark artifacts, CI checks.
 
-- [ ] M10.1: Complete public-API examples for typography, button, input, selection controls, card, and dialog integration, with brands, modes, density, scopes, states, and typed slots.
+- [x] M10.1: Complete public-API examples for typography, button, input, selection controls, card, and dialog integration, with brands, modes, density, scopes, states, and typed slots. Interactive/device acceptance remains open as recorded above.
 - [ ] M10.2: Generate useful contract-driven stories and review cases. Combine representative cross-axis coverage with exhaustive tests for critical states; report unreachable or intentionally untested combinations.
 - [ ] M10.3: Verify font scaling, RTL/logical layout, reduced motion, and supported contrast contexts on native consumers. Declared colour-pair analysis reports unknown compositing/background cases; screen-reader and interaction acceptance stays explicit.
 - [ ] M10.4: Run the three North Star journeys below from packed public packages and retain results, artifact versions, screenshots/recordings where useful, diagnostics, and performance reports.
