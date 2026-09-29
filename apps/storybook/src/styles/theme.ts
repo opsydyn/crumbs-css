@@ -1,5 +1,12 @@
-import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens"
+import {
+  createTokenContract,
+  createTokenTheme,
+  defineToken,
+  type TokenThemeLayer,
+} from "@opsydyn/crumbs-css/tokens"
 
+export type ShowcaseBrand = "foundry" | "signal"
+export type ShowcaseDensity = "compact" | "comfortable"
 export type ShowcaseThemeMode = "dark" | "light"
 
 export const vars = createTokenContract({
@@ -14,6 +21,9 @@ export const vars = createTokenContract({
     panel: defineToken("color"),
     panelRaised: defineToken("color"),
   },
+  control: {
+    height: defineToken("length"),
+  },
   radius: {
     lg: defineToken("length"),
     pill: defineToken("length"),
@@ -26,10 +36,10 @@ export const vars = createTokenContract({
     xs: defineToken("length"),
   },
 }, {
-  identity: { owner: "@opsydyn/crumbs", name: "storybook", version: 1 },
+  identity: { owner: "@opsydyn/crumbs", name: "storybook", version: 2 },
 })
 
-export const darkTheme = createTokenTheme(vars, {
+const defaultThemeValues = {
   color: {
     accent: "#d1a85f",
     accentMuted: "#2f2416",
@@ -41,43 +51,65 @@ export const darkTheme = createTokenTheme(vars, {
     panel: "#17120e",
     panelRaised: "#211912",
   },
-  radius: {
-    lg: 26,
-    pill: 999,
-  },
-  space: {
-    lg: 20,
-    md: 16,
-    sm: 10,
-    xl: 28,
-    xs: 6,
-  },
-})
+  control: { height: 48 },
+  radius: { lg: 26, pill: 999 },
+  space: { lg: 20, md: 16, sm: 10, xl: 28, xs: 6 },
+} as const
 
-export const lightTheme = createTokenTheme(vars, {
-  color: {
-    accent: "#8f231c",
-    accentMuted: "#f2dfd2",
-    accentText: "#fff7ef",
-    canvas: "#f4ecdb",
-    copy: "#2b1a12",
-    edge: "#c9b292",
-    muted: "#6c5648",
-    panel: "#fbf6ed",
-    panelRaised: "#fffaf2",
+export const baseTheme = createTokenTheme(vars, defaultThemeValues)
+
+export const brandScopes = {
+  foundry: {
+    color: {
+      accent: "#d1a85f",
+      accentMuted: "#2f2416",
+      accentText: "#130f09",
+    },
   },
-  radius: {
-    lg: 26,
-    pill: 999,
+  signal: {
+    color: {
+      accent: "#087f8c",
+      accentMuted: "#d4f1ef",
+      accentText: "#ffffff",
+    },
   },
-  space: {
-    lg: 20,
-    md: 16,
-    sm: 10,
-    xl: 28,
-    xs: 6,
+} as const satisfies Record<ShowcaseBrand, TokenThemeLayer<typeof vars>>
+
+export const modeScopes = {
+  dark: {
+    color: {
+      canvas: "#0d0b09",
+      copy: "#f3ecdf",
+      edge: "#4e3921",
+      muted: "#b9ac97",
+      panel: "#17120e",
+      panelRaised: "#211912",
+    },
   },
-})
+  light: {
+    color: {
+      canvas: "#f4ecdb",
+      copy: "#2b1a12",
+      edge: "#c9b292",
+      muted: "#6c5648",
+      panel: "#fbf6ed",
+      panelRaised: "#fffaf2",
+    },
+  },
+} as const satisfies Record<ShowcaseThemeMode, TokenThemeLayer<typeof vars>>
+
+export const densityScopes = {
+  compact: {
+    control: { height: 40 },
+    radius: { lg: 18 },
+    space: { lg: 16, md: 12, sm: 8, xl: 20, xs: 4 },
+  },
+  comfortable: {
+    control: { height: 48 },
+    radius: { lg: 26 },
+    space: { lg: 20, md: 16, sm: 10, xl: 28, xs: 6 },
+  },
+} as const satisfies Record<ShowcaseDensity, TokenThemeLayer<typeof vars>>
 
 export const labelOfThemeMode = (mode: ShowcaseThemeMode): string =>
   mode === "dark" ? "Dark" : "Light"

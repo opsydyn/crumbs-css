@@ -6,6 +6,7 @@ import { PrimitiveGallery } from "./PrimitiveGallery"
 import { useAppTheme } from "./AppThemeProvider"
 import { ShowcaseCard } from "./ShowcaseCard"
 import * as s from "./ShowcaseScreen.css"
+import { ThemeAxisPicker } from "./ThemeAxisPicker"
 import { ThemeModePicker } from "./ThemeModePicker"
 
 export function ShowcaseScreen() {
@@ -25,6 +26,7 @@ export function ShowcaseScreen() {
           </Text>
         </View>
         <ThemeModePicker />
+        <ThemeAxisPicker />
         <ShowcaseCard
           actionLabel="Live primitive gallery"
           body="This screen now groups the installed rn-primitives suite into one scan-friendly surface, with a live example for each package and matching focused stories in Storybook."
