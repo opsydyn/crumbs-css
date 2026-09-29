@@ -109,6 +109,11 @@ Keep the axes in your app state or user preferences. Components consume their
 resolved tokens; they do not need to know why a particular brand, mode, or
 density is active.
 
+Some semantic colours depend on two axes. The reference consumer composes its
+active mode layer from the selected brand and mode so an accent used as text
+remains readable on both light and dark surfaces. It keeps the scope on the
+supported `mode` axis instead of adding a new theme-context name.
+
 ## Define semantic typography roles
 
 Use `textStyle` for roles such as display, heading, body, and caption. Colour
@@ -314,6 +319,48 @@ generated stories or review cases are stale. Reachable public recipe selections
 are resolved exhaustively in the test suite; unreachable cases remain visible
 in `apps/storybook/test/contract-review-cases.json` with their state constraint
 reason.
+
+## Connect native accessibility preferences
+
+The reference consumer adapts React Native's `useWindowDimensions()` values,
+`I18nManager.isRTL`, and `AccessibilityInfo` into one
+`createNativeConditionStore`. Width and font-scale readings update from the
+hook; accessibility listeners are attached only while the store has a
+subscriber and are removed when it unsubscribes. Text keeps
+`allowFontScaling` enabled, and the RTL preview uses a native `direction` style
+with asymmetric Crumbs logical padding declarations. The motion sample fixes
+its own track to LTR so its positive travel distance stays within the track
+under an RTL app launch. Initial preference reads are revision-guarded so a
+late native query cannot replace a newer listener event.
+
+Reduced motion is queried with `AccessibilityInfo.isReduceMotionEnabled()` and
+updated from `reduceMotionChanged`. The reference animation stops when reduced
+motion becomes active and future runs complete immediately. iOS
+`isDarkerSystemColorsEnabled()` and Android `isHighTextContrastEnabled()` map to
+Crumbs' `contrast: "more"`; a custom adapter can provide `contrast: "less"`,
+which these React Native APIs do not expose. The reference theme applies its
+more-contrast color layer through the existing mode scope.
+
+For Expo SDK 56, use the standalone native app for RTL acceptance. Expo Go
+disables RTL on SDK versions before 58, even when the app declares supported
+locales. This app declares `supportsRTL` and its iOS `en` and `ar` locales in
+`apps/storybook/app.json`; validate a localized cold launch on the standalone
+build. See [Expo's localization guidance](https://docs.expo.dev/guides/localization/#rtl-support).
+
+The checked-in `apps/storybook/test/native-accessibility-review-cases.json`
+reports declared six-digit opaque sRGB text pairs using the relative-luminance
+formula described in [WCAG 2.2 SC 1.4.3](https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html).
+The review uses 4.5:1 for ordinary text and a 7:1 design target for the
+more-contrast palette; it does not claim WCAG conformance or measure native
+rendering. It includes active theme-picker and aspect-ratio preview text on
+accent-muted surfaces and marks any known ratio below target as `fail`: Foundry
+light copy, muted, and accent text are recorded at 1.100:1, 2.211:1, and
+2.760:1; Signal dark copy, muted, and accent text at 1.014:1, 1.873:1, and
+2.556:1. Disabled and pressed opacity cases stay `unknown` until their actual
+ancestor/backdrop composition is measured.
+Regenerate or check the report with `bun run accessibility:generate` and
+`bun run accessibility:check` from `apps/storybook`. Screen-reader and
+interaction acceptance require separate native checks.
 
 ## Related guides
 

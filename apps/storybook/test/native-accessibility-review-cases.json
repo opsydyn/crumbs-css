@@ -1,0 +1,1017 @@
+{
+  "formatVersion": 1,
+  "conditions": [
+    {
+      "axis": "fontScaleBucket",
+      "source": "useWindowDimensions().fontScale",
+      "consumerCase": "Text with allowFontScaling enabled and no maxFontSizeMultiplier cap"
+    },
+    {
+      "axis": "direction",
+      "source": "I18nManager.isRTL at AppThemeProvider mount",
+      "consumerCase": "Preview control updates the condition snapshot and native View.direction while Crumbs logical padding remains authored once",
+      "limitation": "The preview control is not a substitute for testing a localized RTL app launch."
+    },
+    {
+      "axis": "motion",
+      "source": "AccessibilityInfo.isReduceMotionEnabled and reduceMotionChanged",
+      "consumerCase": "Reduced motion stops an active sample and completes future sample transitions immediately"
+    },
+    {
+      "axis": "contrast",
+      "sources": {
+        "ios": "AccessibilityInfo.isDarkerSystemColorsEnabled and darkerSystemColorsChanged",
+        "android": "AccessibilityInfo.isHighTextContrastEnabled and highTextContrastChanged"
+      },
+      "mapping": {
+        "enabled": "more",
+        "disabled": "normal"
+      },
+      "limitation": "React Native exposes no less-contrast preference; custom adapters may still supply contrast=less."
+    }
+  ],
+  "contrastReview": {
+    "method": "WCAG 2.2 sRGB relative luminance ratio for declared opaque six-digit hex pairs",
+    "minimumTextRatio": 4.5,
+    "strongerContrastTarget": 7,
+    "appliesLargeTextException": false,
+    "limitation": "Source-level palette review only; not a WCAG conformance result or a native rendering measurement.",
+    "pairs": [
+      {
+        "id": "foundry/dark/normal/copy-on-panel",
+        "foreground": "#f3ecdf",
+        "background": "#17120e",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 15.828153261197928,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/muted-on-panel",
+        "foreground": "#b9ac97",
+        "background": "#17120e",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 8.333284671456767,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/accent-on-panel",
+        "foreground": "#d1a85f",
+        "background": "#17120e",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 8.392276407047808,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/button-label-on-accent",
+        "foreground": "#130f09",
+        "background": "#d1a85f",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 8.6160663878455,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/copy-on-canvas",
+        "foreground": "#f3ecdf",
+        "background": "#0d0b09",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 16.722066138447584,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/accent-on-canvas",
+        "foreground": "#d1a85f",
+        "background": "#0d0b09",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 8.866239719501275,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/copy-on-accent-muted",
+        "foreground": "#f3ecdf",
+        "background": "#2f2416",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 12.907723462508418,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/muted-on-accent-muted",
+        "foreground": "#b9ac97",
+        "background": "#2f2416",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 6.79572229927874,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/normal/accent-on-accent-muted",
+        "foreground": "#d1a85f",
+        "background": "#2f2416",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 6.843829554560962,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/copy-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/muted-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/accent-on-panel",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/button-label-on-accent",
+        "foreground": "#000000",
+        "background": "#ffff00",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/copy-on-canvas",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/accent-on-canvas",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/copy-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/muted-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/dark/more/accent-on-accent-muted",
+        "foreground": "#ffff00",
+        "background": "#222222",
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 14.815983597512291,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/normal/copy-on-panel",
+        "foreground": "#2b1a12",
+        "background": "#fbf6ed",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 15.491482056897764,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/normal/muted-on-panel",
+        "foreground": "#6c5648",
+        "background": "#fbf6ed",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 6.370018655191026,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/normal/accent-on-panel",
+        "foreground": "#905f00",
+        "background": "#fbf6ed",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 5.1028915284830285,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/normal/button-label-on-accent",
+        "foreground": "#ffffff",
+        "background": "#905f00",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 5.493439009116041,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/normal/copy-on-canvas",
+        "foreground": "#2b1a12",
+        "background": "#f4ecdb",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 14.189600705730811,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/normal/accent-on-canvas",
+        "foreground": "#905f00",
+        "background": "#f4ecdb",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 4.674052035040124,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/normal/copy-on-accent-muted",
+        "foreground": "#2b1a12",
+        "background": "#2f2416",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 1.0997394520783381,
+        "status": "fail"
+      },
+      {
+        "id": "foundry/light/normal/muted-on-accent-muted",
+        "foreground": "#6c5648",
+        "background": "#2f2416",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 2.211375322783065,
+        "status": "fail"
+      },
+      {
+        "id": "foundry/light/normal/accent-on-accent-muted",
+        "foreground": "#905f00",
+        "background": "#2f2416",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 2.760494120074857,
+        "status": "fail"
+      },
+      {
+        "id": "foundry/light/more/copy-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/muted-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/accent-on-panel",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/button-label-on-accent",
+        "foreground": "#000000",
+        "background": "#ffff00",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/copy-on-canvas",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/accent-on-canvas",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/copy-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/muted-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "foundry/light/more/accent-on-accent-muted",
+        "foreground": "#ffff00",
+        "background": "#222222",
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 14.815983597512291,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/normal/copy-on-panel",
+        "foreground": "#f3ecdf",
+        "background": "#17120e",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 15.828153261197928,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/normal/muted-on-panel",
+        "foreground": "#b9ac97",
+        "background": "#17120e",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 8.333284671456767,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/normal/accent-on-panel",
+        "foreground": "#15a3b0",
+        "background": "#17120e",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 6.107950798558212,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/normal/button-label-on-accent",
+        "foreground": "#021416",
+        "background": "#15a3b0",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 6.190541322825127,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/normal/copy-on-canvas",
+        "foreground": "#f3ecdf",
+        "background": "#0d0b09",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 16.722066138447584,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/normal/accent-on-canvas",
+        "foreground": "#15a3b0",
+        "background": "#0d0b09",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 6.452904235787267,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/normal/copy-on-accent-muted",
+        "foreground": "#f3ecdf",
+        "background": "#d4f1ef",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 1.0139967378643866,
+        "status": "fail"
+      },
+      {
+        "id": "signal/dark/normal/muted-on-accent-muted",
+        "foreground": "#b9ac97",
+        "background": "#d4f1ef",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 1.8731711964743671,
+        "status": "fail"
+      },
+      {
+        "id": "signal/dark/normal/accent-on-accent-muted",
+        "foreground": "#15a3b0",
+        "background": "#d4f1ef",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 2.555631067342398,
+        "status": "fail"
+      },
+      {
+        "id": "signal/dark/more/copy-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/muted-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/accent-on-panel",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/button-label-on-accent",
+        "foreground": "#000000",
+        "background": "#ffff00",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/copy-on-canvas",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/accent-on-canvas",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/copy-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/muted-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "signal/dark/more/accent-on-accent-muted",
+        "foreground": "#ffff00",
+        "background": "#222222",
+        "context": {
+          "brand": "signal",
+          "mode": "dark",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 14.815983597512291,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/copy-on-panel",
+        "foreground": "#2b1a12",
+        "background": "#fbf6ed",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 15.491482056897764,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/muted-on-panel",
+        "foreground": "#6c5648",
+        "background": "#fbf6ed",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 6.370018655191026,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/accent-on-panel",
+        "foreground": "#077580",
+        "background": "#fbf6ed",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 5.046769138692832,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/button-label-on-accent",
+        "foreground": "#ffffff",
+        "background": "#077580",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 5.433021317766459,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/copy-on-canvas",
+        "foreground": "#2b1a12",
+        "background": "#f4ecdb",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 14.189600705730811,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/accent-on-canvas",
+        "foreground": "#077580",
+        "background": "#f4ecdb",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 4.622646088285037,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/copy-on-accent-muted",
+        "foreground": "#2b1a12",
+        "background": "#d4f1ef",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 13.999189739145093,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/muted-on-accent-muted",
+        "foreground": "#6c5648",
+        "background": "#d4f1ef",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 5.756395641707293,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/normal/accent-on-accent-muted",
+        "foreground": "#077580",
+        "background": "#d4f1ef",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "minimumRatio": 4.5,
+        "ratio": 4.560614567588436,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/copy-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/muted-on-panel",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/accent-on-panel",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/button-label-on-accent",
+        "foreground": "#000000",
+        "background": "#ffff00",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/copy-on-canvas",
+        "foreground": "#ffffff",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 21,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/accent-on-canvas",
+        "foreground": "#ffff00",
+        "background": "#000000",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 19.555999999999997,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/copy-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/muted-on-accent-muted",
+        "foreground": "#ffffff",
+        "background": "#222222",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 15.909984431773273,
+        "status": "pass"
+      },
+      {
+        "id": "signal/light/more/accent-on-accent-muted",
+        "foreground": "#ffff00",
+        "background": "#222222",
+        "context": {
+          "brand": "signal",
+          "mode": "light",
+          "contrast": "more"
+        },
+        "minimumRatio": 7,
+        "ratio": 14.815983597512291,
+        "status": "pass"
+      },
+      {
+        "id": "shared/disabled-label-opacity",
+        "foreground": "token:muted",
+        "background": "token:panelRaised",
+        "minimumRatio": 4.5,
+        "context": {
+          "brand": "foundry",
+          "mode": "dark",
+          "contrast": "normal"
+        },
+        "ratio": null,
+        "status": "unknown",
+        "reason": "Disabled text opacity requires compositing against the actual ancestor and surface backgrounds."
+      },
+      {
+        "id": "shared/pressed-opacity",
+        "foreground": "token:copy",
+        "background": "token:accentMuted",
+        "minimumRatio": 4.5,
+        "context": {
+          "brand": "foundry",
+          "mode": "light",
+          "contrast": "normal"
+        },
+        "ratio": null,
+        "status": "unknown",
+        "reason": "Pressed menu-item opacity composites text and surface colours against the painted ancestor; the result needs native/background compositing."
+      }
+    ]
+  },
+  "acceptance": {
+    "iosSimulator": {
+      "status": "accepted",
+      "osVersion": "26.5",
+      "app": "standalone"
+    },
+    "iosPhysicalDevice": "not-run",
+    "androidDevice": "parked",
+    "screenReader": "not-assessed",
+    "storybookOnDeviceNavigator": "not-qualified"
+  }
+}

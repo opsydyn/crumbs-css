@@ -39,7 +39,7 @@ export const vars = createTokenContract({
   identity: { owner: "@opsydyn/crumbs", name: "storybook", version: 2 },
 })
 
-const defaultThemeValues = {
+export const baseThemeValues = {
   color: {
     accent: "#d1a85f",
     accentMuted: "#2f2416",
@@ -56,7 +56,7 @@ const defaultThemeValues = {
   space: { lg: 20, md: 16, sm: 10, xl: 28, xs: 6 },
 } as const
 
-export const baseTheme = createTokenTheme(vars, defaultThemeValues)
+export const baseTheme = createTokenTheme(vars, baseThemeValues)
 
 export const brandScopes = {
   foundry: {
@@ -97,6 +97,66 @@ export const modeScopes = {
     },
   },
 } as const satisfies Record<ShowcaseThemeMode, TokenThemeLayer<typeof vars>>
+
+/** Mode-aware accents preserve brand identity while keeping text on surfaces readable. */
+const modeAccentOverrides = {
+  foundry: {
+    dark: { color: { accent: "#d1a85f", accentText: "#130f09" } },
+    light: { color: { accent: "#905f00", accentText: "#ffffff" } },
+  },
+  signal: {
+    dark: { color: { accent: "#15a3b0", accentText: "#021416" } },
+    light: { color: { accent: "#077580", accentText: "#ffffff" } },
+  },
+} as const satisfies Record<ShowcaseBrand, Record<ShowcaseThemeMode, TokenThemeLayer<typeof vars>>>
+
+export const contrastMoreScope = {
+  color: {
+    accent: "#ffff00",
+    accentMuted: "#222222",
+    accentText: "#000000",
+    canvas: "#000000",
+    copy: "#ffffff",
+    edge: "#ffffff",
+    muted: "#ffffff",
+    panel: "#000000",
+    panelRaised: "#111111",
+  },
+} as const satisfies TokenThemeLayer<typeof vars>
+
+const contrastMoreModeValues = {
+  foundry: {
+    dark: { color: { ...modeScopes.dark.color, ...contrastMoreScope.color } },
+    light: { color: { ...modeScopes.light.color, ...contrastMoreScope.color } },
+  },
+  signal: {
+    dark: { color: { ...modeScopes.dark.color, ...contrastMoreScope.color } },
+    light: { color: { ...modeScopes.light.color, ...contrastMoreScope.color } },
+  },
+} as const satisfies Record<ShowcaseBrand, Record<ShowcaseThemeMode, TokenThemeLayer<typeof vars>>>
+
+export function modeScopeFor(
+  brand: ShowcaseBrand,
+  mode: ShowcaseThemeMode,
+  contrast: "normal" | "more" | "less" = "normal",
+): TokenThemeLayer<typeof vars> {
+  return contrast === "more"
+    ? contrastMoreModeValues[brand][mode]
+    : {
+      ...modeScopes[mode],
+      color: {
+        ...modeScopes[mode].color,
+        ...modeAccentOverrides[brand][mode].color,
+      },
+  }
+}
+
+export function statusBarStyleFor(
+  mode: ShowcaseThemeMode,
+  contrast: "normal" | "more" | "less",
+): "light" | "dark" {
+  return contrast === "more" || mode === "dark" ? "light" : "dark"
+}
 
 export const densityScopes = {
   compact: {

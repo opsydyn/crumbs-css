@@ -498,6 +498,44 @@ remains. Android remains parked.
 Next recommended roadmap item: **M10.3** — verify font scaling, RTL/logical
 layout, reduced motion, and supported contrast contexts on native consumers.
 
+### 2026-09-29 — M10.3 iOS native accessibility-context acceptance
+
+- The reference `AppThemeProvider` owns a bounded native condition store, updates
+  dimensions and font scale, listens for reduced-motion and supported contrast
+  preferences, and resolves a mode-aware more-contrast token layer.
+- The Storybook consumer running in Expo Go on the iOS 26.5 simulator, with
+  Dynamic Type at `extra-extra-extra-large`
+  reported `fontScale` 1.35 and the Crumbs `extraLarge` bucket. Restoring the
+  `large` baseline returned the app to `fontScale` 1.00 and the `normal` bucket.
+- The standalone Expo SDK 56 app declares English and Arabic as supported iOS
+  locales with RTL enabled. A cold launch with Arabic primary reported native
+  direction `RTL` and rendered the showcase in RTL. Restoring the English-only
+  system language and relaunching reported `LTR`. Expo Go is unsuitable for this
+  RTL check on SDK versions before 58 because it disables RTL
+  ([Expo localization guidance](https://docs.expo.dev/guides/localization/#rtl-support)).
+- In the standalone app, enabling iOS Increase Contrast changed the live native
+  condition from `normal` to `more` and displayed the declared black/white/yellow
+  palette and light system-bar glyphs against its black canvas. Enabling Reduce
+  Motion changed `full` to `reduced`; the LTR motion sample completes at its
+  endpoint in both LTR and RTL app launches. Both preferences were restored.
+- The deterministic declared-colour review covers Foundry/Signal, light/dark,
+  and normal/more-contrast palettes, including the active theme-picker trigger
+  and aspect-ratio preview text on accent-muted. Foundry light's accent on
+  canvas now measures 4.674:1. Those surfaces expose six normal-contrast
+  failures: Foundry light copy, muted, and accent on accent-muted at 1.100:1,
+  2.211:1, and 2.760:1; Signal dark copy, muted, and accent on accent-muted at
+  1.014:1, 1.873:1, and 2.556:1. The more-contrast palette meets the 7:1 review
+  target for known opaque pairs. Disabled and pressed opacity cases remain
+  `unknown` because their painted backgrounds require compositing. This source
+  review is not WCAG conformance evidence.
+
+M10.3 is complete for these iOS simulator contexts. Screen-reader semantics and
+broader interaction acceptance remain separate checks; the regular Storybook
+navigator is still unqualified, and Android remains parked.
+
+Next recommended roadmap item: **M10.4** - run the three North Star journeys
+from packed public packages and retain the result artifacts.
+
 ## M10 — Qualify the reference design system and North Star journeys
 
 **Decisions:** D9–D12.\
@@ -505,7 +543,7 @@ layout, reduced motion, and supported contrast contexts on native consumers.
 
 - [x] M10.1: Complete public-API examples for typography, button, input, selection controls, card, and dialog integration, with brands, modes, density, scopes, states, and typed slots; complete direct iOS interaction smoke. The normal on-device Storybook navigator remains unqualified as recorded above.
 - [x] M10.2: Generate useful contract-driven stories and review cases. Use pairwise theme-axis stories plus exhaustive reachable recipe-state tests; report unreachable recipe selections and intentionally unrendered full theme combinations. See `apps/storybook/scripts/generate-contract-stories.ts` and `apps/storybook/test/contract-review-cases.json`.
-- [ ] M10.3: Verify font scaling, RTL/logical layout, reduced motion, and supported contrast contexts on native consumers. Declared colour-pair analysis reports unknown compositing/background cases; screen-reader and interaction acceptance stays explicit.
+- [x] M10.3: Verify font scaling, RTL/logical layout, reduced motion, and supported contrast contexts on native iOS consumers. The declared-pair review exposes known colour failures and unknown opacity/compositing cases; it is not WCAG conformance evidence. Screen-reader and interaction acceptance stays explicit. Android remains parked.
 - [ ] M10.4: Run the three North Star journeys below from packed public packages and retain results, artifact versions, screenshots/recordings where useful, diagnostics, and performance reports.
 - [ ] M10.5: Run the full compatibility, property, type/editor, package, docs, visual, and device budgets. Publish a guarantees matrix that distinguishes supported, measured, and unsupported behavior.
 

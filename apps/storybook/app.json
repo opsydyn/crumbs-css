@@ -3,12 +3,27 @@
     "name": "Crumbs Storybook",
     "slug": "crumbs-storybook",
     "version": "0.0.0",
+    "ios": {
+      "bundleIdentifier": "dev.crumbs.storybook"
+    },
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "web": {
       "bundler": "metro",
       "output": "single"
     },
-    "plugins": ["expo-font", "@react-native-community/datetimepicker"]
+    "plugins": [
+      "expo-font",
+      "@react-native-community/datetimepicker",
+      [
+        "expo-localization",
+        {
+          "supportsRTL": true,
+          "supportedLocales": {
+            "ios": ["en", "ar"]
+          }
+        }
+      ]
+    ]
   }
 }

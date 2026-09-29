@@ -7,14 +7,24 @@ import { ReferenceButton } from "./ReferenceButton"
 import { ReferenceDialog } from "./ReferenceDialog"
 import { ReferenceSelections } from "./ReferenceSelections"
 import { ReferenceTextField } from "./ReferenceTextField"
+import { NativeAccessibilityContexts } from "./NativeAccessibilityContexts"
 import { ShowcaseCard } from "./ShowcaseCard"
-import { brandScopes, vars } from "../styles/theme"
+import { brandScopes, modeScopeFor, vars } from "../styles/theme"
+import { useAppTheme, useNativeConditions } from "./AppThemeProvider"
 import * as s from "./ReferencePatterns.css"
 
 function PartnerBrandExample() {
+  const { mode } = useAppTheme()
+  const { snapshot } = useNativeConditions()
   return (
     <TokenThemeScopeProvider contract={vars} context="brand" values={brandScopes.signal}>
-      <PartnerBrandExampleContent />
+      <TokenThemeScopeProvider
+        contract={vars}
+        context="mode"
+        values={modeScopeFor("signal", mode, snapshot.contrast)}
+      >
+        <PartnerBrandExampleContent />
+      </TokenThemeScopeProvider>
     </TokenThemeScopeProvider>
   )
 }
@@ -102,6 +112,7 @@ export function ReferenceSystem() {
       </View>
 
       <ReferenceSelections fieldLocked={fieldLocked} onFieldLockedChange={setFieldLocked} />
+      <NativeAccessibilityContexts />
       <PartnerBrandExample />
     </View>
   )
