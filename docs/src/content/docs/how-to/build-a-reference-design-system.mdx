@@ -292,6 +292,29 @@ Go, run `bun run storybook:native:reference` from `apps/storybook`. This builds
 the local Crumbs package, clears Metro, and bypasses the on-device Storybook
 navigator for that run. Use `bun run storybook:native` for the normal navigator.
 
+## Keep reference coverage tied to contracts
+
+The reference Storybook generates a compact set of theme stories from its
+brand, mode, and density axes. Pairwise selection covers every value pair
+without rendering all eight theme combinations. The checked-in review report
+lists the four intentionally unrendered combinations and every public recipe
+selection, including states made unreachable by a component contract.
+
+When a theme axis or recipe contract changes, regenerate the artifacts from
+`apps/storybook` and review both diffs:
+
+```sh
+bun run contracts:generate
+bun run contracts:check
+bun test
+```
+
+`contracts:check` runs as part of the Storybook test command and fails when
+generated stories or review cases are stale. Reachable public recipe selections
+are resolved exhaustively in the test suite; unreachable cases remain visible
+in `apps/storybook/test/contract-review-cases.json` with their state constraint
+reason.
+
 ## Related guides
 
 - [Use themes](/crumbs-css/how-to/use-themes/)

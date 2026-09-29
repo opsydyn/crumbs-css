@@ -29,8 +29,8 @@ describe("@opsydyn/crumbs-css Expo SDK 56 contract", () => {
     const packageJson = readJson<PackageJson>(resolve(storybookRoot, "package.json"))
 
     expect(packageJson.dependencies?.expo).toBe("^56.0.0")
-    expect(packageJson.dependencies?.react).toBe("19.2.5")
-    expect(packageJson.dependencies?.["react-dom"]).toBe("19.2.5")
+    expect(packageJson.dependencies?.react).toBe("19.2.3")
+    expect(packageJson.dependencies?.["react-dom"]).toBe("19.2.3")
     expect(packageJson.dependencies?.["react-native"]).toBe("0.85.3")
     expect(packageJson.dependencies?.["@react-native-community/datetimepicker"]).toBe("9.1.0")
     expect(packageJson.dependencies?.["@react-native-community/slider"]).toBe("5.2.0")
@@ -80,7 +80,7 @@ describe("@opsydyn/crumbs-css Expo SDK 56 contract", () => {
 
     expect(packageJson.peerDependencies?.react).toBe(">=19 <20")
     expect(packageJson.peerDependencies?.["react-native"]).toBe(">=0.85 <0.86")
-    expect(packageJson.devDependencies?.react).toBe("19.2.5")
+    expect(packageJson.devDependencies?.react).toBe("19.2.3")
     expect(packageJson.devDependencies?.["react-native"]).toBe("0.85.3")
   })
 

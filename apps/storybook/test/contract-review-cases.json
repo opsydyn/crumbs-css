@@ -1,0 +1,540 @@
+{
+  "schemaVersion": 1,
+  "storyPolicy": "pairwise-theme-axes",
+  "storyPolicyNote": "Every theme-axis value and pair is represented. Full theme combinations omitted from stories are listed; recipe public states are reviewed exhaustively below.",
+  "theme": {
+    "axes": [
+      {
+        "name": "brand",
+        "values": [
+          "foundry",
+          "signal"
+        ]
+      },
+      {
+        "name": "themeMode",
+        "values": [
+          "dark",
+          "light"
+        ]
+      },
+      {
+        "name": "density",
+        "values": [
+          "compact",
+          "comfortable"
+        ]
+      }
+    ],
+    "fullCombinationCount": 8,
+    "storyCombinationCount": 4,
+    "stories": [
+      {
+        "brand": "foundry",
+        "themeMode": "dark",
+        "density": "compact"
+      },
+      {
+        "brand": "foundry",
+        "themeMode": "light",
+        "density": "comfortable"
+      },
+      {
+        "brand": "signal",
+        "themeMode": "dark",
+        "density": "comfortable"
+      },
+      {
+        "brand": "signal",
+        "themeMode": "light",
+        "density": "compact"
+      }
+    ],
+    "intentionallyUnrenderedCombinations": [
+      {
+        "brand": "foundry",
+        "themeMode": "dark",
+        "density": "comfortable"
+      },
+      {
+        "brand": "foundry",
+        "themeMode": "light",
+        "density": "compact"
+      },
+      {
+        "brand": "signal",
+        "themeMode": "dark",
+        "density": "compact"
+      },
+      {
+        "brand": "signal",
+        "themeMode": "light",
+        "density": "comfortable"
+      }
+    ],
+    "pairCoverage": [
+      {
+        "axes": [
+          "brand",
+          "themeMode"
+        ],
+        "expectedPairs": 4,
+        "coveredPairs": 4,
+        "complete": true
+      },
+      {
+        "axes": [
+          "brand",
+          "density"
+        ],
+        "expectedPairs": 4,
+        "coveredPairs": 4,
+        "complete": true
+      },
+      {
+        "axes": [
+          "themeMode",
+          "density"
+        ],
+        "expectedPairs": 4,
+        "coveredPairs": 4,
+        "complete": true
+      }
+    ]
+  },
+  "recipeStatePolicy": "exhaustive-public-variant-selections",
+  "recipes": [
+    {
+      "contract": "@opsydyn/crumbs#ReferenceActionButton@1",
+      "axes": [
+        {
+          "name": "disabled",
+          "values": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "name": "pressed",
+          "values": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "name": "tone",
+          "values": [
+            "brand",
+            "neutral",
+            "quiet"
+          ]
+        }
+      ],
+      "counts": {
+        "total": 12,
+        "reachable": 9,
+        "unreachable": 3
+      },
+      "cases": [
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": false,
+            "tone": "brand"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": false,
+            "tone": "neutral"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": false,
+            "tone": "quiet"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": true,
+            "tone": "brand"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": true,
+            "tone": "neutral"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": true,
+            "tone": "quiet"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": false,
+            "tone": "brand"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": false,
+            "tone": "neutral"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": false,
+            "tone": "quiet"
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": true,
+            "tone": "brand"
+          },
+          "status": "unreachable",
+          "reason": "state disabled=true allows pressed=false, received true"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": true,
+            "tone": "neutral"
+          },
+          "status": "unreachable",
+          "reason": "state disabled=true allows pressed=false, received true"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": true,
+            "tone": "quiet"
+          },
+          "status": "unreachable",
+          "reason": "state disabled=true allows pressed=false, received true"
+        }
+      ]
+    },
+    {
+      "contract": "@opsydyn/crumbs#ReferenceInputField@1",
+      "axes": [
+        {
+          "name": "disabled",
+          "values": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "name": "focused",
+          "values": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "name": "invalid",
+          "values": [
+            "false",
+            "true"
+          ]
+        }
+      ],
+      "counts": {
+        "total": 8,
+        "reachable": 6,
+        "unreachable": 2
+      },
+      "cases": [
+        {
+          "selection": {
+            "disabled": false,
+            "focused": false,
+            "invalid": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "focused": false,
+            "invalid": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "focused": true,
+            "invalid": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "focused": true,
+            "invalid": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "focused": false,
+            "invalid": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "focused": false,
+            "invalid": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "focused": true,
+            "invalid": false
+          },
+          "status": "unreachable",
+          "reason": "state disabled=true allows focused=false, received true"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "focused": true,
+            "invalid": true
+          },
+          "status": "unreachable",
+          "reason": "state disabled=true allows focused=false, received true"
+        }
+      ]
+    },
+    {
+      "contract": "@opsydyn/crumbs#ReferenceSelectionControl@1",
+      "axes": [
+        {
+          "name": "disabled",
+          "values": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "name": "kind",
+          "values": [
+            "checkbox",
+            "radio",
+            "switch"
+          ]
+        },
+        {
+          "name": "selected",
+          "values": [
+            "false",
+            "true"
+          ]
+        }
+      ],
+      "counts": {
+        "total": 12,
+        "reachable": 12,
+        "unreachable": 0
+      },
+      "cases": [
+        {
+          "selection": {
+            "disabled": false,
+            "kind": "checkbox",
+            "selected": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "kind": "checkbox",
+            "selected": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "kind": "radio",
+            "selected": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "kind": "radio",
+            "selected": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "kind": "switch",
+            "selected": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "kind": "switch",
+            "selected": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "kind": "checkbox",
+            "selected": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "kind": "checkbox",
+            "selected": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "kind": "radio",
+            "selected": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "kind": "radio",
+            "selected": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "kind": "switch",
+            "selected": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "kind": "switch",
+            "selected": true
+          },
+          "status": "reachable"
+        }
+      ]
+    },
+    {
+      "contract": "@opsydyn/crumbs#ReferenceDialog@1",
+      "axes": [],
+      "counts": {
+        "total": 1,
+        "reachable": 1,
+        "unreachable": 0
+      },
+      "cases": [
+        {
+          "selection": {},
+          "status": "reachable"
+        }
+      ]
+    },
+    {
+      "contract": "@crumbs/storybook#ShowcaseCardAction@2",
+      "axes": [
+        {
+          "name": "disabled",
+          "values": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "name": "pressed",
+          "values": [
+            "false",
+            "true"
+          ]
+        }
+      ],
+      "counts": {
+        "total": 4,
+        "reachable": 3,
+        "unreachable": 1
+      },
+      "cases": [
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": false,
+            "pressed": true
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": false
+          },
+          "status": "reachable"
+        },
+        {
+          "selection": {
+            "disabled": true,
+            "pressed": true
+          },
+          "status": "unreachable",
+          "reason": "state disabled=true allows pressed=false, received true"
+        }
+      ]
+    }
+  ]
+}

@@ -3,9 +3,24 @@ import { PortalHost } from "@rn-primitives/portal"
 import { Pressable, StyleSheet, Text, View } from "react-native"
 import { GestureHandlerRootView } from "react-native-gesture-handler"
 import { AppThemeProvider, useAppTheme } from "../src/components/AppThemeProvider"
+import { brandScopes, densityScopes, modeScopes } from "../src/styles/theme"
 
 const canvasBackgroundOf = (themeMode: string): string =>
   themeMode === "light" ? "#f4ecdb" : "#0d0b09"
+
+const axisValueOf = <TOptions extends Readonly<Record<string, unknown>>>(
+  selected: unknown,
+  options: TOptions,
+  fallback: keyof TOptions,
+): keyof TOptions => typeof selected === "string" && Object.hasOwn(options, selected)
+  ? selected as keyof TOptions
+  : fallback
+
+const toolbarItemsOf = (options: Readonly<Record<string, unknown>>) =>
+  Object.keys(options).map(value => ({
+    title: value[0]!.toUpperCase() + value.slice(1),
+    value,
+  }))
 
 function PreviewThemeToolbar() {
   const { mode, setMode } = useAppTheme()
@@ -40,11 +55,18 @@ function PreviewThemeToolbar() {
 const preview: Preview = {
   decorators: [
     (Story, context) => {
-      const themeMode = context.globals.themeMode === "light" ? "light" : "dark"
+      const themeMode = axisValueOf(context.globals.themeMode, modeScopes, "dark")
+      const brand = axisValueOf(context.globals.brand, brandScopes, "foundry")
+      const density = axisValueOf(context.globals.density, densityScopes, "comfortable")
 
       return (
       <GestureHandlerRootView style={styles.root}>
-        <AppThemeProvider initialMode={themeMode} key={themeMode}>
+        <AppThemeProvider
+          initialBrand={brand}
+          initialDensity={density}
+          initialMode={themeMode}
+          key={`${brand}:${themeMode}:${density}`}
+        >
           <View style={[styles.canvas, { backgroundColor: canvasBackgroundOf(themeMode) }]}>
             <PreviewThemeToolbar />
             <View style={styles.storyFrame}>
@@ -58,6 +80,24 @@ const preview: Preview = {
     },
   ],
   globalTypes: {
+    brand: {
+      defaultValue: "foundry",
+      description: "Showcase brand",
+      name: "Brand",
+      toolbar: {
+        dynamicTitle: true,
+        items: toolbarItemsOf(brandScopes),
+      },
+    },
+    density: {
+      defaultValue: "comfortable",
+      description: "Showcase density",
+      name: "Density",
+      toolbar: {
+        dynamicTitle: true,
+        items: toolbarItemsOf(densityScopes),
+      },
+    },
     themeMode: {
       defaultValue: "dark",
       description: "Showcase theme mode",
@@ -65,16 +105,7 @@ const preview: Preview = {
       toolbar: {
         dynamicTitle: true,
         icon: "mirror",
-        items: [
-          {
-            title: "Dark",
-            value: "dark",
-          },
-          {
-            title: "Light",
-            value: "light",
-          },
-        ],
+        items: toolbarItemsOf(modeScopes),
       },
     },
   },

@@ -481,10 +481,22 @@ controls, card, and dialog integration. Keep Android/device acceptance parked.
   smoke route bypasses its FullUI manager, and the previously observed
   `queueMicrotask` UI-load error remains unresolved. Android remains parked.
 
-The M10.1 public-API examples and direct native interaction smoke are complete;
-compatibility and broader device acceptance remain open under M10.3–M10.5. Next
-recommended roadmap item: **M10.2** — generate useful contract-driven stories
-and review cases. Keep Android parked.
+The M10.1 public-API examples and direct native interaction smoke are complete.
+M10.2 now generates four pairwise theme stories covering every brand/mode,
+brand/density, and mode/density value pair, with the four intentionally
+unrendered full combinations listed in
+[`contract-review-cases.json`](../apps/storybook/test/contract-review-cases.json).
+That report also exhaustively enumerates 37 public recipe selections across
+five contracts: 31 reachable selections are resolved in tests, and six
+unreachable selections carry their state-constraint reasons. Story generation
+is deterministic and checked by the Storybook test command. The repository
+suite passed (1,267 CSS tests and 12 Storybook tests); app typecheck, docs build,
+and Expo 56 iOS export passed (1,712 modules). These checks do not establish
+on-device acceptance for the full Storybook navigator; its M10.1 limitation
+remains. Android remains parked.
+
+Next recommended roadmap item: **M10.3** — verify font scaling, RTL/logical
+layout, reduced motion, and supported contrast contexts on native consumers.
 
 ## M10 — Qualify the reference design system and North Star journeys
 
@@ -492,7 +504,7 @@ and review cases. Keep Android parked.
 **Affected paths:** `apps/storybook/`, independent packed-consumer fixtures, consumer documentation, native acceptance/benchmark artifacts, CI checks.
 
 - [x] M10.1: Complete public-API examples for typography, button, input, selection controls, card, and dialog integration, with brands, modes, density, scopes, states, and typed slots; complete direct iOS interaction smoke. The normal on-device Storybook navigator remains unqualified as recorded above.
-- [ ] M10.2: Generate useful contract-driven stories and review cases. Combine representative cross-axis coverage with exhaustive tests for critical states; report unreachable or intentionally untested combinations.
+- [x] M10.2: Generate useful contract-driven stories and review cases. Use pairwise theme-axis stories plus exhaustive reachable recipe-state tests; report unreachable recipe selections and intentionally unrendered full theme combinations. See `apps/storybook/scripts/generate-contract-stories.ts` and `apps/storybook/test/contract-review-cases.json`.
 - [ ] M10.3: Verify font scaling, RTL/logical layout, reduced motion, and supported contrast contexts on native consumers. Declared colour-pair analysis reports unknown compositing/background cases; screen-reader and interaction acceptance stays explicit.
 - [ ] M10.4: Run the three North Star journeys below from packed public packages and retain results, artifact versions, screenshots/recordings where useful, diagnostics, and performance reports.
 - [ ] M10.5: Run the full compatibility, property, type/editor, package, docs, visual, and device budgets. Publish a guarantees matrix that distinguishes supported, measured, and unsupported behavior.
