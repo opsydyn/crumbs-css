@@ -45,6 +45,16 @@ or threshold. The registry therefore remains pending and cannot produce
 whole-registry performance qualification. Existing benchmark smoke ceilings
 remain historical local checks and are not M1.8 budgets.
 
+The 2026-09-30 M10.5 readiness audit confirms 21 of 26 metrics have recorded
+baselines and approved thresholds. Four active frame, allocation and
+retained-memory gates await device evidence. The fifth pending threshold is
+`runtime-emitted-bytes`: M4.6 retired its historical baseline as diagnostic-only,
+but the current readiness assessment still counts every pending threshold and
+requires every registry entry to be recorded and approved. Keep the historical
+comparison verified and visible; do not approve a threshold for that obsolete
+workload. Separate diagnostic reporting from active readiness membership in a
+follow-up registry-model change. See the [M10.5 readiness assessment](../../../docs/assessments/2026-09-30-m10-5-performance-registry-readiness.md).
+
 ## Host comparison and review packets
 
 Run `CRUMBS_AUDIT_NODE_FLOOR=/absolute/path/to/node-v22.0.0 bun run measure:host-budgets <output-directory>` after a complete package build. The command runs the Effect/runtime boundary matrix, the isolated 15-sample runtime-initialization matrix, an Expo/Metro direct-edit run, five independent native-style benchmark processes, and five fresh editor measurements at every scale sequentially. It retains raw reports, an adapted benchmark summary, a comparison for recorded metrics, diagnostic-only comparisons and a threshold review packet. The Metro run binds a localhost port and performs reversible edits, so its host must permit local server and file-watcher operation.
