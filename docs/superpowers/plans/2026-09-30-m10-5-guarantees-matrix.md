@@ -20,6 +20,7 @@
 - Keep contract support separate from measurement status. Test presence alone cannot establish support or a guarantee.
 - Use only the seven required domains and status vocabularies in the approved spec. Unsupported rows require an explicit contract or policy reference.
 - Reject unsupported schema versions, duplicate IDs, missing required domains, absolute or parent-relative paths, source references resolving outside the repository, evidence paths resolving outside `docs/evidence/`, mismatched evidence hashes, and stale generated documentation. Resolve filesystem references so symlinks cannot escape their permitted root.
+- Require passed/failed evidence outcomes to agree with row status and evidence source revisions to equal current Git HEAD. Historical evidence retains its original revision and must stay stale. Refuse generated-page paths or parents that resolve through symlinks.
 - Preserve historical evidence with its original source revision and environment. Never relabel it as a current run.
 - A passing host sample with a pending threshold is measured host evidence, not a performance guarantee.
 - Keep simulator, physical-device, Android, screen-reader, visual-diff, and device-performance states independent. The current device and simulator limitations are environment observations, not unsupported product contracts.
@@ -31,6 +32,8 @@
 
 - Can an absolute, traversal, symlink, or evidence-root escape be represented or accepted by the matrix validator?
 - Can absent, stale, failed, or uncalibrated evidence render as a passing guarantee?
+- Can a passed/failed row contradict its evidence outcome or use a historical source revision?
+- Can the generated-page check or renderer follow a symlink outside its designated destination?
 - Can a passing host measurement with a pending threshold be described as a performance guarantee?
 - Are MDX-sensitive values escaped and repeated rendering byte-for-byte deterministic?
 - Do historical receipts preserve their actual revision/environment and avoid being presented as current?
@@ -41,25 +44,26 @@
 ### Task 1: M10.5.1 — Add the matrix contract, validator, and generated reference
 
 **Files:**
+- Create: `packages/css/src/tooling/guarantees-matrix/schema.ts` (internal, not exported from package entry points)
 - Create: `scripts/guarantees-matrix/model.ts`
 - Create: `scripts/guarantees-matrix/validate.ts`
 - Create: `scripts/guarantees-matrix/render.ts`
 - Create: `scripts/guarantees-matrix.ts`
 - Create: `docs/guarantees/matrix.v1.json`
 - Create: `docs/src/content/docs/reference/guarantees.mdx`
-- Modify: root `package.json` with `guarantees:check`
+- Modify: root `package.json` with `guarantees:check` and `guarantees:render`
 - Create: `packages/css/test/guarantees-matrix.test.ts`
 
-**Interfaces:** Define `GuaranteesMatrix`, a stable row ID, the seven required domains (`compatibility`, `property`, `type-editor`, `package-runtime`, `documentation`, `visual`, and `device`), `supportStatus` (`supported`, `conditional`, `unsupported`, `unspecified`), and `measurementStatus` (`passed`, `failed`, `not-run`, `not-calibrated`, `stale`, `not-applicable`), plus `basis`, `evidence`, and optional existing-registry `budget` linkage exactly as specified. Evidence carries repository-relative artifact path, SHA-256, source revision, command, environment/version identity, result, and scope limit. Export `validateGuaranteesMatrix(matrix, repositoryRoot)` returning structured issues, and `renderGuaranteesMatrix(matrix)` returning deterministic MDX. The CLI exposes `check` (strictly decode, validate references/hashes, compare generated output) and `render` (write only the generated MDX). Use Effect 4 Schema and the existing data-codec boundary; do not export the contract as a runtime package API. Seed rows only from the approved inventory and existing records. Historical references must retain their historical revision/environment; rows requiring new M10.5 runs start incomplete.
+**Interfaces:** Define `GuaranteesMatrix`, a stable row ID, the seven required domains (`compatibility`, `property`, `type-editor`, `package-runtime`, `documentation`, `visual`, and `device`), `supportStatus` (`supported`, `conditional`, `unsupported`, `unspecified`), and `measurementStatus` (`passed`, `failed`, `not-run`, `not-calibrated`, `stale`, `not-applicable`), plus `basis`, `evidence`, and optional existing-registry `budget` linkage exactly as specified. Evidence carries repository-relative artifact path, SHA-256, source revision, command, environment/version identity, structured `resultStatus` (`passed` or `failed`), descriptive result, and scope limit. Passed rows require all evidence outcomes to be passed; failed rows require at least one failed evidence outcome. Passed and failed measurements must match the repository HEAD revision. Export `validateGuaranteesMatrix(matrix, repositoryRoot, currentSourceRevision)` returning structured issues, and `renderGuaranteesMatrix(matrix)` returning deterministic MDX. The CLI exposes `check` (strictly decode, validate references/hashes and current revisions, compare generated output) and `render` (write only the generated MDX to a symlink-checked destination). Use Effect 4 Schema and the existing data-codec boundary; do not export the contract as a runtime package API. Seed rows only from the approved inventory and existing records. Historical references must retain their historical revision/environment and remain stale; rows requiring new M10.5 runs start incomplete.
 
-- [ ] Write focused failing tests named `acceptsCompleteMatrix`, `rejectsUnknownVersionAndFields`, `rejectsDuplicateIdsAndMissingDomains`, `rejectsInvalidStatusCombinations`, `requiresBasisForUnsupported`, `rejectsAbsoluteTraversalWindowsSeparatorsAndSymlinkEscape`, `requiresEvidenceIdentityAndScope`, `detectsEvidenceHashMismatch`, `doesNotPromoteIncompleteEvidence`, `keepsPendingBudgetOutOfPerformanceGuarantees`, `escapesMdxAndPreservesDeclaredOrder`, `rendersByteIdentically`, and `checkDetectsStaleGeneratedMdx`. Assert that absent, stale, failed, not-run, and not-calibrated evidence never renders as a passed guarantee; a passed host sample with a pending budget remains explicitly non-guaranteed; and historical evidence retains its source revision, environment, and scope limit.
-- [ ] Run `bun test packages/css/test/guarantees-matrix.test.ts` and confirm the new contract/renderer assertions fail before implementation.
-- [ ] Implement the strict Effect Schema model using the existing `makeDataCodec` validation behavior; add filesystem checks that resolve references beneath their permitted roots and verify evidence SHA-256 digests.
-- [ ] Implement stable-order MDX rendering with explicit escaping for all user-authored strings. Do not emit machine-specific absolute paths.
-- [ ] Add the curated v1 matrix and render the checked-in MDX from it; include all seven domains and explicit unsupported/not-run/not-calibrated distinctions without claiming fresh results.
-- [ ] Add `bun run guarantees:check`; verify it rejects invalid references and stale generated MDX and passes for the committed source/page pair.
-- [ ] Run `bun test packages/css/test/guarantees-matrix.test.ts`, `bun run guarantees:check`, and `bun run docs:build`; expected: all exit 0, with deterministic output and no generated-page diff after the check.
-- [ ] Run `git diff --check`, review the matrix claims against the spec, and commit as `feat(docs): add M10.5 guarantees matrix`.
+- [x] Write focused failing tests named `acceptsCompleteMatrix`, `rejectsUnknownVersionAndFields`, `rejectsDuplicateIdsAndMissingDomains`, `rejectsInvalidStatusCombinations`, `requiresBasisForUnsupported`, `rejectsAbsoluteTraversalWindowsSeparatorsAndSymlinkEscape`, `requiresEvidenceIdentityAndScope`, `detectsEvidenceHashMismatch`, `doesNotPromoteIncompleteEvidence`, `keepsPendingBudgetOutOfPerformanceGuarantees`, `escapesMdxAndPreservesDeclaredOrder`, `rendersByteIdentically`, and `checkDetectsStaleGeneratedMdx`. Assert that absent, stale, failed, not-run, and not-calibrated evidence never renders as a passed guarantee; a passed host sample with a pending budget remains explicitly non-guaranteed; historical evidence retains its revision/environment/scope; contradicting outcomes or revisions are rejected; and symlinked output cannot escape its destination.
+- [x] Run `bun test packages/css/test/guarantees-matrix.test.ts` and confirm the new contract/renderer assertions fail before implementation.
+- [x] Implement the strict Effect Schema model using the existing `makeDataCodec` validation behavior; add filesystem checks that resolve references beneath their permitted roots and verify evidence SHA-256 digests.
+- [x] Implement stable-order MDX rendering with explicit escaping for all user-authored strings. Do not emit machine-specific absolute paths.
+- [x] Add the curated v1 matrix and render the checked-in MDX from it; include all seven domains and explicit unsupported/not-run/not-calibrated distinctions without claiming fresh results.
+- [x] Add `bun run guarantees:check`; verify it rejects invalid references and stale generated MDX and passes for the committed source/page pair.
+- [x] Run `bun test packages/css/test/guarantees-matrix.test.ts`, `bun run guarantees:check`, and `bun run docs:build`; expected: all exit 0, with deterministic output and no generated-page diff after the check.
+- [x] Run `git diff --check`, review the matrix claims against the spec, and commit as `feat(docs): add M10.5 guarantees matrix`.
 
 **After this commit:** Recommend M10.5.2, the fresh host/package/type/editor/docs qualification run.
 
