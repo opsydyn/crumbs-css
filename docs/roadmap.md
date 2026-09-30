@@ -567,18 +567,24 @@ Next recommended roadmap item: **M10.5** — run the full compatibility, propert
 
 The v1 guarantees matrix and generated reference are published. M10.5.2 recorded package, property, type/editor, compatibility-fixture, and documentation results while preserving the historical M10.4 compatibility row. M10.5.3 contract-story and accessibility-review consistency checks passed; these are structural checks only. The single simulator probe could not connect to CoreSimulatorService, so simulator rendering was not run. Screenshot/image-diff, physical-device, screen-reader, and device performance acceptance remain not-run. Android remains parked.
 
-M10.5 remains open. The exact Node v22.0.0 host-budget suite could not run, and the performance registry is valid but not ready (pending thresholds, missing and diagnostic baselines). Native/device gates still need direct evidence. Next action: resume the remaining M10.5 host and device gates when the exact runtime and named target environment are available; keep Android last and parked.
+M10.5 remains open. The exact Node v22.0.0 host-budget suite could not run, and the performance registry is valid but not ready (pending thresholds, missing and diagnostic baselines). Native/device gates still need direct evidence. The Node-floor host-budget gate is deliberately deferred to the final M10.5 qualification pass; Android remains last and parked. M11 demand assessment may proceed before M10.5 closes, without treating M10 as complete.
 
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
 
 - [ ] Native equivalents for standalone `createVar`, `fallbackVar`, `assignVars`, and dynamic local assignment, extending M3's explicit scope/domain model. M3 already owns required-token and optional-fallback semantics; this item adds convenience/public surface.
-- [ ] Container conditions using explicit layout ownership, measurement timing, subscription cleanup, and resize-loop tests.
+- [ ] Container conditions using explicit layout ownership, measurement timing, subscription cleanup, and resize-loop tests. The current internal Expo dogfood assessment found no concrete parent-width use case; see [M11 assessment](assessments/2026-09-30-m11-container-conditions.md).
 - [ ] Motion adapters using a supported native animation system. Continuous updates run through that system rather than React theme resolution; reduced-motion behavior and cancellation are tested.
 - [ ] Additional token algebra operators, including typed colour/typography derivations, only with defined native representations and errors.
 - [ ] A constrained function-serialization/extension protocol for library authors, with explicit portable arguments and runtime imports. Do not expose arbitrary closure serialization.
 - [ ] Design-tool/editor adapters and a distinct web backend if validated consumer demand warrants them. Browser globals, cascade, font-face, layers, and view transitions do not become implicit native-core promises.
+
+### 2026-09-30 — M11 container-condition dogfood assessment
+
+The internal Expo reference app currently uses a screen-level width condition and fluid wrapping/flex layouts. No same-component, independently constrained parent-width case was demonstrated. Container conditions stay parked until an actual reference/adopter scenario shows that existing composition and intrinsic layout are insufficient. This source review is not native-device acceptance. M11 consumer-need assessment may proceed while the final M10.5 host/device gates remain open; the Node v22.0.0 host-budget gate is explicitly last. See [assessment](assessments/2026-09-30-m11-container-conditions.md).
+
+Next recommended M11 check: evaluate standalone token-variable assignment convenience against a concrete per-instance override in the reference app. Existing M3 contracts, scopes, and fallbacks must be shown insufficient before adding a public API.
 
 ## Property-based testing strategy
 
