@@ -4,7 +4,7 @@ import { resolve, sep } from "node:path"
 import { makeDataCodec } from "../src/contracts/data-codec"
 import { admitMetroIncrementalReport } from "./metro-incremental"
 
-export const BudgetRegistryVersion = 1 as const
+export const BudgetRegistryVersion = 2 as const
 export const requiredBudgetDomains = [
   "js-frames",
   "ui-frames",
@@ -78,6 +78,7 @@ const BudgetMetricSchema = Schema.Union([
   Schema.Struct({ ...commonMetricFields, baseline: RecordedBaselineSchema, threshold: PendingThresholdSchema }),
   Schema.Struct({ ...commonMetricFields, baseline: RecordedBaselineSchema, threshold: ApprovedThresholdSchema }),
 ])
+const DiagnosticMetricSchema = Schema.Struct({ ...commonMetricFields, baseline: DiagnosticBaselineSchema })
 export const BudgetRegistrySchema = Schema.Struct({
   _tag: Schema.Literal("CrumbsPerformanceBudgetRegistry"),
   version: Schema.Literal(BudgetRegistryVersion),
@@ -92,6 +93,7 @@ export const BudgetRegistrySchema = Schema.Struct({
     regressionRule: Schema.Literal("absolute-and-relative-must-pass"),
   }),
   metrics: Schema.Array(BudgetMetricSchema),
+  diagnostics: Schema.Array(DiagnosticMetricSchema),
 }).check(Schema.makeFilter(registry => {
   const issues: Array<{ path: Array<string | number>; issue: string }> = []
   const seen = new Set<string>()
@@ -101,6 +103,10 @@ export const BudgetRegistrySchema = Schema.Struct({
     if (metric.baseline.status === "recorded" && metric.baseline.repetitions < registry.protocol.minimumIndependentRepetitions) {
       issues.push({ path: ["metrics", index, "baseline", "repetitions"], issue: "Recorded baseline has fewer repetitions than the protocol minimum" })
     }
+  })
+  registry.diagnostics.forEach((metric, index) => {
+    if (seen.has(metric.id)) issues.push({ path: ["diagnostics", index, "id"], issue: `Duplicate metric id: ${metric.id}` })
+    seen.add(metric.id)
   })
   for (const domain of requiredBudgetDomains) {
     if (!registry.metrics.some(metric => metric.domain === domain)) issues.push({ path: ["metrics"], issue: `Missing required domain: ${domain}` })
@@ -122,6 +128,7 @@ export function assessBudgetRegistry(registry: BudgetRegistry) {
     pendingThresholds,
     missingBaselines,
     diagnosticBaselines,
+    diagnosticOnlyMetrics: registry.diagnostics.map(metric => metric.id),
   }
 }
 
@@ -157,7 +164,7 @@ export function verifyRecordedBaselines(registry: BudgetRegistry, repoRoot: stri
 export function verifyDiagnosticBaselines(registry: BudgetRegistry, repoRoot: string): BaselineVerificationIssue[] {
   const evidenceRoot = resolve(repoRoot, "docs/evidence") + sep
   const issues: BaselineVerificationIssue[] = []
-  for (const metric of registry.metrics) {
+  for (const metric of [...registry.metrics, ...registry.diagnostics]) {
     if (metric.baseline.status !== "diagnostic") continue
     const hasSelector = metric.baseline.selector !== undefined
     const hasValue = metric.baseline.value !== undefined
@@ -292,7 +299,7 @@ export function compareRecordedMetrics(registry: BudgetRegistry, repoRoot: strin
 }
 
 export function compareDiagnosticMetrics(registry: BudgetRegistry, repoRoot: string, current: EvidenceBundle) {
-  const metrics = registry.metrics.flatMap(metric => {
+  const metrics = [...registry.metrics, ...registry.diagnostics].flatMap(metric => {
     if (metric.baseline.status !== "diagnostic" || metric.baseline.selector === undefined || metric.baseline.value === undefined) return []
     const baselineEvidence = JSON.parse(readFileSync(resolve(repoRoot, metric.baseline.evidence), "utf8")) as unknown
     const currentEvidence = evidenceForSelector(metric.baseline.selector, current)

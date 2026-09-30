@@ -2,7 +2,7 @@
 
 `budgets.json` is the versioned registry for Crumbs performance gates. It names every required M1 domain even when evidence is missing. Schema validity, registry readiness, and a current performance run are separate conclusions.
 
-Run `bun run budgets:validate` to decode the registry, re-derive recorded values from retained JSON evidence, and report pending work. This command succeeds when the document and recorded evidence agree; it does not run workloads or qualify current performance. Run `bun run budgets:readiness` when checking whether every required baseline is recorded and every threshold has explicit approval. It fails while any threshold is pending or any baseline is missing or diagnostic.
+Run `bun run budgets:validate` to decode the registry, re-derive recorded values from retained JSON evidence, and report pending work. This command succeeds when the document and recorded evidence agree; it does not run workloads or qualify current performance. Run `bun run budgets:readiness` when checking whether every active baseline is recorded and every active threshold has explicit approval. It fails while an active threshold is pending or an active baseline is missing or diagnostic. Entries in the separate `diagnostics` collection are verified and reported but do not participate in active readiness or threshold review.
 
 ## Recording a baseline
 
@@ -15,14 +15,15 @@ Run `bun run budgets:validate` to decode the registry, re-derive recorded values
 
 Review the raw repetitions, min/median/max noise envelope, product requirements, and equivalent prior runs. Record both an absolute maximum and a maximum regression percentage, plus reviewer identity, UTC approval time, and retained review evidence. A result must satisfy both limits. Changing either limit is a reviewable policy change. Deterministic emitted bytes and compiler-instantiation counts use zero-growth limits. Timings and process-memory measurements use bounded margins selected for their observed noise. Runtime initialization is split by Node runtime and module format, excludes one warmup process, retains 15 fresh-process samples, and compares medians while preserving individual outliers in evidence.
 
-Set the registry to `active` only after every required baseline is recorded and every threshold is approved. The schema rejects active registries with incomplete entries and pending registries whose entries are all complete. Activation readiness still does not prove the current checkout passes: scenario adapters must produce comparable current measurements, verify environment compatibility, and evaluate both limits before a performance qualification can pass.
+Set the registry to `active` only after every active required baseline is recorded and every active threshold is approved. The schema rejects active registries with incomplete active entries and pending registries whose active entries are all complete; diagnostic-only entries do not affect that state. Activation readiness still does not prove the current checkout passes: scenario adapters must produce comparable current measurements, verify environment compatibility, and evaluate both limits before a performance qualification can pass.
 
 ## Current state
 
-The registry contains 26 metrics across all nine required domains. Twenty-one
-runtime-footprint, transform, incremental-rebuild, and 10,000-token
-editor/compiler metrics have reproducible recorded host baselines and approved
-thresholds. Six of those are the current split emitted-graph gates:
+The registry contains 25 active metrics across all nine required domains and
+one diagnostic-only entry. Twenty-one active metrics covering runtime-footprint,
+transform, incremental-rebuild, and 10,000-token editor/compiler workloads have
+reproducible recorded host baselines and approved thresholds. Six are the
+current split emitted-graph gates:
 `runtime.theme-core.{esm,cjs}.graph-bytes`,
 `runtime.tokens.{esm,cjs}.graph-bytes`, and
 `runtime.theme-compatibility.{esm,cjs}.graph-bytes`. They use five sequential
@@ -41,19 +42,18 @@ approved ceiling remains 137.506 ms with a 10% relative limit.
 
 Retained-memory evidence is diagnostic because it lacks forced-GC release-device
 provenance. JS frames, UI frames, and allocations have no qualifying baseline
-or threshold. The registry therefore remains pending and cannot produce
+or threshold. These four active gates keep the registry pending and prevent
 whole-registry performance qualification. Existing benchmark smoke ceilings
 remain historical local checks and are not M1.8 budgets.
 
-The 2026-09-30 M10.5 readiness audit confirms 21 of 26 metrics have recorded
-baselines and approved thresholds. Four active frame, allocation and
-retained-memory gates await device evidence. The fifth pending threshold is
-`runtime-emitted-bytes`: M4.6 retired its historical baseline as diagnostic-only,
-but the current readiness assessment still counts every pending threshold and
-requires every registry entry to be recorded and approved. Keep the historical
-comparison verified and visible; do not approve a threshold for that obsolete
-workload. Separate diagnostic reporting from active readiness membership in a
-follow-up registry-model change. See the [M10.5 readiness assessment](../../../docs/assessments/2026-09-30-m10-5-performance-registry-readiness.md).
+The historical `runtime-emitted-bytes` entry is now in the top-level
+`diagnostics` collection, has no active threshold, and remains evidence-verified
+and visible in diagnostic comparisons. Registry v2 keeps it outside active
+threshold review and readiness. `budgets:validate` reports 25 active metrics
+and `diagnosticOnlyMetrics: ["runtime-emitted-bytes"]`; readiness remains false
+because of the four active gates. See the [M10.5 readiness audit](../../../docs/assessments/2026-09-30-m10-5-performance-registry-readiness.md)
+for the earlier finding and the [registry membership correction assessment](../../../docs/assessments/2026-09-30-m10-5-performance-registry-membership.md)
+for the corrected contract.
 
 ## Host comparison and review packets
 

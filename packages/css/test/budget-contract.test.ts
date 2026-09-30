@@ -23,7 +23,10 @@ describe("performance budget registry", () => {
     expect(decoded.ok).toBe(true)
     if (!decoded.ok) return
     expect(decoded.value.version).toBe(BudgetRegistryVersion)
-    expect(new Set(decoded.value.metrics.map(metric => metric.id)).size).toBe(decoded.value.metrics.length)
+    expect(decoded.value.metrics).toHaveLength(25)
+    expect(decoded.value.diagnostics).toHaveLength(1)
+    const allIds = [...decoded.value.metrics, ...decoded.value.diagnostics].map(metric => metric.id)
+    expect(new Set(allIds).size).toBe(allIds.length)
     for (const domain of requiredBudgetDomains) {
       expect(decoded.value.metrics.some(metric => metric.domain === domain)).toBe(true)
     }
@@ -34,7 +37,10 @@ describe("performance budget registry", () => {
     if (!decoded.ok) throw Error("Committed budget registry must decode")
     const assessment = assessBudgetRegistry(decoded.value)
     expect(assessment.ready).toBe(false)
-    expect(assessment.pendingThresholds.length).toBeGreaterThan(0)
+    expect(assessment.pendingThresholds).toHaveLength(4)
+    expect(assessment.pendingThresholds).not.toContain("runtime-emitted-bytes")
+    expect(assessment.diagnosticOnlyMetrics).toEqual(["runtime-emitted-bytes"])
+    expect(assessment.diagnosticBaselines).toEqual(["retained-memory-bytes"])
     expect(assessment.missingBaselines).toEqual(expect.arrayContaining([
       "js-frame-time", "ui-frame-time", "allocation-bytes",
     ]))
@@ -80,17 +86,18 @@ describe("performance budget registry", () => {
     const repoRoot = resolve(import.meta.dir, "../../..")
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
-    const metric = decoded.value.metrics.find(candidate => candidate.id === "runtime-emitted-bytes")
-    if (!metric || metric.baseline.status !== "diagnostic") throw Error("Expected the historical metric to be diagnostic")
+    const metric = decoded.value.diagnostics.find(candidate => candidate.id === "runtime-emitted-bytes")
+    if (!metric) throw Error("Expected the historical metric to be diagnostic-only")
     expect(metric.baseline).toMatchObject({
       evidence: "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
       selector: "effect.runtime.cjs.graph-bytes",
       value: 11307,
       repetitions: 5,
     })
-    expect(metric.threshold).toMatchObject({ status: "pending-review", absoluteMax: null, maxRegressionPercent: null })
     expect(verifyDiagnosticBaselines(decoded.value, repoRoot)).toEqual([])
-    expect(assessBudgetRegistry(decoded.value).diagnosticBaselines).toContain("runtime-emitted-bytes")
+    const assessment = assessBudgetRegistry(decoded.value)
+    expect(assessment.diagnosticOnlyMetrics).toContain("runtime-emitted-bytes")
+    expect(assessment.pendingThresholds).not.toContain("runtime-emitted-bytes")
 
     const effect = JSON.parse(readFileSync(resolve(repoRoot,
       "docs/evidence/2026-09-21-m4-6-full-host-comparison/effect.json"), "utf8"))
@@ -126,9 +133,13 @@ describe("performance budget registry", () => {
     const valid = JSON.parse(readFileSync(registryFile, "utf8"))
     for (const mutation of [
       { ...valid, version: BudgetRegistryVersion + 1 },
+      { ...valid, version: 1 },
       { ...valid, unknown: true },
       { ...valid, protocol: { ...valid.protocol, minimumIndependentRepetitions: 0 } },
       { ...valid, metrics: [...valid.metrics, valid.metrics[0]] },
+      { ...valid, diagnostics: [...valid.diagnostics, { ...valid.diagnostics[0], id: valid.metrics[0].id }] },
+      { ...valid, diagnostics: valid.diagnostics.map((metric: object) => ({ ...metric, threshold: { status: "pending-review" } })) },
+      { ...valid, metrics: valid.metrics.filter((metric: { domain: string }) => metric.domain !== "runtime-footprint") },
       { ...valid, metrics: valid.metrics.map((metric: { baseline: { status: string } }, index: number) => index === 5
         ? { ...metric, baseline: { ...metric.baseline, repetitions: 4 } } : metric) },
     ]) expect(budgetRegistryCodec.decode(mutation).ok).toBe(false)
@@ -167,6 +178,7 @@ describe("performance budget registry", () => {
     expect(decoded.ok).toBe(true)
     if (!decoded.ok) return
     expect(assessBudgetRegistry(decoded.value).ready).toBe(true)
+    expect(assessBudgetRegistry(decoded.value).diagnosticOnlyMetrics).toEqual(["runtime-emitted-bytes"])
     active.metrics[0].threshold = { status: "pending-review", absoluteMax: null, maxRegressionPercent: null }
     expect(budgetRegistryCodec.decode(active).ok).toBe(false)
   })
@@ -176,7 +188,13 @@ describe("performance budget registry", () => {
     const script = resolve(repoRoot, "scripts/performance-budgets.ts")
     const validate = Bun.spawnSync([process.execPath, script, "validate"], { cwd: repoRoot })
     expect(validate.exitCode).toBe(0)
-    expect(JSON.parse(validate.stdout.toString())).toMatchObject({ valid: true, registryReady: false, performanceQualification: "not-run" })
+    expect(JSON.parse(validate.stdout.toString())).toMatchObject({
+      valid: true,
+      registryReady: false,
+      performanceQualification: "not-run",
+      metrics: 25,
+      diagnosticOnlyMetrics: ["runtime-emitted-bytes"],
+    })
     const readiness = Bun.spawnSync([process.execPath, script, "readiness"], { cwd: repoRoot })
     expect(readiness.exitCode).toBe(1)
     expect(JSON.parse(readiness.stdout.toString())).toMatchObject({ valid: true, registryReady: false, performanceQualification: "not-run" })

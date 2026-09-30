@@ -22,7 +22,7 @@ const runtimeGraph = scanRuntimeGraphEvidence(join(repoRoot, "packages/css"), 5)
 await writeFile(join(output, "runtime-graph.json"), JSON.stringify(runtimeGraph, null, 2) + "\n")
 const splitComparison = compareRuntimeGraphMetrics(registryResult.value, repoRoot, runtimeGraph)
 
-const historicalMetric = registryResult.value.metrics.find(metric => metric.id === "runtime-emitted-bytes")
+const historicalMetric = registryResult.value.diagnostics.find(metric => metric.id === "runtime-emitted-bytes")
 if (!historicalMetric || historicalMetric.baseline.status !== "diagnostic" || historicalMetric.baseline.selector !== "effect.runtime.cjs.graph-bytes" || historicalMetric.baseline.value === undefined) {
   throw Error("The historical runtime-emitted-bytes metric must remain a verified diagnostic")
 }

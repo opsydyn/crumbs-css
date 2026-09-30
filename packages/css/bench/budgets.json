@@ -1,6 +1,6 @@
 {
   "_tag": "CrumbsPerformanceBudgetRegistry",
-  "version": 1,
+  "version": 2,
   "status": "thresholds-pending-review",
   "protocol": {
     "minimumIndependentRepetitions": 5,
@@ -79,28 +79,6 @@
         "evidence": "docs/evidence/2026-09-15-expo-memory-workloads/qualification.json",
         "reason": "Web readings lack forced-GC and release-device provenance",
         "repetitions": 2
-      },
-      "threshold": {
-        "status": "pending-review",
-        "absoluteMax": null,
-        "maxRegressionPercent": null
-      }
-    },
-    {
-      "id": "runtime-emitted-bytes",
-      "domain": "runtime-footprint",
-      "scenario": "ordinary runtime CommonJS emitted graph",
-      "measure": "sum of emitted local graph bytes",
-      "unit": "bytes",
-      "direction": "lower-is-better",
-      "environmentClass": "node22-and-current-macos-arm64",
-      "baseline": {
-        "status": "diagnostic",
-        "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
-        "selector": "effect.runtime.cjs.graph-bytes",
-        "value": 11307,
-        "reason": "Historical compatibility-entrypoint lineage predates the admitted split graph contract; retain its zero-growth comparison for visibility, not as a current-functionality gate.",
-        "repetitions": 5
       },
       "threshold": {
         "status": "pending-review",
@@ -610,6 +588,25 @@
         "approvedBy": "Alan Currie (session approval)",
         "approvedAt": "2026-09-21T19:54:46Z",
         "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      }
+    }
+  ],
+  "diagnostics": [
+    {
+      "id": "runtime-emitted-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime CommonJS emitted graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "node22-and-current-macos-arm64",
+      "baseline": {
+        "status": "diagnostic",
+        "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
+        "selector": "effect.runtime.cjs.graph-bytes",
+        "value": 11307,
+        "reason": "Historical compatibility-entrypoint lineage predates the admitted split graph contract; retain its zero-growth comparison for visibility, not as a current-functionality gate.",
+        "repetitions": 5
       }
     }
   ]
