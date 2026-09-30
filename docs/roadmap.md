@@ -573,7 +573,7 @@ M10.5 remains open. The exact Node v22.0.0 host-budget suite could not run, and 
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
 
-- [ ] Native equivalents for standalone `createVar`, `fallbackVar`, `assignVars`, and dynamic local assignment, extending M3's explicit scope/domain model. M3 already owns required-token and optional-fallback semantics; this item adds convenience/public surface.
+- [ ] Native equivalents for standalone `createVar`, `fallbackVar`, `assignVars`, and dynamic local assignment, extending M3's explicit scope/domain model. M3 already owns required-token and optional-fallback semantics; this item adds convenience/public surface. The 2026-09-30 dogfood review found no concrete instance-local use case; keep it parked until one demonstrates a gap. See [assessment](assessments/2026-09-30-m11-standalone-token-assignment.md).
 - [ ] Container conditions using explicit layout ownership, measurement timing, subscription cleanup, and resize-loop tests. The current internal Expo dogfood assessment found no concrete parent-width use case; see [M11 assessment](assessments/2026-09-30-m11-container-conditions.md).
 - [ ] Motion adapters using a supported native animation system. Continuous updates run through that system rather than React theme resolution; reduced-motion behavior and cancellation are tested.
 - [ ] Additional token algebra operators, including typed colour/typography derivations, only with defined native representations and errors.
@@ -584,7 +584,13 @@ These ideas remain captured without expanding the initial core. Each requires a 
 
 The internal Expo reference app currently uses a screen-level width condition and fluid wrapping/flex layouts. No same-component, independently constrained parent-width case was demonstrated. Container conditions stay parked until an actual reference/adopter scenario shows that existing composition and intrinsic layout are insufficient. This source review is not native-device acceptance. M11 consumer-need assessment may proceed while the final M10.5 host/device gates remain open; the Node v22.0.0 host-budget gate is explicitly last. See [assessment](assessments/2026-09-30-m11-container-conditions.md).
 
-Next recommended M11 check: evaluate standalone token-variable assignment convenience against a concrete per-instance override in the reference app. Existing M3 contracts, scopes, and fallbacks must be shown insufficient before adding a public API.
+At the time of this assessment, the next recommended M11 check was to evaluate standalone token-variable assignment convenience against a concrete per-instance override in the reference app. Existing M3 contracts, scopes, and fallbacks must be shown insufficient before adding a public API.
+
+### 2026-09-30 — M11 standalone token-assignment dogfood assessment
+
+The reference Expo app uses typed M3 token contracts for a complete base theme and semantically named brand, mode, and density scopes. Its partner-brand example reuses the same card and dialog under nested scopes; finite pressed, disabled, focused, invalid, and selected states use component recipes. No `createVar`, `fallbackVar`, or `assignVars` equivalent is used in `apps/storybook/src`. This source review found no demonstrated demand for arbitrary local assignment. It also confirms that M3's fixed context axes do not model arbitrary instance-owned values; reusing `brand` for such values would weaken the scope semantics. This is not runtime or device-performance evidence. See [assessment](assessments/2026-09-30-m11-standalone-token-assignment.md).
+
+Keep the public API extension parked until a real component needs an instance-owned, domain-checked token value that existing semantic scopes or finite variants cannot represent cleanly. Next recommended roadmap slice: assess the M11 motion-adapter item against a concrete reference interaction. The Node v22.0.0 host-budget gate remains the final M10.5 gate; Android remains parked.
 
 ## Property-based testing strategy
 
