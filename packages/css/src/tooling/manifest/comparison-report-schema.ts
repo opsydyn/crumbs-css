@@ -16,6 +16,7 @@ const SemVer = Schema.String.check(Schema.isPattern(/^(0|[1-9]\d*)\.(0|[1-9]\d*)
 const FindingCodes = [
   "token.removed",
   "token.domain-changed",
+  "token.alias-changed",
   "token.visibility-reduced",
   "token.added",
   "component.removed",
@@ -82,7 +83,7 @@ const CompatibilityReport = Schema.Struct({
   analysisLimits: Schema.Array(AnalysisLimit),
 })
 
-const compatibilityReportCodec = makeDataCodec("design-system-compatibility-report-v1", CompatibilityReport)
+const compatibilityReportCodec = makeDataCodec("design-system-compatibility-report-v2", CompatibilityReport)
 
 /** Validate report data and cross-record relationships, returning detached plain data. */
 export function decodeManifestCompatibilityReport(input: unknown): ManifestCompatibilityReport {
@@ -92,7 +93,7 @@ export function decodeManifestCompatibilityReport(input: unknown): ManifestCompa
       const path = issue.path.length === 0 ? "<root>" : issue.path.join(".")
       return `${path}: ${issue.message}`
     }).join("; ")
-    throw new TypeError(`Invalid Crumbs design-system compatibility report v1: ${detail}`)
+    throw new TypeError(`Invalid Crumbs design-system compatibility report v2: ${detail}`)
   }
 
   const report = decoded.value as ManifestCompatibilityReport

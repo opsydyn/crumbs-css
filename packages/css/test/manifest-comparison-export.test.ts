@@ -76,7 +76,7 @@ it("packs comparison APIs for ESM, CommonJS, and typed consumers through tooling
   writeFileSync(resolve(consumerRoot, "runtime.mjs"), `
     import assert from "node:assert/strict";
     import { checkManifestConsumers, compareManifests, decodeManifestCompatibilityReport, encodeCanonicalManifestCompatibilityReport } from "@opsydyn/crumbs-css/tooling/manifest";
-    const report = { format: "crumbs.design-system-compatibility-report", schemaVersion: 1, mode: "check", provider: { name: "@acme/design-system", currentVersion: "1.0.0" }, suppliedConsumers: [], findings: [], analysisLimits: [{ code: "explicit-coverage", message: "Only declared roots were checked." }] };
+    const report = { format: "crumbs.design-system-compatibility-report", schemaVersion: 2, mode: "check", provider: { name: "@acme/design-system", currentVersion: "1.0.0" }, suppliedConsumers: [], findings: [], analysisLimits: [{ code: "explicit-coverage", message: "Only declared roots were checked." }] };
     assert.deepEqual(decodeManifestCompatibilityReport(report), report);
     assert.equal(encodeCanonicalManifestCompatibilityReport(report), JSON.stringify(report) + "\\n");
     assert.equal(typeof compareManifests, "function");
@@ -85,7 +85,7 @@ it("packs comparison APIs for ESM, CommonJS, and typed consumers through tooling
   writeFileSync(resolve(consumerRoot, "runtime.cjs"), `
     const assert = require("node:assert/strict");
     const { checkManifestConsumers, compareManifests, decodeManifestCompatibilityReport, encodeCanonicalManifestCompatibilityReport } = require("@opsydyn/crumbs-css/tooling/manifest");
-    const report = { format: "crumbs.design-system-compatibility-report", schemaVersion: 1, mode: "check", provider: { name: "@acme/design-system", currentVersion: "1.0.0" }, suppliedConsumers: [], findings: [], analysisLimits: [{ code: "explicit-coverage", message: "Only declared roots were checked." }] };
+    const report = { format: "crumbs.design-system-compatibility-report", schemaVersion: 2, mode: "check", provider: { name: "@acme/design-system", currentVersion: "1.0.0" }, suppliedConsumers: [], findings: [], analysisLimits: [{ code: "explicit-coverage", message: "Only declared roots were checked." }] };
     assert.deepEqual(decodeManifestCompatibilityReport(report), report);
     assert.equal(encodeCanonicalManifestCompatibilityReport(report), JSON.stringify(report) + "\\n");
     assert.equal(typeof compareManifests, "function");

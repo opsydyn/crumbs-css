@@ -107,7 +107,7 @@ function compatibilityReport(
 ): ManifestCompatibilityReport {
   return {
     format: "crumbs.design-system-compatibility-report",
-    schemaVersion: 1,
+    schemaVersion: 2,
     mode: "compare",
     provider: { name: PACKAGE_NAME, baselineVersion: "1.0.0", currentVersion },
     suppliedConsumers: [],
@@ -172,7 +172,7 @@ describe("design-system report ownership annotation", () => {
 
     expect(owned.source).toEqual({
       format: "crumbs.design-system-compatibility-report",
-      schemaVersion: 1,
+      schemaVersion: 2,
       data: report,
     })
     expect(owned.source.data).not.toBe(report)
@@ -249,12 +249,12 @@ describe("design-system report ownership annotation", () => {
 
   it("rejects unsupported source report versions", async () => {
     const api = await getAnnotateApi()
-    const report = { ...compatibilityReport([]), schemaVersion: 2 } as unknown as ManifestCompatibilityReport
+    const report = { ...compatibilityReport([]), schemaVersion: 1 } as unknown as ManifestCompatibilityReport
     expect(() => api.annotateDesignSystemReport({
       ownership: ownership([]),
       manifests: [manifest("2.0.0", [])],
       report,
-    })).toThrow(/compatibility report v1/i)
+    })).toThrow(/compatibility report v2/i)
   })
 
   it("rejects duplicate attribution pointers before assembling an owned report", async () => {
@@ -273,7 +273,7 @@ describe("design-system report ownership annotation", () => {
       schemaVersion: 1,
       source: {
         format: "crumbs.design-system-compatibility-report",
-        schemaVersion: 1,
+        schemaVersion: 2,
         data: compatibilityReport([{
           code: "token.removed",
           level: "error",

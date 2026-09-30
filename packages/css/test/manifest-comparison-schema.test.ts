@@ -25,7 +25,7 @@ function tokenReference(to: string): ManifestConsumerReference {
 function checkReport(): ManifestCompatibilityReport {
   return {
     format: reportFormat,
-    schemaVersion: 1,
+    schemaVersion: 2,
     mode: "check",
     provider: { name: providerName, currentVersion: "1.3.0" },
     suppliedConsumers: [],
@@ -36,14 +36,16 @@ function checkReport(): ManifestCompatibilityReport {
 
 function compareReport(): ManifestCompatibilityReport {
   const tokenIds = [
-    `${providerName}#token:color.canvas`,
-    `${providerName}#token:color.border`,
-    `${providerName}#token:space.2`,
-    `${providerName}#token:space.3`,
+    "@acme/design-system#token:color.canvas",
+    "@acme/design-system#token:color.border",
+    "@acme/design-system#token:space.2",
+    "@acme/design-system#token:space.3",
+    "@acme/design-system#token:color.alias",
   ]
   const codes = [
     "token.removed",
     "token.domain-changed",
+    "token.alias-changed",
     "token.visibility-reduced",
     "token.added",
     "component.removed",
@@ -58,7 +60,7 @@ function compareReport(): ManifestCompatibilityReport {
 
   return {
     format: reportFormat,
-    schemaVersion: 1,
+    schemaVersion: 2,
     mode: "compare",
     provider: { name: providerName, baselineVersion: "1.2.0", currentVersion: "1.3.0" },
     suppliedConsumers: [consumerPackage],
@@ -86,7 +88,7 @@ function compareReport(): ManifestCompatibilityReport {
   }
 }
 
-describe("manifest compatibility report v1 schema", () => {
+describe("manifest compatibility report v2 schema", () => {
   it("accepts check and compare reports with every finding and analysis-limit code", () => {
     expect(decodeManifestCompatibilityReport(checkReport())).toEqual(checkReport())
     expect(decodeManifestCompatibilityReport(compareReport())).toEqual(compareReport())
@@ -119,7 +121,8 @@ describe("manifest compatibility report v1 schema", () => {
   })
 
   it("rejects unsupported versions, unknown fields, and modes without matching provider versions", () => {
-    expect(() => decodeManifestCompatibilityReport({ ...checkReport(), schemaVersion: 2 })).toThrow(/schemaVersion|version/i)
+    expect(() => decodeManifestCompatibilityReport({ ...checkReport(), schemaVersion: 1 })).toThrow(/schemaVersion|version/i)
+    expect(() => decodeManifestCompatibilityReport({ ...checkReport(), schemaVersion: 3 })).toThrow(/schemaVersion|version/i)
     expect(() => decodeManifestCompatibilityReport({ ...checkReport(), surprise: true })).toThrow(/surprise|excess|unexpected/i)
     expect(() => decodeManifestCompatibilityReport({ ...checkReport(), provider: { ...checkReport().provider, surprise: true } })).toThrow(/surprise|excess|unexpected/i)
     expect(() => decodeManifestCompatibilityReport({ ...checkReport(), mode: "compare" })).toThrow(/baselineVersion/i)

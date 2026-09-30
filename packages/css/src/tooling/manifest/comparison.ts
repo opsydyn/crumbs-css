@@ -65,6 +65,17 @@ function tokenContractValue(token: ManifestToken): ManifestReportJson {
   }
 }
 
+function tokenAliasContractValue(token: ManifestToken): ManifestReportJson {
+  if (token.alias === undefined) return { kind: token.kind }
+  return {
+    kind: token.kind,
+    targetId: token.alias.targetId ?? null,
+    targetPath: [...token.alias.targetPath],
+    resolution: token.alias.resolution,
+    ...(token.alias.fallback === undefined ? {} : { fallback: token.alias.fallback }),
+  }
+}
+
 function componentContractValue(component: ManifestComponent): ManifestReportJson {
   const variants: Record<string, ManifestReportJson> = Object.create(null) as Record<string, ManifestReportJson>
   for (const axis of Object.keys(component.variants).sort(compareOrdinal)) {
@@ -146,6 +157,21 @@ function publicTokenFindings(
         after: "private",
       }))
       continue
+    }
+    if (before.alias !== undefined || after.alias !== undefined) {
+      const beforeAlias = tokenAliasContractValue(before)
+      const afterAlias = tokenAliasContractValue(after)
+      if (canonicalJson(beforeAlias) !== canonicalJson(afterAlias)) {
+        findings.push(makeFinding({
+          code: "token.alias-changed",
+          level: "warning",
+          entityId: before.id,
+          fieldPath: "alias",
+          message: "Public token " + JSON.stringify(before.id) + " changed alias semantics.",
+          before: beforeAlias,
+          after: afterAlias,
+        }))
+      }
     }
     const beforeDomain = normalizeTokenDomain(before.domain)
     const afterDomain = normalizeTokenDomain(after.domain)

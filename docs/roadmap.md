@@ -544,7 +544,7 @@ from packed public packages and retain the result artifacts.
 - [x] M10.1: Complete public-API examples for typography, button, input, selection controls, card, and dialog integration, with brands, modes, density, scopes, states, and typed slots; complete direct iOS interaction smoke. The normal on-device Storybook navigator remains unqualified as recorded above.
 - [x] M10.2: Generate useful contract-driven stories and review cases. Use pairwise theme-axis stories plus exhaustive reachable recipe-state tests; report unreachable recipe selections and intentionally unrendered full theme combinations. See `apps/storybook/scripts/generate-contract-stories.ts` and `apps/storybook/test/contract-review-cases.json`.
 - [x] M10.3: Verify font scaling, RTL/logical layout, reduced motion, and supported contrast contexts on native iOS consumers. The declared-pair review exposes known colour failures and unknown opacity/compositing cases; it is not WCAG conformance evidence. Screen-reader and interaction acceptance stays explicit. Android remains parked.
-- [ ] M10.4: Run the three North Star journeys below from packed public packages and retain results, artifact versions, screenshots/recordings where useful, diagnostics, and performance reports.
+- [x] M10.4: Run the three North Star journeys from packed public packages and retain versioned evidence. The exact Expo 56 / React Native 0.85.3 matrix passed on iOS/web bundle exports and host interaction; Android, device rendering/performance, screen-reader acceptance, and publishing remain not-run. See `docs/assessments/2026-09-30-m10-4-north-star-journeys.md` and `docs/evidence/2026-09-30-m10-4-north-star/`.
 - [ ] M10.5: Run the full compatibility, property, type/editor, package, docs, visual, and device budgets. Publish a guarantees matrix that distinguishes supported, measured, and unsupported behavior.
 
 **Journey A — Distribute a component package:** a token package and a component package are packed and consumed by an independent Expo app. Public styles work without source-only dependencies; runtime imports are isolated; supported versions and scopes resolve correctly.
@@ -554,6 +554,14 @@ from packed public packages and retain the result artifacts.
 **Journey C — Add a second brand:** supply another validated brand contract implementation without copying component implementations. Existing variant/slot types remain valid; scoped/portal behavior, accessible states, and performance budgets continue to pass.
 
 **Exit:** all three journeys have direct evidence on the declared matrix; unresolved checks are shown as incomplete; no "gold standard", zero-runtime, or accessibility-compliance claim exceeds the measured guarantees.
+
+### 2026-09-30 — M10.4 packed North Star journeys
+
+The independent Expo consumer passed all three journeys from locally packed artifacts. The compatibility report now emits a versioned `token.alias-changed` finding; the packed migration is explicit-file-only and idempotent; the same component resolves two brands and a portal-scoped Signal theme. iOS/web source-map provenance and host smoke ceilings passed on the declared matrix.
+
+M10.4 does not establish native rendering or device performance. Android remains parked; physical-device and screen-reader acceptance, screenshots/recordings, and publishing were not run. The compatibility report wire format is v2 (manifest and migration wire formats remain v1); saved v1 compatibility reports are rejected by the strict current decoder and must be regenerated.
+
+Next recommended roadmap item: **M10.5** — run the full compatibility, property, type/editor, package, documentation, visual, and device budgets and publish the guarantees matrix.
 
 ## M11 — Evaluate optional extensions
 

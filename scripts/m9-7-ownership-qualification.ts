@@ -24,7 +24,7 @@ const FIXTURE_PATHS = [
   `${FIXTURE_DIRECTORY}/dtcg-failure.json`,
 ] as const
 const REPORT_FIXTURES = [
-  { id: "compatibility", path: `${FIXTURE_DIRECTORY}/compatibility.json`, sourceFormat: "crumbs.design-system-compatibility-report" },
+  { id: "compatibility", path: `${FIXTURE_DIRECTORY}/compatibility.json`, sourceFormat: "crumbs.design-system-compatibility-report", sourceSchemaVersion: 2 },
   { id: "policy", path: `${FIXTURE_DIRECTORY}/policy.json`, sourceFormat: "crumbs.css.design-system-policy-report" },
   { id: "migration", path: `${FIXTURE_DIRECTORY}/migration.json`, sourceFormat: "crumbs.source-migration-report" },
   { id: "style-explanation", path: `${FIXTURE_DIRECTORY}/style-explanation.json`, sourceFormat: "crumbs.css.style-explanation" },
@@ -84,7 +84,8 @@ function evaluateFixtureSet() {
   const reports = REPORT_FIXTURES.map(fixture => {
     const report = readFixture(fixture.path)
     const owned = annotateDesignSystemReport({ ownership, manifests, report: report as SupportedSourceReport })
-    if (owned.source.format !== fixture.sourceFormat || owned.source.schemaVersion !== 1) {
+    const expectedSourceVersion = "sourceSchemaVersion" in fixture ? fixture.sourceSchemaVersion : 1
+    if (owned.source.format !== fixture.sourceFormat || owned.source.schemaVersion !== expectedSourceVersion) {
       throw new Error(`M9.7 ${fixture.id} fixture produced an unexpected owned-report source family.`)
     }
     const canonicalOwnedReport = encodeCanonicalOwnedReport(owned)

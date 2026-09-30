@@ -37,7 +37,7 @@ function tokenFinding(segment: string) {
 function report(findings: ReadonlyArray<ReturnType<typeof tokenFinding>>) {
   return {
     format: "crumbs.design-system-compatibility-report",
-    schemaVersion: 1,
+    schemaVersion: 2,
     mode: "compare",
     provider: { name: providerName, baselineVersion: "1.2.0", currentVersion: "1.3.0" },
     suppliedConsumers: [consumer],

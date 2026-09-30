@@ -1,0 +1,65 @@
+{
+  "format": "crumbs.design-system-manifest",
+  "schemaVersion": 1,
+  "package": {
+    "name": "@acme/mobile-app",
+    "version": "1.0.0"
+  },
+  "producer": {
+    "compiler": {
+      "name": "@opsydyn/crumbs-css",
+      "version": "0.1.1-alpha.1"
+    },
+    "artifact": {
+      "name": "native-style-ir",
+      "version": 1
+    }
+  },
+  "tokens": [],
+  "components": [],
+  "modules": [
+    {
+      "id": "@acme/mobile-app#src/ActionCard.css.ts",
+      "origin": {
+        "path": "src/ActionCard.css.ts"
+      },
+      "exports": [
+        "ActionCard"
+      ]
+    }
+  ],
+  "dependencies": [
+    {
+      "from": "@acme/mobile-app#src/ActionCard.css.ts",
+      "to": "@acme/design-system#token:color.action",
+      "kind": "style-token",
+      "resolution": "external",
+      "origin": {
+        "moduleId": "@acme/mobile-app#src/ActionCard.css.ts",
+        "exportPath": "ActionCard",
+        "property": "backgroundColor"
+      }
+    },
+    {
+      "from": "@acme/mobile-app#src/ActionCard.css.ts",
+      "to": "@acme/design-system#token:color.legacy",
+      "kind": "style-token",
+      "resolution": "external",
+      "origin": {
+        "moduleId": "@acme/mobile-app#src/ActionCard.css.ts",
+        "exportPath": "ActionCard",
+        "property": "borderColor"
+      }
+    }
+  ],
+  "capabilities": [],
+  "coverage": {
+    "roots": [
+      {
+        "kind": "style-module",
+        "id": "@acme/mobile-app#src/ActionCard.css.ts"
+      }
+    ],
+    "unresolved": []
+  }
+}

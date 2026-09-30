@@ -1,6 +1,6 @@
 /** Plain JSON-data types for the versioned manifest compatibility report. */
 export const MANIFEST_COMPATIBILITY_REPORT_FORMAT = "crumbs.design-system-compatibility-report" as const
-export const MANIFEST_COMPATIBILITY_REPORT_VERSION = 1 as const
+export const MANIFEST_COMPATIBILITY_REPORT_VERSION = 2 as const
 
 export type ManifestReportJson = null | boolean | number | string | ReadonlyArray<ManifestReportJson> | {
   readonly [key: string]: ManifestReportJson
@@ -11,6 +11,7 @@ export type ManifestCompatibilityReportMode = "check" | "compare"
 export type ManifestCompatibilityFindingCode =
   | "token.removed"
   | "token.domain-changed"
+  | "token.alias-changed"
   | "token.visibility-reduced"
   | "token.added"
   | "component.removed"

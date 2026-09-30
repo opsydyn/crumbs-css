@@ -1,0 +1,111 @@
+{
+  "format": "crumbs.design-system-manifest",
+  "schemaVersion": 1,
+  "package": {
+    "name": "@acme/design-system",
+    "version": "2.0.0"
+  },
+  "producer": {
+    "compiler": {
+      "name": "@opsydyn/crumbs-css",
+      "version": "0.1.1-alpha.1"
+    },
+    "artifact": {
+      "name": "native-style-ir",
+      "version": 1
+    }
+  },
+  "tokens": [
+    {
+      "id": "@acme/design-system#token:color.action",
+      "contract": {
+        "owner": "@acme/design-system",
+        "name": "foundation",
+        "version": 1
+      },
+      "path": [
+        "color",
+        "action"
+      ],
+      "visibility": "public",
+      "domain": {
+        "kind": "color"
+      },
+      "kind": "alias",
+      "origin": {
+        "path": "src/tokens.css.ts",
+        "exportPath": "vars"
+      },
+      "alias": {
+        "targetId": "@acme/design-system#token:color.brand",
+        "targetPath": [
+          "color",
+          "brand"
+        ],
+        "resolution": "internal"
+      }
+    },
+    {
+      "id": "@acme/design-system#token:color.blue",
+      "contract": {
+        "owner": "@acme/design-system",
+        "name": "foundation",
+        "version": 1
+      },
+      "path": [
+        "color",
+        "blue"
+      ],
+      "visibility": "public",
+      "domain": {
+        "kind": "color"
+      },
+      "kind": "definition",
+      "origin": {
+        "path": "src/tokens.css.ts",
+        "exportPath": "vars"
+      }
+    },
+    {
+      "id": "@acme/design-system#token:color.brand",
+      "contract": {
+        "owner": "@acme/design-system",
+        "name": "foundation",
+        "version": 1
+      },
+      "path": [
+        "color",
+        "brand"
+      ],
+      "visibility": "public",
+      "domain": {
+        "kind": "color"
+      },
+      "kind": "definition",
+      "origin": {
+        "path": "src/tokens.css.ts",
+        "exportPath": "vars"
+      }
+    }
+  ],
+  "components": [],
+  "modules": [],
+  "dependencies": [
+    {
+      "from": "@acme/design-system#token:color.action",
+      "to": "@acme/design-system#token:color.brand",
+      "kind": "token-alias",
+      "resolution": "internal"
+    }
+  ],
+  "capabilities": [],
+  "coverage": {
+    "roots": [
+      {
+        "kind": "token-contract",
+        "id": "@acme/design-system#foundation@1"
+      }
+    ],
+    "unresolved": []
+  }
+}

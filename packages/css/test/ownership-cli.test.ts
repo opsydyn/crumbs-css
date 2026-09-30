@@ -69,7 +69,7 @@ function ownership() {
 function compatibilityReport(providerVersion = "1.0.0") {
   return {
     format: "crumbs.design-system-compatibility-report",
-    schemaVersion: 1,
+    schemaVersion: 2,
     mode: "check",
     provider: { name: packageName, currentVersion: providerVersion },
     suppliedConsumers: [],
@@ -259,7 +259,7 @@ describe("ownership:annotate execution", () => {
       const inputs = writeInputs(directory)
       const unsupportedPath = writeJson(directory, "unsupported.json", {
         ...compatibilityReport(),
-        schemaVersion: 2,
+        schemaVersion: 1,
       })
       const result = runCli([
         "--ownership", inputs.ownershipPath,

@@ -35,3 +35,14 @@ export const theme: NativeTheme<typeof vars> = createTokenThemeSnapshot(vars, {
   },
   contexts: {},
 })
+
+/** A second validated brand layer consumed through the same public contract. */
+export const brandScopes = {
+  signal: {
+    color: {
+      accent: "#c42f73",
+      muted: "#87465f",
+      onAccent: "#ffffff",
+    },
+  },
+} as const
