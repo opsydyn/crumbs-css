@@ -166,14 +166,7 @@ describe("M10.3 native accessibility contexts", () => {
     )
 
     expect(knownPairs.length).toBeGreaterThan(0)
-    expect(knownPairs.filter((pair) => pair.status === "fail")).toEqual([
-      expect.objectContaining({ id: "foundry/light/normal/copy-on-accent-muted", status: "fail" }),
-      expect.objectContaining({ id: "foundry/light/normal/muted-on-accent-muted", status: "fail" }),
-      expect.objectContaining({ id: "foundry/light/normal/accent-on-accent-muted", status: "fail" }),
-      expect.objectContaining({ id: "signal/dark/normal/copy-on-accent-muted", status: "fail" }),
-      expect.objectContaining({ id: "signal/dark/normal/muted-on-accent-muted", status: "fail" }),
-      expect.objectContaining({ id: "signal/dark/normal/accent-on-accent-muted", status: "fail" }),
-    ])
+    expect(knownPairs.filter((pair) => pair.status === "fail")).toEqual([])
     expect(highContrastPairs.every((pair) => pair.ratio !== null && pair.ratio >= 7)).toBe(true)
     expect(foundryLightAccent?.ratio).toBeGreaterThanOrEqual(4.5)
     expect(foundryLightAccentOnCanvas?.ratio).toBeGreaterThanOrEqual(4.5)
@@ -185,15 +178,9 @@ describe("M10.3 native accessibility contexts", () => {
       "signal/dark/normal/muted-on-accent-muted",
       "signal/dark/normal/accent-on-accent-muted",
     ])
-    expect(accentMutedTextPairs.every((pair) => pair.status === "fail")).toBe(true)
-    expect(accentMutedTextPairs.map(({ ratio }) => ratio)).toEqual([
-      expect.closeTo(1.1, 2),
-      expect.closeTo(2.211, 3),
-      expect.closeTo(2.760, 3),
-      expect.closeTo(1.014, 3),
-      expect.closeTo(1.873, 3),
-      expect.closeTo(2.556, 3),
-    ])
+    expect(accentMutedTextPairs.every((pair) =>
+      pair.status === "pass" && pair.ratio !== null && pair.ratio >= 4.5,
+    )).toBe(true)
     expect(report.pairs.filter((pair) => pair.status === "unknown").map(({ id }) => id)).toEqual([
       "shared/disabled-label-opacity",
       "shared/pressed-opacity",

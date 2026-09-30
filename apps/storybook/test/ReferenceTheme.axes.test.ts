@@ -30,6 +30,7 @@ describe("reference system theme axes", () => {
     })
 
     expect(signalDarkComfortable.values.color.accent).toBe("#15a3b0")
+    expect(signalDarkComfortable.values.color.accentMuted).toBe("#022126")
     expect(signalDarkComfortable.values.color.canvas).toBe("#0d0b09")
     expect(signalDarkComfortable.values.control.height).toBe(48)
     expect(signalDarkComfortable.values.space.md).toBe(16)
@@ -43,6 +44,7 @@ describe("reference system theme axes", () => {
     })
 
     expect(foundryLight.values.color.accent).toBe("#905f00")
+    expect(foundryLight.values.color.accentMuted).toBe("#fff4df")
     expect(foundryLight.values.color.accentText).toBe("#ffffff")
   })
 

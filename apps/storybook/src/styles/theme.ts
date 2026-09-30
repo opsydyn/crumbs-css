@@ -102,10 +102,14 @@ export const modeScopes = {
 const modeAccentOverrides = {
   foundry: {
     dark: { color: { accent: "#d1a85f", accentText: "#130f09" } },
-    light: { color: { accent: "#905f00", accentText: "#ffffff" } },
+    light: {
+      color: { accent: "#905f00", accentMuted: "#fff4df", accentText: "#ffffff" },
+    },
   },
   signal: {
-    dark: { color: { accent: "#15a3b0", accentText: "#021416" } },
+    dark: {
+      color: { accent: "#15a3b0", accentMuted: "#022126", accentText: "#021416" },
+    },
     light: { color: { accent: "#077580", accentText: "#ffffff" } },
   },
 } as const satisfies Record<ShowcaseBrand, Record<ShowcaseThemeMode, TokenThemeLayer<typeof vars>>>
