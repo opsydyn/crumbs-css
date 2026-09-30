@@ -1,0 +1,205 @@
+{
+  "format": "crumbs.m10-5-qualification",
+  "schemaVersion": 1,
+  "slice": "M10.5.2",
+  "capturedAt": "2026-09-30T16:29:52.425710+00:00",
+  "sourceRevision": "92f6342652968390f91ef120ecd0a70dc4d68410",
+  "sourceRevisionDefinition": "Latest Git commit touching any path outside docs/; docs-only evidence commits do not invalidate results.",
+  "gitHeadAtFinalQualification": "92f6342652968390f91ef120ecd0a70dc4d68410",
+  "matrixSha256": "51e1b7a0c76d2dd3bfb2eeb89c40d08a91478a54f0cc9a57d0950cc101ab0c9e",
+  "environment": {
+    "host": {
+      "name": "macOS arm64 host",
+      "model": "Apple M4 Pro",
+      "macOS": "26.6.2",
+      "kernelRelease": "25.6.0",
+      "architecture": "arm64",
+      "logicalCpuCount": 12,
+      "memoryBytes": 25769803776
+    },
+    "toolchain": {
+      "bun": "1.4.2",
+      "nodeExecutable": "v24.15.0",
+      "bunNodeCompatibility": "v26.3.0",
+      "typescriptEditor": "6.0.3",
+      "typescriptCss": "5.9.3",
+      "typescriptNativePreview": "7.0.0-dev.20260519.1",
+      "effect": "4.0.0-rc.115",
+      "astro": "6.3.6",
+      "starlight": "0.39.2"
+    },
+    "expoConsumer": {
+      "expo": "56.0.4",
+      "react": "19.2.3",
+      "reactNative": "0.85.3"
+    }
+  },
+  "commands": [
+    {
+      "id": "repository-check",
+      "command": "bun run check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Package build/typecheck passed; 1,287 CSS tests across 206 files and 23 Storybook tests across 7 files passed."
+    },
+    {
+      "id": "property-suite",
+      "command": "bun test packages/css/test/*.property.test.ts",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "87 tests across 28 property-test files passed; 23,647 assertions."
+    },
+    {
+      "id": "theme-store-focused",
+      "command": "bun test packages/css/test/theme-store.test.ts",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "6 tests passed; 13 assertions."
+    },
+    {
+      "id": "storybook-app-typecheck",
+      "command": "bun run app:typecheck",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Expo Storybook workspace typecheck exited 0."
+    },
+    {
+      "id": "release-check",
+      "command": "bun run release:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Package build, typecheck, tests, native-style benchmark smoke, and dry-run pack passed; 120 files and 3.27 MB unpacked. No publication occurred.",
+      "warnings": [
+        "tsdown emitted non-fatal deps.onlyBundle hints for bundled effect and metro-cache dependencies."
+      ]
+    },
+    {
+      "id": "manifest-compatibility-fixture",
+      "command": "bun scripts/m9-2-manifest-check.ts --current packages/css/fixtures/m10-4-north-star/current.json --baseline packages/css/fixtures/m10-4-north-star/baseline.json --consumer packages/css/fixtures/m10-4-north-star/consumer.json --format json",
+      "exitCode": 1,
+      "resultStatus": "expected-fixture-result",
+      "result": "Expected CLI exit 1; one token.alias-changed warning, one token.removed error, and component-use-unavailable/explicit-coverage limits.",
+      "artifact": {
+        "path": "docs/evidence/2026-09-30-m10-5-guarantees/manifest-compatibility-report.json",
+        "sha256": "a30bb83144c434b34c28be17fb26d7de73c5dfd401d6e5b5d613c2ebe1ff1c2c"
+      }
+    },
+    {
+      "id": "host-budget-suite",
+      "requiredRuntime": "Exact Node v22.0.0 executable",
+      "availableRuntimeVersions": [
+        "v22.16.0",
+        "v24.15.0"
+      ],
+      "resultStatus": "not-run",
+      "attempts": [
+        {
+          "command": "CRUMBS_AUDIT_NODE_FLOOR=22 bun scripts/measure-current-host-budgets.ts docs/evidence/2026-09-30-m10-5-guarantees/host-budgets",
+          "exitCode": 1,
+          "reason": "The runner treated `22` as an executable path and exited ENOENT before measurements."
+        },
+        {
+          "command": "CRUMBS_AUDIT_NODE_FLOOR=<installed Node v22.16.0 executable> bun scripts/measure-current-host-budgets.ts docs/evidence/2026-09-30-m10-5-guarantees/host-budgets",
+          "exitCode": 1,
+          "reason": "The audit requires exact v22.0.0 and rejected the installed v22.16.0 before measurements."
+        }
+      ],
+      "result": "No host-budget reports were produced. No Hermes or device performance claim is made."
+    },
+    {
+      "id": "editor-scale",
+      "command": "CRUMBS_SOURCE_REVISION=92f6342652968390f91ef120ecd0a70dc4d68410 bun run measure:editor docs/evidence/2026-09-30-m10-5-guarantees/editor-scale.json 5",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Five repetitions produced 30 compiler runs and 15 completion runs at 100, 1,000, and 10,000 tokens.",
+      "artifact": {
+        "path": "docs/evidence/2026-09-30-m10-5-guarantees/editor-scale.json",
+        "sha256": "4d98ee147ece446471aea4d2d022997ce22a7ae9ba1241422a84072dfd32ce4f"
+      },
+      "note": "The report's identity.node field is Bun's Node compatibility version v26.3.0; the external Node executable is v24.15.0, recorded separately. Conditions and typed slots are excluded from the fixture."
+    },
+    {
+      "id": "budget-registry-validation",
+      "command": "bun run budgets:validate",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "valid true; registryReady false; performanceQualification not-run; 26 metrics; 5 pending thresholds; 3 missing baselines; 2 diagnostic baselines."
+    },
+    {
+      "id": "budget-readiness",
+      "command": "bun run budgets:readiness",
+      "exitCode": 1,
+      "resultStatus": "incomplete",
+      "result": "Expected nonzero while pending thresholds and missing/diagnostic baselines remain; no threshold or baseline was changed."
+    },
+    {
+      "id": "guarantees-check-final",
+      "command": "bun run guarantees:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Final M10.5.2 matrix evidence, source revisions, artifact digests, and generated reference all validated."
+    },
+    {
+      "id": "docs-build-final",
+      "command": "bun run docs:build",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Astro/Starlight built 28 pages from the final M10.5.2 reference."
+    },
+    {
+      "id": "diff-check",
+      "command": "git diff --check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "No whitespace errors."
+    }
+  ],
+  "budgetRegistry": {
+    "valid": true,
+    "registryReady": false,
+    "performanceQualification": "not-run",
+    "metrics": 26,
+    "pendingThresholds": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes",
+      "retained-memory-bytes",
+      "runtime-emitted-bytes"
+    ],
+    "missingBaselines": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes"
+    ],
+    "diagnosticBaselines": [
+      "retained-memory-bytes",
+      "runtime-emitted-bytes"
+    ],
+    "readinessExitCode": 1
+  },
+  "artifacts": [
+    {
+      "path": "docs/evidence/2026-09-30-m10-5-guarantees/provenance.json",
+      "sha256": "c591998d5c34abb09305b0594fdde4604783e764e7b1e958745c8a5f6be11100"
+    },
+    {
+      "path": "docs/evidence/2026-09-30-m10-5-guarantees/gate-results.json",
+      "sha256": "c77f35f6d7254421ac95879852f147d4f31b552109c3617bd59167328a939484"
+    },
+    {
+      "path": "docs/evidence/2026-09-30-m10-5-guarantees/manifest-compatibility-report.json",
+      "sha256": "a30bb83144c434b34c28be17fb26d7de73c5dfd401d6e5b5d613c2ebe1ff1c2c"
+    },
+    {
+      "path": "docs/evidence/2026-09-30-m10-5-guarantees/editor-scale.json",
+      "sha256": "4d98ee147ece446471aea4d2d022997ce22a7ae9ba1241422a84072dfd32ce4f"
+    }
+  ],
+  "limitations": [
+    "Host budget bundle could not run because exact Node v22.0.0 is not installed; the installed versions are v22.16.0 and v24.15.0.",
+    "Host editor timings are raw macOS evidence without an approved budget; the fixture excludes editor UI/incremental edits and condition/slot APIs.",
+    "The compatibility command's exit 1 is the expected result for an intentionally breaking detector fixture, not a package compatibility failure or pass.",
+    "No device, simulator, Android, Hermes, screen-reader, visual-diff, or native performance acceptance was performed. Android remains parked.",
+    "The package dry-run did not publish or exercise a separate packed Expo application consumer."
+  ]
+}

@@ -77,19 +77,19 @@
 
 **Interfaces:** The qualification receipt records source revision, host/runtime/tool versions, exact commands and exit outcomes, artifact paths and SHA-256 digests, budget-registry readiness, and explicit scope limits. Do not modify prior M10.4 evidence. Each matrix update must be supported by a current command result; a result from a different source revision remains historical.
 
-- [ ] Capture the source revision and environment before running the gates. Retain raw output/artifacts needed to reproduce the receipt; exclude transient logs that carry machine-specific secrets or paths.
-- [ ] Create `docs/evidence/2026-09-30-m10-5-guarantees/` for this run's reports and receipt; verify the target paths are new so no historical evidence is overwritten.
-- [ ] Run `bun run check`; expected: build, package typecheck, CSS tests, and Storybook tests pass with zero failures.
-- [ ] Run `bun run app:typecheck`; expected: exit 0.
-- [ ] Run `bun run release:check`; expected: package build/typecheck/tests, native-style smoke check, and dry-run pack pass; this does not publish.
-- [ ] Run `bun scripts/m9-2-manifest-check.ts --current packages/css/fixtures/m10-4-north-star/current.json --baseline packages/css/fixtures/m10-4-north-star/baseline.json --consumer packages/css/fixtures/m10-4-north-star/consumer.json --format json > docs/evidence/2026-09-30-m10-5-guarantees/manifest-compatibility-report.json`; expected report: one `token.alias-changed` warning, one `token.removed` error, and the declared-coverage analysis limits. The CLI's exit 1 is expected for this intentionally breaking fixture and demonstrates detector behavior; do not call it a package compatibility pass. If the normalized findings differ, record the discrepancy and investigate. Keep the result fixture-scoped; do not overwrite M9.2 or M10.4 evidence.
-- [ ] Run `CRUMBS_AUDIT_NODE_FLOOR=22 bun scripts/measure-current-host-budgets.ts docs/evidence/2026-09-30-m10-5-guarantees/host-budgets`; retain the host reports with exact environment and hash. Do not interpret host timings as Hermes/device performance.
-- [ ] Run `bun run measure:editor docs/evidence/2026-09-30-m10-5-guarantees/editor-scale.json 5`; record repetitions, TypeScript/tool versions, and raw reports. No approved editor threshold means no editor budget pass.
-- [ ] Run `bun run budgets:validate`; expected: valid registry structure, while `registryReady` and performance qualification remain incomplete if pending thresholds/baselines/diagnostics remain.
-- [ ] Run `bun run budgets:readiness`; if it exits non-zero because thresholds or baselines remain incomplete, record that exact incomplete result rather than changing thresholds or treating the gate as passed.
-- [ ] Update only rows justified by these results; retain missing, stale, unsupported, and not-calibrated distinctions. Write the receipt and artifact hashes, regenerate the page, and confirm `bun run guarantees:check` passes.
-- [ ] Run `bun run docs:build` and `git diff --check`; expected: exit 0. Review that host-only passes and pending budgets remain clearly non-guarantees.
-- [ ] Commit as `test(css): record M10.5 host and package budgets`.
+- [x] Capture the source revision and environment before running the gates. Retain raw output/artifacts needed to reproduce the receipt; exclude transient logs that carry machine-specific secrets or paths.
+- [x] Create `docs/evidence/2026-09-30-m10-5-guarantees/` for this run's reports and receipt; verify the target paths are new so no historical evidence is overwritten.
+- [x] Run `bun run check`; 1,287 CSS tests and 23 Storybook tests passed with zero failures.
+- [x] Run `bun run app:typecheck`; exit 0.
+- [x] Run `bun run release:check`; package build/typecheck/tests, native-style benchmark smoke, and dry-run pack passed; this did not publish.
+- [x] Run `bun scripts/m9-2-manifest-check.ts --current packages/css/fixtures/m10-4-north-star/current.json --baseline packages/css/fixtures/m10-4-north-star/baseline.json --consumer packages/css/fixtures/m10-4-north-star/consumer.json --format json > docs/evidence/2026-09-30-m10-5-guarantees/manifest-compatibility-report.json`; report: one `token.alias-changed` warning, one `token.removed` error, and the declared-coverage analysis limits. Exit 1 is expected for this intentionally breaking fixture and demonstrates detector behavior; it is not a package compatibility pass.
+- [x] Run `CRUMBS_AUDIT_NODE_FLOOR=/absolute/path/to/node-v22.0.0 bun scripts/measure-current-host-budgets.ts docs/evidence/2026-09-30-m10-5-guarantees/host-budgets`; the plan initially supplied the wrong value `22`. Repository documentation and code require the exact executable path and exact v22.0.0. Only v22.16.0 and v24.15.0 are installed; both attempts exited before sampling, so the suite is recorded `not-run`. No host, Hermes, or device performance result is claimed.
+- [x] Run `bun run measure:editor docs/evidence/2026-09-30-m10-5-guarantees/editor-scale.json 5`; five repetitions retained 30 compiler runs and 15 completion runs. No approved editor threshold means no editor budget pass.
+- [x] Run `bun run budgets:validate`; registry valid, `registryReady` false, performance qualification `not-run` with pending thresholds, missing baselines, and diagnostic baselines.
+- [x] Run `bun run budgets:readiness`; exit 1 because thresholds and baselines remain incomplete; this result was retained without changing thresholds.
+- [x] Update only rows justified by these results; preserve the historical M10.4 compatibility row as stale and record the fresh detector fixture separately. Retain stale packed-consumer, unmeasured condition/slot editor, visual, and device states. Write the receipt and artifact hashes, regenerate the page, and confirm `bun run guarantees:check` passes.
+- [x] Run `bun run docs:build` and `git diff --check`; exit 0, with 28 documentation pages built. Host-only passes and pending budgets remain clearly non-guarantees.
+- [x] Commit as `test(css): record M10.5 host and package budgets`.
 
 **After this commit:** Recommend M10.5.3, the visual/device disposition and roadmap status update.
 
