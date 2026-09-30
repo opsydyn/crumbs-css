@@ -545,7 +545,7 @@ from packed public packages and retain the result artifacts.
 - [x] M10.2: Generate useful contract-driven stories and review cases. Use pairwise theme-axis stories plus exhaustive reachable recipe-state tests; report unreachable recipe selections and intentionally unrendered full theme combinations. See `apps/storybook/scripts/generate-contract-stories.ts` and `apps/storybook/test/contract-review-cases.json`.
 - [x] M10.3: Verify font scaling, RTL/logical layout, reduced motion, and supported contrast contexts on native iOS consumers. The declared-pair review exposes known colour failures and unknown opacity/compositing cases; it is not WCAG conformance evidence. Screen-reader and interaction acceptance stays explicit. Android remains parked.
 - [x] M10.4: Run the three North Star journeys from packed public packages and retain versioned evidence. The exact Expo 56 / React Native 0.85.3 matrix passed on iOS/web bundle exports and host interaction; Android, device rendering/performance, screen-reader acceptance, and publishing remain not-run. See `docs/assessments/2026-09-30-m10-4-north-star-journeys.md` and `docs/evidence/2026-09-30-m10-4-north-star/`.
-- [ ] M10.5: Run the full compatibility, property, type/editor, package, docs, visual, and device budgets. Publish a guarantees matrix that distinguishes supported, measured, and unsupported behavior.
+- [ ] M10.5: Run the full compatibility, property, type/editor, package, docs, visual, and device budgets. Publish a guarantees matrix that distinguishes supported, measured, and unsupported behavior. The matrix and docs are published; M10.5.3 structural story/accessibility checks passed. Exact Node v22.0.0 host-budget measurement and budget-registry readiness remain incomplete; simulator, screenshot, physical-device, screen-reader, and device-budget checks remain not-run. Android is parked.
 
 **Journey A — Distribute a component package:** a token package and a component package are packed and consumed by an independent Expo app. Public styles work without source-only dependencies; runtime imports are isolated; supported versions and scopes resolve correctly.
 
@@ -562,6 +562,12 @@ The independent Expo consumer passed all three journeys from locally packed arti
 M10.4 does not establish native rendering or device performance. Android remains parked; physical-device and screen-reader acceptance, screenshots/recordings, and publishing were not run. The compatibility report wire format is v2 (manifest and migration wire formats remain v1); saved v1 compatibility reports are rejected by the strict current decoder and must be regenerated.
 
 Next recommended roadmap item: **M10.5** — run the full compatibility, property, type/editor, package, documentation, visual, and device budgets and publish the guarantees matrix.
+
+### 2026-09-30 — M10.5 guarantees matrix qualification
+
+The v1 guarantees matrix and generated reference are published. M10.5.2 recorded package, property, type/editor, compatibility-fixture, and documentation results while preserving the historical M10.4 compatibility row. M10.5.3 contract-story and accessibility-review consistency checks passed; these are structural checks only. The single simulator probe could not connect to CoreSimulatorService, so simulator rendering was not run. Screenshot/image-diff, physical-device, screen-reader, and device performance acceptance remain not-run. Android remains parked.
+
+M10.5 remains open. The exact Node v22.0.0 host-budget suite could not run, and the performance registry is valid but not ready (pending thresholds, missing and diagnostic baselines). Native/device gates still need direct evidence. Next action: resume the remaining M10.5 host and device gates when the exact runtime and named target environment are available; keep Android last and parked.
 
 ## M11 — Evaluate optional extensions
 

@@ -1,0 +1,96 @@
+{
+  "format": "crumbs.m10-5-visual-device-disposition",
+  "schemaVersion": 1,
+  "slice": "M10.5.3",
+  "capturedAt": "2026-09-30T17:11:49Z",
+  "gitHeadAtCapture": "279ff113211f952e7f66c8a0cab949dc0634ee8b",
+  "sourceRevision": "92f6342652968390f91ef120ecd0a70dc4d68410",
+  "sourceRevisionDefinition": "Latest Git commit touching any path outside docs/; docs-only evidence commits do not invalidate results.",
+  "environment": {
+    "host": {
+      "name": "macOS arm64 host",
+      "model": "Apple M4 Pro",
+      "macOS": "26.6.2",
+      "kernelRelease": "25.6.0",
+      "architecture": "arm64",
+      "logicalCpuCount": 12,
+      "memoryBytes": 25769803776
+    },
+    "toolchain": {
+      "bun": "1.4.2",
+      "nodeExecutable": "v24.15.0",
+      "bunNodeCompatibility": "v26.3.0",
+      "typescriptEditor": "6.0.3",
+      "typescriptCss": "5.9.3",
+      "typescriptNativePreview": "7.0.0-dev.20260519.1",
+      "effect": "4.0.0-rc.115",
+      "astro": "6.3.6",
+      "starlight": "0.39.2"
+    },
+    "expoConsumer": {
+      "expo": "56.0.4",
+      "react": "19.2.3",
+      "reactNative": "0.85.3"
+    }
+  },
+  "commands": [
+    {
+      "id": "repository-check",
+      "command": "bun run check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Package build, typecheck, CSS tests, Storybook contract/accessibility consistency checks, and Storybook tests completed successfully. The Storybook suite reported 23 tests across 7 files, 0 failures.",
+      "scopeLimit": "Repository and structural Storybook checks only; not native rendering, screenshot/image-diff, screen-reader, device performance, or Android acceptance."
+    },
+    {
+      "id": "contract-story-structure",
+      "command": "bun run --filter @crumbs/storybook contracts:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Contract coverage is current: 5 recipes, 4/8 theme stories.",
+      "scopeLimit": "Generated structural story coverage only; not rendering, screenshot/image-diff, or exhaustive full-theme combinations."
+    },
+    {
+      "id": "accessibility-review-structure",
+      "command": "bun run --filter @crumbs/storybook accessibility:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Generated accessibility review cases are current.",
+      "scopeLimit": "Generated review-case consistency only; not native screen-reader acceptance, WCAG conformance, or interaction acceptance."
+    },
+    {
+      "id": "simulator-availability",
+      "command": "xcrun simctl list devices booted",
+      "exitCode": 1,
+      "resultStatus": "failed",
+      "combinedOutput": "2026-09-30 18:09:33.828 simctl[1531:3150167] CoreSimulatorService connection became invalid.  Simulator services will no longer be available.\n2026-09-30 18:09:33.829 simctl[1531:3150168] Logging connecton invalid: <OS_xpc_error: <dictionary: 0x1fcfc2080> { count = 1, transaction: 0, voucher = 0x0, contents =\n\t\"XPCErrorDescription\" => <string: 0x1fcfc21c0> { string cache = 0x0, length = 18, contents = \"Connection invalid\" }\n}>\n2026-09-30 18:09:33.830 simctl[1531:3150168] Error opening log file (/Users/alancurrie/Library/Logs/CoreSimulator/CoreSimulator.com.apple.CoreSimulator.simctl.log): Operation not permitted\n[-[SimServiceContext sendRequest:]:1751] ERROR : Unable to deliver request ({\n    \"developer_dir\" = \"/Applications/Xcode.app/Contents/Developer\";\n    request = \"set_developer_dir\";\n}) because we are not connected to CoreSimulatorService.\n[-[SimServiceContext initWithDeveloperDir:connectionType:error:]:432] WARN  : Unable to discover any Simulator runtimes. Developer Directory is /Applications/Xcode.app/Contents/Developer.\n[-[SimDiskImageManager init]:175] ERROR : Could not kickstart simdiskimaged; SimDiskImageManager services will no longer be available: Error Domain=NSPOSIXErrorDomain Code=53 \"Software caused connection abort\" UserInfo={NSLocalizedDescription=Error returned in reply from CoreSimulatorService: Connection invalid}\n[-[SimDiskImageManager _onQueue_checkConnection:]:239] ERROR : simdiskimaged returned error (invalid), marking disconnected.\n[-[SimDiskImageManager _onQueue_checkConnection:]:239] ERROR : simdiskimaged returned error (invalid), marking disconnected.\n[-[SimServiceContext initWithDeveloperDir:connectionType:error:]_block_invoke:468] ERROR : Could not get list of trusted mount directories: Error Domain=com.apple.CoreSimulator.SimError Code=410 \"The service used to manage runtime disk images (simdiskimaged) crashed or is not responding\" UserInfo={NSLocalizedDescription=The service used to manage runtime disk images (simdiskimaged) crashed or is not responding}\n[-[SimServiceContext sendRequest:reply:error:]:1771] ERROR : Unable to deliver request ({\n    \"request\" = \"notification_subscription\";\n    \"set_path\" = \"/Users/alancurrie/Library/Developer/CoreSimulator/Devices\"\n}) because we are not connected to CoreSimulatorService.\n2026-09-30 18:09:33.950 simctl[1531:3150163] Error Domain=NSPOSIXErrorDomain Code=61 \"Connection refused\" UserInfo={NSLocalizedDescription=CoreSimulatorService connection became invalid. Simulator services will no longer be available.}\nUnable to locate device set: Error Domain=NSPOSIXErrorDomain Code=61 \"Connection refused\" UserInfo={NSLocalizedFailureReason=Failed to subscribe to notifications from CoreSimulatorService., NSLocalizedDescription=Failed to initialize simulator device set., NSUnderlyingError=0xc14db0660 {NSLocalizedDescription=CoreSimulatorService connection became invalid. Simulator services will no longer be available.}}",
+      "interpretation": "The single availability probe could not connect to CoreSimulatorService or initialize the device set. No simulator render or native interaction check was run. This is an environment observation, not an unsupported API finding."
+    }
+  ],
+  "dispositions": {
+    "screenshotImageDiff": {
+      "measurementStatus": "not-run",
+      "reason": "No screenshot/image-diff run was performed; structural contract stories do not satisfy this gate."
+    },
+    "simulatorRendering": {
+      "measurementStatus": "not-run",
+      "reason": "CoreSimulatorService was unavailable during the single planned probe."
+    },
+    "physicalDeviceAcceptance": {
+      "measurementStatus": "not-run",
+      "reason": "No physical target device is available for acceptance."
+    },
+    "androidAcceptance": {
+      "measurementStatus": "not-run",
+      "reason": "Android remains explicitly parked; no Android acceptance was performed."
+    },
+    "screenReaderAcceptance": {
+      "measurementStatus": "not-run",
+      "reason": "No native screen-reader session or device artifact was available."
+    },
+    "javascriptFrameBudget": {
+      "measurementStatus": "not-run",
+      "reason": "Budget registry is not ready, thresholds/baselines are incomplete, and no release Hermes device baseline exists."
+    }
+  }
+}

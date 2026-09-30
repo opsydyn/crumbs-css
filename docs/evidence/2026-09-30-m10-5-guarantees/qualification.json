@@ -6,7 +6,7 @@
   "sourceRevision": "92f6342652968390f91ef120ecd0a70dc4d68410",
   "sourceRevisionDefinition": "Latest Git commit touching any path outside docs/; docs-only evidence commits do not invalidate results.",
   "gitHeadAtFinalQualification": "92f6342652968390f91ef120ecd0a70dc4d68410",
-  "matrixSha256": "51e1b7a0c76d2dd3bfb2eeb89c40d08a91478a54f0cc9a57d0950cc101ab0c9e",
+  "matrixSha256": "1faab627b60d2ad4686a2da8ef57f1bd199d0a07d1577eb1c335f28c4d612703",
   "environment": {
     "host": {
       "name": "macOS arm64 host",
@@ -193,6 +193,10 @@
     {
       "path": "docs/evidence/2026-09-30-m10-5-guarantees/editor-scale.json",
       "sha256": "4d98ee147ece446471aea4d2d022997ce22a7ae9ba1241422a84072dfd32ce4f"
+    },
+    {
+      "path": "docs/evidence/2026-09-30-m10-5-guarantees/visual-device-disposition.json",
+      "sha256": "b4f1159bf8ba59669baf93828f7d89bf02f58c074b6ad0439193f93f4221f20a"
     }
   ],
   "limitations": [
@@ -200,6 +204,76 @@
     "Host editor timings are raw macOS evidence without an approved budget; the fixture excludes editor UI/incremental edits and condition/slot APIs.",
     "The compatibility command's exit 1 is the expected result for an intentionally breaking detector fixture, not a package compatibility failure or pass.",
     "No device, simulator, Android, Hermes, screen-reader, visual-diff, or native performance acceptance was performed. Android remains parked.",
-    "The package dry-run did not publish or exercise a separate packed Expo application consumer."
-  ]
+    "The package dry-run did not publish or exercise a separate packed Expo application consumer.",
+    "M10.5.3 structural Storybook checks passed, but screenshots/image diffs and native accessibility acceptance were not run.",
+    "The single xcrun simctl availability probe failed because CoreSimulatorService was unavailable; no simulator rendering or interaction check was run.",
+    "No physical device was available for M10.5.3 acceptance; Android remains parked."
+  ],
+  "visualDeviceDisposition": {
+    "slice": "M10.5.3",
+    "capturedAt": "2026-09-30T17:11:49Z",
+    "gitHeadAtCapture": "279ff113211f952e7f66c8a0cab949dc0634ee8b",
+    "sourceRevision": "92f6342652968390f91ef120ecd0a70dc4d68410",
+    "commands": [
+      {
+        "id": "repository-check",
+        "command": "bun run check",
+        "exitCode": 0,
+        "resultStatus": "passed",
+        "result": "Repository build/typecheck/test checks passed; Storybook reported 23 tests across 7 files."
+      },
+      {
+        "id": "contract-story-structure",
+        "command": "bun run --filter @crumbs/storybook contracts:check",
+        "exitCode": 0,
+        "resultStatus": "passed",
+        "result": "5 recipes and 4/8 theme stories are current; structural coverage only."
+      },
+      {
+        "id": "accessibility-review-structure",
+        "command": "bun run --filter @crumbs/storybook accessibility:check",
+        "exitCode": 0,
+        "resultStatus": "passed",
+        "result": "Generated accessibility review cases are current; structural coverage only."
+      },
+      {
+        "id": "simulator-availability",
+        "command": "xcrun simctl list devices booted",
+        "exitCode": 1,
+        "resultStatus": "failed",
+        "result": "CoreSimulatorService connection became invalid; device set initialization failed. Simulator rendering remains not-run."
+      }
+    ],
+    "dispositions": {
+      "screenshotImageDiff": {
+        "measurementStatus": "not-run",
+        "reason": "No screenshot/image-diff run was performed; structural contract stories do not satisfy this gate."
+      },
+      "simulatorRendering": {
+        "measurementStatus": "not-run",
+        "reason": "CoreSimulatorService was unavailable during the single planned probe."
+      },
+      "physicalDeviceAcceptance": {
+        "measurementStatus": "not-run",
+        "reason": "No physical target device is available for acceptance."
+      },
+      "androidAcceptance": {
+        "measurementStatus": "not-run",
+        "reason": "Android remains explicitly parked; no Android acceptance was performed."
+      },
+      "screenReaderAcceptance": {
+        "measurementStatus": "not-run",
+        "reason": "No native screen-reader session or device artifact was available."
+      },
+      "javascriptFrameBudget": {
+        "measurementStatus": "not-run",
+        "reason": "Budget registry is not ready, thresholds/baselines are incomplete, and no release Hermes device baseline exists."
+      }
+    },
+    "artifact": {
+      "path": "docs/evidence/2026-09-30-m10-5-guarantees/visual-device-disposition.json",
+      "sha256": "b4f1159bf8ba59669baf93828f7d89bf02f58c074b6ad0439193f93f4221f20a"
+    },
+    "note": "M10.5 remains open: exact Node v22.0.0 host-budget suite was unavailable, the budget registry is not ready, and screenshot/native/device/screen-reader/Android gates remain not-run."
+  }
 }

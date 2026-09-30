@@ -194,9 +194,71 @@
       "id": "visual.story-coverage",
       "domain": "visual",
       "claim": "Generated contract stories and accessibility review cases are structural review inputs, not screenshot or image-diff acceptance.",
+      "supportStatus": "supported",
+      "measurementStatus": "passed",
+      "measurementNote": "M10.5.3 contract-story and accessibility-review consistency checks passed; this records structural coverage only.",
+      "basis": [
+        {
+          "path": "apps/storybook/package.json",
+          "role": "scope"
+        },
+        {
+          "path": "docs/superpowers/specs/2026-09-30-m10-5-guarantees-matrix-design.md",
+          "role": "policy"
+        }
+      ],
+      "evidence": [
+        {
+          "path": "docs/evidence/2026-09-30-m10-5-guarantees/visual-device-disposition.json",
+          "sha256": "b4f1159bf8ba59669baf93828f7d89bf02f58c074b6ad0439193f93f4221f20a",
+          "sourceRevision": "92f6342652968390f91ef120ecd0a70dc4d68410",
+          "command": "bun run --filter @crumbs/storybook contracts:check",
+          "environment": {
+            "name": "macOS 26.6.2 arm64 Apple M4 Pro host",
+            "versions": {
+              "architecture": "arm64",
+              "bun": "1.4.2",
+              "node": "v24.15.0",
+              "platform": "Darwin 25.6.0",
+              "expo": "56.0.4",
+              "react": "19.2.3",
+              "react-native": "0.85.3"
+            }
+          },
+          "resultStatus": "passed",
+          "result": "Contract coverage is current: 5 recipes, 4/8 theme stories.",
+          "scopeLimit": "Structural contract-story coverage only; no screenshot, image-diff, or native visual acceptance."
+        },
+        {
+          "path": "docs/evidence/2026-09-30-m10-5-guarantees/visual-device-disposition.json",
+          "sha256": "b4f1159bf8ba59669baf93828f7d89bf02f58c074b6ad0439193f93f4221f20a",
+          "sourceRevision": "92f6342652968390f91ef120ecd0a70dc4d68410",
+          "command": "bun run --filter @crumbs/storybook accessibility:check",
+          "environment": {
+            "name": "macOS 26.6.2 arm64 Apple M4 Pro host",
+            "versions": {
+              "architecture": "arm64",
+              "bun": "1.4.2",
+              "node": "v24.15.0",
+              "platform": "Darwin 25.6.0",
+              "expo": "56.0.4",
+              "react": "19.2.3",
+              "react-native": "0.85.3"
+            }
+          },
+          "resultStatus": "passed",
+          "result": "Generated accessibility review cases are current.",
+          "scopeLimit": "Structural review-case consistency only; no native screen-reader acceptance, WCAG conformance, or interaction acceptance."
+        }
+      ]
+    },
+    {
+      "id": "visual.screenshot-diff",
+      "domain": "visual",
+      "claim": "Screenshot and image-diff acceptance is a separate gate from generated structural contract stories.",
       "supportStatus": "unspecified",
       "measurementStatus": "not-run",
-      "measurementNote": "No screenshot or image-diff result is attached; story coverage alone does not establish visual fidelity.",
+      "measurementNote": "No screenshot or image-diff run was performed; generated story coverage does not establish visual fidelity.",
       "basis": [
         {
           "path": "apps/storybook/package.json",
@@ -215,7 +277,7 @@
       "claim": "Native simulator rendering is not qualified by the packed iOS JavaScript export.",
       "supportStatus": "unspecified",
       "measurementStatus": "not-run",
-      "measurementNote": "A fresh simulator probe is required in M10.5.3; the earlier CoreSimulatorService failure was an environment observation, not a permanent availability claim.",
+      "measurementNote": "The single M10.5.3 xcrun simctl list devices booted probe exited 1 because CoreSimulatorService was unavailable and the device set could not initialize; simulator render remains not-run. See visual-device-disposition.json. This is an environment observation, not an unsupported API finding.",
       "basis": [
         {
           "path": "docs/superpowers/specs/2026-09-30-m10-5-guarantees-matrix-design.md",
@@ -223,6 +285,29 @@
         },
         {
           "path": "docs/roadmap.md",
+          "role": "scope"
+        }
+      ],
+      "evidence": []
+    },
+    {
+      "id": "device.physical-device-acceptance",
+      "domain": "device",
+      "claim": "Physical-device rendering and interaction acceptance require evidence from a named target device.",
+      "supportStatus": "unspecified",
+      "measurementStatus": "not-run",
+      "measurementNote": "No physical target device is available for this acceptance slice; no device rendering or interaction session was performed.",
+      "basis": [
+        {
+          "path": "docs/roadmap.md",
+          "role": "policy"
+        },
+        {
+          "path": "docs/superpowers/specs/2026-09-30-m10-5-guarantees-matrix-design.md",
+          "role": "scope"
+        },
+        {
+          "path": "apps/storybook/package.json",
           "role": "scope"
         }
       ],
@@ -253,7 +338,7 @@
       "claim": "Screen-reader acceptance requires direct evidence in a named native environment.",
       "supportStatus": "unspecified",
       "measurementStatus": "not-run",
-      "measurementNote": "No native screen-reader session or device artifact is attached to this matrix version.",
+      "measurementNote": "No native screen-reader session or device artifact is available. Generated accessibility review cases passed structural consistency checks, but they do not establish screen-reader acceptance.",
       "basis": [
         {
           "path": "docs/superpowers/specs/2026-09-30-m10-5-guarantees-matrix-design.md",

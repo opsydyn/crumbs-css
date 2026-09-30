@@ -103,14 +103,14 @@
 
 **Interfaces:** Keep separate rows for generated structural contract/accessibility stories, screenshot/image-diff coverage, simulator, physical device, Android, screen-reader, and device budgets. Record command, environment, artifact and hash for every run. If a gate cannot run, use `not-run` with the observed reason and leave M10.5 unchecked while it is required.
 
-- [ ] Run `bun run --filter @crumbs/storybook contracts:check` and `bun run --filter @crumbs/storybook accessibility:check`; `bun run check` also runs their test suites. Record this as structural/story coverage only, not screenshot or native accessibility acceptance.
-- [ ] Probe simulator availability once with `xcrun simctl list devices booted`; if CoreSimulatorService or runtimes are unavailable, preserve the exact failure and do not retry indefinitely. Run visual/native checks only in an available, named target environment.
-- [ ] Record simulator, physical-device, Android, screen-reader, and device-budget outcomes independently. Keep Android parked and physical-device acceptance not-run until a device is available; do not infer unsupported API status from those constraints.
-- [ ] Update matrix and receipt with direct evidence hashes or `not-run` dispositions, then regenerate and verify using `bun run guarantees:check` and `bun run docs:build`.
-- [ ] Update only the M10.5 roadmap status and next action. Mark complete only if every required budget/platform gate is directly satisfied under the approved criteria; otherwise leave open and name the next environment/evidence needed.
-- [ ] Run `git diff --check`, review each published claim against its attached evidence, and commit as `docs: record M10.5 visual and device disposition`.
+- [x] Run `bun run --filter @crumbs/storybook contracts:check` and `bun run --filter @crumbs/storybook accessibility:check`; both passed (5 recipes, 4/8 theme stories, and current accessibility review cases). `bun run check` passed, including 23 Storybook tests across 7 files. These results establish structural coverage only, not screenshot or native accessibility acceptance.
+- [x] Probe simulator availability once with `xcrun simctl list devices booted`; it exited 1 because CoreSimulatorService became unavailable and the device set could not initialize. The exact output is retained in `docs/evidence/2026-09-30-m10-5-guarantees/visual-device-disposition.json`; no retry or native check was performed.
+- [x] Record screenshot/image-diff, simulator, physical-device, Android, screen-reader, and device-budget outcomes independently. Screenshot/image-diff, physical-device, screen-reader, and device budgets remain not-run; Android remains parked; no unavailable environment is represented as unsupported API behavior.
+- [x] Update the matrix and receipt with evidence hashes or explicit `not-run` dispositions, regenerate with `bun run guarantees:render`, and verify with `bun run guarantees:check` and `bun run docs:build`; 28 pages built.
+- [x] Update only the M10.5 roadmap status and next action. M10.5 remains unchecked because the exact Node v22.0.0 host budget, budget-registry readiness, and native/device gates remain incomplete.
+- [x] Run `git diff --check`, review each published claim against its attached evidence, and commit as `docs: record M10.5 visual and device disposition`.
 
-**After this commit:** Recommend the remaining M10.5 device/native visual gate when its environment is available if the roadmap item remains open; otherwise recommend the next unchecked roadmap item from `docs/roadmap.md`.
+**After this commit:** M10.5 remains open until its exact Node v22.0.0 host budget, registry readiness, and named device/native visual/accessibility gates have direct evidence. Android remains last and parked.
 
 ## Final self-review
 
