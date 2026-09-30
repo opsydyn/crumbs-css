@@ -11,15 +11,17 @@ const PAGE_PATH = "docs/src/content/docs/reference/guarantees.mdx"
 
 function readCurrentSourceRevision(repositoryRoot: string): string {
   try {
-    const revision = execFileSync("git", ["rev-parse", "HEAD"], {
+    // Commits confined to the docs/ tree must not invalidate the source they
+    // record. Bind current evidence to the latest commit touching other paths.
+    const revision = execFileSync("git", ["log", "-1", "--format=%H", "--", ".", ":(exclude)docs/**"], {
       cwd: repositoryRoot,
       encoding: "utf8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim()
-    if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(revision)) throw new Error("Git returned an invalid revision.")
+    if (!/^(?:[0-9a-f]{40}|[0-9a-f]{64})$/u.test(revision)) throw new Error("Git returned no valid source revision.")
     return revision
   } catch {
-    throw new TypeError("Cannot check or render guarantees without the current Git source revision.")
+    throw new TypeError("Cannot check or render guarantees without the latest Git source revision outside docs/.")
   }
 }
 

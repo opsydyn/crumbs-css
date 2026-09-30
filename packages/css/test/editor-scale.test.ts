@@ -14,7 +14,12 @@ describe("editor scale fixtures",()=>{
   expect(readFileSync(file,"utf8")).toBe(createEditorFixture(count).source)
   expect(readFileSync(completion,"utf8")).toBe(createEditorFixture(count).completionSource)
   expect(JSON.parse(readFileSync(resolve(root,String(count),"tsconfig.json"),"utf8"))).toMatchObject({files:["index.css.ts"],include:[]})
-  expect(inspectEditorFixture(file)).toMatchObject({tokenCount:count,recipeCount:1,conditionApi:"unsupported",slotRecipeApi:"unsupported"})
+  expect(inspectEditorFixture(file)).toMatchObject({tokenCount:count,recipeCount:1,conditionApi:"implemented",slotRecipeApi:"implemented"})
+ })
+ it("describes implemented condition and slot APIs as outside this fixture's coverage",()=>{
+  const manifest=JSON.parse(readFileSync(resolve(root,"manifest.json"),"utf8"))
+  expect(manifest.coverage.conditions).toBe("implemented API; not included in this fixture")
+  expect(manifest.coverage.slotRecipes).toBe("implemented API; not included in this fixture")
  })
  it("rejects unsupported scale requests",()=>{
   for(const value of [0,99,101,999,1001,9999,10001,1.5])expect(()=>createEditorFixture(value)).toThrow()

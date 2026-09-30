@@ -1,6 +1,6 @@
 import { createTheme, createThemeContract, recipe, styleVariants, type NativeRecipeProps } from "@opsydyn/crumbs-css/style"
 
-// @crumbs-scale tokens:10000 condition-api:unsupported slot-recipe-api:unsupported
+// @crumbs-scale tokens:10000 condition-api:implemented slot-recipe-api:implemented
 export const vars = createThemeContract({ tokens: {
     token00000: null,
     token00001: null,

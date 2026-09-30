@@ -88,14 +88,17 @@ describe("M10.5 guarantees matrix contract and renderer", () => {
     repositoryRoot = mkdtempSync(join(tmpdir(), "crumbs-guarantees-matrix-"))
     mkdirSync(join(repositoryRoot, "packages/css/src/contracts"), { recursive: true })
     mkdirSync(join(repositoryRoot, "packages/css/bench"), { recursive: true })
+    mkdirSync(join(repositoryRoot, "packages/css/src"), { recursive: true })
     mkdirSync(join(repositoryRoot, "docs/evidence/test"), { recursive: true })
     writeFileSync(join(repositoryRoot, "packages/css/src/contracts/reference.md"), "Fixture contract source.\n")
+    writeFileSync(join(repositoryRoot, "packages/css/src/source.ts"), "export const source = true\n")
     writeFileSync(join(repositoryRoot, "packages/css/bench/budgets.json"), JSON.stringify({
       metrics: [{ id: "js-frame-time", threshold: { status: "pending-review" } }],
     }))
     writeFileSync(join(repositoryRoot, "docs/evidence/test/sample.json"), evidenceBytes)
     execFileSync("git", ["init", "-q", repositoryRoot], { stdio: "ignore" })
-    execFileSync("git", ["-C", repositoryRoot, "-c", "user.name=Crumbs test", "-c", "user.email=crumbs-test@example.invalid", "commit", "--allow-empty", "-m", "fixture"], { stdio: "ignore" })
+    execFileSync("git", ["-C", repositoryRoot, "add", "packages/css/src/source.ts"], { stdio: "ignore" })
+    execFileSync("git", ["-C", repositoryRoot, "-c", "user.name=Crumbs test", "-c", "user.email=crumbs-test@example.invalid", "commit", "-m", "source fixture"], { stdio: "ignore" })
   })
 
   afterEach(() => {
@@ -350,13 +353,11 @@ describe("M10.5 guarantees matrix contract and renderer", () => {
     expect(api.generatedPageCheckIssues("# Current matrix\n", "# Current matrix\n")).toEqual([])
   })
 
-  it("rejects a generated-page symlink before rendering over its target", async () => {
+  it("keeps source evidence current across a docs-only commit and rejects a generated-page symlink", async () => {
     const api = await loadApi()
     if (!api) { expect(api).toBeDefined(); return }
 
-    execFileSync("git", ["init", "-q", repositoryRoot], { stdio: "ignore" })
-    execFileSync("git", ["-C", repositoryRoot, "-c", "user.name=Crumbs test", "-c", "user.email=crumbs-test@example.invalid", "commit", "--allow-empty", "-m", "fixture"], { stdio: "ignore" })
-    const sourceRevision = execFileSync("git", ["-C", repositoryRoot, "rev-parse", "HEAD"], { encoding: "utf8" }).trim()
+    const sourceRevision = repositoryHeadFor(repositoryRoot)
 
     const matrix = baseMatrix()
     const rows = matrix.rows as Array<Record<string, unknown>>
@@ -365,6 +366,9 @@ describe("M10.5 guarantees matrix contract and renderer", () => {
     mkdirSync(join(repositoryRoot, "docs/guarantees"), { recursive: true })
     mkdirSync(join(repositoryRoot, "docs/src/content/docs/reference"), { recursive: true })
     writeFileSync(join(repositoryRoot, "docs/guarantees/matrix.v1.json"), JSON.stringify(matrix))
+    writeFileSync(join(repositoryRoot, "docs/qualification-note.md"), "Documentation-only change.\n")
+    execFileSync("git", ["-C", repositoryRoot, "add", "docs/qualification-note.md"], { stdio: "ignore" })
+    execFileSync("git", ["-C", repositoryRoot, "-c", "user.name=Crumbs test", "-c", "user.email=crumbs-test@example.invalid", "commit", "-m", "docs-only qualification update"], { stdio: "ignore" })
 
     const outsideTarget = join(tmpdir(), `crumbs-guarantees-output-${Date.now()}.mdx`)
     const pagePath = join(repositoryRoot, "docs/src/content/docs/reference/guarantees.mdx")
