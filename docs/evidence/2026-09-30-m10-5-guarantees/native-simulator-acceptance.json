@@ -1,0 +1,119 @@
+{
+  "format": "crumbs.m10-5-native-simulator-acceptance",
+  "schemaVersion": 1,
+  "slice": "M10.5.3",
+  "recordedAt": "2026-09-30T21:21:06Z",
+  "gitHeadAtCapture": "65c3e916990c50042e712eb2194bed077c746eb1",
+  "sourceRevision": "65c3e916990c50042e712eb2194bed077c746eb1",
+  "sourceRevisionDefinition": "Latest Git commit touching any path outside docs/; docs-only evidence commits do not invalidate the source results.",
+  "environment": {
+    "host": {
+      "macOS": "26.6.2",
+      "architecture": "arm64"
+    },
+    "simulator": {
+      "name": "Crumbs Acceptance",
+      "deviceModel": "iPhone 17",
+      "iOS": "26.5",
+      "state": "booted"
+    },
+    "app": {
+      "name": "Crumbs Storybook",
+      "transport": "Expo Go with local Metro server",
+      "expo": "56.0.4",
+      "expoGoSdk": "56.0.0",
+      "react": "19.2.3",
+      "reactNative": "0.85.3",
+      "story": "design-system-reference-patterns--interactive"
+    }
+  },
+  "commands": [
+    {
+      "id": "dev-package-build",
+      "command": "bun run build:dev",
+      "workingDirectory": "packages/css",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "tsdown built current package outputs successfully."
+    },
+    {
+      "id": "expo-metro",
+      "command": "EXPO_PUBLIC_STORYBOOK_ENABLED=true EXPO_PUBLIC_STORYBOOK_REFERENCE_PREVIEW=true EXPO_NO_METRO_WORKSPACE_ROOT=1 STORYBOOK_DISABLE_TELEMETRY=1 bunx expo start --host lan --port 8090",
+      "workingDirectory": "apps/storybook",
+      "resultStatus": "passed",
+      "result": "Metro served the current Storybook source; Expo Go loaded the iOS bundle in 4457 ms (1833 modules)."
+    },
+    {
+      "id": "metro-health",
+      "command": "curl -i --max-time 5 http://<host-lan-address>:8090/status",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Metro returned HTTP 200 and packager-status:running."
+    },
+    {
+      "id": "simulator-screenshot-light",
+      "command": "xcrun simctl io <simulator-udid> screenshot <output.png>",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Captured the light-theme Storybook render at 1206x2622 pixels."
+    },
+    {
+      "id": "simulator-screenshot-dark",
+      "command": "xcrun simctl io <simulator-udid> screenshot <output.png>",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Captured the dark-theme Storybook render at 1206x2622 pixels."
+    }
+  ],
+  "observations": {
+    "render": {
+      "resultStatus": "passed",
+      "story": "design-system-reference-patterns--interactive",
+      "summary": "The native simulator rendered the current typography and button reference sections in both light and dark theme modes."
+    },
+    "interaction": {
+      "resultStatus": "passed",
+      "steps": [
+        "Selected light mode in the Storybook theme control.",
+        "Pressed the Save changes primary action.",
+        "Selected dark mode in the Storybook theme control."
+      ],
+      "visibleResult": "The light-theme screenshot shows the action status text 'Primary action selected.'"
+    },
+    "screenshots": [
+      {
+        "theme": "light",
+        "capturedAt": "2026-09-30T21:14:31Z",
+        "path": "docs/evidence/2026-09-30-m10-5-guarantees/native-simulator-light.png",
+        "sha256": "d396b1a32ea10dfb67eb79ca1ed41b7caf9bbe1ee6721b9b572223c247f63461",
+        "width": 1206,
+        "height": 2622,
+        "resultStatus": "passed"
+      },
+      {
+        "theme": "dark",
+        "capturedAt": "2026-09-30T21:15:26Z",
+        "path": "docs/evidence/2026-09-30-m10-5-guarantees/native-simulator-dark.png",
+        "sha256": "70bbe54c887b3f3b088bb76349826b58d1aab485e2c164e1a30c0781f3f14678",
+        "width": 1206,
+        "height": 2622,
+        "resultStatus": "passed"
+      }
+    ],
+    "accessibilitySnapshot": {
+      "tool": "Codex CUA accessibility snapshot of the iOS Simulator window",
+      "observedElements": [
+        "design-system-reference-patterns--interactive"
+      ],
+      "note": "The snapshot exposed the Storybook story container only. It is not a VoiceOver traversal or spoken-feedback result; no VoiceOver session was run."
+    }
+  },
+  "notRun": {
+    "automatedScreenshotDiff": "No approved baseline or image-diff command was available for this run.",
+    "voiceOverAcceptance": "No VoiceOver session or spoken-feedback evidence was captured.",
+    "physicalDeviceAcceptance": "No physical iOS target device was available.",
+    "releaseDevicePerformance": "Release-Hermes JS/UI frame, allocation and retained-memory budgets still require their target device baseline.",
+    "android": "Explicitly parked."
+  },
+  "scopeLimit": "Manual Expo Go rendering and interaction evidence for one Storybook reference story on an iPhone 17 running iOS 26.5. This does not establish screenshot-diff fidelity, VoiceOver acceptance, WCAG conformance, alpha/compositing coverage, physical-device behavior, release-Hermes performance, Android acceptance, or Node v22 host-budget results."
+}
