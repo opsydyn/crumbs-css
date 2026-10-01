@@ -24,6 +24,13 @@ function graph(entry: string): {files: string[], externals: string[]} {
  return {files: [...visited],externals: [...externals]}
 }
 describe("public runtime dependency isolation", () => {
+ for (const format of ['mjs', 'cjs']) {
+  it(`keeps the lean theme-core ${format} graph independent of optional theme feature chunks`, () => {
+   const result = graph(`theme-core.${format}`)
+   expect(result.files.map(file => path.basename(file))).toEqual([`theme-core.${format}`])
+   expect(result.externals).toEqual(['react'])
+  })
+ }
  for (const entry of ['theme', 'theme-core']) {
   for (const format of ['mjs','cjs']) {
    it(`loads only React and pure package data in ${entry} ${format}`, () => {

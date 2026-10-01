@@ -31,15 +31,16 @@ const toolEntries = {
 }
 const themeRuntimeEntries = {
   theme: "src/theme-runtime.ts",
-  "theme-core": "src/theme-core.ts",
   "theme-conditions": "src/conditions/index.ts",
   "theme-expressions": "src/expressions/index.ts",
   "theme-recipes": "src/theme-recipes.ts",
   "theme-sprinkles": "src/theme-sprinkles.ts",
 }
+const themeCoreRuntimeEntries = {"theme-core": "src/theme-core.ts"}
 
 export default defineConfig([
   { ...common, clean: false, dts: false, entry: themeRuntimeEntries },
+  { ...common, clean: false, dts: false, entry: themeCoreRuntimeEntries },
   {
     ...common,
     clean: false,
@@ -58,6 +59,7 @@ export default defineConfig([
     entry: {
       ...toolEntries,
       ...themeRuntimeEntries,
+      ...themeCoreRuntimeEntries,
       devtools: "src/devtools/index.ts",
     },
     hooks: {
@@ -65,7 +67,7 @@ export default defineConfig([
         // A dual-format declaration-only build emits CJS JavaScript when its
         // re-export optimization disables the second DTS pass. Write the same
         // canonical re-export stubs without rebuilding that JavaScript graph.
-        for (const name of [...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), "devtools"]) {
+        for (const name of [...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), ...Object.keys(themeCoreRuntimeEntries), "devtools"]) {
           writeFileSync(`dist/${name}.d.cts`, `export * from "./${name}.mjs";\n`)
         }
       },
