@@ -155,8 +155,8 @@
       "domain": "package-runtime",
       "claim": "Current host runtime and emitted-graph budget comparisons are measured independently from device performance guarantees.",
       "supportStatus": "unspecified",
-      "measurementStatus": "failed",
-      "measurementNote": "The Node v22.0.0 floor-specific initialization comparisons passed, but the current Node runtime-initialization pair and six existing runtime graph thresholds failed; eleven other comparisons were environment-mismatched.",
+      "measurementStatus": "stale",
+      "measurementNote": "The retained host workloads were reclassified with comparison report format v2; no workloads or thresholds were changed. Three of 21 active metrics pass, eight fail approved limits, and ten remain incomplete. This result is historical after the comparator source update.",
       "basis": [
         {
           "path": "packages/css/bench/budgets.json",
@@ -170,9 +170,9 @@
       "evidence": [
         {
           "sourceRevision": "374e4c44ab8b883a2e93549a2b842d4f827147a1",
-          "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/comparison.json",
-          "sha256": "9f978fe46b1229e959259f28845b352e985683b57688e45917122828f1c3bd9d",
-          "command": "CRUMBS_AUDIT_NODE_FLOOR=<exact Node v22.0.0 executable> bun scripts/measure-current-host-budgets.ts docs/evidence/2026-10-01-m10-5-final/host-budgets",
+          "path": "docs/evidence/2026-10-01-m10-5-host-budget-triage/comparison.json",
+          "sha256": "dd5a6113ac6f960c0bde9a07538562dfa7da64c33959e517dcc6898ecac1c495",
+          "command": "Reclassification of retained M10.5 raw host-budget reports with comparison report format v2; no workloads rerun",
           "environment": {
             "name": "macOS 26.6.2 arm64 host; exact Node v22.0.0 floor and Node v24.15.0 current runtime",
             "versions": {
@@ -185,7 +185,7 @@
             }
           },
           "resultStatus": "failed",
-          "result": "The exact Node v22.0.0 host suite completed: 2 approved metrics passed, 8 failed, and 11 were incomplete because their baseline environments did not match.",
+          "result": "The v2 comparison reports 3 of 21 active metrics passed, 8 failed approved limits, and 10 incomplete; the retained workloads were not rerun.",
           "scopeLimit": "Host-only comparison; no Hermes, release-device, physical-device, frame-time, screen-reader, or accessibility qualification."
         }
       ]
@@ -195,7 +195,7 @@
       "domain": "documentation",
       "claim": "This reference is generated from the strict versioned JSON matrix and does not claim exhaustive package or API coverage.",
       "supportStatus": "supported",
-      "measurementStatus": "passed",
+      "measurementStatus": "stale",
       "basis": [
         {
           "path": "docs/superpowers/specs/2026-09-30-m10-5-guarantees-matrix-design.md",
@@ -225,15 +225,15 @@
           "scopeLimit": "Documentation consistency and local site build only; no deployment, publication, or end-user behavioural qualification."
         }
       ],
-      "measurementNote": "The current-source matrix and generated reference passed validation, and the local Astro/Starlight build completed. This is not a deployment or publication."
+      "measurementNote": "The guarantees check and Astro/Starlight build have been rerun after the comparator update, but the retained receipt is tied to source revision 374e4c44ab8b883a2e93549a2b842d4f827147a1."
     },
     {
       "id": "visual.story-coverage",
       "domain": "visual",
       "claim": "Generated contract stories and accessibility review cases are structural review inputs, not screenshot or image-diff acceptance.",
       "supportStatus": "supported",
-      "measurementStatus": "passed",
-      "measurementNote": "Current-source contract and accessibility review generation checks passed. They establish structural review coverage only.",
+      "measurementStatus": "stale",
+      "measurementNote": "Retained evidence is tied to source revision 374e4c44ab8b883a2e93549a2b842d4f827147a1; the M10.5 comparator update changes the non-docs source revision. Refresh this evidence before treating it as current.",
       "basis": [
         {
           "path": "apps/storybook/package.json",
@@ -475,7 +475,7 @@
       "domain": "property",
       "claim": "Theme resolution matches an independent uncached evaluator for generated styles, reuses cached identities, and invalidates token-dependent outputs when snapshots change.",
       "supportStatus": "supported",
-      "measurementStatus": "passed",
+      "measurementStatus": "stale",
       "basis": [
         {
           "path": "docs/src/content/docs/reference/runtime-model-and-guarantees.mdx",
@@ -505,14 +505,14 @@
           "scopeLimit": "Property test suite only; it does not qualify all public APIs, editor budgets, or device performance."
         }
       ],
-      "measurementNote": "The current-source property suite passed; this covers generated resolver equivalence and invalidation properties, not native device behavior."
+      "measurementNote": "Retained evidence is tied to source revision 374e4c44ab8b883a2e93549a2b842d4f827147a1; the M10.5 comparator update changes the non-docs source revision. Refresh this evidence before treating it as current."
     },
     {
       "id": "type-editor.workspace-typecheck",
       "domain": "type-editor",
       "claim": "The Expo Storybook workspace typechecks against the current Crumbs CSS workspace package declarations.",
       "supportStatus": "conditional",
-      "measurementStatus": "passed",
+      "measurementStatus": "stale",
       "basis": [
         {
           "path": "apps/storybook/package.json",
@@ -542,14 +542,14 @@
           "scopeLimit": "Workspace typecheck only; this is not the independent packed Expo consumer or native runtime acceptance."
         }
       ],
-      "measurementNote": "The current Expo Storybook workspace typechecked against the linked Crumbs CSS build; independent packed-consumer qualification remains represented separately."
+      "measurementNote": "Retained evidence is tied to source revision 374e4c44ab8b883a2e93549a2b842d4f827147a1; the M10.5 comparator update changes the non-docs source revision. Refresh this evidence before treating it as current."
     },
     {
       "id": "type-editor.editor-scale-fixtures",
       "domain": "type-editor",
       "claim": "Generated 100, 1,000, and 10,000-token theme/recipe fixtures compiled and returned the expected token completions in five host repetitions.",
       "supportStatus": "unspecified",
-      "measurementStatus": "passed",
+      "measurementStatus": "stale",
       "basis": [
         {
           "path": "packages/css/fixtures/editor-scale/README.md",
@@ -581,7 +581,7 @@
           "scopeLimit": "Raw host fixture evidence only; no editor UI, incremental edit, device, thermal, or approved budget qualification. Conditions and typed slots are excluded."
         }
       ],
-      "measurementNote": "Five raw host repetitions passed with no approved editor threshold; condition and typed-slot APIs remain outside this fixture."
+      "measurementNote": "Retained evidence is tied to source revision 374e4c44ab8b883a2e93549a2b842d4f827147a1; the M10.5 comparator update changes the non-docs source revision. Refresh this evidence before treating it as current."
     },
     {
       "id": "compatibility.m10-4-report",
@@ -629,8 +629,8 @@
       "domain": "compatibility",
       "claim": "The manifest compatibility detector emits the expected alias-change and token-removal findings for the supplied fixture.",
       "supportStatus": "supported",
-      "measurementStatus": "passed",
-      "measurementNote": "The intentionally breaking fixture returned the expected alias-change warning and removed-token error. This verifies detector behavior only, not compatibility of every package or consumer.",
+      "measurementStatus": "stale",
+      "measurementNote": "Retained evidence is tied to source revision 374e4c44ab8b883a2e93549a2b842d4f827147a1; the M10.5 comparator update changes the non-docs source revision. Refresh this evidence before treating it as current.",
       "basis": [
         {
           "path": "packages/css/src/tooling/manifest/comparison.ts",

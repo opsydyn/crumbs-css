@@ -303,7 +303,56 @@ describe("performance budget registry", () => {
       editor: { ...editor, manifest: { ...editor.manifest, scales: [] } },
       runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     })
-    expect(report.metrics.filter(metric => metric.id.startsWith("editor-")).every(metric => metric.environment === "mismatch")).toBe(true)
+    const editorMetrics = report.metrics.filter(metric => metric.id.startsWith("editor-"))
+    expect(editorMetrics.every(metric => metric.result === "incomplete-measurement-identity-mismatch")).toBe(true)
+    expect(editorMetrics.every(metric => metric.environment === "exact" && metric.measurementIdentity === "mismatch")).toBe(true)
+    expect(editorMetrics.every(metric => metric.measurementIdentityDifferences.includes("manifest.scales.length"))).toBe(true)
+  })
+
+  it("separates host differences from measurement identity and compares equivalent cold-transform evidence", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const hostBudgetRoot = resolve(repoRoot, "docs/evidence/2026-10-01-m10-5-final/host-budgets")
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const evidence = {
+      effect: JSON.parse(readFileSync(resolve(hostBudgetRoot, "effect.json"), "utf8")),
+      runtimeInit: JSON.parse(readFileSync(resolve(hostBudgetRoot, "runtime-initialization.json"), "utf8")),
+      benchmark: JSON.parse(readFileSync(resolve(hostBudgetRoot, "benchmark-summary.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(hostBudgetRoot, "metro-incremental.json"), "utf8")),
+      editor: JSON.parse(readFileSync(resolve(hostBudgetRoot, "editor.json"), "utf8")),
+      runtimeGraph: JSON.parse(readFileSync(resolve(hostBudgetRoot, "runtime-graph.json"), "utf8")),
+    }
+    const report = compareRecordedMetrics(decoded.value, repoRoot, evidence)
+    const metric = (id: string) => report.metrics.find(candidate => candidate.id === id)
+
+    expect(metric("cold-transform-ms")).toMatchObject({
+      result: "pass",
+      environment: "exact",
+      environmentDifferences: [],
+      measurementIdentity: "exact",
+      measurementIdentityDifferences: [],
+    })
+    expect(metric("warm-transform-ms")).toMatchObject({
+      result: "incomplete-measurement-identity-mismatch",
+      environment: "exact",
+      measurementIdentity: "mismatch",
+      measurementIdentityDifferences: ["protocol.ordering"],
+    })
+
+    const incremental = metric("incremental-rebuild")
+    expect(incremental).toMatchObject({ result: "incomplete-environment-mismatch", environment: "mismatch" })
+    expect(incremental?.environmentDifferences).toContain("environment.expo")
+    expect(incremental?.measurementIdentityDifferences).toContain("protocol.cacheState")
+    expect(incremental?.measurementIdentityDifferences).toContain("fixture.originalStyleSha256")
+
+    const editor = metric("editor-tsc-wall-10000")
+    expect(editor).toMatchObject({
+      result: "incomplete-measurement-identity-mismatch",
+      environment: "exact",
+      measurementIdentity: "mismatch",
+    })
+    expect(editor?.measurementIdentityDifferences).toContain("identity.baseRevision")
+    expect(editor?.measurementIdentityDifferences).toContain("manifest.scales[0].sourceSha256")
   })
 
   it("requires both approved absolute and relative limits to pass", () => {

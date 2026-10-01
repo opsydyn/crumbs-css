@@ -68,7 +68,7 @@ const comparison = compareRecordedMetrics(registryResult.value, repoRoot, { effe
 const diagnostic = compareDiagnosticMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor, runtimeGraph })
 const review = createThresholdReviewPacket(registryResult.value, repoRoot)
 await writeFile(join(output, "comparison.json"), JSON.stringify({
-  formatVersion: 1,
+  formatVersion: 2,
   recordedAt: new Date().toISOString(),
   sourceRevision,
   sourceState: "Working tree based on sourceRevision; retained reports carry detailed source and environment identity",

@@ -280,15 +280,21 @@ export function compareRecordedMetrics(registry: BudgetRegistry, repoRoot: strin
     const currentEnvelope = summarizeEnvelope(samples)
     const delta = currentEnvelope.median - metric.baseline.value
     const deltaPercent = metric.baseline.value === 0 ? (delta === 0 ? 0 : null) : delta / metric.baseline.value * 100
-    const environment = JSON.stringify(environmentFingerprint(metric.baseline.selector, baselineEvidence)) ===
-      JSON.stringify(environmentFingerprint(metric.baseline.selector, currentEvidence)) ? "exact" as const : "mismatch" as const
-    let result: "incomplete-environment-mismatch" | "incomplete-insufficient-repetitions" | "incomplete-threshold-pending" | "pass" | "fail"
+    const baselineIdentity = comparisonIdentity(metric.baseline.selector, baselineEvidence)
+    const currentIdentity = comparisonIdentity(metric.baseline.selector, currentEvidence)
+    const environmentDifferences = differingPaths(baselineIdentity.environment, currentIdentity.environment)
+    const measurementIdentityDifferences = differingPaths(baselineIdentity.measurement, currentIdentity.measurement)
+    const environment = environmentDifferences.length === 0 ? "exact" as const : "mismatch" as const
+    const measurementIdentity = measurementIdentityDifferences.length === 0 ? "exact" as const : "mismatch" as const
+    let result: "incomplete-environment-mismatch" | "incomplete-measurement-identity-mismatch" | "incomplete-insufficient-repetitions" | "incomplete-threshold-pending" | "pass" | "fail"
     if (environment === "mismatch") result = "incomplete-environment-mismatch"
+    else if (measurementIdentity === "mismatch") result = "incomplete-measurement-identity-mismatch"
     else if (samples.length < registry.protocol.minimumIndependentRepetitions) result = "incomplete-insufficient-repetitions"
     else if (metric.threshold.status === "pending-review") result = "incomplete-threshold-pending"
     else result = currentEnvelope.median <= metric.threshold.absoluteMax && deltaPercent !== null && deltaPercent <= metric.threshold.maxRegressionPercent ? "pass" : "fail"
     return [{ id: metric.id, unit: metric.unit, baseline: metric.baseline.value, current: currentEnvelope,
-      delta, deltaPercent, environment, thresholdStatus: metric.threshold.status, result }]
+      delta, deltaPercent, environment, environmentDifferences, measurementIdentity, measurementIdentityDifferences,
+      thresholdStatus: metric.threshold.status, result }]
   })
   return {
     performanceQualified: assessBudgetRegistry(registry).ready && metrics.length > 0 && metrics.every(metric => metric.result === "pass"),
@@ -307,14 +313,20 @@ export function compareDiagnosticMetrics(registry: BudgetRegistry, repoRoot: str
     const currentEnvelope = summarizeEnvelope(samples)
     const delta = currentEnvelope.median - metric.baseline.value
     const deltaPercent = metric.baseline.value === 0 ? (delta === 0 ? 0 : null) : delta / metric.baseline.value * 100
-    const environment = JSON.stringify(environmentFingerprint(metric.baseline.selector, baselineEvidence)) ===
-      JSON.stringify(environmentFingerprint(metric.baseline.selector, currentEvidence)) ? "exact" as const : "mismatch" as const
-    let result: "incomplete-environment-mismatch" | "incomplete-insufficient-repetitions" | "pass" | "fail"
+    const baselineIdentity = comparisonIdentity(metric.baseline.selector, baselineEvidence)
+    const currentIdentity = comparisonIdentity(metric.baseline.selector, currentEvidence)
+    const environmentDifferences = differingPaths(baselineIdentity.environment, currentIdentity.environment)
+    const measurementIdentityDifferences = differingPaths(baselineIdentity.measurement, currentIdentity.measurement)
+    const environment = environmentDifferences.length === 0 ? "exact" as const : "mismatch" as const
+    const measurementIdentity = measurementIdentityDifferences.length === 0 ? "exact" as const : "mismatch" as const
+    let result: "incomplete-environment-mismatch" | "incomplete-measurement-identity-mismatch" | "incomplete-insufficient-repetitions" | "pass" | "fail"
     if (environment === "mismatch") result = "incomplete-environment-mismatch"
+    else if (measurementIdentity === "mismatch") result = "incomplete-measurement-identity-mismatch"
     else if (samples.length < registry.protocol.minimumIndependentRepetitions) result = "incomplete-insufficient-repetitions"
     else result = currentEnvelope.median <= metric.baseline.value && deltaPercent !== null && deltaPercent <= 0 ? "pass" : "fail"
     return [{ id: metric.id, unit: metric.unit, baseline: metric.baseline.value, current: currentEnvelope,
-      delta, deltaPercent, environment, result, qualification: "diagnostic-only" as const }]
+      delta, deltaPercent, environment, environmentDifferences, measurementIdentity, measurementIdentityDifferences,
+      result, qualification: "diagnostic-only" as const }]
   })
   return {
     metrics,
@@ -393,11 +405,14 @@ function evidenceForSelector(selector: BaselineSelector, evidence: EvidenceBundl
   return evidence.editor
 }
 
-function environmentFingerprint(selector: BaselineSelector, evidence: unknown): unknown {
+function comparisonIdentity(selector: BaselineSelector, evidence: unknown): { environment: unknown; measurement: unknown } {
   if (selector.startsWith("effect.")) {
     const data = evidence as EffectBoundaryEvidence
-    return { effect: data.effect, build: data.build, protocol: data.protocol, environment: { platform: data.environment.platform, architecture: data.environment.architecture },
-      nodes: [...new Set(data.results.flatMap(entry => entry.samples.map(sample => sample.node)))].sort() }
+    return {
+      environment: { environment: { effect: data.effect, platform: data.environment.platform, architecture: data.environment.architecture,
+        nodes: [...new Set(data.results.flatMap(entry => entry.samples.map(sample => sample.node)))].sort() } },
+      measurement: { build: data.build, protocol: data.protocol },
+    }
   }
   if (selector.startsWith("runtime.") && selector.endsWith(".graph-bytes")) {
     const data = evidence as RuntimeGraphBudgetEvidence
@@ -418,30 +433,86 @@ function environmentFingerprint(selector: BaselineSelector, evidence: unknown): 
         osRelease: environment.osRelease,
         buildTool: environment.buildTool,
       },
-      protocol: data.protocol,
-      selector,
+      measurement: { protocol: data.protocol, selector },
     }
   }
   if (selector.startsWith("runtime-init.")) {
     const data = evidence as RuntimeInitializationEvidence
-    return { environment: { platform: data.environment.platform, architecture: data.environment.architecture,
-      osRelease: data.environment.osRelease, cpu: data.environment.cpu, repetitions: data.environment.repetitions },
-      protocol: data.protocol, nodes: data.scenarios.map(scenario => ({ runtime: scenario.runtime, format: scenario.format, node: scenario.node })) }
+    return {
+      environment: { environment: { platform: data.environment.platform, architecture: data.environment.architecture,
+        osRelease: data.environment.osRelease, cpu: data.environment.cpu,
+        nodes: data.scenarios.map(scenario => ({ runtime: scenario.runtime, format: scenario.format, node: scenario.node })) } },
+      measurement: { protocol: data.protocol, repetitions: data.environment.repetitions },
+    }
   }
   if (selector.startsWith("benchmark.")) {
     const data = evidence as BenchmarkSummaryEvidence
-    return { environment: data.environment, protocol: data.protocol, fixtures: data.fixtures,
-      scenarios: data.results.map(({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun }) =>
-        ({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun })) }
+    const protocol = { ...data.protocol }
+    const coldTransform = selector === "benchmark.cold-transform.max-median-ms"
+    const legacyOrdering = "Sequential scenarios in listed order; warmup excluded; filesystem caches uncontrolled"
+    const currentOrdering = "Sequential scenarios in listed order; warmup excluded; cold and warm transforms use the same fixture-root process cwd; fixture paths are package-relative; filesystem caches uncontrolled"
+    // The cold worker used the fixture root as cwd in both retained protocols. The newer wording also
+    // records the warm-transform cwd change, so normalise only this exact known pair for cold metrics.
+    if (coldTransform && (protocol.ordering === legacyOrdering || protocol.ordering === currentOrdering)) {
+      protocol.ordering = "cold-transform-sequential-v1"
+    }
+    return {
+      environment: { environment: data.environment },
+      measurement: {
+        protocol,
+        fixtures: data.fixtures.map(fixture => ({ ...fixture, file: normalizeBenchmarkFixturePath(fixture.file) })),
+        scenarios: data.results.map(({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun }) =>
+          ({ name, sampleKind, iterationsPerSample, warmupIterations, samplesPerRun })),
+      },
+    }
   }
   if (selector.startsWith("metro-incremental.")) {
     const data = evidence as { environment: unknown; protocol: unknown; fixture: unknown }
-    return { environment: data.environment, protocol: data.protocol, fixture: data.fixture }
+    return { environment: { environment: data.environment }, measurement: { protocol: data.protocol, fixture: data.fixture } }
   }
   const identity = (evidence as EditorScaleEvidence).identity
-  return { bun: identity.bun, node: identity.node, platform: identity.platform, arch: identity.arch, osRelease: identity.osRelease,
-    cpuModel: identity.cpuModel, logicalCpus: identity.logicalCpus, totalMemoryBytes: identity.totalMemoryBytes,
-    typescript: identity.typescript, tsgo: identity.tsgo, manifest: (evidence as EditorScaleEvidence).manifest }
+  return {
+    environment: { identity: { bun: identity.bun, node: identity.node, platform: identity.platform, arch: identity.arch, osRelease: identity.osRelease,
+      cpuModel: identity.cpuModel, logicalCpus: identity.logicalCpus, totalMemoryBytes: identity.totalMemoryBytes,
+      typescript: identity.typescript, tsgo: identity.tsgo } },
+    measurement: {
+      identity: { baseRevision: identity.baseRevision, crumbsVersion: identity.crumbsVersion },
+      manifest: (evidence as EditorScaleEvidence).manifest,
+    },
+  }
+}
+
+function normalizeBenchmarkFixturePath(file: string) {
+  const normalized = file.replaceAll("\\", "/")
+  const packageMarker = "/packages/css/"
+  const packageIndex = normalized.lastIndexOf(packageMarker)
+  if (packageIndex >= 0) return normalized.slice(packageIndex + packageMarker.length)
+  const relativePackagePrefix = "packages/css/"
+  if (normalized.startsWith(relativePackagePrefix)) return normalized.slice(relativePackagePrefix.length)
+  return normalized
+}
+
+function differingPaths(expected: unknown, actual: unknown, path = ""): string[] {
+  if (Object.is(expected, actual)) return []
+  if (Array.isArray(expected) && Array.isArray(actual)) {
+    const differences = expected.length === actual.length ? [] : [`${path}.length`]
+    for (let index = 0; index < Math.min(expected.length, actual.length); index += 1) {
+      differences.push(...differingPaths(expected[index], actual[index], `${path}[${index}]`))
+    }
+    return differences
+  }
+  if (isRecord(expected) && isRecord(actual)) {
+    const differences: string[] = []
+    for (const key of [...new Set([...Object.keys(expected), ...Object.keys(actual)])].sort()) {
+      differences.push(...differingPaths(expected[key], actual[key], path ? `${path}.${key}` : key))
+    }
+    return differences
+  }
+  return [path || "$"]
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
 type EffectBoundaryEvidence = {
@@ -453,14 +524,14 @@ type EffectBoundaryEvidence = {
 }
 type RuntimeGraphBudgetEvidence = {
   sourceRevision: string
-  environment: unknown
+  environment: { bun?: unknown; node?: unknown; npm?: unknown; platform?: unknown; architecture?: unknown; osRelease?: unknown; buildTool?: unknown }
   protocol: unknown
   currentGraphs: Record<string, Record<string, { graphBytes: number; samples: number[] }>>
 }
 type BenchmarkSummaryEvidence = {
   environment: unknown
-  protocol: unknown
-  fixtures: unknown
+  protocol: Record<string, unknown>
+  fixtures: Array<{ file: string; sha256: string; [key: string]: unknown }>
   results: Array<{ name: string; sampleKind: string; iterationsPerSample: number; warmupIterations: number; samplesPerRun: number; runBatchMeanP50Ms: number[] }>
 }
 type RuntimeInitializationEvidence = {
@@ -476,7 +547,7 @@ type BenchmarkRunEvidence = {
   metrics: Array<{ name: string; sampleKind: string; iterationsPerSample: number; warmupIterations: number; samples: number; batchMeanP50Ms: number }>
 }
 type EditorScaleEvidence = {
-  identity: { bun: string; node: string; platform: string; arch: string; osRelease: string; cpuModel: string; logicalCpus: number; totalMemoryBytes: number; typescript: string; tsgo: string }
+  identity: { baseRevision?: string; crumbsVersion?: string; bun: string; node: string; platform: string; arch: string; osRelease: string; cpuModel: string; logicalCpus: number; totalMemoryBytes: number; typescript: string; tsgo: string }
   manifest: unknown
   compilerRuns: Array<{ engine: string; scale: number; wallMs: number; diagnostics: { memoryKiB: number; instantiations: number } }>
   completionRuns: Array<{ scale: number; firstCompletionMs: number; warmCompletionMs: number }>
