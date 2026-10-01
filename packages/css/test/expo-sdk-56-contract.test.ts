@@ -44,17 +44,19 @@ describe("@opsydyn/crumbs-css Expo SDK 56 contract", () => {
     expect(packageJson.scripts?.storybook).toBeUndefined()
   })
 
-  it("keeps the playground on the same supported stack with committed resolutions", () => {
+  it("keeps the playground on the compatible supported stack with committed resolutions", () => {
     const storybook = readJson<PackageJson>(resolve(storybookRoot, "package.json"))
     const playground = readJson<PackageJson>(resolve(playgroundRoot, "package.json"))
     const lockfile = readFileSync(resolve(repoRoot, "bun.lock"), "utf8")
 
-    for (const dependency of ["expo", "react", "react-dom", "react-native"] as const) {
+    for (const dependency of ["react", "react-dom", "react-native"] as const) {
       expect(playground.dependencies?.[dependency]).toBe(storybook.dependencies?.[dependency])
     }
-    expect(lockfile).toContain('"expo": ["expo@56.0.4"')
+    expect(storybook.dependencies?.expo).toBe("^56.0.0")
+    expect(playground.dependencies?.expo).toBe("~56.0.23")
+    expect(lockfile).toContain('"expo": ["expo@56.0.23"')
     expect(lockfile).toContain('"react-native": ["react-native@0.85.3"')
-    expect(lockfile).toContain('"@expo/metro-runtime": ["@expo/metro-runtime@56.0.12"')
+    expect(lockfile).toContain('"@expo/metro-runtime": ["@expo/metro-runtime@56.0.21"')
   })
 
   it("isolates the observed newest SDK candidate from supported workspaces", () => {

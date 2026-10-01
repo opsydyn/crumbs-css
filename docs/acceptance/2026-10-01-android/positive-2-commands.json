@@ -1,0 +1,1298 @@
+[ {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "APP_ID" : "host.exp.exponent",
+        "PLAYGROUND_URL" : "exp://10.0.2.2:8091",
+        "MAESTRO_CLI_NO_ANALYTICS" : "true",
+        "MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED" : "true",
+        "MAESTRO_FILENAME" : "native-scroll",
+        "MAESTRO_DEVICE_UDID" : "emulator-5554",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844729802,
+    "duration" : 4,
+    "sequenceNumber" : 0,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "APP_ID" : "host.exp.exponent",
+          "PLAYGROUND_URL" : "exp://10.0.2.2:8091",
+          "MAESTRO_CLI_NO_ANALYTICS" : "true",
+          "MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED" : "true",
+          "MAESTRO_FILENAME" : "native-scroll",
+          "MAESTRO_DEVICE_UDID" : "emulator-5554",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "${APP_ID}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844729807,
+    "duration" : 408,
+    "sequenceNumber" : 1,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "host.exp.exponent"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "defineVariablesCommand" : {
+          "env" : {
+            "PLAYGROUND_URL" : "${PLAYGROUND_URL}"
+          },
+          "optional" : false
+        }
+      }, {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "host.exp.exponent"
+          },
+          "optional" : false
+        }
+      }, {
+        "launchAppCommand" : {
+          "appId" : "host.exp.exponent",
+          "clearState" : true,
+          "optional" : false
+        }
+      }, {
+        "openLinkCommand" : {
+          "link" : "${PLAYGROUND_URL}",
+          "autoVerify" : false,
+          "browser" : false,
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Open",
+            "optional" : true
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : true
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Continue",
+            "optional" : true
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : true
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Close",
+            "optional" : true
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : true
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "crumbs-scroll-probe",
+              "optional" : false
+            }
+          },
+          "timeout" : "45000",
+          "optional" : false
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Switch to dark",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "copyTextCommand" : {
+          "selector" : {
+            "idRegex" : "crumbs-scroll-probe",
+            "optional" : false
+          },
+          "optional" : false
+        }
+      }, {
+        "runScriptCommand" : {
+          "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+          "sourceDescription" : "read-probe.js",
+          "optional" : false,
+          "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "scriptCondition" : "${output.probe.y === 0 && output.probe.first === 1 && output.probe.drags === 0 && output.probe.content > output.probe.viewport}"
+          },
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "platform" : "ANDROID"
+      },
+      "sourceDescription" : "open-playground-android.yaml",
+      "config" : {
+        "appId" : "host.exp.exponent"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844730216,
+    "duration" : 17526,
+    "sequenceNumber" : 2,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "defineVariablesCommand" : {
+            "env" : {
+              "PLAYGROUND_URL" : "${PLAYGROUND_URL}"
+            },
+            "optional" : false
+          }
+        }, {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "host.exp.exponent"
+            },
+            "optional" : false
+          }
+        }, {
+          "launchAppCommand" : {
+            "appId" : "host.exp.exponent",
+            "clearState" : true,
+            "optional" : false
+          }
+        }, {
+          "openLinkCommand" : {
+            "link" : "${PLAYGROUND_URL}",
+            "autoVerify" : false,
+            "browser" : false,
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Open",
+              "optional" : true
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : true
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Continue",
+              "optional" : true
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : true
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Close",
+              "optional" : true
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : true
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "crumbs-scroll-probe",
+                "optional" : false
+              }
+            },
+            "timeout" : "45000",
+            "optional" : false
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Switch to dark",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "copyTextCommand" : {
+            "selector" : {
+              "idRegex" : "crumbs-scroll-probe",
+              "optional" : false
+            },
+            "optional" : false
+          }
+        }, {
+          "runScriptCommand" : {
+            "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+            "sourceDescription" : "read-probe.js",
+            "optional" : false,
+            "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "scriptCondition" : "${output.probe.y === 0 && output.probe.first === 1 && output.probe.drags === 0 && output.probe.content > output.probe.viewport}"
+            },
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "platform" : "ANDROID"
+        },
+        "sourceDescription" : "open-playground-android.yaml",
+        "config" : {
+          "appId" : "host.exp.exponent"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "PLAYGROUND_URL" : "${PLAYGROUND_URL}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844730226,
+    "duration" : 3,
+    "sequenceNumber" : 3,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "PLAYGROUND_URL" : "exp://10.0.2.2:8091"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "host.exp.exponent"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844730229,
+    "duration" : 0,
+    "sequenceNumber" : 4,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "host.exp.exponent"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "launchAppCommand" : {
+      "appId" : "host.exp.exponent",
+      "clearState" : true,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844730230,
+    "duration" : 1842,
+    "sequenceNumber" : 5,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "launchAppCommand" : {
+        "appId" : "host.exp.exponent",
+        "clearState" : true,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "openLinkCommand" : {
+      "link" : "${PLAYGROUND_URL}",
+      "autoVerify" : false,
+      "browser" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844732073,
+    "duration" : 3351,
+    "sequenceNumber" : 6,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "openLinkCommand" : {
+        "link" : "exp://10.0.2.2:8091",
+        "autoVerify" : false,
+        "browser" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Open",
+        "optional" : true
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "WARNED",
+    "timestamp" : 1790844735425,
+    "duration" : 7063,
+    "sequenceNumber" : 7,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Open",
+          "optional" : true
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : true
+      }
+    },
+    "artifacts" : [ {
+      "type" : "SCREEN_HIERARCHY",
+      "path" : "screen-hierarchy/step-008-tapOnElement-Open.json"
+    }, {
+      "type" : "SCREENSHOT",
+      "path" : "screenshots/step-008-tapOnElement-Open.png"
+    } ]
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Continue",
+        "optional" : true
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844742709,
+    "duration" : 1867,
+    "sequenceNumber" : 8,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Continue",
+          "optional" : true
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Close",
+        "optional" : true
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : true
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844744577,
+    "duration" : 2892,
+    "sequenceNumber" : 9,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Close",
+          "optional" : true
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : true
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "crumbs-scroll-probe",
+          "optional" : false
+        }
+      },
+      "timeout" : "45000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844747470,
+    "duration" : 64,
+    "sequenceNumber" : 10,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "crumbs-scroll-probe",
+            "optional" : false
+          }
+        },
+        "timeout" : "45000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Switch to dark",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844747535,
+    "duration" : 62,
+    "sequenceNumber" : 11,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Switch to dark",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "crumbs-scroll-probe",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844747598,
+    "duration" : 61,
+    "sequenceNumber" : 12,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "crumbs-scroll-probe",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+      "sourceDescription" : "read-probe.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844747660,
+    "duration" : 78,
+    "sequenceNumber" : 13,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+        "sourceDescription" : "read-probe.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "scriptCondition" : "${output.probe.y === 0 && output.probe.first === 1 && output.probe.drags === 0 && output.probe.content > output.probe.viewport}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844747739,
+    "duration" : 3,
+    "sequenceNumber" : 14,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "scriptCondition" : "true"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runFlowCommand" : {
+      "commands" : [ {
+        "defineVariablesCommand" : {
+          "env" : {
+            "PLAYGROUND_URL" : "${PLAYGROUND_URL}"
+          },
+          "optional" : false
+        }
+      }, {
+        "applyConfigurationCommand" : {
+          "config" : {
+            "appId" : "host.exp.Exponent"
+          },
+          "optional" : false
+        }
+      }, {
+        "stopAppCommand" : {
+          "appId" : "host.exp.Exponent",
+          "optional" : false
+        }
+      }, {
+        "openLinkCommand" : {
+          "link" : "${PLAYGROUND_URL}",
+          "autoVerify" : false,
+          "browser" : false,
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Open",
+            "optional" : true
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : true
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Continue",
+            "optional" : true
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : true
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "idRegex" : "crumbs-scroll-probe",
+              "optional" : false
+            }
+          },
+          "timeout" : "45000",
+          "optional" : false
+        }
+      }, {
+        "tapOnElement" : {
+          "selector" : {
+            "textRegex" : "Close",
+            "optional" : true
+          },
+          "retryIfNoChange" : false,
+          "waitUntilVisible" : false,
+          "longPress" : false,
+          "optional" : true
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "visible" : {
+              "textRegex" : "Switch to dark",
+              "optional" : false
+            }
+          },
+          "optional" : false
+        }
+      }, {
+        "copyTextCommand" : {
+          "selector" : {
+            "idRegex" : "crumbs-scroll-probe",
+            "optional" : false
+          },
+          "optional" : false
+        }
+      }, {
+        "runScriptCommand" : {
+          "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+          "sourceDescription" : "read-probe.js",
+          "optional" : false,
+          "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+        }
+      }, {
+        "assertConditionCommand" : {
+          "condition" : {
+            "scriptCondition" : "${output.probe.y === 0 && output.probe.first === 1 && output.probe.drags === 0 && output.probe.content > output.probe.viewport}"
+          },
+          "optional" : false
+        }
+      } ],
+      "condition" : {
+        "platform" : "IOS"
+      },
+      "sourceDescription" : "open-playground.yaml",
+      "config" : {
+        "appId" : "host.exp.Exponent"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "SKIPPED",
+    "timestamp" : 1790844747743,
+    "duration" : 0,
+    "sequenceNumber" : 15,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "runFlowCommand" : {
+        "commands" : [ {
+          "defineVariablesCommand" : {
+            "env" : {
+              "PLAYGROUND_URL" : "${PLAYGROUND_URL}"
+            },
+            "optional" : false
+          }
+        }, {
+          "applyConfigurationCommand" : {
+            "config" : {
+              "appId" : "host.exp.Exponent"
+            },
+            "optional" : false
+          }
+        }, {
+          "stopAppCommand" : {
+            "appId" : "host.exp.Exponent",
+            "optional" : false
+          }
+        }, {
+          "openLinkCommand" : {
+            "link" : "${PLAYGROUND_URL}",
+            "autoVerify" : false,
+            "browser" : false,
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Open",
+              "optional" : true
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : true
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Continue",
+              "optional" : true
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : true
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "idRegex" : "crumbs-scroll-probe",
+                "optional" : false
+              }
+            },
+            "timeout" : "45000",
+            "optional" : false
+          }
+        }, {
+          "tapOnElement" : {
+            "selector" : {
+              "textRegex" : "Close",
+              "optional" : true
+            },
+            "retryIfNoChange" : false,
+            "waitUntilVisible" : false,
+            "longPress" : false,
+            "optional" : true
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "visible" : {
+                "textRegex" : "Switch to dark",
+                "optional" : false
+              }
+            },
+            "optional" : false
+          }
+        }, {
+          "copyTextCommand" : {
+            "selector" : {
+              "idRegex" : "crumbs-scroll-probe",
+              "optional" : false
+            },
+            "optional" : false
+          }
+        }, {
+          "runScriptCommand" : {
+            "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+            "sourceDescription" : "read-probe.js",
+            "optional" : false,
+            "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+          }
+        }, {
+          "assertConditionCommand" : {
+            "condition" : {
+              "scriptCondition" : "${output.probe.y === 0 && output.probe.first === 1 && output.probe.drags === 0 && output.probe.content > output.probe.viewport}"
+            },
+            "optional" : false
+          }
+        } ],
+        "condition" : {
+          "platform" : "IOS"
+        },
+        "sourceDescription" : "open-playground.yaml",
+        "config" : {
+          "appId" : "host.exp.Exponent"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "swipeCommand" : {
+      "startRelative" : "50%, 80%",
+      "endRelative" : "50%, 48%",
+      "duration" : 1000,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844747743,
+    "duration" : 2011,
+    "sequenceNumber" : 16,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "swipeCommand" : {
+        "startRelative" : "50%, 80%",
+        "endRelative" : "50%, 48%",
+        "duration" : 1000,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "crumbs-scroll-probe",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844749756,
+    "duration" : 61,
+    "sequenceNumber" : 17,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "crumbs-scroll-probe",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+      "sourceDescription" : "read-probe.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844749818,
+    "duration" : 4,
+    "sequenceNumber" : 18,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+        "sourceDescription" : "read-probe.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "scriptCondition" : "${output.probe.y > 0 && output.probe.first > 1 && output.probe.drags > 0}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844749822,
+    "duration" : 2,
+    "sequenceNumber" : 19,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "scriptCondition" : "true"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "evalScriptCommand" : {
+      "scriptString" : "${output.forward = output.probe}",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844749824,
+    "duration" : 3,
+    "sequenceNumber" : 20,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "evalScriptCommand" : {
+        "scriptString" : "${output.forward = output.probe}",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "takeScreenshotCommand" : {
+      "path" : "forward-light",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844749827,
+    "duration" : 69,
+    "sequenceNumber" : 21,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "takeScreenshotCommand" : {
+        "path" : "forward-light",
+        "optional" : false
+      }
+    },
+    "artifacts" : [ {
+      "type" : "TAKE_SCREENSHOT",
+      "path" : "takeScreenshot/forward-light.png"
+    } ]
+  }
+}, {
+  "command" : {
+    "tapOnElement" : {
+      "selector" : {
+        "textRegex" : "Switch to dark",
+        "optional" : false
+      },
+      "retryIfNoChange" : false,
+      "waitUntilVisible" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844749896,
+    "duration" : 1201,
+    "sequenceNumber" : 22,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "tapOnElement" : {
+        "selector" : {
+          "textRegex" : "Switch to dark",
+          "optional" : false
+        },
+        "retryIfNoChange" : false,
+        "waitUntilVisible" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "crumbs-scroll-probe",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844751098,
+    "duration" : 628,
+    "sequenceNumber" : 23,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "crumbs-scroll-probe",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+      "sourceDescription" : "read-probe.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844751727,
+    "duration" : 6,
+    "sequenceNumber" : 24,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+        "sourceDescription" : "read-probe.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "scriptCondition" : "${output.probe.y === output.forward.y && output.probe.first === output.forward.first}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844751733,
+    "duration" : 4,
+    "sequenceNumber" : 25,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "scriptCondition" : "true"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "textRegex" : "Switch to light",
+          "optional" : false
+        }
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844751737,
+    "duration" : 65,
+    "sequenceNumber" : 26,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "textRegex" : "Switch to light",
+            "optional" : false
+          }
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "takeScreenshotCommand" : {
+      "path" : "forward-dark",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844751802,
+    "duration" : 73,
+    "sequenceNumber" : 27,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "takeScreenshotCommand" : {
+        "path" : "forward-dark",
+        "optional" : false
+      }
+    },
+    "artifacts" : [ {
+      "type" : "TAKE_SCREENSHOT",
+      "path" : "takeScreenshot/forward-dark.png"
+    } ]
+  }
+}, {
+  "command" : {
+    "swipeCommand" : {
+      "startRelative" : "50%, 48%",
+      "endRelative" : "50%, 80%",
+      "duration" : 1000,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844751875,
+    "duration" : 1986,
+    "sequenceNumber" : 28,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "swipeCommand" : {
+        "startRelative" : "50%, 48%",
+        "endRelative" : "50%, 80%",
+        "duration" : 1000,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "crumbs-scroll-probe",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844753861,
+    "duration" : 60,
+    "sequenceNumber" : 29,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "crumbs-scroll-probe",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+      "sourceDescription" : "read-probe.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844753922,
+    "duration" : 3,
+    "sequenceNumber" : 30,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "// Shared with the admission tests. Missing or malformed native evidence must fail.\nvar match = /^Scroll probe: y=(-?\\d+) first=(\\d+) viewport=(\\d+) content=(\\d+)\\s+Touch: starts=(\\d+) moves=(\\d+) ends=(\\d+) drags=(\\d+)$/.exec(maestro.copiedText)\nif (!match) throw new Error(\"Missing or malformed native scroll probe\")\nvar keys = [\"y\", \"first\", \"viewport\", \"content\", \"starts\", \"moves\", \"ends\", \"drags\"]\nvar probe = {}\nfor (var index = 0; index < keys.length; index++) {\n  var value = Number(match[index + 1])\n  if (!isFinite(value) || Math.abs(value) > 9007199254740991) throw new Error(\"Unsafe native scroll measurement\")\n  if (index > 0 && value < 0) throw new Error(\"Invalid negative native scroll measurement\")\n  probe[keys[index]] = value\n}\nif (probe.first < 1 || probe.first > 1000 || probe.viewport < 1) throw new Error(\"Invalid native scroll geometry or row identity\")\noutput.probe = probe\nconsole.log(\"CRUMBS_NATIVE_SCROLL \" + JSON.stringify(probe))\n",
+        "sourceDescription" : "read-probe.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/e2e"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "scriptCondition" : "${output.probe.y < output.forward.y && output.probe.first < output.forward.first && output.probe.drags > output.forward.drags}"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844753926,
+    "duration" : 1,
+    "sequenceNumber" : 31,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "scriptCondition" : "true"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "takeScreenshotCommand" : {
+      "path" : "reverse-dark",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1790844753927,
+    "duration" : 66,
+    "sequenceNumber" : 32,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "takeScreenshotCommand" : {
+        "path" : "reverse-dark",
+        "optional" : false
+      }
+    },
+    "artifacts" : [ {
+      "type" : "TAKE_SCREENSHOT",
+      "path" : "takeScreenshot/reverse-dark.png"
+    } ]
+  }
+} ]

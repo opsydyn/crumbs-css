@@ -1,0 +1,23 @@
+appId: host.exp.exponent
+---
+- launchApp:
+    clearState: true
+- openLink: ${PLAYGROUND_URL}
+- tapOn:
+    text: Open
+    optional: true
+- tapOn:
+    text: Continue
+    optional: true
+- tapOn:
+    text: Close
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: crumbs-scroll-probe
+    timeout: 45000
+- assertVisible: Switch to dark
+- copyTextFrom:
+    id: crumbs-scroll-probe
+- runScript: read-probe.js
+- assertTrue: ${output.probe.y === 0 && output.probe.first === 1 && output.probe.drags === 0 && output.probe.content > output.probe.viewport}

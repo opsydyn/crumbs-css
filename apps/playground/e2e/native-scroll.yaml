@@ -1,6 +1,17 @@
-appId: host.exp.Exponent
+appId: ${APP_ID}
 ---
-- runFlow: open-playground.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: open-playground-android.yaml
+    env:
+      PLAYGROUND_URL: ${PLAYGROUND_URL}
+- runFlow:
+    when:
+      platform: iOS
+    file: open-playground.yaml
+    env:
+      PLAYGROUND_URL: ${PLAYGROUND_URL}
 - swipe:
     start: 50%, 80%
     end: 50%, 48%
