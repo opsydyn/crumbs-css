@@ -124,4 +124,55 @@ for (const entry of ['index', 'style', 'theme', 'theme-core', 'tokens', 'tokens-
   })
  }
 }
+for (const [entry, allowedExternal] of [
+ ['theme-conditions', 'react'],
+ ['theme-expressions', ''],
+ ['theme-recipes', ''],
+ ['theme-sprinkles', ''],
+] as const) {
+ for (const format of ['mjs', 'cjs']) {
+  it(`keeps focused ${entry} ${format} in the ordinary runtime dependency boundary`, () => {
+   const result = graph(`${entry}.${format}`)
+   expect(result.externals.filter(name => builtins.has(name.replace(/^node:/,'')))).toEqual([])
+   expect(result.externals).toEqual(allowedExternal === '' ? [] : [allowedExternal])
+   expect(result.files.filter(file => /\/(?:style|index|transformer|metro-plugin)\.(?:mjs|cjs)$/.test(file))).toEqual([])
+   expect(result.files.filter(file => /\/(?:native-style|native-capture|compiler)(?:[-.]|\/)/.test(file))).toEqual([])
+   expect(result.files.some(file => file.includes('/devtools/') || /\/devtools\.(?:mjs|cjs)$/.test(file))).toBe(false)
+  })
+ }
+ it(`can require focused ${entry} CommonJS runtime while Node and authoring imports are denied`, () => {
+  const entryPath = path.join(root, `${entry}.cjs`)
+  const allowedExternalCheck = allowedExternal === '' ? '' : ` && name !== ${JSON.stringify(allowedExternal)}`
+  const script = `const Module = require('node:module'); const original = Module._load; Module._load = function(name, ...args) { if (name !== ${JSON.stringify(entryPath)}${allowedExternalCheck} && !name.startsWith('./')) throw new Error('Forbidden runtime import: ' + name); if (/effect|vanilla|style|transformer|metro-plugin|compiler|native-capture/.test(name)) throw new Error('Authoring import: ' + name); return original.call(this,name,...args); }; const api = require(${JSON.stringify(entryPath)}); if (!api || typeof api !== 'object' || Object.keys(api).length === 0) throw new Error('Focused runtime entry was empty');`
+  const result = Bun.spawnSync(['node', '-e', script], {stdout: 'pipe', stderr: 'pipe'})
+  if (result.exitCode !== 0) throw new Error(result.stderr.toString())
+  expect(result.exitCode).toBe(0)
+ })
+ it(`loads focused ${entry} ESM runtime while Node and authoring imports are denied`, () => {
+  const tempRoot = mkdtempSync(path.join(tmpdir(), 'crumbs-css-focused-esm-isolation-'))
+  try {
+   const loaderPath = path.join(tempRoot, 'deny-loader.mjs')
+   const deniedExternal = allowedExternal
+    ? `specifier !== ${JSON.stringify(allowedExternal)} && !specifier.startsWith(${JSON.stringify(`${allowedExternal}/`)})`
+    : 'true'
+   writeFileSync(loaderPath, `
+    const nodeBuiltins = new Set(${JSON.stringify([...builtins])});
+    export async function resolve(specifier, context, nextResolve) {
+     const bare = !specifier.startsWith('.') && !specifier.startsWith('/') && !specifier.startsWith('file:');
+     if (specifier.startsWith('node:') || nodeBuiltins.has(specifier)) throw new Error('Forbidden runtime import: ' + specifier);
+     if (bare && (${deniedExternal})) throw new Error('Forbidden external import: ' + specifier);
+     if (/effect|vanilla-extract|compiler|native-capture/.test(specifier)) throw new Error('Forbidden authoring import: ' + specifier);
+     return nextResolve(specifier, context);
+    }
+   `)
+   const entryUrl = pathToFileURL(path.join(root, `${entry}.mjs`)).href
+   const script = `const api = await import(${JSON.stringify(entryUrl)}); if (!api || Object.keys(api).length === 0) throw new Error('Focused ESM runtime entry was empty');`
+   const result = Bun.spawnSync(['node', '--no-warnings', '--experimental-loader', loaderPath, '--input-type=module', '-e', script], {stdout: 'pipe', stderr: 'pipe'})
+   if (result.exitCode !== 0) throw new Error(result.stderr.toString())
+   expect(result.exitCode).toBe(0)
+  } finally {
+   rmSync(tempRoot, {recursive: true, force: true})
+  }
+ })
+}
 })

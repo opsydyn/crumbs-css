@@ -29,10 +29,17 @@ const toolEntries = {
   "tooling-dtcg": "src/tooling/dtcg.ts",
   "tooling-ownership": "src/tooling/ownership.ts",
 }
+const themeRuntimeEntries = {
+  theme: "src/theme-runtime.ts",
+  "theme-core": "src/theme-core.ts",
+  "theme-conditions": "src/conditions/index.ts",
+  "theme-expressions": "src/expressions/index.ts",
+  "theme-recipes": "src/theme-recipes.ts",
+  "theme-sprinkles": "src/theme-sprinkles.ts",
+}
 
 export default defineConfig([
-  { ...common, clean: false, dts: false, entry: { theme: "src/theme-runtime.ts" } },
-  { ...common, clean: false, dts: false, entry: { "theme-core": "src/theme-core.ts" } },
+  { ...common, clean: false, dts: false, entry: themeRuntimeEntries },
   {
     ...common,
     clean: false,
@@ -50,8 +57,7 @@ export default defineConfig([
     dts: { emitDtsOnly: true },
     entry: {
       ...toolEntries,
-      theme: "src/theme-runtime.ts",
-      "theme-core": "src/theme-core.ts",
+      ...themeRuntimeEntries,
       devtools: "src/devtools/index.ts",
     },
     hooks: {
@@ -59,7 +65,7 @@ export default defineConfig([
         // A dual-format declaration-only build emits CJS JavaScript when its
         // re-export optimization disables the second DTS pass. Write the same
         // canonical re-export stubs without rebuilding that JavaScript graph.
-        for (const name of [...Object.keys(toolEntries), "theme", "theme-core", "devtools"]) {
+        for (const name of [...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), "devtools"]) {
           writeFileSync(`dist/${name}.d.cts`, `export * from "./${name}.mjs";\n`)
         }
       },

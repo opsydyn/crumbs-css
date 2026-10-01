@@ -105,6 +105,11 @@ function writeTypeConfigs(consumerRoot: string): void {
   const source = `
     import { assembleManifest, decodeManifest, encodeCanonicalManifest, transformCssTsToStyleSheetWithManifestSidecar } from "@opsydyn/crumbs-css/tooling/manifest";
     import type { CompilerManifestSidecar, DesignSystemManifest, ManifestAssemblyInput } from "@opsydyn/crumbs-css/tooling/manifest";
+    import type { NativeConditionSnapshot } from "@opsydyn/crumbs-css/theme/conditions";
+    import type { NativeExpression } from "@opsydyn/crumbs-css/theme/expressions";
+    import type { NativeRecipeResolver, RecipeResolutionPlan } from "@opsydyn/crumbs-css/theme/recipes";
+    import type { NativeSprinklesLookupPlan, NativeSprinklesResolver } from "@opsydyn/crumbs-css/theme/sprinkles";
+    type FocusedThemeTypes = [NativeConditionSnapshot, NativeExpression, RecipeResolutionPlan, NativeRecipeResolver<any>, NativeSprinklesLookupPlan<any, any, any>, NativeSprinklesResolver<any, any>];
     import manifestJson from "./manifest.json";
     const manifest: DesignSystemManifest = decodeManifest(manifestJson);
     const input: ManifestAssemblyInput = { package: manifest.package, producer: manifest.producer, styleSidecars: [] };
@@ -113,8 +118,17 @@ function writeTypeConfigs(consumerRoot: string): void {
     void encodeCanonicalManifest(manifest);
     void transformCssTsToStyleSheetWithManifestSidecar;
     void sidecar;
+    void (null as unknown as FocusedThemeTypes);
   `
   writeFileSync(resolve(consumerRoot, "manifest-types.ts"), source)
+  writeFileSync(resolve(consumerRoot, "theme-features.cts"), `
+    import type { NativeConditionInput } from "@opsydyn/crumbs-css/theme/conditions" with { "resolution-mode": "require" };
+    import type { NativeExpressionDomain } from "@opsydyn/crumbs-css/theme/expressions" with { "resolution-mode": "require" };
+    import type { ComponentRecipeResolverOptions } from "@opsydyn/crumbs-css/theme/recipes" with { "resolution-mode": "require" };
+    import type { NativeSprinklesResolutionSelection } from "@opsydyn/crumbs-css/theme/sprinkles" with { "resolution-mode": "require" };
+    type CommonJsThemeTypes = [NativeConditionInput, NativeExpressionDomain, ComponentRecipeResolverOptions, NativeSprinklesResolutionSelection<any, any>];
+    void (null as unknown as CommonJsThemeTypes);
+  `)
   for (const [filename, module, moduleResolution] of [
     ["tsconfig.node16.json", "Node16", "Node16"],
     ["tsconfig.bundler.json", "ESNext", "Bundler"],
@@ -131,7 +145,7 @@ function writeTypeConfigs(consumerRoot: string): void {
         strict: true,
         target: "ES2022",
       },
-      include: ["manifest-types.ts"],
+      include: ["manifest-types.ts", "theme-features.cts"],
     }, null, 2))
   }
 }
@@ -242,4 +256,81 @@ test("packed tooling entry resolves ESM, CommonJS and declarations and round-tri
     .toThrow(/Non-runtime Crumbs/)
   expect(() => assertRuntimeBundleSources(["/app/node_modules/effect/dist/Schema.js"]))
     .toThrow(/Effect dependency/)
+}, 30000)
+
+
+test("packed focused theme feature paths preserve ESM/CJS identities and declaration conditions", async () => {
+  const consumerRoot = createPackedConsumer()
+  const packageRoot = resolve(consumerRoot, "node_modules", "@opsydyn", "crumbs-css")
+  const featureEntries = [
+    ["./theme/conditions", "theme-conditions"],
+    ["./theme/expressions", "theme-expressions"],
+    ["./theme/recipes", "theme-recipes"],
+    ["./theme/sprinkles", "theme-sprinkles"],
+  ] as const
+
+  for (const [, entry] of featureEntries) {
+    for (const filename of [`${entry}.mjs`, `${entry}.cjs`, `${entry}.d.mts`, `${entry}.d.cts`]) {
+      expect(existsSync(resolve(packageRoot, "dist", filename))).toBe(true)
+    }
+  }
+  const resolutions = await verifyPackedExportMap(packageRoot, consumerRoot)
+  for (const [subpath, entry] of featureEntries) {
+    expect(resolutions.find(result => result.subpath === subpath)).toEqual({
+      subpath,
+      import: `./dist/${entry}.mjs`,
+      require: `./dist/${entry}.cjs`,
+      types: `./dist/${entry}.d.mts`,
+    })
+  }
+
+  writeFileSync(resolve(consumerRoot, "package.json"), JSON.stringify({ name: "crumbs-theme-consumer", private: true, type: "module" }))
+  writeFileSync(resolve(consumerRoot, "manifest.json"), "{}")
+  writeFileSync(resolve(consumerRoot, "theme-features.mjs"), `
+    import assert from "node:assert/strict";
+    import * as theme from "@opsydyn/crumbs-css/theme";
+    import * as conditions from "@opsydyn/crumbs-css/theme/conditions";
+    import * as expressions from "@opsydyn/crumbs-css/theme/expressions";
+    import * as recipes from "@opsydyn/crumbs-css/theme/recipes";
+    import * as sprinkles from "@opsydyn/crumbs-css/theme/sprinkles";
+    for (const feature of [conditions, expressions, recipes, sprinkles]) {
+      for (const [name, value] of Object.entries(feature)) {
+        if (Object.prototype.hasOwnProperty.call(theme, name)) assert.strictEqual(value, theme[name], name);
+      }
+    }
+  `)
+  writeFileSync(resolve(consumerRoot, "theme-features.cjs"), `
+    const assert = require("node:assert/strict");
+    const theme = require("@opsydyn/crumbs-css/theme");
+    const features = [
+      require("@opsydyn/crumbs-css/theme/conditions"),
+      require("@opsydyn/crumbs-css/theme/expressions"),
+      require("@opsydyn/crumbs-css/theme/recipes"),
+      require("@opsydyn/crumbs-css/theme/sprinkles"),
+    ];
+    for (const feature of features) {
+      for (const [name, value] of Object.entries(feature)) {
+        if (Object.prototype.hasOwnProperty.call(theme, name)) assert.strictEqual(value, theme[name], name);
+      }
+    }
+  `)
+  run(["node", "theme-features.mjs"], consumerRoot)
+  run(["node", "theme-features.cjs"], consumerRoot)
+
+  writeTypeConfigs(consumerRoot)
+  const tsc = resolve(resolveInstalledPackageRoot("typescript"), "bin", "tsc")
+  run([tsc, "-p", "tsconfig.node16.json"], consumerRoot)
+  run([tsc, "-p", "tsconfig.bundler.json"], consumerRoot)
+
+  const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
+  for (const [subpath] of featureEntries) {
+    const graph = graphs.find(result => result.subpath === subpath && result.format === "esm")!
+    expect(graph.classification).toBe("ordinary-runtime")
+    expect(graph.externalSpecifiers.filter(specifier =>
+      specifier.startsWith("effect") || specifier.startsWith("node:") ||
+      specifier.startsWith("@vanilla-extract/") || specifier === "css-to-react-native" ||
+      specifier === "typescript" || specifier === "metro" || specifier.startsWith("metro/"),
+    )).toEqual([])
+    expect(graph.files.some(file => /\/(?:native-style|native-capture|compiler|transformer|metro-plugin|devtools|tooling)(?:[-.]|\/)/u.test(file))).toBe(false)
+  }
 }, 30000)

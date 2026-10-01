@@ -3,6 +3,10 @@ import * as rootApi from "@opsydyn/crumbs-css"
 import * as styleApi from "@opsydyn/crumbs-css/style"
 import * as themeApi from "@opsydyn/crumbs-css/theme"
 import * as themeCoreApi from "@opsydyn/crumbs-css/theme/core"
+import * as themeConditionsApi from "@opsydyn/crumbs-css/theme/conditions"
+import * as themeExpressionsApi from "@opsydyn/crumbs-css/theme/expressions"
+import * as themeRecipesApi from "@opsydyn/crumbs-css/theme/recipes"
+import * as themeSprinklesApi from "@opsydyn/crumbs-css/theme/sprinkles"
 import * as tokenApi from "@opsydyn/crumbs-css/tokens"
 import * as tokenOpticApi from "@opsydyn/crumbs-css/tokens/optic"
 import * as tokenSchemaApi from "@opsydyn/crumbs-css/tokens/schema"
@@ -27,6 +31,14 @@ function namedApiKeys(api: object): ReadonlyArray<string> {
   return Object.keys(api)
     .filter((key) => key !== "default")
     .sort()
+}
+
+function expectSharedThemeValuesToHaveIdentity(featureApi: object): void {
+  const focused = featureApi as Readonly<Record<string, unknown>>
+  const compatibility = themeApi as Readonly<Record<string, unknown>>
+  for (const [name, value] of Object.entries(focused)) {
+    if (Object.hasOwn(compatibility, name)) expect(value).toBe(compatibility[name])
+  }
 }
 
 describe("@opsydyn/crumbs-css public API contract", () => {
@@ -163,6 +175,74 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "useThemedStyle",
       "useThemedStyles",
     ])
+  })
+
+  it("exposes the complete focused native condition runtime with shared theme identities", () => {
+    expect(namedApiKeys(themeConditionsApi)).toEqual([
+      "NATIVE_CONDITION_BREAKPOINTS",
+      "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+      "NATIVE_RESPONSIVE_CONDITION_NAMES",
+      "createNativeConditionResolver",
+      "createNativeConditionStore",
+      "createNativeMapValueFn",
+      "createNativeNormalizeValueFn",
+      "defaultNativeConditionSnapshot",
+      "mapNativeConditionValueToBranches",
+      "nativeConditionSnapshotKey",
+      "normalizeNativeConditionInput",
+      "traceNativeConditionBranches",
+      "useNativeConditionSnapshot",
+    ].sort())
+    expectSharedThemeValuesToHaveIdentity(themeConditionsApi)
+  })
+
+  it("exposes the complete focused native expression runtime with shared theme identities", () => {
+    expect(namedApiKeys(themeExpressionsApi)).toEqual([
+      "NativeExpressionEvaluationError",
+      "NativeExpressionProgramType",
+      "NativeExpressionProgramVersion",
+      "NativeExpressionType",
+      "NativeExpressionVersion",
+      "createNativeExpressionAdd",
+      "createNativeExpressionAlias",
+      "createNativeExpressionClamp",
+      "createNativeExpressionCompose",
+      "createNativeExpressionConditionReference",
+      "createNativeExpressionDomain",
+      "createNativeExpressionFallback",
+      "createNativeExpressionLiteral",
+      "createNativeExpressionMatch",
+      "createNativeExpressionProgram",
+      "createNativeExpressionRuntime",
+      "createNativeExpressionScale",
+      "createNativeExpressionSubtract",
+      "createNativeExpressionTokenReference",
+      "evaluateNativeExpression",
+      "evaluateNativeExpressionWithTrace",
+      "foldNativeExpression",
+      "isNativeExpression",
+      "isNativeExpressionProgram",
+      "nativeExpressionDependencyKey",
+      "nativeExpressionDomainKey",
+    ].sort())
+    expectSharedThemeValuesToHaveIdentity(themeExpressionsApi)
+  })
+
+  it("exposes canonical recipe resolvers and plan constructors", () => {
+    expect(namedApiKeys(themeRecipesApi)).toEqual([
+      "createComponentRecipeResolutionPlan",
+      "createComponentRecipeResolver",
+      "createRecipeResolver",
+      "resolveComponentRecipeResolutionPlan",
+      "resolveComponentRecipeStyles",
+      "resolveRecipeStyle",
+    ])
+    expectSharedThemeValuesToHaveIdentity(themeRecipesApi)
+  })
+
+  it("exposes the canonical Sprinkles resolver", () => {
+    expect(namedApiKeys(themeSprinklesApi)).toEqual(["createSprinklesResolver"])
+    expectSharedThemeValuesToHaveIdentity(themeSprinklesApi)
   })
 
   it("exposes domain contracts separately from the Effect-backed schema entrypoint", () => {
