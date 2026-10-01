@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Pressable, ScrollView, Text, View } from "react-native"
-import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme"
+import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme/recipes"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as screen from "./screen.css"
 

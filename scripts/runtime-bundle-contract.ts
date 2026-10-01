@@ -14,14 +14,21 @@ export function assertRuntimeBundleSources(sources: ReadonlyArray<string>): numb
       throw new Error(`Compiler dependency in runtime bundle: ${source}`)
     }
     if (/(?:node_modules\/@opsydyn\/crumbs-css|packages\/css)\/(?:dist|src)\//.test(source)) {
-      if (!/(?:\/theme(?:-core)?|\/tokens)\.(?:mjs|cjs)$/.test(source) &&
-        !/(?:\/domains|\/theme-contract|\/theme-token)-[^/]+\.(?:mjs|cjs)$/.test(source)) {
+      const runtimeEntry = /\/(?:theme(?:-core)?|tokens|theme-(?:conditions|expressions|recipes|sprinkles))\.(?:mjs|cjs)$/
+      const runtimeChunk = /\/(?:domains|theme-contract|theme-token|conditions|theme-recipe-resolvers|theme-runtime|theme-sprinkles-resolver|recipe-resolution-plan)-[^/]+\.(?:mjs|cjs)$/
+      if (!runtimeEntry.test(source) && !runtimeChunk.test(source)) {
         throw new Error(`Non-runtime Crumbs module in runtime bundle: ${source}`)
       }
       crumbs++
     }
   }
   return crumbs
+}
+
+function packageRuntimeSourcePath(original: string): string | undefined {
+  const source = original.replaceAll("\\", "/")
+  const match = source.match(/(?:node_modules\/@opsydyn\/crumbs-css|packages\/css)\/(dist|src)\/(.+)$/)
+  return match === null ? undefined : `${match[1]}/${match[2]}`
 }
 
 export async function verifyRuntimeBundles(directory: string) {
@@ -34,7 +41,7 @@ export async function verifyRuntimeBundles(directory: string) {
     }
   }
   await walk(directory)
-  const results: Array<{ file: string; crumbs: number }> = []
+  const results: Array<{ file: string; crumbs: number; crumbsSources: string[] }> = []
   function sources(map: SourceMap): string[] {
     const own = Array.isArray(map.sources)
       ? map.sources.filter((item): item is string => typeof item === "string")
@@ -43,7 +50,11 @@ export async function verifyRuntimeBundles(directory: string) {
   }
   for (const file of maps) {
     const map = JSON.parse(await readFile(file, "utf8")) as SourceMap
-    results.push({ file, crumbs: assertRuntimeBundleSources(sources(map)) })
+    const bundleSources = sources(map)
+    const crumbsSources = [...new Set(bundleSources.map(packageRuntimeSourcePath).filter(
+      (source): source is string => source !== undefined,
+    ))].sort()
+    results.push({ file, crumbs: assertRuntimeBundleSources(bundleSources), crumbsSources })
   }
   const missingPlatform = ["ios", "android", "web"].some(platform =>
     !results.some(result => result.crumbs > 0 && result.file.replaceAll("\\", "/").includes(`/${platform}/`)),

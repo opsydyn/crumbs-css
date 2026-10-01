@@ -1,7 +1,7 @@
 import { useRef, useState } from "react"
 import { FlatList, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native"
 import { Portal, PortalHost } from "@rn-primitives/portal"
-import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme"
+import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme/recipes"
 import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as screen from "./screen.css"
 import { dark, light } from "./theme.css"

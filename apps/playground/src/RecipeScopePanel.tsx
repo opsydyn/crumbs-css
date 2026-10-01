@@ -1,6 +1,6 @@
 import { Profiler, useLayoutEffect, useRef, useState } from "react"
 import { Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
-import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme"
+import { resolveRecipeStyle } from "@opsydyn/crumbs-css/theme/recipes"
 import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as module from "./measurement.css"
 import { dark, light } from "./theme.css"

@@ -119,7 +119,7 @@ authored order, then matching compounds in authored order.
 ```tsx
 import { useMemo } from "react"
 import type { ImageStyle, TextStyle, ViewStyle } from "react-native"
-import { createComponentRecipeResolver } from "@opsydyn/crumbs-css/theme"
+import { createComponentRecipeResolver } from "@opsydyn/crumbs-css/theme/recipes"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { button, type ButtonSelection } from "./button.css"
 
@@ -344,7 +344,7 @@ resolver. Selection order remains authored order, including shorthand targets;
 the resolver returns a readonly array suitable for a React Native `style` prop.
 
 ```tsx
-import { createSprinklesResolver } from "@opsydyn/crumbs-css/theme"
+import { createSprinklesResolver } from "@opsydyn/crumbs-css/theme/sprinkles"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { useMemo } from "react"
 import { View } from "react-native"
@@ -400,6 +400,26 @@ Use this lean entrypoint for common provider, hook and token-resolution code:
 It is emitted as an independent graph so consumers that do not need scopes,
 dependency plans or recipe controls do not load those implementations. Both
 theme entrypoints retain a React-only external runtime dependency boundary.
+
+### Focused theme feature paths
+
+Use these additive paths when a package or application module needs one theme
+feature family without importing the wider compatibility API:
+
+| Path | API family |
+| --- | --- |
+| `@opsydyn/crumbs-css/theme/conditions` | Native condition snapshots, normalization, branch tracing, store and React subscription hook. |
+| `@opsydyn/crumbs-css/theme/expressions` | Typed expression data, constructors, dependency inspection, evaluation, tracing and folding. |
+| `@opsydyn/crumbs-css/theme/recipes` | Recipe and component-recipe plan constructors, resolvers and cache controls. |
+| `@opsydyn/crumbs-css/theme/sprinkles` | Bounded runtime Sprinkles resolver and lookup/resolution plan types. |
+
+The paths are additive and share canonical bindings with `theme`; existing
+imports remain supported. Conditions has a React peer dependency for its hook,
+while expressions, recipes and Sprinkles have no runtime external dependency.
+Choose a focused path for a narrower public dependency boundary. It does not by
+itself guarantee a smaller application bundle: bundler tree-shaking, reachable
+imports and the consuming app determine the result. Check the production
+consumer bundle and source maps before claiming a size improvement.
 
 ### `@opsydyn/crumbs-css/tokens`
 
