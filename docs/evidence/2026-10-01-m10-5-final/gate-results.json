@@ -1,0 +1,167 @@
+{
+  "format": "crumbs.m10-5-final-gate-results",
+  "schemaVersion": 1,
+  "slice": "M10.5 final qualification refresh",
+  "capturedAt": "2026-10-01T11:13:44Z",
+  "sourceRevision": "374e4c44ab8b883a2e93549a2b842d4f827147a1",
+  "sourceRevisionDefinition": "Latest Git commit touching any path outside docs/; docs-only evidence commits do not invalidate results.",
+  "commands": [
+    {
+      "id": "repository-check",
+      "command": "bun run check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Build and typecheck passed; 1,287 CSS tests across 206 files passed with 47,628 expectations, and 23 Storybook tests across 7 files passed with 178 expectations. Contract and accessibility review generators were current."
+    },
+    {
+      "id": "property-suite",
+      "command": "bun test packages/css/test/*.property.test.ts",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "87 tests across 28 property-test files passed; 23,647 assertions."
+    },
+    {
+      "id": "theme-store-focused",
+      "command": "bun test packages/css/test/theme-store.test.ts",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "6 tests passed; 13 assertions."
+    },
+    {
+      "id": "storybook-app-typecheck",
+      "command": "bun run app:typecheck",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Expo Storybook workspace typecheck exited 0 against the current linked CSS workspace build."
+    },
+    {
+      "id": "release-check",
+      "command": "bun run release:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Package build, typecheck, tests, native-style benchmark smoke, and dry-run pack passed; 120 files and 3.27 MB unpacked. No package was published. Existing non-fatal deps.onlyBundle hints named effect and metro-cache."
+    },
+    {
+      "id": "manifest-compatibility-fixture",
+      "command": "bun scripts/m9-2-manifest-check.ts --current packages/css/fixtures/m10-4-north-star/current.json --baseline packages/css/fixtures/m10-4-north-star/baseline.json --consumer packages/css/fixtures/m10-4-north-star/consumer.json --format json",
+      "exitCode": 1,
+      "resultStatus": "expected-fixture-result",
+      "result": "Expected exit 1 for the intentionally breaking fixture; it emitted one token.alias-changed warning and one token.removed error with declared-coverage limits.",
+      "artifact": {
+        "path": "docs/evidence/2026-10-01-m10-5-final/manifest-compatibility-report.json",
+        "sha256": "b4f5665e41ee7a671a6253c7232c0d013b392ae8fc27640d4875a3ae5b5d7ccb"
+      }
+    },
+    {
+      "id": "editor-scale",
+      "command": "CRUMBS_SOURCE_REVISION=374e4c44ab8b883a2e93549a2b842d4f827147a1 bun run measure:editor docs/evidence/2026-10-01-m10-5-final/editor-scale.json 5",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Five repetitions produced 30 compiler runs and 15 completion runs at 100, 1,000, and 10,000 tokens. This is raw host fixture evidence without an approved editor budget; condition and typed-slot cases are excluded.",
+      "artifact": {
+        "path": "docs/evidence/2026-10-01-m10-5-final/editor-scale.json",
+        "sha256": "f403d930af9f7cb72be05e6c91e3d1e98a34e94e24756906d324f2b46c095fbb"
+      }
+    },
+    {
+      "id": "budget-registry-validation",
+      "command": "bun run budgets:validate",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Registry valid; registryReady false and performanceQualification not-run. There are 25 active metrics, four pending thresholds, three missing baselines, one diagnostic baseline, and a separate diagnostic-only runtime-emitted-bytes entry."
+    },
+    {
+      "id": "budget-readiness",
+      "command": "bun run budgets:readiness",
+      "exitCode": 1,
+      "resultStatus": "incomplete",
+      "result": "Expected nonzero while active thresholds and baselines remain incomplete; no threshold, baseline, or registry membership was changed."
+    },
+    {
+      "id": "contract-story-structure",
+      "command": "bun run --filter @crumbs/storybook contracts:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Generated structural coverage is current: 5 recipes and 4/8 theme stories. This does not establish rendered visual or accessibility acceptance."
+    },
+    {
+      "id": "accessibility-review-structure",
+      "command": "bun run --filter @crumbs/storybook accessibility:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Generated accessibility review cases are current. This does not establish TalkBack/VoiceOver or WCAG acceptance."
+    },
+    {
+      "id": "host-budget-suite",
+      "command": "CRUMBS_AUDIT_NODE_FLOOR=<exact Node v22.0.0 executable> bun scripts/measure-current-host-budgets.ts docs/evidence/2026-10-01-m10-5-final/host-budgets",
+      "requiredRuntime": "Exact Node v22.0.0 executable; current runtime was Node v24.15.0",
+      "exitCode": 0,
+      "resultStatus": "failed",
+      "result": "The suite completed and retained five benchmark repetitions. The comparison reports 2 passes, 8 failures against existing approved thresholds, and 11 incomplete environment mismatches. This is host evidence, not Hermes or release-device qualification.",
+      "comparison": {
+        "passed": [
+          "runtime-initialization-node22-esm",
+          "runtime-initialization-node22-cjs"
+        ],
+        "failed": [
+          "runtime-initialization-current-esm",
+          "runtime-initialization-current-cjs",
+          "runtime-theme-core-esm-graph-bytes",
+          "runtime-theme-core-cjs-graph-bytes",
+          "runtime-tokens-esm-graph-bytes",
+          "runtime-tokens-cjs-graph-bytes",
+          "runtime-theme-compatibility-esm-graph-bytes",
+          "runtime-theme-compatibility-cjs-graph-bytes"
+        ],
+        "incompleteEnvironmentMismatch": [
+          "cold-transform-ms",
+          "warm-transform-ms",
+          "incremental-rebuild",
+          "editor-tsc-wall-10000",
+          "editor-tsgo-wall-10000",
+          "editor-tsc-memory-10000",
+          "editor-tsgo-memory-10000",
+          "editor-tsc-instantiations-10000",
+          "editor-tsgo-instantiations-10000",
+          "editor-first-completion-10000",
+          "editor-warm-completion-10000"
+        ]
+      },
+      "artifact": {
+        "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/comparison.json",
+        "sha256": "9f978fe46b1229e959259f28845b352e985683b57688e45917122828f1c3bd9d"
+      }
+    }
+  ],
+  "budgetRegistry": {
+    "valid": true,
+    "registryReady": false,
+    "performanceQualification": "not-run",
+    "activeMetrics": 25,
+    "pendingThresholds": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes",
+      "retained-memory-bytes"
+    ],
+    "missingBaselines": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes"
+    ],
+    "diagnosticBaselines": [
+      "retained-memory-bytes"
+    ],
+    "diagnosticOnlyMetrics": [
+      "runtime-emitted-bytes"
+    ],
+    "readinessExitCode": 1
+  },
+  "scopeLimits": [
+    "Compatibility fixture exit 1 is the expected detector result, not package-compatibility acceptance.",
+    "Host comparisons do not qualify Hermes, release-device performance, physical-device rendering, or screen-reader behavior.",
+    "The host comparison preserves existing thresholds and baselines; no threshold or registry status was changed.",
+    "Structural Storybook and accessibility checks do not establish screenshot-diff, TalkBack/VoiceOver, or WCAG acceptance.",
+    "M10.5 remains open because approved host metrics failed, eleven comparisons were environment-mismatched, registry readiness is false, and device gates remain incomplete."
+  ]
+}

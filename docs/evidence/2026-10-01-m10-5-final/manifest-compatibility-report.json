@@ -1,0 +1,106 @@
+{
+  "format": "crumbs.design-system-compatibility-report",
+  "schemaVersion": 2,
+  "mode": "compare",
+  "provider": {
+    "name": "@acme/design-system",
+    "baselineVersion": "1.0.0",
+    "currentVersion": "2.0.0"
+  },
+  "suppliedConsumers": [
+    {
+      "name": "@acme/mobile-app",
+      "version": "1.0.0"
+    }
+  ],
+  "findings": [
+    {
+      "code": "token.alias-changed",
+      "level": "warning",
+      "entityId": "@acme/design-system#token:color.action",
+      "fieldPath": "alias",
+      "message": "Public token \"@acme/design-system#token:color.action\" changed alias semantics.",
+      "before": {
+        "kind": "alias",
+        "resolution": "internal",
+        "targetId": "@acme/design-system#token:color.blue",
+        "targetPath": [
+          "color",
+          "blue"
+        ]
+      },
+      "after": {
+        "kind": "alias",
+        "resolution": "internal",
+        "targetId": "@acme/design-system#token:color.brand",
+        "targetPath": [
+          "color",
+          "brand"
+        ]
+      },
+      "affectedConsumers": [
+        {
+          "package": {
+            "name": "@acme/mobile-app",
+            "version": "1.0.0"
+          },
+          "dependency": {
+            "from": "@acme/mobile-app#src/ActionCard.css.ts",
+            "to": "@acme/design-system#token:color.action",
+            "kind": "style-token",
+            "origin": {
+              "moduleId": "@acme/mobile-app#src/ActionCard.css.ts",
+              "exportPath": "ActionCard",
+              "property": "backgroundColor"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "code": "token.removed",
+      "level": "error",
+      "entityId": "@acme/design-system#token:color.legacy",
+      "fieldPath": "token",
+      "message": "Public token \"@acme/design-system#token:color.legacy\" was removed.",
+      "before": {
+        "domain": {
+          "kind": "color"
+        },
+        "path": [
+          "color",
+          "legacy"
+        ],
+        "visibility": "public"
+      },
+      "affectedConsumers": [
+        {
+          "package": {
+            "name": "@acme/mobile-app",
+            "version": "1.0.0"
+          },
+          "dependency": {
+            "from": "@acme/mobile-app#src/ActionCard.css.ts",
+            "to": "@acme/design-system#token:color.legacy",
+            "kind": "style-token",
+            "origin": {
+              "moduleId": "@acme/mobile-app#src/ActionCard.css.ts",
+              "exportPath": "ActionCard",
+              "property": "borderColor"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "analysisLimits": [
+    {
+      "code": "component-use-unavailable",
+      "message": "Manifest v1 does not record consumer use of component slots or variants."
+    },
+    {
+      "code": "explicit-coverage",
+      "message": "Comparison is limited to the coverage roots declared in the supplied manifests."
+    }
+  ]
+}

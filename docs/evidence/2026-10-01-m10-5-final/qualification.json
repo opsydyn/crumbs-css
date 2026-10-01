@@ -1,0 +1,190 @@
+{
+  "format": "crumbs.m10-5-final-qualification",
+  "schemaVersion": 1,
+  "slice": "M10.5 final qualification refresh",
+  "capturedAt": "2026-10-01T11:25:43Z",
+  "status": "open",
+  "sourceRevision": "374e4c44ab8b883a2e93549a2b842d4f827147a1",
+  "gitHeadAtFinalQualification": "374e4c44ab8b883a2e93549a2b842d4f827147a1",
+  "sourceRevisionDefinition": "Latest Git commit touching any path outside docs/; docs-only evidence commits do not invalidate results.",
+  "matrixSha256": "e70fbe5f3e81229c9a75b162b55472c9af7d3f736f39b0be960bc30c8fc0f6ef",
+  "generatedReferenceSha256": "5b5a04274cdab47b2591c87f81482028311012e301701b9b15a5f67428396a61",
+  "baseline": {
+    "artifact": "docs/evidence/2026-10-01-m10-5-final/provenance.json",
+    "trackedTreeCleanBeforeGates": true,
+    "exactNodeV22_0_0AvailableAtCapture": false,
+    "exactNodeV22_0_0InstalledForFinalGate": true,
+    "exactNodeVersionUsed": "v22.0.0",
+    "currentNodeVersion": "v24.15.0"
+  },
+  "finalVerification": [
+    {
+      "command": "bun run guarantees:check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Guarantees matrix v1 is valid; generated reference is current."
+    },
+    {
+      "command": "bun run docs:build",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "Astro/Starlight built 28 pages, including the guarantees reference."
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0,
+      "resultStatus": "passed",
+      "result": "No whitespace errors."
+    }
+  ],
+  "hostBudgetComparison": {
+    "commandExitCode": 0,
+    "comparisonCounts": {
+      "pass": 2,
+      "fail": 8,
+      "incomplete-environment-mismatch": 11
+    },
+    "failedMetrics": [
+      "runtime-initialization-current-esm",
+      "runtime-initialization-current-cjs",
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "environmentMismatchMetrics": [
+      "cold-transform-ms",
+      "warm-transform-ms",
+      "incremental-rebuild",
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ],
+    "interpretation": "The suite executed with the exact Node v22.0.0 floor and completed, but it did not pass qualification: eight approved comparisons failed and eleven were incomplete because baseline environments did not match."
+  },
+  "budgetRegistry": {
+    "valid": true,
+    "registryReady": false,
+    "performanceQualification": "not-run",
+    "activeMetrics": 25,
+    "pendingThresholds": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes",
+      "retained-memory-bytes"
+    ],
+    "missingBaselines": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes"
+    ],
+    "diagnosticBaselines": [
+      "retained-memory-bytes"
+    ],
+    "diagnosticOnlyMetrics": [
+      "runtime-emitted-bytes"
+    ],
+    "readinessExitCode": 1
+  },
+  "historicalVisualDeviceEvidence": [
+    {
+      "path": "docs/evidence/2026-09-30-m10-5-guarantees/native-simulator-acceptance.json",
+      "sourceRevision": "65c3e916990c50042e712eb2194bed077c746eb1",
+      "measurementStatus": "stale"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-3-android/acceptance.json",
+      "sourceRevision": "7d71ff3235a8c26c3e16999bfb2f4a97bab5f959",
+      "measurementStatus": "stale"
+    }
+  ],
+  "scopeLimits": [
+    "The compatibility fixture exit 1 is expected detector behavior, not package compatibility acceptance.",
+    "The release dry-run pack did not publish or test an independent packed Expo consumer.",
+    "Host comparisons do not qualify Hermes or release-device performance.",
+    "Screenshot diff, physical-device rendering, TalkBack/VoiceOver, and release-device budgets remain not-run.",
+    "No performance threshold, baseline, or registry membership was modified.",
+    "Absolute user-home, checkout, temporary-directory, and Homebrew prefixes in retained host reports were replaced with stable placeholders; measurement values were preserved."
+  ],
+  "artifacts": [
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/documentation-checks.json",
+      "sha256": "341166319c389ada002dd4a766c5bb720e6c9848bcb77097a27a7658b1434688"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/editor-scale.json",
+      "sha256": "f403d930af9f7cb72be05e6c91e3d1e98a34e94e24756906d324f2b46c095fbb"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/gate-results.json",
+      "sha256": "058b5ea31306ae9b01436e401cdd8a90ce32459ce9296083556b1a0c71aa39b5"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/benchmark-1.json",
+      "sha256": "fe603c73e9285a08e95f5e0c69c4970d60d4fb9095b8b2ccffb99701b3a2226b"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/benchmark-2.json",
+      "sha256": "1a05a4f5922cd3c01ade433e139dbe7f4c02eb8bbce365ce1f8f2a233e66fd03"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/benchmark-3.json",
+      "sha256": "b72194a8a5627006f2402b1aa54a4427f2a7b08810fb7f3f2926538f9c974671"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/benchmark-4.json",
+      "sha256": "7e85abf12a0539f1063d4aed2f36246031acb8eb5ac6da6e086b148fd0bf7f50"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/benchmark-5.json",
+      "sha256": "decad0353e549f58e9054b04fd64cdbc4b09ec55027544cb69a895d0e58cbc0e"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/benchmark-summary.json",
+      "sha256": "b17b871dbeedd2f488d7e774cab63ba60f000e388a14d9f5d8bd035b084a5671"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/comparison.json",
+      "sha256": "9f978fe46b1229e959259f28845b352e985683b57688e45917122828f1c3bd9d"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/editor.json",
+      "sha256": "8f85b29ade3754ea3b4cfffb9248322fd43f096fc1b9701c8a610dc9de49dc06"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/effect.json",
+      "sha256": "7379a224354115f8c8a78588c5c11a0c215d58a886377e259dec18b7c6552a6d"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/metro-incremental.json",
+      "sha256": "6f88f3fee7ee367d6fc8f1dc59e2d8b3808ea4277cf72f1c3d474cd1d206564d"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/runtime-graph.json",
+      "sha256": "b1d1408fc9610b0dd4900b5999d25e4c17b042dc81f91970cc33ad323ea2a0fb"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/runtime-initialization.json",
+      "sha256": "8f3f01e369e8b7cb8c549d7e4900a2ab50d3257c6d570ee5acc1755c6aa33477"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/host-budgets/threshold-review.json",
+      "sha256": "0d6f948c99a5a4f201524e5bba69b2de64640a0f233fb88e5da77ab30eb6792d"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/manifest-compatibility-report.json",
+      "sha256": "b4f5665e41ee7a671a6253c7232c0d013b392ae8fc27640d4875a3ae5b5d7ccb"
+    },
+    {
+      "path": "docs/evidence/2026-10-01-m10-5-final/provenance.json",
+      "sha256": "4e619b3906621af91c7c96ed1f3ce289a4781781b8c8ac3b6c386e867a73cdb4"
+    }
+  ]
+}
