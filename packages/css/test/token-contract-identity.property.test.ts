@@ -9,6 +9,7 @@ import {
   getTokenContractKey,
   getTokenId,
 } from "../src/tokens"
+import { encodeTokenPath, tokenVariableName } from "../src/tokens/identity"
 import { getThemeTokenVisibility } from "../src/theme-token"
 import {
   isTokenThemeCompatible,
@@ -201,5 +202,28 @@ describe("stable token contract identity", () => {
         expect(getTokenId(contract.space.md)).toContain(`${identity.owner}/${identity.name}@1#`)
       },
     ), {numRuns: 25, seed: 20260930})
+  })
+})
+
+describe("canonical token path encoding", () => {
+  it("pins the readable length-prefixed format and keeps segment boundaries distinct", () => {
+    expect(encodeTokenPath(["color", "accent"])).toBe("5:color/6:accent")
+    expect(encodeTokenPath(["a/b"])).not.toBe(encodeTokenPath(["a", "b"]))
+  })
+
+  it("matches the reference encoding for generated Unicode paths", () => {
+    fc.assert(fc.property(
+      fc.array(fc.string({maxLength: 16}), {maxLength: 8}),
+      path => expect(encodeTokenPath(path)).toBe(
+        path.map(segment => `${segment.length}:${segment}`).join("/"),
+      ),
+    ), {numRuns: 120, seed: 20261001})
+  })
+
+  it("leaves token variable Unicode code-point encoding unchanged", () => {
+    expect(tokenVariableName(
+      {owner: "acme", name: "foundation", version: 1},
+      ["😀"],
+    )).toEndWith("-01f600")
   })
 })

@@ -67,6 +67,11 @@ export function tokenContractIdentityKey(identity: TokenContractIdentity): strin
   return `${identity.owner}#${identity.name}@${identity.version}`
 }
 
+/** Encode token path segments without allowing embedded separators to collide. */
+export function encodeTokenPath(path: ReadonlyArray<string>): string {
+  return path.map(segment => `${segment.length}:${segment}`).join("/")
+}
+
 /**
  * A public, inspectable token ID. Length prefixes keep path segment boundaries
  * unambiguous even when authored names contain punctuation.
@@ -75,7 +80,7 @@ export function tokenPublicId(
   identity: TokenContractIdentity,
   path: ReadonlyArray<string>,
 ): string {
-  const encodedPath = path.map(segment => `${segment.length}:${segment}`).join("/")
+  const encodedPath = encodeTokenPath(path)
   return `${identity.owner}/${identity.name}@${identity.version}#${encodedPath}`
 }
 
@@ -106,10 +111,10 @@ export function tokenContractShapeSignature(
 ): string {
   const shapeSignature = entries
     .map(entry => {
-      const path = entry.path.map(segment => segment.length + ":" + segment).join("/")
+      const path = encodeTokenPath(entry.path)
       const alias = entry.alias === undefined
         ? ""
-        : "|alias:" + entry.alias.target.map(segment => segment.length + ":" + segment).join("/") +
+        : "|alias:" + encodeTokenPath(entry.alias.target) +
           (entry.alias.fallback === undefined ? "" : "|fallback:" + JSON.stringify(entry.alias.fallback))
       return path + "=" + domainSignature(entry.domain) + alias
     })
@@ -125,7 +130,7 @@ export function tokenContractVisibilitySignature(
   paths: ReadonlyArray<TokenContractVisibilityPath>,
 ): string {
   return [...paths]
-    .map(path => path.map(segment => segment.length + ":" + segment).join("/"))
+    .map(encodeTokenPath)
     .sort()
     .join(";")
 }

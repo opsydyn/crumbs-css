@@ -36,6 +36,7 @@ import {
   type ThemeContractInput,
 } from "../theme-contract"
 import {
+  encodeTokenPath,
   normalizeTokenContractIdentity,
   tokenContractShapeSignature,
   tokenPublicId,
@@ -999,7 +1000,7 @@ function describeDomain(domain: TokenDomain): string {
 }
 
 function pathKey(path: ReadonlyArray<string>): string {
-  return path.map(segment => segment.length + ":" + segment).join("/")
+  return encodeTokenPath(path)
 }
 
 function formatPath(path: ReadonlyArray<string>): string {
