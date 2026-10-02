@@ -615,6 +615,14 @@ The minified candidate passed package build, typecheck, all 1,340 CSS tests and 
 
 Next recommended roadmap slice: **M10.5 source-level runtime optimization** — reduce the measured `theme/core` and compatibility `theme` graph contributors and runtime initialization while preserving the approved public APIs and performance limits. Keep incomplete Metro/editor comparisons and native/device acceptance as separate gates.
 
+### 2026-10-02 — M10.5 source-profile runtime diagnosis
+
+The committed profile harness measured source revision `78d9fd0` across eight Node/format/entry cells with 128 fresh-process profiles, one excluded warmup and fifteen retained samples per cell. All behavior receipts passed and all 28 default/diagnostic emitted artifacts matched after source-map-comment normalization. Only one retained sample mapped to a Crumbs source location (`components/contracts.ts:351` in the Node 24 compatibility ESM cell); no repeated CPU hotspot or eligible scratch A/B target was established. Raw profiles and diagnostic maps remain in `/private/tmp`; the [profile summary](evidence/2026-10-02-m10-5-source-profile/profile-summary.json) retains hashes and attribution limits.
+
+The unchanged uninstrumented exact-Node-floor host suite was rerun at the same source revision. Its 21 recorded comparisons comprise one pass, ten approved-limit failures (all four runtime-initialization metrics and all six emitted-graph metrics), and ten incomplete results (warm-transform ordering, Metro environment/workload identity, and eight editor identity mismatches). The [assessment](assessments/2026-10-02-m10-5-source-profile.md) and [host comparison report](evidence/2026-10-02-m10-5-source-profile/host-budgets/comparison.json) separate those results from CPU-profile diagnostics. The registry remains unready with four device-facing thresholds pending. No budgets, thresholds, baselines, source runtime, or Android/device dispositions changed; M10.5 remains open.
+
+Next recommended roadmap slice: **M10.5 source-level graph and initialization optimization A/B** — select a candidate from repeated source/graph evidence for `theme/core` or compatibility `theme`, preserving public exports and cross-entry function identity. Do not treat the singleton CPU sample as a hotspot. Keep incomplete Metro/editor comparisons and visual, screen-reader, physical-device, release-device, and Android-specific gates separate.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
