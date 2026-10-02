@@ -1,6 +1,6 @@
 # M10.5 Profile-First Runtime Diagnostic Design
 
-- **Status:** Proposed; conversational design approved; written-spec review pending
+- **Status:** Approved; written spec approved on 2026-10-02
 - **Date:** 2026-10-02
 - **Roadmap:** M10.5 in [roadmap.md](../../roadmap.md)
 - **Extends:** [M10.5 Runtime Footprint Remediation Design](2026-10-01-m10-5-runtime-footprint-design.md)
