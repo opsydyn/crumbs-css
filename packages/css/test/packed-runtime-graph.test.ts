@@ -281,8 +281,8 @@ test("auditPackedRuntimeEntrypoints fails closed on non-literal CommonJS require
 test("only the configured Metro transformer can use its runtime-supplied upstream path", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
-      "dist/transformer.mjs": 'const upstreamPath = "runtime-selected"; __require(upstreamPath); export {};\n',
-      "dist/transformer.cjs": 'const upstreamPath = "runtime-selected"; require(upstreamPath); module.exports = {};\n',
+      "dist/transformer.mjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; __require(upstreamPath)} export {};\n',
+      "dist/transformer.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} module.exports = {};\n',
     },
   })
 
@@ -332,13 +332,46 @@ test("the Metro upstream property binding remains allowlisted after identifier m
     .rejects.toThrow(/non-literal require.*a/i)
 })
 
+test("the Metro exception rejects its canonical name when the value is not from Metro config", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config){const upstreamPath=config.otherPath; require(upstreamPath)} module.exports = {};\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*upstreamPath/i)
+})
+
+test("the Metro exception rejects an identifier shadowed outside the loader call scope", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config){const path=config.upstreamTransformerPath; {const path=config.otherPath; require(path)}} module.exports = {};\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
+test("the Metro exception rejects a reassigned upstream property binding", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config){let path=config.upstreamTransformerPath; path="other"; require(path)} module.exports = {};\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
 test("the manifest tooling graph allows the transformer’s approved Metro loader in emitted chunks", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
       "dist/tooling-manifest.mjs": 'import "./transformer-AbC123.mjs"; export {};\n',
       "dist/tooling-manifest.cjs": 'require("./transformer-AbC123.cjs"); module.exports = {};\n',
-      "dist/transformer-AbC123.mjs": 'const upstreamPath = "runtime-selected"; __require(upstreamPath); export {};\n',
-      "dist/transformer-AbC123.cjs": 'const upstreamPath = "runtime-selected"; require(upstreamPath); module.exports = {};\n',
+      "dist/transformer-AbC123.mjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; __require(upstreamPath)} export {};\n',
+      "dist/transformer-AbC123.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} module.exports = {};\n',
     },
   })
 
@@ -363,8 +396,8 @@ test("the direct transformer export allows its approved Metro loader in emitted 
     overrides: {
       "dist/transformer.mjs": 'import "./transformer-AbC123.mjs"; export {};\n',
       "dist/transformer.cjs": 'require("./transformer-AbC123.cjs"); module.exports = {};\n',
-      "dist/transformer-AbC123.mjs": 'const upstreamPath = "runtime-selected"; __require(upstreamPath); export {};\n',
-      "dist/transformer-AbC123.cjs": 'const upstreamPath = "runtime-selected"; require(upstreamPath); module.exports = {};\n',
+      "dist/transformer-AbC123.mjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; __require(upstreamPath)} export {};\n',
+      "dist/transformer-AbC123.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} module.exports = {};\n',
     },
   })
 

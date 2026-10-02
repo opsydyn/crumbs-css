@@ -119,23 +119,102 @@ function skipParentheses(node: ts.Node): ts.Node {
   return current
 }
 
-function isIdentifierInitializedFromProperty(call: ts.CallExpression, specifier: ts.Node, property: string): boolean {
-  const identifier = skipParentheses(specifier)
-  if (!ts.isIdentifier(identifier)) return false
-  const identifierText = identifier.text
-  const scope = enclosingFunction(call)
-  if (scope === undefined) return false
+type RuntimeBindingAnalysis = Readonly<{
+  sourceFile: ts.SourceFile
+  checker: ts.TypeChecker
+}>
+
+function createRuntimeBindingAnalysis(filename: string, source: string): RuntimeBindingAnalysis | undefined {
+  const options: ts.CompilerOptions = {
+    allowJs: true,
+    checkJs: false,
+    module: ts.ModuleKind.ESNext,
+    noLib: true,
+    noResolve: true,
+    target: ts.ScriptTarget.Latest,
+    types: [],
+  }
+  const host = ts.createCompilerHost(options)
+  const originalGetSourceFile = host.getSourceFile.bind(host)
+  host.getSourceFile = (fileName, languageVersion, onError, shouldCreateNewSourceFile) => {
+    if (resolve(fileName) === resolve(filename)) {
+      return ts.createSourceFile(fileName, source, languageVersion, true, ts.ScriptKind.JS)
+    }
+    return originalGetSourceFile(fileName, languageVersion, onError, shouldCreateNewSourceFile)
+  }
+
+  const program = ts.createProgram([filename], options, host)
+  const sourceFile = program.getSourceFile(filename)
+  return sourceFile === undefined ? undefined : {sourceFile, checker: program.getTypeChecker()}
+}
+
+function findEquivalentNode(sourceFile: ts.SourceFile, target: ts.Node): ts.Node | undefined {
+  let match: ts.Node | undefined
+  function walk(node: ts.Node): void {
+    if (node.kind === target.kind && node.pos === target.pos && node.end === target.end) {
+      match = node
+      return
+    }
+    if (node.pos <= target.pos && node.end >= target.end) ts.forEachChild(node, walk)
+  }
+  walk(sourceFile)
+  return match
+}
+
+function containsNode(root: ts.Node, target: ts.Node): boolean {
+  if (root === target) return true
   let found = false
   function walk(node: ts.Node): void {
-    if (node !== scope && isFunctionScope(node)) return
-    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === identifierText && node.initializer !== undefined) {
-      const initializer = skipParentheses(node.initializer)
-      if (ts.isPropertyAccessExpression(initializer) && initializer.name.text === property) found = true
+    if (node === target) {
+      found = true
+      return
     }
-    ts.forEachChild(node, walk)
+    if (!found) ts.forEachChild(node, walk)
   }
-  walk(scope)
+  walk(root)
   return found
+}
+
+function isWriteReference(identifier: ts.Identifier): boolean {
+  let parent = identifier.parent
+  while (parent !== undefined && ts.isParenthesizedExpression(parent)) parent = parent.parent
+  if (parent === undefined) return false
+  if (ts.isBinaryExpression(parent) &&
+    parent.operatorToken.kind >= ts.SyntaxKind.FirstAssignment &&
+    parent.operatorToken.kind <= ts.SyntaxKind.LastAssignment &&
+    containsNode(parent.left, identifier)) return true
+  if ((ts.isPrefixUnaryExpression(parent) || ts.isPostfixUnaryExpression(parent)) &&
+    (parent.operator === ts.SyntaxKind.PlusPlusToken || parent.operator === ts.SyntaxKind.MinusMinusToken)) return true
+  if ((ts.isForInStatement(parent) || ts.isForOfStatement(parent)) && containsNode(parent.initializer, identifier)) return true
+  return false
+}
+
+function isIdentifierInitializedFromProperty(
+  analysis: RuntimeBindingAnalysis,
+  specifier: ts.Node,
+  property: string,
+): boolean {
+  const equivalentSpecifier = findEquivalentNode(analysis.sourceFile, specifier)
+  if (equivalentSpecifier === undefined) return false
+  const identifier = skipParentheses(equivalentSpecifier)
+  if (!ts.isIdentifier(identifier)) return false
+  const symbol = analysis.checker.getSymbolAtLocation(identifier)
+  if (symbol === undefined || symbol.declarations?.length !== 1) return false
+  const declaration = symbol.declarations[0]
+  if (declaration === undefined || !ts.isVariableDeclaration(declaration) || declaration.initializer === undefined) return false
+  const initializer = skipParentheses(declaration.initializer)
+  if (!ts.isPropertyAccessExpression(initializer) || initializer.name.text !== property) return false
+
+  let reassigned = false
+  function walk(node: ts.Node): void {
+    if (ts.isIdentifier(node) && analysis.checker.getSymbolAtLocation(node) === symbol && isWriteReference(node)) {
+      reassigned = true
+      return
+    }
+    if (!reassigned) ts.forEachChild(node, walk)
+  }
+  walk(analysis.sourceFile)
+  return !reassigned
 }
 
 /** Traverse every packed ESM and CommonJS export and enforce its dependency class. */
@@ -292,6 +371,15 @@ async function visit(
   }
 
   const dependencies: Array<string> = []
+  let bindingAnalysis: RuntimeBindingAnalysis | undefined
+  let bindingAnalysisResolved = false
+  const getBindingAnalysis = (): RuntimeBindingAnalysis | undefined => {
+    if (!bindingAnalysisResolved) {
+      bindingAnalysis = createRuntimeBindingAnalysis(file, source)
+      bindingAnalysisResolved = true
+    }
+    return bindingAnalysis
+  }
   const walk = (node: ts.Node): void => {
     if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
       node.moduleSpecifier !== undefined && ts.isStringLiteralLike(node.moduleSpecifier)) {
@@ -312,16 +400,14 @@ async function visit(
         else {
           const callee = dynamicImport ? "import()" : node.expression.getText(sourceFile)
           const expression = specifier?.getText(sourceFile) ?? "<no argument>"
-          const exception = dynamicLoaderAllowlist.find((entry) =>
-            entry.subpath === subpath &&
-            entry.format === format &&
-            (typeof entry.importer === "string"
-              ? entry.importer === toPackageRelative(packageRoot, file)
-              : entry.importer.test(toPackageRelative(packageRoot, file))) &&
-            entry.callee === callee &&
-            (entry.specifier === expression || specifier !== undefined && entry.sourceProperty !== undefined &&
-              isIdentifierInitializedFromProperty(node, specifier, entry.sourceProperty))
-          )
+          const exception = dynamicLoaderAllowlist.find((entry) => {
+            const importer = toPackageRelative(packageRoot, file)
+            if (entry.subpath !== subpath || entry.format !== format || entry.callee !== callee ||
+              !(typeof entry.importer === "string" ? entry.importer === importer : entry.importer.test(importer)) ||
+              specifier === undefined || entry.sourceProperty === undefined) return false
+            const analysis = getBindingAnalysis()
+            return analysis !== undefined && isIdentifierInitializedFromProperty(analysis, specifier, entry.sourceProperty)
+          })
           if (exception === undefined) {
             throw new Error(`Non-literal ${expressionName} in ${toPackageRelative(packageRoot, file)}: ${expression}`)
           }

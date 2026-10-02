@@ -8,13 +8,13 @@ No budget threshold, baseline, workload identity, registry membership, package e
 
 ## Candidate and package checks
 
-The candidate set `minify: true` on the existing theme, theme-core, tool, and devtools JavaScript groups. The declaration-only group and entry maps were unchanged. The exact temporary config diff is in [minified-config.patch](minified-config.patch); its SHA-256 was `340196e1f7b01d3b9945068fc865191ca31d613473ea2215b9bde85c18d220a0`.
+The candidate set `minify: true` on the existing theme, theme-core, tool, and devtools JavaScript groups. The declaration-only group and entry maps were unchanged. The exact temporary config diff is in [minified-config.patch](minified-config.patch); its SHA-256 is `9fd468fa208bef15ed48dd4238165a18db5342f29401727592d1e3c7c33aa962`.
 
 The package build and typecheck passed. `bun run test` passed with 1,320 CSS tests and 47,904 assertions, plus 23 Storybook tests and 178 assertions. Public API, ESM/CJS identity, package graph isolation, and contract tests were included. `bun run playground:packed --check` passed its packed Expo/Metro source-map checks for web, iOS, and Android; the retained [packed output](packed-expo.log) reports 565 KB web JavaScript and 1.4 MB iOS and Android Hermes bundles. These are bundle/export checks, not device rendering or runtime-performance acceptance.
 
 After restoring the default configuration, `bun run build`, `bun run typecheck`, and the full `bun run test` passed again on unminified artifacts. `bun run budgets:validate` reported a valid registry with no baseline issues; registry readiness remains false with the existing four pending thresholds, three missing baselines, and one diagnostic baseline. `bun run docs:build` built 28 pages.
 
-The graph audit now follows no-substitution template literals in CJS module calls. The strict Metro loader exception also survives minifier identifier renaming only when the same-function binding originates at the `upstreamTransformerPath` property; its negative test still rejects a different identifier.
+The graph audit now follows no-substitution template literals in CJS module calls. The Metro loader exception survives minifier identifier renaming only when TypeScript resolves the call argument to a single local binding initialized from `upstreamTransformerPath`; shadowed, reassigned, or wrong-origin bindings are rejected. After that hardening, a fresh minified candidate build, package typecheck, and packed Expo/Metro check also passed; the committed [packed check output](packed-expo.log) records the three-platform source-map check and bundle sizes.
 
 ## Exact host-budget result
 

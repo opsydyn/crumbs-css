@@ -83,12 +83,12 @@ Set `minify: true` on the existing theme, theme-core, tool, and devtools JavaScr
 
 - [x] **Step 2: Add a failing regression for the minifier-renamed Metro loader.**
 
-Extend `packed-runtime-graph.test.ts` with a minified-shape transformer fixture whose local identifier is initialized from `config.upstreamTransformerPath`, plus a negative fixture where the dynamic `require` uses a different identifier. Run from `packages/css`: `bun test test/packed-runtime-graph.test.ts`.
+Extend `packed-runtime-graph.test.ts` with a minified-shape transformer fixture whose local identifier is initialized from `config.upstreamTransformerPath`, plus negative fixtures for a different identifier, wrong property origin, a shadowed binding, and reassignment. Run from `packages/css`: `bun test test/packed-runtime-graph.test.ts`.
 Expected: FAIL because the currently admitted source-level name is `upstreamPath` and the minified fixture calls `require(a)`.
 
 - [x] **Step 3: Preserve the strict allowlist through identifier mangling.**
 
-Match a minified identifier only when a variable declaration in the same function scope is initialized from the exact `upstreamTransformerPath` property and the existing transformer importer/subpath/format/callee constraints match. Keep the canonical exception result as `upstreamPath`; do not allow arbitrary identifiers or relax the other dynamic-loader checks. Run `bun test test/packed-runtime-graph.test.ts`.
+Resolve the call argument to its actual lexical symbol. Match a minified identifier only when that symbol has one local variable declaration initialized from the exact `upstreamTransformerPath` property and no writes, while the existing transformer importer/subpath/format/callee constraints match. Keep the canonical exception result as `upstreamPath`; do not allow arbitrary identifiers or relax the other dynamic-loader checks. Run `bun test test/packed-runtime-graph.test.ts`.
 Expected: the minified-shape fixture is admitted, the different-identifier fixture remains rejected, and all packed graph audit tests pass.
 
 - [x] **Step 4: Use the AST graph scanner for runtime-isolation checks.**
@@ -117,3 +117,11 @@ Write a concise evidence summary with measured entry graphs, runtime comparisons
 - [x] **Step 9: Commit the qualification evidence.**
 
 Commit only the retained minification evidence, roadmap update, and plan progress as `docs: record M10.5 minification qualification`.
+
+- [x] **Step 10: Close review findings on the Metro loader exception.**
+
+Resolve the loader argument to its TypeScript lexical symbol; accept only a single variable declaration initialized from `upstreamTransformerPath` with no writes. Add real packed-graph regressions for a wrong canonical-name origin, a shadowed binding, and reassignment. Confirm each new rejection test fails before the matcher change.
+
+- [x] **Step 11: Requalify and correct retained evidence.**
+
+Re-run the minified build, package typecheck, and packed Expo/Metro check with the hardened audit, then restore the unminified build and rerun build, typecheck, full tests, budget validation, docs build, and diff checks. Correct the patch digest and retain the packed check log in the evidence commit.
