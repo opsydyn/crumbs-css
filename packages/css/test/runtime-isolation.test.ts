@@ -1,27 +1,14 @@
 import {describe, expect, it} from "bun:test"
-import {readFileSync, existsSync, mkdtempSync, rmSync, writeFileSync} from "node:fs"
+import {mkdtempSync, rmSync, writeFileSync} from "node:fs"
 import path from "node:path"
 import {builtinModules} from "node:module"
 import {tmpdir} from "node:os"
 import {pathToFileURL} from "node:url"
+import {readEmittedGraph} from "../bench/effect-boundary-audit"
 const root = path.resolve(import.meta.dir, "../dist")
 const builtins = new Set(builtinModules.map(name => name.replace(/^node:/, "")))
-function graph(entry: string): {files: string[], externals: string[]} {
- const visited = new Set<string>(), externals = new Set<string>()
- function visit(file: string) {
-  if (visited.has(file)) return
-  if (!existsSync(file)) throw new Error(`Missing emitted graph dependency: ${file}`)
-  visited.add(file)
-  const source = readFileSync(file,"utf8")
-  const imports = source.matchAll(/(?:\bfrom\s*|\bimport\s*|\brequire\s*\(\s*|\bimport\s*\(\s*)["']([^"']+)["']/g)
-  for (const match of imports) {
-   const name = match[1]!
-   if (name.startsWith('.')) visit(path.resolve(path.dirname(file),name))
-   else externals.add(name)
-  }
- }
- visit(path.join(root,entry))
- return {files: [...visited],externals: [...externals]}
+function graph(entry: string) {
+ return readEmittedGraph(path.join(root, entry))
 }
 describe("public runtime dependency isolation", () => {
  for (const format of ['mjs', 'cjs']) {

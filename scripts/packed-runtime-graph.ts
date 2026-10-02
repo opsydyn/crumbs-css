@@ -58,6 +58,7 @@ const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
   importer: string | RegExp
   callee: "require" | "__require"
   specifier: string
+  sourceProperty?: string
   rationale: string
 }>> = [
   {
@@ -66,6 +67,7 @@ const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
     importer: /^dist\/transformer(?:-[A-Za-z0-9_-]+)?\.mjs$/u,
     callee: "__require",
     specifier: "upstreamPath",
+    sourceProperty: "upstreamTransformerPath",
     rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
   },
   {
@@ -74,6 +76,7 @@ const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
     importer: /^dist\/transformer(?:-[A-Za-z0-9_-]+)?\.cjs$/u,
     callee: "require",
     specifier: "upstreamPath",
+    sourceProperty: "upstreamTransformerPath",
     rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
   },
   {
@@ -82,6 +85,7 @@ const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
     importer: /^dist\/transformer-[A-Za-z0-9_-]+\.mjs$/u,
     callee: "__require",
     specifier: "upstreamPath",
+    sourceProperty: "upstreamTransformerPath",
     rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
   },
   {
@@ -90,9 +94,49 @@ const dynamicLoaderAllowlist: ReadonlyArray<Readonly<{
     importer: /^dist\/transformer-[A-Za-z0-9_-]+\.cjs$/u,
     callee: "require",
     specifier: "upstreamPath",
+    sourceProperty: "upstreamTransformerPath",
     rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
   },
 ]
+
+function isFunctionScope(node: ts.Node): boolean {
+  return ts.isFunctionDeclaration(node) || ts.isFunctionExpression(node) || ts.isArrowFunction(node) ||
+    ts.isMethodDeclaration(node) || ts.isConstructorDeclaration(node) || ts.isGetAccessor(node) || ts.isSetAccessor(node)
+}
+
+function enclosingFunction(node: ts.Node): ts.Node | undefined {
+  let current = node.parent
+  while (current !== undefined) {
+    if (isFunctionScope(current)) return current
+    current = current.parent
+  }
+  return undefined
+}
+
+function skipParentheses(node: ts.Node): ts.Node {
+  let current = node
+  while (ts.isParenthesizedExpression(current)) current = current.expression
+  return current
+}
+
+function isIdentifierInitializedFromProperty(call: ts.CallExpression, specifier: ts.Node, property: string): boolean {
+  const identifier = skipParentheses(specifier)
+  if (!ts.isIdentifier(identifier)) return false
+  const identifierText = identifier.text
+  const scope = enclosingFunction(call)
+  if (scope === undefined) return false
+  let found = false
+  function walk(node: ts.Node): void {
+    if (node !== scope && isFunctionScope(node)) return
+    if (ts.isVariableDeclaration(node) && ts.isIdentifier(node.name) && node.name.text === identifierText && node.initializer !== undefined) {
+      const initializer = skipParentheses(node.initializer)
+      if (ts.isPropertyAccessExpression(initializer) && initializer.name.text === property) found = true
+    }
+    ts.forEachChild(node, walk)
+  }
+  walk(scope)
+  return found
+}
 
 /** Traverse every packed ESM and CommonJS export and enforce its dependency class. */
 export async function auditPackedRuntimeEntrypoints(
@@ -275,7 +319,8 @@ async function visit(
               ? entry.importer === toPackageRelative(packageRoot, file)
               : entry.importer.test(toPackageRelative(packageRoot, file))) &&
             entry.callee === callee &&
-            entry.specifier === expression
+            (entry.specifier === expression || specifier !== undefined && entry.sourceProperty !== undefined &&
+              isIdentifierInitializedFromProperty(node, specifier, entry.sourceProperty))
           )
           if (exception === undefined) {
             throw new Error(`Non-literal ${expressionName} in ${toPackageRelative(packageRoot, file)}: ${expression}`)

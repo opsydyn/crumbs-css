@@ -308,6 +308,30 @@ test("only the configured Metro transformer can use its runtime-supplied upstrea
     .rejects.toThrow(/non-literal require.*pathFromConfig/i)
 })
 
+test("the Metro upstream property binding remains allowlisted after identifier mangling", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.mjs": 'function transform(e){let a=e.upstreamTransformerPath; __require(a)} export {};\n',
+      "dist/transformer.cjs": 'function transform(e){let a=e.upstreamTransformerPath; require(a)} module.exports = {};\n',
+    },
+  })
+
+  const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
+
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.dynamicLoaderExceptions)
+    .toMatchObject([{callee: "__require", specifier: "upstreamPath"}])
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "cjs")?.dynamicLoaderExceptions)
+    .toMatchObject([{callee: "require", specifier: "upstreamPath"}])
+
+  const wrongIdentifier = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(e, a){let b=e.upstreamTransformerPath; require(a)} module.exports = {};\n',
+    },
+  })
+  await expect(auditPackedRuntimeEntrypoints(wrongIdentifier))
+    .rejects.toThrow(/non-literal require.*a/i)
+})
+
 test("the manifest tooling graph allows the transformer’s approved Metro loader in emitted chunks", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {

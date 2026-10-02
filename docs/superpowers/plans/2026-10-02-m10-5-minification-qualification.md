@@ -66,6 +66,9 @@ Run `git diff --check`, then commit the test, scanner fix, and this plan as `fix
 ### Task 2: Qualify minification on real package entry groups
 
 **Files:**
+- Modify: `scripts/packed-runtime-graph.ts`
+- Test: `packages/css/test/packed-runtime-graph.test.ts`
+- Modify: `packages/css/test/runtime-isolation.test.ts`
 - Temporarily modify: `packages/css/tsdown.config.ts` (candidate build only; restore before commit)
 - Create: `docs/evidence/2026-10-02-m10-5-minification/` (qualification reports and summary)
 - Modify: `docs/roadmap.md` (record the result and next M10.5 slice)
@@ -74,24 +77,43 @@ Run `git diff --check`, then commit the test, scanner fix, and this plan as `fix
 - Consumes: Task 1's corrected `readEmittedGraph`, the current production ESM/CJS entry groups, packed-consumer check, approved M10.5 budgets, and the exact Node v22.0.0 executable.
 - Produces: retained minified-candidate evidence with every comparison labeled against the unchanged thresholds and workload identities; no default minification or budget-registry change unless all relevant approved gates pass.
 
-- [ ] **Step 1: Temporarily enable minification for each JavaScript artifact group.**
+- [x] **Step 1: Temporarily enable minification for each JavaScript artifact group.**
 
 Set `minify: true` on the existing theme, theme-core, tool, and devtools JavaScript configurations only. Leave the declaration-only configuration and all entry maps unchanged.
 
-- [ ] **Step 2: Build and verify public API, package, and packed Expo/Metro behavior.**
+- [x] **Step 2: Add a failing regression for the minifier-renamed Metro loader.**
 
-Run from the repository root: `bun run build`, `bun run typecheck`, `bun run test`, and `bun run playground:packed --check`.
-Expected: all commands pass; package API and ESM/CJS identity checks remain green, and the packed Expo/Metro check completes against the minified `dist` artifacts.
+Extend `packed-runtime-graph.test.ts` with a minified-shape transformer fixture whose local identifier is initialized from `config.upstreamTransformerPath`, plus a negative fixture where the dynamic `require` uses a different identifier. Run from `packages/css`: `bun test test/packed-runtime-graph.test.ts`.
+Expected: FAIL because the currently admitted source-level name is `upstreamPath` and the minified fixture calls `require(a)`.
 
-- [ ] **Step 3: Run the exact host-budget suite against the minified package outputs.**
+- [x] **Step 3: Preserve the strict allowlist through identifier mangling.**
+
+Match a minified identifier only when a variable declaration in the same function scope is initialized from the exact `upstreamTransformerPath` property and the existing transformer importer/subpath/format/callee constraints match. Keep the canonical exception result as `upstreamPath`; do not allow arbitrary identifiers or relax the other dynamic-loader checks. Run `bun test test/packed-runtime-graph.test.ts`.
+Expected: the minified-shape fixture is admitted, the different-identifier fixture remains rejected, and all packed graph audit tests pass.
+
+- [x] **Step 4: Use the AST graph scanner for runtime-isolation checks.**
+
+Replace the quote-only regex graph helper in `runtime-isolation.test.ts` with the shared `readEmittedGraph` audit. Run `bun test test/runtime-isolation.test.ts`.
+Expected: all runtime-isolation checks pass on minified ESM/CJS outputs, including the React external boundary.
+
+- [x] **Step 5: Commit the minified graph-audit correction.**
+
+Run `git diff --check` and commit `scripts/packed-runtime-graph.ts`, `packages/css/test/packed-runtime-graph.test.ts`, `packages/css/test/runtime-isolation.test.ts`, and this plan as `fix: audit minified runtime graphs`.
+
+- [x] **Step 6: Run API, package, and packed Expo/Metro gates serially.**
+
+Run from the repository root, in order: `bun run build`, `bun run typecheck`, `bun run test`, `bun run playground:packed --check`.
+Expected: all commands pass against minified artifacts; do not run the package tests concurrently with the packed check because the packed check rebuilds `dist`.
+
+- [x] **Step 7: Run the exact host-budget suite against the minified package outputs.**
 
 Run from the repository root with `CRUMBS_AUDIT_NODE_FLOOR=/Users/alancurrie/.local/share/fnm/node-versions/v22.0.0/installation/bin/node`: `bun run measure:host-budgets docs/evidence/2026-10-02-m10-5-minification/host-budgets`.
 Expected: retain the full suite report and comparison even if an unchanged approved budget fails or a comparison is incomplete; do not alter thresholds, baselines, or workload identifiers to produce a pass.
 
-- [ ] **Step 4: Record qualification and restore the normal package build.**
+- [ ] **Step 8: Record qualification and restore the normal package build.**
 
-Write a concise evidence summary with the measured entry graphs, runtime comparisons, API/packed checks, exact host-suite statuses, and limitations. If any approved gate fails, explicitly leave minification out of the default config and M10.5 open. Restore `tsdown.config.ts`, rebuild the unminified package, run `bun run budgets:validate`, `bun run docs:build`, and `git diff --check`.
+Write a concise evidence summary with measured entry graphs, runtime comparisons, API/packed checks, exact host-suite statuses, and limitations. If any approved gate fails, leave minification out of the default config and M10.5 open. Restore `tsdown.config.ts`, rebuild the unminified package, and run `bun run budgets:validate`, `bun run docs:build`, and `git diff --check`.
 
-- [ ] **Step 5: Commit the qualification evidence.**
+- [ ] **Step 9: Commit the qualification evidence.**
 
-Commit only the retained minification evidence, roadmap update, and any final plan/ledger progress as `docs: record M10.5 minification qualification`.
+Commit only the retained minification evidence, roadmap update, and plan progress as `docs: record M10.5 minification qualification`.
