@@ -1,0 +1,26 @@
+diff --git a/packages/css/tsdown.config.ts b/packages/css/tsdown.config.ts
+index 31ceb4a..470dbe6 100644
+--- a/packages/css/tsdown.config.ts
++++ b/packages/css/tsdown.config.ts
+@@ -39,17 +39,18 @@ const themeRuntimeEntries = {
+ const themeCoreRuntimeEntries = {"theme-core": "src/theme-core.ts"}
+
+ export default defineConfig([
+-  { ...common, clean: false, dts: false, entry: themeRuntimeEntries },
+-  { ...common, clean: false, dts: false, entry: themeCoreRuntimeEntries },
++  { ...common, clean: false, dts: false, minify: true, entry: themeRuntimeEntries },
++  { ...common, clean: false, dts: false, minify: true, entry: themeCoreRuntimeEntries },
+   {
+     ...common,
+     clean: false,
+     dts: false,
++    minify: true,
+     entry: toolEntries,
+     deps: compilerDependencies,
+   },
+   // Explanations depend on Effect Schema; keep that cost behind its own opt-in subpath.
+-  { ...common, clean: false, dts: false, entry: { devtools: "src/devtools/index.ts" } },
++  { ...common, clean: false, dts: false, minify: true, entry: { devtools: "src/devtools/index.ts" } },
+   // One declaration graph preserves nominal token brands across public entries.
+   {
+     ...common,

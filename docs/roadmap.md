@@ -609,6 +609,12 @@ The source-current M10.5 graph report still fails all six approved graph compari
 
 Next recommended roadmap slice: **M10.5** — qualify minification on the actual package entry groups, update the static CJS graph scanner, then run the unchanged API, identity, packed Expo/Metro, and exact Node host gates. Keep any remaining theme/core and compatibility-theme failures open for separate source-level optimization; do not change the approved limits.
 
+### 2026-10-02 — M10.5 minification qualification
+
+The minified candidate passed package build, typecheck, all 1,320 CSS tests and 23 Storybook tests, plus packed Expo/Metro source-map qualification for web, iOS and Android. The scanner now follows static no-substitution template-literal CJS paths; the Metro dynamic-loader exception remains constrained to the same-function `upstreamTransformerPath` binding. Minification stays out of the default build because the exact unchanged host comparison reports 8 approved failures, 3 passes and 10 incomplete results. The token ESM/CJS graph ceilings pass; `theme/core`, compatibility `theme`, and all four runtime-initialization ceilings fail. After restoring the unminified config, package build, typecheck, full tests, budget-registry validation and 28-page docs build passed. Registry validation found no baseline issues; readiness remains false under its existing pending threshold and baseline requirements. No threshold, baseline, workload identity, registry membership or export changed. M10.5 remains open; device, visual, accessibility and release-device gates remain separate. See the [minification qualification evidence](evidence/2026-10-02-m10-5-minification/qualification.md).
+
+Next recommended roadmap slice: **M10.5 source-level runtime optimization** — reduce the measured `theme/core` and compatibility `theme` graph contributors and runtime initialization while preserving the approved public APIs and performance limits. Keep incomplete Metro/editor comparisons and native/device acceptance as separate gates.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.

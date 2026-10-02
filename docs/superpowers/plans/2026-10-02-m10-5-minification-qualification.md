@@ -110,10 +110,10 @@ Expected: all commands pass against minified artifacts; do not run the package t
 Run from the repository root with `CRUMBS_AUDIT_NODE_FLOOR=/Users/alancurrie/.local/share/fnm/node-versions/v22.0.0/installation/bin/node`: `bun run measure:host-budgets docs/evidence/2026-10-02-m10-5-minification/host-budgets`.
 Expected: retain the full suite report and comparison even if an unchanged approved budget fails or a comparison is incomplete; do not alter thresholds, baselines, or workload identifiers to produce a pass.
 
-- [ ] **Step 8: Record qualification and restore the normal package build.**
+- [x] **Step 8: Record qualification and restore the normal package build.**
 
 Write a concise evidence summary with measured entry graphs, runtime comparisons, API/packed checks, exact host-suite statuses, and limitations. If any approved gate fails, leave minification out of the default config and M10.5 open. Restore `tsdown.config.ts`, rebuild the unminified package, and run `bun run budgets:validate`, `bun run docs:build`, and `git diff --check`.
 
-- [ ] **Step 9: Commit the qualification evidence.**
+- [x] **Step 9: Commit the qualification evidence.**
 
 Commit only the retained minification evidence, roadmap update, and plan progress as `docs: record M10.5 minification qualification`.
