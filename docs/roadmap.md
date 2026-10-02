@@ -603,6 +603,12 @@ The current matrix marks the prior iOS simulator and Android Storybook receipts 
 
 Next recommended roadmap slice: **M10.5 runtime-footprint remediation** — reduce the current-Node initialization and six emitted-graph regressions by reviewing the expanded shared theme-runtime surface and its entrypoint boundaries; preserve approved thresholds and baseline evidence. Keep comparable warm-transform, Metro/editor measurements, native screenshot, screen-reader, physical-device, and release-device budget evidence as separate open gates.
 
+### 2026-10-02 — M10.5 runtime budget failure triage
+
+The source-current M10.5 graph report still fails all six approved graph comparisons. Source-map attribution locates the largest emitted code in the shared theme runtime, component contracts/extension validation, expression evaluator, and token domains. A controlled single-entry diagnostic associates the current focused-entry chunking with higher import time, but it does not preserve or test compatibility-to-focused function identity and is not a valid replacement build. A separate scratch `minify: true` build preserves checked ESM/CJS exports and shared feature identity, cuts the three graph families by roughly 45–51%, and brings tokens below their unchanged graph ceilings. The theme/core and compatibility theme graphs and all four matched import medians still exceed their existing limits. The current graph scanner also needs to recognize static no-substitution template-literal CJS specifiers before minified output can be qualified. No implementation, threshold, baseline, or workload changed; the full host suite must be refreshed on the measured source revision. See the [M10.5 budget failure triage](assessments/2026-10-02-m10-5-budget-failure-triage.md).
+
+Next recommended roadmap slice: **M10.5** — qualify minification on the actual package entry groups, update the static CJS graph scanner, then run the unchanged API, identity, packed Expo/Metro, and exact Node host gates. Keep any remaining theme/core and compatibility-theme failures open for separate source-level optimization; do not change the approved limits.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
