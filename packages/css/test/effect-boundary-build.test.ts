@@ -34,6 +34,27 @@ describe("Effect boundary build and audit contract", () => {
       expect(graph.nonliteralLoads).toBe(1)
     } finally { rmSync(root, { recursive: true, force: true }) }
   })
+  it("follows static template-literal paths and reports interpolated loads", () => {
+    const root = mkdtempSync(path.join(tmpdir(), "crumbs-emitted-template-"))
+    try {
+      writeFileSync(path.join(root, "entry.cjs"), [
+        "__require(`./child.cjs`)",
+        "__require(`react`)",
+        "import(`./dynamic-child.mjs`)",
+        "__require(`./${part}.cjs`)",
+      ].join("\n"))
+      writeFileSync(path.join(root, "child.cjs"), "module.exports = 1")
+      writeFileSync(path.join(root, "dynamic-child.mjs"), "export const value = 1")
+
+      const graph = readEmittedGraph(path.join(root, "entry.cjs"))
+
+      expect(graph.files.map(file => path.basename(file))).toEqual(["child.cjs", "dynamic-child.mjs", "entry.cjs"])
+      expect(graph.externals).toEqual(["react"])
+      expect(graph.nonliteralLoads).toBe(1)
+    } finally {
+      rmSync(root, { recursive: true, force: true })
+    }
+  })
   it("emits bundled contract candidates using the production tooling policy in both formats", async () => {
     const root = mkdtempSync(path.join(tmpdir(), "crumbs-effect-build-contract-"))
     try {

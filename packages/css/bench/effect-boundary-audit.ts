@@ -34,11 +34,14 @@ export function readEmittedGraph(entry: string) {
       if (name.startsWith(".")) visit(path.resolve(path.dirname(file), name))
       else externals.add(name)
     }
+    function isStaticSpecifier(node: ts.Node): node is ts.StringLiteral | ts.NoSubstitutionTemplateLiteral {
+      return ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)
+    }
     function walk(node: ts.Node) {
       if ((ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) && node.moduleSpecifier && ts.isStringLiteral(node.moduleSpecifier)) dependency(node.moduleSpecifier.text)
       if (ts.isCallExpression(node) && (node.expression.kind === ts.SyntaxKind.ImportKeyword || ts.isIdentifier(node.expression) && ["require", "__require"].includes(node.expression.text))) {
         const first = node.arguments[0]
-        if (first && ts.isStringLiteral(first)) dependency(first.text)
+        if (first && isStaticSpecifier(first)) dependency(first.text)
         else nonliteralLoads++
       }
       ts.forEachChild(node, walk)
