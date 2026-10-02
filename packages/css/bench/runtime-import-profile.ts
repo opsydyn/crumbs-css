@@ -32,6 +32,12 @@ export type RuntimeProfileSummary = Readonly<{
   frames: ReadonlyArray<RuntimeProfileFrameSummary>
 }>
 
+export function normalizeGeneratedJavaScript(source: string): string {
+  return source
+    .replace(/\r?\n(?:\r?\n)?\/\/[#@]\s*sourceMappingURL=[^\r\n]*(?:\r?\n)?$/, "\n")
+    .replace(/\/\*[#@]\s*sourceMappingURL=[\s\S]*?\*\//g, "")
+}
+
 function isNodeLoaderUrl(url: string): boolean {
   return /^node:internal\/(?:modules\/(?:cjs|esm)\/|process\/esm_loader$)/.test(url)
 }

@@ -14,6 +14,7 @@ type FrameAttribution =
   | { kind: "unattributed"; reason: string; url: string }
 
 type RuntimeProfileAnalyzer = {
+  normalizeGeneratedJavaScript(source: string): string
   attributeProfileFrame(
     frame: ProfileCallFrame,
     sourceMap: Pick<SourceMap, "findEntry"> | undefined,
@@ -88,6 +89,16 @@ function sourceMap(mappings: string) {
 }
 
 describe("M10.5 runtime import profile analysis", () => {
+  it("normalizes the source-map comment and its emitted separator without changing other output", async () => {
+    const { normalizeGeneratedJavaScript } = await loadAnalyzer()
+    const defaultOutput = "export const value = 1;\n"
+    const mappedOutput = "export const value = 1;\n\n//# sourceMappingURL=entry.mjs.map\n"
+
+    expect(normalizeGeneratedJavaScript(mappedOutput)).toBe(defaultOutput)
+    expect(normalizeGeneratedJavaScript("export const value = 1;\n//# sourceURL=runtime.js\n"))
+      .toBe("export const value = 1;\n//# sourceURL=runtime.js\n")
+  })
+
   it("maps generated positions to one-based TypeScript locations", async () => {
     const { attributeProfileFrame } = await loadAnalyzer()
     const emittedFrame = frame("resolveThemeTokens", "file:///repo/dist/theme-core.mjs")

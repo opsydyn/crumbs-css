@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 
 import { createRequire, SourceMap } from "node:module"
 import { basename, join, relative, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
-import { aggregateCpuProfiles, attributeProfileFrame, type RuntimeCpuProfile, type RuntimeProfileCallFrame } from "../packages/css/bench/runtime-import-profile"
+import { aggregateCpuProfiles, attributeProfileFrame, normalizeGeneratedJavaScript, type RuntimeCpuProfile, type RuntimeProfileCallFrame } from "../packages/css/bench/runtime-import-profile"
 import { readEmittedGraph } from "../packages/css/bench/effect-boundary-audit"
 
 type BuildConfig = Readonly<{
@@ -103,12 +103,6 @@ function graphEntry(root: string, name: "theme-core" | "theme", format: "esm" | 
   return entry
 }
 
-function normalizedJavaScript(source: string): string {
-  return source
-    .replace(/\/\/[#@]\s*sourceMappingURL=[^\r\n]*/g, "")
-    .replace(/\/\*[#@]\s*sourceMappingURL=[\s\S]*?\*\//g, "")
-}
-
 function sourceMapFor(file: string): { sourceMap?: SourceMap; issue?: string; sha256?: string } {
   const mapFile = file + ".map"
   if (!existsSync(mapFile)) return { issue: "source-map-missing" }
@@ -151,8 +145,8 @@ function pairGraphs(defaultRoot: string, diagnosticRoot: string, defaultGraph: A
     const diagnosticFile = join(diagnosticRoot, file)
     const defaultExists = defaultFiles.has(file)
     const diagnosticExists = diagnosticFiles.has(file)
-    const defaultHash = defaultExists ? sha256(normalizedJavaScript(readFileSync(defaultFile, "utf8"))) : null
-    const diagnosticHash = diagnosticExists ? sha256(normalizedJavaScript(readFileSync(diagnosticFile, "utf8"))) : null
+    const defaultHash = defaultExists ? sha256(normalizeGeneratedJavaScript(readFileSync(defaultFile, "utf8"))) : null
+    const diagnosticHash = diagnosticExists ? sha256(normalizeGeneratedJavaScript(readFileSync(diagnosticFile, "utf8"))) : null
     const generatedFilesMatch = defaultExists && diagnosticExists && defaultHash === diagnosticHash
     const map = diagnosticExists ? sourceMapFor(diagnosticFile) : { issue: "diagnostic-file-missing" }
     if (defaultExists) {
