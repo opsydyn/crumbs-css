@@ -281,8 +281,8 @@ test("auditPackedRuntimeEntrypoints fails closed on non-literal CommonJS require
 test("only the configured Metro transformer can use its runtime-supplied upstream path", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
-      "dist/transformer.mjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; __require(upstreamPath)} export {};\n',
-      "dist/transformer.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} module.exports = {};\n',
+      "dist/transformer.mjs": 'import{createRequire}from"node:module";const ge=createRequire(import.meta.url);export function transform(config){const upstreamPath=config.upstreamTransformerPath; ge(upstreamPath)}\n',
+      "dist/transformer.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} exports.transform=transform;\n',
     },
   })
 
@@ -290,7 +290,7 @@ test("only the configured Metro transformer can use its runtime-supplied upstrea
 
   expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.dynamicLoaderExceptions)
     .toEqual([{
-      callee: "__require",
+      callee: "createRequire",
       specifier: "upstreamPath",
       rationale: "Metro supplies its configured upstream transformer path at runtime so Crumbs can delegate Expo's selected transform worker.",
     }])
@@ -311,21 +311,21 @@ test("only the configured Metro transformer can use its runtime-supplied upstrea
 test("the Metro upstream property binding remains allowlisted after identifier mangling", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
-      "dist/transformer.mjs": 'function transform(e){let a=e.upstreamTransformerPath; __require(a)} export {};\n',
-      "dist/transformer.cjs": 'function transform(e){let a=e.upstreamTransformerPath; require(a)} module.exports = {};\n',
+      "dist/transformer.mjs": 'import{createRequire}from"node:module";const ge=createRequire(import.meta.url);export function transform(e){let a=e.upstreamTransformerPath; ge(a)}\n',
+      "dist/transformer.cjs": 'function transform(e){let a=e.upstreamTransformerPath; require(a)} exports.transform=transform;\n',
     },
   })
 
   const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
 
   expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.dynamicLoaderExceptions)
-    .toMatchObject([{callee: "__require", specifier: "upstreamPath"}])
+    .toMatchObject([{callee: "createRequire", specifier: "upstreamPath"}])
   expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "cjs")?.dynamicLoaderExceptions)
     .toMatchObject([{callee: "require", specifier: "upstreamPath"}])
 
   const wrongIdentifier = await createFixturePackage({
     overrides: {
-      "dist/transformer.cjs": 'function transform(e, a){let b=e.upstreamTransformerPath; require(a)} module.exports = {};\n',
+      "dist/transformer.cjs": 'function transform(e, a){let b=e.upstreamTransformerPath; require(a)} exports.transform=transform;\n',
     },
   })
   await expect(auditPackedRuntimeEntrypoints(wrongIdentifier))
@@ -335,7 +335,7 @@ test("the Metro upstream property binding remains allowlisted after identifier m
 test("the Metro exception rejects its canonical name when the value is not from Metro config", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
-      "dist/transformer.cjs": 'function transform(config){const upstreamPath=config.otherPath; require(upstreamPath)} module.exports = {};\n',
+      "dist/transformer.cjs": 'function transform(config){const upstreamPath=config.otherPath; require(upstreamPath)} exports.transform=transform;\n',
     },
   })
 
@@ -343,10 +343,32 @@ test("the Metro exception rejects its canonical name when the value is not from 
     .rejects.toThrow(/non-literal require.*upstreamPath/i)
 })
 
+test("the Metro exception rejects its property when it comes from a non-config parameter", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config,other){const path=other.upstreamTransformerPath; require(path)} exports.transform=transform;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
+test("the Metro exception is limited to the transform function rather than helper config parameters", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function helper(config){const path=config.upstreamTransformerPath; require(path)} module.exports = {};\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
 test("the Metro exception rejects an identifier shadowed outside the loader call scope", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
-      "dist/transformer.cjs": 'function transform(config){const path=config.upstreamTransformerPath; {const path=config.otherPath; require(path)}} module.exports = {};\n',
+      "dist/transformer.cjs": 'function transform(config){const path=config.upstreamTransformerPath; {const path=config.otherPath; require(path)}} exports.transform=transform;\n',
     },
   })
 
@@ -357,7 +379,18 @@ test("the Metro exception rejects an identifier shadowed outside the loader call
 test("the Metro exception rejects a reassigned upstream property binding", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
-      "dist/transformer.cjs": 'function transform(config){let path=config.upstreamTransformerPath; path="other"; require(path)} module.exports = {};\n',
+      "dist/transformer.cjs": 'function transform(config){let path=config.upstreamTransformerPath; path="other"; require(path)} exports.transform=transform;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
+test("the Metro exception rejects a destructuring reassignment of its upstream binding", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config){let path=config.upstreamTransformerPath; ({path}={path:"other"}); require(path)} exports.transform=transform;\n',
     },
   })
 
@@ -370,8 +403,10 @@ test("the manifest tooling graph allows the transformer’s approved Metro loade
     overrides: {
       "dist/tooling-manifest.mjs": 'import "./transformer-AbC123.mjs"; export {};\n',
       "dist/tooling-manifest.cjs": 'require("./transformer-AbC123.cjs"); module.exports = {};\n',
-      "dist/transformer-AbC123.mjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; __require(upstreamPath)} export {};\n',
-      "dist/transformer-AbC123.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} module.exports = {};\n',
+      "dist/transformer.mjs": 'import {transform as local} from "./transformer-AbC123.mjs"; export {local as transform};\n',
+      "dist/transformer.cjs": 'const local=require("./transformer-AbC123.cjs"); exports.transform=local.transform;\n',
+      "dist/transformer-AbC123.mjs": 'import{createRequire}from"node:module";const ge=createRequire(import.meta.url);export function transform(config){const upstreamPath=config.upstreamTransformerPath; ge(upstreamPath)}\n',
+      "dist/transformer-AbC123.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} exports.transform=transform;\n',
     },
   })
 
@@ -379,7 +414,7 @@ test("the manifest tooling graph allows the transformer’s approved Metro loade
 
   expect(graphs.find((graph) => graph.subpath === "./tooling/manifest" && graph.format === "esm")?.dynamicLoaderExceptions)
     .toEqual([{
-      callee: "__require",
+      callee: "createRequire",
       specifier: "upstreamPath",
       rationale: expect.stringMatching(/configured upstream transformer path/i),
     }])
@@ -394,10 +429,10 @@ test("the manifest tooling graph allows the transformer’s approved Metro loade
 test("the direct transformer export allows its approved Metro loader in emitted chunks", async () => {
   const packageRoot = await createFixturePackage({
     overrides: {
-      "dist/transformer.mjs": 'import "./transformer-AbC123.mjs"; export {};\n',
-      "dist/transformer.cjs": 'require("./transformer-AbC123.cjs"); module.exports = {};\n',
-      "dist/transformer-AbC123.mjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; __require(upstreamPath)} export {};\n',
-      "dist/transformer-AbC123.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} module.exports = {};\n',
+      "dist/transformer.mjs": 'import {transform as local} from "./transformer-AbC123.mjs"; export {local as transform};\n',
+      "dist/transformer.cjs": 'const local=require("./transformer-AbC123.cjs"); exports.transform=local.transform;\n',
+      "dist/transformer-AbC123.mjs": 'import{createRequire}from"node:module";const ge=createRequire(import.meta.url);export function transform(config){const upstreamPath=config.upstreamTransformerPath; ge(upstreamPath)}\n',
+      "dist/transformer-AbC123.cjs": 'function transform(config){const upstreamPath=config.upstreamTransformerPath; require(upstreamPath)} exports.transform=transform;\n',
     },
   })
 
@@ -407,6 +442,189 @@ test("the direct transformer export allows its approved Metro loader in emitted 
     .toHaveLength(1)
   expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "cjs")?.dynamicLoaderExceptions)
     .toHaveLength(1)
+})
+
+test("minified transformer chunks remain allowlisted through the public transform export", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.mjs": 'import{r as a}from"./transformer-AbC123.mjs";export{a as transform};\n',
+      "dist/transformer.cjs": 'const a=require("./transformer-AbC123.cjs");exports.transform=a.r;\n',
+      "dist/tooling-manifest.mjs": 'import "./transformer-AbC123.mjs"; export {};\n',
+      "dist/tooling-manifest.cjs": 'require("./transformer-AbC123.cjs"); module.exports = {};\n',
+      "dist/transformer-AbC123.mjs": 'import{createRequire as c}from"node:module";const ge=c(import.meta.url);async function Ua(e){let a=e.upstreamTransformerPath;ge(a)}export{Ua as r};\n',
+      "dist/transformer-AbC123.cjs": 'async function Ca(e){let a=e.upstreamTransformerPath;require(a)}Object.defineProperty(exports,"r",{enumerable:!0,get:function(){return Ca}});\n',
+    },
+  })
+
+  const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
+
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.dynamicLoaderExceptions)
+    .toHaveLength(1)
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "cjs")?.dynamicLoaderExceptions)
+    .toHaveLength(1)
+  expect(graphs.find((graph) => graph.subpath === "./tooling/manifest" && graph.format === "esm")?.dynamicLoaderExceptions)
+    .toHaveLength(1)
+  expect(graphs.find((graph) => graph.subpath === "./tooling/manifest" && graph.format === "cjs")?.dynamicLoaderExceptions)
+    .toHaveLength(1)
+})
+
+test("the ESM Metro loader recognizes a createRequire instance", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.mjs": 'import{createRequire as c}from"node:module";const ge=c(import.meta.url);export function transform(e){let a=e.upstreamTransformerPath;ge(a)}\n',
+    },
+  })
+
+  const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
+
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.dynamicLoaderExceptions)
+    .toMatchObject([{callee: "createRequire", specifier: "upstreamPath"}])
+})
+
+test("a shadowed CommonJS require cannot receive the Metro exception", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config){const path=config.upstreamTransformerPath;const require=value=>value;require(path)} exports.transform=transform;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
+test("a shadowed __require cannot receive the Metro exception", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.mjs": 'export function transform(config){const path=config.upstreamTransformerPath;const __require=value=>value;__require(path)}\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
+test("a reassigned createRequire instance cannot receive the Metro exception", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.mjs": 'import{createRequire as c}from"node:module";let ge=c(import.meta.url);export function transform(config){const path=config.upstreamTransformerPath;ge=value=>value;ge(path)}\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
+test("the Metro exception rejects a reassigned first config parameter", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config,other){config=other;const path=config.upstreamTransformerPath;require(path)} exports.transform=transform;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*path/i)
+})
+
+test("writing a config property does not count as reassigning the config parameter", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function transform(config){config.other=1;const path=config.upstreamTransformerPath;require(path)} exports.transform=transform;\n',
+    },
+  })
+
+  const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
+
+  expect(graphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "cjs")?.dynamicLoaderExceptions)
+    .toMatchObject([{callee: "require", specifier: "upstreamPath"}])
+})
+
+test("a shadowed CJS require binding cannot redirect the public transformer export", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'const a=require("./transformer-AbC123.cjs");{const a=require("./transformer-Rogue.cjs")}exports.transform=a.r;\n',
+      "dist/transformer-AbC123.cjs": 'exports.r=true;\n',
+      "dist/transformer-Rogue.cjs": 'async function Ca(e){let a=e.upstreamTransformerPath;require(a)}Object.defineProperty(exports,"r",{enumerable:!0,get:function(){return Ca}});\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*a/i)
+})
+
+test("a literal call to shadowed CommonJS require cannot add a packed dependency", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'function require(value){return {}}const a=require("./transformer-AbC123.cjs");exports.transform=a.r;\n',
+      "dist/transformer-AbC123.cjs": 'async function Ca(e){let a=e.upstreamTransformerPath;require(a)}Object.defineProperty(exports,"r",{enumerable:!0,get:function(){return Ca}});\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/shadowed.*require/i)
+})
+
+test("a reassigned CommonJS module alias cannot identify the public transformer", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'let a=require("./transformer-AbC123.cjs");a=require("./transformer-Rogue.cjs");exports.transform=a.r;\n',
+      "dist/transformer-AbC123.cjs": 'async function Ca(e){let a=e.upstreamTransformerPath;require(a)}Object.defineProperty(exports,"r",{enumerable:!0,get:function(){return Ca}});\n',
+      "dist/transformer-Rogue.cjs": 'exports.r=true;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/reassigned.*module.*binding/i)
+})
+
+test("duplicate CommonJS module alias initializers cannot identify the public transformer", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'var a=require("./transformer-AbC123.cjs");var a=require("./transformer-Rogue.cjs");exports.transform=a.r;\n',
+      "dist/transformer-AbC123.cjs": 'exports.r=true;\n',
+      "dist/transformer-Rogue.cjs": 'exports.r=true;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/ambiguous.*CommonJS module binding/i)
+})
+
+test("a loop-scoped CommonJS alias does not shadow the exported module binding", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'let a=require("./transformer-AbC123.cjs");for(let a=require("./transformer-Rogue.cjs");false;){}exports.transform=a.r;\n',
+      "dist/transformer-AbC123.cjs": 'exports.r=true;\n',
+      "dist/transformer-Rogue.cjs": 'exports.r=true;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot)).resolves.toBeDefined()
+})
+
+test("an ambiguous CJS transform getter cannot receive a loader exception", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.cjs": 'const local=require("./transformer-AbC123.cjs");exports.transform=local.r;\n',
+      "dist/transformer-AbC123.cjs": 'async function Ca(e){let a=e.upstreamTransformerPath;require(a)}function helper(e){return e}Object.defineProperty(exports,"r",{get:function(){if(flag)return Ca;return helper}});\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*a/i)
+})
+
+test("a minified transformer chunk cannot lend its export exception to a helper", async () => {
+  const packageRoot = await createFixturePackage({
+    overrides: {
+      "dist/transformer.mjs": 'import{r as a}from"./transformer-AbC123.mjs";export{a as transform};\n',
+      "dist/transformer.cjs": 'const a=require("./transformer-AbC123.cjs");exports.transform=a.r;\n',
+      "dist/transformer-AbC123.mjs": 'import{createRequire as c}from"node:module";const ge=c(import.meta.url);async function Ua(e){let a=e.upstreamTransformerPath;ge(a)}function helper(e){let a=e.upstreamTransformerPath;ge(a)}export{Ua as r,helper as s};\n',
+      "dist/transformer-AbC123.cjs": 'async function Ca(e){let a=e.upstreamTransformerPath;require(a)}function helper(e){let a=e.upstreamTransformerPath;require(a)}Object.defineProperty(exports,"r",{enumerable:!0,get:function(){return Ca}});exports.s=helper;\n',
+    },
+  })
+
+  await expect(auditPackedRuntimeEntrypoints(packageRoot))
+    .rejects.toThrow(/non-literal require.*a/i)
 })
 
 test("ordinary runtime entrypoints cannot reach an advanced entry target", async () => {

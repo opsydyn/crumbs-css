@@ -120,8 +120,16 @@ Commit only the retained minification evidence, roadmap update, and plan progres
 
 - [x] **Step 10: Close review findings on the Metro loader exception.**
 
-Resolve the loader argument to its TypeScript lexical symbol; accept only a single variable declaration initialized from `upstreamTransformerPath` with no writes. Add real packed-graph regressions for a wrong canonical-name origin, a shadowed binding, and reassignment. Confirm each new rejection test fails before the matcher change.
+Resolve the loader argument to its TypeScript lexical symbol; accept only a single unwritten variable binding initialized from `upstreamTransformerPath` on the first config parameter when the enclosing function symbol is exported publicly as `transform`, directly or through a minified ESM/CJS chunk re-export. Add packed-graph regressions for renamed exports, wrong property origins and receivers, helper functions, shadowed bindings, and direct and destructuring reassignment. Confirm each new rejection test fails before the matcher change.
 
 - [x] **Step 11: Requalify and correct retained evidence.**
 
-Re-run the minified build, package typecheck, and packed Expo/Metro check with the hardened audit, then restore the unminified build and rerun build, typecheck, full tests, budget validation, docs build, and diff checks. Correct the patch digest and retain the packed check log in the evidence commit.
+Re-run the minified build, package typecheck, real packed runtime-graph audit, and packed Expo/Metro check with the hardened audit, then restore the unminified build and rerun build, typecheck, full tests, budget validation, docs build, and diff checks. Correct the patch digest and retain the packed check and runtime-graph logs in the evidence commit.
+
+- [x] **Step 12: Close independent review findings on actual minified loader provenance.**
+
+Add fail-first fixtures for the packed `createRequire(import.meta.url)` ESM loader, a reassigned config parameter, shadowed CJS `require` and ESM `__require` bindings, reassigned createRequire instances, shadowed CJS require variables, and a getter with multiple/conditional returns; add a positive fixture showing that mutating a config field is not parameter reassignment. Resolve loader and CJS module bindings by TypeScript symbol, accept only an unshadowed Node require global or an unwritten createRequire instance, require one unambiguous getter return, distinguish binding writes from object-property writes, and reject writes to the first config parameter. Re-run minified package build/typecheck/full tests, retain the graph output with ESM `createRequire` and CJS `require` exceptions, and rerun packed web/iOS/Android source-map checks. Keep the default build unminified because existing host budgets still fail.
+
+- [x] **Step 13: Close final CJS export-provenance review findings.**
+
+Add fail-first cases for a literal `require` call shadowed by a local binding, reassignment of the module alias used by `exports.transform`, duplicate same-scope alias initializers, and a loop-scoped alias that must remain distinct. Admit literal module edges only when their loader resolves to the unshadowed Node `require` or a verified `createRequire`, and reject mutated or ambiguous module aliases before CJS export mapping. Re-run the focused graph suite, complete package/Storybook tests, typecheck, minified packed graph and Expo/Metro source-map checks; refresh test totals in the roadmap and qualification evidence. The final review found no remaining Critical or Important issues. Keep device and runtime-performance claims bounded to the evidence.
