@@ -647,6 +647,12 @@ Seven source-mapped Node profiles per workload attributed 44.18% of component-co
 
 Next recommended roadmap slice: **M10.5 extension descriptor normalization fast path** — remove the duplicate top-level class-reference probe with adversarial contract coverage, then repeat the paired benchmark against the production implementation. Keep component-contract `readArray` profiling, runtime graph budgets, native/device evidence, and Android as separate gates.
 
+### 2026-10-03 — M10.5 extension descriptor normalization fast path
+
+The descriptor style normalizer no longer probes a root value as a class reference before passing it to the recursive clone, which already performs that validation. Tagged and untagged references still normalize to frozen, marked values; accessors, symbol keys, custom prototypes, and cycles remain rejected. The proxy regression observed three own-key scans before and is now capped at two. The production-source A/B lowered the representative extension-validation median from 512.156 µs to 286.358 µs per descriptor (44.09%) across 13 fresh processes per variant, with non-overlapping ranges. This is Node v24.15.0 macOS host evidence only; package behavior and budgets were not widened. The full package run had one 5-second timeout in the generated native-composition test; all 1,352 other tests passed and the timed-out file passed in isolation. See the [assessment](assessments/2026-10-03-m10-5-extension-descriptor-normalization-fast-path.md) and [A/B evidence](evidence/2026-10-03-m10-5-extension-normalization-fast-path/qualification.json). M10.5 remains open; Android remains last.
+
+Next recommended roadmap slice: **M10.5 component-contract array-validation A/B** — isolate the measured `readArray` cost and test one bounded candidate before changing that validator. Keep the exact Node v22.0.0 host-budget gate as the final M10.5 step; native/device evidence and Android remain separate gates.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.

@@ -518,7 +518,6 @@ function validateRawSlotStyleRecord(
 }
 
 function normalizeDescriptorStyle(value: unknown, context: string): unknown {
-  if (isNativeClassReference(value as object)) return normalizeClassReference(value, context)
   return cloneAndFreezeDescriptorStyle(value, context)
 }
 

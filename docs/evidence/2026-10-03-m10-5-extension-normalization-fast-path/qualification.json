@@ -1,0 +1,106 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "baselineRevision": "7a91789e7ea9f46559605a510b4ce417bc225b8f",
+  "implementationBaseRevision": "713ff15abeea966c4946cc38a8b91d1f9f2e622d",
+  "source": {
+    "path": "packages/css/src/components/extension-contract.ts",
+    "baselineSha256": "7eb196f6269d46b5ad7f9ae44c5fa529baefc9dfe4c69408d447c0e52051873a",
+    "candidateSha256": "a5bd2cc2befedca35ce43d4e3e2de3cb9fe6ac01f476e4b3671282f8323e096e"
+  },
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "bun": "1.4.2",
+    "nodeVersion": "v24.15.0",
+    "buildTarget": "node22",
+    "buildFormat": "esm",
+    "minified": false,
+    "tsdown": "0.21.10"
+  },
+  "workload": "8 axes x 6 values, 8 compounds, 1 slot override; repeated descriptor validation",
+  "sampleProtocol": {
+    "freshProcessesPerVariant": 13,
+    "warmupCallsPerProcess": 1000,
+    "measuredCallsPerProcess": 700,
+    "order": "alternating baseline-first and candidate-first"
+  },
+  "baseline": {
+    "count": 13,
+    "medianNsPerCall": 512155.5357142858,
+    "minNsPerCall": 493701.9042857142,
+    "maxNsPerCall": 526671.9042857143,
+    "samplesNsPerCall": [
+      493701.9042857142,
+      494659.5242857142,
+      502611.19,
+      509216.37,
+      510825.5957142856,
+      510879.58285714284,
+      512155.5357142858,
+      512312.44,
+      516461.66714285704,
+      519243.21428571426,
+      521199.10714285716,
+      526179.88,
+      526671.9042857143
+    ]
+  },
+  "candidate": {
+    "count": 13,
+    "medianNsPerCall": 286357.7385714285,
+    "minNsPerCall": 281049.4042857143,
+    "maxNsPerCall": 304952.44000000006,
+    "samplesNsPerCall": [
+      281049.4042857143,
+      281682.02428571426,
+      282192.26285714284,
+      285121.1314285714,
+      285555.7728571429,
+      285719.16714285716,
+      286357.7385714285,
+      286711.1314285714,
+      291842.14285714284,
+      294425.41714285716,
+      295750.2385714286,
+      298107.5585714285,
+      304952.44000000006
+    ]
+  },
+  "candidateMedianDeltaPercent": -44.09,
+  "behaviorReceipt": {
+    "plainFrozen": true,
+    "classReference": "{\"$$type\":\"crumbs.css.class\",\"className\":\"brandTone\"}",
+    "classMarker": true,
+    "accessorError": "component recipe extension 0 slot overrides style for \"root\".opacity must be an enumerable data property",
+    "getterInvoked": false,
+    "regressionTests": {
+      "focusedTestsPassed": 22,
+      "focusedAssertions": 2003,
+      "proxyStyleOwnKeyScansBefore": 3,
+      "proxyStyleOwnKeyScanBudgetAfter": 2,
+      "taggedAndUntaggedClassReferences": "normalized, frozen, and marked",
+      "accessorGetterInvocations": 0,
+      "symbolKeysCustomPrototypesAndCycles": "rejected"
+    }
+  },
+  "verification": {
+    "fullPackageSuite": {
+      "passed": 1352,
+      "failed": 1,
+      "total": 1353,
+      "failure": "native-composition.test.ts generated ordered graphs case exceeded the 5-second suite timeout"
+    },
+    "isolatedTimedOutFile": {
+      "passed": 6,
+      "failed": 0
+    },
+    "packageTypecheck": "passed",
+    "packageBuild": "passed",
+    "documentationBuild": {
+      "status": "passed",
+      "pages": 28
+    }
+  },
+  "evidenceBoundary": "Node v24.15 macOS host microbenchmark for internal extension descriptor validation. Not React Native, Hermes, Metro, device, render-loop, or release-performance evidence."
+}
