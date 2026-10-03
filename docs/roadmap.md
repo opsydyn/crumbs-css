@@ -623,6 +623,12 @@ The unchanged uninstrumented exact-Node-floor host suite remains measured at sou
 
 Next recommended roadmap slice: **M10.5 runtime-budget failure triage** — trace the four initialization and six graph-size failures to narrower source contributors before selecting another A/B, while preserving public exports and cross-entry function identity. Keep incomplete Metro/editor comparisons and visual, screen-reader, physical-device, release-device, and Android-specific gates separate.
 
+### 2026-10-03 — M10.5 runtime-budget failure triage
+
+The four exact initialization failures load the compatibility `theme` entry, not `theme/core`. The corrected source profile did not show a repeated Crumbs function hotspot in those four compatibility cells; the one condition-snapshot scratch candidate was rejected because it increased graph size and worsened initialization medians. Current source-map attribution locates the large graph payload in the shared theme resolver, component contracts and extension validation, conditions, recipes, sprinkles, expressions, and token-domain modules. These are current module-size estimates, not exact byte deltas from the M4.6 baselines. A prior single-entry diagnostic improved compatibility import times and reduced graph bytes, but did not verify the required focused-entry function identity. No production change or budget adjustment is justified yet. See the [runtime-budget failure triage assessment](assessments/2026-10-03-m10-5-runtime-budget-failure-triage.md).
+
+Next recommended roadmap slice: **M10.5 identity-preserving compatibility-entry chunk-layout A/B** — test whether a smaller/faster `theme` load can retain all current exports and compatibility-to-focused function identity. Keep the four initialization and two compatibility-graph limits unchanged; retain separate follow-up for `theme/core` and token graphs. Android remains parked for last.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
