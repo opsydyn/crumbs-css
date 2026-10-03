@@ -641,6 +641,12 @@ The extension descriptor validator no longer performs a symbol-only own-key scan
 
 Next recommended roadmap slice: **M10.5 targeted resolver CPU attribution** — profile component-recipe and extension validation separately with representative descriptors, then select a candidate with a measurable impact. Keep runtime graph budgets, native/device evidence, and Android as separate gates.
 
+### 2026-10-03 — M10.5 targeted resolver CPU attribution
+
+Seven source-mapped Node profiles per workload attributed 44.18% of component-contract samples to `readArray` and 89.64% of extension-descriptor samples to `normalizeClassReference`. A scratch A/B that removed the duplicate top-level class-reference probe lowered the representative extension-validation median from 549.233 µs to 308.123 µs per descriptor across 13 fresh processes per variant (43.90%); the sampled ranges did not overlap. Plain-style freezing, class-reference marker normalization, and accessor rejection receipts matched. This is Node v24.15.0 macOS host evidence only; no production source, API, runtime budget, or release gate changed. See the [assessment](assessments/2026-10-03-m10-5-targeted-resolver-profile.md) and [machine-readable profile and A/B evidence](evidence/2026-10-03-m10-5-targeted-resolver-profile/qualification.json). M10.5 remains open; Android remains last.
+
+Next recommended roadmap slice: **M10.5 extension descriptor normalization fast path** — remove the duplicate top-level class-reference probe with adversarial contract coverage, then repeat the paired benchmark against the production implementation. Keep component-contract `readArray` profiling, runtime graph budgets, native/device evidence, and Android as separate gates.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
