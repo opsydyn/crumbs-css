@@ -683,7 +683,6 @@ function dataRecordEntries(value: unknown, context: string): Array<[string, unkn
   }
   const prototype = Object.getPrototypeOf(value)
   if (prototype !== Object.prototype && prototype !== null) throw new TypeError(`${context} must be a plain data record`)
-  if (Object.getOwnPropertySymbols(value).length > 0) throw new TypeError(`${context} cannot contain symbol keys`)
   const entries: Array<[string, unknown]> = []
   for (const key of Reflect.ownKeys(value)) {
     if (typeof key !== "string") throw new TypeError(`${context} cannot contain symbol keys`)
@@ -700,10 +699,10 @@ function dataArray(value: unknown, context: string): unknown[] {
   if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) {
     throw new TypeError(`${context} must be an array`)
   }
-  if (Object.getOwnPropertySymbols(value).length > 0) throw new TypeError(`${context} cannot contain symbol properties`)
   for (const key of Reflect.ownKeys(value)) {
     if (key === "length") continue
-    if (typeof key !== "string" || !/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) {
+    if (typeof key !== "string") throw new TypeError(`${context} cannot contain symbol properties`)
+    if (!/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) {
       throw new TypeError(`${context} must contain only indexed data values`)
     }
   }

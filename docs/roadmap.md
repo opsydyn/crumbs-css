@@ -635,6 +635,12 @@ A paired scratch build compared the current multi-entry theme output with a one-
 
 Next recommended roadmap slice: **M10.5 source-level runtime optimization** — reduce measured resolver and component-contract costs while preserving focused and compatibility API/identity contracts and the existing budgets. Keep `theme/core`, token graphs, and native/device acceptance as separate gates; Android remains last.
 
+### 2026-10-03 — M10.5 extension descriptor validation scan reduction
+
+The extension descriptor validator no longer performs a symbol-only own-key scan immediately before `Reflect.ownKeys`; symbol rejection, array diagnostics, and accessor safety remain covered. Package typecheck and build pass. A paired descriptor-normalization microbenchmark was neutral within run-to-run spread, so this is retained as a small validation-path cleanup and is not counted as a runtime-performance pass. With reduced test concurrency, 1,349 package tests passed and one migration-export graph test exceeded its 5-second suite-load timeout; that file passed all four tests when isolated. See the [assessment](assessments/2026-10-03-m10-5-extension-validation-scan.md). M10.5 remains open; the existing device and compatibility budgets are unchanged.
+
+Next recommended roadmap slice: **M10.5 targeted resolver CPU attribution** — profile component-recipe and extension validation separately with representative descriptors, then select a candidate with a measurable impact. Keep runtime graph budgets, native/device evidence, and Android as separate gates.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
