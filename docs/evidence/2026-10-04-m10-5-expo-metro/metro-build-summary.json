@@ -1,0 +1,222 @@
+{
+  "formatVersion": 1,
+  "roadmap": "M10.5",
+  "sourceRevision": "3e04b80c52323a537ccadfe5b79db7bce0ff6bae",
+  "commands": {
+    "cssBuild": "bun run --cwd packages/css build:dev",
+    "defaultWeb": "EXPO_NO_METRO_WORKSPACE_ROOT=1 bunx expo export --clear --platform web --output-dir <temp> --source-maps external --max-workers 2",
+    "probeWeb": "same Expo export command with temporary app entry changed to m10-5-metro-probe.tsx",
+    "probeIos": "EXPO_NO_METRO_WORKSPACE_ROOT=1 bunx expo export --clear --platform ios --no-bytecode --output-dir <temp> --source-maps external --max-workers 2",
+    "storybookIos": "same iOS export command with the unmodified app entry"
+  },
+  "metroConfig": {
+    "file": "apps/storybook/metro.config.js",
+    "sha256": "cf43f3e8f43e7bf86f700873260920318a28104c991e4bdd1f6479c328be448c",
+    "withNativeStyles": true,
+    "strictDiagnostics": true,
+    "withStorybookDisabled": "EXPO_PUBLIC_STORYBOOK_ENABLED was unset; default src/App entry was tested"
+  },
+  "versions": {
+    "node": "v24.15.0",
+    "bun": "1.4.2",
+    "expo": "56.0.23",
+    "expoMetroConfig": "56.0.12",
+    "metro": "0.84.4",
+    "react": "19.2.3",
+    "reactNative": "0.85.3",
+    "reactNativeWeb": "0.21.2"
+  },
+  "sourceHashes": {
+    "apps/storybook/index.jsAfterTemporaryProbeRestore": "63e6353cbcfebd7d40ddaa8a02719ff6adcabdadc60d083c89dfd0657149f11e",
+    "apps/storybook/metro.config.js": "cf43f3e8f43e7bf86f700873260920318a28104c991e4bdd1f6479c328be448c",
+    "packages/css/package.json": "af913c9c085e778b19a3cc52b5458fed9710bd1290143c0b3aeae1548c78e569",
+    "packages/css/tsdown.config.ts": "a4f3bb60c2152175d0ecfb9ab52ac1eb3f70a1992cd76ae40611bb4698688cbf"
+  },
+  "packageExports": {
+    "compatibilityTheme": {
+      "specifier": "@opsydyn/crumbs-css/theme",
+      "metroResolved": "dist/theme.mjs",
+      "cjsTarget": "dist/theme.cjs"
+    },
+    "themeCore": {
+      "specifier": "@opsydyn/crumbs-css/theme/core",
+      "metroResolved": "dist/theme-core.mjs",
+      "cjsTarget": "dist/theme-core.cjs"
+    },
+    "resolutionEvidence": "Each of the four Metro source maps includes theme.mjs and theme-core.mjs; no CJS target was present in these Metro graphs."
+  },
+  "builds": [
+    {
+      "name": "storybook-web",
+      "platform": "web",
+      "moduleCountFromExpoLog": 913,
+      "bundle": {
+        "file": "index-34f109b1d0c1bb4a63b332d6fed8bfac.js",
+        "bytes": 2482198,
+        "sha256": "0f32e585043e6e80f52aad24ac14e85502535b5d3ef412c5c75821b0eb4d2917"
+      },
+      "sourceMap": {
+        "file": "index-34f109b1d0c1bb4a63b332d6fed8bfac.js.map",
+        "bytes": 6601266,
+        "sha256": "e74e091450eb7115b20b291e9203af60ca7e7e551203c282f91b47710361b610"
+      },
+      "themeEntrySources": [
+        "/../../packages/css/dist/theme-contract-DbZiCwYI.mjs",
+        "/../../packages/css/dist/theme-core.mjs",
+        "/../../packages/css/dist/theme-expressions.mjs",
+        "/../../packages/css/dist/theme-recipe-resolvers-BKU_T5zM.mjs",
+        "/../../packages/css/dist/theme-sprinkles-resolver-BovVAHPp.mjs",
+        "/../../packages/css/dist/theme-token-gYsIuMTO.mjs",
+        "/../../packages/css/dist/theme.mjs"
+      ],
+      "bothPackageEntriesResolved": true,
+      "reactSources": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react-jsx-runtime.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/index.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/jsx-runtime.js"
+      ],
+      "reactPackageRoots": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react"
+      ],
+      "singleReactPackageRoot": true,
+      "probeSourceBundled": false,
+      "outcome": "default Storybook app; Expo export passed"
+    },
+    {
+      "name": "probe-web",
+      "platform": "web",
+      "moduleCountFromExpoLog": 730,
+      "bundle": {
+        "file": "index-0d881f1ecb8c1af8c7285484ecea9b47.js",
+        "bytes": 1643022,
+        "sha256": "e07e44803776a5f270d64500ef5aada8718158ab942ba0cd378f2f5c288b356a"
+      },
+      "sourceMap": {
+        "file": "index-0d881f1ecb8c1af8c7285484ecea9b47.js.map",
+        "bytes": 4992685,
+        "sha256": "0183926add72fcc843011ff55db6584c44a9b9becafe229e81be6899902c2df6"
+      },
+      "themeEntrySources": [
+        "/../../packages/css/dist/theme-contract-DbZiCwYI.mjs",
+        "/../../packages/css/dist/theme-core.mjs",
+        "/../../packages/css/dist/theme-expressions.mjs",
+        "/../../packages/css/dist/theme-recipe-resolvers-BKU_T5zM.mjs",
+        "/../../packages/css/dist/theme-sprinkles-resolver-BovVAHPp.mjs",
+        "/../../packages/css/dist/theme-token-gYsIuMTO.mjs",
+        "/../../packages/css/dist/theme.mjs"
+      ],
+      "bothPackageEntriesResolved": true,
+      "reactSources": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react-jsx-runtime.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/index.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/jsx-runtime.js"
+      ],
+      "reactPackageRoots": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react"
+      ],
+      "singleReactPackageRoot": true,
+      "probeSourceBundled": true,
+      "outcome": "mixed-entry probe; Expo export and browser assertions passed"
+    },
+    {
+      "name": "probe-ios",
+      "platform": "ios",
+      "moduleCountFromExpoLog": 1019,
+      "bundle": {
+        "file": "index-b17f0f8acffe63e53bed6f7ba69bbe47.js",
+        "bytes": 2123471,
+        "sha256": "4b4fb906dd87f92db91493fef0edcd8f81861363472845bbcdce451bd3a0bddf"
+      },
+      "sourceMap": {
+        "file": "index-b17f0f8acffe63e53bed6f7ba69bbe47.js.map",
+        "bytes": 7515446,
+        "sha256": "a6caaa7b46189cc94cd2f527760b5714f59368a3737ddd473f409610c7763152"
+      },
+      "themeEntrySources": [
+        "/../../packages/css/dist/theme-contract-DbZiCwYI.mjs",
+        "/../../packages/css/dist/theme-core.mjs",
+        "/../../packages/css/dist/theme-expressions.mjs",
+        "/../../packages/css/dist/theme-recipe-resolvers-BKU_T5zM.mjs",
+        "/../../packages/css/dist/theme-sprinkles-resolver-BovVAHPp.mjs",
+        "/../../packages/css/dist/theme-token-gYsIuMTO.mjs",
+        "/../../packages/css/dist/theme.mjs"
+      ],
+      "bothPackageEntriesResolved": true,
+      "reactSources": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react-jsx-runtime.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/index.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/jsx-runtime.js"
+      ],
+      "reactPackageRoots": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react"
+      ],
+      "singleReactPackageRoot": true,
+      "probeSourceBundled": true,
+      "outcome": "mixed-entry probe; Expo/Metro export passed; no bytecode"
+    },
+    {
+      "name": "storybook-ios",
+      "platform": "ios",
+      "moduleCountFromExpoLog": 1102,
+      "bundle": {
+        "file": "index-73f09af51907d924bf614f15299c0ce2.js",
+        "bytes": 2662632,
+        "sha256": "8ac781f450ed1f931f736c1eeb17d7f497b4ec0c16d6a2cf13b9ffc943df96e7"
+      },
+      "sourceMap": {
+        "file": "index-73f09af51907d924bf614f15299c0ce2.js.map",
+        "bytes": 8075769,
+        "sha256": "76bc67d1bd5ca006a62e598070116164c382052e365797aca401f59436239bf9"
+      },
+      "themeEntrySources": [
+        "/../../packages/css/dist/theme-contract-DbZiCwYI.mjs",
+        "/../../packages/css/dist/theme-core.mjs",
+        "/../../packages/css/dist/theme-expressions.mjs",
+        "/../../packages/css/dist/theme-recipe-resolvers-BKU_T5zM.mjs",
+        "/../../packages/css/dist/theme-sprinkles-resolver-BovVAHPp.mjs",
+        "/../../packages/css/dist/theme-token-gYsIuMTO.mjs",
+        "/../../packages/css/dist/theme.mjs"
+      ],
+      "bothPackageEntriesResolved": true,
+      "reactSources": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react-jsx-runtime.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/cjs/react.production.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/index.js",
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react/jsx-runtime.js"
+      ],
+      "reactPackageRoots": [
+        "/../../node_modules/.bun/react@19.2.3/node_modules/react"
+      ],
+      "singleReactPackageRoot": true,
+      "probeSourceBundled": false,
+      "outcome": "unmodified default Storybook app; Expo/Metro export passed; no bytecode"
+    }
+  ],
+  "runtime": {
+    "probeWeb": "passed",
+    "probeIos": "bundled only; no device/runtime execution",
+    "fullStorybookIos": "bundled only; no device/runtime execution",
+    "fullStorybookWeb": {
+      "bundle": "passed",
+      "browserRender": "failed",
+      "observedError": "TypeError: isRTL must be a boolean",
+      "stackLocation": "AppThemeProvider",
+      "interpretation": "The default app shell did not render in the web host. This is recorded separately and is not counted as a mixed-entry failure; the isolated probe using the same Expo/Metro config rendered all mixed-entry checks."
+    }
+  },
+  "identity": {
+    "currentThemeAndThemeCoreProviderFunctionReferences": "distinct in the Metro probe",
+    "mixedProviderHookBehavior": "all tested combinations render through the same global theme-store context in the web runtime",
+    "reactPackageRootsInEverySourceMap": 1
+  },
+  "limitations": [
+    "Metro exercised the ESM package export target; its CJS require target was not selected or tested.",
+    "The iOS platform artifacts are Metro bundles only; --no-bytecode was used and no Hermes, simulator, or physical-device execution occurred.",
+    "The successful rendered proof is React Native Web in a browser host and does not establish native renderer behavior.",
+    "The full default Storybook web entry bundles but currently throws isRTL must be a boolean during AppThemeProvider rendering.",
+    "Android remains parked and last."
+  ]
+}

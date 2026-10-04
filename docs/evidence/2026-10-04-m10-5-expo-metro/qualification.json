@@ -1,0 +1,31 @@
+{
+  "formatVersion": 1,
+  "date": "2026-10-04",
+  "roadmap": "M10.5",
+  "status": "Expo/Metro host qualification complete; native runtime and device qualification remain open",
+  "sourceRevision": "3e04b80c52323a537ccadfe5b79db7bce0ff6bae",
+  "freshPackageBuild": {
+    "command": "bun run --cwd packages/css build:dev",
+    "result": "passed",
+    "target": "Node 22",
+    "runtimeUsedForMetro": "Node v24.15.0"
+  },
+  "consumer": "apps/storybook",
+  "question": "Do actual Expo/Metro package exports preserve interoperability when ThemeProvider and hooks are imported from theme and theme/core?",
+  "decision": "The current ESM split interoperates in the tested web runtime despite distinct ThemeProvider export references. Metro's iOS platform also bundles both entrypoints from the unmodified Storybook app. Keep the current build split; no package API or source change was needed.",
+  "evidence": {
+    "metroSummary": {
+      "file": "metro-build-summary.json",
+      "sha256": "dceddfbe8289437cacae35ad129706e8e83714caefbfa8513ddfa3f332f38402"
+    },
+    "renderReceipt": {
+      "file": "render-receipt.json",
+      "sha256": "558bc126bd6da1790d05bffe72b93dc1460c15810dd059e8e4fae16f0d8b6694"
+    },
+    "probeSource": {
+      "file": "m10-5-metro-probe.tsx",
+      "sha256": "5542ad6a76f6e561e12813594650a553d56945cde72b1bc64b7ce5d31ed1fc6b"
+    }
+  },
+  "nextRoadmapItem": "M10.5 exact Node v22.0.0 host-budget gate; keep approved limits and baselines unchanged, and Android remains last."
+}
