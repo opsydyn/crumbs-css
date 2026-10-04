@@ -1,0 +1,2334 @@
+{
+  "formatVersion": 1,
+  "date": "2026-10-04",
+  "roadmap": "M10.5",
+  "status": "diagnostic; no production source, public API, threshold, or baseline change",
+  "question": "Can tsdown grouping make theme and theme/core exports share references while retaining a lean theme/core graph and focused-entry identity?",
+  "sourceRevision": "0611321ca161d3bdb1dd7d4ad5d30cc1887d0b4d",
+  "environment": {
+    "host": "macOS 26.6.2, Apple M4 Pro arm64",
+    "build": "Bun 1.4.2, tsdown 0.21.10, Rolldown 1.0.0-rc.17",
+    "runtimes": {
+      "floor": "Node v22.0.0",
+      "current": "Node v24.15.0"
+    },
+    "reactPeer": "19.2.3"
+  },
+  "protocol": {
+    "variants": [
+      "current-split",
+      "core-theme-pair",
+      "all-theme-entries"
+    ],
+    "builds": "Each candidate config built successfully in a package-shaped consumer checkout from the same source revision.",
+    "graphs": "Five deterministic graph scans per package entry and format.",
+    "initialization": "One excluded fresh-process warmup plus 15 retained fresh-process module-evaluation samples per runtime and format; process startup excluded; forced GC before and after; one sequential cohort per layout; OS cache state uncontrolled.",
+    "identityAndBehavior": "Resolve @opsydyn/crumbs-css through its declared export map in one consumer with one React peer; import ESM and require CJS, compare exported references, and render six mixed ThemeProvider/useTheme pairings per runtime.",
+    "redaction": "Absolute checkout, temporary directory, and Node executable prefixes in retained JSON are replaced with stable placeholders; sourceSha256 records the original scratch digest for redacted JSON files."
+  },
+  "buildConfigSha256": {
+    "currentSplit": "a4f3bb60c2152175d0ecfb9ab52ac1eb3f70a1992cd76ae40611bb4698688cbf",
+    "coreThemePair": "d70fb30cc4979a89a6fb6881dfda474f1561f6d2fd92e2d380f985ee59537979",
+    "allThemeEntries": "5b702fab5715ab89a16e568f221f34de59f410d7d4c55aef14295ce27c3f17d9"
+  },
+  "graphBytes": {
+    "current-split": {
+      "theme-core": {
+        "esm": 64549,
+        "cjs": 65408
+      },
+      "theme": {
+        "esm": 164215,
+        "cjs": 171842
+      }
+    },
+    "core-theme-pair": {
+      "theme-core": {
+        "esm": 159443,
+        "cjs": 164543
+      },
+      "theme": {
+        "esm": 160442,
+        "cjs": 165984
+      }
+    },
+    "all-theme-entries": {
+      "theme-core": {
+        "esm": 131044,
+        "cjs": 138518
+      },
+      "theme": {
+        "esm": 165167,
+        "cjs": 174456
+      }
+    }
+  },
+  "initialization": {
+    "existingLimitsMs": {
+      "node22": {
+        "esm": 7.553,
+        "cjs": 4.083
+      },
+      "node24": {
+        "esm": 3.067,
+        "cjs": 2.444
+      }
+    },
+    "cohortMediansAndRanges": {
+      "current-split": {
+        "node22": {
+          "esm": {
+            "n": 15,
+            "medianMs": 8.143042000000001,
+            "minMs": 7.667416000000001,
+            "maxMs": 8.639167,
+            "statusAgainstExistingLimit": "fail"
+          },
+          "cjs": {
+            "n": 15,
+            "medianMs": 4.8536670000000015,
+            "minMs": 4.4815830000000005,
+            "maxMs": 5.656167,
+            "statusAgainstExistingLimit": "fail"
+          }
+        },
+        "node24": {
+          "esm": {
+            "n": 15,
+            "medianMs": 4.5788329999999995,
+            "minMs": 4.171458000000001,
+            "maxMs": 4.916625,
+            "statusAgainstExistingLimit": "fail"
+          },
+          "cjs": {
+            "n": 15,
+            "medianMs": 3.610583,
+            "minMs": 3.2760419999999986,
+            "maxMs": 4.215292,
+            "statusAgainstExistingLimit": "fail"
+          }
+        }
+      },
+      "core-theme-pair": {
+        "node22": {
+          "esm": {
+            "n": 15,
+            "medianMs": 7.019874999999999,
+            "minMs": 6.672500000000001,
+            "maxMs": 8.79975,
+            "statusAgainstExistingLimit": "pass"
+          },
+          "cjs": {
+            "n": 15,
+            "medianMs": 4.738624999999999,
+            "minMs": 4.177792,
+            "maxMs": 5.051875000000001,
+            "statusAgainstExistingLimit": "fail"
+          }
+        },
+        "node24": {
+          "esm": {
+            "n": 15,
+            "medianMs": 3.5375000000000014,
+            "minMs": 3.3566670000000016,
+            "maxMs": 3.869624999999999,
+            "statusAgainstExistingLimit": "fail"
+          },
+          "cjs": {
+            "n": 15,
+            "medianMs": 3.307208000000001,
+            "minMs": 2.960374999999999,
+            "maxMs": 3.500292,
+            "statusAgainstExistingLimit": "fail"
+          }
+        }
+      },
+      "all-theme-entries": {
+        "node22": {
+          "esm": {
+            "n": 15,
+            "medianMs": 7.957250000000002,
+            "minMs": 7.406084,
+            "maxMs": 16.051083,
+            "statusAgainstExistingLimit": "fail"
+          },
+          "cjs": {
+            "n": 15,
+            "medianMs": 4.918082999999999,
+            "minMs": 4.702583000000001,
+            "maxMs": 5.5585830000000005,
+            "statusAgainstExistingLimit": "fail"
+          }
+        },
+        "node24": {
+          "esm": {
+            "n": 15,
+            "medianMs": 4.57375,
+            "minMs": 4.336208000000003,
+            "maxMs": 5.230916000000001,
+            "statusAgainstExistingLimit": "fail"
+          },
+          "cjs": {
+            "n": 15,
+            "medianMs": 3.4570410000000003,
+            "minMs": 3.232584000000001,
+            "maxMs": 3.799999999999999,
+            "statusAgainstExistingLimit": "fail"
+          }
+        }
+      }
+    },
+    "qualification": "Diagnostic only: one cohort per layout. No layout passes all four existing initialization limits."
+  },
+  "identityAndBehavior": {
+    "current-split": {
+      "node22": {
+        "node": "v22.0.0",
+        "peerReact": "19.2.3",
+        "oneReactResolution": true,
+        "themeToCoreReferenceIdentity": {
+          "esm": {
+            "same": 0,
+            "total": 21
+          },
+          "cjs": {
+            "same": 0,
+            "total": 21
+          }
+        },
+        "themeToFocusedEntryReferenceIdentity": {
+          "esm": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          },
+          "cjs": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          }
+        },
+        "mixedProviderHookCases": 6,
+        "mixedProviderHookRendersPassed": true,
+        "exportNames": {
+          "esm": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          },
+          "cjs": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          }
+        }
+      },
+      "node24": {
+        "node": "v24.15.0",
+        "peerReact": "19.2.3",
+        "oneReactResolution": true,
+        "themeToCoreReferenceIdentity": {
+          "esm": {
+            "same": 0,
+            "total": 21
+          },
+          "cjs": {
+            "same": 0,
+            "total": 21
+          }
+        },
+        "themeToFocusedEntryReferenceIdentity": {
+          "esm": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          },
+          "cjs": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          }
+        },
+        "mixedProviderHookCases": 6,
+        "mixedProviderHookRendersPassed": true,
+        "exportNames": {
+          "esm": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          },
+          "cjs": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "core-theme-pair": {
+      "node22": {
+        "node": "v22.0.0",
+        "peerReact": "19.2.3",
+        "oneReactResolution": true,
+        "themeToCoreReferenceIdentity": {
+          "esm": {
+            "same": 21,
+            "total": 21
+          },
+          "cjs": {
+            "same": 21,
+            "total": 21
+          }
+        },
+        "themeToFocusedEntryReferenceIdentity": {
+          "esm": {
+            "conditions": {
+              "same": 0,
+              "total": 12
+            },
+            "expressions": {
+              "same": 0,
+              "total": 4
+            },
+            "recipes": {
+              "same": 0,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 0,
+              "total": 1
+            }
+          },
+          "cjs": {
+            "conditions": {
+              "same": 0,
+              "total": 12
+            },
+            "expressions": {
+              "same": 0,
+              "total": 4
+            },
+            "recipes": {
+              "same": 0,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 0,
+              "total": 1
+            }
+          }
+        },
+        "mixedProviderHookCases": 6,
+        "mixedProviderHookRendersPassed": true,
+        "exportNames": {
+          "esm": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          },
+          "cjs": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          }
+        }
+      },
+      "node24": {
+        "node": "v24.15.0",
+        "peerReact": "19.2.3",
+        "oneReactResolution": true,
+        "themeToCoreReferenceIdentity": {
+          "esm": {
+            "same": 21,
+            "total": 21
+          },
+          "cjs": {
+            "same": 21,
+            "total": 21
+          }
+        },
+        "themeToFocusedEntryReferenceIdentity": {
+          "esm": {
+            "conditions": {
+              "same": 0,
+              "total": 12
+            },
+            "expressions": {
+              "same": 0,
+              "total": 4
+            },
+            "recipes": {
+              "same": 0,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 0,
+              "total": 1
+            }
+          },
+          "cjs": {
+            "conditions": {
+              "same": 0,
+              "total": 12
+            },
+            "expressions": {
+              "same": 0,
+              "total": 4
+            },
+            "recipes": {
+              "same": 0,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 0,
+              "total": 1
+            }
+          }
+        },
+        "mixedProviderHookCases": 6,
+        "mixedProviderHookRendersPassed": true,
+        "exportNames": {
+          "esm": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          },
+          "cjs": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "all-theme-entries": {
+      "node22": {
+        "node": "v22.0.0",
+        "peerReact": "19.2.3",
+        "oneReactResolution": true,
+        "themeToCoreReferenceIdentity": {
+          "esm": {
+            "same": 21,
+            "total": 21
+          },
+          "cjs": {
+            "same": 21,
+            "total": 21
+          }
+        },
+        "themeToFocusedEntryReferenceIdentity": {
+          "esm": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          },
+          "cjs": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          }
+        },
+        "mixedProviderHookCases": 6,
+        "mixedProviderHookRendersPassed": true,
+        "exportNames": {
+          "esm": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          },
+          "cjs": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          }
+        }
+      },
+      "node24": {
+        "node": "v24.15.0",
+        "peerReact": "19.2.3",
+        "oneReactResolution": true,
+        "themeToCoreReferenceIdentity": {
+          "esm": {
+            "same": 21,
+            "total": 21
+          },
+          "cjs": {
+            "same": 21,
+            "total": 21
+          }
+        },
+        "themeToFocusedEntryReferenceIdentity": {
+          "esm": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          },
+          "cjs": {
+            "conditions": {
+              "same": 12,
+              "total": 12
+            },
+            "expressions": {
+              "same": 4,
+              "total": 4
+            },
+            "recipes": {
+              "same": 6,
+              "total": 6
+            },
+            "sprinkles": {
+              "same": 1,
+              "total": 1
+            }
+          }
+        },
+        "mixedProviderHookCases": 6,
+        "mixedProviderHookRendersPassed": true,
+        "exportNames": {
+          "esm": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          },
+          "cjs": {
+            "theme": {
+              "count": 39,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeExpressionEvaluationError",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "TokenThemeProvider",
+                "TokenThemeScopeProvider",
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeExpressionRuntime",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createRecipeResolver",
+                "createSprinklesResolver",
+                "createThemeDependencyPlan",
+                "createThemeDependencyResolver",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "evaluateNativeExpression",
+                "foldNativeExpression",
+                "isThemeTokenReference",
+                "isTokenThemeCompatible",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles",
+                "useTokenTheme"
+              ]
+            },
+            "core": {
+              "count": 22,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "NativeThemeTokenReferenceType",
+                "ThemeProvider",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "createThemeTokenReference",
+                "defaultNativeConditionSnapshot",
+                "isThemeTokenReference",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "resolveThemeStyles",
+                "resolveThemeTokens",
+                "useNativeConditionSnapshot",
+                "useTheme",
+                "useThemeSelector",
+                "useThemedStyle",
+                "useThemedStyles"
+              ]
+            },
+            "conditions": {
+              "count": 13,
+              "names": [
+                "NATIVE_CONDITION_BREAKPOINTS",
+                "NATIVE_RESPONSIVE_CONDITION_MATCHERS",
+                "NATIVE_RESPONSIVE_CONDITION_NAMES",
+                "createNativeConditionResolver",
+                "createNativeConditionStore",
+                "createNativeMapValueFn",
+                "createNativeNormalizeValueFn",
+                "defaultNativeConditionSnapshot",
+                "mapNativeConditionValueToBranches",
+                "nativeConditionSnapshotKey",
+                "normalizeNativeConditionInput",
+                "traceNativeConditionBranches",
+                "useNativeConditionSnapshot"
+              ]
+            },
+            "expressions": {
+              "count": 26,
+              "names": [
+                "NativeExpressionEvaluationError",
+                "NativeExpressionProgramType",
+                "NativeExpressionProgramVersion",
+                "NativeExpressionType",
+                "NativeExpressionVersion",
+                "createNativeExpressionAdd",
+                "createNativeExpressionAlias",
+                "createNativeExpressionClamp",
+                "createNativeExpressionCompose",
+                "createNativeExpressionConditionReference",
+                "createNativeExpressionDomain",
+                "createNativeExpressionFallback",
+                "createNativeExpressionLiteral",
+                "createNativeExpressionMatch",
+                "createNativeExpressionProgram",
+                "createNativeExpressionRuntime",
+                "createNativeExpressionScale",
+                "createNativeExpressionSubtract",
+                "createNativeExpressionTokenReference",
+                "evaluateNativeExpression",
+                "evaluateNativeExpressionWithTrace",
+                "foldNativeExpression",
+                "isNativeExpression",
+                "isNativeExpressionProgram",
+                "nativeExpressionDependencyKey",
+                "nativeExpressionDomainKey"
+              ]
+            },
+            "recipes": {
+              "count": 6,
+              "names": [
+                "createComponentRecipeResolutionPlan",
+                "createComponentRecipeResolver",
+                "createRecipeResolver",
+                "resolveComponentRecipeResolutionPlan",
+                "resolveComponentRecipeStyles",
+                "resolveRecipeStyle"
+              ]
+            },
+            "sprinkles": {
+              "count": 1,
+              "names": [
+                "createSprinklesResolver"
+              ]
+            }
+          }
+        }
+      }
+    }
+  },
+  "contractParity": {
+    "runtimeExportNamesUnchangedAcrossVariants": true,
+    "themeEntryDeclarationsByteIdenticalAcrossVariants": {
+      "current-split": true,
+      "core-theme-pair": true,
+      "all-theme-entries": true
+    }
+  },
+  "tests": {
+    "currentSplitBaseline": {
+      "passed": 50,
+      "failed": 0,
+      "expectations": 180
+    },
+    "eachGroupingCandidate": {
+      "passed": 48,
+      "failed": 2,
+      "expectations": 178,
+      "failures": [
+        "ESM: keeps the lean theme-core graph independent of optional theme feature chunks",
+        "CJS: keeps the lean theme-core graph independent of optional theme feature chunks"
+      ]
+    }
+  },
+  "decision": "Retain the current split. The pair layout adds 94,894/99,135 bytes to the theme/core ESM/CJS graph and loses focused-entry references. Grouping all six theme entries adds 66,495/73,110 bytes to theme/core. Both candidates fail the existing lean-core isolation assertions. Node SSR mixed-provider/hook rendering succeeds with the current split despite distinct exported function references; that result is limited to the tested Node consumer, React peer, and JS realm.",
+  "limitations": [
+    "This does not qualify Expo/Metro, Hermes, a simulator, or a physical device.",
+    "Initialization timing is a single diagnostic cohort per layout; do not claim a timing gate pass.",
+    "Existing graph zero-growth references remain unchanged and current source is not fully budget-qualified.",
+    "Node mixed-entry success does not prove cross-realm or multiple-copy React interoperability.",
+    "Android/device acceptance remains parked and last."
+  ],
+  "evidenceFiles": [
+    {
+      "file": "all-theme-entries-graphs.json",
+      "sourceSha256": "0863c795a617f2690778bdc5c5ec81256f179bb9cde515a990cb03361082d2ac",
+      "sha256": "0863c795a617f2690778bdc5c5ec81256f179bb9cde515a990cb03361082d2ac"
+    },
+    {
+      "file": "all-theme-entries-init.json",
+      "sourceSha256": "56c4cd0d2a576f7645c7779d67589b570a14d5cf8664ef65f749796b18a24aab",
+      "sha256": "993571fbe0e511f70334ad1990118b061b44004356fa445f6ae7a92d8daa288b"
+    },
+    {
+      "file": "all-theme-entries-node22-identity-consumer.json",
+      "sourceSha256": "ad87fcec63d24d359c6b13e984e13ad82e222fb8f909fa6c5e5a207eedcff0dd",
+      "sha256": "e9c705676d66ba0b614102a8ac46b38a76f86a1ecdcd0e0913ccd9ee1676d618"
+    },
+    {
+      "file": "all-theme-entries-node24-identity-consumer.json",
+      "sourceSha256": "fbe5e9df83478087b5ea1828fc16d6719cc68d5209178415e4e82f7f64e358b7",
+      "sha256": "6c94fc9169886671663385b21283eb16d0d1275fddeb9b40e56c910beae9db17"
+    },
+    {
+      "file": "config-all-theme-entries.ts",
+      "sourceSha256": "5b702fab5715ab89a16e568f221f34de59f410d7d4c55aef14295ce27c3f17d9",
+      "sha256": "5b702fab5715ab89a16e568f221f34de59f410d7d4c55aef14295ce27c3f17d9"
+    },
+    {
+      "file": "config-core-theme-pair.ts",
+      "sourceSha256": "d70fb30cc4979a89a6fb6881dfda474f1561f6d2fd92e2d380f985ee59537979",
+      "sha256": "d70fb30cc4979a89a6fb6881dfda474f1561f6d2fd92e2d380f985ee59537979"
+    },
+    {
+      "file": "config-current-split.ts",
+      "sourceSha256": "a4f3bb60c2152175d0ecfb9ab52ac1eb3f70a1992cd76ae40611bb4698688cbf",
+      "sha256": "a4f3bb60c2152175d0ecfb9ab52ac1eb3f70a1992cd76ae40611bb4698688cbf"
+    },
+    {
+      "file": "core-theme-pair-graphs.json",
+      "sourceSha256": "3e7905e4f7825d9f601a2caa01274f412dfe111d7898d4d59f25905e59a56542",
+      "sha256": "3e7905e4f7825d9f601a2caa01274f412dfe111d7898d4d59f25905e59a56542"
+    },
+    {
+      "file": "core-theme-pair-init.json",
+      "sourceSha256": "86409121f7147babda82f58c4e32cbd6d947a65dfe973f599d742df4845af3dc",
+      "sha256": "c12a5be0382f46ec46712363ab54cc42b865b81c1f92405ba93873a6cb47475d"
+    },
+    {
+      "file": "core-theme-pair-node22-identity-consumer.json",
+      "sourceSha256": "294d17367f67f5486545b3241c2bdb9a567f3572b47af5ede1b79761689acc31",
+      "sha256": "08ecdf3c262445ee787785ea59175b857c2c630ba166dcc3a43c30f6dfc0ec13"
+    },
+    {
+      "file": "core-theme-pair-node24-identity-consumer.json",
+      "sourceSha256": "a3641bb70e5b200bd50d429a3b41c32b985c057b5f4a8c3a851300c8ad35097a",
+      "sha256": "ef75ee575ff4129f62a87b3b6a22d7ec6e15d85eaf8b07cebcb2ca5adb2bc0fe"
+    },
+    {
+      "file": "current-split-graphs.json",
+      "sourceSha256": "85224fac06fa7da64275e850bba975ad53bae3d5a192362baddd54e6e7d0a03b",
+      "sha256": "85224fac06fa7da64275e850bba975ad53bae3d5a192362baddd54e6e7d0a03b"
+    },
+    {
+      "file": "current-split-init-isolated.json",
+      "sourceSha256": "fed671a54a325782fe9178b2ed08143e569bbbeb51615cd082e1eca5ad676de5",
+      "sha256": "c657da9fd76c96be9bd1999d262edfcd1527e870469f3cad74dbc88c20bdbc3a"
+    },
+    {
+      "file": "current-split-node22-identity-consumer.json",
+      "sourceSha256": "89fbde4324cd7a11d1715cf56d5ac7f93b1b0c7d6dc3733eb285e7e86037c704",
+      "sha256": "09fde9901a95110c58e21db0f9c383acadc928aacc67c4aa0647446a9af901df"
+    },
+    {
+      "file": "current-split-node24-identity-consumer.json",
+      "sourceSha256": "2a08dbf7686e229460ccb5873a20076b7992963573824dcd921ed88fd4a52d8e",
+      "sha256": "e51a25c1958dd9b021cba479a4c8d17f43363e9a15590c0b52ada76c1897be58"
+    },
+    {
+      "file": "package-consumer-probe.mjs",
+      "sha256": "b91f3d026cc2d48b7d5e07869bc5653142812de454369e80f2ea1f73012e3462"
+    }
+  ],
+  "candidateConfigurations": {
+    "current-split": {
+      "file": "config-current-split.ts",
+      "sha256": "a4f3bb60c2152175d0ecfb9ab52ac1eb3f70a1992cd76ae40611bb4698688cbf",
+      "buildConfigSha256": "a4f3bb60c2152175d0ecfb9ab52ac1eb3f70a1992cd76ae40611bb4698688cbf",
+      "built": "passed"
+    },
+    "core-theme-pair": {
+      "file": "config-core-theme-pair.ts",
+      "sha256": "d70fb30cc4979a89a6fb6881dfda474f1561f6d2fd92e2d380f985ee59537979",
+      "buildConfigSha256": "d70fb30cc4979a89a6fb6881dfda474f1561f6d2fd92e2d380f985ee59537979",
+      "built": "passed"
+    },
+    "all-theme-entries": {
+      "file": "config-all-theme-entries.ts",
+      "sha256": "5b702fab5715ab89a16e568f221f34de59f410d7d4c55aef14295ce27c3f17d9",
+      "buildConfigSha256": "5b702fab5715ab89a16e568f221f34de59f410d7d4c55aef14295ce27c3f17d9",
+      "built": "passed"
+    }
+  }
+}
