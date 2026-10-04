@@ -682,6 +682,29 @@ run the approved host-budget suite on its required Node version without changing
 thresholds, then record each pass, failure, or incomplete domain. Keep native
 and device acceptance as separate gates; Android remains last.
 
+
+### 2026-10-04 — M10.5 exact Node v22.0.0 host-budget gate
+
+The committed source at `1ffc68f` was freshly built and the exact Node v22.0.0
+host-budget suite completed. The comparison records one pass, ten failures
+against approved limits, and ten incomplete comparisons due to warm-transform
+ordering, Metro environment/fixture identity, and editor workload identity. The
+exact-floor Node v22 ESM/CJS initialization medians and all six graph metrics
+fail their existing limits. The Metro run completed five repetitions and
+restored all fixtures. `budgets:validate` passes, while the registry remains
+unready with device-facing work pending. No thresholds, baselines, or registry
+members changed. This is host evidence, not Hermes/device or release
+qualification. See the [assessment](assessments/2026-10-04-m10-5-node-22-host-budget.md)
+and [machine-readable qualification](evidence/2026-10-04-m10-5-node-22-host-budget/qualification.json).
+M10.5 remains open; Android remains last.
+
+Next recommended roadmap slice: **M10.5 host-budget result triage** — explain
+the exact-Node initialization and graph-size failures against current source,
+then repair measurement identity for warm transform, Metro, and editor runs.
+Keep existing approved thresholds and baselines unchanged until reviewed
+evidence supports a specific update; native/device acceptance remains
+separate and Android remains last.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.

@@ -1,0 +1,187 @@
+{
+  "format": "crumbs.m10-5-node22-host-budget-rerun",
+  "schemaVersion": 1,
+  "slice": "M10.5 exact Node v22.0.0 host-budget gate",
+  "capturedAt": "2026-10-04T09:44:49.237Z",
+  "status": "complete-measurement-not-qualified",
+  "sourceRevision": "1ffc68f581eaae0d4970f7736abc102b5e41c76e",
+  "gitHeadAtRun": "1ffc68f581eaae0d4970f7736abc102b5e41c76e",
+  "sourceRevisionDefinition": "Current committed non-documentation source revision; the retained suite reports identify this revision.",
+  "command": "CRUMBS_AUDIT_NODE_FLOOR=<exact Node v22.0.0 executable> CRUMBS_METRO_PORT=8093 bun run measure:host-budgets docs/evidence/2026-10-04-m10-5-node-22-host-budget",
+  "baseline": {
+    "exactNodeV22_0_0Available": true,
+    "exactNodeVersionUsed": "v22.0.0",
+    "exactNodeBinarySha256": "9507031f6769f2381eae353b3614bafa871c957dc6f2ae86a3af948acdf9b178",
+    "matchesPreviouslyRetainedExactNodeBinary": true,
+    "currentNodeVersion": "<NODE_CURRENT_V24_15_0>",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "bunVersion": "1.4.2"
+  },
+  "hostBudgetComparison": {
+    "commandExitCode": 0,
+    "metricCount": 21,
+    "counts": {
+      "fail": 10,
+      "pass": 1,
+      "incomplete-measurement-identity-mismatch": 9,
+      "incomplete-environment-mismatch": 1
+    },
+    "passingMetrics": [
+      "cold-transform-ms"
+    ],
+    "failedMetrics": [
+      "runtime-initialization-node22-esm",
+      "runtime-initialization-node22-cjs",
+      "runtime-initialization-current-esm",
+      "runtime-initialization-current-cjs",
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "incompleteMeasurementIdentityMetrics": [
+      "warm-transform-ms",
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ],
+    "incompleteEnvironmentMetrics": [
+      "incremental-rebuild"
+    ],
+    "interpretation": "All 21 recorded comparisons were evaluated against unchanged approved limits and retained measurement identities. The suite completed, but it did not pass performance qualification."
+  },
+  "metroReceipt": {
+    "status": "complete",
+    "runs": 5,
+    "fixturesRestored": true,
+    "environment": {
+      "platform": "darwin",
+      "architecture": "arm64",
+      "osRelease": "25.6.0",
+      "cpu": "Apple M4 Pro",
+      "expo": "56.0.23",
+      "metro": "0.84.4",
+      "reactNative": "0.85.3"
+    }
+  },
+  "budgetRegistry": {
+    "registryStatus": "thresholds-pending-review",
+    "performanceQualification": "not-run",
+    "ready": false,
+    "pendingThresholds": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes",
+      "retained-memory-bytes"
+    ],
+    "missingBaselines": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes"
+    ],
+    "diagnosticBaselines": [
+      "retained-memory-bytes"
+    ],
+    "diagnosticOnlyMetrics": [
+      "runtime-emitted-bytes"
+    ]
+  },
+  "noThresholdOrBaselineChanges": true,
+  "pathRedactions": {
+    "checkedInReportsUsePlaceholders": true,
+    "preservedRawReportsOutsideRepository": true,
+    "replacements": [
+      "exact Node v22.0.0 path",
+      "current Node v24.15.0 path",
+      "managed checkout path",
+      "dependency checkout path",
+      "temporary-directory path"
+    ],
+    "measurementValuesAndIdentitiesPreserved": true
+  },
+  "scopeLimits": [
+    "Host measurements do not qualify Hermes or release-device performance, physical-device rendering, or screen-reader behavior.",
+    "A failed approved comparison is retained as a failure; an incomplete identity/environment comparison is not a pass.",
+    "The exact Node v22.0.0 floor is verified, and the Node v24.15.0 current runtime is recorded separately.",
+    "M10.5 remains open; four device-facing performance thresholds and their baselines remain incomplete."
+  ],
+  "artifacts": [
+    {
+      "path": "benchmark-1.json",
+      "sha256": "60b17c7c966288f4b1b295e11ebff291336f3fd3917025d42fffc79f3030dac1"
+    },
+    {
+      "path": "benchmark-2.json",
+      "sha256": "47ae7cdc732ff454c8985e231927dea4baf6f1189c8335f6ea4f339f6103e981"
+    },
+    {
+      "path": "benchmark-3.json",
+      "sha256": "8b3841f7bbbddec62945aa05fca0950e50de6025e431d1c862b47d7232139f0e"
+    },
+    {
+      "path": "benchmark-4.json",
+      "sha256": "b67546a049294017ce017b5e2434ee7a550705e55ebf937166ef9b7653696eb8"
+    },
+    {
+      "path": "benchmark-5.json",
+      "sha256": "4ce30a7aead5068e0196ef8d8a03e6b69cf03d800ff2fe089bca21bf8beb6837"
+    },
+    {
+      "path": "benchmark-summary.json",
+      "sha256": "a410b720d5f11f8b009cefad3081c5dd2fc7c24dc2c921c3614e59b3018c6f12"
+    },
+    {
+      "path": "comparison.json",
+      "sha256": "a122cc5d7b48224d013286e61b7ffc20a5a336f0769ee580bf656b2cae5428fa"
+    },
+    {
+      "path": "editor.json",
+      "sha256": "377d13912598c422ca2f3e8d22ca79be96b612e6aa874f11401a35bb44d18411"
+    },
+    {
+      "path": "effect.json",
+      "sha256": "116d66e2ff4bfbdb425044be607761b5e6ada81dea3ce62ace2cc2aeb1e43806"
+    },
+    {
+      "path": "metro-incremental.json",
+      "sha256": "ea8878988483b9fa55c92bf1c2156e970c9b787f08750733e45c5ee4712896af"
+    },
+    {
+      "path": "runtime-graph.json",
+      "sha256": "4a1af773d03a72c635ef2b98c3045323a96031dcccf85656f5c427798d34e974"
+    },
+    {
+      "path": "runtime-initialization.json",
+      "sha256": "8070ea460308b24e01c89ae36798d0dcb72495488af3490dae236423c0e8ba45"
+    },
+    {
+      "path": "threshold-review.json",
+      "sha256": "0d6f948c99a5a4f201524e5bba69b2de64640a0f233fb88e5da77ab30eb6792d"
+    }
+  ],
+  "runtimeVersionNotes": {
+    "explicitCurrentNodeExecutable": "v24.15.0",
+    "runtimeGraphScannerNodeField": "v26.3.0 from process.version inside Bun 1.4.2; not the current Node executable",
+    "graphComparisonIdentity": "Bun, build-tool, and host identity per PERFORMANCE_BUDGETS.md"
+  },
+  "verification": {
+    "freshPackageBuild": "passed",
+    "hostSuiteExitCode": 0,
+    "budgetRegistryValidation": "passed",
+    "docsBuild": {
+      "status": "passed",
+      "pages": 28
+    },
+    "gitDiffCheck": "passed"
+  }
+}
