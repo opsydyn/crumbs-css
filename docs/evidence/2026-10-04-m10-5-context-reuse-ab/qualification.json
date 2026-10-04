@@ -1,0 +1,242 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "slice": "esbuild context reuse feasibility and invalidation A/B",
+  "recordedAt": "2026-10-04",
+  "sourceRevision": "f1c1e044011eb6d3e858f9481b14999f677807de",
+  "productionChange": false,
+  "thresholdsOrBaselinesChanged": false,
+  "environment": {
+    "runtime": "v24.15.0",
+    "os": "macOS 25.6.0",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "esbuildVersion": "0.27.7",
+    "vanillaExtractIntegrationVersion": "8.0.10"
+  },
+  "packageBuild": {
+    "command": "bun run build",
+    "status": "passed",
+    "target": "node22",
+    "bunVersion": "1.4.2",
+    "tsdownVersion": "0.21.10",
+    "rolldownVersion": "1.0.0-rc.17",
+    "note": "The package dist used by the benchmark was rebuilt from the designated worktree before the final run."
+  },
+  "protocol": {
+    "method": "esbuild integration compile() fresh-build baseline versus one retained esbuild context rebuilt after alternating CSS entry edits",
+    "transformsPerProcess": 8,
+    "sourceChangesAfterInitialTransform": 7,
+    "warmupEditsPerProcess": 2,
+    "retainedEditsPerProcess": 6,
+    "freshProcessesPerFixtureAndVariant": 5,
+    "fixtureAndVariantOrder": "fixture and variant order alternated by process",
+    "fixtures": [
+      "recipe",
+      "consumer"
+    ],
+    "controlledChanges": {
+      "recipe": "borderRadius 8 <-> 128",
+      "consumer": "minHeight 48 <-> 128"
+    },
+    "timer": "performance.now around integration.compile() or context.rebuild(); fixture copy and source writes are outside each timed call.",
+    "outputAndInputParity": "all eight builds per fresh process matched across variants by exact generated source SHA-256 and normalized metafile/watch input list",
+    "contextsRetainedPerProcess": 1,
+    "contextSetupAndInitialBuildIncludedInProcessTotal": true
+  },
+  "results": {
+    "readmeRecipe": {
+      "baselineWarmChangedEntryMedianMs": 6.081499999999991,
+      "contextWarmChangedEntryMedianMs": 3.666124999999994,
+      "warmChangedEntryDeltaPercent": -39.716763956260806,
+      "baselineEightTransformProcessMedianMs": 98.73462500000002,
+      "contextEightTransformProcessMedianMs": 82.28087300000001,
+      "processTotalDeltaPercent": -16.664621960127977,
+      "pairedProcessTotalDeltaPercent": [
+        -16.1,
+        -16.4,
+        -18.5,
+        -18.9,
+        -14.7
+      ],
+      "baselineWarmMedianPerProcessMs": [
+        6.031854499999994,
+        5.998041499999999,
+        6.2295204999999925,
+        6.103250000000017,
+        6.149854000000005
+      ],
+      "contextWarmMedianPerProcessMs": [
+        3.766146000000006,
+        3.692271000000005,
+        3.667708000000019,
+        3.5518750000000097,
+        3.8715835
+      ],
+      "exactOutputHashesBaseline": [
+        "37a3e8ecb5fcf985cd823a0a287e615ed8c90ab59e7d1b0544c24f7fda12ba3a",
+        "c9e8f93af9b57575f08c8c45288253713d2305782b80707f55ee610eb1a8a17c"
+      ],
+      "exactOutputHashesContext": [
+        "37a3e8ecb5fcf985cd823a0a287e615ed8c90ab59e7d1b0544c24f7fda12ba3a",
+        "c9e8f93af9b57575f08c8c45288253713d2305782b80707f55ee610eb1a8a17c"
+      ],
+      "outputHashParity": true,
+      "retainedSamplesPerVariant": 30
+    },
+    "consumerButton": {
+      "baselineWarmChangedEntryMedianMs": 6.126062499999989,
+      "contextWarmChangedEntryMedianMs": 4.089770999999999,
+      "warmChangedEntryDeltaPercent": -33.23980942081466,
+      "baselineEightTransformProcessMedianMs": 98.22245699999998,
+      "contextEightTransformProcessMedianMs": 85.84462399999998,
+      "processTotalDeltaPercent": -12.601836054661097,
+      "pairedProcessTotalDeltaPercent": [
+        -13.3,
+        -14,
+        -12.6,
+        -12.5,
+        -13.2
+      ],
+      "baselineWarmMedianPerProcessMs": [
+        6.235896000000011,
+        6.08456249999999,
+        6.0495414999999895,
+        6.113875000000007,
+        6.154708499999998
+      ],
+      "contextWarmMedianPerProcessMs": [
+        4.1919790000000035,
+        4.048354000000003,
+        4.075292000000005,
+        4.179062500000001,
+        4.054270499999987
+      ],
+      "exactOutputHashesBaseline": [
+        "f5c14a66b519c66bc0139d55656fb98733984c79ee140dc13b0ca0a478d2040d",
+        "7587a05300363a6a2ac8bdb216788128307472464bf97473f63df48f9bba3b51"
+      ],
+      "exactOutputHashesContext": [
+        "f5c14a66b519c66bc0139d55656fb98733984c79ee140dc13b0ca0a478d2040d",
+        "7587a05300363a6a2ac8bdb216788128307472464bf97473f63df48f9bba3b51"
+      ],
+      "outputHashParity": true,
+      "retainedSamplesPerVariant": 30
+    }
+  },
+  "invalidation": {
+    "probe": {
+      "status": "passed",
+      "dependencyContentInvalidation": "passed",
+      "importGraphInvalidation": "passed",
+      "dependencyReceipts": "fresh-metafile-inputs",
+      "contextReloadsTsconfig": true,
+      "disposeAndRecreateOnConfigChange": "passed",
+      "esbuildVersion": "0.27.7",
+      "integrationVersion": "8.0.10"
+    },
+    "staleOutputControl": {
+      "status": "failed-as-expected",
+      "assertion": "After the dependency changed from space=2 to space=128, the intentionally reused initial result failed the expected emitted-value assertion."
+    }
+  },
+  "sourceAndArtifactHashes": {
+    "trackedSourceAndHarnessFiles": [
+      {
+        "path": "packages/css/examples/recipe.css.ts",
+        "sha256": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9"
+      },
+      {
+        "path": "packages/css/examples/theme.ts",
+        "sha256": "02738291040b0ed5c17a7c7345c7518671f84345416e6b905024281f981e2c18"
+      },
+      {
+        "path": "packages/css/fixtures/consumer/styles/button.css.ts",
+        "sha256": "db8546f2baef375412fe03a4fa0d0fad1c40168919453c73eb8fa9229cfdadea"
+      },
+      {
+        "path": "packages/css/fixtures/consumer/styles/theme.css.ts",
+        "sha256": "568a174e7290bfbe8f6c4fda5cfcb3c292de5be79494a140d5f9c2d5c32045e9"
+      },
+      {
+        "path": "packages/css/package.json",
+        "sha256": "af913c9c085e778b19a3cc52b5458fed9710bd1290143c0b3aeae1548c78e569"
+      },
+      {
+        "path": "packages/css/tsdown.config.ts",
+        "sha256": "a4f3bb60c2152175d0ecfb9ab52ac1eb3f70a1992cd76ae40611bb4698688cbf"
+      },
+      {
+        "path": "docs/evidence/2026-10-04-m10-5-context-reuse-ab/context-reuse-bench.cjs",
+        "sha256": "11d9e823726b9b88cb50f7d3cb81dcc3132f5aadb402757d74d6adbe08198336"
+      },
+      {
+        "path": "docs/evidence/2026-10-04-m10-5-context-reuse-ab/context-invalidation.cjs",
+        "sha256": "3c32c6a9edffd702a01ae8d78d7743ef531a96d87b515116831d0f902fb1cd77"
+      }
+    ],
+    "vanillaExtractAndEsbuildRuntimeFiles": [
+      {
+        "package": "@vanilla-extract/integration",
+        "version": "8.0.10",
+        "file": "dist/vanilla-extract-integration.cjs.dev.js",
+        "sha256": "172d84996b213ed3091b4028c085f399c8b598090c6bda4d84fc6d2b75159fc1"
+      },
+      {
+        "package": "esbuild",
+        "version": "0.27.7",
+        "file": "lib/main.js",
+        "sha256": "bce772de103e1cbb118f1b7313916caa81f0e85461b3b6e3531607e7ed75ec85"
+      }
+    ],
+    "worktreePackageDistInputs": [
+      {
+        "path": "packages/css/dist/contracts-BOjlbOzk.mjs",
+        "sha256": "572085d98e95ee6d74f0888e8bb323897e8cd7e0ba20c5979c493ae381176c23"
+      },
+      {
+        "path": "packages/css/dist/identity-3H34LHby.mjs",
+        "sha256": "6034b55248d8fea694051681318a2e770d287fc0ecb7cc8be008c074536ea8cf"
+      },
+      {
+        "path": "packages/css/dist/native-capture-B8oYIJxP.mjs",
+        "sha256": "165584cb694a8903de998f09d0f096cf445e478aa20c6147de11e645031b455e"
+      },
+      {
+        "path": "packages/css/dist/native-style-CsltMrTT.mjs",
+        "sha256": "cad4798a3f5e4cd0e9b790821be86db7b1fd76200b66ce35fe1dea4d6481d9f2"
+      },
+      {
+        "path": "packages/css/dist/style.mjs",
+        "sha256": "688f5c09a4eaf2266df3f5d29df27560d11514395e81e8108985ff898e2e9107"
+      },
+      {
+        "path": "packages/css/dist/theme-contract-DbZiCwYI.mjs",
+        "sha256": "5c7a75124cc059d5ee9a57526a0cdfd5f4ce7c750169575b6458ef4ba0285a9c"
+      },
+      {
+        "path": "packages/css/dist/theme-token-gYsIuMTO.mjs",
+        "sha256": "05cbff9a3de07676178b5624a177a2df8ef8b91ad781f95053f2e12371633c9c"
+      }
+    ]
+  },
+  "evidenceFiles": [
+    "raw-benchmark.json",
+    "context-invalidation.json",
+    "context-reuse-bench.cjs",
+    "context-invalidation.cjs"
+  ],
+  "limits": [
+    "Benchmark ran on Node 24.15.0, not the Node 22 host-budget runtime.",
+    "The probe measures @vanilla-extract/integration compile output, not Crumbs' complete native transformer or Metro.",
+    "Only one context was retained per process; cache cardinality, many-context memory, eviction, and Metro worker lifecycle were not qualified.",
+    "Hermes, React Native device behavior, Android, accessibility, visual acceptance, and release gates were not run."
+  ],
+  "result": {
+    "status": "repeatably-faster-exact-output-and-input-parity-context-candidate",
+    "decision": "advance-to-bounded-cache-cardinality-and-lifecycle-A/B; do not adopt a production cache yet",
+    "nextRecommendedSlice": "M10.5 bounded context-cache cardinality, retained-memory, eviction, and disposal A/B",
+    "android": "remains last"
+  },
+  "reference": "https://esbuild.github.io/api/"
+}
