@@ -266,13 +266,18 @@ function readArray(value: unknown, context: string): unknown[] {
   if (Object.getOwnPropertySymbols(value).length > 0) {
     throw new TypeError(context + " cannot contain symbol properties.")
   }
-  for (const key of Reflect.ownKeys(value)) {
+  const keys = Reflect.ownKeys(value)
+  for (const key of keys) {
     if (key === "length") continue
     if (typeof key !== "string" || !/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) {
       throw new TypeError(context + " must contain only indexed values.")
     }
   }
-  const descriptors = Object.getOwnPropertyDescriptors(value)
+  // Reuse the validated snapshot instead of enumerating a proxy again.
+  const descriptors: Record<string, PropertyDescriptor | undefined> = Object.create(null)
+  for (const key of keys) {
+    descriptors[String(key)] = Object.getOwnPropertyDescriptor(value, key)
+  }
   const result: unknown[] = []
   for (let index = 0; index < value.length; index += 1) {
     const descriptor = descriptors[String(index)]

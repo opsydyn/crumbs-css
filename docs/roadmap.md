@@ -660,6 +660,28 @@ The unchanged `contracts.ts` source remains the `readArray` hotspot identified b
 
 Next recommended roadmap slice: **M10.5 component-contract descriptor-snapshot implementation gate** — define the compatibility expectation for side-effectful and stateful array proxies; if one fewer `ownKeys` trap call is acceptable, add adversarial regression coverage, implement the descriptor-snapshot candidate, and repeat the production-source A/B. Keep the exact Node v22.0.0 host-budget gate as the final M10.5 step; Android remains last.
 
+
+### 2026-10-04 — M10.5 component-contract descriptor-snapshot implementation
+
+`readArray` now reuses its validated own-key snapshot for descriptor reads,
+retaining the `length` descriptor check and existing validation diagnostics.
+The compatibility decision records exact Proxy trap counts as an implementation
+detail: the stable-proxy regression observes `ownKeys` fall from three calls to
+two, and stateful or side-effectful traps are outside the API guarantee. The
+production-source A/B lowered the repeated contract-validation median by
+12.75% (21.024 µs to 18.343 µs) across 13 fresh processes per variant, with
+non-overlapping ranges. Seven deterministic cases, 300 generated array shapes,
+the full 1,357-test CSS suite, build, and typecheck passed. This is Node v24.15
+host evidence, not React Native, Hermes, device, or release-budget evidence.
+See the [assessment](assessments/2026-10-04-m10-5-component-array-descriptor-snapshot.md)
+and [machine-readable evidence](evidence/2026-10-04-m10-5-array-descriptor-snapshot/qualification.json).
+M10.5 remains open; Android remains last.
+
+Next recommended roadmap slice: **M10.5 exact Node v22.0.0 host-budget gate** —
+run the approved host-budget suite on its required Node version without changing
+thresholds, then record each pass, failure, or incomplete domain. Keep native
+and device acceptance as separate gates; Android remains last.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.

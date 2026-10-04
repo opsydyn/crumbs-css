@@ -1,0 +1,162 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "baselineRevision": "5c88b2edf394e75c1f12d6281600aaaea1aa9fa1",
+  "implementationBaseRevision": "5c88b2edf394e75c1f12d6281600aaaea1aa9fa1",
+  "sourceFiles": [
+    {
+      "variant": "productionBaseline",
+      "sourceRevision": "5c88b2edf394e75c1f12d6281600aaaea1aa9fa1",
+      "sha256": "592ba0a5bb856e56c8ed543c26caffef053eb2948d652d497598af9c7232f85f"
+    },
+    {
+      "variant": "productionCandidate",
+      "path": "packages/css/src/components/contracts.ts",
+      "sha256": "4cef5272bb1553615f8e1bbccaa9f2792163d4bb0db740f5b5f83425f0aaf08f"
+    }
+  ],
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osVersion": "26.6.2",
+    "bunVersion": "1.4.2",
+    "nodeVersion": "v24.15.0",
+    "tsdownVersion": "0.21.10",
+    "fastCheckVersion": "4.8.0"
+  },
+  "workload": {
+    "function": "validateNativeComponentContract",
+    "axes": 8,
+    "valuesPerAxis": 6,
+    "slots": 3,
+    "extensionPoints": {
+      "defaultAxes": 8,
+      "variantValueAxes": 8,
+      "compoundVariants": true,
+      "slotStyles": 3
+    },
+    "stateConstraintArrays": 1,
+    "identityRegistration": false
+  },
+  "build": {
+    "target": "node22",
+    "format": "esm",
+    "minified": false,
+    "sourceMaps": true,
+    "tsdownVersion": "0.21.10"
+  },
+  "sampleProtocol": {
+    "freshProcessesPerVariant": 13,
+    "warmupCallsPerProcess": 12000,
+    "measuredCallsPerProcess": 700,
+    "rotatingOrder": true,
+    "explicitGc": true
+  },
+  "buildArtifacts": [
+    {
+      "path": "production-dist/productionBaseline.mjs",
+      "sha256": "8a5a4c3ecc456e8f6c14cd613a50e9465b36040829ae451cdf592e6067bd1a1d"
+    },
+    {
+      "path": "production-dist/productionBaseline.mjs.map",
+      "sha256": "569e55bcc308725232c6c5ddfda6785d1317f022b8e9223d96a7d326f5e682f9"
+    },
+    {
+      "path": "production-dist/productionCandidate.mjs",
+      "sha256": "69ffca0a9183082a04a8976620c72521d187415c2b9c2a78fe78421116a70aac"
+    },
+    {
+      "path": "production-dist/productionCandidate.mjs.map",
+      "sha256": "f125a8c49f9879fe7f37ae355298c7c588e2f1178fd2ac5961f21cd70a11bbdf"
+    }
+  ],
+  "measurements": {
+    "baseline": {
+      "count": 13,
+      "medianNsPerCall": 21024.404285714285,
+      "minNsPerCall": 20663.035714285714,
+      "maxNsPerCall": 21954.464285714286,
+      "samplesNsPerCall": [
+        20663.035714285714,
+        21064.464285714286,
+        21300.11857142857,
+        20764.64285714286,
+        21024.404285714285,
+        20941.785714285714,
+        20862.262857142858,
+        21954.464285714286,
+        20917.85714285714,
+        21192.5,
+        20952.915714285715,
+        21232.678571428572,
+        21470.772857142856
+      ]
+    },
+    "candidate": {
+      "count": 13,
+      "medianNsPerCall": 18343.155714285713,
+      "minNsPerCall": 17951.19142857143,
+      "maxNsPerCall": 18816.36857142857,
+      "samplesNsPerCall": [
+        18280,
+        18431.428571428572,
+        18412.917142857143,
+        18028.63,
+        18448.51142857143,
+        18237.202857142856,
+        18343.155714285713,
+        18678.274285714284,
+        18100,
+        17951.19142857143,
+        18816.36857142857,
+        18379.047142857144,
+        18009.047142857144
+      ],
+      "medianDeltaPercent": -12.753029931271032
+    },
+    "candidateMedianDeltaPercent": -12.753029931271032
+  },
+  "behaviorReceipt": {
+    "status": "pass",
+    "deterministicCaseCount": 7,
+    "fastCheckRuns": 300,
+    "proxyOwnKeyTrapCount": {
+      "baseline": 3,
+      "candidate": 2
+    },
+    "proxyDescriptorReads": [
+      "0",
+      "length"
+    ],
+    "throwingLengthDescriptor": "rejected by both",
+    "accessorGettersInvoked": false,
+    "regressionTests": 4
+  },
+  "proxyCompatibility": {
+    "decision": "Proxy ownKeys trap counts are observable implementation behavior, not a validator API guarantee. Stable proxy arrays retain the validated output and diagnostics; deliberately stateful or side-effectful traps may observe the removed third enumeration and are outside the supported compatibility contract.",
+    "descriptorsStillIncludeLength": true,
+    "symbolDiagnosticPrecedencePreserved": true,
+    "accessorGettersInvoked": false
+  },
+  "verification": {
+    "fullPackageSuite": {
+      "command": "bun test --max-concurrency=8",
+      "passed": 1357,
+      "failed": 0,
+      "assertions": 48010,
+      "files": 211
+    },
+    "packageBuild": "passed",
+    "packageTypecheck": "passed",
+    "docsBuild": {
+      "status": "passed",
+      "pages": 28
+    }
+  },
+  "scratchRetention": {
+    "directory": "/private/tmp/crumbs-m10-5-array-ab",
+    "productionSourceCopiedBeforeBuild": true,
+    "rawCpuProfilesGenerated": false
+  },
+  "evidenceBoundary": "Node v24.15.0 macOS host microbenchmark of unminified Node22-targeted ESM bundles. Not React Native, Hermes, Metro, device, render-loop, release-budget, or release-gate evidence."
+}
