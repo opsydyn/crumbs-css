@@ -1,0 +1,70 @@
+{
+  "format": "crumbs.m10-5-warm-transform-identity-qualification",
+  "schemaVersion": 1,
+  "capturedDate": "2026-10-04",
+  "status": "open",
+  "sourceRevision": "6318034b004f19fe2ca53726f086abccfae6fd4f",
+  "sourceState": "Working tree based on sourceRevision; benchmark source and fixture hashes are retained in each raw report",
+  "historicalWarmCommand": "bun run --cwd packages/css bench:native-styles",
+  "standaloneWarmTransformCwdDefault": "fixture-root",
+  "hostBudgetWarmTransformCwd": "package-root",
+  "thresholdsAndBaselinesChanged": false,
+  "host": {
+    "floorNode": "v22.0.0",
+    "floorNodePath": "/Users/alancurrie/.local/share/fnm/node-versions/v22.0.0/installation/bin/node",
+    "floorNodeSha256": "9507031f6769f2381eae353b3614bafa871c957dc6f2ae86a3af948acdf9b178",
+    "benchmarkRuntime": "Bun 1.4.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "sequentialBenchmarkRepetitions": 5
+  },
+  "approvedComparisons": {
+    "count": 21,
+    "pass": 1,
+    "fail": 11,
+    "incompleteEnvironmentMismatch": 1,
+    "incompleteMeasurementIdentityMismatch": 8,
+    "performanceQualified": false
+  },
+  "warmTransform": {
+    "measurementIdentity": "exact",
+    "result": "fail",
+    "baselineMedianMs": 5.664125000000013,
+    "currentMedianMs": 7.84570900000017,
+    "regressionPercent": 38.515816653060305,
+    "absoluteLimitMs": 6.514,
+    "maximumRegressionPercent": 15,
+    "packageOwnedConsumerFixtureColdWarmOutputParity": false
+  },
+  "coldTransform": {
+    "measurementIdentity": "exact",
+    "result": "pass",
+    "baselineMedianMs": 66.404584,
+    "currentMedianMs": 65.572583,
+    "regressionPercent": -1.2529270569634248
+  },
+  "remainingIncompleteMetrics": {
+    "metroEnvironmentOrWorkloadMismatch": ["incremental-rebuild"],
+    "editorSourceOrWorkloadIdentityMismatch": [
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ]
+  },
+  "diagnosticOnlyFailures": ["runtime-emitted-bytes"],
+  "registry": {
+    "valid": true,
+    "ready": false,
+    "pendingThresholds": ["js-frame-time", "ui-frame-time", "allocation-bytes", "retained-memory-bytes"],
+    "missingBaselines": ["js-frame-time", "ui-frame-time", "allocation-bytes"],
+    "diagnosticBaselines": ["retained-memory-bytes"]
+  },
+  "nextRecommendedRoadmapItem": "M10.5 Metro and editor measurement-identity repair"
+}

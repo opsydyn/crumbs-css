@@ -355,6 +355,57 @@ describe("performance budget registry", () => {
     expect(editor?.measurementIdentityDifferences).toContain("manifest.scales[0].sourceSha256")
   })
 
+  it("matches warm transforms only for the exact historical package-root protocol", () => {
+    const repoRoot = resolve(import.meta.dir, "../../..")
+    const hostBudgetRoot = resolve(repoRoot, "docs/evidence/2026-10-01-m10-5-final/host-budgets")
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    if (!decoded.ok) throw Error("Committed budget registry must decode")
+    const benchmark = JSON.parse(readFileSync(resolve(hostBudgetRoot, "benchmark-summary.json"), "utf8"))
+    const evidence = {
+      effect: JSON.parse(readFileSync(resolve(hostBudgetRoot, "effect.json"), "utf8")),
+      runtimeInit: JSON.parse(readFileSync(resolve(hostBudgetRoot, "runtime-initialization.json"), "utf8")),
+      benchmark,
+      incremental: JSON.parse(readFileSync(resolve(hostBudgetRoot, "metro-incremental.json"), "utf8")),
+      editor: JSON.parse(readFileSync(resolve(hostBudgetRoot, "editor.json"), "utf8")),
+      runtimeGraph: JSON.parse(readFileSync(resolve(hostBudgetRoot, "runtime-graph.json"), "utf8")),
+    }
+    const compare = (candidate: typeof benchmark) => compareRecordedMetrics(decoded.value, repoRoot, {
+      ...evidence,
+      benchmark: candidate,
+    })
+    const packageRootBenchmark = {
+      ...benchmark,
+      protocol: {
+        ...benchmark.protocol,
+        ordering: "Sequential scenarios in listed order; warmup excluded; cold transforms use fixture-root cwd; warm transforms use package-root cwd; fixture paths are package-relative; filesystem caches uncontrolled",
+        warmTransformCwd: "package-root",
+      },
+    }
+    const matched = compare(packageRootBenchmark)
+    expect(matched.metrics.find(metric => metric.id === "warm-transform-ms")).toMatchObject({
+      environment: "exact",
+      measurementIdentity: "exact",
+      measurementIdentityDifferences: [],
+    })
+    expect(matched.metrics.find(metric => metric.id === "cold-transform-ms")?.measurementIdentity).toBe("exact")
+
+    const fixtureRootBenchmark = {
+      ...packageRootBenchmark,
+      protocol: { ...packageRootBenchmark.protocol, warmTransformCwd: "fixture-root" },
+    }
+    expect(compare(fixtureRootBenchmark).metrics.find(metric => metric.id === "warm-transform-ms"))
+      .toMatchObject({ measurementIdentity: "mismatch" })
+
+    const changedFixtureBenchmark = {
+      ...packageRootBenchmark,
+      fixtures: packageRootBenchmark.fixtures.map((fixture: { sha256: string }, index: number) => index === 0
+        ? { ...fixture, sha256: "changed-fixture-digest" }
+        : fixture),
+    }
+    expect(compare(changedFixtureBenchmark).metrics.find(metric => metric.id === "warm-transform-ms")?.measurementIdentityDifferences)
+      .toContain("fixtures[0].sha256")
+  })
+
   it("requires both approved absolute and relative limits to pass", () => {
     const repoRoot = resolve(import.meta.dir, "../../..")
     const valid = JSON.parse(readFileSync(registryFile, "utf8"))

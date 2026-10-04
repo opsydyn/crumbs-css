@@ -34,7 +34,7 @@ for (let repetition = 1; repetition <= 5; repetition += 1) {
   const file = join(output, `benchmark-${repetition}.json`)
   const child = Bun.spawn([process.execPath, "packages/css/bench/native-styles.bench.ts"], {
     cwd: repoRoot,
-    env: { ...process.env, CRUMBS_BENCH_JSON_OUTPUT: file },
+    env: { ...process.env, CRUMBS_BENCH_JSON_OUTPUT: file, CRUMBS_BENCH_WARM_TRANSFORM_CWD: "package-root" },
     stdout: "pipe",
     stderr: "pipe",
   })

@@ -449,11 +449,25 @@ function comparisonIdentity(selector: BaselineSelector, evidence: unknown): { en
     const data = evidence as BenchmarkSummaryEvidence
     const protocol = { ...data.protocol }
     const coldTransform = selector === "benchmark.cold-transform.max-median-ms"
+    const warmTransform = selector === "benchmark.warm-transform.max-median-ms"
     const legacyOrdering = "Sequential scenarios in listed order; warmup excluded; filesystem caches uncontrolled"
     const currentOrdering = "Sequential scenarios in listed order; warmup excluded; cold and warm transforms use the same fixture-root process cwd; fixture paths are package-relative; filesystem caches uncontrolled"
-    // The cold worker used the fixture root as cwd in both retained protocols. The newer wording also
-    // records the warm-transform cwd change, so normalise only this exact known pair for cold metrics.
-    if (coldTransform && (protocol.ordering === legacyOrdering || protocol.ordering === currentOrdering)) {
+    const packageRootWarmOrdering = "Sequential scenarios in listed order; warmup excluded; cold transforms use fixture-root cwd; warm transforms use package-root cwd; fixture paths are package-relative; filesystem caches uncontrolled"
+    const warmCwdMode = protocol.warmTransformCwd
+    // Package-root mode restores the legacy warm-transform cwd. Normalize it only with its exact
+    // recorded ordering; retain fixture, host, sample, and all other protocol checks.
+    if (warmTransform && warmCwdMode === "package-root" && protocol.ordering === packageRootWarmOrdering) {
+      protocol.ordering = legacyOrdering
+      delete protocol.warmTransformCwd
+    }
+    // The cold worker used fixture-root cwd in both retained protocols; warm cwd does not affect it.
+    const coldOrderingMatches = protocol.ordering === legacyOrdering || protocol.ordering === currentOrdering ||
+      warmCwdMode === "package-root" && protocol.ordering === packageRootWarmOrdering
+    if (coldTransform && coldOrderingMatches) {
+      if (warmCwdMode === "fixture-root" && protocol.ordering === currentOrdering ||
+        warmCwdMode === "package-root" && protocol.ordering === packageRootWarmOrdering) {
+        delete protocol.warmTransformCwd
+      }
       protocol.ordering = "cold-transform-sequential-v1"
     }
     return {
