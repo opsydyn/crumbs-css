@@ -705,6 +705,12 @@ Keep existing approved thresholds and baselines unchanged until reviewed
 evidence supports a specific update; native/device acceptance remains
 separate and Android remains last.
 
+### 2026-10-04 — M10.5 exact Node 22 host-budget result triage
+
+The exact-floor host suite completed at source revision `1ffc68f` with one pass, ten approved-limit failures, and ten incomplete comparisons. Initialization medians for Node 22 are now 7.773 ms ESM and 4.612 ms CJS, above the unchanged 7.553/4.083 ms limits. They passed at source `374e4c4` and first failed at `78d9fd0`, after resolver extraction and focused-entry changes; existing CPU profiles are too sparse to attribute that regression to one function. Recent validator optimizations improved all four initialization medians by 2–6% from the intermediate run, while graph totals barely changed. The `theme/core` graph remains far above its historical limit, while `theme/core` and token totals are close to their October 1 sizes; compatibility `theme` has grown by 6,242 B ESM and 12,279 B CJS since then. Warm transform, Metro and eight editor metrics remain incomplete due to cwd/protocol, Expo/fixture/cache, and source/package/workload-identity differences. No threshold, baseline, runtime or API changed. See the [host-budget result triage](assessments/2026-10-04-m10-5-host-budget-result-triage.md).
+
+Next recommended roadmap slice: **M10.5 matched compatibility-entry initialization and graph attribution** — compare the measured runtime-entry revisions under one exact Node 22 executable and fixed build/measurement protocol, then select a source A/B from repeated module-level evidence. Preserve export/function identity and existing limits. Keep measurement-identity repair, native/device qualification and Android as separate gates; Android remains last.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
