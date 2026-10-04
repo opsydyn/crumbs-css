@@ -2557,3 +2557,11 @@ Vanilla Extract integration compilation accounts for about 71–72% of the instr
 M10.5 remains open; Android remains last.
 
 Next recommended roadmap slice: **M10.5 integration-compilation subphase attribution and parity-preserving candidate search** — separate esbuild and Vanilla Extract debug-id costs inside the integration boundary, then test one bounded candidate that retains development identifiers and exact output parity before any full host-budget rerun. Keep the approved 6.514 ms ceiling unchanged.
+
+### 2026-10-04 — M10.5 Vanilla Extract compile subphase attribution and A/B
+
+The exact package-root instrumentation attributes about 5.75–5.82 ms to esbuild build, with debug-ID Babel transformation at 1.03–1.53 ms and package lookup, source reads and metafile capture much smaller. A scratch candidate switched the plugin to Vanilla Extract's `transformSync`; generated module bodies matched exactly, but end-to-end process medians overlapped and the consumer median was slightly slower. The candidate would also require carrying custom upstream compile-plugin behavior, so no production change was retained. Instrumented timings are diagnostic only; the existing uninstrumented host comparison and 6.514 ms ceiling remain unchanged. The full Node 22 suite was not rerun. See the [assessment](assessments/2026-10-04-m10-5-compile-subphase-ab.md) and [machine-readable evidence](evidence/2026-10-04-m10-5-compile-subphase-ab/qualification.json).
+
+M10.5 remains open; Android remains last.
+
+Next recommended roadmap slice: **M10.5 esbuild context-reuse feasibility and invalidation A/B** — test whether reusing an esbuild context reduces the measured build overhead while retaining exact output and reliable invalidation for entry files, dependencies and compiler configuration. Run the full Node 22 host gate only if this candidate is repeatably faster and parity-safe.

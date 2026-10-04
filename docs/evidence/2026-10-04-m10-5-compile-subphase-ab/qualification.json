@@ -1,0 +1,188 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "slice": "Vanilla Extract compile subphase attribution and synchronous Babel candidate A/B",
+  "recordedAt": "2026-10-04",
+  "sourceRevision": "1252381cb1144f655ab05e7b7fc809fdd59318cf",
+  "productionChange": "none",
+  "environment": {
+    "runtime": "Bun 1.4.2",
+    "os": "Darwin 25.6.0",
+    "architecture": "arm64",
+    "integrationVersion": "@vanilla-extract/integration 8.0.10"
+  },
+  "sourceFiles": [
+    {
+      "relative": "packages/css/src/transformer.ts",
+      "sha256": "a975c5c2e209ff5a5a83b48de31b4a34f906ba85c25959fdbb221c07211ac668"
+    },
+    {
+      "relative": "packages/css/examples/recipe.css.ts",
+      "sha256": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9"
+    },
+    {
+      "relative": "packages/css/fixtures/consumer/styles/button.css.ts",
+      "sha256": "db8546f2baef375412fe03a4fa0d0fad1c40168919453c73eb8fa9229cfdadea"
+    },
+    {
+      "relative": "packages/css/node_modules/@vanilla-extract/integration/dist/vanilla-extract-integration.cjs.dev.js",
+      "sha256": "172d84996b213ed3091b4028c085f399c8b598090c6bda4d84fc6d2b75159fc1"
+    }
+  ],
+  "approvedBudget": {
+    "absoluteMaxMs": 6.514,
+    "baselineMs": 5.664125,
+    "unchanged": true,
+    "previousUninstrumentedComparisonMs": {
+      "readmeWarmMedian": 8.033292000000074,
+      "consumerWarmMedian": 7.371832999999697
+    }
+  },
+  "protocol": {
+    "transform": "transformCssTsToStyleSheet with strictDiagnostics=true",
+    "processCwd": "packages/css (package-root)",
+    "iterationsPerProcess": 1,
+    "warmupPerProcess": 1,
+    "retainedSamplesPerProcess": 6,
+    "freshProcessesPerFixtureAndVariant": 5,
+    "fixtures": [
+      "packages/css/examples/recipe.css.ts",
+      "packages/css/fixtures/consumer/styles/button.css.ts"
+    ],
+    "fixtureOrder": "alternated between fixtures; variant order alternated within each fixture cohort",
+    "nodeEnv": "unset",
+    "instrumentation": "Scratch-only timers in a copied transformer and copied Vanilla Extract integration CJS bundle. Absolute totals are diagnostic, not host-budget qualification.",
+    "nestedPhases": "Babel and file-scope timers are nested inside the Vanilla Extract onLoad/plugin transform, which is nested inside esbuild build and integration compile; do not sum nested phases."
+  },
+  "phaseAggregation": "Each retained process reports the median of six individual full-transform samples. Phase values are summed per transform when there are multiple phase events, then summarized as the median of the five process phase medians.",
+  "fixtures": {
+    "readmeRecipe": {
+      "defaultDebugIdentifiers": {
+        "processTotalMediansMs": [
+          8.3516875,
+          8.1697915,
+          8.4981455,
+          8.1329585,
+          8.266104
+        ],
+        "medianOfProcessTotalMediansMs": 8.266104,
+        "phaseMedianOfProcessMediansMs": {
+          "esbuildBuildInclusivePlugin": 5.817833,
+          "vanillaExtractIntegrationCompile": 5.831771,
+          "vanillaExtractPackageInfo": 0.001271,
+          "vanillaExtractCssFileRead": 0.053542,
+          "vanillaExtractBabelTransformAsync": 1.028834,
+          "vanillaExtractFileScope": 0.027667,
+          "vanillaExtractPluginTransform": 1.055813,
+          "metafileCaptureCallback": 0.001417,
+          "generatedModuleEvaluation": 1.226667,
+          "vmRunInNewContext": 1.205938,
+          "vmScriptCompile": 0.011563,
+          "vanillaExtractTransformCss": 0.105604
+        }
+      },
+      "syncBabelCandidate": {
+        "processTotalMediansMs": [
+          8.458479,
+          8.028979,
+          7.976354,
+          8.9551665,
+          8.100979
+        ],
+        "medianOfProcessTotalMediansMs": 8.100979,
+        "phaseMedianOfProcessMediansMs": {
+          "esbuildBuildInclusivePlugin": 5.750896,
+          "vanillaExtractIntegrationCompile": 5.765375,
+          "vanillaExtractPackageInfo": 0.001271,
+          "vanillaExtractCssFileRead": 0.057355,
+          "vanillaExtractBabelTransformSync": 0.919229,
+          "vanillaExtractFileScope": 0.027792,
+          "vanillaExtractPluginTransform": 0.948999,
+          "metafileCaptureCallback": 0.001396,
+          "generatedModuleEvaluation": 1.25327,
+          "vmRunInNewContext": 1.237,
+          "vmScriptCompile": 0.011271,
+          "vanillaExtractTransformCss": 0.105125
+        },
+        "outputBodySha256": "62436853c120a8aea54c49a6d511601e18ef3edfe333b113a0e0518d85933ff5"
+      },
+      "defaultOutputBodySha256": "62436853c120a8aea54c49a6d511601e18ef3edfe333b113a0e0518d85933ff5",
+      "bodyParity": true
+    },
+    "consumerButton": {
+      "defaultDebugIdentifiers": {
+        "processTotalMediansMs": [
+          8.153771,
+          7.9443965,
+          8.182334,
+          8.307271,
+          8.134125
+        ],
+        "medianOfProcessTotalMediansMs": 8.153771,
+        "phaseMedianOfProcessMediansMs": {
+          "esbuildBuildInclusivePlugin": 5.802396,
+          "vanillaExtractIntegrationCompile": 5.816708,
+          "vanillaExtractPackageInfo": 0.001479,
+          "vanillaExtractCssFileRead": 0.105625,
+          "vanillaExtractBabelTransformAsync": 1.53129,
+          "vanillaExtractFileScope": 0.045771,
+          "vanillaExtractPluginTransform": 1.586062,
+          "metafileCaptureCallback": 0.001354,
+          "generatedModuleEvaluation": 1.22027,
+          "vmRunInNewContext": 1.204667,
+          "vmScriptCompile": 0.011125,
+          "vanillaExtractTransformCss": 0.13525
+        }
+      },
+      "syncBabelCandidate": {
+        "processTotalMediansMs": [
+          8.0607915,
+          8.283937,
+          8.134521,
+          8.2011245,
+          8.169646
+        ],
+        "medianOfProcessTotalMediansMs": 8.169646,
+        "phaseMedianOfProcessMediansMs": {
+          "esbuildBuildInclusivePlugin": 5.774646,
+          "vanillaExtractIntegrationCompile": 5.803854,
+          "vanillaExtractPackageInfo": 0.001375,
+          "vanillaExtractCssFileRead": 0.103105,
+          "vanillaExtractBabelTransformSync": 1.448875,
+          "vanillaExtractFileScope": 0.043916,
+          "vanillaExtractPluginTransform": 1.498458,
+          "metafileCaptureCallback": 0.001562,
+          "generatedModuleEvaluation": 1.239937,
+          "vmRunInNewContext": 1.222583,
+          "vmScriptCompile": 0.011542,
+          "vanillaExtractTransformCss": 0.132729
+        },
+        "outputBodySha256": "c8cf285f95a7a324764e9a0bac30c91750db7224cbcc7da3169377db3f70cd3d"
+      },
+      "defaultOutputBodySha256": "c8cf285f95a7a324764e9a0bac30c91750db7224cbcc7da3169377db3f70cd3d",
+      "bodyParity": true
+    }
+  },
+  "candidate": {
+    "name": "Use Vanilla Extract integration transformSync inside its css-file esbuild onLoad hook",
+    "change": "Scratch copy replaced the plugin await transform({...}) call with transformSync({...}); identOption stayed debug and the production transformer remained untouched.",
+    "outputParity": "Exact generated JavaScript body equality with the uninstrumented current transformer on both fixtures after removing the @crumbs-native-cache marker, whose value hashes the instrumented scratch transformer source.",
+    "timing": "The debug Babel phase fell by approximately 0.11 ms for the README fixture and 0.08 ms for the consumer fixture. Median total transform time moved from 8.266 to 8.101 ms on README and from 8.154 to 8.170 ms on consumer. Process ranges overlap for both fixtures.",
+    "decision": "rejected-no-repeatable-two-fixture-improvement",
+    "reason": "Exact output parity passed, but the total process medians do not improve consistently across both fixtures. The sync candidate does not reduce the dominant esbuild build phase materially and would require maintaining a custom copy of upstream compile-plugin behavior."
+  },
+  "interpretation": {
+    "dominantPhase": "esbuild-build-inclusive-plugin is about 5.75-5.82 ms; Vanilla Extract integration compile is about 5.77-5.83 ms.",
+    "debugIdTransform": "Babel transformAsync contributes about 1.03 ms on README and 1.53 ms on consumer; transformSync reduces those figures slightly but has no repeatable end-to-end benefit.",
+    "smallPhases": "Cached getPackageInfo is about 0.001-0.002 ms; file reads are about 0.05 ms on README and 0.10 ms on consumer; metafile callback is about 0.001-0.002 ms.",
+    "residual": "Esbuild build work outside the measured plugin subphases remains roughly 4.1-4.7 ms by residual subtraction and includes esbuild resolution, bundling, and other plugin/build overhead; this remainder is not an independently timed esbuild internal metric."
+  },
+  "result": {
+    "status": "compile-subphases-attributed-no-candidate-accepted",
+    "officialWarmTransformGate": "unchanged-and-still-failing-per-previous-uninstrumented-comparison",
+    "fullNode22HostSuiteRerun": false,
+    "thresholdsOrBaselinesChanged": false,
+    "android": "remains last",
+    "nextRecommendedSlice": "M10.5 esbuild context-reuse feasibility and invalidation A/B"
+  }
+}
