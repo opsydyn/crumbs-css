@@ -1,0 +1,255 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "slice": "warm-transform cost remediation candidate review",
+  "recordedAt": "2026-10-04",
+  "sourceRevision": "49940c16bb6a934310799707d706c2acd531e389",
+  "productionChange": "none",
+  "environment": {
+    "runtime": "Bun 1.4.2",
+    "os": "Darwin 25.6.0",
+    "architecture": "arm64"
+  },
+  "approvedBudget": {
+    "evidence": "../2026-10-04-m10-5-metro-editor-identity/host-budgets/threshold-review.json",
+    "baselineMs": 5.664125,
+    "absoluteMaxMs": 6.514,
+    "unchanged": true,
+    "currentOfficialComparison": {
+      "evidence": "../2026-10-04-m10-5-metro-editor-identity/host-budgets/comparison.json",
+      "readmeWarmMedianMs": 8.033292000000074,
+      "consumerWarmMedianMs": 7.371832999999697
+    }
+  },
+  "profile": {
+    "workload": "100 repeated strict transforms of packages/css/examples/recipe.css.ts with package-root cwd",
+    "durationMs": 961.7,
+    "cpuSamples": 347,
+    "sampleIntervalMs": 1,
+    "outputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+    "findings": [
+      {
+        "function": "sourceIdentity",
+        "totalPercent": 11.5
+      },
+      {
+        "function": "readFileSync",
+        "selfPercent": 7.3,
+        "totalPercent": 9.4
+      },
+      {
+        "function": "Effect SchemaParser.parseLocal",
+        "totalPercent": 14.7
+      },
+      {
+        "function": "vm.runInNewContext",
+        "selfPercent": 3.1,
+        "totalPercent": 34.1
+      }
+    ],
+    "sourceIdentityScratchCount": {
+      "localCssRules": 10,
+      "distinctFilePaths": 1
+    }
+  },
+  "scratchProtocol": {
+    "transform": "transformCssTsToStyleSheet with strictDiagnostics=true",
+    "warmCwd": "packages/css (package-root mode)",
+    "iterationsPerSample": 1,
+    "warmupIterations": 1,
+    "samplesPerProcess": 6,
+    "freshBunProcessesPerVariantAndFixture": 10,
+    "variantOrder": "alternated within pairs",
+    "timingScope": "warm transform only; process startup excluded"
+  },
+  "candidates": [
+    {
+      "name": "Effect 4 decoder factory hoist",
+      "change": "scratch-hoisted Schema.decodeUnknownResult factories for scalar, opacity, and structured IR schemas",
+      "freshProcessesPerVariantAndFixture": 5,
+      "processMediansMs": {
+        "readmeBaseline": [
+          7.7415,
+          9.223834,
+          7.697667,
+          8.155958,
+          7.738708
+        ],
+        "readmeCandidate": [
+          7.749625,
+          7.892375,
+          8.244667,
+          7.936333,
+          8.256542
+        ],
+        "consumerBaseline": [
+          7.841416,
+          7.780334,
+          10.908916,
+          8.562458,
+          7.75025
+        ],
+        "consumerCandidate": [
+          7.895375,
+          7.753292,
+          7.893292,
+          7.919459,
+          7.991083
+        ]
+      },
+      "medianOfProcessMediansMs": {
+        "readmeBaseline": 7.7415,
+        "readmeCandidate": 7.936333,
+        "consumerBaseline": 7.841416,
+        "consumerCandidate": 7.895375
+      },
+      "outputSha256": {
+        "readmeBaseline": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+        "readmeCandidate": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+        "consumerBaseline": "e5e0e1a527e2ddf8d49d287d415d24809422ebc91dc0ae7f7578da1a0c8bf108",
+        "consumerCandidate": "e5e0e1a527e2ddf8d49d287d415d24809422ebc91dc0ae7f7578da1a0c8bf108"
+      },
+      "decision": "rejected; no repeatable improvement"
+    },
+    {
+      "name": "per-transform source identity memo",
+      "change": "scratch cache keyed by resolved file path, scoped to one native transform",
+      "freshProcessesPerVariantAndFixture": 10,
+      "processMediansMs": {
+        "readmeBaseline": [
+          8.334041,
+          8.839458,
+          8.761458,
+          8.539041,
+          7.904333,
+          7.57775,
+          7.530708,
+          7.668958,
+          7.869791,
+          8.024
+        ],
+        "readmeCandidate": [
+          8.324375,
+          8.521833,
+          8.399209,
+          8.326833,
+          8.193041,
+          7.587459,
+          7.607416,
+          7.388458,
+          7.591584,
+          7.569125
+        ],
+        "consumerBaseline": [
+          8.475458,
+          8.442083,
+          8.5725,
+          10.908916,
+          8.562458,
+          7.666917,
+          7.81375,
+          7.932709,
+          7.752583,
+          7.860541
+        ],
+        "consumerCandidate": [
+          8.574458,
+          8.249292,
+          7.944542,
+          7.543708,
+          8.99975,
+          7.785041,
+          7.427417,
+          7.423166,
+          7.327708,
+          7.248708
+        ]
+      },
+      "medianOfProcessMediansMs": {
+        "readmeBaseline": 7.9641665,
+        "readmeCandidate": 7.9002285,
+        "consumerBaseline": 8.187396,
+        "consumerCandidate": 7.6643745
+      },
+      "outputSha256": {
+        "readmeBaseline": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+        "readmeCandidate": "d2e857d1f82e43ed5510d88ef7536114b0bd6c55f97ae423525fa667c5d34910",
+        "consumerBaseline": "e5e0e1a527e2ddf8d49d287d415d24809422ebc91dc0ae7f7578da1a0c8bf108",
+        "consumerCandidate": "f4e3185bfd4b45cdcd9c7d23634bfe548e1cab4a79875bece5a1278f698eca16"
+      },
+      "outputBodyComparison": "generated JavaScript bodies matched; only the @crumbs-native-cache marker differed",
+      "decision": "rejected; small, overlapping gain remains above the approved ceiling"
+    },
+    {
+      "name": "compiled vm.Script cache",
+      "change": "unbounded scratch-only cache keyed by file path and exact adapter-bound source; no production cache design was accepted",
+      "freshProcessesPerVariantAndFixture": 10,
+      "processMediansMs": {
+        "readmeBaseline": [
+          8.001291,
+          7.667792,
+          7.80525,
+          7.881083,
+          7.872083,
+          7.902041,
+          7.803625,
+          7.685125,
+          7.863667,
+          7.957875
+        ],
+        "readmeCandidate": [
+          7.823375,
+          7.789834,
+          7.848833,
+          8.006667,
+          7.738375,
+          7.853291,
+          7.508125,
+          7.823,
+          7.852958,
+          7.784708
+        ],
+        "consumerBaseline": [
+          7.42575,
+          7.747458,
+          7.965917,
+          7.770209,
+          7.740125,
+          7.535333,
+          8.016875,
+          8.179917,
+          7.807333,
+          8.044875
+        ],
+        "consumerCandidate": [
+          10.611,
+          8.506208,
+          8.022667,
+          7.902917,
+          7.729209,
+          7.689708,
+          7.805625,
+          7.755583,
+          7.8775,
+          7.59975
+        ]
+      },
+      "medianOfProcessMediansMs": {
+        "readmeBaseline": 7.867875,
+        "readmeCandidate": 7.8231875,
+        "consumerBaseline": 7.788771,
+        "consumerCandidate": 7.8415625
+      },
+      "decision": "rejected; no repeatable two-fixture improvement, and candidate cache was not bounded"
+    }
+  ],
+  "result": {
+    "status": "no-candidate-accepted",
+    "officialWarmTransformGate": "still-fails",
+    "thresholdsOrBaselinesChanged": false,
+    "fullNode22SuiteRerun": false,
+    "fullSuiteReason": "No candidate produced a clear focused improvement suitable for production qualification.",
+    "nextRecommendedSlice": "M10.5 exact-workload attribution of Vanilla Extract integration compilation and generated-module evaluation costs",
+    "android": "remains last"
+  }
+}

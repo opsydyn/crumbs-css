@@ -2541,3 +2541,11 @@ Next recommended roadmap item: **M7.2** — add exhaustive discriminated state
 recipes and prohibited-combination checking without generating state products
 eagerly. Keep performance registry activation, device frame/allocation gates
 and Android backlogged until their required harnesses are available.
+
+### 2026-10-04 — M10.5 warm-transform cost candidate review
+
+The exact package-root workload remains over its unchanged warm-transform ceiling: the current report records 8.033 ms for the README fixture and 7.372 ms for the package-owned consumer, against a 6.514 ms ceiling and 5.664 ms baseline. A 100-transform CPU profile identified source-identity lookup, schema validation, and VM evaluation as candidate costs. Three scratch A/B candidates did not establish a repeatable improvement across both fixtures; no production change, threshold, or baseline was retained. The full Node 22 suite was not rerun. See the [assessment](assessments/2026-10-04-m10-5-warm-transform-cost.md) and [qualification evidence](evidence/2026-10-04-m10-5-warm-transform-cost/qualification.json).
+
+M10.5 remains open; Android remains last.
+
+Next recommended roadmap slice: **M10.5 exact-workload phase attribution inside Vanilla Extract integration compilation and generated-module evaluation** — separate these costs under the package-root workload, then A/B one bounded candidate before any full host-budget rerun. Keep the output-parity assertion and approved 6.514 ms gate unchanged.
