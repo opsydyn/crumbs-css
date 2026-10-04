@@ -63,8 +63,10 @@ type MetroIncrementalEvidence = {
   formatVersion: number
   status: string
   environment: { platform: string; architecture: string; osRelease: string; cpu: string; expo: string; metro: string; reactNative: string }
+  packageProvenance?: { expoMetroRuntime: string; react: string; reactDom: string; babelPresetExpo: string }
   protocol: { requestUrl: string; repetitions: number; editKind: string; cacheState: string }
   fixture: { entrySha256: string; originalStyleSha256: string; restoredStyleSha256: string; originalTokenSha256: string; restoredTokenSha256: string; originalBaseStyleSha256?: string; restoredBaseStyleSha256?: string; originalWorkspaceTokenSha256?: string; restoredWorkspaceTokenSha256?: string }
+  measurementFixture?: { entrySha256: string; styleSha256: string; tokenSha256: string; baseStyleSha256: string; workspaceTokenSha256: string }
   initial: { compiledValue: number; bundleSha256: string; bytes: number }
   warmup: IncrementalRun & { excluded: boolean }
   runs: IncrementalRun[]
@@ -99,6 +101,25 @@ export function createIncrementalStyleSource(
   incrementalCompiledValue(addend)
   const unsupported = options.includeDroppedDeclaration ? ', transition: "all 0.3s"' : ""
   return `import { viewStyle } from "@opsydyn/crumbs-css/style"\nimport { incrementalPadding } from "./incremental-token"\nimport { incrementalBase } from "./incremental-base.css"\nimport { sharedThemeTokens } from "../../../packages/css/fixtures/m2-7-workspace-token"\n\nconst directIncrementalPadding = incrementalPadding + ${addend} - 1\nexport const incrementalProbe = viewStyle([incrementalBase, { padding: directIncrementalPadding, borderWidth: sharedThemeTokens.borderWidth${unsupported} }])\n`
+}
+
+export function createHistoricalWorkspaceTokenSource(addend: number): string {
+  incrementalCompiledValue(addend)
+  return `// Rewritten by the Metro incremental measurement and restored after the run.\nexport const workspaceBorderWidth = 32000 + ${addend}\n`
+}
+
+export function createHistoricalIncrementalStyleSource(addend: number): string {
+  incrementalCompiledValue(addend)
+  return `import { viewStyle } from "@opsydyn/crumbs-css/style"\nimport { incrementalPadding } from "./incremental-token"\nimport { incrementalBase } from "./incremental-base.css"\nimport { workspaceBorderWidth } from "../../../packages/css/fixtures/m2-7-workspace-token"\n\nconst directIncrementalPadding = incrementalPadding + ${addend} - 1\nexport const incrementalProbe = viewStyle([incrementalBase, { padding: directIncrementalPadding, borderWidth: workspaceBorderWidth }])\n`
+}
+
+export function createHistoricalMetroFixture() {
+  return {
+    token: `// The measurement runner rewrites the addend, then restores this exact source.\n// Keeping the result out of the source as one literal distinguishes compiled\n// .css.ts output from the ordinary dependency module in the Metro bundle.\nexport const incrementalPadding = 30000 + 1\n`,
+    baseStyle: `import { viewStyle } from "@opsydyn/crumbs-css/style"\n\nexport const incrementalBase = viewStyle({ margin: 31000 + 1 })\n`,
+    workspaceToken: `export const workspaceBorderWidth = 32000 + 1\n`,
+    style: `import { viewStyle } from "@opsydyn/crumbs-css/style"\nimport { incrementalPadding } from "./incremental-token"\nimport { incrementalBase } from "./incremental-base.css"\nimport { workspaceBorderWidth } from "../../../packages/css/fixtures/m2-7-workspace-token"\n\nexport const incrementalProbe = viewStyle([incrementalBase, { padding: incrementalPadding, borderWidth: workspaceBorderWidth }])\n`,
+  }
 }
 
 export function admitDependencyControls(input: unknown): DependencyControl[] {
@@ -156,14 +177,39 @@ export function admitConfigurationControl(input: unknown): ConfigurationControl 
 export function admitMetroIncrementalReport(input: unknown, minimumRepetitions = 5, requireConfigurationControl = false): number[] {
   const report = input as MetroIncrementalEvidence
   if (report?.formatVersion !== 1 || report.status !== "complete") throw Error("Metro incremental evidence is incomplete or has an unsupported version")
+  const hasMeasurementFixture = Object.prototype.hasOwnProperty.call(report, "measurementFixture")
+  if (hasMeasurementFixture) {
+    const measurementFixture = report.measurementFixture
+    const expectedFields = ["baseStyleSha256", "entrySha256", "styleSha256", "tokenSha256", "workspaceTokenSha256"]
+    if (typeof measurementFixture !== "object" || measurementFixture === null || Array.isArray(measurementFixture) ||
+      Object.keys(measurementFixture).sort().join(",") !== expectedFields.join(",") ||
+      Object.values(measurementFixture).some(value => typeof value !== "string" || !/^[a-f0-9]{64}$/.test(value))) {
+      throw Error("Metro measurement fixture identity is invalid")
+    }
+    if (measurementFixture.entrySha256 !== report.fixture?.entrySha256) {
+      throw Error("Metro measurement entry identity does not match the requested bundle entry")
+    }
+  }
   if (report.dependencyControls !== undefined) admitDependencyControls(report.dependencyControls)
   if (requireConfigurationControl && report.configurationControl === undefined) throw Error("M8.4 Metro evidence is missing its configuration invalidation control")
   if (report.configurationControl !== undefined) admitConfigurationControl(report.configurationControl)
   if (!Number.isSafeInteger(minimumRepetitions) || minimumRepetitions < 1 || report.protocol?.editKind !== "direct-css-source" || report.protocol.repetitions !== report.runs?.length || report.runs.length < minimumRepetitions) {
     throw Error("Metro incremental evidence has insufficient repetitions")
   }
-  if (!report.fixture?.originalTokenSha256 || report.fixture.originalTokenSha256 !== report.fixture.restoredTokenSha256 ||
-    !report.fixture.originalStyleSha256 || report.fixture.originalStyleSha256 !== report.fixture.restoredStyleSha256) throw Error("Metro incremental fixture was not restored")
+  const fixtureRestoration = [
+    ["token", report.fixture?.originalTokenSha256, report.fixture?.restoredTokenSha256],
+    ["style", report.fixture?.originalStyleSha256, report.fixture?.restoredStyleSha256],
+    ["base style", report.fixture?.originalBaseStyleSha256, report.fixture?.restoredBaseStyleSha256],
+    ["workspace token", report.fixture?.originalWorkspaceTokenSha256, report.fixture?.restoredWorkspaceTokenSha256],
+  ] as const
+  for (const [name, original, restored] of fixtureRestoration) {
+    const required = hasMeasurementFixture || name === "token" || name === "style"
+    if (original === undefined || restored === undefined) {
+      if (required) throw Error(`Metro incremental ${name} fixture restoration hashes are missing`)
+      continue
+    }
+    if (!/^[a-f0-9]{64}$/.test(original) || original !== restored) throw Error(`Metro incremental ${name} fixture was not restored`)
+  }
   if (report.warmup?.excluded !== true || report.warmup.previousCompiledValue !== report.initial?.compiledValue ||
     report.warmup.compiledValue === report.initial.compiledValue || !Number.isFinite(report.warmup.editToReceiptMs) || report.warmup.editToReceiptMs < 0 ||
     !Number.isSafeInteger(report.warmup.attempts) || report.warmup.attempts < 1 || !Number.isSafeInteger(report.warmup.bytes) || report.warmup.bytes < 1 ||
@@ -189,14 +235,26 @@ export function admitMetroIncrementalReport(input: unknown, minimumRepetitions =
 export async function measureMetroIncremental(outputFile: string, repetitions = 5, port = 8093) {
   if (!Number.isSafeInteger(repetitions) || repetitions < 5) throw Error("At least five actual edit repetitions are required")
   if (!Number.isSafeInteger(port) || port < 1024 || port > 65535) throw Error("Metro measurement port is invalid")
-  const originalToken = await readFile(tokenFile, "utf8")
-  const originalBaseStyle = await readFile(baseStyleFile, "utf8")
-  const originalWorkspaceToken = await readFile(workspaceTokenFile, "utf8")
-  const originalStyle = await readFile(styleFile, "utf8")
-  const originalTokenSha256 = sha256(originalToken)
-  const originalBaseStyleSha256 = sha256(originalBaseStyle)
-  const originalWorkspaceTokenSha256 = sha256(originalWorkspaceToken)
-  const originalStyleSha256 = sha256(originalStyle)
+  const worktreeFixture = {
+    token: await readFile(tokenFile, "utf8"),
+    baseStyle: await readFile(baseStyleFile, "utf8"),
+    workspaceToken: await readFile(workspaceTokenFile, "utf8"),
+    style: await readFile(styleFile, "utf8"),
+  }
+  const worktreeHashes = {
+    token: sha256(worktreeFixture.token),
+    baseStyle: sha256(worktreeFixture.baseStyle),
+    workspaceToken: sha256(worktreeFixture.workspaceToken),
+    style: sha256(worktreeFixture.style),
+  }
+  const measurementFixture = createHistoricalMetroFixture()
+  const measurementHashes = {
+    entry: sha256(await readFile(entryFile, "utf8")),
+    style: sha256(measurementFixture.style),
+    token: sha256(measurementFixture.token),
+    baseStyle: sha256(measurementFixture.baseStyle),
+    workspaceToken: sha256(measurementFixture.workspaceToken),
+  }
   const requestPath = "/src/incremental-entry.bundle?platform=ios&dev=true&minify=false&modulesOnly=false&runModule=true"
   const requestUrl = `http://127.0.0.1:${port}${requestPath}`
   const expoBin = join(appRoot, "node_modules/.bin/expo")
@@ -208,6 +266,10 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
   let configurationControl: ConfigurationControl | undefined
   const serverStarts: ConfigurationControl["serverStarts"] = []
   try {
+    await writeFile(tokenFile, measurementFixture.token)
+    await writeFile(baseStyleFile, measurementFixture.baseStyle)
+    await writeFile(workspaceTokenFile, measurementFixture.workspaceToken)
+    await writeFile(styleFile, measurementFixture.style)
     await assertPortUnused(port)
     const firstServer = await startMetro({ expoBin, appRoot, port, logs, strictDiagnostics: true, clearCache: true })
     child = firstServer.child
@@ -222,24 +284,53 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     await writeFile(tokenFile, createIncrementalTokenSource(2))
     const dependencyReceipt = await waitForBundle(requestUrl, bundle => hasDependencyExpression(bundle, 2) && hasCompiledValue(bundle, incrementalCompiledValue(2)) && !hasCompiledValue(bundle, initialValue), dependencyStarted)
     dependencyControls.push(makeDependencyControl("plain-token", initialValue, incrementalCompiledValue(2), dependencyStarted, dependencyReceipt))
-    await writeFile(tokenFile, originalToken)
+    await writeFile(tokenFile, measurementFixture.token)
     await waitForBundle(requestUrl, bundle => hasDependencyExpression(bundle, 1) && hasCompiledValue(bundle, initialValue) && !hasCompiledValue(bundle, incrementalCompiledValue(2)), performance.now())
 
     const nestedStarted = performance.now()
     await writeFile(baseStyleFile, createIncrementalBaseStyleSource(3))
     const nestedReceipt = await waitForBundle(requestUrl, bundle => hasMarginValue(bundle, 31003) && !hasMarginValue(bundle, 31001), nestedStarted)
     dependencyControls.push(makeDependencyControl("nested-css", 31001, 31003, nestedStarted, nestedReceipt, hasMarginValue))
-    await writeFile(baseStyleFile, originalBaseStyle)
+    await writeFile(baseStyleFile, measurementFixture.baseStyle)
     await waitForBundle(requestUrl, bundle => hasMarginValue(bundle, 31001) && !hasMarginValue(bundle, 31003), performance.now())
 
     const workspaceStarted = performance.now()
-    await writeFile(workspaceTokenFile, createWorkspaceTokenSource(4))
+    await writeFile(workspaceTokenFile, createHistoricalWorkspaceTokenSource(4))
     const workspaceReceipt = await waitForBundle(requestUrl, bundle => hasBorderWidthValue(bundle, 32004) && !hasBorderWidthValue(bundle, 32001), workspaceStarted)
     dependencyControls.push(makeDependencyControl("workspace-source", 32001, 32004, workspaceStarted, workspaceReceipt, hasBorderWidthValue))
-    await writeFile(workspaceTokenFile, originalWorkspaceToken)
+    await writeFile(workspaceTokenFile, measurementFixture.workspaceToken)
     await waitForBundle(requestUrl, bundle => hasBorderWidthValue(bundle, 32001) && !hasBorderWidthValue(bundle, 32004), performance.now())
 
+    const warmupStarted = performance.now()
+    await writeFile(styleFile, createHistoricalIncrementalStyleSource(100))
+    await delay(75)
+    const warmupBundle = await waitForBundle(requestUrl, bundle => hasCompiledValue(bundle, incrementalCompiledValue(100)) && !hasCompiledValue(bundle, initialValue), warmupStarted)
+    const warmup = makeRun(0, initialValue, incrementalCompiledValue(100), warmupStarted, warmupBundle)
+    if (!warmup.receipt.compiledValuePresent || !warmup.receipt.previousCompiledValueAbsent) throw Error("Metro did not emit the excluded direct-edit warmup")
+    const runs: IncrementalRun[] = []
+    let previousValue = warmup.compiledValue
+    for (let index = 0; index < repetitions; index += 1) {
+      const addend = index + 101
+      const compiledValue = incrementalCompiledValue(addend)
+      const started = performance.now()
+      await writeFile(styleFile, createHistoricalIncrementalStyleSource(addend))
+      await delay(75)
+      const updated = await waitForBundle(requestUrl, bundle => hasCompiledValue(bundle, compiledValue) && !hasCompiledValue(bundle, previousValue), started)
+      const { attempts, bundle } = updated
+      const run = makeRun(index + 1, previousValue, compiledValue, started, { attempts, bundle })
+      const receipt = run.receipt
+      runs.push(run)
+      if (!receipt.compiledValuePresent || !receipt.previousCompiledValueAbsent) throw Error(`Metro did not emit dependency edit ${index + 1}`)
+      previousValue = compiledValue
+    }
+
+    // M8.4 remains covered, but runs after the timed sequence so config-restart
+    // cache activity cannot change the baseline incremental-edit workload.
     await stop(child)
+    await writeFile(tokenFile, worktreeFixture.token)
+    await writeFile(baseStyleFile, worktreeFixture.baseStyle)
+    await writeFile(workspaceTokenFile, worktreeFixture.workspaceToken)
+    await writeFile(styleFile, worktreeFixture.style)
     const permissiveServer = await startMetro({ expoBin, appRoot, port, logs, strictDiagnostics: false, clearCache: false })
     child = permissiveServer.child
     serverStarts.push({ strictDiagnostics: permissiveServer.strictDiagnostics, clearCache: permissiveServer.clearCache })
@@ -290,32 +381,10 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     }
     admitConfigurationControl(configurationControl)
 
-    const warmupStarted = performance.now()
-    await writeFile(styleFile, createIncrementalStyleSource(100))
-    await delay(75)
-    const warmupBundle = await waitForBundle(requestUrl, bundle => hasCompiledValue(bundle, incrementalCompiledValue(100)) && !hasCompiledValue(bundle, initialValue), warmupStarted)
-    const warmup = makeRun(0, initialValue, incrementalCompiledValue(100), warmupStarted, warmupBundle)
-    if (!warmup.receipt.compiledValuePresent || !warmup.receipt.previousCompiledValueAbsent) throw Error("Metro did not emit the excluded direct-edit warmup")
-    const runs: IncrementalRun[] = []
-    let previousValue = warmup.compiledValue
-    for (let index = 0; index < repetitions; index += 1) {
-      const addend = index + 101
-      const compiledValue = incrementalCompiledValue(addend)
-      const started = performance.now()
-      await writeFile(styleFile, createIncrementalStyleSource(addend))
-      await delay(75)
-      const updated = await waitForBundle(requestUrl, bundle => hasCompiledValue(bundle, compiledValue) && !hasCompiledValue(bundle, previousValue), started)
-      const { attempts, bundle } = updated
-      const run = makeRun(index + 1, previousValue, compiledValue, started, { attempts, bundle })
-      const receipt = run.receipt
-      runs.push(run)
-      if (!receipt.compiledValuePresent || !receipt.previousCompiledValueAbsent) throw Error(`Metro did not emit dependency edit ${index + 1}`)
-      previousValue = compiledValue
-    }
-    await writeFile(styleFile, originalStyle)
-    await writeFile(tokenFile, originalToken)
-    await writeFile(baseStyleFile, originalBaseStyle)
-    await writeFile(workspaceTokenFile, originalWorkspaceToken)
+    await writeFile(styleFile, worktreeFixture.style)
+    await writeFile(tokenFile, worktreeFixture.token)
+    await writeFile(baseStyleFile, worktreeFixture.baseStyle)
+    await writeFile(workspaceTokenFile, worktreeFixture.workspaceToken)
     restoredTokenSha256 = sha256(await readFile(tokenFile, "utf8"))
     restoredBaseStyleSha256 = sha256(await readFile(baseStyleFile, "utf8"))
     restoredWorkspaceTokenSha256 = sha256(await readFile(workspaceTokenFile, "utf8"))
@@ -330,8 +399,12 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
       environment: { platform: process.platform, architecture: process.arch, osRelease: release(), cpu: cpus()[0]?.model ?? "unknown",
         expo: requireFromApp("expo/package.json").version as string, metro: requireFromApp("metro/package.json").version as string,
         reactNative: requireFromApp("react-native/package.json").version as string },
-      protocol: { requestUrl: requestPath, repetitions, editKind: "direct-css-source", cacheState: "One initially cleared Metro cache; dependency controls run warm; strictDiagnostics switches across server restarts without clearing the cache and require the same edited source to change from successful compiled output to a strict declaration diagnostic, then back to successful output; direct-edit samples follow" },
-      fixture: { entrySha256: sha256(await readFile(entryFile)), originalStyleSha256, restoredStyleSha256, originalTokenSha256, restoredTokenSha256, originalBaseStyleSha256, restoredBaseStyleSha256, originalWorkspaceTokenSha256, restoredWorkspaceTokenSha256 },
+      packageProvenance: { expoMetroRuntime: requireFromApp("@expo/metro-runtime/package.json").version as string,
+        react: requireFromApp("react/package.json").version as string, reactDom: requireFromApp("react-dom/package.json").version as string,
+        babelPresetExpo: requireFromApp("babel-preset-expo/package.json").version as string },
+      protocol: { requestUrl: requestPath, repetitions, editKind: "direct-css-source", cacheState: "One cleared Metro server and warm initial graph; three dependency-only controls (plain token, nested .css.ts and workspace source) prove parent rebuilds before one excluded direct-edit warmup and five retained direct .css.ts edits; dependency receipts require the new baked value and absence of the old value" },
+      fixture: { entrySha256: measurementHashes.entry, originalStyleSha256: worktreeHashes.style, restoredStyleSha256: restoredStyleSha256, originalTokenSha256: worktreeHashes.token, restoredTokenSha256, originalBaseStyleSha256: worktreeHashes.baseStyle, restoredBaseStyleSha256, originalWorkspaceTokenSha256: worktreeHashes.workspaceToken, restoredWorkspaceTokenSha256 },
+      measurementFixture: { entrySha256: measurementHashes.entry, styleSha256: measurementHashes.style, tokenSha256: measurementHashes.token, baseStyleSha256: measurementHashes.baseStyle, workspaceTokenSha256: measurementHashes.workspaceToken },
       server: { startupMs, logs },
       initial,
       dependencyControls,
@@ -343,10 +416,10 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
     await writeFile(outputFile, JSON.stringify(report, null, 2) + "\n")
     return report
   } finally {
-    if (sha256(await readFile(tokenFile)) !== originalTokenSha256) await writeFile(tokenFile, originalToken)
-    if (sha256(await readFile(baseStyleFile)) !== originalBaseStyleSha256) await writeFile(baseStyleFile, originalBaseStyle)
-    if (sha256(await readFile(workspaceTokenFile)) !== originalWorkspaceTokenSha256) await writeFile(workspaceTokenFile, originalWorkspaceToken)
-    if (sha256(await readFile(styleFile)) !== originalStyleSha256) await writeFile(styleFile, originalStyle)
+    if (sha256(await readFile(tokenFile)) !== worktreeHashes.token) await writeFile(tokenFile, worktreeFixture.token)
+    if (sha256(await readFile(baseStyleFile)) !== worktreeHashes.baseStyle) await writeFile(baseStyleFile, worktreeFixture.baseStyle)
+    if (sha256(await readFile(workspaceTokenFile)) !== worktreeHashes.workspaceToken) await writeFile(workspaceTokenFile, worktreeFixture.workspaceToken)
+    if (sha256(await readFile(styleFile)) !== worktreeHashes.style) await writeFile(styleFile, worktreeFixture.style)
     if (child) await stop(child)
   }
 }

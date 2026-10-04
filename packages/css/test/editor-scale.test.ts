@@ -14,7 +14,17 @@ describe("editor scale fixtures",()=>{
   expect(readFileSync(file,"utf8")).toBe(createEditorFixture(count).source)
   expect(readFileSync(completion,"utf8")).toBe(createEditorFixture(count).completionSource)
   expect(JSON.parse(readFileSync(resolve(root,String(count),"tsconfig.json"),"utf8"))).toMatchObject({files:["index.css.ts"],include:[]})
-  expect(inspectEditorFixture(file)).toMatchObject({tokenCount:count,recipeCount:1,conditionApi:"implemented",slotRecipeApi:"implemented"})
+  expect(inspectEditorFixture(file)).toMatchObject({tokenCount:count,recipeCount:1,conditionApi:"unsupported",slotRecipeApi:"unsupported"})
+ })
+ it("preserves recorded compiler inputs while keeping current feature coverage as provenance",()=>{
+  const manifest=JSON.parse(readFileSync(resolve(root,"manifest.json"),"utf8"))
+  expect(manifest.scales.map((scale:{sourceSha256:string})=>scale.sourceSha256)).toEqual([
+   "6064de7b665bd69b3bd7a35d28c531b5ce31ec3c642ac109ba2d4a51dfdc2f6f",
+   "a068e75af05389f1afe794bc58f5a666d2acea39bc6d7fd33822fe681f332a47",
+   "402fc098802073f8a0b0a839d91a3c8e325d8d619c076942c975c177a42cf139",
+  ])
+  expect(manifest.coverage.conditions).toBe("implemented API; not included in this fixture")
+  expect(manifest.coverage.slotRecipes).toBe("implemented API; not included in this fixture")
  })
  it("describes implemented condition and slot APIs as outside this fixture's coverage",()=>{
   const manifest=JSON.parse(readFileSync(resolve(root,"manifest.json"),"utf8"))

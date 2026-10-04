@@ -481,8 +481,15 @@ function comparisonIdentity(selector: BaselineSelector, evidence: unknown): { en
     }
   }
   if (selector.startsWith("metro-incremental.")) {
-    const data = evidence as { environment: unknown; protocol: unknown; fixture: unknown }
-    return { environment: { environment: data.environment }, measurement: { protocol: data.protocol, fixture: data.fixture } }
+    const data = evidence as { environment: unknown; protocol: unknown; fixture: Record<string, unknown>; measurementFixture?: unknown }
+    const fixture = data.measurementFixture ?? {
+      entrySha256: data.fixture.entrySha256,
+      styleSha256: data.fixture.originalStyleSha256,
+      tokenSha256: data.fixture.originalTokenSha256,
+      baseStyleSha256: data.fixture.originalBaseStyleSha256,
+      workspaceTokenSha256: data.fixture.originalWorkspaceTokenSha256,
+    }
+    return { environment: { environment: data.environment }, measurement: { protocol: data.protocol, fixture } }
   }
   const identity = (evidence as EditorScaleEvidence).identity
   return {
@@ -490,8 +497,9 @@ function comparisonIdentity(selector: BaselineSelector, evidence: unknown): { en
       cpuModel: identity.cpuModel, logicalCpus: identity.logicalCpus, totalMemoryBytes: identity.totalMemoryBytes,
       typescript: identity.typescript, tsgo: identity.tsgo } },
     measurement: {
-      identity: { baseRevision: identity.baseRevision, crumbsVersion: identity.crumbsVersion },
-      manifest: (evidence as EditorScaleEvidence).manifest,
+      protocol: (evidence as EditorScaleEvidence).protocol,
+      scales: (evidence as EditorScaleEvidence).manifest.scales.map(({ tokenCount, sourceSha256, sourceBytes, sourceLines }) =>
+        ({ tokenCount, sourceSha256, sourceBytes, sourceLines })),
     },
   }
 }
@@ -562,7 +570,8 @@ type BenchmarkRunEvidence = {
 }
 type EditorScaleEvidence = {
   identity: { baseRevision?: string; crumbsVersion?: string; bun: string; node: string; platform: string; arch: string; osRelease: string; cpuModel: string; logicalCpus: number; totalMemoryBytes: number; typescript: string; tsgo: string }
-  manifest: unknown
+  protocol: unknown
+  manifest: { scales: Array<{ tokenCount: number; sourceSha256: string; sourceBytes: number; sourceLines: number }>; coverage?: unknown }
   compilerRuns: Array<{ engine: string; scale: number; wallMs: number; diagnostics: { memoryKiB: number; instantiations: number } }>
   completionRuns: Array<{ scale: number; firstCompletionMs: number; warmCompletionMs: number }>
 }

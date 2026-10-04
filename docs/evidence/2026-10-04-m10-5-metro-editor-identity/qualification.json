@@ -1,0 +1,193 @@
+{
+  "format": "crumbs.m10-5-metro-editor-identity",
+  "schemaVersion": 1,
+  "slice": "M10.5 Metro and editor measurement-identity repair",
+  "capturedAt": "2026-10-04T18:10:45.637Z",
+  "status": "identity-repair-complete-performance-qualification-open",
+  "sourceRevision": "4416770a474891c28d2c28001eb12eb6471d4c66",
+  "sourceState": "Working tree based on sourceRevision; retained reports carry detailed source and environment identity",
+  "command": "CRUMBS_AUDIT_NODE_FLOOR=<exact Node v22.0.0 executable> CRUMBS_METRO_PORT=8093 bun scripts/measure-current-host-budgets.ts docs/evidence/2026-10-04-m10-5-metro-editor-identity/host-budgets",
+  "host": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "bunVersion": "1.4.2",
+    "floorNodeVersion": "v22.0.0",
+    "floorNodeBinarySha256": "9507031f6769f2381eae353b3614bafa871c957dc6f2ae86a3af948acdf9b178",
+    "currentNodeVersion": "v24.15.0"
+  },
+  "metro": {
+    "status": "complete",
+    "environment": {
+      "expo": "56.0.4",
+      "metro": "0.84.4",
+      "reactNative": "0.85.3"
+    },
+    "additionalPackageProvenance": {
+      "expoMetroRuntime": "56.0.12",
+      "react": "19.2.5",
+      "reactDom": "19.2.5",
+      "babelPresetExpo": "56.0.12"
+    },
+    "runs": 5,
+    "measurementFixtureMatchesRetainedBaseline": true,
+    "protocolMatchesRetainedBaseline": true,
+    "currentWorktreeFixturesRestored": true,
+    "m8_4StrictDiagnosticsControl": "retained-after-timed-samples; current shared-token worktree fixtures restored before control; first control start clears cache and later restarts preserve it",
+    "baselineMedianMs": 123.95049999999901,
+    "currentMedianMs": 127.31016699999964,
+    "deltaPercent": 2.7104908814411024,
+    "approvedAbsoluteMaxMs": 137.506,
+    "approvedMaxRegressionPercent": 10,
+    "result": "pass"
+  },
+  "editor": {
+    "status": "complete",
+    "scaleSourceHashesMatchRetainedBaseline": true,
+    "currentCoverageProvenance": {
+      "conditions": "implemented API; not included in this fixture",
+      "slotRecipes": "implemented API; not included in this fixture"
+    },
+    "identityPolicy": "Host and toolchain plus protocol and exact per-scale source hashes/bytes/lines define the measurement; base revision, Crumbs package version, and API coverage remain provenance.",
+    "passingMetrics": [
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ]
+  },
+  "hostBudgetComparison": {
+    "metricCount": 21,
+    "counts": {
+      "pass": 10,
+      "fail": 11,
+      "incomplete": 0
+    },
+    "passingMetrics": [
+      "cold-transform-ms",
+      "incremental-rebuild",
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ],
+    "failingMetrics": [
+      "runtime-initialization-node22-esm",
+      "runtime-initialization-node22-cjs",
+      "runtime-initialization-current-esm",
+      "runtime-initialization-current-cjs",
+      "warm-transform-ms",
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "performanceQualified": false
+  },
+  "diagnosticOnly": {
+    "metric": "runtime-emitted-bytes",
+    "result": "fail",
+    "deltaPercent": 1419.784204475104,
+    "contributesToPerformanceQualification": false
+  },
+  "budgetRegistry": {
+    "status": "thresholds-pending-review",
+    "pendingThresholds": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes",
+      "retained-memory-bytes"
+    ],
+    "missingBaselines": [
+      "js-frame-time",
+      "ui-frame-time",
+      "allocation-bytes"
+    ],
+    "diagnosticBaselines": [
+      "retained-memory-bytes"
+    ]
+  },
+  "noThresholdOrBaselineChanges": true,
+  "pathRedactions": {
+    "checkedInHostReportsUseStablePlaceholders": true,
+    "rawRunPreservedOutsideRepository": true,
+    "replacements": [
+      "managed checkout path",
+      "dependency checkout path",
+      "Node executable paths",
+      "temporary-directory paths"
+    ],
+    "measurementValuesAndIdentitiesPreserved": true
+  },
+  "scopeLimits": [
+    "This repairs comparison identity and records host qualification; it does not change production runtime behavior.",
+    "Eleven approved host-budget metrics still fail, and the overall host performance gate remains open.",
+    "Host measurements do not qualify Hermes or release-device performance, native rendering, screen-reader behavior, or Android.",
+    "Android remains last; M10.5 remains open for performance remediation and device-facing baselines."
+  ],
+  "artifacts": [
+    {
+      "path": "host-budgets/benchmark-1.json",
+      "sha256": "36481e2e523be8cbd7ac87ce62b9ae8c732cce8b56a0c48a436021a1f545fa0b"
+    },
+    {
+      "path": "host-budgets/benchmark-2.json",
+      "sha256": "9e4f41e902b169b7a70d2e3465399d8c03a839c900a1b5130922df358bf4801e"
+    },
+    {
+      "path": "host-budgets/benchmark-3.json",
+      "sha256": "e582908f33a1aad6b8e754d1325468cd4cabdae3e988899c474fd8a080069cb2"
+    },
+    {
+      "path": "host-budgets/benchmark-4.json",
+      "sha256": "62bbfb81f5eb566fce060acf73da6cacc064af880a7fe9e4cdac132a41aeb871"
+    },
+    {
+      "path": "host-budgets/benchmark-5.json",
+      "sha256": "01f5a574dfc8f12897f5b027bb3cf30d62bd642a3d01bce4c05c2cbc258656df"
+    },
+    {
+      "path": "host-budgets/benchmark-summary.json",
+      "sha256": "6375414fdb3fb8447da0f6b81c95790cfb1d6fd9ec4e5ccce84d4223a8e47f49"
+    },
+    {
+      "path": "host-budgets/comparison.json",
+      "sha256": "86f76e1b751a7735086e411ddc0439de5f2343437268a5c1af80bf6d76cf253d"
+    },
+    {
+      "path": "host-budgets/editor.json",
+      "sha256": "f6e5d8ea6f0bdacdc2ac5c31d78128821d98fbf780f8a2b4c0216c4782eafecb"
+    },
+    {
+      "path": "host-budgets/effect.json",
+      "sha256": "c0ae56221e410d60b62bfcf6a214e09865afec88f27aa1da4205198e6f1ae081"
+    },
+    {
+      "path": "host-budgets/metro-incremental.json",
+      "sha256": "8fe68ecf0a57ec9f2a156e9c18b46ed7a9c5a551fe65374b00cef72484a3c7a9"
+    },
+    {
+      "path": "host-budgets/runtime-graph.json",
+      "sha256": "89247e70a1f8cf1263294a8d9c9d0fb6e23b527b3d65a3d5dc29341d1b77f453"
+    },
+    {
+      "path": "host-budgets/runtime-initialization.json",
+      "sha256": "eeb3dddb1c1b9dcf9dc56beb912448a44b36aafa532c9f24d5b0e0053f73ea35"
+    },
+    {
+      "path": "host-budgets/threshold-review.json",
+      "sha256": "0d6f948c99a5a4f201524e5bba69b2de64640a0f233fb88e5da77ab30eb6792d"
+    }
+  ]
+}

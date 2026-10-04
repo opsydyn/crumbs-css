@@ -1,0 +1,520 @@
+{
+  "formatVersion": 2,
+  "recordedAt": "2026-10-04T18:10:12.221Z",
+  "sourceRevision": "4416770a474891c28d2c28001eb12eb6471d4c66",
+  "sourceState": "Working tree; source/fixture hashes identify this pre-commit benchmark",
+  "sourceFiles": [
+    {
+      "relative": "bench/native-styles.bench.ts",
+      "sha256": "0c1313ff62a8c63c2179727931742338717a6a1298c2e1adc6198f43e45bcc26"
+    },
+    {
+      "relative": "bench/benchmark-protocol.ts",
+      "sha256": "674f4172ac2ede7cbdfde10d927192eed9f2230523fed3ae99a3edeeafe3c8f3"
+    },
+    {
+      "relative": "bench/selection-workload.ts",
+      "sha256": "11165545db0433df1ae1df61bd6cd67dc66737879a161054d09568d90ba5728c"
+    },
+    {
+      "relative": "bench/first-transform.ts",
+      "sha256": "bec25a624b7582a304de98964a8b1bdc2c0c287d4cab259d75efe1a8866aa989"
+    },
+    {
+      "relative": "bench/perf-harness.ts",
+      "sha256": "2d847624d35dcd3bbc6a4162abe7c72111f8aa18351fa109ef7a7121d80b4610"
+    },
+    {
+      "relative": "src/theme-runtime.ts",
+      "sha256": "a9355afc80ba8c331b1a6ed108558313b3521ce2b6470029df7a470bcb24337f"
+    },
+    {
+      "relative": "src/transformer.ts",
+      "sha256": "a975c5c2e209ff5a5a83b48de31b4a34f906ba85c25959fdbb221c07211ac668"
+    }
+  ],
+  "environment": {
+    "bun": "1.4.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "nodeEnv": "unset"
+  },
+  "fixtures": [
+    {
+      "file": "examples/recipe.css.ts",
+      "sha256": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9"
+    },
+    {
+      "file": "fixtures/consumer/styles/button.css.ts",
+      "sha256": "db8546f2baef375412fe03a4fa0d0fad1c40168919453c73eb8fa9229cfdadea"
+    },
+    {
+      "file": "fixtures/consumer/styles/shared.css.ts",
+      "sha256": "bceab75091add774d3eb27c8697622fd41b8404328e027a6dd07c0f60110e1ec"
+    },
+    {
+      "file": "fixtures/consumer/styles/theme.css.ts",
+      "sha256": "568a174e7290bfbe8f6c4fda5cfcb3c292de5be79494a140d5f9c2d5c32045e9"
+    }
+  ],
+  "protocol": {
+    "quantiles": "Nearest-rank quantiles of batch-average milliseconds per operation, never individual operation/GC tails; one-iteration transform samples are individual transform observations",
+    "ordering": "Sequential scenarios in listed order; warmup excluded; cold transforms use fixture-root cwd; warm transforms use package-root cwd; fixture paths are package-relative; filesystem caches uncontrolled",
+    "warmTransformCwd": "package-root",
+    "budgets": "Existing host smoke ceilings retained with corrected names; new ingress/cold scenarios have no calibrated budget; M1.8 remains open",
+    "runtimeCaching": "createRecipeResolver is an uncached closure. Pre-resolved theme selection amortizes earlier resolution, not a recipe cache hit. React useMemo reuse/invalidation is not measured by this pure host harness."
+  },
+  "selectionsPerCycle": 52,
+  "metrics": [
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.0025,
+        "minHz": 400000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        2.2985829999999936,
+        2.1541249999999934,
+        2.1750839999999982,
+        2.6902500000000202,
+        2.141750000000002,
+        2.077167000000003,
+        2.604417000000012,
+        2.0187919999999906,
+        2.021790999999979,
+        2.5397920000000056,
+        2.0719589999999926,
+        2.0692090000000007
+      ],
+      "hz": 11167810.914368616,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.00010761000000000081,
+      "meanOperationMs": 8.954306333333331e-05,
+      "batchMeanMinMs": 8.075167999999963e-05,
+      "name": "raw equivalent recipe selection",
+      "batchMeanP50Ms": 8.567000000000008e-05,
+      "batchMeanP95Ms": 0.00010761000000000081,
+      "samples": 12,
+      "totalMs": 26.86291899999999,
+      "warmupIterations": 25000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.006,
+        "minHz": 150000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        66.01054199999999,
+        65.31162499999999,
+        65.730166,
+        65.740209,
+        65.59520799999996,
+        65.39949999999999,
+        64.64920899999993,
+        65.04916700000001,
+        66.19687499999998,
+        65.33899999999994,
+        64.9409159999999,
+        66.05029200000001
+      ],
+      "hz": 381673.21795810823,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.002647874999999999,
+      "meanOperationMs": 0.0026200423633333325,
+      "batchMeanMinMs": 0.002585968359999997,
+      "name": "resolveRecipeStyle uncached selection",
+      "batchMeanP50Ms": 0.0026159799999999995,
+      "batchMeanP95Ms": 0.002647874999999999,
+      "samples": 12,
+      "totalMs": 786.0127089999997,
+      "warmupIterations": 25000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.006,
+        "minHz": 150000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        32.10154200000011,
+        30.347041999999874,
+        31.147458000000142,
+        30.250499999999874,
+        32.101541,
+        29.841333000000077,
+        32.79049999999984,
+        30.139666999999918,
+        32.77345800000012,
+        29.902958000000126,
+        32.45987500000001,
+        29.936457999999902
+      ],
+      "hz": 802584.6822347335,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.0013116199999999936,
+      "meanOperationMs": 0.00124597444,
+      "batchMeanMinMs": 0.001193653320000003,
+      "name": "createRecipeResolver uncached selection",
+      "batchMeanP50Ms": 0.0012138816799999949,
+      "batchMeanP95Ms": 0.0013116199999999936,
+      "samples": 12,
+      "totalMs": 373.792332,
+      "warmupIterations": 25000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.0075,
+        "minHz": 125000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        29.30295799999999,
+        31.415707999999995,
+        28.337541999999985,
+        30.205957999999782,
+        28.777541000000156,
+        29.608124999999973,
+        27.967999999999847,
+        30.023290999999972,
+        28.303042000000005,
+        30.27491699999996,
+        28.64670799999999,
+        32.110999999999876
+      ],
+      "hz": 845130.4386996056,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.001284439999999995,
+      "meanOperationMs": 0.0011832492999999985,
+      "batchMeanMinMs": 0.0011187199999999938,
+      "name": "pre-resolved theme recipe uncached selection",
+      "batchMeanP50Ms": 0.0011721183199999996,
+      "batchMeanP95Ms": 0.001284439999999995,
+      "samples": 12,
+      "totalMs": 354.97478999999953,
+      "warmupIterations": 25000
+    },
+    {
+      "iterationsPerSample": 5000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        14.176958999999897,
+        13.658415999999988,
+        14.10525000000007,
+        14.504333000000088,
+        13.793165999999928,
+        13.669957999999951,
+        13.394415999999865,
+        13.341958000000204,
+        13.415915999999925,
+        13.604125000000067,
+        13.053667000000132,
+        13.315250000000106
+      ],
+      "hz": 365779.133268542,
+      "iterations": 60000,
+      "batchMeanMaxMs": 0.0029008666000000178,
+      "meanOperationMs": 0.002733890233333337,
+      "batchMeanMinMs": 0.0026107334000000267,
+      "name": "resolve theme module plus recipe selection per call",
+      "batchMeanP50Ms": 0.0027208250000000135,
+      "batchMeanP95Ms": 0.0029008666000000178,
+      "samples": 12,
+      "totalMs": 164.03341400000022,
+      "warmupIterations": 5000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 1.5
+      },
+      "iterationsPerSample": 20,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        0.0018340000001444423,
+        0.0013330000001587905,
+        0.001291999999921245,
+        0.001209000000017113,
+        0.0011669999998957792,
+        0.0012500000000272848,
+        0.0012499999997999112,
+        0.0012500000000272848,
+        0.0012500000000272848,
+        0.0016660000001138542,
+        0.0012500000000272848,
+        0.0012500000000272848
+      ],
+      "hz": 14999062.558414275,
+      "iterations": 240,
+      "batchMeanMaxMs": 9.170000000722212e-05,
+      "meanOperationMs": 6.667083333411483e-05,
+      "batchMeanMinMs": 5.834999999478896e-05,
+      "name": "resolveThemeStyles 240 exports uncached",
+      "batchMeanP50Ms": 6.250000000136424e-05,
+      "batchMeanP95Ms": 9.170000000722212e-05,
+      "samples": 12,
+      "totalMs": 0.01600100000018756,
+      "warmupIterations": 20
+    },
+    {
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        80.92854100000001,
+        69.215167,
+        69.147958,
+        68.231458,
+        68.67316600000001,
+        66.71112500000001
+      ],
+      "hz": 14.187502482073999,
+      "iterations": 6,
+      "batchMeanMaxMs": 80.92854100000001,
+      "meanOperationMs": 70.48456916666669,
+      "batchMeanMinMs": 66.71112500000001,
+      "name": "first transform README recipe fixture",
+      "batchMeanP50Ms": 68.67316600000001,
+      "batchMeanP95Ms": 80.92854100000001,
+      "samples": 6,
+      "totalMs": 422.9074150000001,
+      "warmupIterations": 0
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 100
+      },
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        11.362165999999888,
+        8.527874999999767,
+        8.033292000000074,
+        7.395999999999731,
+        8.277084000000286,
+        6.804834000000028
+      ],
+      "hz": 119.04466418899061,
+      "iterations": 6,
+      "batchMeanMaxMs": 11.362165999999888,
+      "meanOperationMs": 8.400208499999962,
+      "batchMeanMinMs": 6.804834000000028,
+      "name": "warm transform README recipe fixture",
+      "batchMeanP50Ms": 8.033292000000074,
+      "batchMeanP95Ms": 11.362165999999888,
+      "samples": 6,
+      "totalMs": 50.401250999999775,
+      "warmupIterations": 1
+    },
+    {
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        68.73025000000001,
+        67.682666,
+        69.328375,
+        68.133458,
+        67.146458,
+        68.229416
+      ],
+      "hz": 14.660942861900052,
+      "iterations": 6,
+      "batchMeanMaxMs": 69.328375,
+      "meanOperationMs": 68.20843716666667,
+      "batchMeanMinMs": 67.146458,
+      "name": "first transform package-owned consumer button fixture",
+      "batchMeanP50Ms": 68.133458,
+      "batchMeanP95Ms": 69.328375,
+      "samples": 6,
+      "totalMs": 409.250623,
+      "warmupIterations": 0
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 150
+      },
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        7.584208000000217,
+        9.748082999999951,
+        7.672042000000147,
+        7.1349999999997635,
+        6.915209000000232,
+        7.371832999999697
+      ],
+      "hz": 129.2368831294711,
+      "iterations": 6,
+      "batchMeanMaxMs": 9.748082999999951,
+      "meanOperationMs": 7.737729166666668,
+      "batchMeanMinMs": 6.915209000000232,
+      "name": "warm transform package-owned consumer button fixture",
+      "batchMeanP50Ms": 7.371832999999697,
+      "batchMeanP95Ms": 9.748082999999951,
+      "samples": 6,
+      "totalMs": 46.42637500000001,
+      "warmupIterations": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "raw equivalent recipe selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "resolveRecipeStyle uncached selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "createRecipeResolver uncached selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "pre-resolved theme recipe uncached selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "resolve theme module plus recipe selection per call",
+      "phase": "warm-runtime-uncached",
+      "work": "Recompute one themed recipe module and select on every operation; differs deliberately from pre-resolved selection"
+    },
+    {
+      "name": "resolveThemeStyles 240 exports uncached",
+      "phase": "warm-runtime-uncached",
+      "work": "Traverse/allocate/resolve all 240 style exports each call; no provider or React memoization"
+    },
+    {
+      "name": "first transform README recipe fixture",
+      "phase": "fresh-process-first-transform",
+      "work": "One transform per fresh Bun process; imports/startup excluded, lazy compiler initialization included; OS caches uncontrolled; no cold budget calibrated"
+    },
+    {
+      "name": "warm transform README recipe fixture",
+      "phase": "same-process-warm-transform",
+      "work": "Repeated full transform calls after setup/warmup; process cwd is package-root; package-info/esbuild state may be warm; no transform-result cache"
+    },
+    {
+      "name": "first transform package-owned consumer button fixture",
+      "phase": "fresh-process-first-transform",
+      "work": "One transform per fresh Bun process; imports/startup excluded, lazy compiler initialization included; OS caches uncontrolled; no cold budget calibrated"
+    },
+    {
+      "name": "warm transform package-owned consumer button fixture",
+      "phase": "same-process-warm-transform",
+      "work": "Repeated full transform calls after setup/warmup; process cwd is package-root; package-info/esbuild state may be warm; no transform-result cache"
+    }
+  ],
+  "transformReceipts": [
+    {
+      "name": "README recipe fixture",
+      "cold": [
+        {
+          "durationMs": 80.92854100000001,
+          "outputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+          "outputBytes": 13713,
+          "pid": 29124
+        },
+        {
+          "durationMs": 69.215167,
+          "outputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+          "outputBytes": 13713,
+          "pid": 29219
+        },
+        {
+          "durationMs": 69.147958,
+          "outputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+          "outputBytes": 13713,
+          "pid": 29307
+        },
+        {
+          "durationMs": 68.231458,
+          "outputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+          "outputBytes": 13713,
+          "pid": 29396
+        },
+        {
+          "durationMs": 68.67316600000001,
+          "outputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+          "outputBytes": 13713,
+          "pid": 29487
+        },
+        {
+          "durationMs": 66.71112500000001,
+          "outputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+          "outputBytes": 13713,
+          "pid": 29579
+        }
+      ],
+      "warmedOutputSha256": "5e323202bf13fbdcab410cdd8ce11591ed39d7e25a1a511e2cb9c7f2cec41b08",
+      "coldWarmOutputParity": true
+    },
+    {
+      "name": "package-owned consumer button fixture",
+      "cold": [
+        {
+          "durationMs": 68.73025000000001,
+          "outputSha256": "b426f59e27440891013b8e3a3acb876bbb800a14399c1e773c5a2177a4a4ea9c",
+          "outputBytes": 11807,
+          "pid": 29738
+        },
+        {
+          "durationMs": 67.682666,
+          "outputSha256": "b426f59e27440891013b8e3a3acb876bbb800a14399c1e773c5a2177a4a4ea9c",
+          "outputBytes": 11807,
+          "pid": 29827
+        },
+        {
+          "durationMs": 69.328375,
+          "outputSha256": "b426f59e27440891013b8e3a3acb876bbb800a14399c1e773c5a2177a4a4ea9c",
+          "outputBytes": 11807,
+          "pid": 29915
+        },
+        {
+          "durationMs": 68.133458,
+          "outputSha256": "b426f59e27440891013b8e3a3acb876bbb800a14399c1e773c5a2177a4a4ea9c",
+          "outputBytes": 11807,
+          "pid": 30006
+        },
+        {
+          "durationMs": 67.146458,
+          "outputSha256": "b426f59e27440891013b8e3a3acb876bbb800a14399c1e773c5a2177a4a4ea9c",
+          "outputBytes": 11807,
+          "pid": 30093
+        },
+        {
+          "durationMs": 68.229416,
+          "outputSha256": "b426f59e27440891013b8e3a3acb876bbb800a14399c1e773c5a2177a4a4ea9c",
+          "outputBytes": 11807,
+          "pid": 30183
+        }
+      ],
+      "warmedOutputSha256": "e5e0e1a527e2ddf8d49d287d415d24809422ebc91dc0ae7f7578da1a0c8bf108",
+      "coldWarmOutputParity": false
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "recipe result cache",
+      "status": "not-implemented",
+      "reason": "Current createRecipeResolver delegates to resolveRecipeStyle on every call; M4 owns future caches."
+    },
+    {
+      "name": "React theme memo cache hits/invalidation",
+      "status": "not-run",
+      "reason": "useThemedStyles uses React useMemo; this host harness times pure resolution and pre-resolved selection, not render/provider lifecycle."
+    },
+    {
+      "name": "native-device performance",
+      "status": "not-run",
+      "reason": "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate."
+    }
+  ]
+}
