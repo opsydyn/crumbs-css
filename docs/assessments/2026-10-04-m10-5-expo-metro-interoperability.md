@@ -27,4 +27,4 @@ The default Storybook web bundle also compiled, but its browser render stopped i
 
 Metro selected the ESM exports; its CJS require branch was not exercised. The iOS exports are bundles only: bytecode was disabled, and there was no Hermes, simulator, or device execution. Android remains parked and last.
 
-Next roadmap slice: **M10.5 exact Node v22.0.0 host-budget gate** — rerun the approved host-budget suite on the exact Node floor against the current committed source, without changing thresholds or baselines. Keep the device-facing results separate; Android remains last.
+The exact Node v22.0.0 host-budget gate has since been completed against the same non-documentation source revision; see the [host-budget assessment](2026-10-04-m10-5-node-22-host-budget.md) and [qualification evidence](../evidence/2026-10-04-m10-5-node-22-host-budget/qualification.json). M10.5 remains open. The next recommended slice is to investigate the measured initialization and graph-size failures, then reconcile the warm-transform, Metro, and editor measurement identities. Preserve approved limits and baselines; keep device-facing qualification separate and Android last.
