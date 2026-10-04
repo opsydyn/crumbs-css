@@ -653,6 +653,13 @@ The descriptor style normalizer no longer probes a root value as a class referen
 
 Next recommended roadmap slice: **M10.5 component-contract array-validation A/B** — isolate the measured `readArray` cost and test one bounded candidate before changing that validator. Keep the exact Node v22.0.0 host-budget gate as the final M10.5 step; native/device evidence and Android remain separate gates.
 
+
+### 2026-10-04 — M10.5 component-contract array-validation A/B
+
+The unchanged `contracts.ts` source remains the `readArray` hotspot identified by the prior M10.5 profile. A 13-process paired A/B found a descriptor-snapshot scratch candidate 12.98% faster at the median with non-overlapping ranges. It preserves descriptor reads for array `length`, but reuses the validated key snapshot, reducing proxy `ownKeys` trap calls from three to two. A faster per-index candidate skips the `length` descriptor and changes a throwing proxy trap from rejection to acceptance. No production change was made because proxy trap behavior needs an explicit compatibility decision. See the [assessment](assessments/2026-10-04-m10-5-component-array-validation-ab.md) and [machine-readable evidence](evidence/2026-10-04-m10-5-array-validation-ab/qualification.json).
+
+Next recommended roadmap slice: **M10.5 component-contract descriptor-snapshot implementation gate** — define the compatibility expectation for side-effectful and stateful array proxies; if one fewer `ownKeys` trap call is acceptable, add adversarial regression coverage, implement the descriptor-snapshot candidate, and repeat the production-source A/B. Keep the exact Node v22.0.0 host-budget gate as the final M10.5 step; Android remains last.
+
 ## M11 — Evaluate optional extensions
 
 These ideas remain captured without expanding the initial core. Each requires a specific consumer scenario, a bounded API design, semantic/type tests, and measured cost before adoption.
