@@ -1,0 +1,133 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "slice": "exact-workload Vanilla Extract compilation and generated-module evaluation attribution",
+  "recordedAt": "2026-10-04",
+  "sourceRevision": "0eb88810901aa1cd2f15cbd0f9425a86e72c86bc",
+  "productionChange": "none",
+  "environment": {
+    "runtime": "Bun 1.4.2",
+    "os": "Darwin 25.6.0",
+    "architecture": "arm64",
+    "integrationVersion": "@vanilla-extract/integration 8.0.10"
+  },
+  "sourceFiles": [
+    {
+      "relative": "packages/css/src/transformer.ts",
+      "sha256": "a975c5c2e209ff5a5a83b48de31b4a34f906ba85c25959fdbb221c07211ac668"
+    },
+    {
+      "relative": "packages/css/examples/recipe.css.ts",
+      "sha256": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9"
+    },
+    {
+      "relative": "packages/css/fixtures/consumer/styles/button.css.ts",
+      "sha256": "db8546f2baef375412fe03a4fa0d0fad1c40168919453c73eb8fa9229cfdadea"
+    }
+  ],
+  "approvedBudget": {
+    "absoluteMaxMs": 6.514,
+    "baselineMs": 5.664125,
+    "unchanged": true,
+    "previousUninstrumentedComparisonMs": {
+      "readmeWarmMedian": 8.033292000000074,
+      "consumerWarmMedian": 7.371832999999697
+    }
+  },
+  "protocol": {
+    "transform": "transformCssTsToStyleSheet with strictDiagnostics=true",
+    "processCwd": "packages/css (package-root)",
+    "iterationsPerProcess": 1,
+    "warmupPerProcess": 1,
+    "retainedSamplesPerProcess": 6,
+    "freshProcessesPerFixtureAndVariant": 5,
+    "fixtureOrder": "alternated between README recipe and package-owned consumer button fixtures",
+    "variants": [
+      "default development debug identifiers",
+      "scratch forced short identifiers"
+    ],
+    "instrumentation": "Scratch-only timers in a source copy; phase totals include timer overhead, so absolute totals are diagnostic and are not official budget qualification."
+  },
+  "baselinePhaseAttribution": {
+    "aggregation": "median of each phase median across five fresh processes; total is median of process total medians",
+    "readmeRecipe": {
+      "processTotalMediansMs": [
+        8.3050625,
+        8.254646,
+        8.4741245,
+        8.282771,
+        8.136437
+      ],
+      "medianOfProcessTotalMediansMs": 8.282771,
+      "phaseMedianOfProcessMediansMs": {
+        "vanillaExtractIntegrationCompile": 5.911104,
+        "generatedModuleEvaluation": 1.2314165,
+        "vmRunInNewContext": 1.215625,
+        "vmScriptCompile": 0.0108125,
+        "vanillaExtractTransformCss": 0.105917
+      },
+      "baselineOutputBodySha256": "62436853c120a8aea54c49a6d511601e18ef3edfe333b113a0e0518d85933ff5"
+    },
+    "consumerButton": {
+      "processTotalMediansMs": [
+        7.994521,
+        7.966083,
+        8.278646,
+        8.0648955,
+        8.017125
+      ],
+      "medianOfProcessTotalMediansMs": 8.017125,
+      "phaseMedianOfProcessMediansMs": {
+        "vanillaExtractIntegrationCompile": 5.7633125,
+        "generatedModuleEvaluation": 1.2093125,
+        "vmRunInNewContext": 1.192875,
+        "vmScriptCompile": 0.011791,
+        "vanillaExtractTransformCss": 0.131354
+      },
+      "baselineOutputBodySha256": "c8cf285f95a7a324764e9a0bac30c91750db7224cbcc7da3169377db3f70cd3d"
+    },
+    "interpretation": "Vanilla Extract integration compile is about 71-72% of measured full-transform time. The generated-module evaluation phase is about 1.21-1.23 ms, and vm.Script construction is about 0.01 ms."
+  },
+  "candidate": {
+    "name": "force Vanilla Extract short identifiers in development",
+    "scope": "scratch only; NODE_ENV was unset and the current transformer therefore selects debug identifiers",
+    "readmeRecipe": {
+      "processTotalMediansMs": [
+        7.4384165,
+        7.584229,
+        7.734083,
+        7.2393335,
+        7.3225625
+      ],
+      "medianOfProcessTotalMediansMs": 7.4384165,
+      "compileMedianOfProcessMediansMs": 4.881375,
+      "outputBodySha256": "b311f2360ba2d259c9c2ad0c45900933646f697f802e05198b77c44f26018e32"
+    },
+    "consumerButton": {
+      "processTotalMediansMs": [
+        6.946125,
+        7.173729,
+        7.3241665,
+        7.155125,
+        7.0557705
+      ],
+      "medianOfProcessTotalMediansMs": 7.155125,
+      "compileMedianOfProcessMediansMs": 4.6886045,
+      "outputBodySha256": "35d1adf7928392d3ccd1e85ce2530d5e5621eba49dc38c1797e86934f434933d"
+    },
+    "decision": "rejected",
+    "reason": "Forcing short identifiers changes the generated development module body on both fixtures and discards Vanilla Extract debug identifiers. It does not preserve the output-parity contract. Timings are instrumented diagnostics and are not an official budget pass."
+  },
+  "outputParity": {
+    "instrumentedDefaultAgainstUninstrumentedCurrentSource": "Generated JavaScript bodies matched exactly after removing the first @crumbs-native-cache marker. Full output hashes differ because getCacheKey hashes the instrumented transformer source.",
+    "candidateAgainstDefault": "Generated JavaScript body hashes differ for both fixtures."
+  },
+  "result": {
+    "status": "attribution-complete-no-candidate-accepted",
+    "officialWarmTransformGate": "unchanged-and-still-failing-per-previous-uninstrumented-comparison",
+    "fullNode22HostSuiteRerun": false,
+    "thresholdsOrBaselinesChanged": false,
+    "android": "remains last",
+    "nextRecommendedSlice": "M10.5 integration-compilation subphase attribution and parity-preserving candidate search"
+  }
+}

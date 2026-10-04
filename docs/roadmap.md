@@ -2549,3 +2549,11 @@ The exact package-root workload remains over its unchanged warm-transform ceilin
 M10.5 remains open; Android remains last.
 
 Next recommended roadmap slice: **M10.5 exact-workload phase attribution inside Vanilla Extract integration compilation and generated-module evaluation** — separate these costs under the package-root workload, then A/B one bounded candidate before any full host-budget rerun. Keep the output-parity assertion and approved 6.514 ms gate unchanged.
+
+### 2026-10-04 — M10.5 exact-workload compilation and evaluation attribution
+
+Vanilla Extract integration compilation accounts for about 71–72% of the instrumented package-root transform time across the README and package-owned consumer fixtures. Generated-module evaluation is about 1.2 ms; `vm.Script` construction is negligible. A scratch candidate forcing short identifiers improved timing but changed both generated development module bodies and removed readable debug IDs, so it was rejected. Scratch-default output bodies matched the uninstrumented transformer; absolute instrumented timings remain diagnostic, and the existing uninstrumented host comparison still exceeds the unchanged 6.514 ms ceiling. No production change, baseline, or threshold was retained. The full Node 22 host suite was not rerun. See the [assessment](assessments/2026-10-04-m10-5-phase-attribution.md) and [machine-readable evidence](evidence/2026-10-04-m10-5-phase-attribution/qualification.json).
+
+M10.5 remains open; Android remains last.
+
+Next recommended roadmap slice: **M10.5 integration-compilation subphase attribution and parity-preserving candidate search** — separate esbuild and Vanilla Extract debug-id costs inside the integration boundary, then test one bounded candidate that retains development identifiers and exact output parity before any full host-budget rerun. Keep the approved 6.514 ms ceiling unchanged.
