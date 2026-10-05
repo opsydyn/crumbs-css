@@ -56,17 +56,17 @@ it("rejects operation drift and produces executable synchronous boundaries in th
 });
 it("falls back to fresh when real bytes change between inventory samples before or after compilation", async () => {
   const { cpSync, mkdirSync, symlinkSync } = await import("node:fs");
-  const { patchReceiptScopes, instrumentGuardSource } = await import("../bench/context-reuse/guard-attribution");
+  const { patchReceiptScopes, instrumentGuardSource, patchPathDigestSource } = await import("../bench/context-reuse/guard-attribution");
   const { sessionFixture, ControlledBackend } = await import("./support/context-reuse");
-  for (const sample of [1, 2]) {
+  for (const pathOnly of [false, true]) for (const sample of [1, 2]) {
     const root = mkdtempSync(join(tmpdir(), "crumbs-sampling-")); roots.push(root);
     const tooling = join(import.meta.dir, "../bench/context-reuse");
     for (const file of ["guard-receipts.ts", "guard-profile.ts", "admission-policy.ts"]) cpSync(join(tooling, file), join(root, file));
     symlinkSync(join(import.meta.dir, "../node_modules"), join(root, "node_modules"));
-    for (const file of ["identity.ts", "compile-session.ts"]) writeFileSync(join(root, file), instrumentGuardSource(file, patchReceiptScopes(file, readFileSync(join(tooling, file), "utf8")), true).source);
+    for (const file of ["identity.ts", "compile-session.ts"]) writeFileSync(join(root, file), instrumentGuardSource(file, pathOnly ? patchPathDigestSource(file, patchReceiptScopes(file, readFileSync(join(tooling, file), "utf8"))) : patchReceiptScopes(file, readFileSync(join(tooling, file), "utf8")), true, pathOnly).source);
     // Deterministically change actual owned bytes between the helper's two filesystem reads.
     const helper = join(root, "guard-receipts.ts");
-    writeFileSync(helper, 'import { writeFileSync } from "node:fs"; let samples = 0;\n' + readFileSync(helper, "utf8").replace('const second = guardRead(() => readFileSync(path));', `if (path.endsWith("A.css.ts") && ++samples === ${sample}) writeFileSync(path, "export const value = 999;");\n    const second = guardRead(() => readFileSync(path));`).replace('enabled = process.env.CRUMBS_GUARD_RECEIPTS === "1"', 'enabled = true'));
+    writeFileSync(helper, 'import { writeFileSync } from "node:fs"; let samples = 0;\n' + readFileSync(helper, "utf8").replace('const second = guardRead(() => readFileSync(path));', `if (path.endsWith("A.css.ts") && ++samples === ${sample}) writeFileSync(path, "export const value = 999;");\n    const second = guardRead(() => readFileSync(path));`).replace('enabled = process.env.CRUMBS_GUARD_RECEIPTS === "1"', 'enabled = true').replace('pathDigests = process.env.CRUMBS_GUARD_PATH_DIGESTS === "1"', `pathDigests = ${pathOnly}`));
     const { createCompileSession } = await import(join(root, "compile-session.ts"));
     const fixture = sessionFixture(), backend = new ControlledBackend();
     const session = createCompileSession({ settings: { capacity: 2, admission: "immediate" }, mode: "immediate", idleMs: 1000, backend });
@@ -74,3 +74,40 @@ it("falls back to fresh when real bytes change between inventory samples before 
     finally { await session.close(); fixture.remove(); }
   }
 }, 30000);
+it("returns immutable path digests and byte matches without consulting buffer-returning consumers", async () => {
+  const api = await import("../bench/context-reuse/guard-receipts");
+  expect(typeof api.guardReceiptFileDigest).toBe("function");
+  expect(typeof api.guardReceiptMatches).toBe("function");
+  const path = fixture(), pass = createGuardReceiptPass(true, true);
+  try {
+    pass.run(() => {
+      expect(api.guardReceiptFileDigest(path)).toBe("a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e");
+      const view = new Uint8Array([0, 102, 105, 114, 115, 116, 0]).subarray(1, 6);
+      expect(api.guardReceiptMatches(path, view)).toBe(true);
+      expect(api.guardReceiptMatches(path, Buffer.from("first"))).toBe(true);
+      expect(api.guardReceiptMatches(path, Buffer.from("later"))).toBe(false);
+      writeFileSync(path, "later");
+      expect(api.guardReceiptFileDigest(path)).toBe("a7937b64b8caa58f03721bb6bacf5c78cb235febe0e70b1b84cd99541461a08e");
+    });
+    pass.close();
+    expect(createGuardReceiptPass(true, true).run(() => api.guardReceiptMatches(path, Buffer.from("later")))).toBe(true);
+  } finally { pass.close(); }
+});
+it("generated path-digest guards do not expose a binary receipt for hashing or entry checks", async () => {
+  const { cpSync, symlinkSync } = await import("node:fs");
+  const { patchReceiptScopes, instrumentGuardSource, patchPathDigestSource } = await import("../bench/context-reuse/guard-attribution");
+  expect(typeof patchPathDigestSource).toBe("function");
+  const { sessionFixture, ControlledBackend } = await import("./support/context-reuse");
+  const root = mkdtempSync(join(tmpdir(), "crumbs-path-consumers-")); roots.push(root);
+  const tooling = join(import.meta.dir, "../bench/context-reuse");
+  for (const file of ["guard-receipts.ts", "guard-profile.ts", "admission-policy.ts"]) cpSync(join(tooling, file), join(root, file));
+  symlinkSync(join(import.meta.dir, "../node_modules"), join(root, "node_modules"));
+  for (const file of ["identity.ts", "compile-session.ts"]) writeFileSync(join(root, file), instrumentGuardSource(file, patchPathDigestSource(file, patchReceiptScopes(file, readFileSync(join(tooling, file), "utf8"))), true, true).source);
+  const helper = join(root, "guard-receipts.ts");
+  writeFileSync(helper, readFileSync(helper, "utf8").replace('  if (!active) return guardRead', '  if (active && activePathDigests && !encoding) throw Error("Binary receipt escaped");\n  if (!active) return guardRead').replace('enabled = process.env.CRUMBS_GUARD_RECEIPTS === "1"', 'enabled = true').replace('pathDigests = process.env.CRUMBS_GUARD_PATH_DIGESTS === "1"', 'pathDigests = true'));
+  const { createCompileSession } = await import(join(root, "compile-session.ts"));
+  const fixture = sessionFixture(), backend = new ControlledBackend(), request = fixture.request();
+  const session = createCompileSession({ settings: { capacity: 2, admission: "immediate" }, mode: "immediate", idleMs: 1000, backend });
+  try { const receipt = await session.compile({ ...request, entryBytes: readFileSync(request.filePath) }); expect(receipt.source).toBe("export const value = 65;"); expect(session.snapshot()).toMatchObject({ live: 1, bypasses: 0 }); }
+  finally { await session.close(); fixture.remove(); }
+});

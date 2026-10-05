@@ -3,7 +3,7 @@
 const fs = require("node:fs"), path = require("node:path"), crypto = require("node:crypto"), cp = require("node:child_process");
 const [root, kind, output] = process.argv.slice(2);
 const fixture = JSON.parse(fs.readFileSync(path.join(root, "report.json"))).fixture;
-const spec = JSON.parse(fs.readFileSync(path.join(root, "seven-entry-0-immediate-on-spec.json")));
+const spec = JSON.parse(fs.readFileSync(path.join(root, process.env.CRUMBS_GUARD_CONTROL_SPEC || "seven-entry-0-immediate-on-spec.json")));
 const t = require(fixture.artifact.transformerPath), entry = fixture.entries[0];
 const hash = bytes => crypto.createHash("sha256").update(bytes).digest("hex");
 const originals = new Map();
@@ -56,5 +56,5 @@ async function run(buffer = fs.readFileSync(entry)) {
     await t.__crumbsQualificationClose();
   }
   const restored = [...originals].map(([file, value]) => ({ path: file, originalSha256: hash(value.bytes), restoredSha256: hash(fs.readFileSync(file)) }));
-  fs.writeFileSync(output, JSON.stringify({ node: process.version, kind, deduplicate: process.env.CRUMBS_GUARD_RECEIPTS === "1", before, after, error, failedPhases, reference, restored, closed: t.__crumbsQualificationSnapshot() }));
+  fs.writeFileSync(output, JSON.stringify({ node: process.version, kind, deduplicate: process.env.CRUMBS_GUARD_RECEIPTS === "1", pathDigests: process.env.CRUMBS_GUARD_PATH_DIGESTS === "1", variant: process.env.CRUMBS_GUARD_VARIANT, before, after, error, failedPhases, reference, restored, closed: t.__crumbsQualificationSnapshot() }));
 })().catch(error => { console.error(error.stack); process.exitCode = 1; });

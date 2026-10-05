@@ -81,7 +81,8 @@ async function transform(index) {
         const sample = memory();
         await t.__crumbsQualificationClose();
         closed = t.__crumbsQualificationSnapshot();
-        const report = { moduleLoadMs, node: process.version, pid: process.pid, kind: spec.kind, id: spec.id, workload: spec.workload, mode: spec.mode, capacity: spec.capacity, requests: spec.requests, rows, cycles: spec.cycles, totalMs: performance.now() - start, beforeClose, closed, memory: sample, memoryAfterClose: memory() };
+        const guardEnvironment = spec.guardProfile === undefined ? undefined : { profile: process.env.CRUMBS_GUARD_PROFILE, receipts: process.env.CRUMBS_GUARD_RECEIPTS, pathDigests: process.env.CRUMBS_GUARD_PATH_DIGESTS, variant: process.env.CRUMBS_GUARD_VARIANT };
+        const report = { guardEnvironment, moduleLoadMs, node: process.version, pid: process.pid, kind: spec.kind, id: spec.id, workload: spec.workload, mode: spec.mode, capacity: spec.capacity, requests: spec.requests, rows, cycles: spec.cycles, totalMs: performance.now() - start, beforeClose, closed, memory: sample, memoryAfterClose: memory() };
         fs.writeFileSync(spec.output, JSON.stringify(report));
         console.log(JSON.stringify({ completed: spec.id, rows: rows.length, hits: closed.hits, live: closed.live }));
     }

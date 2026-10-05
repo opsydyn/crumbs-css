@@ -1,0 +1,44 @@
+{
+  "packageTests": {
+    "passed": 1458,
+    "failed": 0,
+    "files": 221,
+    "assertions": 115508
+  },
+  "focusedTests": {
+    "passed": 17,
+    "failed": 0,
+    "assertions": 61
+  },
+  "copiedCandidateTests": {
+    "passed": 42,
+    "failed": 0,
+    "propertySeed": 10506,
+    "propertyTraces": 500
+  },
+  "typecheck": "passed after explicit string narrowing of private runner variant",
+  "docsBuild": {
+    "status": "passed",
+    "pages": 28
+  },
+  "matrix": {
+    "processes": 135,
+    "transforms": 10035,
+    "pathBaselineComparisons": 3345,
+    "pathBufferComparisons": 3345,
+    "bufferBaselineComparisons": 3345,
+    "retainedFreshComparisons": 6690
+  },
+  "supplementaryControls": {
+    "cases": 21,
+    "status": "passed",
+    "freshReferenceParityCases": 18,
+    "packageRename": "restart-required; in-process source/input/result differ from a newly loaded worker, metadata equal"
+  },
+  "samplingRegression": "real byte edits before/after compilation select fresh with zero live resources for both buffer/path samplers",
+  "shippingChanges": false,
+  "performanceDecision": "reject; improves buffer candidate but remains slower than same-artifact guard baseline",
+  "review": "Ready; independent final typecheck and live archive replay passed; no remaining findings after correction.",
+  "typecheckCorrection": "Initial final check failed TS2322; preserved in types-failed-excluded.log.gz. Narrowing retains the same variant values for all measured rows and does not change generated candidate/probe bytes.",
+  "archiveTamperControl": "passed; appended bytes in copied raw evidence rejected by archive membership/hash check"
+}

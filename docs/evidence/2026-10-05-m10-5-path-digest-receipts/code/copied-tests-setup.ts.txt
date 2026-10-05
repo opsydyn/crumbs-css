@@ -1,0 +1,11 @@
+import { cpSync, mkdirSync, readFileSync, symlinkSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { patchReceiptScopes, instrumentGuardSource, patchPathDigestSource } from "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/context-reuse/guard-attribution";
+const repo = "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css", root = "/private/tmp/crumbs-path-digest-copied-tests-20261005";
+mkdirSync(join(root,"bench"),{recursive:true});cpSync(join(repo,"bench/context-reuse"),join(root,"bench/context-reuse"),{recursive:true});mkdirSync(join(root,"test/support"),{recursive:true});
+symlinkSync(join(repo,"node_modules"),join(root,"node_modules"));
+for(const file of ["identity.ts","compile-session.ts"]) {const path=join(root,"bench/context-reuse",file);writeFileSync(path,instrumentGuardSource(file,patchPathDigestSource(file,patchReceiptScopes(file,readFileSync(path,"utf8"))),true,true).source);}
+for(const file of ["context-reuse-session.test.ts","context-reuse-session.property.test.ts","context-reuse-identity.test.ts"]) cpSync(join(repo,"test",file),join(root,"test",file));
+cpSync(join(repo,"test/support/context-reuse.ts"),join(root,"test/support/context-reuse.ts"));
+
+cpSync("/private/tmp/crumbs-dedup-patched-tests-20261005/test/context-reuse-identity.test.ts", join(root,"test/context-reuse-identity.test.ts"));

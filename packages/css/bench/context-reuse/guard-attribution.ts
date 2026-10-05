@@ -2,7 +2,7 @@ import ts from "typescript";
 export { createAttribution } from "./guard-profile";
 import type { Phase } from "./guard-profile";
 /** Instrument only an owned copy; every named function must have exactly one match. */
-export function instrumentGuardSource(filename: string, source: string, receiptExperiment = false) {
+export function instrumentGuardSource(filename: string, source: string, receiptExperiment = false, pathDigestExperiment = false) {
   if (!["identity.ts", "compile-session.ts"].includes(filename)) throw Error("Unknown guard source");
   const file = ts.createSourceFile(filename, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS);
   if ((file as ts.SourceFile & { parseDiagnostics: readonly ts.Diagnostic[] }).parseDiagnostics.length) throw Error("Invalid guard source syntax");
@@ -24,6 +24,8 @@ export function instrumentGuardSource(filename: string, source: string, receiptE
       }
       if (ts.isCallExpression(original) && ts.isCallExpression(node)) {
         const name = original.expression.getText(file); let phase: Phase | undefined;
+        if (pathDigestExperiment && name === "guardReceiptFileDigest") { count("read-bytes"); count("sha256"); return node; }
+        if (pathDigestExperiment && name === "guardReceiptMatches") { count("read-bytes"); return node; }
         if (name === "readFileSync") { count("read-bytes"); if (receiptExperiment) return ts.factory.createCallExpression(ts.factory.createIdentifier("guardReceiptRead"), undefined, node.arguments); return ts.factory.createCallExpression(ts.factory.createIdentifier("guardRead"), undefined, [ts.factory.createArrowFunction(undefined, undefined, [], undefined, ts.factory.createToken(ts.SyntaxKind.EqualsGreaterThanToken), node)]); }
         if (name.startsWith("createHash(") && name.endsWith('.digest')) phase = "sha256";
         if (["backend.fresh", "backend.create", "handle.rebuild", "evaluate"].includes(name)) phase = ({ "backend.fresh": "compile-fresh", "backend.create": "context-create", "handle.rebuild": "rebuild", evaluate: "native" } as Record<string, Phase>)[name];
@@ -44,12 +46,12 @@ export function instrumentGuardSource(filename: string, source: string, receiptE
     return root => ts.visitNode(root, visit) as ts.SourceFile;
   }]);
   try {
-    const result = (receiptExperiment ? 'import { guardReceiptRead, guardReceiptSha, createGuardReceiptPass, GuardReceiptUnstableError } from \"./guard-receipts\";\n' : '') + 'import { guardBegin, guardEnd, guardMeasure, guardRead, guardInvoke } from "./guard-profile";\n' + ts.createPrinter().printFile(instrumented.transformed[0] as ts.SourceFile);
+    const result = (receiptExperiment ? 'import { guardReceiptRead, guardReceiptSha, guardReceiptFileDigest, guardReceiptMatches, createGuardReceiptPass, GuardReceiptUnstableError } from \"./guard-receipts\";\n' : '') + 'import { guardBegin, guardEnd, guardMeasure, guardRead, guardInvoke } from "./guard-profile";\n' + ts.createPrinter().printFile(instrumented.transformed[0] as ts.SourceFile);
     const check = ts.createSourceFile(filename, result, ts.ScriptTarget.Latest, true);
     if ((check as ts.SourceFile & { parseDiagnostics: readonly ts.Diagnostic[] }).parseDiagnostics.length) throw Error("Instrumented guard syntax invalid");
     for (const phase of ["read-bytes", "sha256"] as const) if (!counts.get(phase)) throw Error(`Expected ${phase} operations`);
     if (receiptExperiment) {
-      const expected: Partial<Record<Phase, number>> = filename === "identity.ts" ? { "read-bytes": 7, sha256: 1, configuration: 1, eligibility: 1, "input-validation": 1, "context-key": 1 } : { "read-bytes": 3, sha256: 1, "receipt-clone": 1, "source-inventory": 1, "compile-fresh": 2, "context-create": 1, rebuild: 1, native: 2, session: 1 };
+      const expected: Partial<Record<Phase, number>> = filename === "identity.ts" ? { "read-bytes": 7, sha256: pathDigestExperiment ? 4 : 1, configuration: 1, eligibility: 1, "input-validation": 1, "context-key": 1 } : { "read-bytes": 3, sha256: 1, "receipt-clone": 1, "source-inventory": 1, "compile-fresh": 2, "context-create": 1, rebuild: 1, native: 2, session: 1 };
       if (JSON.stringify([...counts].sort()) !== JSON.stringify(Object.entries(expected).sort())) throw Error("Unsupported receipt operation coverage");
     }
     return { source: result, operations: [...counts].map(([phase, matches]) => ({ phase, matches })) };
@@ -59,7 +61,7 @@ export function instrumentGuardSource(filename: string, source: string, receiptE
 import { cpSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { buildCandidate } from "./build-candidate";
-export async function buildAttributionCandidate(outputRoot: string, receiptExperiment = false) {
+export async function buildAttributionCandidate(outputRoot: string, receiptExperiment = false, pathDigestExperiment = false) {
   const patches: { filename: string; operations: { phase: Phase; matches: number }[] }[] = [];
   const artifact = await buildCandidate(outputRoot, packageRoot => {
     const tooling = join(packageRoot, "bench/context-reuse");
@@ -68,8 +70,9 @@ export async function buildAttributionCandidate(outputRoot: string, receiptExper
     for (const filename of ["identity.ts", "compile-session.ts"]) {
       const path = join(tooling, filename);
       const original = readFileSync(path, "utf8");
-      const prepared = receiptExperiment ? patchReceiptScopes(filename, original) : original;
-      const patch = instrumentGuardSource(filename, prepared, receiptExperiment);
+      const scoped = receiptExperiment ? patchReceiptScopes(filename, original) : original;
+      const prepared = pathDigestExperiment ? patchPathDigestSource(filename, scoped) : scoped;
+      const patch = instrumentGuardSource(filename, prepared, receiptExperiment, pathDigestExperiment);
       writeFileSync(path, patch.source); patches.push({ filename, operations: patch.operations });
     }
     const transformer = join(packageRoot, "src/transformer.ts");
@@ -97,5 +100,19 @@ export function patchReceiptScopes(filename: string, source: string): string {
   replace('const after = assessReuse(request, loadedReceipt, previousReceipt);', 'const after = __crumbsReceiptPass.run(() => assessReuse(request, loadedReceipt!, previousReceipt));\n      __crumbsReceiptPass.close();');
   replace('policy = forgetAdmissionKey(policy, plan.key); await disposeKey(plan.key); if (disabled) await drain(); throw error;', 'if (error instanceof GuardReceiptUnstableError) { lastBypassReason = \"source-unstable\"; await drain(); return fresh(request, evaluate); }\n      policy = forgetAdmissionKey(policy, plan.key); await disposeKey(plan.key); if (disabled) await drain(); throw error;');
   replace('\n  }\n  return {\n    compile(request)', '\n    } finally { __crumbsReceiptPass.close(); }\n  }\n  return {\n    compile(request)');
+  return source;
+}
+
+/** Path-based consumers preserve two-read admission while returning only primitives. */
+export function patchPathDigestSource(filename: string, source: string): string {
+  const replace = (old: string, next: string) => { if (source.split(old).length !== 2) throw Error(`Expected one path-digest boundary: ${old}`); source = source.replace(old, next); };
+  if (filename === "identity.ts") {
+    replace('const bytes = readFileSync(path); const hash = sha(bytes);', 'const hash = guardReceiptFileDigest(path);');
+    replace('if (sha(readFileSync(path)) !== hash) return fail("source-unstable");', 'if (guardReceiptFileDigest(path) !== hash) return fail("source-unstable");');
+    replace('sha(readFileSync(path)) !== hashes.get(path)', 'guardReceiptFileDigest(path) !== hashes.get(path)');
+    replace('!Buffer.from(request.entryBytes).equals(readFileSync(resolve(request.cwd, request.filePath)))', '!guardReceiptMatches(resolve(request.cwd, request.filePath), request.entryBytes)');
+  } else if (filename === "compile-session.ts") {
+    replace('createHash("sha256").update(readFileSync(path)).digest("hex")', 'guardReceiptFileDigest(path)');
+  } else throw Error("Unknown path-digest source");
   return source;
 }

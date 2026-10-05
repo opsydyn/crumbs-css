@@ -2651,3 +2651,12 @@ The repaired private candidate completes a new fixed 90-process / 6,690-transfor
 No production cache/API/dependency/default, performance threshold or admission gate changes. Existing graph/configuration, HMR, receipt and multi-worker shutdown blockers remain open. Android remains last.
 
 Next recommended roadmap slice: **M10.5 — A/B immutable path-digest receipts**, avoiding buffer exposure/copies for digest-only consumers while preserving independent sampling, restart, instability and buffer-conflict checks; compare complete transforms before admission.
+
+
+### 2026-10-05 — M10.5: immutable path-digest receipts A/B
+
+One private artifact compares original-guard, shared-buffer and immutable path-digest variants with five processes per mode/workload: 135 processes / 10,035 transforms. All source/input/native-metadata/full-result pairs, independent sampling, logical read/clock conservation, bounds and owned cleanup pass. Path primitives avoid exporting/copying sampler buffers for file hashing and entry matching. Retained warm medians improve roughly 6–10% relative to buffer receipts but remain roughly 6–17% slower than the same-artifact guard baseline. The candidate is rejected as an overall performance improvement; smaller fresh-control deltas remain host-variable diagnostics. [Assessment/evidence](assessments/2026-10-05-m10-5-path-digest-receipts.md).
+
+No shipping API/cache/dependency/default, approved threshold, host/native/device guarantee or production-admission gate changes. Existing graph/configuration, native receipt, HMR and worker-shutdown blockers remain open. Android remains last.
+
+Next recommended roadmap slice: **M10.5 — configuration/graph invalidation gate diagnosis**, reproducing alias-retarget, workspace-package-import and symlink-retarget failures against independent fresh Metro receipts before deciding remediation.
