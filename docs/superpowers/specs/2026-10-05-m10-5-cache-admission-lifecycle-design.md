@@ -81,19 +81,19 @@ Use only owned `context.dispose()` calls. esbuild documents that disposal waits 
 
 ## Qualification requirements
 
-All boxes are pending implementation. Existing benchmark thresholds are unchanged; trial cache selection requires its own review of performance and memory trade-offs.
+Qualification Tasks 1–5 are executed; checked boxes below have scoped evidence, while failed or incomplete admission requirements remain unchecked. Existing benchmark thresholds are unchanged; trial cache selection requires its own review of performance and memory trade-offs.
 
 - [ ] Exact generated source, current metafile inputs, native dependency metadata, complete Metro results and diagnostics match fresh compilation on entry, plain-token, nested CSS and workspace-source edits.
-- [ ] Real Metro graph invalidation rebuilds unchanged importers after dependency edits, with new baked values present and prior values absent. A direct WorkerFarm replay alone does not pass this gate.
+- [x] Real Metro graph invalidation rebuilds unchanged importers after dependency edits, with new baked values present and prior values absent. A direct WorkerFarm replay alone does not pass this gate.
 - [ ] Added/removed imports, tsconfig aliases/extends, manifest/exports changes, installation changes and symlink retargeting either produce correct reused results or deliberately select fresh compilation.
-- [ ] Concurrent calls under controlled stable input/settings each match their fresh reference; different entries cannot leak capture state; queued failures do not poison subsequent work. Buffer/disk conflicts and mid-build edits select the documented fresh bypass without claiming snapshot isolation.
-- [ ] Model-based sequences cover acquire, hit, eviction, failed creation/rebuild/disposal, idle expiry, stale timers, configuration replacement and repeated close. Live context count never exceeds its explicit limit; probation count never exceeds twice that limit.
-- [ ] Idle cleanup and direct session close await exactly-once disposal; repaired syntax/dependency errors recover without cached output or changed diagnostics. No negative-cache entry retains a source error.
+- [x] Concurrent calls under controlled stable input/settings each match their fresh reference; different entries cannot leak capture state; queued failures do not poison subsequent work. Buffer/disk conflicts and mid-build edits select the documented fresh bypass without claiming snapshot isolation.
+- [x] Model-based sequences cover acquire, hit, eviction, failed creation/rebuild/disposal, idle expiry, stale timers, configuration replacement and repeated close. Live context count never exceeds its explicit limit; probation count never exceeds twice that limit.
+- [x] Idle cleanup and direct session close await exactly-once disposal; repaired syntax/dependency errors recover without cached output or changed diagnostics. No negative-cache entry retains a source error.
 - [ ] Actual Expo/Metro runs exercise one and multiple workers, process and worker-thread modes where supported, server shutdown/restart, and a second project in the same long-lived process. Observe child resources after exit separately from awaited disposal.
-- [ ] Stock fresh compilation, immediate admission and repeat admission are measured in at least five fresh-process pairs with alternating order. Capture cold setup, complete transform time, edit-to-bundle receipt time, queue wait, hit/miss/eviction counts, context count and process/service RSS separately.
-- [ ] Replay seven-entry, four-hot-plus-scan and high-cardinality workloads across explicit trial limits; measure through at least three idle/reopen cycles. Freeze workloads and trial settings before collection. Select no bound from hit rate alone and label RSS as process evidence.
+- [x] Stock fresh compilation, immediate admission and repeat admission are measured in at least five fresh-process pairs with alternating order. Capture cold setup, complete transform time, edit-to-bundle receipt time, queue wait, hit/miss/eviction counts, context count and process/service RSS separately.
+- [x] Replay seven-entry, four-hot-plus-scan and high-cardinality workloads across explicit trial limits; measure through at least three idle/reopen cycles. Freeze workloads and trial settings before collection. Select no bound from hit rate alone and label RSS as process evidence.
 - [ ] Node v22.0.0 package/tooling behaviour and current Node qualification both pass their required checks; approved host-budget comparisons retain their existing workload/identity. Consumer runtime graphs remain free of esbuild/compiler imports.
-- [ ] Resolve the recorded Expo serializer issue or use an independently qualified Expo bundling path before claiming incremental app-bundle success. Device, screen-reader and release performance evidence stay separate; Android remains last.
+- [x] Resolve the recorded Expo serializer issue or use an independently qualified Expo bundling path before claiming incremental app-bundle success. Device, screen-reader and release performance evidence stay separate; Android remains last.
 
 ## Candidate implementation boundaries and next slice
 
@@ -106,3 +106,8 @@ Stop at fresh compilation if unsupported configuration, lifecycle mode or insuff
 ## Implementation clarification — 2026-10-05
 
 The initial plan keeps policy/session code under private benchmark tooling and integrates receipts only in an owned disposable transformer copy. Shipping compiler paths listed above are prospective production-adoption paths, not edits authorised by this qualification plan. Installed Vanilla Extract integration 8.0.10 also caches package information by cwd: package-name changes require a new module/worker lifetime, even on its fresh compile path. Qualification must record that restart boundary explicitly rather than claim context recreation refreshes package information. The parent ADR remains proposed.
+
+
+## Qualification outcome — 2026-10-05
+
+[Task 5 evidence](../../assessments/2026-10-05-m10-5-cache-qualification.md) establishes non-development Expo bundling, three dependency families, direct-entry/import-removal, real idle cycles and five-block full-transform measurements. All retained variants regress, configuration/graph and restored-entry receipt controls fail, and bounded two-worker exit fails despite later natural exit. Broad complete-result/configuration/lifecycle admission remains incomplete; installed-package replacement and unchanged host/device budgets are not-run. Checked measurement boxes do not admit production retention. Private Tasks 1–4 cover controlled concurrency, resource models and compiler semantics; no package, default, dependency or approved threshold changes. Next: **M10.5 — attribute retained-candidate guard cost**. Android remains last.
