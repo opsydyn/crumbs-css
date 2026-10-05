@@ -97,7 +97,7 @@ export const __crumbsQualificationOptionsOnce = (options: Readonly<Record<string
 export const __crumbsQualificationUnstableOnce = (path: string, bytes: string) => { overrides = { plugins: [createQualificationReceiptPlugin(() => writeFileSync(path, bytes))] }; };
 `;
 
-export async function buildCandidate(outputRoot: string): Promise<CandidateArtifact> {
+export async function buildCandidate(outputRoot: string, instrumentCopy?: (packageRoot: string) => void): Promise<CandidateArtifact> {
   if (!isAbsolute(outputRoot) || (existsSync(outputRoot) && readdirSync(outputRoot).length)) throw new Error("Candidate output must be an empty absolute owned directory");
   const originalFiles = shippingInventory();
   mkdirSync(outputRoot, { recursive: true }); const packageRoot = join(outputRoot, "package"); mkdirSync(packageRoot);
@@ -108,6 +108,7 @@ export async function buildCandidate(outputRoot: string): Promise<CandidateArtif
   const path = join(packageRoot, "src/transformer.ts"); const original = readFileSync(path, "utf8"); const patch = patchTransformer(original); writeFileSync(path, patch.source);
   writeFileSync(join(packageRoot, "src/qualification-adapter.ts"), adapter);
   writeFileSync(join(packageRoot, "qualification.config.ts"), `import { defineConfig } from "tsdown"; import { compilerDependencies } from "./build-policy"; export default defineConfig({ entry: { "qualification-transformer": "src/transformer.ts" }, deps: compilerDependencies, format: ["cjs"], outDir: "dist", clean: false, dts: false, shims: true, target: "node22" });`);
+  instrumentCopy?.(packageRoot);
   const require = createRequire(import.meta.url); const cli = join(dirname(require.resolve("tsdown/package.json")), "dist/run.mjs");
   const proc = Bun.spawn([process.execPath, cli, "--config", "qualification.config.ts"], { cwd: packageRoot, stdout: "pipe", stderr: "pipe" });
   const [stdout, stderr, code] = await Promise.all([new Response(proc.stdout).text(), new Response(proc.stderr).text(), proc.exited]);

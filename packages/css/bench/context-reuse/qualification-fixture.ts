@@ -3,9 +3,9 @@ import { join, resolve } from "node:path";
 import { buildCandidate } from "./build-candidate";
 import { transformerFixture } from "../../test/support/context-reuse-transformer";
 const repository = resolve(import.meta.dir, "../../../..");
-export async function prepareQualificationFixture(root: string) {
+export async function prepareQualificationFixture(root: string, builder: typeof buildCandidate = buildCandidate) {
     mkdirSync(root, { recursive: true });
-    const artifact = await buildCandidate(join(root, "candidate"));
+    const artifact = await builder(join(root, "candidate"));
     const fixture = transformerFixture(root, artifact), app = fixture.cwd;
     const modules = realpathSync(join(repository, "apps/storybook/node_modules"));
     const sharedModules = realpathSync(join(repository, "node_modules"));

@@ -7,6 +7,10 @@ const t = require(spec.transformerPath);
 const moduleLoadMs = performance.now() - loadedAt;
 const hash = value => crypto.createHash("sha256").update(value).digest("hex");
 const rows = [];
+if (spec.guardProfile !== undefined) {
+    if (typeof t.__crumbsQualificationProfileDrain !== "function") throw Error("Missing guard attribution export");
+    t.__crumbsQualificationProfileDrain(); // Module-load spans are outside per-transform accounting.
+}
 function memory() {
     const proc = spawnSync("ps", ["-axo", "pid=,ppid=,rss=,comm="], { encoding: "utf8" });
     if (proc.status !== 0)
@@ -30,6 +34,7 @@ async function transform(index) {
     const start = performance.now();
     const result = await t.transform(spec.config, spec.app, filename, fs.readFileSync(filename), spec.options);
     const elapsedMs = performance.now() - start;
+    const phases = spec.guardProfile === undefined ? undefined : t.__crumbsQualificationProfileDrain();
     const snapshot = t.__crumbsQualificationSnapshot();
     const receipts = t.__crumbsQualificationDrainReceipts();
     if (receipts.length !== 1)
@@ -43,7 +48,7 @@ async function transform(index) {
             if (!fs.existsSync(file))
                 fs.writeFileSync(file, require('node:zlib').gzipSync(Buffer.from(bytes)));
         }
-    rows.push({ index, elapsedMs, queueWaitMs: snapshot.queueWaitMs, sourceHash: hash(receipt.source), inputsHash: hash(JSON.stringify(receipt.inputs)), metadataHash: hash(JSON.stringify(result.__crumbsNativeStyles)), resultHash: hash(JSON.stringify(result)), snapshot });
+    rows.push({ index, elapsedMs, phases, queueWaitMs: snapshot.queueWaitMs, sourceHash: hash(receipt.source), inputsHash: hash(JSON.stringify(receipt.inputs)), metadataHash: hash(JSON.stringify(result.__crumbsNativeStyles)), resultHash: hash(JSON.stringify(result)), snapshot });
 }
 (async () => {
     const start = performance.now();
