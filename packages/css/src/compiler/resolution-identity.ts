@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto"
-import { readFileSync, realpathSync } from "node:fs"
+import { existsSync, readFileSync, realpathSync } from "node:fs"
 import * as path from "node:path"
 
 export type ResolutionFileReceipt = Readonly<{ sourcePath: string; sourceHash: string | null; canonicalPath: string | null }>
@@ -10,10 +10,14 @@ export type ResolutionIdentity = Readonly<{
 }>
 const hash = (bytes: Uint8Array) => createHash("sha256").update(bytes).digest("hex")
 function canonical(sourcePath: string): string | null {
-  try { return realpathSync(sourcePath) } catch { return null }
+  try { return existsSync(sourcePath) ? realpathSync(sourcePath) : null } catch { return null }
 }
 function fileReceipt(sourcePath: string): ResolutionFileReceipt {
-  try { return { sourcePath, sourceHash: hash(readFileSync(sourcePath)), canonicalPath: canonical(sourcePath) } }
+  // Missing candidates remain explicit receipts and are probed afresh on every pass.
+  try {
+    if (!existsSync(sourcePath)) return { sourcePath, sourceHash: null, canonicalPath: null }
+    return { sourcePath, sourceHash: hash(readFileSync(sourcePath)), canonicalPath: canonical(sourcePath) }
+  }
   catch { return { sourcePath, sourceHash: null, canonicalPath: canonical(sourcePath) } }
 }
 

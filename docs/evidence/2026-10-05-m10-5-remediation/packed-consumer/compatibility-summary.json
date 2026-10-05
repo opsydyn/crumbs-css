@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 2,
+  "suppliedConsumers": [
+    {
+      "name": "@acme/mobile-app",
+      "version": "1.0.0"
+    }
+  ],
+  "findings": [
+    {
+      "code": "token.alias-changed",
+      "level": "warning",
+      "entityId": "@acme/design-system#token:color.action",
+      "fieldPath": "alias",
+      "affectedConsumerCount": 1
+    },
+    {
+      "code": "token.removed",
+      "level": "error",
+      "entityId": "@acme/design-system#token:color.legacy",
+      "fieldPath": "token",
+      "affectedConsumerCount": 1
+    }
+  ],
+  "analysisLimits": [
+    {
+      "code": "component-use-unavailable",
+      "message": "Manifest v1 does not record consumer use of component slots or variants."
+    },
+    {
+      "code": "explicit-coverage",
+      "message": "Comparison is limited to the coverage roots declared in the supplied manifests."
+    }
+  ]
+}

@@ -1,0 +1,38 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/resolution-identity.test.ts:
+(pass) M10.5 compiler resolution identity > detects inherited JSONC config edits with unchanged entry and token bytes [2.96ms]
+(pass) M10.5 compiler resolution identity > detects newly created nearest config and missing extends appearing [1.82ms]
+(pass) M10.5 compiler resolution identity > detects package exports edits and canonical link retargets even with equal file content [3.28ms]
+(pass) M10.5 compiler resolution identity > tracks package based extends and installation files [2.51ms]
+(pass) M10.5 compiler resolution identity > fails closed for cyclic or malformed config instead of accepting cached styles [2.01ms]
+(pass) M10.5 compiler resolution identity > cache-store and graph keys include resolution identity while legacy metadata remains valid [2.21ms]
+(pass) M10.5 malformed resolution cache metadata is a miss, never a cache crash [0.08ms]
+(pass) M10.5 JSONC extends arrays preserve quoted comment/comma text and commented trailing commas [1.29ms]
+(pass) M10.5 emitted identity distinguishes unchanged styles from entry/config resolution edits [0.91ms]
+(pass) M10.5 cached package scope requires restart only when name or nearest named manifest changes [0.95ms]
+(pass) M10.5 imported workspace config and package config links participate in invalidation [3.44ms]
+(pass) M10.5 entry bytes are checked when a restored source hits a prior Metro transform key [1.16ms]
+(pass) M10.5 relative imports retain their logical symlink identity [2.02ms]
+(pass) M10.5 paths aliases observe retargeted logical symlinks with unchanged config [2.32ms]
+(pass) M10.5 package config edits after link retarget use the current target without Node resolution cache [2.40ms]
+(pass) M10.5 resolution captures sample each receipt once per pass and resample on the next pass [1.61ms]
+122 | test("M10.5 missing candidates are recorded without exception-driven reads and newly created config is observed",()=>fixture((root,cwd,entry)=>{
+123 |  const config=join(cwd,"tsconfig.json"), read=spyOn(fs,"readFileSync");
+124 |  try {
+125 |   const first=captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry,verification:true});
+126 |   expect(first.files.find(file=>file.sourcePath===config)?.sourceHash).toBeNull();
+127 |   expect(read.mock.calls.filter(call=>String(call[0])===config)).toHaveLength(0);
+                                                                       ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 0
+Received length: 1
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/resolution-identity.test.ts:127:66)
+(fail) M10.5 missing candidates are recorded without exception-driven reads and newly created config is observed [1.05ms]
+
+ 16 pass
+ 1 fail
+ 37 expect() calls
+Ran 17 tests across 1 file. [634.00ms]

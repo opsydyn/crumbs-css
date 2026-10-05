@@ -32,5 +32,6 @@ config.transformer = {
 
 module.exports = withStorybook(withNativeStyles(config), {
   configPath: path.resolve(projectRoot, ".rnstorybook"),
+  liteMode: true,
   enabled: process.env.EXPO_PUBLIC_STORYBOOK_ENABLED === "true",
 })

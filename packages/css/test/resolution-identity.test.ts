@@ -118,3 +118,17 @@ test("M10.5 resolution captures sample each receipt once per pass and resample o
   expect(read.mock.calls.filter(call=>String(call[0])===entry)).toHaveLength(2);
  } finally {read.mockRestore();real.mockRestore()}
 }));
+
+test("M10.5 missing candidates are recorded without exception-driven reads and newly created config is observed",()=>fixture((root,cwd,entry)=>{
+ const config=join(cwd,"tsconfig.json"), read=spyOn(fs,"readFileSync");
+ try {
+  const first=captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry,verification:true});
+  expect(first.files.find(file=>file.sourcePath===config)?.sourceHash).toBeNull();
+  expect(read.mock.calls.filter(call=>String(call[0])===config)).toHaveLength(0);
+  writeFileSync(config,'{"compilerOptions":{"strict":true}}');
+  expect(hasChangedResolutionIdentity(first)).toBe(true);
+  const second=captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry,verification:true});
+  expect(second.files.find(file=>file.sourcePath===config)?.sourceHash).toBeString();
+  expect(second.cacheable).toBe(true);
+ } finally {read.mockRestore()}
+}));

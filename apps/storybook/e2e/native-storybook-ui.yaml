@@ -1,0 +1,51 @@
+appId: ${STORYBOOK_APP_ID}
+---
+# Run after opening the workspace Storybook URL. App IDs differ on iOS/Android.
+- tapOn: Open story list
+- scrollUntilVisible:
+    element: Showcase Card
+    direction: DOWN
+    timeout: 20000
+- runFlow:
+    when:
+      notVisible: Dark
+    commands:
+      - tapOn: Showcase Card
+- tapOn: Dark
+- tapOn: Close story list
+- assertVisible: Open stories
+- tapOn: Open addons panel
+- tapOn: Controls
+- tapOn:
+    id: actionLabel
+- eraseText
+- inputText: M10.5 action
+- tapOn: Close addons panel
+- assertVisible: M10.5 action
+- tapOn: M10.5 action
+- tapOn: Open addons panel
+- tapOn: Actions
+- assertVisible: .*onActionPress.*
+- takeScreenshot: native-action-event
+- tapOn: Controls
+- tapOn:
+    id: actionLabel
+- eraseText
+- inputText: Open stories
+- tapOn: Close addons panel
+- assertVisible: Open stories
+- tapOn: Open story list
+- tapOn: Light
+- tapOn: Close story list
+- assertVisible: Inspect tokens
+- takeScreenshot: native-light-story
+- tapOn: Open story list
+- tapOn: Disabled
+- tapOn: Close story list
+- assertVisible: Unavailable action
+- takeScreenshot: native-disabled-story
+- tapOn: Open story list
+- tapOn: Dark
+- tapOn: Close story list
+- assertVisible: Open stories
+- takeScreenshot: native-restored-story

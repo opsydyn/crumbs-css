@@ -23,6 +23,10 @@ const referencePreviewOnly =
 
 const StorybookUIRoot = view.getStorybookUI({
   storage: storybookStorage,
+  // The supported Lite UI keeps native browsing and addons independent of Reanimated.
+  CustomUIComponent: referencePreviewOnly
+    ? undefined
+    : require("@storybook/react-native-ui-lite").LiteUI,
   onDeviceUI: !referencePreviewOnly,
   initialSelection: referencePreviewOnly
     ? { kind: "Design System/Reference Patterns", name: "Interactive" }
