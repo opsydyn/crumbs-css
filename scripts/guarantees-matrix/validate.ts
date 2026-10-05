@@ -3,6 +3,8 @@ import { readFileSync, realpathSync, statSync } from "node:fs"
 import { isAbsolute, relative, resolve, sep } from "node:path"
 import { GUARANTEES_DOMAINS, type GuaranteesMatrix, type GuaranteesMatrixIssue } from "./model"
 
+import { captureGuaranteesSourceIdentity } from "./source-identity"
+
 type BudgetRegistry = {
   readonly metrics?: ReadonlyArray<{
     readonly id?: unknown
@@ -103,6 +105,11 @@ export function validateGuaranteesMatrix(
   const ids = new Set<string>()
   const domains = new Set<string>()
   const budgetRegistry = loadBudgetRegistry(repositoryRoot)
+  let sourceDigest: string | undefined
+  if (matrix.rows.some(row => row.evidence.some(evidence => evidence.sourceDigest !== undefined))) {
+    try { sourceDigest = captureGuaranteesSourceIdentity(repositoryRoot).sha256 }
+    catch { issues.push(issue("evidence-source-identity-unavailable", "Cannot verify the complete repository source content identity.")) }
+  }
 
   for (const [rowIndex, row] of matrix.rows.entries()) {
     const rowPath = `rows.${rowIndex}`
@@ -131,10 +138,10 @@ export function validateGuaranteesMatrix(
     }
     if (row.measurementStatus === "passed" || row.measurementStatus === "failed") {
       for (const [evidenceIndex, evidence] of row.evidence.entries()) {
-        if (evidence.sourceRevision !== currentSourceRevision) {
+        if (evidence.sourceDigest !== undefined ? evidence.sourceDigest !== sourceDigest : evidence.sourceRevision !== currentSourceRevision) {
           issues.push(issue(
             "evidence-source-revision-mismatch",
-            "Passed and failed measurements must reference the current repository revision; mark historical evidence stale.",
+            "Passed and failed measurements must reference the current repository revision or match the complete source content digest; mark historical evidence stale.",
             `${rowPath}.evidence.${evidenceIndex}.sourceRevision`,
           ))
         }

@@ -3,9 +3,10 @@ appId: host.exp.exponent
 - launchApp:
     clearState: true
 - openLink: ${STORYBOOK_URL}
-- tapOn:
-    text: Continue
-    optional: true
+- extendedWaitUntil:
+    visible: Continue
+    timeout: 60000
+- tapOn: Continue
 - tapOn:
     text: Close
     optional: true
@@ -17,7 +18,7 @@ appId: host.exp.exponent
 - takeScreenshot: android-storybook-dark
 - tapOn:
     text: Light
-    point: "0%,50%"
+    point: "20%,50%"
 - assertVisible: Storybook theme
 - takeScreenshot: android-storybook-light
 - tapOn: Save changes

@@ -203,3 +203,15 @@ Resolved recipe arrays are ordered like this:
 3. matching compound variants in array order
 
 Later entries override earlier ones using normal React Native style-array semantics.
+
+## Metro configuration and source refresh
+
+Native transform cache records include byte receipts for authored inputs, ancestor configuration, extended configuration, installation manifests and logical/canonical resolution paths. A changed receipt rejects the disk-cache record and invalidates the generated importer through the existing Metro bridge. Legacy cache records retain their existing validation. Compiler-only receipts are absent from ordinary theme/token runtime imports.
+
+A fresh compile verifies configuration and input receipts before and after compilation. Newly discovered graphs receive a verification pass; repeated changes reject the transform after three attempts. This is a bounded consistency check, not an atomic filesystem snapshot. Metro source buffers must agree with the saved entry bytes; save the file and retry when a concurrent edit produces a conflict.
+
+Configuration and authored dependency edits can refresh styles. Restart Metro after changing the nearest package identity, replacing the loaded compiler/plugin artifacts, or changing process-owned loader configuration. Installation receipts detect replacement; they do not unload executable modules already held by Node.
+
+No retained esbuild-context cache is enabled in production. The shipping development workflow has bounded iOS simulator and Android emulator Fast Refresh evidence. Local animation state may reset during Fast Refresh; this is not a state-preservation or device-performance guarantee. See the current guarantees matrix for measured scope and failed/incomplete budgets.
+
+Source-current evidence may carry a complete source-content SHA-256 alongside its base revision. Validation checks tracked non-documentation files and newly authored files in the declared source/tool/test roots; stage new files outside those roots before capture. This keeps one code-and-documentation commit verifiable while rejecting code drift. Evidence without this field continues to require the current source commit.

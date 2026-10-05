@@ -56,6 +56,7 @@ export function analyseDependencyInputs(
 export function createDependencyCacheIdentity(
   dependencies: ReadonlyArray<AnalysedDependencyInput>,
   context: DependencyCacheContext,
+  resolutionKey?: string,
 ): string {
   const hash = createHash("sha256")
   hash.update("crumbs-native-cache-v1\0")
@@ -68,6 +69,7 @@ export function createDependencyCacheIdentity(
   for (const dependency of [...dependencies].sort((left, right) => left.importPath.localeCompare(right.importPath))) {
     hash.update(`${dependency.importPath}\0${dependency.sourceHash}\0`)
   }
+  if (resolutionKey !== undefined) hash.update(`resolution=${resolutionKey}\0`)
   return hash.digest("hex")
 }
 

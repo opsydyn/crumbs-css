@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { consumerFixtures } from "../test-support/consumer-fixtures"
 import * as path from "node:path"
+import { readFileSync } from "node:fs"
 import { runInNewContext } from "node:vm"
 import { buildStyleSheetCode, transform, transformCssTsToStyleSheet } from "../src/transformer"
 
@@ -116,7 +117,7 @@ describe("Metro transformer", () => {
       const result = await transform({
         upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER,
         nativeStyles: includeStyleExplanations === undefined ? {} : { includeStyleExplanations },
-      }, PKG_ROOT, FIXTURE, Buffer.from(""), { dev, platform: "web" }) as { readonly code: string }
+      }, PKG_ROOT, FIXTURE, readFileSync(FIXTURE), { dev, platform: "web" }) as { readonly code: string }
       return result.code
     }
     const developmentDefault = await transformWithSetting(true)
@@ -160,7 +161,7 @@ describe("Metro transformer", () => {
       { upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER },
       PKG_ROOT,
       FIXTURE,
-      Buffer.from(""),
+      readFileSync(FIXTURE),
       { dev: true, platform: "web" },
     )) as { readonly code: string }
 
@@ -174,7 +175,7 @@ describe("Metro transformer", () => {
       { upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER },
       PKG_ROOT,
       FIXTURE,
-      Buffer.from(""),
+      readFileSync(FIXTURE),
       { dev: true, platform: "ios" },
     )) as { readonly code: string; readonly unstable_transformResultKey?: unknown }
 
@@ -189,7 +190,7 @@ describe("Metro transformer", () => {
       { upstreamTransformerPath: FIXTURE_UPSTREAM_TRANSFORMER },
       consumer.root,
       consumer.button,
-      Buffer.from(""),
+      readFileSync(consumer.button),
       { dev: true, platform: "web" },
     )) as { readonly code: string }
 

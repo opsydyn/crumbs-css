@@ -1,0 +1,14 @@
+appId: host.exp.Exponent
+---
+- scrollUntilVisible:
+    element: ".*Current scale:.*"
+    direction: UP
+    timeout: 30000
+- assertVisible: ".*Current scale: 1.3[0-9].*"
+- takeScreenshot: ios-font-scale
+- scrollUntilVisible:
+    element: "Native condition: more"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "Native condition: more"
+- takeScreenshot: ios-more-contrast

@@ -1,0 +1,29 @@
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- openLink: ${STORYBOOK_URL}
+- extendedWaitUntil:
+    visible: Continue
+    timeout: 60000
+- tapOn: Continue
+- tapOn:
+    text: Close
+    optional: true
+- extendedWaitUntil:
+    visible:
+      text: Storybook theme
+    timeout: 60000
+- assertVisible: Save changes
+- takeScreenshot: ios-storybook-dark
+- tapOn:
+    point: "78%,13%"
+- assertVisible: Storybook theme
+- takeScreenshot: ios-storybook-light
+- tapOn: Save changes
+- assertVisible: Primary action selected.
+- takeScreenshot: ios-storybook-light-action
+- tapOn: Dark
+- assertVisible: Storybook theme
+- assertVisible: Primary action selected.
+- takeScreenshot: ios-storybook-dark-action

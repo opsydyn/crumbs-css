@@ -1,11 +1,13 @@
 import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
+import { hasChangedResolutionIdentity, type ResolutionIdentity } from "./compiler/resolution-identity"
 import type { CacheStore } from "metro-cache"
 
 export const NativeTransformCacheMetadataType = "crumbs.css.transform-cache" as const
 
 export type NativeTransformCacheMetadata = {
   readonly $$type: typeof NativeTransformCacheMetadataType
+  readonly resolutionIdentity?: ResolutionIdentity
   readonly dependencies: ReadonlyArray<{
     readonly sourcePath: string
     readonly sourceHash: string
@@ -43,7 +45,7 @@ export function hasChangedNativeTransformDependencies(value: unknown): boolean {
 export function createNativeTransformResultKey(value: unknown, baseKey: unknown): string | undefined {
   const metadata = readMetadata(value)
   if (metadata === undefined || typeof baseKey !== "string") return undefined
-  return `${baseKey}:crumbs:${createHash("sha1").update(JSON.stringify(metadata.dependencies)).digest("hex")}`
+  return `${baseKey}:crumbs:${createHash("sha1").update(JSON.stringify(metadata.resolutionIdentity === undefined ? metadata.dependencies : { dependencies: metadata.dependencies, resolutionIdentity: metadata.resolutionIdentity })).digest("hex")}`
 }
 
 function readMetadata(value: unknown): NativeTransformCacheMetadata | undefined {
@@ -61,7 +63,7 @@ function readMetadata(value: unknown): NativeTransformCacheMetadata | undefined 
 }
 
 function dependenciesChanged(metadata: NativeTransformCacheMetadata): boolean {
-  return metadata.dependencies.some(dependency => {
+  return (metadata.resolutionIdentity !== undefined && hasChangedResolutionIdentity(metadata.resolutionIdentity)) || metadata.dependencies.some(dependency => {
     try {
       return createHash("sha256").update(readFileSync(dependency.sourcePath)).digest("hex") !== dependency.sourceHash
     } catch {

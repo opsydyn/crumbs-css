@@ -11,22 +11,49 @@ const matches = (text: string, property: string, value: number) => ({ padding: [
 const logs = () => readdirSync(f.logs).flatMap(n => readFileSync(join(f.logs, n), 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line))).sort((a, b) => a.at - b.at).filter(r => r.kind === 'transform' && r.args[1] === f.app && r.args[2].endsWith('Q0.css.ts'));
 async function request(kind: string, property: string, value: number, prior?: number, unchanged?: string) {
     const began = performance.now();
-    let body = '', status = 0, attempts = 0;
+    const previous = logs().at(-1);
+    if (!previous) throw Error('No owned native worker configuration');
+    const nativeOutput=join(root,'native-reference-'+kind+'.js');
+    const nativeSpec=join(root,'native-reference-'+kind+'.json');
+    const fullResultOutput=fixture.shipping ? join(root,'full-reference-'+kind+'.json') : undefined;
+    writeFileSync(nativeSpec,JSON.stringify({transformerPath:f.artifact.transformerPath,entry:f.entries[0],app:f.app,config:previous.args[0],options:previous.args[3],output:nativeOutput,fullResultOutput}));
+    const native=Bun.spawnSync([process.argv[5]!,join(f.repo,'packages/css/bench/context-reuse/bundle-reference.cjs'),nativeSpec],{cwd:f.app,env:{...process.env,CRUMBS_CONTEXT_QUALIFICATION_CONFIG:join(root,'session.json')},maxBuffer:1000000});
+    if(native.exitCode) throw Error('Fresh native reference failed: '+native.stderr.toString());
+    const nativeCode=readFileSync(nativeOutput,'utf8');
+    const nativeMarker=nativeCode.match(/@crumbs-native-cache ([a-f0-9]{64})/)?.[1];
+    if(!nativeMarker) throw Error('Fresh native source lacks identity');
+    const expectedEntry=readFileSync(f.entries[0],'utf8');
+    let body = '', status = 0, attempts = 0, bundleSourceMatched=false, bundleSourceHash: string | undefined;
+
     while (performance.now() - began < 30000) {
         attempts++;
         try {
             const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
             status = response.status;
             body = await response.text();
-            if (status === 200 && matches(body, property, value) && (!prior || !matches(body, property, prior)))
-                break;
+            if (status === 200 && matches(body, property, value) && (!prior || !matches(body, property, prior))) {
+                const mapResponse=await fetch(url.replace('index.bundle?','index.map?'),{signal:AbortSignal.timeout(30000)});
+                if(mapResponse.status===200){
+                  const map:any=await mapResponse.json();
+                  const contents: string[]=[];
+                  const visit=(node:any)=>{ if(Array.isArray(node.sourcesContent)) for(let i=0;i<node.sources.length;i++) if(node.sources[i]?.endsWith('Q0.css.ts')) contents.push(node.sourcesContent[i]); if(Array.isArray(node.sections)) node.sections.forEach((section:any)=>visit(section.map)); };
+                  visit(map);
+                  bundleSourceMatched=contents.some(content=>content===expectedEntry) && body.includes('@crumbs-native-cache '+nativeMarker);
+                  if(bundleSourceMatched) bundleSourceHash=nativeMarker;
+                }
+                if(bundleSourceMatched) break;
+            }
         }
         catch { }
         await Bun.sleep(500);
     }
-    const actual = logs().at(-1);
+    const currentEntryHash=hash(readFileSync(f.entries[0]));
+    const productionReference=fullResultOutput===undefined?undefined:JSON.parse(readFileSync(fullResultOutput,'utf8'));
+    const actual = logs().filter(row=>row.diskEntryHash===currentEntryHash && (productionReference===undefined || row.resultHash===hash(JSON.stringify(productionReference)))).at(-1) ?? logs().at(-1);
     let reference: any, referenceMatched = false;
-    if (status === 200 && actual) {
+    if (fixture.shipping && status===200 && actual) {
+      reference=productionReference;referenceMatched=actual.resultHash===hash(JSON.stringify(reference)) && hash(JSON.stringify(actual.metadata))===hash(JSON.stringify(reference.__crumbsNativeStyles));
+    } else if (status === 200 && actual) {
         const spec: any = { kind: 'performance', receiptStore: join(root, 'receipts'), transformerPath: f.artifact.transformerPath, mode: 'fresh', capacity: 8 };
         Object.assign(spec, { id: 'reference-' + kind, app: f.app, entries: f.entries.map((p: string) => relative(f.app, p)), requests: [0], config: actual.args[0], options: actual.args[3], output: join(root, 'reference-' + kind + '.json') });
         const specPath = join(root, 'reference-' + kind + '-spec.json'), configPath = join(root, 'reference-' + kind + '-session.json');
@@ -38,12 +65,13 @@ async function request(kind: string, property: string, value: number, prior?: nu
             referenceMatched = actual.resultHash === reference.resultHash && actual.receipts[0].sourceHash === reference.sourceHash && actual.receipts[0].inputsHash === reference.inputsHash && hash(JSON.stringify(actual.metadata)) === reference.metadataHash;
         }
     }
-    const receipt = { currentEntryHash: hash(readFileSync(f.entries[0])), kind, property, value, prior, status, attempts, elapsedMs: performance.now() - began, bytes: body.length, sha256: hash(body), expectedPresent: matches(body, property, value), previousAbsent: !prior || !matches(body, property, prior), importerUnchanged: unchanged === undefined ? undefined : hash(readFileSync(f.entries[0])) === unchanged, referenceMatched, actual, reference };
+    const receipt = { bundleSourceMatched, bundleSourceHash, nativeReferenceHash:hash(nativeCode), nativeMarker, currentEntryHash: hash(readFileSync(f.entries[0])), kind, property, value, prior, status, attempts, elapsedMs: performance.now() - began, bytes: body.length, sha256: hash(body), expectedPresent: matches(body, property, value), previousAbsent: !prior || !matches(body, property, prior), importerUnchanged: unchanged === undefined ? undefined : hash(readFileSync(f.entries[0])) === unchanged, referenceMatched, actual, reference };
     observations.push(receipt);
     writeFileSync(join(root, 'integration-observations.json'), JSON.stringify(observations));
-    console.log(kind, status, receipt.expectedPresent, receipt.previousAbsent, referenceMatched, actual?.snapshot?.lastBypassReason);
+    console.log(kind, status, receipt.expectedPresent, receipt.previousAbsent, bundleSourceMatched, referenceMatched, actual?.snapshot?.lastBypassReason);
 }
-const watched = [f.entries[0], join(f.app, 'src/token.ts'), join(f.app, 'src/nested.css.ts'), join(f.app, 'src/alias-token.ts'), join(f.app, 'tsconfig.base.json'), join(f.workspace, 'tokens.ts'), join(f.workspace, 'package.json'), join(root, 'bun.lock')];
+const installationFile=f.domain.installationFiles[0];
+const watched = [f.entries[0], join(f.app, 'src/token.ts'), join(f.app, 'src/nested.css.ts'), join(f.app, 'src/alias-token.ts'), join(f.app, 'tsconfig.base.json'), join(f.workspace, 'tokens.ts'), join(f.workspace, 'package.json'), installationFile];
 const originals = new Map(watched.map((p: string) => [p, readFileSync(p)]));
 const originalLink = f.workspace;
 try {
@@ -76,9 +104,11 @@ try {
         unlinkSync(f.link);
         symlinkSync(f.otherWorkspace, f.link);
         await request('symlink-retarget', 'borderWidth', 41023, 41019, hash(readFileSync(q0)));
-        writeFileSync(join(root, 'bun.lock'), 'qualification-installation-edit');
+        writeFileSync(installationFile, 'qualification-installation-edit');
+        await request('installation-lock-only', 'padding', 40017, undefined, hash(readFileSync(q0)));
+        observations.at(-1).installationFile = installationFile;
         writeFileSync(join(f.app, 'src/alias-token.ts'), 'export const token = 37;\n');
-        await request('installation-lock', 'padding', 40037, 40017, hash(readFileSync(q0)));
+        await request('token-after-installation', 'padding', 40037, 40017, hash(readFileSync(q0)));
         writeFileSync(q0, 'export const broken = ;');
         let errorStatus = 0, errorBody = '';
         const errorStart = performance.now();

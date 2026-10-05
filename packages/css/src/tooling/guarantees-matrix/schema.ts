@@ -45,6 +45,7 @@ const EvidenceSchema = Schema.Struct({
   path: NonEmptyText,
   sha256: Sha256,
   sourceRevision: Revision,
+  sourceDigest: Schema.optional(Sha256),
   command: NonEmptyText,
   environment: EnvironmentSchema,
   resultStatus: Schema.Literals(["passed", "failed"]),

@@ -612,3 +612,15 @@ test("verifyExpoBundleInventory rejects repository paths encoded in virtual sour
     expectedBundlePackages,
   )).rejects.toThrow(/repository|worktree/i)
 })
+
+test("M10.5 Android maps require the same installed-package provenance as iOS/web", async () => {
+ const fixture=await createBundleFixture();
+ const directory=join(fixture.consumerRoot,'dist','android');
+ const map=join(directory,'index.js.map');
+ const targets=[...fixture.targets,{platform:'android' as const,directory}];
+ await writeBundleMap(map,Object.values(fixture.packageSources));
+ const result=await verifyExpoBundleInventory(targets,fixture.consumerRoot,fixture.repositoryRoot,expectedBundlePackages);
+ expect(result.map(row=>row.platform)).toEqual(['ios','web','android']);
+ await writeBundleMap(map,Object.values(fixture.packageSources).filter(file=>file!==fixture.packageSources['@acme/ui']));
+ await expect(verifyExpoBundleInventory(targets,fixture.consumerRoot,fixture.repositoryRoot,expectedBundlePackages)).rejects.toThrow(/android.*@acme\/ui/);
+});

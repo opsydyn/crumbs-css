@@ -14,12 +14,21 @@ import { scanRuntimeGraphEvidence } from "../packages/css/bench/runtime-graph-bu
 import { measureRuntimeInitialization } from "../packages/css/bench/runtime-initialization"
 import { measureMetroIncremental } from "../packages/css/bench/metro-incremental"
 
+import { captureGuaranteesSourceIdentity } from "./guarantees-matrix/source-identity"
+import { readdirSync, readFileSync } from "node:fs"
+import { createHash } from "node:crypto"
+import { acceptBenchmarkProcessReport } from "./host-budget-report-collection"
+
 const repoRoot = resolve(import.meta.dir, "..")
 const output = resolve(process.argv[2] ?? "docs/evidence/current-host-budgets")
 const floorNode = process.env.CRUMBS_AUDIT_NODE_FLOOR
 if (!floorNode) throw Error("CRUMBS_AUDIT_NODE_FLOOR is required")
 await mkdir(output, { recursive: true })
 
+const sourceBefore = captureGuaranteesSourceIdentity(repoRoot)
+function artifactIdentity(){ const root=join(repoRoot,"packages/css/dist"); return readdirSync(root).sort().filter(name=>!name.endsWith(".map")).map(path=>({path,sha256:createHash("sha256").update(readFileSync(join(root,path))).digest("hex")})) }
+const artifactsBefore = artifactIdentity()
+await writeFile(join(output,"input-identity.json"),JSON.stringify({sourceBefore,artifactsBefore},null,2)+"\n")
 const sourceRevision = Bun.spawnSync(["git", "rev-parse", "HEAD"], { cwd: repoRoot }).stdout.toString().trim()
 const effect = (await runEffectBoundaryAudit(floorNode, 5)).result
 await writeFile(join(output, "effect.json"), JSON.stringify(effect, null, 2) + "\n")
@@ -30,8 +39,10 @@ await writeFile(join(output, "runtime-initialization.json"), JSON.stringify(runt
 const incremental = await measureMetroIncremental(join(output, "metro-incremental.json"), 5, Number(process.env.CRUMBS_METRO_PORT ?? 8093))
 
 const benchmarkRuns: unknown[] = []
+const smokeResults: unknown[] = []
 for (let repetition = 1; repetition <= 5; repetition += 1) {
   const file = join(output, `benchmark-${repetition}.json`)
+  await import("node:fs/promises").then(fs=>fs.rm(file,{force:true}))
   const child = Bun.spawn([process.execPath, "packages/css/bench/native-styles.bench.ts"], {
     cwd: repoRoot,
     env: { ...process.env, CRUMBS_BENCH_JSON_OUTPUT: file, CRUMBS_BENCH_WARM_TRANSFORM_CWD: "package-root" },
@@ -41,16 +52,21 @@ for (let repetition = 1; repetition <= 5; repetition += 1) {
   const [exitCode, stdout, stderr] = await Promise.all([
     child.exited, new Response(child.stdout).text(), new Response(child.stderr).text(),
   ])
-  if (exitCode !== 0) throw Error(`Benchmark repetition ${repetition} failed: ${stdout}\n${stderr}`)
-  benchmarkRuns.push(JSON.parse(await readFile(file, "utf8")))
+  const report = JSON.parse(await readFile(file, "utf8"))
+  const printedReport=stdout.slice(stdout.indexOf("{\n"),stdout.lastIndexOf("\n}")+2)
+  if(JSON.stringify(JSON.parse(printedReport))!==JSON.stringify(report)) throw Error("Retained benchmark report differs from this process stdout")
+  smokeResults.push({ repetition, ...acceptBenchmarkProcessReport(report, exitCode, stderr) })
+  await writeFile(join(output, `benchmark-${repetition}.log`), stdout + "\n" + stderr)
+  benchmarkRuns.push(report)
 }
+await writeFile(join(output, "legacy-smoke-results.json"), JSON.stringify(smokeResults, null, 2) + "\n")
 const benchmark = summarizeBenchmarkReports(benchmarkRuns)
 await writeFile(join(output, "benchmark-summary.json"), JSON.stringify(benchmark, null, 2) + "\n")
 
 const editorFile = join(output, "editor.json")
 const editorChild = Bun.spawn([process.execPath, "scripts/editor-scale.ts", "measure", editorFile, "5"], {
   cwd: repoRoot,
-  env: { ...process.env, CRUMBS_SOURCE_REVISION: `${sourceRevision} M1.8b working tree` },
+  env: { ...process.env, CRUMBS_SOURCE_REVISION: `${sourceRevision} M10.5 working tree` },
   stdout: "pipe",
   stderr: "pipe",
 })
@@ -76,4 +92,7 @@ await writeFile(join(output, "comparison.json"), JSON.stringify({
   ...comparison,
 }, null, 2) + "\n")
 await writeFile(join(output, "threshold-review.json"), JSON.stringify(review, null, 2) + "\n")
+const sourceAfter=captureGuaranteesSourceIdentity(repoRoot), artifactsAfter=artifactIdentity()
+if(sourceBefore.sha256!==sourceAfter.sha256 || JSON.stringify(artifactsBefore)!==JSON.stringify(artifactsAfter)) throw Error("Host measurement input drift")
+await writeFile(join(output,"input-identity.json"),JSON.stringify({sourceBefore,sourceAfter,artifactsBefore,artifactsAfter},null,2)+"\n")
 console.log(`HOST_BUDGET_REPORT ${output}`)

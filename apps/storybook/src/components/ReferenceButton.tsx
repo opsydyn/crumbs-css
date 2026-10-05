@@ -52,6 +52,7 @@ export function ReferenceButton({
 
   return (
     <Pressable
+      accessibilityLabel={typeof children === "string" ? children : undefined}
       accessibilityRole="button"
       accessibilityState={{ disabled }}
       disabled={disabled}

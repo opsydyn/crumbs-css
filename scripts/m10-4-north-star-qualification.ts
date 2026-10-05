@@ -5,6 +5,7 @@ import { cpus, release, tmpdir } from "node:os"
 import { dirname, isAbsolute, join, relative, resolve, sep } from "node:path"
 import { pathToFileURL } from "node:url"
 import { verifyExpoBundleInventory, type BundleInventory } from "./packed-distribution-contract"
+import { captureGuaranteesSourceIdentity } from "./guarantees-matrix/source-identity"
 import { auditPackedRuntimeEntrypoints } from "./packed-runtime-graph"
 
 type PackedArtifact = Readonly<{
@@ -31,7 +32,7 @@ type PackageLock = Readonly<{
 }>
 
 const repositoryRoot = resolve(import.meta.dir, "..")
-const evidenceRelativePath = "docs/evidence/2026-09-30-m10-4-north-star"
+const evidenceRelativePath = process.env.CRUMBS_NORTHSTAR_OUTPUT ?? "docs/evidence/2026-09-30-m10-4-north-star"
 const packageNames = ["@opsydyn/crumbs-css", "@acme/design-tokens", "@acme/ui"] as const
 const runtimePackageNames = ["expo", "react", "react-native", "react-native-web", "@rn-primitives/portal", "react-test-renderer"] as const
 const fixtureRoot = "packages/css/fixtures/m10-4-north-star"
@@ -159,6 +160,7 @@ async function copyLogs(sourceDirectory: string, destinationDirectory: string): 
 }
 
 async function qualify(): Promise<Readonly<{ status: string; evidencePath: string }>> {
+  const collectionSourceIdentity = captureGuaranteesSourceIdentity(repositoryRoot)
   const workRoot = await realpath(await mkdtemp(join(tmpdir(), "crumbs-m10-4-")))
   const prepareLog = join(workRoot, "packed-consumer-prepare.log")
   let prepared: PreparedConsumer | undefined
@@ -365,11 +367,12 @@ async function qualify(): Promise<Readonly<{ status: string; evidencePath: strin
     )
 
     const expo = join(appRoot, "node_modules/.bin/expo")
-    const outputDirectories: Record<"ios" | "web", string> = {
+    const outputDirectories: Record<"ios" | "android" | "web", string> = {
       ios: join(appRoot, "dist", "m10-4", "ios"),
+      android: join(appRoot, "dist", "m10-4", "android"),
       web: join(appRoot, "dist", "m10-4", "web"),
     }
-    for (const platform of ["ios", "web"] as const) {
+    for (const platform of ["ios", "android", "web"] as const) {
       await mkdir(outputDirectories[platform], { recursive: true })
       await runCommand(
         [expo, "export", "--platform", platform, "--source-maps", "--output-dir", outputDirectories[platform]],
@@ -381,6 +384,7 @@ async function qualify(): Promise<Readonly<{ status: string; evidencePath: strin
     const inventories = await verifyExpoBundleInventory(
       [
         { platform: "ios", directory: outputDirectories.ios },
+        { platform: "android", directory: outputDirectories.android },
         { platform: "web", directory: outputDirectories.web },
       ],
       appRoot,
@@ -454,8 +458,8 @@ async function qualify(): Promise<Readonly<{ status: string; evidencePath: strin
       platforms: {
         iosBundleExport: "passed",
         webBundleExport: "passed",
-        androidBundleExport: "not-run",
-        reason: "Android remains parked by the user.",
+        androidBundleExport: "passed",
+        reason: "All three packed Expo platforms exported; native rendering is qualified separately.",
       },
       nativeDevice: {
         iosRendering: "not-run",
@@ -488,14 +492,16 @@ async function qualify(): Promise<Readonly<{ status: string; evidencePath: strin
       { path: benchmarkEvidencePath, sha256: sha256(benchmarkBytes) },
       { path: runtimeGraphPath, sha256: sha256(runtimeGraphBytes) },
     ]
+    if (captureGuaranteesSourceIdentity(repositoryRoot).sha256 !== collectionSourceIdentity.sha256) throw Error("Packed qualification source changed during collection")
     const receipt = {
       format: "crumbs.north-star-qualification",
       schemaVersion: 1,
       roadmapItem: "M10.4",
-      status: benchmarkStatus === "passed" ? "qualified-packed-ios-web-and-host" : "incomplete-host-performance",
+      status: benchmarkStatus === "passed" ? "qualified-packed-ios-android-web-and-host" : "incomplete-host-performance",
       generatedAt: new Date().toISOString(),
       source: {
         revision: sourceRevision,
+        digest: collectionSourceIdentity.sha256,
         state: "working-tree; selected source and fixture hashes bind this run",
         files: sourceEvidence,
       },
@@ -533,11 +539,12 @@ async function qualify(): Promise<Readonly<{ status: string; evidencePath: strin
         expoSdk: installedVersions.expo,
         react: installedVersions.react,
         reactNative: installedVersions["react-native"],
-        supportedSurface: ["iOS bundle export", "web bundle export", "host interaction test"],
+        supportedSurface: ["iOS bundle export", "Android bundle export", "web bundle export", "host interaction test"],
         results: {
           integrationTest: "passed",
           typecheck: "passed",
           iosExport: "passed",
+          androidExport: "passed",
           webExport: "passed",
           sourceMapInventory: "passed",
         },
@@ -569,8 +576,8 @@ async function qualify(): Promise<Readonly<{ status: string; evidencePath: strin
       evidenceArtifacts: reportArtifacts,
       limitations: [
         "The package, Expo, React, and React Native matrix is limited to the exact versions recorded above.",
-        "iOS and web exports prove packed JavaScript bundle provenance, not native rendering, native accessibility, or device performance.",
-        "Android export and device acceptance remain parked; publishing and broader consumer compatibility are not covered.",
+        "iOS, Android and web exports prove packed JavaScript bundle provenance, not native rendering, native accessibility, or device performance.",
+        "Physical-device acceptance is deferred; publishing and broader consumer compatibility are not covered.",
       ],
     }
 

@@ -1,0 +1,14 @@
+appId: host.exp.Exponent
+---
+- scrollUntilVisible:
+    element: .*Preview RTL layout.*
+    direction: UP
+    timeout: 30000
+- assertVisible: "Native condition direction: LTR"
+- takeScreenshot: ios-conditions-ltr
+- tapOn: .*Preview RTL layout.*
+- assertVisible: "Native condition direction: RTL"
+- takeScreenshot: ios-conditions-rtl
+- tapOn: .*Preview LTR layout.*
+- assertVisible: "Native condition direction: LTR"
+- takeScreenshot: ios-conditions-restored

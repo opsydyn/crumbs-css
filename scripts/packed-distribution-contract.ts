@@ -89,12 +89,12 @@ export function assertPrecompiledComponentFiles(files: ReadonlyArray<string>): v
 
 
 export type ExpoBundleTarget = Readonly<{
-  platform: "ios" | "web"
+  platform: "ios" | "android" | "web"
   directory: string
 }>
 
 export type BundleInventory = Readonly<{
-  platform: "ios" | "web"
+  platform: "ios" | "android" | "web"
   sourceMapFiles: ReadonlyArray<string>
   packageSources: Readonly<Record<string, ReadonlyArray<string>>>
 }>
@@ -436,7 +436,7 @@ export async function verifyExpoBundleInventory(
     throw new Error(`Cannot resolve Expo inventory roots: ${messageOf(error)}`, { cause: error })
   }
 
-  const targetsByPlatform: Record<"ios" | "web", ExpoBundleTarget[]> = { ios: [], web: [] }
+  const targetsByPlatform: Record<"ios" | "android" | "web", ExpoBundleTarget[]> = { ios: [], android: [], web: [] }
   for (const target of targets) targetsByPlatform[target.platform].push(target)
   for (const platform of ["ios", "web"] as const) {
     if (targetsByPlatform[platform].length === 0) {
@@ -446,7 +446,7 @@ export async function verifyExpoBundleInventory(
 
   const packageRoots = await resolveInstalledBundlePackages(canonicalConsumerRoot, expectedPackages)
   const inventories: BundleInventory[] = []
-  for (const platform of ["ios", "web"] as const) {
+  for (const platform of ["ios", "web", ...(targetsByPlatform.android.length ? ["android" as const] : [])] as const) {
     const sourceMapFiles = new Set<string>()
     const packageSources: Record<string, Set<string>> = Object.fromEntries(
       expectedPackages.map((packageName) => [packageName, new Set<string>()]),

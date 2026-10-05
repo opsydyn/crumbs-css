@@ -105,6 +105,19 @@ describe("M10.5 guarantees matrix contract and renderer", () => {
     if (repositoryRoot !== "") rmSync(repositoryRoot, { recursive: true, force: true })
   })
 
+  it("accepts content-pinned evidence across commits and rejects source drift even at the same revision", async () => {
+    const api = await loadApi()
+    if (!api) { expect(api).toBeDefined(); return }
+    const { captureGuaranteesSourceIdentity } = await import("../../../scripts/guarantees-matrix/source-identity")
+    const input = baseMatrix() as any
+    input.rows[0].evidence[0].sourceDigest = captureGuaranteesSourceIdentity(repositoryRoot).sha256
+    input.rows[0].evidence[0].sourceRevision = "0".repeat(40)
+    const matrix = api.decodeGuaranteesMatrix(input)
+    expect(issueCodes(api.validateGuaranteesMatrix(matrix, repositoryRoot))).toEqual([])
+    writeFileSync(join(repositoryRoot, "packages/css/src/source.ts"), "export const source = false\n")
+    expect(issueCodes(api.validateGuaranteesMatrix(matrix, repositoryRoot))).toContain("evidence-source-revision-mismatch")
+  })
+
   it("accepts a complete representative matrix", async () => {
     const api = await loadApi()
     if (!api) { expect(api).toBeDefined(); return }

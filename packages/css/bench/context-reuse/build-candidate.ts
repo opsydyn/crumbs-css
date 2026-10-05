@@ -52,10 +52,10 @@ export function patchTransformer(source: string) {
   const edits = [
     { start: native.name.getStart(file), end: native.name.end, text: "__crumbsTransformFromReceipt" },
     { start: native.parameters[0]!.getStart(file), end: native.parameters[0]!.getStart(file), text: "receipt: CompileReceipt, " },
-    { start: inputs.getFullStart(), end: compiled.end, text: "\n  const { source, inputs: capturedInputs } = receipt" },
+    { start: inputs.getFullStart(), end: compiled.end, text: "\n  const { source, inputs: capturedInputs } = receipt\n  const resolutionIdentity = captureResolutionIdentity(capturedInputs, { cwd, absoluteEntryPath: absoluteFilePath, verification: true })" },
     { start: native.getFullStart(), end: native.getFullStart(), text: wrapper },
     { start: call.arguments.end, end: call.arguments.end, text: ", undefined, data" },
-    { start: 0, end: 0, text: 'import { qualificationRequest, qualificationRunNative } from "./qualification-adapter"\nimport type { CompileReceipt } from "../bench/context-reuse/compile-session"\nexport { __crumbsQualificationSnapshot, __crumbsQualificationClose, __crumbsQualificationDrainReceipts, __crumbsQualificationStaleInputsOnce, __crumbsQualificationOptionsOnce, __crumbsQualificationUnstableOnce } from "./qualification-adapter"\n' },
+    { start: 0, end: 0, text: 'import { captureResolutionIdentity } from "./compiler/resolution-identity"\nimport { qualificationRequest, qualificationRunNative } from "./qualification-adapter"\nimport type { CompileReceipt } from "../bench/context-reuse/compile-session"\nexport { __crumbsQualificationSnapshot, __crumbsQualificationClose, __crumbsQualificationDrainReceipts, __crumbsQualificationStaleInputsOnce, __crumbsQualificationOptionsOnce, __crumbsQualificationUnstableOnce } from "./qualification-adapter"\n' },
   ];
   let patched = source;
   for (const edit of edits.sort((a, b) => b.start - a.start)) patched = patched.slice(0, edit.start) + edit.text + patched.slice(edit.end);

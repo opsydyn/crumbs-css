@@ -88,8 +88,13 @@ it("stale-input negative control diverges native metadata/results despite the sa
 }, 120000);
 it("buffer, unknown option, package-cache, artifact and unstable-input cases expose their bypass scope", async () => {
   const artifact = await candidate(); const bypass = runTransformerProbe("node", artifact, fixture, "immediate", "bypass");
-  assertSuccess(bypass);
-  expect(bypass.operations[1].snapshot.lastBypassReason).toBe("entry-buffer-mismatch");
+  expect(bypass.failure).toBeUndefined();
+  expect(bypass.restored).toBe(true);
+  for (const row of [bypass.operations[0], bypass.operations[2]]) { expect(row.error).toBeUndefined(); expect(row.result).toBeDefined(); }
+  expect(bypass.operations[3].error?.message).toContain("Restart Metro after changing package scope");
+  expect(bypass.operations[3].result).toBeUndefined();
+  expect(bypass.operations[1].error?.message).toContain("entry changed before compilation");
+  expect(bypass.operations[1].result).toBeUndefined();
   expect(bypass.operations[2].snapshot.lastBypassReason).toBe("unknown-build-option");
   expect(bypass.operations[3].snapshot).toMatchObject({ state: "disabled", lastBypassReason: "package-info-changed" });
   const changed = runTransformerProbe("node", artifact, fixture, "immediate", "artifact");

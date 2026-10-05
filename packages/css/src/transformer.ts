@@ -7,9 +7,10 @@ import type { Adapter } from "@vanilla-extract/css"
 import * as vanillaAdapter from "@vanilla-extract/css/adapter"
 import { transformCss } from "@vanilla-extract/css/transformCss"
 import {
-  compile,
+  compile as compileVanilla,
   cssFileFilter,
   getSourceFromVirtualCssFile,
+  getPackageInfo,
   parseFileScope,
   serializeCss,
   stringifyFileScope,
@@ -29,6 +30,8 @@ import {
   analyseDependencyInputs,
   createDependencyCacheIdentity,
 } from "./compiler/dependency-analysis"
+import { assertPackageScopeIdentity, hasChangedResolutionIdentity } from "./compiler/resolution-identity"
+import { compileWithStableResolution } from "./compiler/stable-resolution-compile"
 import { indexStyleExportOwnership } from "./compiler/export-ownership"
 import {
   createNativeStyleExplanationMetadata,
@@ -344,6 +347,17 @@ export async function transformCssTsToStyleSheetWithManifestSidecar(
   return { code: result.code, sidecar: result.manifestSidecar }
 }
 
+async function compile(options: Parameters<typeof compileVanilla>[0]) {
+  let inputs: Record<string, unknown> = {}
+  const capture: EsbuildPlugin = { name: "crumbs-resolution-receipt", setup(build) {
+    ;(build as OnEndBuild).onEnd(result => { inputs = result.metafile?.inputs ?? {} })
+  } }
+  return compileWithStableResolution({ cwd: options.cwd ?? process.cwd(), absoluteEntryPath: path.resolve(options.cwd ?? process.cwd(), options.filePath) }, async () => {
+    const result = await compileVanilla({ ...options, esbuildOptions: { ...options.esbuildOptions, plugins: [...(options.esbuildOptions?.plugins ?? []), capture] } })
+    return { ...result, inputs }
+  })
+}
+
 async function transformCssTsToStyleSheetWithMetadata(
   filePath: string,
   cwd: string,
@@ -353,6 +367,7 @@ async function transformCssTsToStyleSheetWithMetadata(
   const identOption = process.env.NODE_ENV === "production" ? "short" : "debug"
   const includeStyleExplanations = options.includeStyleExplanations ?? options.dev ?? process.env.NODE_ENV !== "production"
   const absoluteFilePath = path.isAbsolute(filePath) ? filePath : path.resolve(cwd, filePath)
+  assertPackageScopeIdentity(cwd, getPackageInfo(cwd))
 
   // Capture esbuild's resolved inputs via an onEnd plugin so we know which
   // files this .css.ts depends on at compile time.
@@ -366,7 +381,7 @@ async function transformCssTsToStyleSheetWithMetadata(
     },
   }
 
-  const { source } = await compile({
+  const { source, resolutionIdentity } = await compile({
     filePath: absoluteFilePath,
     cwd,
     identOption,
@@ -484,7 +499,11 @@ async function transformCssTsToStyleSheetWithMetadata(
     strictDiagnostics: options.strictDiagnostics === true,
     useStyleSheet: options.useStyleSheet ?? true,
     identOption: String(identOption),
-  })
+  }, createHash("sha256").update(JSON.stringify({
+    entryHash: resolutionIdentity.files.find(receipt => receipt.sourcePath === absoluteFilePath)?.sourceHash,
+    inputs: capturedInputs,
+    resolutionIdentity,
+  })).digest("hex"))
 
   const moduleIdentity = includeStyleExplanations ? sourceIdentity(absoluteFilePath, cwd) : undefined
   const styleExplanationMetadata = includeStyleExplanations && classCandidates !== undefined && moduleIdentity !== undefined
@@ -519,10 +538,13 @@ async function transformCssTsToStyleSheetWithMetadata(
         ? {}
         : { declaredTokenIds: manifestSidecarOptions.declaredTokenIds }),
     })
+  assertPackageScopeIdentity(cwd, getPackageInfo(cwd))
+  if (resolutionIdentity.cacheable && hasChangedResolutionIdentity(resolutionIdentity)) throw new Error("Native style sources or resolution changed during compilation; retry after edits settle")
   return {
     code,
     cacheMetadata: {
       $$type: NativeTransformCacheMetadataType,
+      resolutionIdentity,
       dependencies: Object.freeze(dependencyInputs.map(({ sourcePath, sourceHash }) => ({ sourcePath, sourceHash }))),
     },
     ...(manifestSidecar === undefined ? {} : { manifestSidecar }),
@@ -667,6 +689,8 @@ export async function transform(
     return defaultTransform(config, projectRoot, filename, data, options)
   }
 
+  if (!data.equals(readFileSync(path.resolve(projectRoot, filename)))) throw new Error("Native style entry changed before compilation; retry after edits settle")
+
   const nativeStylesConfig = config.nativeStyles as {
     strictDiagnostics?: boolean
     includeStyleExplanations?: boolean
@@ -680,6 +704,8 @@ export async function transform(
     dev: options.dev,
     includeStyleExplanations: nativeStylesConfig?.includeStyleExplanations ?? options.dev,
   })
+  const entryReceipt = transformed.cacheMetadata.resolutionIdentity?.files.find(receipt => receipt.sourcePath === path.resolve(projectRoot, filename))
+  if (entryReceipt?.sourceHash !== createHash("sha256").update(data).digest("hex")) throw new Error("Native style entry changed during compilation; retry after edits settle")
   const result = await defaultTransform(config, projectRoot, filename, Buffer.from(transformed.code), options) as Record<string, unknown>
   const upstreamKey = typeof result.unstable_transformResultKey === "string" ? result.unstable_transformResultKey : "crumbs"
   const dependencyAwareKey = `${upstreamKey}:crumbs:${createHash("sha1").update(transformed.code).digest("hex")}`

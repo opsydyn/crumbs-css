@@ -1,0 +1,12 @@
+17 |   if(stat.isDirectory())return files(file,base)
+18 |   if(!stat.isFile())throw Error('Evidence requires regular files: '+file)
+19 |   return [relative(base,file)]
+20 |  })
+21 | }
+22 | function assert(value:unknown,message:string):asserts value {if(!value)throw Error(message)}
+                                                                                  ^
+error: Evidence tamper was not rejected
+      at assert (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m10-5-completion-evidence.ts:22:78)
+      at /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m10-5-completion-evidence.ts:99:4
+
+Bun v1.4.2 (macOS arm64)

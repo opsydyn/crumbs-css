@@ -27,6 +27,7 @@ function renderEvidence(row: GuaranteesMatrixRow): string {
       `Evidence: \`${escapeCell(evidence.path)}\``,
       `SHA-256 ${escapeCell(evidence.sha256)}`,
       `revision ${escapeCell(evidence.sourceRevision)}`,
+      ...(evidence.sourceDigest === undefined ? [] : [`source content SHA-256 ${escapeCell(evidence.sourceDigest)}`]),
       `${escapeCell(evidence.environment.name)} (${versions})`,
       `outcome: ${escapeCell(evidence.resultStatus)}; result: ${escapeCell(evidence.result)}`,
       `scope: ${escapeCell(evidence.scopeLimit)}`,

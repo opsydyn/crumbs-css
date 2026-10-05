@@ -82,7 +82,7 @@ export function AppThemeProvider({
       width: dimensions.width,
       height: dimensions.height,
       fontScale: dimensions.fontScale,
-      isRTL: I18nManager.isRTL,
+      isRTL: I18nManager.isRTL === true,
     },
     sources: [createNativeAccessibilityConditionSource(nativePlatform, nativeAccessibilityPreferences)],
   }))
