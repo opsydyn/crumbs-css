@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Bun tests, installed `fast-check`, Node v22.0.0 and the current Node executable, esbuild 0.27.7, Vanilla Extract integration 8.0.10, Expo/Metro. Existing Effect 4.0.0-rc.115 remains unchanged.
 
-**Spec:** [Approved cache admission/lifecycle design](../specs/2026-10-05-m10-5-cache-admission-lifecycle-design.md), reviewed by the user on 2026-10-05. This plan awaits its own review; no task has run.
+**Spec:** [Approved cache admission/lifecycle design](../specs/2026-10-05-m10-5-cache-admission-lifecycle-design.md), reviewed by the user on 2026-10-05. The user approved this plan on 2026-10-05. Task 1 is implemented and verified; Tasks 2–5 remain pending approval and execution.
 
 ## Global Constraints
 
@@ -51,7 +51,7 @@ Private candidate types are defined by the task that produces them below. Do not
 
 **Interfaces:** Produces `AdmissionSettings = { capacity: number; admission: "immediate" | "repeat" }`, immutable `AdmissionState = { settings: AdmissionSettings; retained: readonly string[]; probation: readonly string[] }` (oldest first), and `AdmissionPlan = { kind: "fresh" | "reuse" | "create"; key: string; evict?: string; onSuccess: AdmissionState }`. Export private tooling functions `createAdmissionState(settings): AdmissionState`, `planAdmission(state, key): AdmissionPlan`, `forgetAdmissionKey(state, key): AdmissionState`, `clearAdmissionState(state): AdmissionState`. Planning does not mutate/commit the input; the resource interpreter commits only after success.
 
-- [ ] Write unit cases for immediate `A,B,A,C` at capacity 2 (evict B), repeat `A,A` (fresh then create), probation pruning at `2 * capacity`, first access after retained eviction, failed promotion via `forgetAdmissionKey`, clearing and invalid runtime settings. Assert input state is unchanged and arrays are immutable.
+- [x] Write unit cases for immediate `A,B,A,C` at capacity 2 (evict B), repeat `A,A` (fresh then create), probation pruning at `2 * capacity`, first access after retained eviction, failed promotion via `forgetAdmissionKey`, clearing and invalid runtime settings. Assert input state is unchanged and arrays are immutable.
 
 ```ts
 expect(planAdmission(createAdmissionState({ capacity: 4, admission: "repeat" }), "A").kind).toBe("fresh")
@@ -60,10 +60,10 @@ expect(planAdmission(createAdmissionState({ capacity: 4, admission: "repeat" }),
 // probation.length <= 2 * capacity; unique/disjoint keys; frozen previous state unchanged.
 ```
 
-- [ ] Run `cd packages/css && bun test test/context-reuse-policy.test.ts test/context-reuse-policy.property.test.ts`. Expected RED: missing policy API; once present, assertions must fail for the relevant absent rule, not setup errors.
-- [ ] Implement only the pure policy. Validate positive safe integers and safe doubled capacity, supported admission modes and non-empty keys. Touch retained order on successful use; no lifetime frequency map or resource code.
-- [ ] Run the focused command and `bun run test` from `packages/css`. Expected GREEN: policy/model checks and package suite pass. Generated traces use existing fast-check with seed `10505`, 500 runs and at most 200 events; record shrunk counterexamples on failure.
-- [ ] Commit as `test(perf): model M10.5 bounded context admission`; recommend **M10.5 Task 2 — configuration identity**. Do not describe pure policy checks as real esbuild qualification.
+- [x] Run `cd packages/css && bun test test/context-reuse-policy.test.ts test/context-reuse-policy.property.test.ts`. Expected RED: missing policy API; once present, assertions must fail for the relevant absent rule, not setup errors.
+- [x] Implement only the pure policy. Validate positive safe integers and safe doubled capacity, supported admission modes and non-empty keys. Touch retained order on successful use; no lifetime frequency map or resource code.
+- [x] Run the focused command and `bun run test` from `packages/css`. Expected GREEN: policy/model checks and package suite pass. Generated traces use existing fast-check with seed `10505`, 500 runs and at most 200 events; record shrunk counterexamples on failure.
+- [x] Commit as `test(perf): model M10.5 bounded context admission`; recommend **M10.5 Task 2 — configuration identity**. Do not describe pure policy checks as real esbuild qualification.
 
 ## Task 2 — M10.5 configuration identity and eligibility
 
