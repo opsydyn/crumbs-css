@@ -1,0 +1,22 @@
+appId: com.apple.Preferences
+---
+- scrollUntilVisible:
+    element: Accessibility
+    direction: DOWN
+    timeout: 15000
+- tapOn: Accessibility
+- tapOn: Motion
+- tapOn:
+    point: "84%,18%"
+- takeScreenshot: ios-motion-switch-on
+- openLink: exp://127.0.0.1:8090
+- tapOn:
+    text: Open
+    optional: true
+- scrollUntilVisible:
+    element: "Native preference: reduced"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "Native preference: reduced"
+- tapOn: Run motion preview
+- takeScreenshot: ios-motion-reduced

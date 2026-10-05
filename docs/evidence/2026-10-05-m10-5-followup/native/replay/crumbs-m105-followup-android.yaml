@@ -1,0 +1,13 @@
+appId: host.exp.exponent
+---
+- assertVisible: Save changes
+- takeScreenshot: android-dark
+- tapOn:
+    point: "80%,6%"
+- takeScreenshot: android-light
+- tapOn: Save changes
+- assertVisible: Primary action selected.
+- takeScreenshot: android-light-action
+- tapOn: Dark
+- assertVisible: Primary action selected.
+- takeScreenshot: android-dark-action

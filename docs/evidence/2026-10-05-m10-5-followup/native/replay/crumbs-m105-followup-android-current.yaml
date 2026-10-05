@@ -1,0 +1,22 @@
+appId: host.exp.exponent
+---
+- extendedWaitUntil:
+    visible: Save changes
+    timeout: 60000
+- scrollUntilVisible:
+    element: Save changes
+    direction: DOWN
+    centerElement: true
+    timeout: 15000
+- tapOn: Save changes
+- scrollUntilVisible:
+    element: Primary action selected.
+    direction: DOWN
+    timeout: 15000
+- assertVisible: Primary action selected.
+- takeScreenshot: android-action-current
+- tapOn: Dark
+- takeScreenshot: android-dark-current
+- tapOn:
+    point: "85%,6%"
+- takeScreenshot: android-light-current

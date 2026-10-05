@@ -1,0 +1,25 @@
+appId: host.exp.exponent
+---
+- scrollUntilVisible:
+    element: ".*Current scale: 1.30.*"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: ".*Current scale: 1.30.*"
+- takeScreenshot: android-font-scale
+- scrollUntilVisible:
+    element: "Native preference: reduced"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "Native preference: reduced"
+- scrollUntilVisible:
+    element: Run motion preview
+    direction: DOWN
+    timeout: 15000
+- tapOn: Run motion preview
+- takeScreenshot: android-motion-reduced
+- scrollUntilVisible:
+    element: "Native condition: more"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "Native condition: more"
+- takeScreenshot: android-more-contrast

@@ -1,4 +1,5 @@
-import { describe, expect, test } from "bun:test";
+import * as fs from "node:fs";
+import { describe, expect, test, spyOn } from "bun:test";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync, unlinkSync, symlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -103,4 +104,17 @@ test("M10.5 package config edits after link retarget use the current target with
  const a=join(root,'a'),b=join(root,'b');for(const dir of[a,b]){mkdirSync(dir);writeFileSync(join(dir,'base.json'),'{}');}mkdirSync(join(cwd,'node_modules'));const link=join(cwd,'node_modules/config');symlinkSync(a,link);writeFileSync(join(cwd,'tsconfig.json'),'{"extends":"config/base.json"}');
  captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry});unlinkSync(link);symlinkSync(b,link);
  const receipt=captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry});writeFileSync(join(b,'base.json'),'{"compilerOptions":{"strict":true}}');expect(hasChangedResolutionIdentity(receipt)).toBe(true);
+}));
+
+test("M10.5 resolution captures sample each receipt once per pass and resample on the next pass",()=>fixture((root,cwd,entry)=>{
+ const read=spyOn(fs,"readFileSync"), real=spyOn(fs,"realpathSync");
+ try {
+  const first=captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry,verification:true});
+  expect(read.mock.calls.filter(call=>String(call[0])===entry)).toHaveLength(1);
+  expect(real.mock.calls.filter(call=>String(call[0])===entry)).toHaveLength(1);
+  writeFileSync(entry,"export const x=2;");
+  const second=captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry,verification:true});
+  expect(second.files.find(file=>file.sourcePath===entry)?.sourceHash).not.toBe(first.files.find(file=>file.sourcePath===entry)?.sourceHash);
+  expect(read.mock.calls.filter(call=>String(call[0])===entry)).toHaveLength(2);
+ } finally {read.mockRestore();real.mockRestore()}
 }));

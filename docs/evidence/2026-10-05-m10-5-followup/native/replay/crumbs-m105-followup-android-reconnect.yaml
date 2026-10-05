@@ -1,0 +1,19 @@
+appId: host.exp.exponent
+---
+- stopApp
+- openLink: exp://10.0.2.2:8090
+- extendedWaitUntil:
+    visible: Save changes
+    timeout: 60000
+- scrollUntilVisible:
+    element: Save changes
+    direction: DOWN
+    centerElement: true
+    timeout: 15000
+- tapOn: Save changes
+- scrollUntilVisible:
+    element: Primary action selected.
+    direction: DOWN
+    timeout: 15000
+- assertVisible: Primary action selected.
+- takeScreenshot: android-action-reconnected

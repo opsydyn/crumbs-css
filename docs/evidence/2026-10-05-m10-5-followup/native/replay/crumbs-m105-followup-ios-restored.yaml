@@ -1,0 +1,18 @@
+appId: host.exp.Exponent
+---
+- scrollUntilVisible:
+    element: ".*Current scale: 1.00.*"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: ".*Current scale: 1.00.*"
+- scrollUntilVisible:
+    element: "Native preference: full"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "Native preference: full"
+- scrollUntilVisible:
+    element: "Native condition: normal"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "Native condition: normal"
+- takeScreenshot: ios-context-restored

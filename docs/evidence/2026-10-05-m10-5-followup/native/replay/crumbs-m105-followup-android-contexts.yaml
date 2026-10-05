@@ -1,0 +1,27 @@
+appId: host.exp.exponent
+---
+- back
+- tapOn:
+    point: "80%,6%"
+- assertVisible: Primary action selected.
+- takeScreenshot: android-light-action
+- tapOn: Dark
+- assertVisible: Primary action selected.
+- takeScreenshot: android-dark-action
+- scrollUntilVisible:
+    element: ".*Preview RTL layout.*"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "Native condition direction: LTR"
+- tapOn: ".*Preview RTL layout.*"
+- assertVisible: "Native condition direction: RTL"
+- takeScreenshot: android-rtl
+- tapOn: ".*Preview LTR layout.*"
+- assertVisible: "Native condition direction: LTR"
+- scrollUntilVisible:
+    element: "Native preference: full"
+    direction: DOWN
+    timeout: 15000
+- assertVisible: "Native preference: full"
+- tapOn: Run motion preview
+- takeScreenshot: android-motion-full

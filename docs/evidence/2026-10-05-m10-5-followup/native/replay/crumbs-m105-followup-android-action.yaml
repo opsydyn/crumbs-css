@@ -1,0 +1,11 @@
+appId: host.exp.exponent
+---
+- scrollUntilVisible:
+    element: Primary action selected.
+    direction: DOWN
+    timeout: 15000
+- assertVisible: Primary action selected.
+- takeScreenshot: android-light-action
+- tapOn: Dark
+- assertVisible: Primary action selected.
+- takeScreenshot: android-dark-action

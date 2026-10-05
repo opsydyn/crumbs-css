@@ -1,0 +1,45 @@
+[32m[ INFO][m Debug output path: /Users/alancurrie/.maestro/tests/2026-10-05_214006
+[32m[ INFO][m ---- System Info ----
+[32m[ INFO][m Maestro Version: 2.11.0
+[32m[ INFO][m CI: Undefined
+[32m[ INFO][m OS Name: Mac OS X
+[32m[ INFO][m OS Version: 26.6.2
+[32m[ INFO][m Architecture: aarch64
+[32m[ INFO][m Java Version: 17
+[32m[ INFO][m Xcode Version: 26.5
+[32m[ INFO][m Flutter Version: Undefined
+[32m[ INFO][m Flutter Channel: Undefined
+[32m[ INFO][m ---------------------
+[36m[DEBUG][m Using SLF4J as the default logging framework
+
+Command failed (host:transport:emulator-5562): device offline
+
+The stack trace was:
+java.io.IOException: Command failed (host:transport:emulator-5562): device offline
+	at dadb.adbserver.AdbServer.send$dadb(AdbServer.kt:103)
+	at dadb.adbserver.AdbServerDadb.open(AdbServer.kt:148)
+	at dadb.adbserver.AdbServerDadb.<init>(AdbServer.kt:134)
+	at dadb.adbserver.AdbServer.createDadb(AdbServer.kt:56)
+	at dadb.adbserver.AdbServer.createDadb$default(AdbServer.kt:46)
+	at dadb.adbserver.AdbServer.listDadbs(AdbServer.kt:85)
+	at dadb.adbserver.AdbServer.listDadbs$default(AdbServer.kt:64)
+	at dadb.Dadb$Companion.list(Dadb.kt:256)
+	at dadb.Dadb$Companion.list$default(Dadb.kt:255)
+	at maestro.android.AndroidDeviceConnection$Companion.byId(AndroidDeviceConnection.kt:419)
+	at maestro.android.AndroidDeviceConnection$Companion.byId$default(AndroidDeviceConnection.kt:414)
+	at maestro.cli.session.MaestroSessionManager.createAndroid(MaestroSessionManager.kt:339)
+	at maestro.cli.session.MaestroSessionManager.createMaestro(MaestroSessionManager.kt:211)
+	at maestro.cli.session.MaestroSessionManager.newSession(MaestroSessionManager.kt:106)
+	at maestro.cli.session.MaestroSessionManager.newSession$default(MaestroSessionManager.kt:64)
+	at maestro.cli.command.PrintHierarchyCommand.run(PrintHierarchyCommand.kt:130)
+	at picocli.CommandLine.executeUserObject(CommandLine.java:1939)
+	at picocli.CommandLine.access$1300(CommandLine.java:145)
+	at picocli.CommandLine$RunLast.executeUserObjectOfLastSubcommandWithSameParent(CommandLine.java:2358)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2352)
+	at picocli.CommandLine$RunLast.handle(CommandLine.java:2314)
+	at picocli.CommandLine$AbstractParseResultHandler.execute(CommandLine.java:2179)
+	at picocli.CommandLine$RunLast.execute(CommandLine.java:2316)
+	at maestro.cli.DisableAnsiMixin$Companion.executionStrategy(DisableAnsiMixin.kt:25)
+	at picocli.CommandLine.execute(CommandLine.java:2078)
+	at maestro.cli.AppKt.main(App.kt:184)
+

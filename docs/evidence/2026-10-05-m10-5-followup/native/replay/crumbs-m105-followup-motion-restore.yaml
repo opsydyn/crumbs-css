@@ -1,0 +1,33 @@
+appId: com.apple.Preferences
+---
+- launchApp
+- scrollUntilVisible:
+    element: Accessibility
+    direction: DOWN
+    timeout: 15000
+- tapOn: Accessibility
+- tapOn: Motion
+- tapOn:
+    point: "84%,18%"
+- takeScreenshot: ios-motion-switch-restored
+- openLink: exp://127.0.0.1:8090
+- tapOn:
+    text: Open
+    optional: true
+- scrollUntilVisible:
+    element: "Native preference: full"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "Native preference: full"
+- tapOn: Run motion preview
+- takeScreenshot: ios-motion-full
+- scrollUntilVisible:
+    element: ".*Preview RTL layout.*"
+    direction: UP
+    timeout: 15000
+- tapOn: ".*Preview RTL layout.*"
+- assertVisible: "Native condition direction: RTL"
+- takeScreenshot: ios-rtl
+- tapOn: ".*Preview LTR layout.*"
+- assertVisible: "Native condition direction: LTR"
+- takeScreenshot: ios-ltr-restored

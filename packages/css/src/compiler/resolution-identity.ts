@@ -61,10 +61,13 @@ export function captureResolutionIdentity(
   const aliasConfigs: { directory: string; baseUrl?: string; paths: Record<string, unknown> }[] = []
   const admit = (file: string) => {
     const absolute = path.resolve(file)
+    const existing = files.get(absolute)
+    if (existing !== undefined) return existing
     if (files.size >= fileLimit && !files.has(absolute)) { cacheable = false; return undefined }
     const receipt = fileReceipt(absolute); files.set(absolute, receipt); return receipt
   }
   const linkReceipt = (logical: string) => {
+    if (links.has(logical)) return
     if (links.size >= linkLimit && !links.has(logical)) { cacheable = false; return }
     links.set(logical, canonical(logical))
   }

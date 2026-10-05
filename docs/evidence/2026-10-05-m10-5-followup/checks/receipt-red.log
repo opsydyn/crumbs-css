@@ -1,0 +1,37 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/resolution-identity.test.ts:
+(pass) M10.5 compiler resolution identity > detects inherited JSONC config edits with unchanged entry and token bytes [3.51ms]
+(pass) M10.5 compiler resolution identity > detects newly created nearest config and missing extends appearing [1.94ms]
+(pass) M10.5 compiler resolution identity > detects package exports edits and canonical link retargets even with equal file content [3.57ms]
+(pass) M10.5 compiler resolution identity > tracks package based extends and installation files [2.49ms]
+(pass) M10.5 compiler resolution identity > fails closed for cyclic or malformed config instead of accepting cached styles [2.17ms]
+(pass) M10.5 compiler resolution identity > cache-store and graph keys include resolution identity while legacy metadata remains valid [2.74ms]
+(pass) M10.5 malformed resolution cache metadata is a miss, never a cache crash [0.12ms]
+(pass) M10.5 JSONC extends arrays preserve quoted comment/comma text and commented trailing commas [1.40ms]
+(pass) M10.5 emitted identity distinguishes unchanged styles from entry/config resolution edits [0.98ms]
+(pass) M10.5 cached package scope requires restart only when name or nearest named manifest changes [1.04ms]
+(pass) M10.5 imported workspace config and package config links participate in invalidation [3.45ms]
+(pass) M10.5 entry bytes are checked when a restored source hits a prior Metro transform key [1.26ms]
+(pass) M10.5 relative imports retain their logical symlink identity [1.98ms]
+(pass) M10.5 paths aliases observe retargeted logical symlinks with unchanged config [2.18ms]
+(pass) M10.5 package config edits after link retarget use the current target without Node resolution cache [2.48ms]
+108 | 
+109 | test("M10.5 resolution captures sample each receipt once per pass and resample on the next pass",()=>fixture((root,cwd,entry)=>{
+110 |  const read=spyOn(fs,"readFileSync"), real=spyOn(fs,"realpathSync");
+111 |  try {
+112 |   const first=captureResolutionIdentity(inputs(),{cwd,absoluteEntryPath:entry,verification:true});
+113 |   expect(read.mock.calls.filter(call=>String(call[0])===entry)).toHaveLength(1);
+                                                                      ^
+error: expect(received).toHaveLength(expected)
+
+Expected length: 1
+Received length: 2
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/resolution-identity.test.ts:113:65)
+(fail) M10.5 resolution captures sample each receipt once per pass and resample on the next pass [1.47ms]
+
+ 15 pass
+ 1 fail
+ 32 expect() calls
+Ran 16 tests across 1 file. [530.00ms]

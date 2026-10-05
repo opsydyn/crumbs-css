@@ -1,0 +1,37 @@
+{
+  "sourceDigest": "44d199d915f965cfcab53377cfeaa4a8688c8fe8df700ff74ac4d35aeb889c25",
+  "scope": "Current native reference and finite accessibility contexts only. Simulator/emulator results are not physical-device or spoken reader acceptance.",
+  "ios": {
+    "reference": "light/dark and primary action passed",
+    "motion": "system Reduce Motion off/on/off and full/reduced labels plus preview action passed",
+    "fontScale": "1.00 -> 1.35 -> 1.00 passed",
+    "contrast": "normal -> more -> normal passed",
+    "direction": "LTR -> RTL -> LTR preview passed",
+    "preferencesRestored": true,
+    "temporaryDeviceDeleted": true
+  },
+  "android": {
+    "reference": "light/dark and primary action passed",
+    "motion": "transition_animation_scale 1.0 -> 0 -> 1.0; full/reduced labels and preview action passed",
+    "fontScale": "1.00 -> 1.30 -> 1.00 passed",
+    "contrast": "high_text_contrast_enabled null -> 1 -> null; normal/more/normal passed",
+    "direction": "LTR -> RTL -> LTR preview passed",
+    "preferencesRestored": true,
+    "ownedEmulatorStopped": true
+  },
+  "hmr": "passed; source restored",
+  "unchangedFrames": "both byte-identical",
+  "unperformed": [
+    "Spoken VoiceOver/TalkBack acceptance",
+    "Exhaustive variant screenshot coverage",
+    "Physical-device performance and acceptance"
+  ],
+  "harnessFindings": [
+    "Maestro discovery enumerates unrelated offline emulator-5562; direct --host 127.0.0.1 --port 5555 succeeds without changing that transport.",
+    "Expo manifest emits localhost:8090; owned Android adb reverse fixes routing, removed during cleanup.",
+    "Full Storybook controls warn: Property queueMicrotask does not exist. Reference content and finite context checks remain accessible; full Storybook UI is not qualified.",
+    "Initial label tap did not toggle iOS motion; observed switch target was used and on/off verified.",
+    "Initial Android action tap was below viewport; centred visible action and callback state were verified in corrected flow."
+  ],
+  "sharedSimulator": "Original shared iPhone left running; reference frames were checked there before moving to isolated device. Expo Tools button disabled there during first replay; not changed again after external screen activity."
+}

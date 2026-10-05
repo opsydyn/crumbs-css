@@ -1,0 +1,18 @@
+appId: host.exp.Exponent
+---
+- scrollUntilVisible:
+    element: "Native preference: reduced"
+    direction: DOWN
+    timeout: 30000
+- assertVisible: "Native preference: reduced"
+- takeScreenshot: ios-motion-reduced
+- scrollUntilVisible:
+    element: ".*Preview RTL layout.*"
+    direction: UP
+    timeout: 30000
+- assertVisible: "Native condition direction: LTR"
+- tapOn: ".*Preview RTL layout.*"
+- assertVisible: "Native condition direction: RTL"
+- takeScreenshot: ios-rtl
+- tapOn: ".*Preview LTR layout.*"
+- assertVisible: "Native condition direction: LTR"

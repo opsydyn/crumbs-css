@@ -46,6 +46,8 @@ export default defineConfig([
     clean: false,
     dts: false,
     entry: toolEntries,
+    // Keep runtime feature groups unchanged; reduce the token/tooling graph only.
+    minify: true,
     deps: compilerDependencies,
   },
   // Explanations depend on Effect Schema; keep that cost behind its own opt-in subpath.

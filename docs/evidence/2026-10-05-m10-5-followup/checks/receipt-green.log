@@ -1,0 +1,30 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/stable-resolution-compile.test.ts:
+(pass) M10.5 discovery verifies newly observed inputs once and warm requests compile once [3.67ms]
+(pass) M10.5 changing configuration during every compile rejects output within a bounded retry [2.33ms]
+(pass) M10.5 Metro refuses entry-buffer/disk conflicts before upstream transformation [137.63ms]
+(pass) M10.5 large graphs verify every input without retaining a truncated plan [101.45ms]
+
+packages/css/test/resolution-identity.test.ts:
+(pass) M10.5 compiler resolution identity > detects inherited JSONC config edits with unchanged entry and token bytes [2.51ms]
+(pass) M10.5 compiler resolution identity > detects newly created nearest config and missing extends appearing [1.58ms]
+(pass) M10.5 compiler resolution identity > detects package exports edits and canonical link retargets even with equal file content [2.77ms]
+(pass) M10.5 compiler resolution identity > tracks package based extends and installation files [1.98ms]
+(pass) M10.5 compiler resolution identity > fails closed for cyclic or malformed config instead of accepting cached styles [1.46ms]
+(pass) M10.5 compiler resolution identity > cache-store and graph keys include resolution identity while legacy metadata remains valid [1.97ms]
+(pass) M10.5 malformed resolution cache metadata is a miss, never a cache crash [0.07ms]
+(pass) M10.5 JSONC extends arrays preserve quoted comment/comma text and commented trailing commas [1.08ms]
+(pass) M10.5 emitted identity distinguishes unchanged styles from entry/config resolution edits [0.08ms]
+(pass) M10.5 cached package scope requires restart only when name or nearest named manifest changes [0.76ms]
+(pass) M10.5 imported workspace config and package config links participate in invalidation [2.59ms]
+(pass) M10.5 entry bytes are checked when a restored source hits a prior Metro transform key [1.01ms]
+(pass) M10.5 relative imports retain their logical symlink identity [1.74ms]
+(pass) M10.5 paths aliases observe retargeted logical symlinks with unchanged config [2.12ms]
+(pass) M10.5 package config edits after link retarget use the current target without Node resolution cache [2.25ms]
+(pass) M10.5 resolution captures sample each receipt once per pass and resample on the next pass [1.38ms]
+
+ 20 pass
+ 0 fail
+ 42 expect() calls
+Ran 20 tests across 2 files. [487.00ms]
