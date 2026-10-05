@@ -1,0 +1,30 @@
+import { readFileSync, writeFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { createCompileSession, type CompileReceipt } from "../bench/context-reuse/compile-session";
+import { createQualificationReceiptPlugin, type CompileRequest, type ClosedResolutionDomain } from "../bench/context-reuse/identity";
+const configPath = process.env.CRUMBS_CONTEXT_QUALIFICATION_CONFIG;
+const config = configPath ? JSON.parse(readFileSync(configPath, "utf8")) : { mode: "fresh", settings: { capacity: 4, admission: "immediate" }, idleMs: 1000, domain: { configurationFiles: [], installationFiles: [], loadedArtifacts: [], symlinkPaths: [], allowedInputRoots: [] } };
+const session = createCompileSession(config);
+let overrides: Readonly<Record<string, unknown>> | undefined;
+let staleOnce = false;
+let priorInputs: Readonly<Record<string, unknown>> | undefined;
+const receipts: { filePath: string; receipt: CompileReceipt; evaluatedReceipt: CompileReceipt }[] = [];
+export function qualificationRequest(filePath: string, cwd: string, entryBytes?: Uint8Array): CompileRequest {
+  const esbuildOptions = overrides ?? {}; overrides = undefined;
+  return { filePath: resolve(cwd, filePath), cwd, identOption: process.env.NODE_ENV === "production" ? "short" : "debug", esbuildOptions, domain: config.domain as ClosedResolutionDomain, ...(entryBytes === undefined ? {} : { entryBytes }) };
+}
+export function qualificationRunNative<T>(request: CompileRequest, evaluate: (receipt: CompileReceipt) => Promise<T>): Promise<T> {
+  return session.runNative(request, async receipt => {
+    const evaluatedReceipt = staleOnce && priorInputs ? Object.freeze({ ...receipt, inputs: priorInputs }) : receipt;
+    staleOnce = false; priorInputs = receipt.inputs;
+    receipts.push(Object.freeze({ filePath: request.filePath, receipt, evaluatedReceipt }));
+    if (receipts.length > 64) receipts.shift();
+    return evaluate(evaluatedReceipt);
+  });
+}
+export const __crumbsQualificationSnapshot = () => session.snapshot();
+export const __crumbsQualificationClose = () => session.close();
+export const __crumbsQualificationDrainReceipts = () => Object.freeze(receipts.splice(0));
+export const __crumbsQualificationStaleInputsOnce = () => { staleOnce = true; };
+export const __crumbsQualificationOptionsOnce = (options: Readonly<Record<string, unknown>>) => { overrides = options; };
+export const __crumbsQualificationUnstableOnce = (path: string, bytes: string) => { overrides = { plugins: [createQualificationReceiptPlugin(() => writeFileSync(path, bytes))] }; };

@@ -1,0 +1,110 @@
+{
+  "roadmap": "M10.5",
+  "task": 4,
+  "base": "4b5c101",
+  "scope": "Private complete-transform receipt candidate; controlled upstream only",
+  "gates": [
+    {
+      "command": "CRUMBS_AUDIT_NODE_FLOOR=<exact Node 22.0.0> bun test packages/css/test/context-reuse-transformer.test.ts",
+      "result": "passed",
+      "tests": 9,
+      "failures": 0,
+      "floorSkipped": false
+    },
+    {
+      "command": "CRUMBS_AUDIT_NODE_FLOOR=<exact Node 22.0.0> bun run --cwd packages/css test",
+      "result": "passed",
+      "tests": 1429,
+      "files": 218,
+      "failures": 0
+    },
+    {
+      "command": "bun run --cwd packages/css typecheck",
+      "result": "passed"
+    },
+    {
+      "command": "bun run docs:build",
+      "result": "passed",
+      "pages": 28
+    },
+    {
+      "command": "node docs/evidence/2026-10-05-m10-5-full-transform-candidate/verify.cjs --live",
+      "result": "passed",
+      "rawReports": 16,
+      "exactResultComparisons": 88,
+      "shippingSemanticComparisons": 16,
+      "staleControlRejected": true,
+      "expectedOutcomes": true,
+      "liveHashesChecked": true
+    },
+    {
+      "command": "node docs/evidence/2026-10-05-m10-5-full-transform-ab/verify.cjs",
+      "result": "passed",
+      "inventoryFiles": 161,
+      "comparisons": 567
+    }
+  ],
+  "review": {
+    "freshReviewers": 1,
+    "findings": [
+      {
+        "priority": "P2",
+        "finding": "Concurrent completion-order storage made shipping semantic comparison flaky",
+        "regression": "Observed focused-suite failure compared different submitted entries",
+        "resolution": "Allocate stable invocation IDs before awaiting; retain submission-order slots and compare matching IDs"
+      },
+      {
+        "priority": "P2",
+        "finding": "Parity could admit unexpected failures",
+        "regression": "Mutated repaired-operation report was admitted; rejection assertion failed",
+        "resolution": "Require all intended successes, exactly identified diagnostics and explicit changed/repaired golden values in tests and evidence verifier"
+      }
+    ],
+    "finalFocusedResult": "9 passed; zero failures; exact floor enabled",
+    "additionalReview": "not requested"
+  },
+  "failedAttempts": [
+    {
+      "scope": "Private Node candidate",
+      "result": "CJS import.meta.url shim collided with local require binding",
+      "resolution": "Rename private backend loader; shipping code untouched"
+    },
+    {
+      "scope": "Fixture",
+      "result": "Missing authored-module dependency resolution",
+      "resolution": "Link fixture dependencies to existing package installation"
+    },
+    {
+      "scope": "Typecheck",
+      "result": "One invocation reported unresolved Metro types",
+      "resolution": "Immediate and final reruns passed without code/dependency changes; cause unestablished"
+    },
+    {
+      "scope": "Reproducible collector",
+      "result": "Shipping artifact path initially resolved from cwd instead of collector directory",
+      "resolution": "Use import.meta.dir; rerun all 16 reports successfully"
+    }
+  ],
+  "preservation": {
+    "shippingSourceArtifactsFixturesPackageBuildPolicy": "hash verified unchanged",
+    "copiedExistingAuthoringArtifacts": "hash verified unchanged",
+    "copiedSourceDifferences": [
+      "src/qualification-adapter.ts",
+      "src/transformer.ts"
+    ],
+    "unrelatedUntracked": [
+      "apps/storybook/ios/",
+      "node_modules",
+      "packages/css/node_modules"
+    ]
+  },
+  "notQualified": [
+    "Actual incremental Expo/Metro",
+    "Performance or memory budgets",
+    "Production admission or defaults",
+    "Worker-exit awaited disposal",
+    "Device performance"
+  ],
+  "next": "M10.5 Task 5 \u2014 incremental Metro qualification",
+  "android": "last"
+}

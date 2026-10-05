@@ -200,8 +200,8 @@ export function createCompileSession({ settings, idleMs, mode, backend = createR
 type BuildResult = { outputFiles?: { text: string }[]; metafile?: { inputs: Record<string, unknown> } };
 type EsbuildContext = { rebuild(): Promise<BuildResult>; dispose(): Promise<void> };
 function createRealBackend(): CompileBackend {
-  const require = createRequire(import.meta.url); const manifest = require.resolve("@vanilla-extract/integration/package.json");
-  const integration = require("@vanilla-extract/integration") as {
+  const integrationLoader = createRequire(import.meta.url); const manifest = integrationLoader.resolve("@vanilla-extract/integration/package.json");
+  const integration = integrationLoader("@vanilla-extract/integration") as {
     compile(request: Record<string, unknown>): Promise<{ source: string; watchFiles: string[] }>;
     vanillaExtractTransformPlugin(options: { identOption: string }): unknown;
   };
