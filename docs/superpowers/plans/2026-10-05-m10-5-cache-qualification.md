@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Bun tests, installed `fast-check`, Node v22.0.0 and the current Node executable, esbuild 0.27.7, Vanilla Extract integration 8.0.10, Expo/Metro. Existing Effect 4.0.0-rc.115 remains unchanged.
 
-**Spec:** [Approved cache admission/lifecycle design](../specs/2026-10-05-m10-5-cache-admission-lifecycle-design.md), reviewed by the user on 2026-10-05. The user approved this plan on 2026-10-05. Task 1 is implemented and verified; Tasks 2–5 remain pending approval and execution.
+**Spec:** [Approved cache admission/lifecycle design](../specs/2026-10-05-m10-5-cache-admission-lifecycle-design.md), reviewed by the user on 2026-10-05. The user approved this plan on 2026-10-05. Tasks 1–2 are implemented and verified; Tasks 3–5 remain pending approval and execution.
 
 ## Global Constraints
 
@@ -73,11 +73,11 @@ expect(planAdmission(createAdmissionState({ capacity: 4, admission: "repeat" }),
 
 Export `captureConfiguration(request): ConfigurationReceipt`, `assessReuse(request: CompileRequest, loadedReceipt: ConfigurationReceipt, previousReceipt?: ConfigurationReceipt): ReuseEligibility` and `createContextKey(request: CompileRequest, receipt: ConfigurationReceipt): string`. `ReuseEligibility` is `{ kind: "eligible"; key: string; receipt: ConfigurationReceipt } | { kind: "fresh"; reason: ReuseReason } | { kind: "restart-required"; reason: ReuseReason }`. `ReuseReason` is a closed union defined in this module: `unknown-build-option`, `unknown-plugin`, `incomplete-resolution-domain`, `configuration-changed`, `entry-buffer-mismatch`, `source-unstable`, `loaded-artifact-changed`, `package-info-changed`. Snapshot these strings in tests.
 
-- [ ] Write tests: entry/theme byte edits preserve context keys; logical roots and symlink targets remain distinct; aliases/extends, manifests, lockfile and explicit settings change eligibility; byte edits with preserved mtimes invalidate; missing files, unknown options/plugins and unlisted input roots select fresh. Only package-info/loaded-artifact changes return `restart-required`.
-- [ ] Run `cd packages/css && bun test test/context-reuse-identity.test.ts`; expected RED, then implement byte-hash/canonical-order receipts without an mtime-only shortcut. Whitelist the measured compile option domain and known file-scope/receipt plugins; unknown executable plugin configuration stays fresh.
-- [ ] Keep initial receipt completeness restricted to explicit disposable fixture domains. Include root/nested tsconfig plus their complete extends closure, relevant project/dependency package manifests, package name used by file-scope setup, install/lock identity and symlink targets. Verify discovered build inputs against declared roots and configuration inventory; unprovable resolver coverage cannot become eligible merely because compilation succeeded.
-- [ ] Test installed Vanilla Extract's package-info cache in a disposable process: changing package name at the same cwd requires a new process/module lifetime. Record the old fresh compiler's limitation; do not claim a context reset fixes it. Mutable ordinary config inputs must either recreate correctly or remain explicitly unqualified/fresh.
-- [ ] Run focused tests and the package suite; expected GREEN. Commit as `test(perf): define M10.5 compile identity receipts`; recommend **M10.5 Task 3 — resource session**.
+- [x] Write tests: entry/theme byte edits preserve context keys; logical roots and symlink targets remain distinct; aliases/extends, manifests, lockfile and explicit settings change eligibility; byte edits with preserved mtimes invalidate; missing files, unknown options/plugins and unlisted input roots select fresh. Only package-info/loaded-artifact changes return `restart-required`.
+- [x] Run `cd packages/css && bun test test/context-reuse-identity.test.ts`; expected RED, then implement byte-hash/canonical-order receipts without an mtime-only shortcut. Whitelist the measured compile option domain and known file-scope/receipt plugins; unknown executable plugin configuration stays fresh.
+- [x] Keep initial receipt completeness restricted to explicit disposable fixture domains. Include root/nested tsconfig plus their complete extends closure, relevant project/dependency package manifests, package name used by file-scope setup, install/lock identity and symlink targets. Verify discovered build inputs against declared roots and configuration inventory; unprovable resolver coverage cannot become eligible merely because compilation succeeded.
+- [x] Test installed Vanilla Extract's package-info cache in a disposable process: changing package name at the same cwd requires a new process/module lifetime. Record the old fresh compiler's limitation; do not claim a context reset fixes it. Mutable ordinary config inputs must either recreate correctly or remain explicitly unqualified/fresh.
+- [x] Run focused tests and the package suite; expected GREEN. Commit as `test(perf): define M10.5 compile identity receipts`; recommend **M10.5 Task 3 — resource session**.
 
 ## Task 3 — M10.5 resource-owning compile session
 
