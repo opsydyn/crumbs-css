@@ -1,0 +1,164 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "slice": "bounded context-cache cardinality, retained-memory, eviction, and disposal A/B",
+  "recordedAt": "2026-10-05",
+  "sourceRevision": "e64b846d0cf2252a5ecbb23be82d05307527dbb8",
+  "productionChange": false,
+  "thresholdsOrBaselinesChanged": false,
+  "packageBuild": {
+    "command": "bun run build",
+    "status": "passed",
+    "target": "node22",
+    "bunVersion": "1.4.2",
+    "tsdownVersion": "0.21.10",
+    "rolldownVersion": "1.0.0-rc.17",
+    "worktreePackageDistRebuilt": true
+  },
+  "environment": {
+    "runtime": "v24.15.0",
+    "os": "macOS 26.6.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "esbuildVersion": "0.27.7",
+    "vanillaExtractIntegrationVersion": "8.0.10",
+    "dependencyResolution": "The worktree node_modules symlink resolves through the existing shared install; the fixture links the Crumbs package directly to the worktree package root."
+  },
+  "protocol": {
+    "method": "scratch-only bounded LRU over esbuild contexts; all cache hits call rebuild(), misses create a context, and eviction/close await dispose()",
+    "stylesheetEntryCounts": [
+      1,
+      8,
+      32
+    ],
+    "cacheCapacities": [
+      1,
+      4,
+      8,
+      16,
+      32
+    ],
+    "freshProcessesPerMatrixCell": 3,
+    "processCount": 27,
+    "hotWorkingSet": "up to four most-recently scanned cloned entries",
+    "hotAccessPattern": "0, 1, 0, 2, 0, 1, 3 repeated eight times",
+    "fixture": "Cloned Crumbs recipe entries share one theme dependency; entry edits alternate borderRadius 8 and 128.",
+    "memorySampling": "Node process.memoryUsage() and read-only ps RSS snapshots for esbuild service children at baseline, post-cold-scan, post-hot-workload, post-context-disposal, and post-service-stop.",
+    "outputParity": "Every distinct entry/value result is compared after disposing cached contexts with a fresh @vanilla-extract/integration compile by exact generated JavaScript SHA-256 and normalized input list.",
+    "rawReceiptCompaction": "Per-process output hashes and a hash of the exact combined receipts are retained; normalized input lists are stored once per entry-count and entry and are cross-checked exactly across processes. Output hashes are intentionally not compared across workers because Vanilla Extract includes each unique temporary fixture path.",
+    "crossProcessNormalizedInputs": "passed"
+  },
+  "lruControl": {
+    "status": "passed",
+    "capacity": 2,
+    "accessSequence": [
+      "A",
+      "B",
+      "A",
+      "C",
+      "B"
+    ],
+    "expectedHits": 1,
+    "expectedEvictions": [
+      "B",
+      "A"
+    ],
+    "idempotentClose": true,
+    "rejectsAcquireAfterClose": true
+  },
+  "results": {
+    "freshOutputAndInputParity": "passed",
+    "freshComparisonCount": 654,
+    "sharedNormalizedInputReceiptCount": 41,
+    "processSpecificOutputHashesRetained": 654,
+    "contextsCreated": 891,
+    "contextsDisposed": 891,
+    "cachesClosedWithZeroRetainedContexts": true,
+    "hotWorkloadHitRateByEntryCountAndCapacity": [
+      {
+        "entries": 1,
+        "capacity": 1,
+        "hitRate": 1
+      },
+      {
+        "entries": 8,
+        "capacity": 1,
+        "hitRate": 0
+      },
+      {
+        "entries": 8,
+        "capacity": 4,
+        "hitRate": 1
+      },
+      {
+        "entries": 8,
+        "capacity": 8,
+        "hitRate": 1
+      },
+      {
+        "entries": 32,
+        "capacity": 1,
+        "hitRate": 0
+      },
+      {
+        "entries": 32,
+        "capacity": 4,
+        "hitRate": 1
+      },
+      {
+        "entries": 32,
+        "capacity": 8,
+        "hitRate": 1
+      },
+      {
+        "entries": 32,
+        "capacity": 16,
+        "hitRate": 1
+      },
+      {
+        "entries": 32,
+        "capacity": 32,
+        "hitRate": 1
+      }
+    ],
+    "capacityOneEvictionsPerProcess": {
+      "entries8": 63,
+      "entries32": 87
+    },
+    "sampledEsbuildServicePeakRssMiBRange": [
+      31.8,
+      136.3
+    ],
+    "sampledServiceRssAfterDisposeRemainedNearHighWater": true,
+    "serviceProcessesStoppedAfterExplicitEsbuildStop": 27,
+    "serviceRssAfterStopMiB": 0
+  },
+  "limits": [
+    "The stylesheet-count and hot-entry workload is synthetic; it is not a captured Metro transform trace from a representative Expo application.",
+    "RSS snapshots do not isolate live per-context bytes and may reflect allocator high-water behavior.",
+    "The scratch LRU does not qualify the complete Crumbs native transformer, Metro worker shutdown, Node 22 host budget, Hermes, device rendering, Android, or release readiness.",
+    "No production cache, public API, approved performance threshold, or baseline changed."
+  ],
+  "artifacts": {
+    "benchmark": "context-cache-bench.cjs",
+    "rawResults": "raw-context-cache.json",
+    "assessment": "docs/assessments/2026-10-05-m10-5-context-cache-cardinality-lifecycle.md",
+    "sourceAndBuildHashes": {
+      "packages/css/package.json": "af913c9c085e778b19a3cc52b5458fed9710bd1290143c0b3aeae1548c78e569",
+      "packages/css/examples/recipe.css.ts": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9",
+      "packages/css/examples/theme.ts": "02738291040b0ed5c17a7c7345c7518671f84345416e6b905024281f981e2c18",
+      "packages/css/dist/style.mjs": "688f5c09a4eaf2266df3f5d29df27560d11514395e81e8108985ff898e2e9107",
+      "packages/css/dist/theme.mjs": "e8d7b0183caa772a8457f488d231d930d7a8f7922acd996d3b2a96f5bed483ca",
+      "packages/css/dist/transformer.mjs": "a8ca1308b09fefb983f6f9e571236d55e46a4ba9ec7b4c3d7b369d5b1e34ba9c",
+      "context-cache-bench.cjs": "a78bfcc1d0df3f13ee5d41cef54274d6a57e1fa0b7323671462885f1956844a2",
+      "raw-context-cache.json": "7fb12ce89e3b4ea84d28991581d2e9ab12b48b759cfcd3f0b7980af730be05f9"
+    }
+  },
+  "result": {
+    "status": "bounded-context-feasibility-measured; production-adoption-not-approved-by-evidence",
+    "decision": "Do not add a production context cache from this synthetic trace. Capacity 4 is a candidate for the next full-transform and Metro lifecycle A/B only.",
+    "nextRecommendedSlice": "M10.5 full-transform cache integration and Metro worker-lifecycle A/B using a captured Expo Storybook transform trace",
+    "android": "remains last"
+  },
+  "reference": "https://esbuild.github.io/api/"
+}
