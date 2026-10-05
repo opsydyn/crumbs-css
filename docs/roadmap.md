@@ -2642,3 +2642,12 @@ The approved private attribution slice measures fresh/immediate/repeat at capaci
 No guard, shipping compiler/API/dependency/default or approved threshold is changed. Task 5's production-admission failures and all host/device gates remain open. Android remains last.
 
 Next recommended roadmap slice: **M10.5 — A/B deduplicated guard receipts per transform**, retaining coherent before/after validation, loaded-artifact/package restart rules, unknown-domain fallback and source/buffer conflict controls; compare complete fresh results before any admission review.
+
+
+### 2026-10-05 — M10.5: per-pass guard receipts A/B
+
+The repaired private candidate completes a new fixed 90-process / 6,690-transform matrix with exact source/input/native-metadata/result parity and bounded owned cleanup. Sharing byte receipts reduces logical artifact bytes but increases retained warm transform time by roughly 14–25% in paired process medians; fresh controls remain near parity. The candidate is rejected as a performance improvement. Sampling, canonicalisation and defensive buffer handling add work; their individual costs are not isolated. A review-found unstable-read fallback was reproduced with real before/after sampling edits and repaired before repeating the measurement. Fourteen supplementary controls preserve fresh parity except the documented package-name worker-restart boundary. [Assessment/evidence](assessments/2026-10-05-m10-5-guard-receipts-ab.md).
+
+No production cache/API/dependency/default, performance threshold or admission gate changes. Existing graph/configuration, HMR, receipt and multi-worker shutdown blockers remain open. Android remains last.
+
+Next recommended roadmap slice: **M10.5 — A/B immutable path-digest receipts**, avoiding buffer exposure/copies for digest-only consumers while preserving independent sampling, restart, instability and buffer-conflict checks; compare complete transforms before admission.
