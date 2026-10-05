@@ -1,6 +1,6 @@
 # M10.5 compiler context admission and lifecycle design
 
-- Status: Proposed written spec; design-slice scope approved, detailed contracts awaiting review
+- Status: Written spec approved by the user on 2026-10-05; implementation and production admission remain separate
 - Date: 2026-10-05
 - Roadmap: M10.5 in [roadmap](../../roadmap.md)
 - Source inspected: `4383250`
@@ -11,7 +11,7 @@
 
 Improve repeated native stylesheet compilation for large React Native design systems while preserving emitted code, diagnostics, dependency metadata, public APIs and runtime isolation. Reuse esbuild's compilation work; run native evaluation and emission for every request. A context hit is never a cached native-result hit.
 
-This spec describes an opt-in qualification candidate, not a shipped feature, approved cache default or permission to change production code. The next slice writes its implementation plan after review. Production admission follows independent incremental Metro and performance qualification. Existing approved budgets and Android-last sequencing remain unchanged.
+This spec describes an opt-in qualification candidate, not a shipped feature, approved cache default or permission to change production code. The [qualification implementation plan](../plans/2026-10-05-m10-5-cache-qualification.md) records the next bounded work and awaits its own review. Production admission follows independent incremental Metro and performance qualification. Existing approved budgets and Android-last sequencing remain unchanged.
 
 ## Evidence and alternatives
 
@@ -102,3 +102,7 @@ After written-spec review, write the **M10.5 cache qualification implementation 
 Affected paths are `packages/css/src/compiler/` for a prospective compile-session/policy adapter; `src/transformer.ts` for current receipts and the CSS-operation gate; `src/compiler/dependency-analysis.ts` and `src/transform-cache.ts` for existing final-result identity/invalidation; `src/metro-plugin.ts` for the existing transformer boundary; and `packages/css/test/`, `packages/css/bench/metro-incremental.ts`, `scripts/`, and `docs/evidence/` for qualification. Any later direct esbuild import also affects `packages/css/package.json`, `build-policy.ts` and `bun.lock`. No ordinary authoring, theme/core, recipe or Sprinkles API changes are proposed.
 
 Stop at fresh compilation if unsupported configuration, lifecycle mode or insufficient benefit prevents safe admission. The spec does not convert a prototype into a shipping cache, promise lower service memory, or accept the existing proposed ADR as a whole.
+
+## Implementation clarification — 2026-10-05
+
+The initial plan keeps policy/session code under private benchmark tooling and integrates receipts only in an owned disposable transformer copy. Shipping compiler paths listed above are prospective production-adoption paths, not edits authorised by this qualification plan. Installed Vanilla Extract integration 8.0.10 also caches package information by cwd: package-name changes require a new module/worker lifetime, even on its fresh compile path. Qualification must record that restart boundary explicitly rather than claim context recreation refreshes package information. The parent ADR remains proposed.
