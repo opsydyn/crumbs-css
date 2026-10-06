@@ -2701,3 +2701,10 @@ The approved design slice records a [proposed ADR](decisions/separate-mandatory-
 The design requires a private candidate, independent characterization, graph inspection and paired import/first-use evidence before admission. It makes no claim that separation alone clears the four theme graph limits or three failing startup cells. Warm-transform and Metro comparability gates remain open. The existing 12/8/1 host result remains the source-current measured status; physical acceptance stays deferred.
 
 Next recommended numbered slice: **M10.5 — static runtime-boundary candidate implementation plan**, after written-design review. Plan characterization, extraction, paired measurement and one admission/rejection decision as a consolidated item. Production implementation and new qualification remain subsequent work.
+
+
+### 2026-10-06 — M10.5 runtime-boundary candidate implementation plan
+
+The consolidated [implementation plan](superpowers/plans/2026-10-06-m10-5-runtime-boundary.md) sequences characterization, static extraction, paired import/first-use measurement, unchanged full host budgets, and current packed/Metro/native qualification as one candidate slice and one admission decision. The execution method is native. The plan retains all existing failures and leaves production admission conditional on measured results; it does not alter APIs, budgets, baselines or the explicit physical-device deferral.
+
+Next recommended slice: **M10.5 — implement and qualify the static runtime-boundary candidate**, following this plan as one consolidated slice with a single commit. If no candidate can meet current contracts and gates, retain a verified rejection and keep M10.5 open for a separate user policy decision.
