@@ -6,6 +6,7 @@ ADRs record consequential architectural choices, their alternatives, and their v
 | --- | --- | --- | --- |
 | [Adopt a native design-system compiler architecture](adopt-native-design-system-compiler.md) | Proposed | 2026-09-06 | [Design-system roadmap](../roadmap.md) |
 | [Separate mandatory theme resolution from optional runtime state](separate-mandatory-theme-resolution-from-optional-runtime-state.md) | Rejected | 2026-10-06 | M10.5 runtime-boundary candidate |
+| [Anchor M10.5 runtime-budget revisions in Expo consumer evidence](anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md) | Proposed | 2026-10-06 | [M10.5 runtime-budget policy](../roadmap.md) |
 
 ## Conventions
 
