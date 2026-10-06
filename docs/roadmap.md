@@ -2751,3 +2751,14 @@ The interval is JavaScript entry to first positive-size root layout, excluding n
 Seven incomplete preceding cohorts remain explicit, including ENOSPC and an iOS URL-confirmation warm-up timeout; diagnostic consent/transport runs were excluded before fresh collection. Disk admission now checks operational capacity. The protected Simulator was not operated, and all physical-device work remains deferred. No production runtime/API/package dependency, approved budget, baseline or ADR acceptance changed. Existing host failures and the Expo baseline mismatch remain unchanged.
 
 **M10.5 remains open.** Next recommended numbered slice: **M10.5 — consumer-evidence review and explicit performance-target policy decision**. Review this software-context matrix before proposing mobile targets or changing existing host ceilings; keep the policy ADR proposed until that separate decision.
+
+
+### 2026-10-06 — M10.5 consumer-evidence and target-policy decision
+
+The [consumer-evidence review](assessments/2026-10-06-m10-5-target-policy.md) and explicit session approval accept the [runtime-budget policy ADR](decisions/anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md). All existing host/package/compiler/editor gates, baseline selectors, maxima, allowed regressions and enforcement remain binding. The complete Expo/Hermes software-context cohort is reference evidence; no numerical mobile target, threshold relaxation or host-gate retirement is approved. The retained rejected-candidate comparison still reports 11 passes, nine failures and one Expo mismatch; it is not a fresh current-checkout qualification.
+
+The review keeps package graph bytes, mapped consumer JavaScript contribution, whole-bundle Hermes deltas and entry-to-root-layout timing distinct. Future target proposals require independently retained repeat cohorts, exact metric/environment/workload identity, a product reason for tolerated regression and explicit per-metric approval. Direct executable Node/npm capture is required before the next study; H's retrospective npm observation is not rewritten into contemporaneous evidence.
+
+Only policy documentation and its review receipt change. Runtime APIs, package dependencies, budget registry and enforcement are unchanged. The broader native-compiler ADR remains proposed. **M10.5 remains open**, and physical-device work stays deferred.
+
+Next recommended numbered slice: **M10.5 — mobile-target calibration and repeatability plan**. Plan version capture, artifact reproducibility, independent timing cohorts, sample/schedule admission and reject/inconclusive criteria together before collecting another study. Keep the nine retained host failures and matched Expo comparison unresolved until their separate qualification or explicit future policy decision.

@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-06
 decision-makers: Alan P Currie
 ---
@@ -33,7 +33,7 @@ How should M10.5 resolve the mismatch between the existing package-host budgets 
 
 Chosen option: "Preserve the existing APIs and checks, then use packed Expo/Hermes evidence to inform a separately reviewed target decision", because it retains the approved contracts and prevents Node package measurements from being presented as React Native user experience.
 
-This ADR is proposed and awaits review. Drafting it does not change an API, approve a new target, or authorize changing an existing threshold.
+Accepted after the 2026-10-06 consumer-evidence review and explicit session approval by Alan P Currie. Retain every existing host gate and admit the packed Expo/Hermes cohort as reference evidence. No numerical mobile target, baseline replacement, host-gate retirement or relaxation is approved. M10.5 remains open; acceptance of this policy does not accept the broader native-compiler ADR.
 
 The startup and theme graph limits implicated by this assessment remain unchanged:
 
@@ -50,13 +50,13 @@ These values remain host/package checks. Expo evidence does not automatically pa
 
 - Good: consumers keep the synchronous APIs and descriptor behavior on which existing code relies.
 - Good: future React Native targets can be based on actual packed application artifacts and Hermes measurements.
-- Bad: the current host-budget failures remain visible and M10.5 stays open while evidence is collected.
+- Bad: the retained host-budget failures remain visible and M10.5 stays open; consumer reference evidence does not resolve them.
 - Bad: an Expo consumer study adds a separate harness and repeatable platform runs.
 - Neutral: simulator and emulator measurements can qualify software-context behavior, but cannot establish physical-device performance acceptance.
 
 ## Implementation Plan
 
-This ADR itself changes documentation only. The subsequent evidence slice should add a repeatable measurement harness and retain its full receipt.
+This policy slice changes documentation only. The original measurement implementation is complete in `56719d3`; its six staged consumers live under the retained archive rather than modifying the playground. The dated review below records completion and remaining calibration work. The original evidence plan follows for provenance.
 
 - **Affected paths for this ADR**: `docs/decisions/anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md`, `docs/decisions/README.md`, and `docs/roadmap.md`.
 - **Affected paths for the later evidence slice**: the packed Expo app under `apps/playground/`; a focused harness at `scripts/measure-expo-consumer-runtime.ts` with tests at `scripts/measure-expo-consumer-runtime.test.ts`; and raw reports under `docs/evidence/<date>-m10-5-expo-hermes/`.
@@ -68,17 +68,19 @@ This ADR itself changes documentation only. The subsequent evidence slice should
 
 ### Verification
 
-- [ ] The ADR, index, and roadmap link to one another and identify the work as M10.5.
-- [ ] The ADR remains marked proposed until explicitly accepted or rejected.
-- [ ] `packages/css/bench/budgets.json`, package exports, declarations, dependencies, and public APIs are unchanged by this documentation slice.
-- [ ] The later packed study installs the exact Crumbs artifact outside workspace resolution and proves the app resolves that artifact on both iOS and Android.
+- [x] The ADR, index, and roadmap link to one another and identify the work as M10.5.
+- [x] Explicit session approval follows the concrete consumer-evidence review; the ADR and index now record acceptance.
+- [x] `packages/css/bench/budgets.json`, package exports, declarations, dependencies, and public APIs are unchanged by this documentation slice.
+- [x] The completed packed study installs the exact Crumbs artifact outside workspace resolution and proves the app resolves that artifact on both iOS and Android.
 - [ ] Each platform report includes production-mode Hermes outputs, source maps, package/artifact/source hashes, exact runtime versions, and a matching plain React Native control.
-- [ ] Each runtime cell retains at least five independent cold-launch samples and reports the median plus minimum and maximum. Define the measured interval as JavaScript entry execution to the first themed root `onLayout`; label it as first-layout time, not native frame or physical-device startup.
-- [ ] The report attributes Metro JavaScript and Hermes bytecode size to `theme/core` and compatibility `theme` separately, and compares each with its plain React Native control.
-- [ ] iOS Simulator and Android Emulator results are labelled software-context evidence. No physical-device acceptance is claimed; that work stays deferred.
-- [ ] The evidence report proposes no automatic threshold change. Any new or replacement target is submitted in a separate explicit review with metric scope, platform, baseline, absolute limit, and allowed regression stated.
+- [x] Each runtime cell retains at least five independent cold-launch samples and reports the median plus minimum and maximum. Define the measured interval as JavaScript entry execution to the first themed root `onLayout`; label it as first-layout time, not native frame or physical-device startup.
+- [x] The report attributes mapped Metro JavaScript bytes to `theme/core` and compatibility `theme` separately and reports platform-specific whole-bundle Hermes deltas against plain React Native. Per-source Hermes cost is not inferred.
+- [x] iOS Simulator and Android Emulator results are labelled software-context evidence. No physical-device acceptance is claimed; that work stays deferred.
+- [x] The evidence report proposes no automatic threshold change. Any new or replacement target is submitted in a separate explicit review with metric scope, platform, baseline, absolute limit, and allowed regression stated.
 
 ## Pros and Cons of the Options
+
+These options record the original proposal. The dated consumer-evidence review in More Information and its accepted policy preserve the subsequent findings; the original absence of consumer measurements is no longer the current state.
 
 ### Keep Node checks as the only runtime performance evidence
 
@@ -121,3 +123,28 @@ This separates host/package gates from consumer runtime evidence and defers targ
 - [Performance budget registry](../../packages/css/bench/budgets.json).
 - [Packed playground instructions](../../apps/playground/README.md).
 - The later Expo/Hermes evidence may support a new or amended target proposal; it does not itself approve one. Physical-device acceptance remains separately deferred.
+
+
+### 2026-10-06 — accepted consumer-evidence and target policy
+
+The [policy review](../assessments/2026-10-06-m10-5-target-policy.md) maps every unresolved retained host metric to its unchanged approved maximum and allowed regression. The rejected candidate's 11 passes, nine failures and one Expo environment mismatch remain historical candidate results, not fresh qualification of the current checkout. The [review receipt](../evidence/2026-10-06-m10-5-target-policy/review.json) pins their provenance and the unchanged registry digest.
+
+The [consumer study](../assessments/2026-10-06-m10-5-expo-hermes-runtime.md) is admitted as software-context reference evidence: six matched release apps and export pairs, 30 retained cold-process samples and six excluded warm-ups. Admission establishes the controlled study's identity and completeness, not a performance pass, a causal speed claim, or physical-device acceptance. Five samples per cell in one cohort do not justify rounding the observed medians or byte counts into approved limits.
+
+The accepted policy is:
+
+1. Keep all existing host/package/compiler/editor metrics, baseline selectors, absolute maxima, allowed regressions and enforcement unchanged. Do not reclassify existing failures or waive environment mismatches.
+2. Preserve synchronous public APIs and descriptor validation. Do not introduce a narrower public entry solely to avoid existing checks.
+3. Keep package emitted graph bytes, mapped consumer JavaScript contribution and whole-bundle Hermes delta separate. Keep JavaScript-entry-to-root-layout time separate from native startup, frame presentation, allocation and retained memory.
+4. Require repeatable, independently retained matched cohorts before proposing numerical mobile targets. A target proposal must specify metric identity, workload, platform/environment, baseline, absolute limit, allowed regression and enforcement. Artifact-byte and timing targets may need different repeatability criteria; no sample-count or regression allowance is approved here.
+5. Keep all physical-device work deferred. Software targets cannot close physical acceptance or the pending physical metrics.
+
+Follow-up **M10.5 — mobile-target calibration and repeatability plan** must cover these items together:
+
+- Extend `scripts/expo-consumer-native.ts` and `scripts/measure-expo-consumer-runtime.ts` to capture executable Node/npm versions and paths directly before another cohort; cover the distinction from Bun's `process.version` in `scripts/measure-expo-consumer-runtime.test.ts`. Do not rewrite historical H fingerprints; npm's historical version remains unproven.
+- Specify independent cohort count, within-cell cold-process repetitions, balanced schedule, failure retention and environment admission before collection. Use the existing packed plain/core/compatibility fixture and owned software-device lifecycle. Do not repeatedly sample until a preferred result appears.
+- Specify artifact reproducibility and timing variability checks, a product reason for tolerated regression, and a reject/inconclusive outcome. Do not pool platforms or turn diagnostic negative Android deltas into a claimed optimization.
+- Retain the plan under `docs/superpowers/plans/`, the resulting assessment under `docs/assessments/`, and raw evidence under `docs/evidence/`. Any later registry/enforcement change in `packages/css/bench/budgets.json` or `scripts/performance-budgets.ts` requires a separately reviewed per-metric proposal. Add no public API or dependency for this calibration work without its own review.
+- Keep host-gap remediation separate: warm full-transform and matched Expo incremental rebuild need their own evidence; mobile calibration cannot resolve them. The roadmap must continue to identify M10.5 as open.
+
+Verification boundary: production-mode Hermes artifacts, source maps, matched controls and recorded environment identities were verified in H. The original exact-runtime-version checkbox above remains unchecked because executable npm version was not captured contemporaneously; retained iOS paths establish Node 24.15.0 and a supplemental post-run receipt records npm separately. Capturing versions directly is a required follow-up, not a retroactive qualification claim.
