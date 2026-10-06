@@ -1,0 +1,86 @@
+{
+  "formatVersion": 1,
+  "roadmapItem": "M10.5",
+  "decision": "reject-static-runtime-boundary-production-candidate",
+  "recordedAt": "2026-10-06",
+  "source": {
+    "controlRevision": "7eb51d89225802f57f51cb16259d8c96c61c1bfe",
+    "controlProductionSourceDigest": "1f88a93d9dfbeffc911303eb1e531492cc005d83ba52a885513526d448362673",
+    "candidateMeasuredSourceDigest": "3b3f42485e3ebd29f093963bee0715d6c1fc825caf17068bec135e35b1a5f14c",
+    "candidateSourceArchive": "candidate-source.tar.gz",
+    "candidateSourceArchiveSha256": "4c79fe72bdf3da8ec78b7c042d1f93d247f401e3c8a6bdebba9212a4317229d1"
+  },
+  "officialHostBudget": {
+    "evidence": "host-budgets/comparison.json",
+    "inputIdentity": "host-budgets/input-identity.json",
+    "recordedAt": "2026-10-06T08:34:28.673Z",
+    "registryMetrics": 21,
+    "passed": 11,
+    "failed": 9,
+    "incomparable": 1,
+    "performanceQualified": false,
+    "diagnosticOnly": {
+      "id": "runtime-emitted-bytes",
+      "result": "fail",
+      "currentBytes": 172137,
+      "baselineBytes": 11307
+    },
+    "failedMetricMedians": {
+      "runtime-initialization-node22-esm": {"current": 8.598584, "baseline": 6.293542, "unit": "ms"},
+      "runtime-initialization-node22-cjs": {"current": 5.208625, "baseline": 3.401791, "unit": "ms"},
+      "runtime-initialization-current-esm": {"current": 4.732083, "baseline": 2.555625, "unit": "ms"},
+      "runtime-initialization-current-cjs": {"current": 3.646125, "baseline": 2.0365, "unit": "ms"},
+      "warm-transform-ms": {"current": 9.681083, "baseline": 5.664125, "unit": "ms"},
+      "runtime-theme-core-esm-graph-bytes": {"current": 64899, "baseline": 17271, "unit": "bytes"},
+      "runtime-theme-core-cjs-graph-bytes": {"current": 65747, "baseline": 17641, "unit": "bytes"},
+      "runtime-theme-compatibility-esm-graph-bytes": {"current": 164730, "baseline": 44017, "unit": "bytes"},
+      "runtime-theme-compatibility-cjs-graph-bytes": {"current": 172137, "baseline": 44764, "unit": "bytes"}
+    },
+    "incomparableMetric": {
+      "id": "incremental-rebuild",
+      "reason": "baseline Expo 56.0.4 and candidate Expo 56.0.23 differ"
+    },
+    "legacySmoke": {"passed": 5, "failed": 0}
+  },
+  "controlCandidateGraphComparison": [
+    {"entry": "theme.mjs", "controlBytes": 164215, "candidateBytes": 164730, "deltaBytes": 515},
+    {"entry": "theme.cjs", "controlBytes": 171842, "candidateBytes": 172137, "deltaBytes": 295},
+    {"entry": "theme-core.mjs", "controlBytes": 64549, "candidateBytes": 64899, "deltaBytes": 350},
+    {"entry": "theme-core.cjs", "controlBytes": 65408, "candidateBytes": 65747, "deltaBytes": 339}
+  ],
+  "pairedFirstUse": {
+    "evidence": "paired-first-use/candidate-control.json",
+    "nodeFloor": "v22.0.0",
+    "currentNode": "v24.15.0",
+    "formats": ["esm", "cjs"],
+    "scenarios": ["token", "component", "extension", "scope"],
+    "cohorts": 16,
+    "pairsPerCohort": 15,
+    "totalPairs": 240,
+    "allWithinControlRange": true,
+    "interpretation": "No qualifying improvement or material first-use regression; this diagnostic does not override the official host gates."
+  },
+  "qualificationChecks": {
+    "build": "passed",
+    "packageAndStorybookTests": "passed",
+    "packageTypecheck": "passed",
+    "storybookTypecheck": "passed",
+    "candidatePackageContractAndRuntimeIsolation": "passed",
+    "candidatePackedConsumerOutput": "observed-in-command-output-but-not-retained-as-source-controlled-artifact",
+    "candidateMetroRefreshAndNativeFlows": "not-run-after-official-gate-rejection",
+    "physicalDevices": "deferred-by-user"
+  },
+  "disposition": {
+    "productionExtractionRetained": false,
+    "publicApiChanged": false,
+    "thresholdsOrBaselinesChanged": false,
+    "m10_5Closed": false,
+    "nextRecommendedSlice": "M10.5 non-breaking startup and emitted-graph attribution and feasibility design"
+  },
+  "historicalMatrixReconciliation": {
+    "currentSourceDigest": "69b11a546e95a51254207c1f5caa57349319049d4fb0d4e595483168573a2393",
+    "olderEvidenceSourceDigest": "1f88a93d9dfbeffc911303eb1e531492cc005d83ba52a885513526d448362673",
+    "rowsMarkedStale": 15,
+    "revision": "The original evidence hashes, source identities and passed/failed outcomes were preserved; only current-measurement status was changed because the source digest no longer matches."
+  }
+}

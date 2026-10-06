@@ -106,4 +106,12 @@ Reject the candidate if validation, output/reference relations, focused identity
 
 The initial measurement cannot guarantee an 80% reduction in mandatory core semantics or a 73% reduction in compatibility bytes. If the remaining graph is required by legacy APIs and no admissible compact implementation clears the ceilings, record that incompatibility for a separate explicit policy/product decision. This design does not approve dropping APIs or altering budgets.
 
-Next M10.5 handoff after written-design review: one consolidated implementation plan for a private static-boundary candidate, characterization and paired qualification, with one admission/rejection decision. Do not restart the historical sequence of unrelated micro-optimisation slices. No production implementation, release or native device operation occurs in this design slice.
+## Candidate execution disposition — 2026-10-06
+
+The consolidated implementation plan executed one private static-boundary candidate and one admission/rejection decision. The candidate preserved the tested export, declaration, focused-binding, mixed-provider, nested-slot, cache-identity and runtime-isolation contracts. Its source is archived under `docs/evidence/2026-10-06-m10-5-runtime-boundary/`.
+
+The unchanged 21-metric host comparison reported 11 passes, 9 failures and 1 Expo environment mismatch. All four startup metrics, warm full-transform and all four theme graph-size gates failed. Theme/core and compatibility graphs grew slightly relative to the package control. A 240-pair first-use diagnostic across 16 runtime/format/scenario cohorts remained within control spread and showed no qualifying improvement. The candidate therefore fails this design's admission rule and the production extraction was removed. No API, dependency, approved threshold or baseline changed.
+
+The candidate packed Expo result was not retained as an artifact; Metro refresh and native flows were not run after the decisive host failure. The restored-control packed iOS/Android/web exports and three source maps passed and are recorded separately. Physical-device acceptance remains deferred. M10.5 remains open.
+
+Next M10.5 handoff: **non-breaking startup and emitted-graph attribution and feasibility design**. Attribute mandatory public semantics and avoidable initialization cost before proposing another implementation. Preserve current APIs and approved limits; retain warm-transform and Expo-version comparability as open gates. Do not repeat static extraction without a specific, measurable path that can meet the current criteria.

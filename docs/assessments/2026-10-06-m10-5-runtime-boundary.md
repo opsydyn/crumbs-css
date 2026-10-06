@@ -1,0 +1,19 @@
+# M10.5 static runtime-boundary candidate assessment
+
+**Disposition:** the static extraction candidate is rejected for production. M10.5 remains open; approved thresholds and baselines remain unchanged.
+
+The candidate extracted theme caching, token/style resolution, component/extension token traversal, React integration, token-theme scopes and dependency resolution into internal modules. It kept `theme-runtime.ts` as the compatibility facade, preserved the independently built core entry, passed the canonical generic resolver into nested slot recursion, and retained validator timing and global symbol identity. Package-shaped ESM/CJS tests covered exports, declarations, compatibility/focused binding identity, mixed `theme`/`theme/core` provider-hook order, recursive component slots, frozen result identity and the single-file React-only core graph. The exact candidate edits are retained in [the source archive](../evidence/2026-10-06-m10-5-runtime-boundary/candidate-source.tar.gz).
+
+The candidate is not admissible under the existing performance contract. The official 21-metric comparison reports 11 passes, 9 failures and 1 Expo environment mismatch. All four runtime-startup cells fail; warm full-transform fails; and all four theme graph-size cells fail. The Metro comparison remains incomplete because the Expo baseline and candidate versions differ. Five legacy smoke runs pass. A separate diagnostic-only emitted-byte check also fails.
+
+Measured ESM/CJS theme graphs grew from 164,215/171,842 bytes to 164,730/172,137 bytes. Core graphs grew from 64,549/65,408 bytes to 64,899/65,747 bytes. Across 240 adjacent fresh-process pairs spanning 16 Node/format/scenario cohorts, every combined import-plus-first-use result stayed within the control range. This supports neither a regression beyond sample spread nor a qualifying improvement. The candidate did not clear the approved graph or startup ceilings.
+
+The candidate build, tests, typecheck, contract/identity characterization and isolation checks passed. The candidate's packed Expo output was observed but not archived; candidate Metro refresh and native Simulator/emulator flows were not run after the official gate rejected the candidate. The control-backed packed iOS/Android/web export was rerun after rollback and its three source maps passed. No Simulator was operated, and physical-device acceptance remains deferred.
+
+The production extraction was removed after preserving the source archive. The final production runtime source matches the control. The only retained source changes are the runtime bundle source-map contract's allowance for `native-tags-*` chunks and its focused test, plus the control-backed characterization test. These preserve current consumer behavior and improve the packed source-map check; they do not claim a performance benefit.
+
+The guarantees-matrix check found 15 previously passed/failed rows tied to an older full-source digest. I changed those measurement statuses to `stale`, preserving each historical hash, revision and result. The contract-support statuses were not changed. The generated guarantees page now reflects that distinction; validation passed and the docs build produced 28 pages.
+
+**Next recommended roadmap slice: M10.5 — non-breaking startup and emitted-graph attribution and feasibility design.** Identify which emitted bytes and startup costs are mandatory for current public semantics, which arise from avoidable module evaluation, and one evidence-backed candidate that could fit the approved budgets. Do not change APIs, thresholds or baselines during that design slice. Keep warm-transform and Expo-version comparability as separate gates.
+
+See [the archived control/candidate measurements](../evidence/2026-10-06-m10-5-runtime-boundary/README.md) and [the implementation plan](../superpowers/plans/2026-10-06-m10-5-runtime-boundary.md).
