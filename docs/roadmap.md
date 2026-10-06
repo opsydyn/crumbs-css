@@ -2762,3 +2762,10 @@ The review keeps package graph bytes, mapped consumer JavaScript contribution, w
 Only policy documentation and its review receipt change. Runtime APIs, package dependencies, budget registry and enforcement are unchanged. The broader native-compiler ADR remains proposed. **M10.5 remains open**, and physical-device work stays deferred.
 
 Next recommended numbered slice: **M10.5 — mobile-target calibration and repeatability plan**. Plan version capture, artifact reproducibility, independent timing cohorts, sample/schedule admission and reject/inconclusive criteria together before collecting another study. Keep the nine retained host failures and matched Expo comparison unresolved until their separate qualification or explicit future policy decision.
+
+
+### 2026-10-06 — M10.5 mobile-target calibration implementation plan
+
+The [calibration plan](superpowers/plans/2026-10-06-m10-5-mobile-target-calibration.md) operationalises the accepted target policy: capture executable Node/npm identity directly, retain Bun compatibility metadata separately, and admit three fresh comparable packed Expo/Hermes cohorts with cohort-level variability visible. Calibration may recommend a numerical target for later review but cannot approve it or modify existing host gates. The completed H cohort remains historical reference evidence.
+
+This is planning evidence only. No harness, native run, public API, dependency, baseline or threshold changed. **M10.5 remains open.** Next recommended numbered slice: **M10.5 — implement the calibrated cohort protocol, collect three fresh software-device cohorts and publish the explicit target review.** Physical-device work remains deferred.
