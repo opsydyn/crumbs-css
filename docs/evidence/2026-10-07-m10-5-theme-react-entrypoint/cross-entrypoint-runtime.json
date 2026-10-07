@@ -1,0 +1,25 @@
+{
+  "formatVersion": 1,
+  "node": "v24.15.0",
+  "react": "19.2.3",
+  "reactResolution": "The scratch package entry and React DOM renderer were made to resolve the same React peer module.",
+  "checks": [
+    {
+      "provider": "theme/core",
+      "consumerHooks": "theme/react",
+      "rendered": "<output data-opacity=\"0.5\">shared-context</output>",
+      "result": "pass"
+    },
+    {
+      "provider": "theme/react",
+      "consumerHooks": "theme/core",
+      "rendered": "<output data-opacity=\"0.5\">shared-context</output>",
+      "result": "pass"
+    }
+  ],
+  "protocol": "React DOM server render; each consumer reads the active theme and resolves a stable style through useThemedStyles.",
+  "limits": [
+    "This checks cross-entrypoint context interoperability in a JavaScript consumer.",
+    "It is not Expo, Metro, Hermes, native-device, or full-package qualification."
+  ]
+}

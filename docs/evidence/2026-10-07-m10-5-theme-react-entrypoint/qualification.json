@@ -1,0 +1,56 @@
+{
+  "formatVersion": 1,
+  "status": "rejected-as-host-budget-remedy",
+  "baseRevision": "897f372",
+  "baseProductSourceDigest": "23b89158a7642af4a4f7c8693cd79b2a21a34b74bdf52be967c2efd1049bfebd",
+  "candidate": "Additive ./theme/react export surface; no implementation extraction",
+  "environment": {
+    "bun": "1.4.2",
+    "nodeFloor": "v22.0.0",
+    "nodeCurrent": "v24.15.0",
+    "install": "Frozen lockfile in isolated scratch workspace"
+  },
+  "checks": {
+    "packageBuild": { "command": "bun run --filter @opsydyn/crumbs-css build", "exitCode": 0 },
+    "packageTypecheckWithCandidateConsumer": { "command": "bun run --filter @opsydyn/crumbs-css typecheck", "exitCode": 0 },
+    "crossEntrypointServerRender": { "evidence": "cross-entrypoint-runtime.json", "result": "pass" },
+    "packDryRun": {
+      "command": "bun pm pack --dry-run",
+      "exitCode": 0,
+      "includes": ["dist/theme-react.mjs", "dist/theme-react.cjs", "dist/theme-react.d.mts", "dist/theme-react.d.cts"]
+    }
+  },
+  "unchangedCoreArtifactHashes": {
+    "esm": "d8d4a5082337939def41cca11b97ac7881a66687a1d3cdc371770cb46eaf6cff",
+    "cjs": "7957711aefd1d797f16518617a5d65106477fde70062d54ce31142e2d9602ba1"
+  },
+  "approvedGraphMatches": {
+    "compatibilityThemeEsm": true,
+    "compatibilityThemeCjs": true,
+    "themeCoreEsm": true,
+    "themeCoreCjs": true
+  },
+  "exploratoryInitializationMedianChangesPercent": {
+    "node22Esm": -3.5,
+    "node22Cjs": -5.2,
+    "node24Esm": -4.8,
+    "node24Cjs": -7.4,
+    "allSampleRangesOverlap": true,
+    "officialCompatibilityEntryUnchanged": true
+  },
+  "budgetScreen": {
+    "candidateThemeReactEsmBytes": 50416,
+    "themeCoreEsmMaximumBytes": 17271,
+    "candidateThemeReactCjsBytes": 50620,
+    "themeCoreCjsMaximumBytes": 17641,
+    "result": "fail"
+  },
+  "notRun": [
+    "Full CSS test suite",
+    "Metro qualification",
+    "Full 21-metric host matrix",
+    "Native or physical-device acceptance"
+  ],
+  "productionChanges": 0,
+  "budgetsChanged": 0
+}

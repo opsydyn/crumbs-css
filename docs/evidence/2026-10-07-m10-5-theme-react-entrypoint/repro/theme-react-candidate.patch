@@ -1,0 +1,32 @@
+--- a/packages/css/package.json
++++ b/packages/css/package.json
+@@ -37,0 +38,5 @@
++    "./theme/react": {
++      "types": "./dist/theme-react.d.mts",
++      "import": "./dist/theme-react.mjs",
++      "require": "./dist/theme-react.cjs"
++    },
+--- a/packages/css/tsdown.config.ts
++++ b/packages/css/tsdown.config.ts
+@@ -39,0 +40 @@
++const themeReactRuntimeEntries = {"theme-react": "src/theme-react.ts"}
+@@ -43,0 +45 @@
++  { ...common, clean: false, dts: false, entry: themeReactRuntimeEntries },
+@@ -64,0 +67 @@
++      ...themeReactRuntimeEntries,
+@@ -72 +75 @@
+-        for (const name of [...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), ...Object.keys(themeCoreRuntimeEntries), "devtools"]) {
++        for (const name of [...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), ...Object.keys(themeCoreRuntimeEntries), ...Object.keys(themeReactRuntimeEntries), "devtools"]) {
+--- /dev/null
++++ b/packages/css/src/theme-react.ts
+@@ -0,0 +1,10 @@
++/** Focused React provider and hook surface for native theme consumers. */
++export {
++  ThemeProvider,
++  useTheme,
++  useThemeSelector,
++  useThemedStyle,
++  useThemedStyles,
++} from "./theme-runtime"
++
++export type { ResolvedThemeStyles } from "./theme-runtime"

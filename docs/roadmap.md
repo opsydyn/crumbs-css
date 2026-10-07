@@ -2868,3 +2868,11 @@ The [assessment](assessments/2026-10-07-m10-5-current-theme-minification-candida
 No production source, API, dependency, budget, baseline, threshold, or enforcement rule changed. The current-source full host result remains 11 pass, nine fail, and one incomplete; **M10.5 remains unqualified**. Physical-device acceptance remains deferred.
 
 Next recommended slice: **M10.5 — review the accepted runtime-budget policy against the current exact host gate and already-retained Expo/Hermes consumer evidence. Decide whether to retain these package-host gates as binding or propose a distinct API-preserving architecture path; keep every registry value unchanged until any per-metric change is explicitly approved.**
+
+### 2026-10-07 — M10.5 focused ThemeProvider and hook entrypoint candidate
+
+The [assessment](assessments/2026-10-07-m10-5-theme-react-entrypoint.md) and [evidence packet](evidence/2026-10-07-m10-5-theme-react-entrypoint/README.md) screen an additive `theme/react` subpath exporting `ThemeProvider` and common theme hooks. It reduces the focused ESM/CJS graphs by 21.9%/22.6%, but the candidate remains 2.92×/2.87× the unchanged `theme/core` limits. Both existing `theme/core` and compatibility `theme` output graphs match the approved host report byte-for-byte, so their budget results are unchanged. Import-only initialization medians improve by 3.5–7.4%, with overlapping ranges; the official initialization entrypoint is unaffected.
+
+The package/declaration build, focused consumer type-check, pack dry-run, and bidirectional cross-entrypoint React render pass. No production API, implementation, dependency, baseline, threshold, or enforcement rule changed. Full package tests and Metro/device qualification were not repeated after the graph screen failed. **M10.5 remains unqualified**, and physical-device work remains deferred.
+
+Next recommended slice: **M10.5 — assess whether a separately typed token-only React runtime can omit recipe, component-contract, and extension-validation code without weakening existing `theme/core` semantics.** Keep the existing entrypoints and budgets binding; stop at a design/cost screen if a specialized additive API cannot plausibly meet the current graph ceiling.
