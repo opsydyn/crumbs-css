@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-06T21:17:21Z",
+  "protectedSimulatorUuid": "1F706822-9584-4340-B426-EECF36F9D8EA",
+  "ios": {
+    "query": {
+      "argv": [
+        "xcrun",
+        "simctl",
+        "list",
+        "devices",
+        "available",
+        "-j"
+      ]
+    },
+    "matches": [
+      {
+        "runtime": "com.apple.CoreSimulator.SimRuntime.iOS-26-5",
+        "device": {
+          "lastBootedAt": "2026-10-06T18:31:04Z",
+          "dataPath": "/Users/alancurrie/Library/Developer/CoreSimulator/Devices/61DFB462-1FBF-4632-8302-1DD067E15D57/data",
+          "dataPathSize": 2331738112,
+          "logPath": "/Users/alancurrie/Library/Logs/CoreSimulator/61DFB462-1FBF-4632-8302-1DD067E15D57",
+          "udid": "61DFB462-1FBF-4632-8302-1DD067E15D57",
+          "isAvailable": true,
+          "logPathSize": 225280,
+          "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-17",
+          "state": "Booted",
+          "name": "Crumbs M105 Expo Consumer"
+        }
+      }
+    ],
+    "appPackageCheck": {
+      "argv": [
+        "xcrun",
+        "simctl",
+        "listapps",
+        "61DFB462-1FBF-4632-8302-1DD067E15D57"
+      ],
+      "exitCode": 0,
+      "matchingIdentifierLines": [],
+      "allStudyPackagesAbsent": true
+    }
+  },
+  "android": {
+    "id": "emulator-5580",
+    "avdName": "crumbs_m105_expo_consumer_20261006c",
+    "commands": [
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "emu",
+          "avd",
+          "name"
+        ],
+        "exitCode": 0,
+        "stdout": "crumbs_m105_expo_consumer_20261006c\nOK\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "shell",
+          "getprop",
+          "sys.boot_completed"
+        ],
+        "exitCode": 0,
+        "stdout": "1\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "shell",
+          "getprop",
+          "ro.build.fingerprint"
+        ],
+        "exitCode": 0,
+        "stdout": "google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "shell",
+          "getprop",
+          "ro.product.cpu.abi"
+        ],
+        "exitCode": 0,
+        "stdout": "arm64-v8a\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "shell",
+          "getprop",
+          "ro.build.version.release"
+        ],
+        "exitCode": 0,
+        "stdout": "16\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "shell",
+          "getprop",
+          "ro.build.version.sdk"
+        ],
+        "exitCode": 0,
+        "stdout": "36\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "shell",
+          "df",
+          "-k",
+          "/data"
+        ],
+        "exitCode": 0,
+        "stdout": "Filesystem       1K-blocks    Used Available Use% Mounted on\n/dev/block/dm-53   6082144 1594396   4345536  27% /data/user/0\n",
+        "stderr": ""
+      },
+      {
+        "argv": [
+          "/private/tmp/crumbs-m105-native/sdk/platform-tools/adb",
+          "-s",
+          "emulator-5580",
+          "shell",
+          "pm",
+          "list",
+          "packages",
+          "dev.crumbs.m105."
+        ],
+        "exitCode": 0,
+        "stdout": "",
+        "stderr": ""
+      }
+    ],
+    "avdConfig": {
+      "path": "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/avds/crumbs_m105_expo_consumer_20261006c.avd/config.ini",
+      "sha256": "e169dd9a985abe1df6ff73e9b6d6cf9d40f7d6391dfcc96138d8a838e7abf009",
+      "settings": {
+        "disk.dataPartition.size": "6442450944",
+        "hw.cpu.ncore": "4",
+        "hw.ramSize": "2G",
+        "hw.gpu.enabled": "no",
+        "hw.gpu.mode": "auto",
+        "fastboot.forceFastBoot": "yes",
+        "fastboot.forceColdBoot": "no",
+        "firstboot.saveToLocalSnapshot": "yes"
+      },
+      "effectiveLaunchOverrides": {
+        "memoryMiB": 2048,
+        "cores": 2,
+        "gpu": "swiftshader",
+        "snapshots": false
+      },
+      "priorOwnershipClaim": {
+        "userdataPartitionMiB": 2048,
+        "memoryMiB": 2048,
+        "cores": 2,
+        "gpu": "swiftshader",
+        "snapshots": false
+      },
+      "observedDataPartitionMiB": 6144.0,
+      "discrepancy": "The prior owner record claimed a 2048 MiB userdata partition; the persisted AVD config and live /data filesystem report approximately 6144 MiB. Existing data was preserved; no partition resize or wipe was attempted."
+    },
+    "successfulBootCommand": [
+      "/private/tmp/crumbs-m105-native/sdk/emulator/emulator",
+      "-avd",
+      "crumbs_m105_expo_consumer_20261006c",
+      "-port",
+      "5580",
+      "-no-window",
+      "-no-audio",
+      "-no-snapshot",
+      "-gpu",
+      "swiftshader",
+      "-memory",
+      "2048",
+      "-cores",
+      "2",
+      "-verbose"
+    ]
+  }
+}

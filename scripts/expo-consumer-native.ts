@@ -1,6 +1,6 @@
 import {createServer} from 'node:http'
 import {randomBytes} from 'node:crypto'
-import {readFile,writeFile,mkdir,readdir,cp,appendFile} from 'node:fs/promises'
+import {readFile,writeFile,mkdir,readdir,cp,appendFile,realpath as resolveRealPath} from 'node:fs/promises'
 import {join} from 'node:path'
 import {createRequire} from 'node:module'
 import {validateReceipt,type Attempt,type RunPermit,type Identity,type ArtifactRecord} from './expo-consumer-protocol'
@@ -10,6 +10,25 @@ export const protectedSimulator='1F706822-9584-4340-B426-EECF36F9D8EA'
 export type OwnedDevice={platform:'ios'|'android';id:string;ownershipRecordPath:string}
 export type Resource={kind:'app'|'mapping';device:OwnedDevice;value:string;cleaned:boolean;studyId:string;state?:'intended'|'acquired';artifact?:ArtifactRecord}
 export type ResourceLedger={studyId:string;archive:string;devices:OwnedDevice[];resources:Resource[]}
+export type ToolExecutable={command:string;resolvedPath:string;realPath:string;version:string}
+export type ToolchainIdentity={node:ToolExecutable;npm:ToolExecutable;bun:{resolvedPath:string;realPath:string;version:string;nodeCompatibilityVersion:string}}
+type VersionCommandResult={exitCode:number;stdout:string;stderr?:string}
+type ToolchainCommand={tool:'node'|'npm';resolvedPath:string;realPath:string;args:['--version'];exitCode:number;stdout:string;stderr:string;observedAt:string}
+type ToolchainCommandRecorder=(receipt:ToolchainCommand)=>Promise<void>
+type ExecutableResolver=(command:string)=>string|null|Promise<string|null>
+type VersionRunner=(path:string,args:readonly string[])=>VersionCommandResult|Promise<VersionCommandResult>
+const readVersionOutput=async(stream:ReadableStream<Uint8Array>,limit=4096)=>{const reader=stream.getReader(),chunks:Uint8Array[]=[];let size=0;try{while(true){const item=await reader.read();if(item.done)break;size+=item.value.length;if(size>limit)throw Error('version output exceeds 4096 bytes');chunks.push(item.value)}return Buffer.concat(chunks.map(x=>Buffer.from(x))).toString('utf8')}finally{reader.releaseLock()}}
+async function runVersion(path:string,args:readonly string[]):Promise<VersionCommandResult>{
+ const child=Bun.spawn([path,...args],{stdout:'pipe',stderr:'pipe'});let timedOut=false;const timer=setTimeout(()=>{timedOut=true;child.kill()},10_000)
+ try{const stdout=readVersionOutput(child.stdout),stderr=readVersionOutput(child.stderr);const [out,err,exitCode]=await Promise.all([stdout,stderr,child.exited]);if(timedOut)throw Error('version command timed out');return {exitCode,stdout:out,stderr:err}}
+ catch(error){child.kill();throw error}finally{clearTimeout(timer)}
+}
+export async function collectToolchainIdentity(resolveExecutable:ExecutableResolver=(command)=>Bun.which(command)??null,run:VersionRunner=runVersion,record?:ToolchainCommandRecorder):Promise<ToolchainIdentity>{
+ const capture=async(tool:'node'|'npm'):Promise<ToolExecutable>=>{const path=await resolveExecutable(tool);if(!path)throw Error(`${tool} executable is unavailable`);const resolved=await resolveRealPath(path);const result=await run(path,['--version']);const stdout=result.stdout.slice(0,4097),stderr=(result.stderr??'').slice(0,4097);await record?.({tool,resolvedPath:path,realPath:resolved,args:['--version'],exitCode:result.exitCode,stdout,stderr,observedAt:new Date().toISOString()});if(result.exitCode!==0)throw Error(`${tool} --version exited ${result.exitCode}`);if(Buffer.byteLength(stdout)>4096||Buffer.byteLength(stderr)>4096)throw Error(`${tool} version output exceeds 4096 bytes`);const version=stdout.trim();if(!version||version.split(/\r?\n/).length!==1)throw Error(`${tool} --version returned invalid output`);return {command:tool,resolvedPath:path,realPath:resolved,version}}
+ const [node,npm]=[await capture('node'),await capture('npm')];return {node,npm,bun:{resolvedPath:process.execPath,realPath:await resolveRealPath(process.execPath),version:Bun.version,nodeCompatibilityVersion:process.version}}
+}
+export function sameToolchainIdentity(before:ToolchainIdentity,after:ToolchainIdentity):boolean{return ['node','npm'].every(tool=>{const a=before[tool as 'node'|'npm'],b=after[tool as 'node'|'npm'];return a.command===b.command&&a.resolvedPath===b.resolvedPath&&a.realPath===b.realPath&&a.version===b.version})&&before.bun.resolvedPath===after.bun.resolvedPath&&before.bun.realPath===after.bun.realPath&&before.bun.version===after.bun.version&&before.bun.nodeCompatibilityVersion===after.bun.nodeCompatibilityVersion}
+export function assertStudySourceForPhase(phase:'prepare'|'collect'|'report',expected:string,actual:string){if(phase!=='report'&&expected!==actual)throw Error('Source digest changed; begin a new cohort')}
 export const sdk=process.env.ANDROID_HOME??'/private/tmp/crumbs-m105-native/sdk'
 export const nativeEnv={ANDROID_HOME:sdk,ANDROID_SDK_ROOT:sdk,JAVA_HOME:process.env.JAVA_HOME??'/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home',EXPO_NO_METRO_WORKSPACE_ROOT:'1',CI:'1',LANG:'en_US.UTF-8'}
 export function deviceCommand(device:OwnedDevice,args:string[]):string[]{
@@ -63,7 +82,7 @@ export async function assertDevice(device:OwnedDevice,ledger:ResourceLedger,arti
  }else{if(await deviceRun(device,['shell','getprop','ro.kernel.qemu'],ledger.archive)!=='1'||parseAvdName(await deviceRun(device,['emu','avd','name'],ledger.archive))!==owner.avdName)throw Error('Emulator identity drift');if(artifact){const apk=(await deviceRun(device,['shell','pm','path',`dev.crumbs.m105.${artifact.identity.variant}`],ledger.archive)).replace(/^package:/,'').split('\n')[0]!;if(!(await deviceRun(device,['shell','sha256sum',apk],ledger.archive)).startsWith(artifact.nativeBinaryHash))throw Error('Installed APK replaced')}}
 }
 export async function environmentFingerprint(devices:OwnedDevice[],ledger:ResourceLedger){
- const fingerprint:any={node:process.version,bun:Bun.version,platform:process.platform,architecture:process.arch,host:await runLogged(['uname','-a'],ledger.archive,ledger.archive),xcode:await runLogged(['xcodebuild','-version'],ledger.archive,ledger.archive),adb:await runLogged([join(sdk,'platform-tools/adb'),'version'],ledger.archive,ledger.archive),java:await runLogged([join(nativeEnv.JAVA_HOME,'bin/java'),'--version'],ledger.archive,ledger.archive,nativeEnv),devices:[]}
+ const fingerprint:any={bunNodeCompatibilityVersion:process.version,bunVersion:Bun.version,platform:process.platform,architecture:process.arch,host:await runLogged(['uname','-a'],ledger.archive,ledger.archive),xcode:await runLogged(['xcodebuild','-version'],ledger.archive,ledger.archive),adb:await runLogged([join(sdk,'platform-tools/adb'),'version'],ledger.archive,ledger.archive),java:await runLogged([join(nativeEnv.JAVA_HOME,'bin/java'),'--version'],ledger.archive,ledger.archive,nativeEnv),devices:[]}
  const listing=JSON.parse(await runLogged(['xcrun','simctl','list','devices','available','-j'],ledger.archive,ledger.archive))
  for(const device of devices){await assertDevice(device,ledger);const owner=JSON.parse(await readFile(device.ownershipRecordPath,'utf8'));if(device.platform==='ios'){const runtime=Object.entries(listing.devices).find(([,entries])=>(entries as any[]).some(d=>d.udid===device.id))?.[0];fingerprint.devices.push({id:device.id,platform:device.platform,runtime,owner})}else{const properties:Record<string,string>={};for(const key of ['ro.build.fingerprint','ro.product.cpu.abi','ro.build.version.release','ro.build.version.sdk'])properties[key]=await deviceRun(device,['shell','getprop',key],ledger.archive);fingerprint.devices.push({id:device.id,platform:device.platform,properties,owner})}}
  return fingerprint

@@ -38,6 +38,20 @@ describe('fixture',()=>{
   expect(fixtures[1]!.entrypoint).toBe('@opsydyn/crumbs-css/theme/core')
   expect(fixtures[2]!.entrypoint).toBe('@opsydyn/crumbs-css/theme')
  })
+ test('keeps compiled screen source stable across distinct study and cohort identities',()=>{
+  const first=generateFixture('core',{...id,studyId:'study-one',cohortId:'cohort-one',buildId:'build-one',variant:'core',packageHash:'c'.repeat(64)})
+  const second=generateFixture('core',{...id,studyId:'study-two',cohortId:'cohort-two',buildId:'build-two',variant:'core',packageHash:'c'.repeat(64)})
+  expect(second.scene).toBe(first.scene)
+ })
+ test('uses the launch permit identity in the native receipt',async()=>{
+  const fixture=generateFixture('plain',id),studyId='study-two',cohortId='cohort-two',buildId='build-two',runId='run-two',deviceId='device-two'
+  const params=new URLSearchParams({studyId,cohortId,buildId,variant:'plain',runId,deviceId,port:'1234',token:'token'})
+  const module={exports:{} as any};let sent:any;const errors:string[]=[]
+  const context:any={module,console:{error:(_label:string,error:string)=>errors.push(error)},__crumbsEntryMs:1,performance:{now:()=>4},URL,__DEV__:false,HermesInternal:{},require:(name:string)=>name==='react'?React:name==='react-native'?{View:'View',Text:'Text',StyleSheet:{create:(value:any)=>value},Linking:{getInitialURL:()=>Promise.resolve('crumbsm105plain://measure?'+params)}}:undefined,fetch:async(_url:string,options:any)=>{sent=JSON.parse(options.body);return {ok:true}}}
+  runInNewContext(fixture.scene,context);module.exports.default().props.onLayout({nativeEvent:{layout:{width:320,height:640}}});await new Promise(resolve=>setTimeout(resolve,0))
+  expect(errors).toEqual([])
+  expect(sent).toMatchObject({identity:{studyId,cohortId,buildId,variant:'plain'},runId,deviceId})
+ })
 })
 import {attributeJavaScript, validateArtifacts} from './expo-consumer-artifacts'
 describe('artifacts',()=>{
@@ -82,6 +96,16 @@ describe('study',()=>{
   expect(()=>parseStudyArgs(['report','--unknown'])).toThrow()
   expect(()=>parseStudyArgs(['prepare','--archive','relative'])).toThrow()
   expect(parseStudyArgs(['report','--archive','/tmp/study'])).toMatchObject({phase:'report',archive:'/tmp/study'})
+ })
+ test('accepts preregistered study and cohort IDs only for preparation',()=>{
+  const studyId='11111111-1111-4111-8111-111111111111',cohortId='22222222-2222-4222-8222-222222222222'
+  expect(parseStudyArgs(['prepare','--archive','/tmp/study','--study-id',studyId,'--cohort-id',cohortId])).toMatchObject({studyId,cohortId})
+  expect(()=>parseStudyArgs(['collect','--archive','/tmp/study','--ios-uuid','61DFB462-1FBF-4632-8302-1DD067E15D57','--android-serial','emulator-5580','--study-id',studyId,'--cohort-id',cohortId])).toThrow('Preparation only')
+ })
+ test('accepts a frozen package tarball only during preparation',()=>{
+  const tarball='/tmp/crumbs-css-frozen.tgz'
+  expect(parseStudyArgs(['prepare','--archive','/tmp/study','--frozen-package-tarball',tarball])).toMatchObject({frozenPackageTarball:tarball})
+  expect(()=>parseStudyArgs(['report','--archive','/tmp/study','--frozen-package-tarball',tarball])).toThrow('Preparation only')
  })
 })
 describe('native boundaries',()=>{
@@ -186,3 +210,47 @@ test('collector rejects oversized and mismatched bodies without consuming the pe
 test('cleanup reconciles intended resources, preserves replacements and is idempotent',async()=>{const {cleanupOwned}=await import('./expo-consumer-native');const dir=await mkdtemp(join(tmpdir(),'crumbs-cleanup-')),device={platform:'android',id:'emulator-5580',ownershipRecordPath:''} as any;const ledger={archive:dir,studyId:'study',devices:[device],resources:[{kind:'mapping',device,value:'tcp:7',studyId:'study',cleaned:false,state:'intended'}]} as any;const calls:string[][]=[];const adapter={assert:async()=>{},run:async(_d:any,args:string[])=>{calls.push(args);return args.includes('--list')?'emulator-5580 tcp:7 tcp:7\nemulator-5580 tcp:8 tcp:8':''}};try{expect((await cleanupOwned(ledger,adapter)).failures).toEqual([]);await cleanupOwned(ledger,adapter);expect(calls.filter(x=>x.includes('--remove'))).toEqual([['reverse','--remove','tcp:7']]);const replaced={...ledger,resources:[{...ledger.resources[0],cleaned:false}]};expect((await cleanupOwned(replaced,{...adapter,run:async()=> 'emulator-5580 tcp:7 tcp:9'})).failures.length).toBe(1)}finally{await rm(dir,{recursive:true,force:true})}})
 test('normalizes hoisting while rejecting changed dependency resolution',async()=>{const {compareDependencyGraphs}=await import('./expo-consumer-artifacts');const plain={packages:{'node_modules/tool':{version:'1',dependencies:{leaf:'1'}},'node_modules/leaf':{version:'1'}}};const relocated={packages:{'node_modules/tool':{version:'1',dependencies:{leaf:'1'}},'node_modules/tool/node_modules/leaf':{version:'1'}}};expect(()=>compareDependencyGraphs([plain,relocated])).not.toThrow();expect(()=>compareDependencyGraphs([plain,{packages:{...relocated.packages,'node_modules/tool/node_modules/leaf':{version:'2'}}}])).toThrow()})
 test('disk admission stops work before an insufficient-space phase',async()=>{const {requireDiskSpace}=await import('./expo-consumer-artifacts');const dir=await mkdtemp(join(tmpdir(),'crumbs-disk-'));try{expect(await requireDiskSpace(dir,0,'test')).toBeGreaterThan(0);await expect(requireDiskSpace(dir,Number.MAX_SAFE_INTEGER,'release build')).rejects.toThrow('release build requires')}finally{await rm(dir,{recursive:true,force:true})}})
+
+import {collectToolchainIdentity,sameToolchainIdentity,assertStudySourceForPhase} from './expo-consumer-native'
+import {realpath} from 'node:fs/promises'
+describe('toolchain identity',()=>{
+ test('records executable symlink, resolved binary, and output from that exact Node/npm command',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'crumbs-toolchain-test-'))
+  try{
+   const targets={node:join(dir,'node-real'),npm:join(dir,'npm-real')},links={node:join(dir,'node'),npm:join(dir,'npm')}
+   await Promise.all([writeFile(targets.node,'node'),writeFile(targets.npm,'npm')]);await Promise.all([symlink(targets.node,links.node),symlink(targets.npm,links.npm)])
+   const calls:string[]=[]
+   const result=await collectToolchainIdentity(async command=>command==='node'?links.node:command==='npm'?links.npm:null,async(path,args)=>{calls.push(path+':'+args.join(' '));return {exitCode:0,stdout:path===links.node?'v24.15.0\n':'11.12.1\n'}})
+   expect(result.node).toMatchObject({command:'node',resolvedPath:links.node,realPath:await realpath(links.node),version:'v24.15.0'})
+   expect(result.npm).toMatchObject({command:'npm',resolvedPath:links.npm,realPath:await realpath(links.npm),version:'11.12.1'})
+   expect(calls).toEqual([links.node+':--version',links.npm+':--version'])
+   expect(result.bun).toMatchObject({resolvedPath:process.execPath,version:Bun.version,nodeCompatibilityVersion:process.version})
+  }finally{await rm(dir,{recursive:true,force:true})}
+ })
+ test('fails closed when a direct executable is missing, exits nonzero, or emits oversized output',async()=>{
+  await expect(collectToolchainIdentity(async command=>command==='npm'?null:process.execPath,async()=>({exitCode:0,stdout:'v24'}))).rejects.toThrow('npm executable is unavailable')
+  await expect(collectToolchainIdentity(async()=>process.execPath,async()=>({exitCode:7,stdout:'v24'}))).rejects.toThrow('exited 7')
+  await expect(collectToolchainIdentity(async()=>process.execPath,async()=>({exitCode:0,stdout:'x'.repeat(4097)}))).rejects.toThrow('version output exceeds')
+ })
+ test('detects executable or version drift while ignoring receipt timestamps',async()=>{
+  const dir=await mkdtemp(join(tmpdir(),'crumbs-toolchain-drift-'))
+  try{await writeFile(join(dir,'node'),'node');await writeFile(join(dir,'npm'),'npm')
+   const resolveExecutable=async(command:string)=>join(dir,command),run=async(path:string)=>({exitCode:0,stdout:path.endsWith('/node')?'v24.15.0':'11.12.1'})
+   const before=await collectToolchainIdentity(resolveExecutable,run),after=await collectToolchainIdentity(resolveExecutable,async(path)=>({exitCode:0,stdout:path.endsWith('/node')?'v24.15.0':'11.12.2'}))
+   expect(sameToolchainIdentity(before,before)).toBe(true);expect(sameToolchainIdentity(before,after)).toBe(false)
+   const otherPath=structuredClone(before);otherPath.node.realPath='/node-replaced';expect(sameToolchainIdentity(before,otherPath)).toBe(false)
+  }finally{await rm(dir,{recursive:true,force:true})}
+ })
+ test('does not apply current source identity to an immutable historical report',()=>{
+  expect(()=>assertStudySourceForPhase('report','historical','current')).not.toThrow()
+  expect(()=>assertStudySourceForPhase('collect','historical','current')).toThrow('Source digest changed')
+  expect(()=>assertStudySourceForPhase('collect','current','current')).not.toThrow()
+ })
+})
+
+test('historical report validation can leave its archived summary byte-for-byte unchanged',async()=>{
+ const {persistStudySummary}=await import('./measure-expo-consumer-runtime')
+ expect(typeof persistStudySummary).toBe('function')
+ const dir=await mkdtemp(join(tmpdir(),'crumbs-report-readonly-')),path=join(dir,'summary.json'),original='historical-summary\n'
+ try{await writeFile(path,original);await persistStudySummary(path,{complete:true},false);expect(await readFile(path,'utf8')).toBe(original);await persistStudySummary(path,{complete:true},true);expect(await readFile(path,'utf8')).toBe(JSON.stringify({complete:true},null,2))}finally{await rm(dir,{recursive:true,force:true})}
+})

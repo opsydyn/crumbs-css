@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "recordedAt": "2026-10-07T06:59:58.401963+00:00",
+  "priorProtocol": {
+    "path": "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-06-m10-5-mobile-target-calibration/protocol.json",
+    "sha256": "66f570cfe51a975af1d5fef7ae22fe7721e033748520fd24f5adb8616ab68c56",
+    "protocolId": "M10.5-mobile-target-calibration-2026-10-06"
+  },
+  "userDirection": "we have storagge lets resume",
+  "observedFreeBytes": 85361725440,
+  "ruling": "Keep cohort A as failed/incomplete history. Reuse original preregistered B and C because neither archive exists and no collection command ran for either. Register new cohort D so the revised active set again has exactly three fresh cohorts. Preserve all source, package, runtime, device, matrix, failure-retention and post-report cache-pruning constraints.",
+  "activeCohorts": [
+    {
+      "order": 1,
+      "cohortLabel": "b",
+      "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+      "studyId": "cb07ba81-4299-4ede-a936-91f90a2bf493",
+      "archivePath": "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-mobile-calibration-20261006-b",
+      "status": "registered"
+    },
+    {
+      "order": 2,
+      "cohortLabel": "c",
+      "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+      "studyId": "d160d781-7bfa-4601-b2a3-01dabbb2894a",
+      "archivePath": "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-mobile-calibration-20261006-c",
+      "status": "registered"
+    },
+    {
+      "order": 3,
+      "cohortLabel": "d",
+      "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+      "studyId": "b8136e10-ff33-4d5c-9c9b-fd2d3c54128c",
+      "archivePath": "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-mobile-calibration-20261007-d",
+      "status": "registered"
+    }
+  ],
+  "excludedCohorts": [
+    {
+      "cohortLabel": "a",
+      "cohortId": "f19cd595-2f99-4040-b3a7-8d3fae9017c2",
+      "studyId": "d8a2e2df-a4ec-4fef-9497-3d5a250b7692",
+      "archivePath": "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-mobile-calibration-20261006-a",
+      "failureReceipt": ".superpowers/artifacts/m105-mobile-calibration-20261006-a/collection-failure.json",
+      "failureSha256": "68b71a3f196f1911b704b8ca59edf53966c8e5c17dcd6503fa18d196ad140275",
+      "status": "incomplete-retained-excluded",
+      "reason": "Android/core 3 GiB release-build gate found 2.6 GiB free; zero launch attempts; scoped cleanup succeeded."
+    }
+  ],
+  "costIfWrong": "This adds one new cohort and runs three complete fresh cohorts; if the user intended only to retry the failed cohort, the additional build and measurement work is unnecessary. The failed A data remains preserved."
+}

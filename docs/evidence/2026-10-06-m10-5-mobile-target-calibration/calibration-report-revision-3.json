@@ -1,0 +1,955 @@
+{
+  "eligibleForPolicyProposal": true,
+  "targetApproved": false,
+  "interpretation": "Eligibility means three preregistered comparable cohorts are available for explicit policy review. It does not approve a numerical target.",
+  "cohorts": [
+    {
+      "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+      "studyId": "d160d781-7bfa-4601-b2a3-01dabbb2894a",
+      "archive": "m105-mobile-calibration-20261006-c",
+      "sourceHash": "5a5f9cffa69a3b22d16f4ff891bc6a0249d8a9dc816237926106fe743f2abf5d",
+      "toolchain": {
+        "node": {
+          "command": "node",
+          "resolvedPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+          "realPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+          "version": "v24.15.0"
+        },
+        "npm": {
+          "command": "npm",
+          "resolvedPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/npm",
+          "realPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/lib/node_modules/npm/bin/npm-cli.js",
+          "version": "11.12.1"
+        },
+        "bun": {
+          "resolvedPath": "/Users/alancurrie/.bun/bin/bun",
+          "realPath": "/Users/alancurrie/.bun/bin/bun",
+          "version": "1.4.2",
+          "nodeCompatibilityVersion": "v26.3.0"
+        }
+      },
+      "environment": {
+        "platform": "darwin",
+        "architecture": "arm64",
+        "host": "Darwin Alans-Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:17:26 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T6041 arm64",
+        "xcode": "Xcode 26.5\nBuild version 17F42",
+        "adb": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /private/tmp/crumbs-m105-native/sdk/platform-tools/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "java": "openjdk 17.0.20.1 2026-08-18\nOpenJDK Runtime Environment Homebrew (build 17.0.20.1+0)\nOpenJDK 64-Bit Server VM Homebrew (build 17.0.20.1+0, mixed mode, sharing)",
+        "bunVersion": "1.4.2",
+        "bunNodeCompatibilityVersion": "v26.3.0",
+        "byPlatform": {
+          "ios": "[{\"id\":\"61DFB462-1FBF-4632-8302-1DD067E15D57\",\"owner\":{\"creationCommand\":[\"xcrun\",\"simctl\",\"create\",\"Crumbs M105 Expo Consumer\",\"com.apple.CoreSimulator.SimDeviceType.iPhone-17\",\"com.apple.CoreSimulator.SimRuntime.iOS-26-5\"],\"id\":\"61DFB462-1FBF-4632-8302-1DD067E15D57\",\"platform\":\"ios\",\"provisioningStudyId\":\"cec11e51-a7b7-40b2-a919-0fd7ba07eab1\",\"transferFrom\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/ownership/ios.json\",\"transferFromStudyId\":\"23c1e744-3737-48d2-9b19-b5de91ce175e\",\"transferReason\":\"Fresh cohort after separately verified iOS URL-consent setup; failed warm-up and all diagnostics retained in prior archive.\",\"urlConsentDiagnostics\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-g/diagnostics\"},\"platform\":\"ios\",\"properties\":null,\"runtime\":\"com.apple.CoreSimulator.SimRuntime.iOS-26-5\"}]",
+          "android": "[{\"id\":\"emulator-5580\",\"owner\":{\"avdName\":\"crumbs_m105_expo_consumer_20261006c\",\"configuration\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false,\"userdataPartitionMiB\":6144},\"configurationDiscrepancy\":\"The prior owner record claimed a 2048 MiB userdata partition; the persisted AVD config and live /data filesystem report approximately 6144 MiB. Existing data was preserved; no partition resize or wipe was attempted.\",\"creationCommand\":[\"/private/tmp/crumbs-m105-native/sdk/cmdline-tools/latest/bin/avdmanager\",\"create\",\"avd\",\"-n\",\"crumbs_m105_expo_consumer_20261006c\",\"-p\",\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/avds/crumbs_m105_expo_consumer_20261006c.avd\",\"-k\",\"system-images;android-36;google_apis;arm64-v8a\",\"-d\",\"pixel_7\"],\"effectiveLaunchOverrides\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false},\"id\":\"emulator-5580\",\"observedAvdConfigSha256\":\"e169dd9a985abe1df6ff73e9b6d6cf9d40f7d6391dfcc96138d8a838e7abf009\",\"platform\":\"android\",\"priorOwnershipConfigurationClaim\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false,\"userdataPartitionMiB\":2048},\"provisioningStudyId\":\"cec11e51-a7b7-40b2-a919-0fd7ba07eab1\",\"restartReceipt\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-f/emulator-restart.json\",\"successfulBootCommand\":[\"/private/tmp/crumbs-m105-native/sdk/emulator/emulator\",\"-avd\",\"crumbs_m105_expo_consumer_20261006c\",\"-port\",\"5580\",\"-no-window\",\"-no-audio\",\"-no-snapshot\",\"-gpu\",\"swiftshader\",\"-memory\",\"2048\",\"-cores\",\"2\",\"-verbose\"],\"transferFrom\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/ownership/android.json\",\"transferFromStudyId\":\"23c1e744-3737-48d2-9b19-b5de91ce175e\",\"transferReason\":\"Fresh cohort after separately verified iOS URL-consent setup; failed warm-up and all diagnostics retained in prior archive.\"},\"platform\":\"android\",\"properties\":{\"ro.build.fingerprint\":\"google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys\",\"ro.build.version.release\":\"16\",\"ro.build.version.sdk\":\"36\",\"ro.product.cpu.abi\":\"arm64-v8a\"},\"runtime\":null}]"
+        }
+      },
+      "cells": [
+        {
+          "key": "ios/plain",
+          "platform": "ios",
+          "variant": "plain",
+          "samples": [
+            22.667750000953674,
+            22.472709000110626,
+            22.82795798778534,
+            22.576625049114227,
+            22.1584170460701
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 22.1584170460701,
+          "medianMs": 22.576625049114227,
+          "maxMs": 22.82795798778534,
+          "javascriptBytes": 1021240,
+          "mappedJavascriptBytes": 0,
+          "hermesBytes": 1256868,
+          "hermesDeltaBytes": 0
+        },
+        {
+          "key": "ios/core",
+          "platform": "ios",
+          "variant": "core",
+          "samples": [
+            22.45695799589157,
+            22.31925004720688,
+            22.58474999666214,
+            22.505124986171722,
+            22.2674999833107
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 22.2674999833107,
+          "medianMs": 22.45695799589157,
+          "maxMs": 22.58474999666214,
+          "javascriptBytes": 1055595,
+          "mappedJavascriptBytes": 33860,
+          "hermesBytes": 1306968,
+          "hermesDeltaBytes": 50100
+        },
+        {
+          "key": "ios/compatibility",
+          "platform": "ios",
+          "variant": "compatibility",
+          "samples": [
+            22.320624947547913,
+            24.320165991783142,
+            22.50712502002716,
+            24.722958981990814,
+            23.349792003631592
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 22.320624947547913,
+          "medianMs": 23.349792003631592,
+          "maxMs": 24.722958981990814,
+          "javascriptBytes": 1114639,
+          "mappedJavascriptBytes": 92687,
+          "hermesBytes": 1384256,
+          "hermesDeltaBytes": 127388
+        },
+        {
+          "key": "android/plain",
+          "platform": "android",
+          "variant": "plain",
+          "samples": [
+            51.83325000014156,
+            67.75066599994898,
+            54.10891699977219,
+            63.14462500018999,
+            46.966749999672174
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 46.966749999672174,
+          "medianMs": 54.10891699977219,
+          "maxMs": 67.75066599994898,
+          "javascriptBytes": 1026223,
+          "mappedJavascriptBytes": 0,
+          "hermesBytes": 1260728,
+          "hermesDeltaBytes": 0
+        },
+        {
+          "key": "android/core",
+          "platform": "android",
+          "variant": "core",
+          "samples": [
+            47.612625000067055,
+            38.73587500024587,
+            43.0693330001086,
+            41.691583999898285,
+            45.043541999999434
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 38.73587500024587,
+          "medianMs": 43.0693330001086,
+          "maxMs": 47.612625000067055,
+          "javascriptBytes": 1060578,
+          "mappedJavascriptBytes": 33860,
+          "hermesBytes": 1311072,
+          "hermesDeltaBytes": 50344
+        },
+        {
+          "key": "android/compatibility",
+          "platform": "android",
+          "variant": "compatibility",
+          "samples": [
+            38.50258299987763,
+            61.959082999732345,
+            46.846584000159055,
+            52.033375000115484,
+            38.92979099974036
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 38.50258299987763,
+          "medianMs": 46.846584000159055,
+          "maxMs": 61.959082999732345,
+          "javascriptBytes": 1119622,
+          "mappedJavascriptBytes": 92687,
+          "hermesBytes": 1388120,
+          "hermesDeltaBytes": 127392
+        }
+      ],
+      "failures": []
+    },
+    {
+      "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+      "studyId": "b8136e10-ff33-4d5c-9c9b-fd2d3c54128c",
+      "archive": "m105-mobile-calibration-20261007-d",
+      "sourceHash": "5a5f9cffa69a3b22d16f4ff891bc6a0249d8a9dc816237926106fe743f2abf5d",
+      "toolchain": {
+        "node": {
+          "command": "node",
+          "resolvedPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+          "realPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+          "version": "v24.15.0"
+        },
+        "npm": {
+          "command": "npm",
+          "resolvedPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/npm",
+          "realPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/lib/node_modules/npm/bin/npm-cli.js",
+          "version": "11.12.1"
+        },
+        "bun": {
+          "resolvedPath": "/Users/alancurrie/.bun/bin/bun",
+          "realPath": "/Users/alancurrie/.bun/bin/bun",
+          "version": "1.4.2",
+          "nodeCompatibilityVersion": "v26.3.0"
+        }
+      },
+      "environment": {
+        "platform": "darwin",
+        "architecture": "arm64",
+        "host": "Darwin Alans-Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:17:26 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T6041 arm64",
+        "xcode": "Xcode 26.5\nBuild version 17F42",
+        "adb": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /private/tmp/crumbs-m105-native/sdk/platform-tools/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "java": "openjdk 17.0.20.1 2026-08-18\nOpenJDK Runtime Environment Homebrew (build 17.0.20.1+0)\nOpenJDK 64-Bit Server VM Homebrew (build 17.0.20.1+0, mixed mode, sharing)",
+        "bunVersion": "1.4.2",
+        "bunNodeCompatibilityVersion": "v26.3.0",
+        "byPlatform": {
+          "ios": "[{\"id\":\"61DFB462-1FBF-4632-8302-1DD067E15D57\",\"owner\":{\"creationCommand\":[\"xcrun\",\"simctl\",\"create\",\"Crumbs M105 Expo Consumer\",\"com.apple.CoreSimulator.SimDeviceType.iPhone-17\",\"com.apple.CoreSimulator.SimRuntime.iOS-26-5\"],\"id\":\"61DFB462-1FBF-4632-8302-1DD067E15D57\",\"platform\":\"ios\",\"provisioningStudyId\":\"cec11e51-a7b7-40b2-a919-0fd7ba07eab1\",\"transferFrom\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/ownership/ios.json\",\"transferFromStudyId\":\"23c1e744-3737-48d2-9b19-b5de91ce175e\",\"transferReason\":\"Fresh cohort after separately verified iOS URL-consent setup; failed warm-up and all diagnostics retained in prior archive.\",\"urlConsentDiagnostics\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-g/diagnostics\"},\"platform\":\"ios\",\"properties\":null,\"runtime\":\"com.apple.CoreSimulator.SimRuntime.iOS-26-5\"}]",
+          "android": "[{\"id\":\"emulator-5580\",\"owner\":{\"avdName\":\"crumbs_m105_expo_consumer_20261006c\",\"configuration\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false,\"userdataPartitionMiB\":6144},\"configurationDiscrepancy\":\"The prior owner record claimed a 2048 MiB userdata partition; the persisted AVD config and live /data filesystem report approximately 6144 MiB. Existing data was preserved; no partition resize or wipe was attempted.\",\"creationCommand\":[\"/private/tmp/crumbs-m105-native/sdk/cmdline-tools/latest/bin/avdmanager\",\"create\",\"avd\",\"-n\",\"crumbs_m105_expo_consumer_20261006c\",\"-p\",\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/avds/crumbs_m105_expo_consumer_20261006c.avd\",\"-k\",\"system-images;android-36;google_apis;arm64-v8a\",\"-d\",\"pixel_7\"],\"effectiveLaunchOverrides\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false},\"id\":\"emulator-5580\",\"observedAvdConfigSha256\":\"e169dd9a985abe1df6ff73e9b6d6cf9d40f7d6391dfcc96138d8a838e7abf009\",\"platform\":\"android\",\"priorOwnershipConfigurationClaim\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false,\"userdataPartitionMiB\":2048},\"provisioningStudyId\":\"cec11e51-a7b7-40b2-a919-0fd7ba07eab1\",\"restartReceipt\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-f/emulator-restart.json\",\"successfulBootCommand\":[\"/private/tmp/crumbs-m105-native/sdk/emulator/emulator\",\"-avd\",\"crumbs_m105_expo_consumer_20261006c\",\"-port\",\"5580\",\"-no-window\",\"-no-audio\",\"-no-snapshot\",\"-gpu\",\"swiftshader\",\"-memory\",\"2048\",\"-cores\",\"2\",\"-verbose\"],\"transferFrom\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/ownership/android.json\",\"transferFromStudyId\":\"23c1e744-3737-48d2-9b19-b5de91ce175e\",\"transferReason\":\"Fresh cohort after separately verified iOS URL-consent setup; failed warm-up and all diagnostics retained in prior archive.\"},\"platform\":\"android\",\"properties\":{\"ro.build.fingerprint\":\"google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys\",\"ro.build.version.release\":\"16\",\"ro.build.version.sdk\":\"36\",\"ro.product.cpu.abi\":\"arm64-v8a\"},\"runtime\":null}]"
+        }
+      },
+      "cells": [
+        {
+          "key": "ios/plain",
+          "platform": "ios",
+          "variant": "plain",
+          "samples": [
+            21.907124996185303,
+            22.513875007629395,
+            21.780750036239624,
+            21.25066602230072,
+            20.812792003154755
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 20.812792003154755,
+          "medianMs": 21.780750036239624,
+          "maxMs": 22.513875007629395,
+          "javascriptBytes": 1021240,
+          "mappedJavascriptBytes": 0,
+          "hermesBytes": 1256868,
+          "hermesDeltaBytes": 0
+        },
+        {
+          "key": "ios/core",
+          "platform": "ios",
+          "variant": "core",
+          "samples": [
+            20.81141698360443,
+            22.000042021274567,
+            21.772916972637177,
+            22.165167033672333,
+            22.083624958992004
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 20.81141698360443,
+          "medianMs": 22.000042021274567,
+          "maxMs": 22.165167033672333,
+          "javascriptBytes": 1055595,
+          "mappedJavascriptBytes": 33860,
+          "hermesBytes": 1306968,
+          "hermesDeltaBytes": 50100
+        },
+        {
+          "key": "ios/compatibility",
+          "platform": "ios",
+          "variant": "compatibility",
+          "samples": [
+            21.69791704416275,
+            21.484957993030548,
+            22.823916018009186,
+            21.421666979789734,
+            20.954625010490417
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 20.954625010490417,
+          "medianMs": 21.484957993030548,
+          "maxMs": 22.823916018009186,
+          "javascriptBytes": 1114639,
+          "mappedJavascriptBytes": 92687,
+          "hermesBytes": 1384256,
+          "hermesDeltaBytes": 127388
+        },
+        {
+          "key": "android/plain",
+          "platform": "android",
+          "variant": "plain",
+          "samples": [
+            62.51549999974668,
+            42.49987499974668,
+            42.514458999969065,
+            46.296708000358194,
+            32.585250000003725
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 32.585250000003725,
+          "medianMs": 42.514458999969065,
+          "maxMs": 62.51549999974668,
+          "javascriptBytes": 1026223,
+          "mappedJavascriptBytes": 0,
+          "hermesBytes": 1260728,
+          "hermesDeltaBytes": 0
+        },
+        {
+          "key": "android/core",
+          "platform": "android",
+          "variant": "core",
+          "samples": [
+            30.967124999966472,
+            47.2762499996461,
+            61.10162500012666,
+            46.06491700001061,
+            43.4393329997547
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 30.967124999966472,
+          "medianMs": 46.06491700001061,
+          "maxMs": 61.10162500012666,
+          "javascriptBytes": 1060578,
+          "mappedJavascriptBytes": 33860,
+          "hermesBytes": 1311072,
+          "hermesDeltaBytes": 50344
+        },
+        {
+          "key": "android/compatibility",
+          "platform": "android",
+          "variant": "compatibility",
+          "samples": [
+            44.34304099995643,
+            49.99845799989998,
+            42.96954099973664,
+            46.08429199969396,
+            49.24095800006762
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 42.96954099973664,
+          "medianMs": 46.08429199969396,
+          "maxMs": 49.99845799989998,
+          "javascriptBytes": 1119622,
+          "mappedJavascriptBytes": 92687,
+          "hermesBytes": 1388120,
+          "hermesDeltaBytes": 127392
+        }
+      ],
+      "failures": []
+    },
+    {
+      "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+      "studyId": "cb07ba81-4299-4ede-a936-91f90a2bf493",
+      "archive": "m105-mobile-calibration-20261006-b",
+      "sourceHash": "5a5f9cffa69a3b22d16f4ff891bc6a0249d8a9dc816237926106fe743f2abf5d",
+      "toolchain": {
+        "node": {
+          "command": "node",
+          "resolvedPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+          "realPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+          "version": "v24.15.0"
+        },
+        "npm": {
+          "command": "npm",
+          "resolvedPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/npm",
+          "realPath": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/lib/node_modules/npm/bin/npm-cli.js",
+          "version": "11.12.1"
+        },
+        "bun": {
+          "resolvedPath": "/Users/alancurrie/.bun/bin/bun",
+          "realPath": "/Users/alancurrie/.bun/bin/bun",
+          "version": "1.4.2",
+          "nodeCompatibilityVersion": "v26.3.0"
+        }
+      },
+      "environment": {
+        "platform": "darwin",
+        "architecture": "arm64",
+        "host": "Darwin Alans-Mac-mini.local 25.6.0 Darwin Kernel Version 25.6.0: Fri Jul 31 19:17:26 PDT 2026; root:xnu-12377.161.14~5/RELEASE_ARM64_T6041 arm64",
+        "xcode": "Xcode 26.5\nBuild version 17F42",
+        "adb": "Android Debug Bridge version 1.0.41\nVersion 37.0.1-15733141\nInstalled as /private/tmp/crumbs-m105-native/sdk/platform-tools/adb\nRunning on Darwin 25.6.0 (arm64)",
+        "java": "openjdk 17.0.20.1 2026-08-18\nOpenJDK Runtime Environment Homebrew (build 17.0.20.1+0)\nOpenJDK 64-Bit Server VM Homebrew (build 17.0.20.1+0, mixed mode, sharing)",
+        "bunVersion": "1.4.2",
+        "bunNodeCompatibilityVersion": "v26.3.0",
+        "byPlatform": {
+          "ios": "[{\"id\":\"61DFB462-1FBF-4632-8302-1DD067E15D57\",\"owner\":{\"creationCommand\":[\"xcrun\",\"simctl\",\"create\",\"Crumbs M105 Expo Consumer\",\"com.apple.CoreSimulator.SimDeviceType.iPhone-17\",\"com.apple.CoreSimulator.SimRuntime.iOS-26-5\"],\"id\":\"61DFB462-1FBF-4632-8302-1DD067E15D57\",\"platform\":\"ios\",\"provisioningStudyId\":\"cec11e51-a7b7-40b2-a919-0fd7ba07eab1\",\"transferFrom\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/ownership/ios.json\",\"transferFromStudyId\":\"23c1e744-3737-48d2-9b19-b5de91ce175e\",\"transferReason\":\"Fresh cohort after separately verified iOS URL-consent setup; failed warm-up and all diagnostics retained in prior archive.\",\"urlConsentDiagnostics\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-g/diagnostics\"},\"platform\":\"ios\",\"properties\":null,\"runtime\":\"com.apple.CoreSimulator.SimRuntime.iOS-26-5\"}]",
+          "android": "[{\"id\":\"emulator-5580\",\"owner\":{\"avdName\":\"crumbs_m105_expo_consumer_20261006c\",\"configuration\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false,\"userdataPartitionMiB\":6144},\"configurationDiscrepancy\":\"The prior owner record claimed a 2048 MiB userdata partition; the persisted AVD config and live /data filesystem report approximately 6144 MiB. Existing data was preserved; no partition resize or wipe was attempted.\",\"creationCommand\":[\"/private/tmp/crumbs-m105-native/sdk/cmdline-tools/latest/bin/avdmanager\",\"create\",\"avd\",\"-n\",\"crumbs_m105_expo_consumer_20261006c\",\"-p\",\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/avds/crumbs_m105_expo_consumer_20261006c.avd\",\"-k\",\"system-images;android-36;google_apis;arm64-v8a\",\"-d\",\"pixel_7\"],\"effectiveLaunchOverrides\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false},\"id\":\"emulator-5580\",\"observedAvdConfigSha256\":\"e169dd9a985abe1df6ff73e9b6d6cf9d40f7d6391dfcc96138d8a838e7abf009\",\"platform\":\"android\",\"priorOwnershipConfigurationClaim\":{\"cores\":2,\"gpu\":\"swiftshader\",\"memoryMiB\":2048,\"snapshots\":false,\"userdataPartitionMiB\":2048},\"provisioningStudyId\":\"cec11e51-a7b7-40b2-a919-0fd7ba07eab1\",\"restartReceipt\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-f/emulator-restart.json\",\"successfulBootCommand\":[\"/private/tmp/crumbs-m105-native/sdk/emulator/emulator\",\"-avd\",\"crumbs_m105_expo_consumer_20261006c\",\"-port\",\"5580\",\"-no-window\",\"-no-audio\",\"-no-snapshot\",\"-gpu\",\"swiftshader\",\"-memory\",\"2048\",\"-cores\",\"2\",\"-verbose\"],\"transferFrom\":\"/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/artifacts/m105-expo-hermes-20261006-c/ownership/android.json\",\"transferFromStudyId\":\"23c1e744-3737-48d2-9b19-b5de91ce175e\",\"transferReason\":\"Fresh cohort after separately verified iOS URL-consent setup; failed warm-up and all diagnostics retained in prior archive.\"},\"platform\":\"android\",\"properties\":{\"ro.build.fingerprint\":\"google/sdk_gphone64_arm64/emu64a:16/BE2A.250530.026.F3/13894323:userdebug/dev-keys\",\"ro.build.version.release\":\"16\",\"ro.build.version.sdk\":\"36\",\"ro.product.cpu.abi\":\"arm64-v8a\"},\"runtime\":null}]"
+        }
+      },
+      "cells": [
+        {
+          "key": "ios/plain",
+          "platform": "ios",
+          "variant": "plain",
+          "samples": [
+            22.70129096508026,
+            22.89345896244049,
+            24.257499992847443,
+            21.940874993801117,
+            23.030333995819092
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 21.940874993801117,
+          "medianMs": 22.89345896244049,
+          "maxMs": 24.257499992847443,
+          "javascriptBytes": 1021240,
+          "mappedJavascriptBytes": 0,
+          "hermesBytes": 1256868,
+          "hermesDeltaBytes": 0
+        },
+        {
+          "key": "ios/core",
+          "platform": "ios",
+          "variant": "core",
+          "samples": [
+            23.576958000659943,
+            22.86933296918869,
+            23.93045800924301,
+            23.035582959651947,
+            22.110249996185303
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 22.110249996185303,
+          "medianMs": 23.035582959651947,
+          "maxMs": 23.93045800924301,
+          "javascriptBytes": 1055595,
+          "mappedJavascriptBytes": 33860,
+          "hermesBytes": 1306968,
+          "hermesDeltaBytes": 50100
+        },
+        {
+          "key": "ios/compatibility",
+          "platform": "ios",
+          "variant": "compatibility",
+          "samples": [
+            22.55425000190735,
+            22.5276660323143,
+            22.042374968528748,
+            22.47000002861023,
+            22.55691695213318
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 22.042374968528748,
+          "medianMs": 22.5276660323143,
+          "maxMs": 22.55691695213318,
+          "javascriptBytes": 1114639,
+          "mappedJavascriptBytes": 92687,
+          "hermesBytes": 1384256,
+          "hermesDeltaBytes": 127388
+        },
+        {
+          "key": "android/plain",
+          "platform": "android",
+          "variant": "plain",
+          "samples": [
+            47.74920800002292,
+            16.516499999910593,
+            47.34954100009054,
+            40.46070900000632,
+            55.64174999995157
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 16.516499999910593,
+          "medianMs": 47.34954100009054,
+          "maxMs": 55.64174999995157,
+          "javascriptBytes": 1026223,
+          "mappedJavascriptBytes": 0,
+          "hermesBytes": 1260728,
+          "hermesDeltaBytes": 0
+        },
+        {
+          "key": "android/core",
+          "platform": "android",
+          "variant": "core",
+          "samples": [
+            40.90716699999757,
+            44.025499999988824,
+            48.98087600013241,
+            48.54870899999514,
+            29.66124999988824
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 29.66124999988824,
+          "medianMs": 44.025499999988824,
+          "maxMs": 48.98087600013241,
+          "javascriptBytes": 1060578,
+          "mappedJavascriptBytes": 33860,
+          "hermesBytes": 1311072,
+          "hermesDeltaBytes": 50344
+        },
+        {
+          "key": "android/compatibility",
+          "platform": "android",
+          "variant": "compatibility",
+          "samples": [
+            24.610374999931082,
+            40.05749999987893,
+            55.97508299979381,
+            46.64158400008455,
+            49.16400000010617
+          ],
+          "sampleRounds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "failedAttempts": [],
+          "attempted": 5,
+          "warmups": 1,
+          "minMs": 24.610374999931082,
+          "medianMs": 46.64158400008455,
+          "maxMs": 55.97508299979381,
+          "javascriptBytes": 1119622,
+          "mappedJavascriptBytes": 92687,
+          "hermesBytes": 1388120,
+          "hermesDeltaBytes": 127392
+        }
+      ],
+      "failures": []
+    }
+  ],
+  "cohortMedianRanges": [
+    {
+      "key": "ios/plain",
+      "minMs": 21.780750036239624,
+      "medianMs": 22.576625049114227,
+      "maxMs": 22.89345896244049,
+      "cohortMedians": [
+        {
+          "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+          "medianMs": 22.576625049114227
+        },
+        {
+          "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+          "medianMs": 21.780750036239624
+        },
+        {
+          "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+          "medianMs": 22.89345896244049
+        }
+      ]
+    },
+    {
+      "key": "ios/core",
+      "minMs": 22.000042021274567,
+      "medianMs": 22.45695799589157,
+      "maxMs": 23.035582959651947,
+      "cohortMedians": [
+        {
+          "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+          "medianMs": 22.45695799589157
+        },
+        {
+          "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+          "medianMs": 22.000042021274567
+        },
+        {
+          "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+          "medianMs": 23.035582959651947
+        }
+      ]
+    },
+    {
+      "key": "ios/compatibility",
+      "minMs": 21.484957993030548,
+      "medianMs": 22.5276660323143,
+      "maxMs": 23.349792003631592,
+      "cohortMedians": [
+        {
+          "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+          "medianMs": 23.349792003631592
+        },
+        {
+          "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+          "medianMs": 21.484957993030548
+        },
+        {
+          "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+          "medianMs": 22.5276660323143
+        }
+      ]
+    },
+    {
+      "key": "android/plain",
+      "minMs": 42.514458999969065,
+      "medianMs": 47.34954100009054,
+      "maxMs": 54.10891699977219,
+      "cohortMedians": [
+        {
+          "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+          "medianMs": 54.10891699977219
+        },
+        {
+          "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+          "medianMs": 42.514458999969065
+        },
+        {
+          "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+          "medianMs": 47.34954100009054
+        }
+      ]
+    },
+    {
+      "key": "android/core",
+      "minMs": 43.0693330001086,
+      "medianMs": 44.025499999988824,
+      "maxMs": 46.06491700001061,
+      "cohortMedians": [
+        {
+          "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+          "medianMs": 43.0693330001086
+        },
+        {
+          "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+          "medianMs": 46.06491700001061
+        },
+        {
+          "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+          "medianMs": 44.025499999988824
+        }
+      ]
+    },
+    {
+      "key": "android/compatibility",
+      "minMs": 46.08429199969396,
+      "medianMs": 46.64158400008455,
+      "maxMs": 46.846584000159055,
+      "cohortMedians": [
+        {
+          "cohortId": "0698d48a-a7f8-469f-ba7a-7dc7eb63765d",
+          "medianMs": 46.846584000159055
+        },
+        {
+          "cohortId": "4620d156-8d34-40f2-87dc-d0926c34bbbc",
+          "medianMs": 46.08429199969396
+        },
+        {
+          "cohortId": "e34294a8-4a94-4414-981a-58b779ae61a6",
+          "medianMs": 46.64158400008455
+        }
+      ]
+    }
+  ],
+  "artifactEquality": [
+    {
+      "key": "ios/plain",
+      "javascriptEqual": true,
+      "sourceMapEqual": true,
+      "hermesEqual": true,
+      "nativeBinaryEqual": false,
+      "javascriptHashes": [
+        "e91ba335a13f6f879197a435357ebc737157940ae40d9153415226a465db6c45",
+        "e91ba335a13f6f879197a435357ebc737157940ae40d9153415226a465db6c45",
+        "e91ba335a13f6f879197a435357ebc737157940ae40d9153415226a465db6c45"
+      ],
+      "sourceMapHashes": [
+        "63cc71385dcbb368f0371921366c15652d42dd1533aee2a4bc66ef0b79cb9f75",
+        "63cc71385dcbb368f0371921366c15652d42dd1533aee2a4bc66ef0b79cb9f75",
+        "63cc71385dcbb368f0371921366c15652d42dd1533aee2a4bc66ef0b79cb9f75"
+      ],
+      "hermesHashes": [
+        "c661b97ac35cc11280f4a1e31c3136b5a7e2a29225710ada7af7becaa9191551",
+        "c661b97ac35cc11280f4a1e31c3136b5a7e2a29225710ada7af7becaa9191551",
+        "c661b97ac35cc11280f4a1e31c3136b5a7e2a29225710ada7af7becaa9191551"
+      ],
+      "nativeBinaryHashes": [
+        "327d97a5c4535b3edda8ec91c1d05fc1def154ff0d4101f9a172a5e86a7d347f",
+        "762baef5d5efed3a5e750ad4d0cd304dcc79f030479a59ce5da944f03ae71a98",
+        "c714b3fd925ac1464b777303be6af9d2ec2604af4aee3285f2ba5cb11b332e39"
+      ]
+    },
+    {
+      "key": "ios/core",
+      "javascriptEqual": true,
+      "sourceMapEqual": true,
+      "hermesEqual": true,
+      "nativeBinaryEqual": false,
+      "javascriptHashes": [
+        "a3b01df202a3bda7764ade802109216937939f7c2a56980559234729e7db7e07",
+        "a3b01df202a3bda7764ade802109216937939f7c2a56980559234729e7db7e07",
+        "a3b01df202a3bda7764ade802109216937939f7c2a56980559234729e7db7e07"
+      ],
+      "sourceMapHashes": [
+        "c582b7790fdc7eba934fb72f84bc08d732013062270782f1f566498c252ac5a5",
+        "c582b7790fdc7eba934fb72f84bc08d732013062270782f1f566498c252ac5a5",
+        "c582b7790fdc7eba934fb72f84bc08d732013062270782f1f566498c252ac5a5"
+      ],
+      "hermesHashes": [
+        "3767fa1ab8d513f76751b699f1ac80e81ccc6cadf82eff947498d430332c912b",
+        "3767fa1ab8d513f76751b699f1ac80e81ccc6cadf82eff947498d430332c912b",
+        "3767fa1ab8d513f76751b699f1ac80e81ccc6cadf82eff947498d430332c912b"
+      ],
+      "nativeBinaryHashes": [
+        "0b671276aedf58cddf979f519a9121a986597c2fbba19c3ffcb0f85d71f05686",
+        "32d14ae99873d27dc0c118143873727757fb4a6fb7e0cfaaa4dd489082c10368",
+        "baefc8e8c228382871e647debf3119eda5a5cb9a4094a156fa828e63bbcadffc"
+      ]
+    },
+    {
+      "key": "ios/compatibility",
+      "javascriptEqual": true,
+      "sourceMapEqual": true,
+      "hermesEqual": true,
+      "nativeBinaryEqual": false,
+      "javascriptHashes": [
+        "c461ae857bdf337ffa2cd1ffb64b56cf33b452c14bfb013318905f9bdb325d8b",
+        "c461ae857bdf337ffa2cd1ffb64b56cf33b452c14bfb013318905f9bdb325d8b",
+        "c461ae857bdf337ffa2cd1ffb64b56cf33b452c14bfb013318905f9bdb325d8b"
+      ],
+      "sourceMapHashes": [
+        "32a67bc020e5bce4d949a9663dcecd7bafcdaa26cb8f7085f168d5bb2ff79dc6",
+        "32a67bc020e5bce4d949a9663dcecd7bafcdaa26cb8f7085f168d5bb2ff79dc6",
+        "32a67bc020e5bce4d949a9663dcecd7bafcdaa26cb8f7085f168d5bb2ff79dc6"
+      ],
+      "hermesHashes": [
+        "42442d57d895caa2c111d50916b3cd8c235f5328bae36ae96cb51df8a12d63f9",
+        "42442d57d895caa2c111d50916b3cd8c235f5328bae36ae96cb51df8a12d63f9",
+        "42442d57d895caa2c111d50916b3cd8c235f5328bae36ae96cb51df8a12d63f9"
+      ],
+      "nativeBinaryHashes": [
+        "f9339b72dcecb53630d7aceb7c4df1b005162812f0bea3ed84f0afa345add958",
+        "e37b93c8128152267769f5ab99d8e37f1d6f40759fcbb3b1042be984720077e3",
+        "287860963d50b10d3b0782986709d885c7d3546ff9782ab442f1cfa2f0bc4884"
+      ]
+    },
+    {
+      "key": "android/plain",
+      "javascriptEqual": true,
+      "sourceMapEqual": true,
+      "hermesEqual": true,
+      "nativeBinaryEqual": false,
+      "javascriptHashes": [
+        "723a75a5f7468009c493f68a1afbc328910468dc17757f50df67e04d271e1d19",
+        "723a75a5f7468009c493f68a1afbc328910468dc17757f50df67e04d271e1d19",
+        "723a75a5f7468009c493f68a1afbc328910468dc17757f50df67e04d271e1d19"
+      ],
+      "sourceMapHashes": [
+        "b71b2547654d244fe65e4fcc144c498f0fc084c548340fb87130ca0c0256494d",
+        "b71b2547654d244fe65e4fcc144c498f0fc084c548340fb87130ca0c0256494d",
+        "b71b2547654d244fe65e4fcc144c498f0fc084c548340fb87130ca0c0256494d"
+      ],
+      "hermesHashes": [
+        "a8244cd162196dbde6c99dac88571d5c3b039d110cc32aea9518138a7e7b63e0",
+        "a8244cd162196dbde6c99dac88571d5c3b039d110cc32aea9518138a7e7b63e0",
+        "a8244cd162196dbde6c99dac88571d5c3b039d110cc32aea9518138a7e7b63e0"
+      ],
+      "nativeBinaryHashes": [
+        "02988c35a885feaecebbf8032405900c1ac5a209e8640a063ae91497a22f133b",
+        "53fb8429a9dcde1941855c7e3d2b59bf63d84c715699dae904f1b39734847d19",
+        "849293411046908dfe617392e6416f050d2eff54103d7ff57a73fa428121219f"
+      ]
+    },
+    {
+      "key": "android/core",
+      "javascriptEqual": true,
+      "sourceMapEqual": true,
+      "hermesEqual": true,
+      "nativeBinaryEqual": false,
+      "javascriptHashes": [
+        "09249074cd8e57957115b30baa04f235f90562a96da84e8c8165ce5c70e5f4d1",
+        "09249074cd8e57957115b30baa04f235f90562a96da84e8c8165ce5c70e5f4d1",
+        "09249074cd8e57957115b30baa04f235f90562a96da84e8c8165ce5c70e5f4d1"
+      ],
+      "sourceMapHashes": [
+        "e015404cc4050e1e46abb2b180fbf7e4ff8ed9d59c2ea91296e64db830296a5f",
+        "e015404cc4050e1e46abb2b180fbf7e4ff8ed9d59c2ea91296e64db830296a5f",
+        "e015404cc4050e1e46abb2b180fbf7e4ff8ed9d59c2ea91296e64db830296a5f"
+      ],
+      "hermesHashes": [
+        "6baa056ad435124a0ea458e85972b799b80ed6362a88d1470aa77cf8e1e86267",
+        "6baa056ad435124a0ea458e85972b799b80ed6362a88d1470aa77cf8e1e86267",
+        "6baa056ad435124a0ea458e85972b799b80ed6362a88d1470aa77cf8e1e86267"
+      ],
+      "nativeBinaryHashes": [
+        "45bae803f266cdfd5f7fa401a3d5d10edebbaad971f936b7d43c488652c86fa3",
+        "8ef99c82bc060289a2910c9f8102f7624310572689efa8cec15fbfb8caf729fa",
+        "8fca78ad983c9ac59c4982fb498fdf92a568f6776e74f5c630f503ce8c8b12dd"
+      ]
+    },
+    {
+      "key": "android/compatibility",
+      "javascriptEqual": true,
+      "sourceMapEqual": true,
+      "hermesEqual": true,
+      "nativeBinaryEqual": false,
+      "javascriptHashes": [
+        "69edc948b68d2a6c2eeda947ea61622f2a1ee68d2061e07a40f73480311e60e6",
+        "69edc948b68d2a6c2eeda947ea61622f2a1ee68d2061e07a40f73480311e60e6",
+        "69edc948b68d2a6c2eeda947ea61622f2a1ee68d2061e07a40f73480311e60e6"
+      ],
+      "sourceMapHashes": [
+        "64b7da305365081b628f92d91446a47194c3e0540813b44f28d9eecb568ddc15",
+        "64b7da305365081b628f92d91446a47194c3e0540813b44f28d9eecb568ddc15",
+        "64b7da305365081b628f92d91446a47194c3e0540813b44f28d9eecb568ddc15"
+      ],
+      "hermesHashes": [
+        "22932bbdd203551a331c35aaecfc042ac39c7d1da3e5b17f5706ac5822c4ddb9",
+        "22932bbdd203551a331c35aaecfc042ac39c7d1da3e5b17f5706ac5822c4ddb9",
+        "22932bbdd203551a331c35aaecfc042ac39c7d1da3e5b17f5706ac5822c4ddb9"
+      ],
+      "nativeBinaryHashes": [
+        "91423532380184bab32c621e4d98d3b84b2de67d0802b0253aaf75c9ad730eaf",
+        "431576386d91c58cfd8d1bfc4d87cba40d2bd5806b141c10f15bd85193d0b37d",
+        "e222ca4f4eff0c6f93d8fc224fc70df6154e60ba8453dd47e63ad89539c0c898"
+      ]
+    }
+  ],
+  "excluded": [],
+  "reference": {
+    "archivePath": "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-06-m10-5-expo-hermes",
+    "studyId": "1cd1bcbe-77e6-4b99-8ed7-129faf21cebc",
+    "cohortId": "1b7e4eb1-53af-42e1-933f-b7bd6d002bf1",
+    "status": "legacy-unverified",
+    "reasons": [
+      "direct Node/npm versions were not captured contemporaneously or did not match"
+    ],
+    "complete": true
+  }
+}
