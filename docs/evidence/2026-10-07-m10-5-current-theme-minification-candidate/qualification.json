@@ -1,0 +1,130 @@
+{
+  "format": "crumbs.m10-5-current-theme-minification-candidate",
+  "version": 1,
+  "source": {
+    "baseRevision": "b7c20705109a1ea6a47a7a1ac95cd7c95de79544",
+    "baseContentSha256": "23b89158a7642af4a4f7c8693cd79b2a21a34b74bdf52be967c2efd1049bfebd",
+    "candidateContentSha256": "dd75eff46ab294e28c7706978573a111b0cc6f2019a1a59233b3f220113e4c71",
+    "sourceFiles": 670,
+    "onlyChangedTrackedFile": "packages/css/tsdown.config.ts",
+    "candidateConfigSha256": "cefb3a2ff25222afe1741bc3d21ea368089415fbdb26959aa8a232aa8c8ba150"
+  },
+  "toolchain": {
+    "bun": "1.4.2",
+    "tsdown": "0.21.10",
+    "rolldown": "1.0.0-rc.17",
+    "floorNode": "v22.0.0",
+    "currentNode": "v24.15.0",
+    "platform": "darwin-arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro"
+  },
+  "candidate": {
+    "change": "Set minify: true on the existing theme and theme/core build groups. The default build config and all product source remain unchanged.",
+    "configPatchSha256": "3c7800492c18989c49ab3c044bd3fbe8c351779241af7c5136a672ffc578710f"
+  },
+  "graph": {
+    "metrics": [
+      {
+        "id": "runtime-theme-core-esm-graph-bytes",
+        "currentBytes": 35205,
+        "approvedMaximumBytes": 17271,
+        "ratio": 2.038,
+        "result": "fail"
+      },
+      {
+        "id": "runtime-theme-core-cjs-graph-bytes",
+        "currentBytes": 35426,
+        "approvedMaximumBytes": 17641,
+        "ratio": 2.008,
+        "result": "fail"
+      },
+      {
+        "id": "runtime-tokens-esm-graph-bytes",
+        "currentBytes": 29906,
+        "approvedMaximumBytes": 56013,
+        "ratio": 0.534,
+        "result": "pass"
+      },
+      {
+        "id": "runtime-tokens-cjs-graph-bytes",
+        "currentBytes": 33656,
+        "approvedMaximumBytes": 63308,
+        "ratio": 0.532,
+        "result": "pass"
+      },
+      {
+        "id": "runtime-theme-compatibility-esm-graph-bytes",
+        "currentBytes": 86996,
+        "approvedMaximumBytes": 44017,
+        "ratio": 1.976,
+        "result": "fail"
+      },
+      {
+        "id": "runtime-theme-compatibility-cjs-graph-bytes",
+        "currentBytes": 89711,
+        "approvedMaximumBytes": 44764,
+        "ratio": 2.004,
+        "result": "fail"
+      }
+    ],
+    "passed": 2,
+    "failed": 4,
+    "repetitions": 5
+  },
+  "runtimeInitialization": {
+    "scenarios": [
+      {
+        "runtime": "floor",
+        "format": "esm",
+        "currentUnminifiedMedianMs": 8.393375000000002,
+        "candidateMinifiedMedianMs": 8.128499999999999,
+        "improvementPercent": 3.16,
+        "approvedMaximumMs": 7.553,
+        "result": "fail"
+      },
+      {
+        "runtime": "floor",
+        "format": "cjs",
+        "currentUnminifiedMedianMs": 5.221874999999999,
+        "candidateMinifiedMedianMs": 4.7344170000000005,
+        "improvementPercent": 9.33,
+        "approvedMaximumMs": 4.083,
+        "result": "fail"
+      },
+      {
+        "runtime": "current",
+        "format": "esm",
+        "currentUnminifiedMedianMs": 4.594791999999998,
+        "candidateMinifiedMedianMs": 4.197709,
+        "improvementPercent": 8.64,
+        "approvedMaximumMs": 3.067,
+        "result": "fail"
+      },
+      {
+        "runtime": "current",
+        "format": "cjs",
+        "currentUnminifiedMedianMs": 3.5574580000000005,
+        "candidateMinifiedMedianMs": 3.2959169999999993,
+        "improvementPercent": 7.35,
+        "approvedMaximumMs": 2.444,
+        "result": "fail"
+      }
+    ],
+    "repetitionsPerCell": 15,
+    "warmupsExcludedPerCell": 1
+  },
+  "decision": {
+    "admitted": false,
+    "reason": "All four current theme graph limits still fail at about 1.98x to 2.04x their approved maxima, and all four runtime-initialization medians still exceed their approved absolute maxima. The candidate does not qualify under unchanged gates."
+  },
+  "scope": {
+    "full21MetricGate": "not-run; candidate was rejected at the focused graph gate",
+    "packageTests": "not-run for this current-source candidate",
+    "expoMetro": "not-run for this current-source candidate",
+    "physicalDeviceWork": "deferred",
+    "publicApiChanged": false,
+    "productionSourceChanged": false,
+    "dependencyOrBudgetChanged": false
+  }
+}

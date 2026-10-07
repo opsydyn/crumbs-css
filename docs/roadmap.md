@@ -2860,3 +2860,11 @@ The [assessment](assessments/2026-10-07-m10-5-final-host-budget-gate.md) and [re
 The result is **11 pass, nine fail and one incomplete**. Four runtime-initialisation budgets, warm transform, and four theme/core or compatibility-theme graph budgets fail unchanged limits. Incremental rebuild remains incomplete because Expo 56.0.23 / Metro 0.84.5 differs from the approved Expo 56.0.4 / Metro 0.84.4 baseline; React Native 0.85.3 matches. No API, dependency, baseline, threshold or enforcement rule changed. Physical-device work remains deferred, and **M10.5 remains unqualified**.
 
 Next recommended numbered slice: **M10.5 — select one API-preserving remediation candidate for the runtime-initialisation and theme graph failures using the current source and graph evidence.** Preserve the full API and all budgets; do not repeat rejected cache or static-extraction candidates.
+
+### 2026-10-07 — M10.5 current-source theme-minification candidate
+
+The [assessment](assessments/2026-10-07-m10-5-current-theme-minification-candidate.md) and [retained reports](evidence/2026-10-07-m10-5-current-theme-minification-candidate/README.md) screen minification on current product source b7c2070. The scratch candidate changes only the theme and theme/core build minify options; it reduces the four graphs by 45–48%, but all remain about twice their unchanged approved maxima. All four 15-sample Node initialization medians improve modestly and still exceed their limits. The token graphs pass. No full candidate suite was run after the graph gate failed.
+
+No production source, API, dependency, budget, baseline, threshold, or enforcement rule changed. The current-source full host result remains 11 pass, nine fail, and one incomplete; **M10.5 remains unqualified**. Physical-device acceptance remains deferred.
+
+Next recommended slice: **M10.5 — review the accepted runtime-budget policy against the current exact host gate and already-retained Expo/Hermes consumer evidence. Decide whether to retain these package-host gates as binding or propose a distinct API-preserving architecture path; keep every registry value unchanged until any per-metric change is explicitly approved.**
