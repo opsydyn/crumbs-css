@@ -2852,3 +2852,11 @@ The [assessment](assessments/2026-10-07-m10-5-noncaching-adapter-feasibility.md)
 No production source, API, dependency, budget, baseline, or enforcement rule changed. **M10.5 remains open** for four runtime-initialisation failures, the warm-transform failure, and four theme graph-size failures. Physical-device work remains deferred.
 
 Next recommended numbered slice: **M10.5 — run the final host-budget gate** against current tracked source with approved selectors and limits fixed. Record each metric as pass, fail, or incomplete; preserve physical-device acceptance as deferred.
+
+### 2026-10-07 — M10.5 final current-source host-budget gate
+
+The [assessment](assessments/2026-10-07-m10-5-final-host-budget-gate.md) and [retained report](evidence/2026-10-07-m10-5-final-host-budget-gate/README.md) complete all 21 approved host comparisons against current source revision `b7c2070` and content digest `23b89158a7642af4a4f7c8693cd79b2a21a34b74bdf52be967c2efd1049bfebd`. The prior report digest was stale: 12 source paths changed or were added, so this run is the current gate. Source identity and all 145 built artifact hashes were stable during collection. The exact Node 22.0.0 floor and Node 24.15.0 current-runtime cohorts, clean frozen install, full package check and budget registry validation are retained.
+
+The result is **11 pass, nine fail and one incomplete**. Four runtime-initialisation budgets, warm transform, and four theme/core or compatibility-theme graph budgets fail unchanged limits. Incremental rebuild remains incomplete because Expo 56.0.23 / Metro 0.84.5 differs from the approved Expo 56.0.4 / Metro 0.84.4 baseline; React Native 0.85.3 matches. No API, dependency, baseline, threshold or enforcement rule changed. Physical-device work remains deferred, and **M10.5 remains unqualified**.
+
+Next recommended numbered slice: **M10.5 — select one API-preserving remediation candidate for the runtime-initialisation and theme graph failures using the current source and graph evidence.** Preserve the full API and all budgets; do not repeat rejected cache or static-extraction candidates.

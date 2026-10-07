@@ -1,0 +1,153 @@
+{
+  "format": "crumbs.m10-5-final-host-budget-gate",
+  "version": 1,
+  "recordedAt": "2026-10-07T14:44:20.764Z",
+  "source": {
+    "revision": "b7c20705109a1ea6a47a7a1ac95cd7c95de79544",
+    "contentSha256": "23b89158a7642af4a4f7c8693cd79b2a21a34b74bdf52be967c2efd1049bfebd",
+    "sourceFiles": 670,
+    "contentStableDuringCollection": true,
+    "builtArtifacts": 145,
+    "artifactHashesStableDuringCollection": true,
+    "previousGateContentSha256": "db9a02ecd57c1c0c11f96ea19640fb975f447ae03bf52117ef2dcc3c349f9894",
+    "previousGateFileCount": 667,
+    "changedOrAddedFilesSincePreviousGate": 12,
+    "report": "host-budgets/comparison.json",
+    "sourceDelta": "source-delta.json"
+  },
+  "toolchain": {
+    "bun": "1.4.2",
+    "floorNode": {
+      "version": "v22.0.0",
+      "path": "/Users/alancurrie/.local/share/fnm/node-versions/v22.0.0/installation/bin/node",
+      "sha256": "9507031f6769f2381eae353b3614bafa871c957dc6f2ae86a3af948acdf9b178"
+    },
+    "currentNode": {
+      "version": "v24.15.0",
+      "path": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+      "sha256": "3200fbd9f7fd4410426dd541e10d1ab829d3472f270d743c7fabd1696c03fe32"
+    },
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "metroPort": 8093
+  },
+  "result": {
+    "performanceQualified": false,
+    "metrics": 21,
+    "pass": 11,
+    "fail": 9,
+    "incomplete": 1,
+    "failedMetrics": [
+      {
+        "id": "runtime-initialization-node22-esm",
+        "baseline": 6.293542000000002,
+        "median": 8.393375000000002,
+        "deltaPercent": 33.364884193988054
+      },
+      {
+        "id": "runtime-initialization-node22-cjs",
+        "baseline": 3.401791000000001,
+        "median": 5.221874999999999,
+        "deltaPercent": 53.50369849294084
+      },
+      {
+        "id": "runtime-initialization-current-esm",
+        "baseline": 2.555624999999999,
+        "median": 4.594791999999998,
+        "deltaPercent": 79.79132306187331
+      },
+      {
+        "id": "runtime-initialization-current-cjs",
+        "baseline": 2.036500000000002,
+        "median": 3.5574580000000005,
+        "deltaPercent": 74.68490056469417
+      },
+      {
+        "id": "warm-transform-ms",
+        "baseline": 5.664125000000013,
+        "median": 9.973375000000033,
+        "deltaPercent": 76.0797122238653
+      },
+      {
+        "id": "runtime-theme-core-esm-graph-bytes",
+        "baseline": 17271,
+        "median": 64549,
+        "deltaPercent": 273.7421110532106
+      },
+      {
+        "id": "runtime-theme-core-cjs-graph-bytes",
+        "baseline": 17641,
+        "median": 65408,
+        "deltaPercent": 270.772631936965
+      },
+      {
+        "id": "runtime-theme-compatibility-esm-graph-bytes",
+        "baseline": 44017,
+        "median": 164215,
+        "deltaPercent": 273.0717677261058
+      },
+      {
+        "id": "runtime-theme-compatibility-cjs-graph-bytes",
+        "baseline": 44764,
+        "median": 171842,
+        "deltaPercent": 283.8843713698508
+      }
+    ],
+    "incompleteMetrics": [
+      {
+        "id": "incremental-rebuild",
+        "baselineMedianMs": 123.95049999999901,
+        "currentMedianMs": 131.61874999999964,
+        "observedDeltaPercent": 6.186542208382126,
+        "status": "incomplete-environment-mismatch",
+        "environmentDifferences": [
+          "environment.expo",
+          "environment.metro"
+        ]
+      }
+    ]
+  },
+  "checks": {
+    "command": "bun run check",
+    "status": "passed",
+    "crumbsCss": {
+      "tests": 1503,
+      "passed": 1502,
+      "skipped": 1,
+      "failed": 0
+    },
+    "storybook": {
+      "tests": 23,
+      "passed": 23,
+      "failed": 0
+    },
+    "budgetsValidate": {
+      "valid": true,
+      "registryReady": false,
+      "baselineIssues": 0,
+      "pendingThresholds": [
+        "js-frame-time",
+        "ui-frame-time",
+        "allocation-bytes",
+        "retained-memory-bytes"
+      ],
+      "missingBaselines": [
+        "js-frame-time",
+        "ui-frame-time",
+        "allocation-bytes"
+      ],
+      "diagnosticBaselines": [
+        "retained-memory-bytes"
+      ]
+    }
+  },
+  "controls": {
+    "approvedBaselinesChanged": false,
+    "approvedThresholdsChanged": false,
+    "publicApiChanged": false,
+    "productionRuntimeDependencyChanged": false,
+    "physicalDeviceWork": "deferred"
+  }
+}
