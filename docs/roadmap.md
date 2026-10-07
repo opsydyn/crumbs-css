@@ -2810,3 +2810,11 @@ The [current-source phase attribution and candidate assessment](assessments/2026
 No production source, API, dependency, baseline, threshold or enforcement rule changed. **M10.5 remains open** for four runtime-initialisation failures, the warm-transform failure and four theme graph-size failures. Physical-device work remains deferred.
 
 Next recommended roadmap slice: **M10.5 — design and test the bounded compiler-session lifecycle and residual warm-transform reductions**, keeping development identifiers, exact output parity, dependency invalidation and the existing 6.514 ms ceiling fixed. Require an explicit Metro disposal owner and a full-transform pass before production admission.
+
+### 2026-10-07 — M10.5 current-source compiler-session requalification
+
+The [assessment](assessments/2026-10-07-m10-5-compiler-session-requalification.md) and [raw qualification packet](evidence/2026-10-07-m10-5-compiler-session-requalification/README.md) requalify the retained esbuild-session candidate against current source. Its fixed 105-process matrix preserves exact output/receipt hashes for 6,690 paired rows, and the owned-context idle cycles pass at 1, 30 and 120 seconds. Actual Metro nevertheless returns the prior import-removal result after the entry is restored; non-threaded shutdown also leaves four worker/service processes at the two-second gate check.
+
+Every retained timing variant is slower than its matched fresh control: the fastest medians are 32.00/32.23/35.09 ms versus 10.64/10.65/10.79 ms for the seven-entry, hot-scan and 32-entry workloads. This is not an official host-budget comparison. The current-host warm-transform failure remains at 9.754042 ms against the unchanged 6.514 ms maximum. The candidate is rejected; no runtime, API, dependency, baseline or threshold changed, and no device test was run.
+
+Next recommended slice: **M10.5 — make retained-context identity fail closed across changed and restored compiler inputs, then pass exact Metro source/input/metadata/result parity before another performance comparison.**
