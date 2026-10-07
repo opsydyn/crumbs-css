@@ -1,0 +1,135 @@
+{
+  "formatVersion": 1,
+  "status": "passed",
+  "metric": {
+    "id": "incremental-rebuild",
+    "selector": "metro-incremental.direct-css-edit-ms.median",
+    "baselineEvidence": "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json",
+    "candidateEvidence": "metro-incremental.json",
+    "baselineSourceRevision": "43c5ece39360cf321fdb074d82cee41d5daaba23",
+    "baselineSamplesMs": [
+      123.95049999999901,
+      122.8393750000032,
+      122.82970799999748,
+      126.82683300000281,
+      125.72208399999727
+    ],
+    "candidateSamplesMs": [
+      130.28020800000013,
+      130.75604199999998,
+      130.36320799999976,
+      132.35929099999976,
+      129.65354099999968
+    ],
+    "baselineMedianMs": 123.95049999999901,
+    "candidateMedianMs": 130.36320799999976,
+    "regressionPercent": 5.17360397900839,
+    "approvedMaximumRegressionPercent": 10,
+    "computedRelativeMaximumMs": 136.34554999999892,
+    "approvedAbsoluteMaximumMs": 137.506,
+    "pass": true
+  },
+  "identity": {
+    "environmentMatchesApprovedBaseline": true,
+    "protocolMatchesApprovedBaseline": true,
+    "environment": {
+      "platform": "darwin",
+      "architecture": "arm64",
+      "osRelease": "25.6.0",
+      "cpu": "Apple M4 Pro",
+      "expo": "56.0.4",
+      "metro": "0.84.4",
+      "reactNative": "0.85.3",
+      "expoMetroRuntime": "56.0.12",
+      "react": "19.2.5",
+      "reactDom": "19.2.5",
+      "babelPresetExpo": "56.0.12",
+      "expoMetroConfig": "56.0.12",
+      "resolvedMetro": "0.84.4",
+      "expoPackage": "56.0.4"
+    },
+    "protocol": {
+      "requestUrl": "/src/incremental-entry.bundle?platform=ios&dev=true&minify=false&modulesOnly=false&runModule=true",
+      "repetitions": 5,
+      "editKind": "direct-css-source",
+      "cacheState": "One cleared Metro server and warm initial graph; three dependency-only controls (plain token, nested .css.ts and workspace source) prove parent rebuilds before one excluded direct-edit warmup and five retained direct .css.ts edits; dependency receipts require the new baked value and absence of the old value"
+    },
+    "dependencyControls": [
+      {
+        "kind": "plain-token",
+        "compiledValuePresent": true,
+        "previousCompiledValueAbsent": true
+      },
+      {
+        "kind": "nested-css",
+        "compiledValuePresent": true,
+        "previousCompiledValueAbsent": true
+      },
+      {
+        "kind": "workspace-source",
+        "compiledValuePresent": true,
+        "previousCompiledValueAbsent": true
+      }
+    ],
+    "strictDiagnosticsConfigurationControlPassed": true,
+    "fixturesRestored": {
+      "currentInputsMatch": true,
+      "style": true,
+      "token": true,
+      "baseStyle": true,
+      "workspaceToken": true
+    }
+  },
+  "sourceProvenance": {
+    "compilerSourceRevision": "dbf491d12c5700f50c77d646873bece3bf341f20",
+    "currentTrackedSourceSha256": "4e519e759379541fbdc557e61e3968e59c94c6f3e617508271f4ace56d6ef70d",
+    "trackedSourceFileCount": 675,
+    "benchmarkRunnerSha256": "dabb2f18076ea85116d76e0c13ca7dd7e1f8f218a079d74e0c03e98e7a51af66",
+    "currentMetroConfigSha256": "84752318147cb5d1ffc4cedcbe5a7a9f119e9d5d4d3b349876d6267b7f673483",
+    "currentMetroConfigMatchesDisposableScaffold": true,
+    "currentSourcePackageManifestSha256": "99d7b70aa31b7047eaf117d0ef171a98c509b68571f321cf13ec3f55dde4286f",
+    "disposablePlaygroundManifestSha256": "b4c6618af6c02b68fb9003c6418ee7a1ded9d8674d2f467b034a3a182f76fca7",
+    "disposableLockfileSha256": "198801517a9c77a2f64ae71b4976bc511660cd5f427739f4ee7a148ffcd17d3a",
+    "baselineScaffoldRevision": "43c5ece39360cf321fdb074d82cee41d5daaba23",
+    "currentRuntimeArtifactFiles": 89,
+    "currentRuntimeArtifactManifestSha256": "e8ae2fec33a5e6dbc6755991d159a7220de4fe1947c59b1dd7d34dbdd08de68e",
+    "relevantRuntimeArtifactSha256": {
+      "metroPlugin": "5b33511a04735c8660840f8445a0da11ddb905b70a99ffd066423572b47630a5",
+      "transformer": "cf56d44884095a119a5f9148ae1fa55f19cad2b416b4edccd180f3f7a726659e",
+      "style": "865d9795a2e2c7aab662d59ccc4bc45ad36f7258b05a1dc3b63de36de92d6747"
+    },
+    "fixtureSha256": {
+      "entry": "144d8b53dd4ca114521b1ffe31490dc2235c5637cb68857ef2cc2e8d5b10c67d",
+      "style": "128e56aed26248d9a4e5a71e9146b80b55d7f8a2f908b90552897203c9246240",
+      "token": "7fc7402174a685353ec647f0ca9179eca94ee60e132f0362955a8f4600f984e7",
+      "baseStyle": "457e351c0623cb8618446ff0b22a1a254033c073afc80ecb44d4b5e6aedd0142",
+      "workspaceToken": "74fd37b636eb573ef271e8816137124bbd9774d713c8286bea3e5b98ba409816"
+    },
+    "currentArtifactsOverlaidIntoBaselineScaffold": true,
+    "relevantPackageExportsMatchCurrentSource": true
+  },
+  "scaffold": {
+    "environment": {
+      "expo": "56.0.4",
+      "expoMetroConfig": "56.0.12",
+      "expoMetroRuntime": "56.0.12",
+      "metro": "0.84.4",
+      "reactNative": "0.85.3",
+      "react": "19.2.5",
+      "reactDom": "19.2.5",
+      "babelPresetExpo": "56.0.12"
+    },
+    "resolverOverlay": {
+      "dependency": "@vanilla-extract/css",
+      "declaredRange": "^1.20.1",
+      "resolvedVersion": "1.20.1",
+      "expoMetroReactAndReactNativeVersionsChanged": false
+    }
+  },
+  "rawReportSha256": "3c8cab5614ccdbab9249ad6d896eae8dd45c669567846dbc3d46dacd104ed47a",
+  "runtimeArtifactManifestSha256": "e8ae2fec33a5e6dbc6755991d159a7220de4fe1947c59b1dd7d34dbdd08de68e",
+  "limits": [
+    "Host Expo/Metro development evidence; no release Hermes, native rendering, or physical-device claim.",
+    "Four runtime-initialization failures, warm-transform failure, and four theme graph-size failures remain open."
+  ]
+}
