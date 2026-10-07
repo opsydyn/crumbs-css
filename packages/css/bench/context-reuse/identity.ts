@@ -18,7 +18,7 @@ export type CompileRequest = Readonly<{
 }>;
 export const reuseReasons = Object.freeze([
   "unknown-build-option", "unknown-plugin", "incomplete-resolution-domain", "configuration-changed", "entry-buffer-mismatch",
-  "source-unstable", "loaded-artifact-changed", "package-info-changed",
+  "source-changed", "source-unstable", "loaded-artifact-changed", "package-info-changed",
 ] as const);
 export type ReuseReason = typeof reuseReasons[number];
 export type ReuseEligibility = Readonly<

@@ -95,8 +95,8 @@ export function patchReceiptScopes(filename: string, source: string): string {
   replace('current = captureConfiguration(request);', 'current = __crumbsReceiptPass.run(() => captureConfiguration(request));');
   replace('loadedReceipt ? assessReuse(request, loadedReceipt, previousReceipt) : undefined', 'loadedReceipt ? __crumbsReceiptPass.run(() => assessReuse(request, loadedReceipt!, previousReceipt)) : undefined');
   replace('await disposeKey(plan.evict);', '__crumbsReceiptPass.close(); await disposeKey(plan.evict); __crumbsReceiptPass = createGuardReceiptPass();');
-  replace('const before = sourceInventory(request);', 'const before = __crumbsReceiptPass.run(() => sourceInventory(request));\n      __crumbsReceiptPass.close();');
-  replace('const stable = before === sourceInventory(request);', '__crumbsReceiptPass = createGuardReceiptPass();\n      const stable = before === __crumbsReceiptPass.run(() => sourceInventory(request));');
+  replace('try { before = sourceInventory(request); }', 'try { before = __crumbsReceiptPass.run(() => sourceInventory(request));\n      __crumbsReceiptPass.close(); __crumbsReceiptPass = createGuardReceiptPass(); }');
+  replace('const stable = before === sourceInventory(request);', '__crumbsReceiptPass.close(); __crumbsReceiptPass = createGuardReceiptPass();\n      const stable = before === __crumbsReceiptPass.run(() => sourceInventory(request));');
   replace('const after = assessReuse(request, loadedReceipt, previousReceipt);', 'const after = __crumbsReceiptPass.run(() => assessReuse(request, loadedReceipt!, previousReceipt));\n      __crumbsReceiptPass.close();');
   replace('policy = forgetAdmissionKey(policy, plan.key); await disposeKey(plan.key); if (disabled) await drain(); throw error;', 'if (error instanceof GuardReceiptUnstableError) { lastBypassReason = \"source-unstable\"; await drain(); return fresh(request, evaluate); }\n      policy = forgetAdmissionKey(policy, plan.key); await disposeKey(plan.key); if (disabled) await drain(); throw error;');
   replace('\n  }\n  return {\n    compile(request)', '\n    } finally { __crumbsReceiptPass.close(); }\n  }\n  return {\n    compile(request)');

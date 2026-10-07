@@ -1,4 +1,5 @@
 import { expect, it } from "bun:test";
+import { utimesSync, writeFileSync } from "node:fs";
 import { createCompileSession } from "../bench/context-reuse/compile-session";
 import { createQualificationReceiptPlugin } from "../bench/context-reuse/identity";
 import { ControlledBackend, ControlledClock, deferred, flushGate, sessionFixture } from "./support/context-reuse";
@@ -147,19 +148,47 @@ it("validates session settings and freezes detached compile receipts and snapsho
     for (const value of [receipt, receipt.inputs, Object.values(receipt.inputs)[0], receipt.watchFiles, session.snapshot()]) expect(Object.isFrozen(value)).toBe(true);
   } finally { await session.close(); fixture.remove(); }
 });
-it("real esbuild receipts rebuild entry/import bytes, recover syntax errors and close directly", async () => {
+it("real esbuild sessions fail closed on source changes, recover syntax errors and close directly", async () => {
   const fixture = sessionFixture();
   const session = createCompileSession({ settings: { capacity: 2, admission: "immediate" }, mode: "immediate", idleMs: 1000 });
   try {
     fixture.put("theme.ts", "export const token = 111;"); fixture.put("A.css.ts", "import { token } from './theme'; export const value = token;");
     const first = await session.compile(fixture.request()); expect(first.source).toContain("111");
+    expect(await session.compile(fixture.request())).toEqual(first); expect(session.snapshot().hits).toBe(1);
     fixture.put("theme.ts", "export const token = 222;"); const second = await session.compile(fixture.request()); expect(second.source).toContain("222"); expect(second.source).not.toContain("111");
     expect(second.inputs).not.toBe(first.inputs); expect(second.watchFiles.some(path => path.endsWith("theme.ts"))).toBe(true);
+    expect(session.snapshot()).toMatchObject({ live: 0, lastBypassReason: "source-changed" });
     fixture.put("A.css.ts", "export const value = 333;"); const third = await session.compile(fixture.request()); expect(third.source).toContain("333"); expect(third.watchFiles.some(path => path.endsWith("theme.ts"))).toBe(false);
+    expect(session.snapshot()).toMatchObject({ live: 0, lastBypassReason: "source-changed" });
     fixture.put("A.css.ts", "export const value = ;"); await expect(session.compile(fixture.request())).rejects.toThrow(); expect(session.snapshot().live).toBe(0);
     fixture.put("A.css.ts", "export const value = 444;"); expect((await session.compile(fixture.request())).source).toContain("444");
-    expect(session.snapshot().hits).toBeGreaterThanOrEqual(2);
+    expect(session.snapshot()).toMatchObject({ live: 0, hits: 1, lastBypassReason: "source-changed" });
   } finally { await session.close(); expect(session.snapshot().live).toBe(0); fixture.remove(); }
+});
+it("real retained sessions fail closed on changed and restored inputs with unchanged file metadata", async () => {
+  const fixture = sessionFixture();
+  const fresh = createCompileSession({ settings: { capacity: 2, admission: "immediate" }, mode: "fresh", idleMs: 1000 });
+  const retained = createCompileSession({ settings: { capacity: 2, admission: "immediate" }, mode: "immediate", idleMs: 1000 });
+  const filePath = fixture.request().filePath;
+  const original = "import { token } from './theme';\nexport const value = token;\n";
+  const editedBase = "import { token } from './theme';\nexport const value = 9;\n";
+  const edited = editedBase + " ".repeat(original.length - editedBase.length);
+  const removedBase = "export const value = 143;\n";
+  const removed = removedBase + " ".repeat(original.length - removedBase.length);
+  const baselineTime = new Date("2020-01-01T00:00:00.000Z");
+  const setSource = (source: string) => { writeFileSync(filePath, source); utimesSync(filePath, baselineTime, baselineTime); };
+  try {
+    fixture.put("theme.ts", "export const token = 141;");
+    expect(edited.length).toBe(original.length);
+    expect(removed.length).toBe(original.length);
+    for (const [index, source] of [original, edited, removed, original].entries()) {
+      setSource(source);
+      const actual = await retained.compile(fixture.request());
+      const expected = await fresh.compile(fixture.request());
+      expect(actual).toEqual(expected);
+      if (index > 0) expect(retained.snapshot()).toMatchObject({ live: 0, lastBypassReason: "source-changed" });
+    }
+  } finally { await retained.close(); await fresh.close(); fixture.remove(); }
 });
 it("real idle timer releases contexts and permits reopening", async () => {
   const fixture = sessionFixture(); const session = createCompileSession({ settings: { capacity: 1, admission: "immediate" }, mode: "immediate", idleMs: 20 });
@@ -221,16 +250,18 @@ it("close and idle teardown do not report success after a disposal failure", asy
     } finally { fixture.remove(); }
   }
 });
-it("real fresh and retained receipts match exactly on stable inputs", async () => {
+it("real session reuses stable inputs and falls back to fresh output when dependency bytes change", async () => {
   const fixture = sessionFixture();
   const fresh = createCompileSession({ settings: { capacity: 2, admission: "immediate" }, mode: "fresh", idleMs: 1000 });
   const retained = createCompileSession({ settings: { capacity: 2, admission: "immediate" }, mode: "immediate", idleMs: 1000 });
   try {
-    for (const value of [111, 222, 333]) {
-      fixture.put("theme.ts", `export const token = ${value};`); fixture.put("A.css.ts", "import { token } from './theme'; export const value = token;");
-      expect(await retained.compile(fixture.request())).toEqual(await fresh.compile(fixture.request()));
-    }
-    expect(retained.snapshot().hits).toBe(2); expect(fresh.snapshot().live).toBe(0);
+    fixture.put("theme.ts", "export const token = 111;"); fixture.put("A.css.ts", "import { token } from './theme'; export const value = token;");
+    const first = await retained.compile(fixture.request()); expect(first).toEqual(await fresh.compile(fixture.request()));
+    expect(await retained.compile(fixture.request())).toEqual(await fresh.compile(fixture.request()));
+    expect(retained.snapshot().hits).toBe(1);
+    fixture.put("theme.ts", "export const token = 222;");
+    expect(await retained.compile(fixture.request())).toEqual(await fresh.compile(fixture.request()));
+    expect(retained.snapshot()).toMatchObject({ live: 0, hits: 1, lastBypassReason: "source-changed" });
   } finally { await retained.close(); await fresh.close(); fixture.remove(); }
 });
 

@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, readdirSync, unlinkSync, symlinkSync, realpathSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { qualificationHash as hash } from './qualify';
+import { isNewMetroTrace, metroTraceId, selectExactMetroTrace } from './metro-trace-selection';
 const root = process.argv[2]!;
 const fixture = JSON.parse(readFileSync(join(root, 'qualification-fixture.json'), 'utf8'));
 const f = { ...fixture, ...fixture.integration, logs: process.argv[4]! };
@@ -10,6 +11,8 @@ const matches = (text: string, property: string, value: number) => ({ padding: [
 const logs = () => readdirSync(f.logs).flatMap(n => readFileSync(join(f.logs, n), 'utf8').trim().split('\n').filter(Boolean).map(line => JSON.parse(line))).sort((a, b) => a.at - b.at).filter(r => r.kind === 'transform' && r.args[1] === f.app && r.args[2].endsWith('Q0.css.ts'));
 async function request(kind: string, property: string, value: number, prior?: number, unchanged?: string) {
     const began = performance.now();
+    const traceRowsBefore = logs();
+    const traceIdsBefore = new Set(traceRowsBefore.filter(row => Number.isSafeInteger(row.pid) && Number.isSafeInteger(row.sequence)).map(metroTraceId));
     let body = '', status = 0, attempts = 0;
     while (performance.now() - began < 30000) {
         attempts++;
@@ -23,21 +26,32 @@ async function request(kind: string, property: string, value: number, prior?: nu
         catch { }
         await Bun.sleep(500);
     }
-    const actual = logs().at(-1);
+    const traceRows = logs();
+    const latestTrace = traceRows.at(-1) ?? traceRowsBefore.at(-1);
     let reference: any, referenceMatched = false;
-    if (status === 200 && actual) {
+    let actual: any, traceResolution: string | undefined, currentEntryHash: string | undefined;
+    if (status === 200 && latestTrace) {
+        currentEntryHash = hash(readFileSync(f.entries[0]));
         const spec: any = { kind: 'performance', transformerPath: f.artifact.transformerPath, mode: 'fresh', capacity: 8 };
-        Object.assign(spec, { id: 'reference-' + kind, app: f.app, entries: f.entries.map((p: string) => relative(f.app, p)), requests: [0], config: actual.args[0], options: actual.args[3], output: join(root, 'reference-' + kind + '.json') });
+        Object.assign(spec, { id: 'reference-' + kind, app: f.app, entries: f.entries.map((p: string) => relative(f.app, p)), requests: [0], config: latestTrace.args[0], options: latestTrace.args[3], output: join(root, 'reference-' + kind + '.json') });
         const specPath = join(root, 'reference-' + kind + '-spec.json'), configPath = join(root, 'reference-' + kind + '-session.json');
         writeFileSync(specPath, JSON.stringify(spec));
         writeFileSync(configPath, JSON.stringify({ mode: 'fresh', settings: { capacity: 8, admission: 'immediate' }, idleMs: 1000, domain: f.domain }));
         const result = Bun.spawnSync([process.argv[5]!, join(f.repo, 'packages/css/bench/context-reuse/qualification-probe.cjs'), specPath], { cwd: f.app, env: { ...process.env, CRUMBS_CONTEXT_QUALIFICATION_CONFIG: configPath }, maxBuffer: 1000000 });
         if (!result.exitCode) {
             reference = JSON.parse(readFileSync(spec.output, 'utf8')).rows[0];
-            referenceMatched = actual.resultHash === reference.resultHash && actual.receipts[0].sourceHash === reference.sourceHash && actual.receipts[0].inputsHash === reference.inputsHash && hash(JSON.stringify(actual.metadata)) === reference.metadataHash;
+            const expected = { entryHash: currentEntryHash, sourceHash: reference.sourceHash, inputsHash: reference.inputsHash, metadataHash: reference.metadataHash, resultHash: reference.resultHash };
+            const candidates = traceRows.filter(row => row.kind === 'transform' && Number.isSafeInteger(row.pid) && Number.isSafeInteger(row.sequence) && row.receipts?.[0]).map(row => ({
+                id: metroTraceId(row), entryHash: row.entryHash, sourceHash: row.receipts[0].sourceHash, inputsHash: row.receipts[0].inputsHash,
+                metadataHash: hash(JSON.stringify(row.metadata)), resultHash: row.resultHash, row,
+            }));
+            const selected = selectExactMetroTrace(candidates, expected);
+            actual = selected?.row;
+            referenceMatched = selected !== undefined;
+            traceResolution = selected ? (isNewMetroTrace(traceIdsBefore, selected) ? 'new-transform' : 'exact-prior-transform-cache-hit') : 'no-exact-transform-trace';
         }
     }
-    const receipt = { kind, property, value, prior, status, attempts, elapsedMs: performance.now() - began, bytes: body.length, sha256: hash(body), expectedPresent: matches(body, property, value), previousAbsent: !prior || !matches(body, property, prior), importerUnchanged: unchanged === undefined ? undefined : hash(readFileSync(f.entries[0])) === unchanged, referenceMatched, actual, reference };
+    const receipt = { kind, property, value, prior, status, attempts, elapsedMs: performance.now() - began, bytes: body.length, sha256: hash(body), expectedPresent: matches(body, property, value), previousAbsent: !prior || !matches(body, property, prior), importerUnchanged: unchanged === undefined ? undefined : hash(readFileSync(f.entries[0])) === unchanged, currentEntryHash, traceResolution, referenceMatched, actual, reference };
     observations.push(receipt);
     writeFileSync(join(root, 'integration-observations.json'), JSON.stringify(observations));
     console.log(kind, status, receipt.expectedPresent, receipt.previousAbsent, referenceMatched, actual?.snapshot?.lastBypassReason);

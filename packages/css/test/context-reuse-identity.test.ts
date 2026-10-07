@@ -24,7 +24,7 @@ function fixture() {
 }
 
 it("pins closed bypass reasons", () => {
-  expect(reuseReasons).toEqual(["unknown-build-option", "unknown-plugin", "incomplete-resolution-domain", "configuration-changed", "entry-buffer-mismatch", "source-unstable", "loaded-artifact-changed", "package-info-changed"]);
+  expect(reuseReasons).toEqual(["unknown-build-option", "unknown-plugin", "incomplete-resolution-domain", "configuration-changed", "entry-buffer-mismatch", "source-changed", "source-unstable", "loaded-artifact-changed", "package-info-changed"]);
 });
 it("hashes configuration bytes, freezes receipts and preserves keys on entry/theme edits", () => {
   const f = fixture(); const before = captureConfiguration(f.request);

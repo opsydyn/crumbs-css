@@ -68,6 +68,7 @@ export function createCompileSession({ settings, idleMs, mode, backend = createR
   let state: SessionSnapshot["state"] = "open";
   let disabled = false; let generation = 0; let pending = 0; let creating = 0;
   let loadedArtifactDomain: string | undefined;
+  let previousSourceInventory: string | undefined;
   let loadedReceipt: ConfigurationReceipt | undefined; let previousReceipt: ConfigurationReceipt | undefined;
   let queue: Promise<void> = Promise.resolve(); let closePromise: Promise<void> | undefined;
   let timer: ReturnType<SessionClock["schedule"]> | undefined; let timerToken = 0;
@@ -113,8 +114,14 @@ export function createCompileSession({ settings, idleMs, mode, backend = createR
     if (state === "closing" || state === "closed") return Promise.reject(new Error("Compile session is closed"));
     return enqueue(work);
   }
-  async function fresh<T>(request: CompileRequest, evaluate: (receipt: CompileReceipt) => Promise<T>) {
-    totals.bypasses++; return evaluate(immutableReceipt(await backend.fresh(request)));
+  async function fresh<T>(request: CompileRequest, evaluate: (receipt: CompileReceipt) => Promise<T>, sourceBefore?: string) {
+    totals.bypasses++;
+    const result = await evaluate(immutableReceipt(await backend.fresh(request)));
+    if (sourceBefore !== undefined) {
+      try { previousSourceInventory = sourceBefore === sourceInventory(request) ? sourceBefore : undefined; }
+      catch { previousSourceInventory = undefined; }
+    }
+    return result;
   }
   async function perform<T>(request: CompileRequest, evaluate: (receipt: CompileReceipt) => Promise<T>): Promise<T> {
     if (mode === "fresh" || disabled) return fresh(request, evaluate);
@@ -125,12 +132,20 @@ export function createCompileSession({ settings, idleMs, mode, backend = createR
       const assessment = loadedReceipt ? assessReuse(request, loadedReceipt, previousReceipt) : undefined;
       lastBypassReason = assessment && assessment.kind !== "eligible" ? assessment.reason : captureReason;
       if (assessment?.kind === "restart-required") disable();
-      await drain(); return fresh(request, evaluate);
+      await drain(); previousSourceInventory = undefined; return fresh(request, evaluate);
+    }
+    let before: string;
+    try { before = sourceInventory(request); }
+    catch (error) {
+      lastBypassReason = error !== null && typeof error === "object" && "reason" in error && error.reason === "source-unstable"
+        ? "source-unstable" : "incomplete-resolution-domain";
+      await drain(); previousSourceInventory = undefined;
+      return fresh(request, evaluate);
     }
     const artifactDomain = JSON.stringify([...new Set(request.domain.loadedArtifacts.map(path => resolve(request.cwd, path)))].sort());
     if (loadedArtifactDomain !== undefined && loadedArtifactDomain !== artifactDomain) {
       // A module owner cannot prove that a newly declared implementation has been loaded.
-      lastBypassReason = "loaded-artifact-changed"; disable(); await drain(); return fresh(request, evaluate);
+      lastBypassReason = "loaded-artifact-changed"; disable(); await drain(); return fresh(request, evaluate, before);
     }
     loadedArtifactDomain ??= artifactDomain;
     loadedReceipt ??= current;
@@ -139,7 +154,11 @@ export function createCompileSession({ settings, idleMs, mode, backend = createR
       lastBypassReason = eligibility.reason;
       if (eligibility.kind === "restart-required") disable();
       await drain(); previousReceipt = eligibility.kind === "fresh" ? current : undefined;
-      return fresh(request, evaluate);
+      return fresh(request, evaluate, before);
+    }
+    if (previousSourceInventory !== undefined && before !== previousSourceInventory) {
+      lastBypassReason = "source-changed"; await drain(); previousReceipt = current;
+      return fresh(request, evaluate, before);
     }
     if (!previousReceipt) generation++;
     previousReceipt = eligibility.receipt;
@@ -150,7 +169,6 @@ export function createCompileSession({ settings, idleMs, mode, backend = createR
       if (disabled) { await drain(); return fresh(request, evaluate); }
     }
     try {
-      const before = sourceInventory(request);
       let receipt: CompileReceipt;
       if (plan.kind === "fresh") receipt = immutableReceipt(await backend.fresh(request));
       else {
@@ -167,9 +185,9 @@ export function createCompileSession({ settings, idleMs, mode, backend = createR
       if (!stable || !verifyBuildInputs(request, Object.keys(receipt.inputs)) || after.kind !== "eligible") {
         lastBypassReason = !stable ? "source-unstable" : after.kind !== "eligible" ? after.reason : "incomplete-resolution-domain";
         if (after.kind === "restart-required") disable();
-        await drain(); return fresh(request, evaluate);
+        await drain(); return fresh(request, evaluate, before);
       }
-      const result = await evaluate(receipt); policy = plan.onSuccess; return result;
+      const result = await evaluate(receipt); policy = plan.onSuccess; previousSourceInventory = before; return result;
     } catch (error) {
       policy = forgetAdmissionKey(policy, plan.key); await disposeKey(plan.key); if (disabled) await drain(); throw error;
     }
