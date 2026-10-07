@@ -2920,3 +2920,11 @@ The [Android evidence packet](evidence/2026-10-07-m10-5-android-packed-consumer/
 This is native emulator rendering evidence only. It adds no performance or host-budget result, does not qualify a standalone app or physical device, and leaves the earlier host report stale for the current source. The protected iOS Simulator was untouched, physical-device work remains deferred, and **M10.5 remains open**. No API, dependency, baseline, selector, or threshold changed.
 
 Next recommended roadmap item: **M10.5 — rerun the final current-source host-budget gate** against the latest tracked source with all approved selectors and thresholds unchanged; record each metric as pass, fail, or incomplete. Keep physical-device acceptance deferred.
+
+### 2026-10-07 — M10.5 final current-source host-budget gate rerun
+
+The [assessment](assessments/2026-10-07-m10-5-final-host-budget-gate-rerun.md) and [host evidence](evidence/2026-10-07-m10-5-final-host-budget-gate-rerun/README.md) refresh the 21 approved host comparisons against commit `dbf491d12c5700f50c77d646873bece3bf341f20` after the additive `theme/token` implementation changed the source identity. The run records **11 pass, nine fail, and one incomplete**. The four runtime-initialization rows, warm transform, and four `theme/core` or compatibility-theme graph rows exceed their unchanged budgets. Incremental rebuild remains incomplete because measured Expo 56.0.23 / Metro 0.84.5 differs from the approved Expo 56.0.4 / Metro 0.84.4; React Native 0.85.3 matches.
+
+The source digest and all 149 built artifact hashes remained stable during collection. Frozen install, repository checks, and budget-registry validation passed; the registry still has future/device-facing thresholds pending. No API, dependency, baseline, threshold, selector, or enforcement rule changed in the gate. Host results do not establish Hermes or physical-device performance, and physical-device work remains deferred. **M10.5 remains unqualified.**
+
+Next recommended numbered slice: **M10.5 — select one API-preserving remediation candidate for the runtime-initialisation, warm-transform, and theme graph failures using current source and graph evidence.** Preserve the full API and approved budgets; avoid rejected cache or static-extraction candidates.

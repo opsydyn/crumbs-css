@@ -1,0 +1,322 @@
+{
+  "format": "crumbs.m10-5-final-host-budget-gate-rerun",
+  "version": 1,
+  "recordedAt": "2026-10-07T18:48:17.920Z",
+  "source": {
+    "revision": "dbf491d12c5700f50c77d646873bece3bf341f20",
+    "contentSha256": "4e519e759379541fbdc557e61e3968e59c94c6f3e617508271f4ace56d6ef70d",
+    "sourceFiles": 675,
+    "contentStableDuringCollection": true,
+    "builtArtifacts": 149,
+    "artifactHashesStableDuringCollection": true,
+    "previousGateRevision": "b7c20705109a1ea6a47a7a1ac95cd7c95de79544",
+    "previousGateContentSha256": "23b89158a7642af4a4f7c8693cd79b2a21a34b74bdf52be967c2efd1049bfebd",
+    "previousGateSourceFiles": 670,
+    "changedOrAddedFilesSincePreviousGate": 17,
+    "removedFilesSincePreviousGate": 0
+  },
+  "toolchain": {
+    "bun": "1.4.2",
+    "nodeFloor": {
+      "version": "v22.0.0",
+      "path": "/Users/alancurrie/.local/share/fnm/node-versions/v22.0.0/installation/bin/node",
+      "sha256": "9507031f6769f2381eae353b3614bafa871c957dc6f2ae86a3af948acdf9b178"
+    },
+    "nodeCurrent": {
+      "version": "v24.15.0",
+      "path": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+      "sha256": "3200fbd9f7fd4410426dd541e10d1ab829d3472f270d743c7fabd1696c03fe32"
+    },
+    "platform": "darwin",
+    "architecture": "arm64",
+    "macOS": "26.6.2",
+    "cpu": "Apple M4 Pro",
+    "runtimeInitializationRepetitions": 15
+  },
+  "incrementalEnvironment": {
+    "measured": {
+      "expo": "56.0.23",
+      "metro": "0.84.5",
+      "reactNative": "0.85.3"
+    },
+    "approved": {
+      "expo": "56.0.4",
+      "metro": "0.84.4",
+      "reactNative": "0.85.3"
+    },
+    "result": "incomplete due Expo and Metro environment mismatch"
+  },
+  "result": {
+    "performanceQualified": false,
+    "metricCount": 21,
+    "statusCounts": {
+      "fail": 9,
+      "pass": 11,
+      "incomplete-environment-mismatch": 1
+    },
+    "metrics": [
+      {
+        "id": "runtime-initialization-node22-esm",
+        "unit": "ms",
+        "result": "fail",
+        "baseline": 6.293542000000002,
+        "currentMedian": 8.6385,
+        "deltaPercent": 37.25974975617859,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-initialization-node22-cjs",
+        "unit": "ms",
+        "result": "fail",
+        "baseline": 3.401791000000001,
+        "currentMedian": 5.336833000000002,
+        "deltaPercent": 56.88303602425899,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-initialization-current-esm",
+        "unit": "ms",
+        "result": "fail",
+        "baseline": 2.555624999999999,
+        "currentMedian": 4.618208000000003,
+        "deltaPercent": 80.70757642455385,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-initialization-current-cjs",
+        "unit": "ms",
+        "result": "fail",
+        "baseline": 2.036500000000002,
+        "currentMedian": 3.728291999999998,
+        "deltaPercent": 83.07350847041465,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "cold-transform-ms",
+        "unit": "ms",
+        "result": "pass",
+        "baseline": 66.404584,
+        "currentMedian": 81.05083400000001,
+        "deltaPercent": 22.056082754768873,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "warm-transform-ms",
+        "unit": "ms",
+        "result": "fail",
+        "baseline": 5.664125000000013,
+        "currentMedian": 10.369791999999961,
+        "deltaPercent": 83.0784454792212,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "incremental-rebuild",
+        "unit": "ms",
+        "result": "incomplete-environment-mismatch",
+        "baseline": 123.95049999999901,
+        "currentMedian": 130.4622500000005,
+        "deltaPercent": 5.253508457006253,
+        "environment": "mismatch",
+        "environmentDifferences": [
+          "environment.expo",
+          "environment.metro"
+        ]
+      },
+      {
+        "id": "editor-tsc-wall-10000",
+        "unit": "ms",
+        "result": "pass",
+        "baseline": 882.1055000000006,
+        "currentMedian": 556.9519580000006,
+        "deltaPercent": -36.86107183324442,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "editor-tsgo-wall-10000",
+        "unit": "ms",
+        "result": "pass",
+        "baseline": 332.92241699999977,
+        "currentMedian": 161.0756250000013,
+        "deltaPercent": -51.617669230125344,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "editor-tsc-memory-10000",
+        "unit": "KiB",
+        "result": "pass",
+        "baseline": 285025,
+        "currentMedian": 215813,
+        "deltaPercent": -24.28278221208666,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "editor-tsgo-memory-10000",
+        "unit": "KiB",
+        "result": "pass",
+        "baseline": 140013,
+        "currentMedian": 112061,
+        "deltaPercent": -19.96386049866798,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "editor-tsc-instantiations-10000",
+        "unit": "count",
+        "result": "pass",
+        "baseline": 490410,
+        "currentMedian": 113973,
+        "deltaPercent": -76.75965008870129,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "editor-tsgo-instantiations-10000",
+        "unit": "count",
+        "result": "pass",
+        "baseline": 490508,
+        "currentMedian": 114072,
+        "deltaPercent": -76.74411018780529,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "editor-first-completion-10000",
+        "unit": "ms",
+        "result": "pass",
+        "baseline": 39.28841699999998,
+        "currentMedian": 33.43762499999997,
+        "deltaPercent": -14.891900582301435,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "editor-warm-completion-10000",
+        "unit": "ms",
+        "result": "pass",
+        "baseline": 30.386750000000006,
+        "currentMedian": 25.119208000000015,
+        "deltaPercent": -17.33499633886477,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-theme-core-esm-graph-bytes",
+        "unit": "bytes",
+        "result": "fail",
+        "baseline": 17271,
+        "currentMedian": 64549,
+        "deltaPercent": 273.7421110532106,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-theme-core-cjs-graph-bytes",
+        "unit": "bytes",
+        "result": "fail",
+        "baseline": 17641,
+        "currentMedian": 65408,
+        "deltaPercent": 270.772631936965,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-tokens-esm-graph-bytes",
+        "unit": "bytes",
+        "result": "pass",
+        "baseline": 56013,
+        "currentMedian": 29906,
+        "deltaPercent": -46.60882295181475,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-tokens-cjs-graph-bytes",
+        "unit": "bytes",
+        "result": "pass",
+        "baseline": 63308,
+        "currentMedian": 33656,
+        "deltaPercent": -46.83768244139761,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-theme-compatibility-esm-graph-bytes",
+        "unit": "bytes",
+        "result": "fail",
+        "baseline": 44017,
+        "currentMedian": 164215,
+        "deltaPercent": 273.0717677261058,
+        "environment": "exact",
+        "environmentDifferences": []
+      },
+      {
+        "id": "runtime-theme-compatibility-cjs-graph-bytes",
+        "unit": "bytes",
+        "result": "fail",
+        "baseline": 44764,
+        "currentMedian": 171842,
+        "deltaPercent": 283.8843713698508,
+        "environment": "exact",
+        "environmentDifferences": []
+      }
+    ],
+    "failedMetrics": [
+      "runtime-initialization-node22-esm",
+      "runtime-initialization-node22-cjs",
+      "runtime-initialization-current-esm",
+      "runtime-initialization-current-cjs",
+      "warm-transform-ms",
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "incompleteMetrics": [
+      "incremental-rebuild"
+    ]
+  },
+  "checks": {
+    "frozenInstall": {
+      "command": "bun install --frozen-lockfile",
+      "passed": true,
+      "packagesInstalled": 1094
+    },
+    "repositoryCheck": {
+      "command": "bun run check",
+      "passed": true,
+      "cssTestsPassed": 1515,
+      "cssTestsSkipped": 1,
+      "cssTestsFailed": 0,
+      "storybookTestsPassed": 23,
+      "storybookTestsFailed": 0
+    },
+    "budgetRegistry": {
+      "valid": true,
+      "registryReady": false,
+      "baselineIssues": 0,
+      "pendingThresholds": [
+        "js-frame-time",
+        "ui-frame-time",
+        "allocation-bytes",
+        "retained-memory-bytes"
+      ]
+    }
+  },
+  "controls": {
+    "approvedBudgetRegistryUnchanged": true,
+    "approvedSelectorsAndThresholdsUnchanged": true,
+    "publicApiChangedSincePreviousGate": true,
+    "publicApiStableDuringCollection": true,
+    "physicalDeviceAcceptance": "deferred",
+    "scope": "host-budget gate only"
+  }
+}
