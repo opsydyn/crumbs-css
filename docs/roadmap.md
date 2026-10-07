@@ -2944,3 +2944,20 @@ The [policy review](assessments/2026-10-07-m10-5-host-budget-policy-review.md) r
 The live budget CLIs could not be rerun in the attached worktree because `effect/Schema` does not resolve there; the latest retained host report records registry validation during collection. **M10.5 remains open and unqualified** at 12 host passes and nine failures, with physical-device work deferred.
 
 Next recommended numbered slice: **M10.5 — make an explicit release-policy decision on whether the full host-budget report should become a prerequisite in `release:check` or remain an M10.5 qualification gate only. Define the exact selectors, environment, and enforcement behavior before changing the publish workflow; keep all metric values unchanged.**
+
+
+### 2026-10-07 — M10.5 host-budget release gate
+
+The [approved implementation plan](superpowers/plans/2026-10-07-m10-5-host-budget-release-gate.md) binds npm publication to a closed set of 21 approved host comparisons. The M4 Pro qualification job validates the current source and package artifacts, uses the locked Expo 56.0.4 / Metro 0.84.4 cohort, and stages the report with the exact tarball. An Ubuntu publisher rechecks the tag SHA and release, verifies the hashed bundle, and publishes that tarball only after qualification. Registry-wide readiness remains a separate report; deferred device thresholds do not gate this host-only policy. The qualification job has no npm token or OIDC write permission, and the token is scoped to the final publish step.
+
+The retained current-source matched comparison has 12 passes and nine failures against unchanged limits. Those nine failures remain release blockers, so this implementation does not qualify a release or enable publication. The dedicated GitHub runner registration remains a separate end-to-end prerequisite. Android emulator acceptance is complete; physical-device work remains deferred. No API, dependency, baseline, selector, or threshold changed.
+
+Next recommended numbered slice: **M10.5 — remediate the nine binding host-budget failures through a separately evidenced, API-preserving implementation; retain all approved limits and the release gate, and rerun the current-source matched M4 Pro measurement after each remediation batch.**
+
+### 2026-10-07 — M10.5 host-budget release-gate implementation
+
+The committed implementation makes all 21 approved host-budget rows a prerequisite to `release:check` and npm publication. Local verification ran on macOS 26.6.2 / Apple M4 Pro with the pinned Expo 56.0.4 / Metro 0.84.4 / React Native 0.85.3 scaffold. The measurement recorded **12 pass, nine fail and zero incomplete**; `incremental-rebuild` passed at a 130.878 ms median. The full release check completed build, typecheck, package tests, native-style benchmark and pack dry-run, then rejected exactly the nine runtime-initialisation, warm-transform and theme-graph failures. Publication remains blocked, as intended.
+
+The scaffold overlays only the current app's direct Vanilla Extract resolver edge because the approved baseline Playground manifest omits it, and keeps the overlaid Crumbs package connected to the baseline frozen package-local dependencies. Both contexts resolve `@vanilla-extract/css` 1.20.1. The dedicated GitHub runner registration could not be verified from this host, so end-to-end Actions qualification remains unverified. Registry readiness remains separate, and physical-device work remains deferred.
+
+Next recommended roadmap item: **M10.5 — remediate the nine binding host-budget failures through one API-preserving batch, preserving all 21 selectors and approved limits. Start with runtime initialisation and theme graph attribution, then run the matched M4 Pro gate before considering broader changes.**

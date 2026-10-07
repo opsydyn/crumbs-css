@@ -141,7 +141,7 @@
     "build:dev": "CRUMBS_CSS_SKIP_CLEAN=1 tsdown",
     "build": "tsdown",
     "prepack": "bun run build",
-    "release:check": "bun run build && bun run typecheck && bun run test && bun run bench:native-styles && bun pm pack --dry-run",
+    "release:check": "bun run build && bun run typecheck && bun run test && bun run bench:native-styles && bun pm pack --dry-run && bun ../../scripts/check-release-host-budgets.ts",
     "test": "bun test",
     "typecheck": "tsgo --noEmit"
   },

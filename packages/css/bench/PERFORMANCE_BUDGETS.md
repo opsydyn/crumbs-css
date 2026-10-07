@@ -68,3 +68,25 @@ The benchmark fingerprint includes environment, protocol, fixture hashes and sam
 Run `bun run measure:metro-incremental <output.json>` for the focused Metro scenario. It warms one cleared iOS development graph, records three dependency-only invalidation receipts, excludes one direct-edit warmup, then records five direct `.css.ts` edits from file write through a 75 ms watcher-settle interval and receipt of the updated full bundle. Every direct receipt must contain all four newly compiled padding longhands, omit the previous values, change the bundle hash, and restore both edited files. The dependency receipts prove that plain-token, nested `.css.ts`, and workspace-source parents rebuild; they remain separate correctness samples and are excluded from the direct-edit median.
 
 The review packet preserves approved decisions beside their min/median/max envelopes and derives mechanical candidates only for recorded metrics still awaiting review. Diagnostic baselines are checked for complete optional selector/value metadata and evidence re-derivation, but are excluded from active threshold approval. Candidates use the larger of the observed maximum or the median plus twice the observed deviation, with a minimum ten-percent review margin and upward rounding. High-noise metrics and approved zero-growth policies remain visible. The tool never edits or activates `budgets.json`.
+
+
+## Release qualification gate
+
+The M10.5 release gate requires all 21 approved host-budget rows to pass before `release:check` can succeed or npm publication can start. The closed row policy is separate from registry readiness: `budgets:validate` checks recorded evidence and `budgets:readiness` reports whether every active registry entry is approved, but neither replaces the exact 21-row release decision. Device-facing thresholds remain pending and physical-device acceptance remains deferred.
+
+Run the report on the dedicated Apple M4 Pro runner with macOS 26.6.2, Bun 1.4.2, Node 22.0.0 as the explicit floor and Node 24.15.0 on `PATH`. Install the approved Expo/Metro baseline from commit `43c5ece39360cf321fdb074d82cee41d5daaba23` with its frozen lockfile, then prepare the scaffold. The baseline Playground manifest has no direct Vanilla Extract edge, so the helper mirrors only the current app's `^1.20.1` resolver edge into the disposable app manifest. It keeps the Crumbs package-local runtime dependency links from the frozen baseline install and verifies Vanilla Extract resolves to 1.20.1 from both app and package contexts. No other consumer versions are overlaid. Pass the prepared roots to the full report command:
+
+```sh
+bun scripts/prepare-matched-metro-scaffold.ts <baseline-checkout> <matched-scaffold>
+CRUMBS_AUDIT_NODE_FLOOR=<absolute-node-22.0.0-path> \
+CRUMBS_INCREMENTAL_REPO_ROOT=<matched-scaffold> \
+CRUMBS_INCREMENTAL_APP_ROOT=<matched-scaffold>/apps/playground \
+bun run measure:host-budgets <report-directory>
+CRUMBS_HOST_BUDGET_REPORT=<report-directory> \
+CRUMBS_RELEASE_SOURCE_REVISION=$(git rev-parse HEAD) \
+bun run release:check
+```
+
+`release:check` rebuilds the package, validates the raw report against its source identity and package artifact hashes, rederives every stored row, and requires the 21 approved IDs exactly once with `pass`. The publish workflow repeats this gate on `[self-hosted, macOS, ARM64, crumbs-m4-pro]`, then hands the report and exact no-script package tarball to an Ubuntu job. The Ubuntu job checks the tag SHA and published GitHub Release, verifies the bundle, and publishes that tarball without rebuilding it. The qualification job has no npm token or OIDC write permission; the token is available only to the final publish step.
+
+The current-source matched comparison records 12 passes and nine failures; those nine unchanged host-budget failures continue to block release. This result does not qualify physical-device performance or Hermes, and **M10.5 remains open**.

@@ -28,7 +28,24 @@ const roadmap = readFileSync(resolve(repoRoot, "docs/roadmap.md"), "utf8")
 
 const commit = "0123456789abcdef0123456789abcdef01234567"
 
-describe("M8.5 release policy", () => {
+function jobBlock(name: string, nextName?: string): string {
+  const start = publishWorkflow.indexOf(`  ${name}:\n`)
+  if (start === -1) return ""
+  const end = nextName ? publishWorkflow.indexOf(`  ${nextName}:\n`, start + 1) : -1
+  return publishWorkflow.slice(start, end === -1 ? undefined : end)
+}
+
+const qualifyJob = jobBlock("qualify", "publish")
+const publishJob = jobBlock("publish")
+
+function publishStep(): string {
+  const start = publishJob.indexOf("      - name: Publish to npm\n")
+  if (start === -1) return ""
+  const next = publishJob.indexOf("\n      - name: ", start + 1)
+  return publishJob.slice(start, next === -1 ? undefined : next)
+}
+
+describe("M10.5 release policy", () => {
   it("routes prereleases to their channel and stable versions to latest", () => {
     expect(npmDistTagForVersion("0.1.1-alpha.1")).toBe("alpha")
     expect(npmDistTagForVersion("2.0.0-beta.3")).toBe("beta")
@@ -88,40 +105,68 @@ describe("M8.5 release policy", () => {
     expect(releaseWorkflow).not.toMatch(/npm publish|NPM_TOKEN|NODE_AUTH_TOKEN/i)
   })
 
-  it("limits manual publishing to a completed, version-matched tag with reproducible checks", () => {
-    for (const requiredContract of [
-      "release_tag:",
-      "required: true",
-      "refs/heads/main",
-      'if [[ -z "$NPM_TOKEN" ]]',
-      "gh release view",
-      ".isDraft == false and .publishedAt != null",
-      "bun run release:preflight",
+  it("qualifies on the approved M4 Pro host and records a matched full report", () => {
+    expect(qualifyJob).not.toBe("")
+    for (const required of [
+      "runs-on: [self-hosted, macOS, ARM64, crumbs-m4-pro]",
+      "bun-version: 1.4.2",
+      "node-version: 22.0.0",
+      "node-version: 24.15.0",
       "bun install --frozen-lockfile",
+      "bun run release:preflight --tag",
+      "bun scripts/prepare-matched-metro-scaffold.ts",
+      "43c5ece39360cf321fdb074d82cee41d5daaba23",
+      "bun run measure:host-budgets \"$CRUMBS_HOST_BUDGET_REPORT\"",
       "bun run release:check",
-      "npm publish --access public --provenance",
-      "secrets.NPM_TOKEN",
+      "CRUMBS_AUDIT_NODE_FLOOR:",
+      "CRUMBS_INCREMENTAL_REPO_ROOT:",
+      "CRUMBS_INCREMENTAL_APP_ROOT:",
+      "CRUMBS_HOST_BUDGET_REPORT:",
+      "CRUMBS_RELEASE_SOURCE_REVISION:",
+      "npm pack --ignore-scripts --json",
+      "scripts/release-qualification-artifact.ts create",
+      "if: always()",
+      "actions/upload-artifact@v4",
     ]) {
-      expect(publishWorkflow).toContain(requiredContract)
+      expect(qualifyJob).toContain(required)
     }
-    const publishCommandIndex = publishWorkflow.indexOf("run: npm publish")
-    expect(publishCommandIndex).toBeGreaterThan(0)
-    for (const gate of [
-      "Require workflow dispatch from main",
-      'if [[ -z "$NPM_TOKEN" ]]',
-      ".isDraft == false and .publishedAt != null",
-      "bun run release:preflight",
-      "bun run release:check",
-    ]) {
-      const gateIndex = publishWorkflow.indexOf(gate)
-      expect(gateIndex).toBeGreaterThanOrEqual(0)
-      expect(gateIndex).toBeLessThan(publishCommandIndex)
-    }
-    expect(publishWorkflow).not.toContain("inputs.ref")
-    expect(publishWorkflow).not.toContain("bun install\n")
+    expect(qualifyJob).not.toMatch(/NPM_TOKEN|NODE_AUTH_TOKEN|id-token:\s*write/)
   })
 
-  it("documents alpha breaks, stable SemVer, migration, and the deprecation window", () => {
+  it("passes the explicit Node 22 floor into the report-sealing command", () => {
+    const sealStart = qualifyJob.indexOf("      - name: Seal report and exact tarball\n")
+    const sealEnd = qualifyJob.indexOf("\n      - name: ", sealStart + 1)
+    const sealStep = qualifyJob.slice(sealStart, sealEnd === -1 ? undefined : sealEnd)
+    expect(sealStep).toContain("CRUMBS_AUDIT_NODE_FLOOR: ${{ steps.node-floor.outputs.binary }}")
+    expect(sealStep).toContain("scripts/release-qualification-artifact.ts create")
+  })
+
+  it("publishes only the qualified tarball after checking the tag SHA and release", () => {
+    expect(publishJob).not.toBe("")
+    expect(publishJob).toContain("needs: qualify")
+    expect(publishJob).toContain("runs-on: ubuntu-latest")
+    expect(publishJob).toContain("actions/download-artifact@v4")
+    expect(publishJob).toContain("git rev-parse HEAD")
+    expect(publishJob).toContain("sourceRevision")
+    expect(publishJob).toContain("gh release view")
+    expect(publishJob).toContain("scripts/release-qualification-artifact.ts verify")
+    expect(publishJob).toContain("npm publish \"$PACKAGE_TARBALL\"")
+    expect(publishJob).not.toMatch(/bun run build|release:check|npm pack/i)
+    expect(publishJob).not.toContain("bun install\n")
+  })
+
+  it("scopes OIDC and the npm token to the final publish step", () => {
+    expect(publishWorkflow).toContain("permissions:\n  contents: read")
+    expect(publishWorkflow).not.toMatch(/^  id-token: write$/m)
+    expect(publishJob).toContain("permissions:\n      contents: read\n      id-token: write")
+    expect(publishWorkflow.match(/secrets\.NPM_TOKEN/g)).toHaveLength(1)
+    const finalPublishStep = publishStep()
+    expect(finalPublishStep).toContain("NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}")
+    expect(finalPublishStep).toContain("npm publish \"$PACKAGE_TARBALL\"")
+    expect(publishJob.slice(0, publishJob.indexOf("      - name: Publish to npm"))).not.toMatch(/NPM_TOKEN|NODE_AUTH_TOKEN/)
+  })
+
+  it("documents the host gate, current blockers, and device deferral", () => {
     for (const requiredPolicy of [
       "pre-1.0 alpha",
       "breaking changes",
@@ -139,5 +184,8 @@ describe("M8.5 release policy", () => {
     expect(publicCompatibility).toContain("packages/css/COMPATIBILITY.md")
     expect(roadmap).toContain("[x] M8.5")
     expect(roadmap).toContain("2026-09-27-m8-5-release-policy.md")
+    expect(roadmap).toContain("M10.5 host-budget release gate")
+    expect(roadmap).toContain("nine failures")
+    expect(roadmap).toContain("physical-device work remains deferred")
   })
 })

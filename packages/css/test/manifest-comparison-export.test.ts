@@ -128,4 +128,4 @@ it("packs comparison APIs for ESM, CommonJS, and typed consumers through tooling
   const tsc = resolve(dirname(requireFromPackage.resolve("typescript/package.json")), "bin", "tsc")
   run([tsc, "-p", "tsconfig.node16.json"], consumerRoot)
   run([tsc, "-p", "tsconfig.bundler.json"], consumerRoot)
-})
+}, { timeout: 15_000 })

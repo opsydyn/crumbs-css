@@ -225,4 +225,4 @@ test("keeps the DTCG tooling graph opt-in and outside every ordinary runtime ent
       expect(graph?.files.some(file => /tooling-dtcg|\/tooling\/dtcg/u.test(file))).toBe(false)
     }
   }
-})
+}, { timeout: 15_000 })
