@@ -1,0 +1,404 @@
+{
+  "formatVersion": 1,
+  "roadmap": "M10.5",
+  "sourceRevision": "a8d597e73e0a19d5250a9b431d4ddbefc61123d4",
+  "sourceIdentity": {
+    "packageSourceHashesMatch": true,
+    "fixtureHashesMatch": true,
+    "sourceFiles": [
+      {
+        "relative": "bench/native-styles.bench.ts",
+        "sha256": "0c1313ff62a8c63c2179727931742338717a6a1298c2e1adc6198f43e45bcc26"
+      },
+      {
+        "relative": "bench/benchmark-protocol.ts",
+        "sha256": "674f4172ac2ede7cbdfde10d927192eed9f2230523fed3ae99a3edeeafe3c8f3"
+      },
+      {
+        "relative": "bench/selection-workload.ts",
+        "sha256": "11165545db0433df1ae1df61bd6cd67dc66737879a161054d09568d90ba5728c"
+      },
+      {
+        "relative": "bench/first-transform.ts",
+        "sha256": "bec25a624b7582a304de98964a8b1bdc2c0c287d4cab259d75efe1a8866aa989"
+      },
+      {
+        "relative": "bench/perf-harness.ts",
+        "sha256": "2d847624d35dcd3bbc6a4162abe7c72111f8aa18351fa109ef7a7121d80b4610"
+      },
+      {
+        "relative": "src/theme-runtime.ts",
+        "sha256": "a9355afc80ba8c331b1a6ed108558313b3521ce2b6470029df7a470bcb24337f"
+      },
+      {
+        "relative": "src/transformer.ts",
+        "sha256": "bb080bfe7420bcd5a4a3013e9df84b8d9251a1c8f659caefdd551b1ac8dd5842"
+      }
+    ],
+    "fixtures": [
+      {
+        "file": "examples/recipe.css.ts",
+        "sha256": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9"
+      },
+      {
+        "file": "fixtures/consumer/styles/button.css.ts",
+        "sha256": "db8546f2baef375412fe03a4fa0d0fad1c40168919453c73eb8fa9229cfdadea"
+      },
+      {
+        "file": "fixtures/consumer/styles/shared.css.ts",
+        "sha256": "bceab75091add774d3eb27c8697622fd41b8404328e027a6dd07c0f60110e1ec"
+      },
+      {
+        "file": "fixtures/consumer/styles/theme.css.ts",
+        "sha256": "568a174e7290bfbe8f6c4fda5cfcb3c292de5be79494a140d5f9c2d5c32045e9"
+      }
+    ]
+  },
+  "environment": {
+    "bun": "1.4.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "nodeEnv": "unset"
+  },
+  "protocol": "Five sequential control/candidate process pairs; each process uses one excluded warm-up and six retained full-transform samples per fixture with package-root cwd. The test ran from a disposable copy whose source and fixture hashes match the pinned checkout.",
+  "candidate": {
+    "type": "scratch-only bounded LRU for Vanilla Extract debug-ID Babel intermediate results",
+    "maximumEntries": 64,
+    "cacheKeyFields": [
+      "source",
+      "filename",
+      "cwd",
+      "configFile",
+      "babelrc",
+      "plugin names"
+    ],
+    "purpose": "Measure whether repeated Babel debug-ID work materially reduces full transform time; no production files or installed dependencies were changed."
+  },
+  "pairs": [
+    {
+      "pair": 1,
+      "rawReports": [
+        "raw/control-1.json",
+        "raw/candidate-1.json"
+      ],
+      "control": {
+        "warmP50Ms": {
+          "readme": 9.140750000000025,
+          "consumer": 9.04825000000028
+        },
+        "warmP95Ms": {
+          "readme": 10.041707999999744,
+          "consumer": 9.557749999999942
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        }
+      },
+      "candidate": {
+        "warmP50Ms": {
+          "readme": 8.966625000000022,
+          "consumer": 7.965666999999939
+        },
+        "warmP95Ms": {
+          "readme": 9.233000000000175,
+          "consumer": 8.567457999999988
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        },
+        "debugIdCacheStats": {
+          "hits": 24,
+          "misses": 3,
+          "evictions": 0
+        }
+      },
+      "outputParity": true
+    },
+    {
+      "pair": 2,
+      "rawReports": [
+        "raw/control-2.json",
+        "raw/candidate-2.json"
+      ],
+      "control": {
+        "warmP50Ms": {
+          "readme": 8.964207999999871,
+          "consumer": 8.855125000000044
+        },
+        "warmP95Ms": {
+          "readme": 9.782709000000068,
+          "consumer": 9.157208000000082
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        }
+      },
+      "candidate": {
+        "warmP50Ms": {
+          "readme": 8.355082999999922,
+          "consumer": 8.031582999999955
+        },
+        "warmP95Ms": {
+          "readme": 12.020292000000154,
+          "consumer": 10.224125000000186
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        },
+        "debugIdCacheStats": {
+          "hits": 24,
+          "misses": 3,
+          "evictions": 0
+        }
+      },
+      "outputParity": true
+    },
+    {
+      "pair": 3,
+      "rawReports": [
+        "raw/control-3.json",
+        "raw/candidate-3.json"
+      ],
+      "control": {
+        "warmP50Ms": {
+          "readme": 9.778249999999844,
+          "consumer": 8.752290999999786
+        },
+        "warmP95Ms": {
+          "readme": 10.17904099999987,
+          "consumer": 9.503749999999854
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        }
+      },
+      "candidate": {
+        "warmP50Ms": {
+          "readme": 9.122083000000202,
+          "consumer": 7.693832999999813
+        },
+        "warmP95Ms": {
+          "readme": 14.358375000000251,
+          "consumer": 8.074458999999933
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        },
+        "debugIdCacheStats": {
+          "hits": 24,
+          "misses": 3,
+          "evictions": 0
+        }
+      },
+      "outputParity": true
+    },
+    {
+      "pair": 4,
+      "rawReports": [
+        "raw/control-4.json",
+        "raw/candidate-4.json"
+      ],
+      "control": {
+        "warmP50Ms": {
+          "readme": 9.000375000000076,
+          "consumer": 8.903124999999818
+        },
+        "warmP95Ms": {
+          "readme": 10.617958000000272,
+          "consumer": 9.498042000000169
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        }
+      },
+      "candidate": {
+        "warmP50Ms": {
+          "readme": 8.183832999999595,
+          "consumer": 8.193832999999813
+        },
+        "warmP95Ms": {
+          "readme": 9.775417000000289,
+          "consumer": 9.791541999999936
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        },
+        "debugIdCacheStats": {
+          "hits": 24,
+          "misses": 3,
+          "evictions": 0
+        }
+      },
+      "outputParity": true
+    },
+    {
+      "pair": 5,
+      "rawReports": [
+        "raw/control-5.json",
+        "raw/candidate-5.json"
+      ],
+      "control": {
+        "warmP50Ms": {
+          "readme": 9.284000000000106,
+          "consumer": 8.218624999999975
+        },
+        "warmP95Ms": {
+          "readme": 10.199375000000146,
+          "consumer": 9.205457999999908
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        }
+      },
+      "candidate": {
+        "warmP50Ms": {
+          "readme": 7.889125000000149,
+          "consumer": 8.466042000000016
+        },
+        "warmP95Ms": {
+          "readme": 13.613666999999623,
+          "consumer": 10.48700000000008
+        },
+        "outputSha256": {
+          "readme": "db26ef2d744559c2ea6ecdd40399ab524d74cc271a61380272afc9276b96bfda",
+          "consumer": "73d6a2cdde07a606dd8cc8a5220f71b9f212e6e36edf9d7edba42a1764e34b12"
+        },
+        "debugIdCacheStats": {
+          "hits": 24,
+          "misses": 3,
+          "evictions": 0
+        }
+      },
+      "outputParity": true
+    }
+  ],
+  "derived": {
+    "controlFixtureMedianMs": {
+      "readme": 9.140750000000025,
+      "consumer": 8.855125000000044
+    },
+    "candidateFixtureMedianMs": {
+      "readme": 8.355082999999922,
+      "consumer": 8.031582999999955
+    },
+    "gateSelector": "maximum of the two fixture medians",
+    "controlGateMs": 9.140750000000025,
+    "candidateGateMs": 8.355082999999922,
+    "improvementMs": 0.785667,
+    "improvementPercent": 8.595,
+    "approvedCeilingMs": 6.514,
+    "remainingGapMs": 1.841083,
+    "everyPairOutputHashesMatch": true,
+    "perProcessCacheStats": [
+      {
+        "hits": 24,
+        "misses": 3,
+        "evictions": 0
+      },
+      {
+        "hits": 24,
+        "misses": 3,
+        "evictions": 0
+      },
+      {
+        "hits": 24,
+        "misses": 3,
+        "evictions": 0
+      },
+      {
+        "hits": 24,
+        "misses": 3,
+        "evictions": 0
+      },
+      {
+        "hits": 24,
+        "misses": 3,
+        "evictions": 0
+      }
+    ]
+  },
+  "limitations": [
+    "Diagnostic matched scratch evidence, not a current-host budget requalification.",
+    "Moving the package root changes the generated @crumbs-native-cache marker, so scratch output hashes do not equal hashes from the live checkout; control and candidate outputs match within every pair.",
+    "The cache-key probe is intentionally incomplete and does not establish configuration invalidation, Metro lifecycle ownership, or production suitability.",
+    "The 6.514 ms ceiling, baselines, selectors, budget registry, public API, runtime dependencies, and production source were unchanged."
+  ],
+  "currentSourceCohort": {
+    "protocol": "Focused exact-checkout warm-transform cohort; not a full host-budget requalification.",
+    "reports": [
+      {
+        "report": "raw/current-source-1.json",
+        "warmP50Ms": {
+          "readme": 9.456083000000035,
+          "consumer": 8.80120799999986
+        },
+        "outputSha256": {
+          "readme": "be1d0f716d5fd48c43a57a35756e9a9cc46b9c364a573f3ab7cacf0988500d40",
+          "consumer": "0200d90086d2e295ea18ba61477669d61a67a8d77f424f2e643480ed9089a0e9"
+        }
+      },
+      {
+        "report": "raw/current-source-2.json",
+        "warmP50Ms": {
+          "readme": 9.56637499999988,
+          "consumer": 8.45129199999974
+        },
+        "outputSha256": {
+          "readme": "be1d0f716d5fd48c43a57a35756e9a9cc46b9c364a573f3ab7cacf0988500d40",
+          "consumer": "0200d90086d2e295ea18ba61477669d61a67a8d77f424f2e643480ed9089a0e9"
+        }
+      },
+      {
+        "report": "raw/current-source-3.json",
+        "warmP50Ms": {
+          "readme": 9.351624999999785,
+          "consumer": 8.805125000000317
+        },
+        "outputSha256": {
+          "readme": "be1d0f716d5fd48c43a57a35756e9a9cc46b9c364a573f3ab7cacf0988500d40",
+          "consumer": "0200d90086d2e295ea18ba61477669d61a67a8d77f424f2e643480ed9089a0e9"
+        }
+      },
+      {
+        "report": "raw/current-source-4.json",
+        "warmP50Ms": {
+          "readme": 9.2356249999998,
+          "consumer": 9.098457999999937
+        },
+        "outputSha256": {
+          "readme": "be1d0f716d5fd48c43a57a35756e9a9cc46b9c364a573f3ab7cacf0988500d40",
+          "consumer": "0200d90086d2e295ea18ba61477669d61a67a8d77f424f2e643480ed9089a0e9"
+        }
+      },
+      {
+        "report": "raw/current-source-5.json",
+        "warmP50Ms": {
+          "readme": 9.856208000000152,
+          "consumer": 9.084292000000005
+        },
+        "outputSha256": {
+          "readme": "be1d0f716d5fd48c43a57a35756e9a9cc46b9c364a573f3ab7cacf0988500d40",
+          "consumer": "0200d90086d2e295ea18ba61477669d61a67a8d77f424f2e643480ed9089a0e9"
+        }
+      }
+    ],
+    "fixtureMedianMs": {
+      "readme": 9.456083000000035,
+      "consumer": 8.805125000000317
+    },
+    "gateMedianMs": 9.456083000000035,
+    "approvedCeilingMs": 6.514,
+    "gapMs": 2.942083
+  }
+}

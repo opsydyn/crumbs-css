@@ -2836,3 +2836,11 @@ The [assessment](assessments/2026-10-07-m10-5-development-identity-parity.md) re
 No public API, dependency, performance candidate, budget, baseline or threshold changed. The existing host-budget results remain in force, the retained esbuild-context candidate remains rejected, **M10.5 remains open**, and physical-device work remains deferred.
 
 Next recommended numbered slice: **M10.5 — select and validate a distinct API-preserving warm-transform optimization against current source, exact generated-output parity and the unchanged 6.514 ms ceiling**. Do not repeat the rejected esbuild-context comparison without a materially different candidate.
+
+### 2026-10-07 — M10.5 debug-ID intermediate-cache candidate
+
+The [candidate assessment](assessments/2026-10-07-m10-5-debug-id-cache-candidate.md) and [retained evidence](evidence/2026-10-07-m10-5-debug-id-cache-candidate/README.md) record a five-process exact-checkout warm cohort and five matched process pairs for a scratch-only bounded cache around Vanilla Extract's Babel debug-ID intermediate transform. The live focused cohort selects 9.456 ms, 2.942 ms over the unchanged 6.514 ms maximum. Source and fixture hashes match the pinned checkout, and every scratch pair preserves its output hashes. The cache A/B improves its gate statistic from 9.141 ms to 8.355 ms, but this remains 1.841 ms over the maximum. Because the disposable package root changes the generated cache marker and the candidate's configuration invalidation is unqualified, the result is diagnostic only and the candidate is rejected.
+
+No production source, API, dependency, baseline, threshold, or enforcement rule changed. **M10.5 remains open** for the four runtime-initialisation failures, the warm-transform failure, and four theme graph-size failures. Physical-device work remains deferred.
+
+Next recommended numbered slice: **M10.5 — assess a non-caching compiler-adapter path that removes redundant work within one Vanilla Extract compilation.** First establish a cost model and show that a candidate could recover at least the live 2.942 ms gap to the unchanged 6.514 ms ceiling; then require exact output parity, dependency-edit correctness, and Metro restore evidence before implementation. Keep current host limits and selectors fixed.
