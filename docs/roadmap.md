@@ -2936,3 +2936,11 @@ The [candidate assessment](assessments/2026-10-07-m10-5-api-preserving-candidate
 The matched Expo/Metro comparison now passes, leaving **12 host passes and nine failures with no incomplete comparison**. No production source, public export, dependency, baseline, selector, threshold, or enforcement rule changed. **M10.5 remains open and unqualified** for the nine host failures; physical-device work remains deferred.
 
 Next recommended numbered slice: **M10.5 — review the binding host-budget policy against the completed current-source evidence. Record whether the nine package-host limits remain release blockers or whether a separately authorised compatibility/architecture change is needed. Keep the existing budget registry and API unchanged until that decision is explicit.**
+
+### 2026-10-07 — M10.5 host-budget policy review against current evidence
+
+The [policy review](assessments/2026-10-07-m10-5-host-budget-policy-review.md) reaffirms the accepted [runtime-budget policy](decisions/anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md): the nine current host failures remain M10.5 qualification blockers, and the Expo/Hermes cohort remains reference evidence. The current publish workflow runs release preflight and `release:check`, but that check does not invoke the full host-budget comparison or registry-readiness command. The retained evidence therefore does not show the nine failures as automated npm publication blockers. No threshold, API, or workflow change is approved by this review.
+
+The live budget CLIs could not be rerun in the attached worktree because `effect/Schema` does not resolve there; the latest retained host report records registry validation during collection. **M10.5 remains open and unqualified** at 12 host passes and nine failures, with physical-device work deferred.
+
+Next recommended numbered slice: **M10.5 — make an explicit release-policy decision on whether the full host-budget report should become a prerequisite in `release:check` or remain an M10.5 qualification gate only. Define the exact selectors, environment, and enforcement behavior before changing the publish workflow; keep all metric values unchanged.**
