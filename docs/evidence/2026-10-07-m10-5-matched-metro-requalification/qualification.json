@@ -1,0 +1,104 @@
+{
+  "formatVersion": 1,
+  "status": "passed",
+  "metric": {
+    "id": "incremental-rebuild",
+    "selector": "metro-incremental.direct-css-edit-ms.median",
+    "baselineEvidence": "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json",
+    "candidateEvidence": "metro-incremental.json",
+    "baselineSourceRevision": "43c5ece39360cf321fdb074d82cee41d5daaba23",
+    "baselineSamplesMs": [
+      123.95049999999901,
+      122.8393750000032,
+      122.82970799999748,
+      126.82683300000281,
+      125.72208399999727
+    ],
+    "candidateSamplesMs": [
+      130.63866700000017,
+      129.31875000000036,
+      130.95679199999995,
+      128.5079169999999,
+      129.22308299999986
+    ],
+    "baselineMedianMs": 123.95049999999901,
+    "candidateMedianMs": 129.31875000000036,
+    "regressionPercent": 4.330962763362312,
+    "approvedAbsoluteMaximumMs": 137.506,
+    "approvedMaximumRegressionPercent": 10,
+    "computedRelativeMaximumMs": 136.34554999999892,
+    "pass": true
+  },
+  "identity": {
+    "environmentMatchesBaseline": true,
+    "protocolMatchesBaseline": true,
+    "environment": {
+      "platform": "darwin",
+      "architecture": "arm64",
+      "osRelease": "25.6.0",
+      "cpu": "Apple M4 Pro",
+      "expo": "56.0.4",
+      "metro": "0.84.4",
+      "reactNative": "0.85.3",
+      "expoMetroRuntime": "56.0.12",
+      "react": "19.2.5",
+      "reactDom": "19.2.5",
+      "babelPresetExpo": "56.0.12"
+    },
+    "protocol": {
+      "requestUrl": "/src/incremental-entry.bundle?platform=ios&dev=true&minify=false&modulesOnly=false&runModule=true",
+      "repetitions": 5,
+      "editKind": "direct-css-source",
+      "cacheState": "One cleared Metro server and warm initial graph; three dependency-only controls (plain token, nested .css.ts and workspace source) prove parent rebuilds before one excluded direct-edit warmup and five retained direct .css.ts edits; dependency receipts require the new baked value and absence of the old value"
+    },
+    "dependencyControls": [
+      { "kind": "plain-token", "compiledValuePresent": true, "previousCompiledValueAbsent": true },
+      { "kind": "nested-css", "compiledValuePresent": true, "previousCompiledValueAbsent": true },
+      { "kind": "workspace-source", "compiledValuePresent": true, "previousCompiledValueAbsent": true }
+    ],
+    "strictDiagnosticsConfigurationControlPassed": true,
+    "fixturesRestored": {
+      "style": true,
+      "token": true,
+      "baseStyle": true,
+      "workspaceToken": true
+    }
+  },
+  "sourceProvenance": {
+    "compilerSourceRevision": "fa9d347101b0b2757a7b4db90462df90adb8b6dc",
+    "currentTrackedSourceDigestFromHostQualification": "db9a02ecd57c1c0c11f96ea19640fb975f447ae03bf52117ef2dcc3c349f9894",
+    "benchmarkRunnerSha256": "dabb2f18076ea85116d76e0c13ca7dd7e1f8f218a079d74e0c03e98e7a51af66",
+    "transformerSourceSha256": "0282b145f5e42bdae476a9440d5b3414a07d48700403de7f839113c6b9b9ee44",
+    "themeRuntimeSourceSha256": "a9355afc80ba8c331b1a6ed108558313b3521ce2b6470029df7a470bcb24337f",
+    "metroPluginRuntimeArtifactSha256": "5b33511a04735c8660840f8445a0da11ddb905b70a99ffd066423572b47630a5",
+    "currentMetroConfigSha256": "84752318147cb5d1ffc4cedcbe5a7a9f119e9d5d4d3b349876d6267b7f673483",
+    "referencePlaygroundManifestSha256": "fda8fe7def332c9fa386d29ba8207bf27917530dfb3b83780a604e797d63ac31",
+    "disposablePlaygroundManifestSha256": "b4c6618af6c02b68fb9003c6418ee7a1ded9d8674d2f467b034a3a182f76fca7",
+    "disposableRuntimeArtifactsMatchCurrentBuild": true,
+    "runtimeArtifactComparisonExcludesTypeDeclarations": true,
+    "fixtureSha256": {
+      "entry": "144d8b53dd4ca114521b1ffe31490dc2235c5637cb68857ef2cc2e8d5b10c67d",
+      "token": "7fc7402174a685353ec647f0ca9179eca94ee60e132f0362955a8f4600f984e7",
+      "baseStyle": "457e351c0623cb8618446ff0b22a1a254033c073afc80ecb44d4b5e6aedd0142",
+      "style": "128e56aed26248d9a4e5a71e9146b80b55d7f8a2f908b90552897203c9246240",
+      "workspaceToken": "74fd37b636eb573ef271e8816137124bbd9774d713c8286bea3e5b98ba409816"
+    }
+  },
+  "scaffold": {
+    "rawReportSourceRevision": "43c5ece39360cf321fdb074d82cee41d5daaba23",
+    "rawReportSourceTreeDirty": true,
+    "meaning": "The raw runner sourceRevision identifies the disposable baseline lock scaffold, not the compiler source. Current runtime artifacts, Metro config and benchmark fixtures were overlaid from the compiler worktree and are pinned above.",
+    "resolverOverlay": {
+      "dependency": "@vanilla-extract/css",
+      "declaredRange": "^1.20.1",
+      "resolvedVersion": "1.20.1",
+      "reason": "The current Playground manifest declares this adapter directly; the older baseline manifest did not expose the workspace-hoisted package to the filtered disposable app install.",
+      "expoMetroReactAndReactNativeVersionsChanged": false
+    }
+  },
+  "rawReportSha256": "bdab2a10758ee07b9d3419d9d29d658ab6037e8f6970cab4ae2c512ac976f5cd",
+  "limits": [
+    "This is host Expo/Metro development evidence and does not establish native rendering, release Hermes performance or physical-device acceptance.",
+    "The four runtime-initialization failures, warm-transform failure and four theme graph-size failures remain open."
+  ]
+}
