@@ -41,8 +41,19 @@ it("measures a first transform in a fresh process and retains an equivalent outp
   const root = resolve(import.meta.dir, "..")
   const fixture = resolve(root, "examples/recipe.css.ts")
   const cold = await measureFirstTransform(fixture, root)
-  const warm = await transformCssTsToStyleSheet(fixture, root, { strictDiagnostics: true })
+  const originalCwd = process.cwd()
+  let warm: string
+  try {
+    // The fresh worker runs from the project root. Keep this in-process
+    // transform at the workspace root so relative file-scope paths cannot
+    // accidentally depend on the ambient working directory.
+    process.chdir(resolve(root, "../.."))
+    warm = await transformCssTsToStyleSheet(fixture, root, { strictDiagnostics: true })
+  } finally {
+    process.chdir(originalCwd)
+  }
   expect(cold.durationMs).toBeGreaterThan(0)
+  expect(warm).toContain('"packageOwner":"@opsydyn/crumbs-css"')
   expect(cold.outputSha256).toBe(createHash("sha256").update(warm).digest("hex"))
   expect(cold.outputBytes).toBe(Buffer.byteLength(warm))
   expect(cold.pid).not.toBe(process.pid)

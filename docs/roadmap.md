@@ -2828,3 +2828,11 @@ The isolated Expo/Metro edit, import-removal and restore control passes against 
 Focused context-reuse tests pass (93, with one Node-floor-only skip) and package typecheck passes. The full CSS suite reports 1,501 passes, one skip and one unrelated repeatable failure: the fresh-process benchmark compares different development metadata package identities between its worker and parent. Its production-mode control passes. This failure is retained as an open qualification issue rather than hidden or changed as part of the compiler-session slice. See the [assessment](assessments/2026-10-07-m10-5-fail-closed-metro-parity.md) and [source-pinned Metro evidence](evidence/2026-10-07-m10-5-fail-closed-metro-parity/README.md).
 
 **M10.5 remains open.** Next recommended item: **M10.5 — align development metadata identity between fresh-process and in-process transforms, restore a green full package suite, then select a new warm-transform optimization from current evidence.** The rejected esbuild-context candidate remains rejected; do not repeat its performance matrix without a materially different candidate. Physical-device work remains deferred.
+
+### 2026-10-07 — M10.5 development metadata identity parity
+
+The [assessment](assessments/2026-10-07-m10-5-development-identity-parity.md) resolves Vanilla Extract's relative file-scope path against the explicit project root. A deterministic regression runs fresh and in-process transforms from different working directories and verifies identical package ownership and complete generated output. The fix restores the full CSS package suite: 1,502 tests pass, one exact-Node-floor test is skipped, and none fail. Package build and typecheck pass.
+
+No public API, dependency, performance candidate, budget, baseline or threshold changed. The existing host-budget results remain in force, the retained esbuild-context candidate remains rejected, **M10.5 remains open**, and physical-device work remains deferred.
+
+Next recommended numbered slice: **M10.5 — select and validate a distinct API-preserving warm-transform optimization against current source, exact generated-output parity and the unchanged 6.514 ms ceiling**. Do not repeat the rejected esbuild-context comparison without a materially different candidate.

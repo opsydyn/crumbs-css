@@ -114,8 +114,11 @@ export function buildStyleSheetCode(
 }
 
 function sourceIdentity(filePath: string, projectRoot: string): { readonly packageOwner: string; readonly sourceId: string } {
-  let directory = path.dirname(path.resolve(filePath))
   const resolvedProjectRoot = path.resolve(projectRoot)
+  // Vanilla Extract's file scope stores the source path relative to its root.
+  // Resolve that path against the same root, independent of process.cwd().
+  const resolvedFilePath = path.resolve(resolvedProjectRoot, filePath)
+  let directory = path.dirname(resolvedFilePath)
   while (true) {
     const manifestPath = path.join(directory, "package.json")
     try {
@@ -123,7 +126,7 @@ function sourceIdentity(filePath: string, projectRoot: string): { readonly packa
       if (typeof manifest.name === "string" && manifest.name.length > 0) {
         return {
           packageOwner: manifest.name,
-          sourceId: toPosixPath(path.relative(directory, path.resolve(filePath))),
+          sourceId: toPosixPath(path.relative(directory, resolvedFilePath)),
         }
       }
     } catch {
@@ -134,7 +137,7 @@ function sourceIdentity(filePath: string, projectRoot: string): { readonly packa
   }
   return {
     packageOwner: path.basename(resolvedProjectRoot) || "project",
-    sourceId: toPosixPath(path.relative(resolvedProjectRoot, path.resolve(filePath))),
+    sourceId: toPosixPath(path.relative(resolvedProjectRoot, resolvedFilePath)),
   }
 }
 
