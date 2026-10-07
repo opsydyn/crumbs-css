@@ -1,0 +1,61 @@
+{
+  "_tag": "CrumbsM105TokenOnlyFeasibility",
+  "version": 1,
+  "status": "cost-screen-passed-type-contract-not-ready",
+  "sourceRevision": "8ba4cf9cbd6783b307676076c5b8febe6fb7af49",
+  "candidatePatch": {
+    "path": "repro/theme-token-only-candidate.patch.b64",
+    "encoding": "base64",
+    "sha256": "66f1d4ffc90efbcafee0e49fdd6812284d026c225ddb111f352ad83207ddc528",
+    "applyScript": "repro/apply-candidate.mts"
+  },
+  "runtime": {
+    "bun": "1.4.2",
+    "node": "24.15.0",
+    "platform": "darwin",
+    "architecture": "arm64"
+  },
+  "graphScreen": {
+    "repetitions": 5,
+    "deterministic": true,
+    "candidate": {
+      "esmBytes": 13176,
+      "cjsBytes": 13366,
+      "esmSha256": "579c9d7ca792f2a7490142855f34af1f86f44c17357f8de97694194bd83206a8",
+      "cjsSha256": "407d2b198fd0fb52292079a23637a171ddc503019648a7e5df0c74b6fb0c2f90",
+      "externals": ["react"],
+      "localArtifactsPerFormat": 1
+    },
+    "existingThemeCore": {
+      "esmBytes": 64549,
+      "cjsBytes": 65408,
+      "matchesOfficialHostHashes": true
+    },
+    "comparisonCeilingsOnly": {
+      "esmBytes": 17271,
+      "cjsBytes": 17641,
+      "admittedForCandidate": false
+    }
+  },
+  "checks": {
+    "packageBuild": "pass",
+    "packageTypecheck": "pass",
+    "crossEntryProviderInterop": "pass-esm-cjs-both-directions",
+    "fullPackageTests": {
+      "passed": 1514,
+      "skipped": 1,
+      "failed": 0
+    },
+    "metroExpoCandidateQualification": "not-run",
+    "physicalDeviceAcceptance": "deferred"
+  },
+  "officialM105HostGate": {
+    "passed": 11,
+    "failed": 9,
+    "incomplete": 1,
+    "changed": false
+  },
+  "productionChanges": false,
+  "publicAdoptionReady": false,
+  "reason": "The prototype lets a caller assert a token value type that is not bound to the referenced contract token."
+}
