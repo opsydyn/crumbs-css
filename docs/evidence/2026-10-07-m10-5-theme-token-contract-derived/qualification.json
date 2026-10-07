@@ -1,0 +1,81 @@
+{
+  "_tag": "CrumbsM105ThemeTokenContractDerived",
+  "version": 1,
+  "status": "candidate-types-and-expo-web-dogfood-passed-host-gate-open",
+  "sourceRevision": "df63092bb7de71448754c0268c783edb52c08608",
+  "candidatePatch": {
+    "path": "repro/contract-derived-candidate.patch.b64",
+    "encoding": "base64",
+    "sha256": "85554fa6f1e6e4fc37d63c9d4fa6100cbbdb01705ded0acfd5371861edb4d14b",
+    "applyScript": "repro/apply-candidate.mts"
+  },
+  "runtime": {
+    "bun": "1.4.2",
+    "nodeExecutable": "v24.15.0",
+    "bunNodeCompatibility": "v26.3.0",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "packageTestLinker": "isolated",
+    "expoExportLinker": "hoisted"
+  },
+  "candidateGraph": {
+    "repetitions": 5,
+    "deterministic": true,
+    "esmBytes": 13631,
+    "cjsBytes": 13821,
+    "esmSha256": "f0cbf21e7cea509fe26542159bb4eed73a4f07f24aa775a3275c347396f3951c",
+    "cjsSha256": "c0983ecef90f1b4cc701ff98cf9ed517b642d8f7fabf35ea40b7d41b1117973f",
+    "externals": ["react"],
+    "localArtifactsPerFormat": 1,
+    "comparisonCeilingsOnly": {
+      "esmBytes": 17271,
+      "cjsBytes": 17641,
+      "admittedAsCandidateBudget": false
+    }
+  },
+  "existingThemeCore": {
+    "esmBytes": 64549,
+    "cjsBytes": 65408,
+    "esmSha256": "d8d4a5082337939def41cca11b97ac7881a66687a1d3cdc371770cb46eaf6cff",
+    "cjsSha256": "7957711aefd1d797f16518617a5d65106477fde70062d54ce31142e2d9602ba1",
+    "matchesOfficialHostHashes": true
+  },
+  "checks": {
+    "candidatePackageBuild": "pass",
+    "candidatePackageTypecheck": "pass",
+    "focusedRuntimeTests": {"passed": 8, "failed": 0},
+    "crossEntryProviderInterop": "pass-esm-cjs-both-directions",
+    "packedExportsAndDeclarations": "pass",
+    "fullPackageTests": {
+      "passed": 1515,
+      "skipped": 1,
+      "failed": 0,
+      "expectations": 115642
+    },
+    "typeContract": {
+      "validDomains": ["color", "length", "opacity", "finite-enum"],
+      "rejectedCases": 7,
+      "resultTypesPreserved": true
+    },
+    "storybookTypecheck": "pass",
+    "storybookTests": {"passed": 23, "failed": 0, "expectations": 178},
+    "expoWebExport": {
+      "status": "pass",
+      "metroModules": 914,
+      "dogfoodComponentIncluded": true,
+      "bundleSha256": "060dca16879941cec4a233ab9654df8efd26c24dd040739f2ea25846a7681e69"
+    }
+  },
+  "officialM105HostGate": {
+    "passed": 11,
+    "failed": 9,
+    "incomplete": 1,
+    "changed": false
+  },
+  "nativeRendering": "not-run",
+  "physicalDeviceAcceptance": "deferred",
+  "approvedBudgetChanged": false,
+  "productionChanges": false,
+  "publicSubpathAdoption": "deferred",
+  "performanceClaim": "none"
+}
