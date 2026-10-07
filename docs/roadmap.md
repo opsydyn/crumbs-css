@@ -2928,3 +2928,11 @@ The [assessment](assessments/2026-10-07-m10-5-final-host-budget-gate-rerun.md) a
 The source digest and all 149 built artifact hashes remained stable during collection. Frozen install, repository checks, and budget-registry validation passed; the registry still has future/device-facing thresholds pending. No API, dependency, baseline, threshold, selector, or enforcement rule changed in the gate. Host results do not establish Hermes or physical-device performance, and physical-device work remains deferred. **M10.5 remains unqualified.**
 
 Next recommended numbered slice: **M10.5 — select one API-preserving remediation candidate for the runtime-initialisation, warm-transform, and theme graph failures using current source and graph evidence.** Preserve the full API and approved budgets; avoid rejected cache or static-extraction candidates.
+
+### 2026-10-07 — M10.5 API-preserving remediation candidate selection
+
+The [candidate assessment](assessments/2026-10-07-m10-5-api-preserving-candidate-selection.md) screens the remaining runtime-initialisation, warm-transform, and theme-graph failures against the current source. No production candidate satisfies both the complete public API and unchanged host budgets. Minification, static-boundary extraction, a focused React entrypoint, cache work, and a non-caching compiler-adapter path either fail the relevant gate or leave its selector unchanged; the token-only surface is separately type-safe but does not reduce existing theme entrypoints.
+
+The matched Expo/Metro comparison now passes, leaving **12 host passes and nine failures with no incomplete comparison**. No production source, public export, dependency, baseline, selector, threshold, or enforcement rule changed. **M10.5 remains open and unqualified** for the nine host failures; physical-device work remains deferred.
+
+Next recommended numbered slice: **M10.5 — review the binding host-budget policy against the completed current-source evidence. Record whether the nine package-host limits remain release blockers or whether a separately authorised compatibility/architecture change is needed. Keep the existing budget registry and API unchanged until that decision is explicit.**
