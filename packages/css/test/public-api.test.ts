@@ -3,6 +3,7 @@ import * as rootApi from "@opsydyn/crumbs-css"
 import * as styleApi from "@opsydyn/crumbs-css/style"
 import * as themeApi from "@opsydyn/crumbs-css/theme"
 import * as themeCoreApi from "@opsydyn/crumbs-css/theme/core"
+import * as themeTokenApi from "@opsydyn/crumbs-css/theme/token"
 import * as themeConditionsApi from "@opsydyn/crumbs-css/theme/conditions"
 import * as themeExpressionsApi from "@opsydyn/crumbs-css/theme/expressions"
 import * as themeRecipesApi from "@opsydyn/crumbs-css/theme/recipes"
@@ -174,6 +175,16 @@ describe("@opsydyn/crumbs-css public API contract", () => {
       "useThemeSelector",
       "useThemedStyle",
       "useThemedStyles",
+    ])
+  })
+
+  it("exposes a deliberately narrow token-only theme runtime", () => {
+    expect(namedApiKeys(themeTokenApi)).toEqual([
+      "ThemeProvider",
+      "createTokenStyles",
+      "resolveTokenStyles",
+      "themeToken",
+      "useTokenStyles",
     ])
   })
 

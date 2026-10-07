@@ -2902,3 +2902,13 @@ The [admission review](assessments/2026-10-07-m10-5-theme-token-public-surface.m
 The review relies on package/type tests and internal Storybook plus Expo web-bundle dogfood; candidate-specific native rendering and Hermes results remain unverified. The existing M10.5 host gate remains 11 pass, nine fail, and one incomplete, with every selector and threshold unchanged. No package export, shipped API reference, dependency, release, or budget changed in this review. M10.5 remains open; physical-device work remains deferred.
 
 Next recommended numbered slice: **M10.5 — implement the reviewed `theme/token` subpath** with package export/declaration wiring, provider and runtime tests, negative/positive type fixtures, and focused consumer documentation; then verify a packed Expo consumer on the available iOS Simulator and Android Emulator. Keep the current host gate fixed and graph comparisons diagnostic until a separate budget review.
+
+### 2026-10-07 — M10.5 reviewed `theme/token` admission and packed consumer verification
+
+The [implementation assessment](assessments/2026-10-07-m10-5-theme-token-admission-implementation.md) admits the reviewed additive `@opsydyn/crumbs-css/theme/token` API with ESM/CommonJS exports and declarations. Contract-derived type checks, runtime/provider interoperability, public API tests, and the source-map contract cover the new subpath. No existing entrypoint, dependency, package version, approved host limit, baseline, selector, or enforcement rule changed.
+
+Build, package and app typechecks, docs build, 1,515 package tests (one exact-Node-22-only skip), and 23 Storybook tests pass. The packed Expo consumer exports validated iOS, Android, and web bundles/maps. On the already-booted iOS 26.5 `Crumbs M105 Expo Consumer` Simulator, the packed “Token styles” journey rendered and switched between light and dark token themes. Native Android execution remains unverified because this environment has no available Android SDK or `adb`; physical-device work remains deferred. The protected Simulator was not touched.
+
+The previous 21-metric host report remains 11 pass, nine fail, and one incomplete, but its source digest predates this implementation. It is not current-source qualification. The token-entry graph sizes are diagnostic and are not approved budgets. **M10.5 remains open.**
+
+Next recommended numbered slice: **M10.5 — set up or locate an Android SDK/emulator and complete the packed consumer's native Android token-style journey.** Then rerun the final current-source host-budget gate with all approved selectors and limits unchanged; preserve physical-device work as deferred.

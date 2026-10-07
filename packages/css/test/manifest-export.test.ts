@@ -109,7 +109,12 @@ function writeTypeConfigs(consumerRoot: string): void {
     import type { NativeExpression } from "@opsydyn/crumbs-css/theme/expressions";
     import type { NativeRecipeResolver, RecipeResolutionPlan } from "@opsydyn/crumbs-css/theme/recipes";
     import type { NativeSprinklesLookupPlan, NativeSprinklesResolver } from "@opsydyn/crumbs-css/theme/sprinkles";
+    import { createTokenStyles, themeToken } from "@opsydyn/crumbs-css/theme/token";
+    import type { ThemeStyleToken } from "@opsydyn/crumbs-css/theme/token";
+    import { createTokenContract, defineToken } from "@opsydyn/crumbs-css/tokens";
+    import type { ViewStyle } from "react-native";
     type FocusedThemeTypes = [NativeConditionSnapshot, NativeExpression, RecipeResolutionPlan, NativeRecipeResolver<any>, NativeSprinklesLookupPlan<any, any, any>, NativeSprinklesResolver<any, any>];
+    type TokenRuntimeTypes = [ThemeStyleToken];
     import manifestJson from "./manifest.json";
     const manifest: DesignSystemManifest = decodeManifest(manifestJson);
     const input: ManifestAssemblyInput = { package: manifest.package, producer: manifest.producer, styleSidecars: [] };
@@ -119,6 +124,9 @@ function writeTypeConfigs(consumerRoot: string): void {
     void transformCssTsToStyleSheetWithManifestSidecar;
     void sidecar;
     void (null as unknown as FocusedThemeTypes);
+    const vars = createTokenContract({ color: { accent: defineToken("color") } });
+    void createTokenStyles<ViewStyle>()({ card: { backgroundColor: themeToken(vars.color.accent) } });
+    void (null as unknown as TokenRuntimeTypes);
   `
   writeFileSync(resolve(consumerRoot, "manifest-types.ts"), source)
   writeFileSync(resolve(consumerRoot, "theme-features.cts"), `
@@ -126,7 +134,8 @@ function writeTypeConfigs(consumerRoot: string): void {
     import type { NativeExpressionDomain } from "@opsydyn/crumbs-css/theme/expressions" with { "resolution-mode": "require" };
     import type { ComponentRecipeResolverOptions } from "@opsydyn/crumbs-css/theme/recipes" with { "resolution-mode": "require" };
     import type { NativeSprinklesResolutionSelection } from "@opsydyn/crumbs-css/theme/sprinkles" with { "resolution-mode": "require" };
-    type CommonJsThemeTypes = [NativeConditionInput, NativeExpressionDomain, ComponentRecipeResolverOptions, NativeSprinklesResolutionSelection<any, any>];
+    import type { ThemeStyleToken } from "@opsydyn/crumbs-css/theme/token" with { "resolution-mode": "require" };
+    type CommonJsThemeTypes = [NativeConditionInput, NativeExpressionDomain, ComponentRecipeResolverOptions, NativeSprinklesResolutionSelection<any, any>, ThemeStyleToken];
     void (null as unknown as CommonJsThemeTypes);
   `)
   for (const [filename, module, moduleResolution] of [

@@ -7,10 +7,11 @@ import * as screen from "./screen.css"
 import { dark, light } from "./theme.css"
 import { MeasurementPanel } from "./MeasurementPanel"
 import { GradientAcceptancePanel } from "./GradientAcceptancePanel"
+import { TokenStylesPanel } from "./TokenStylesPanel"
 
 const rows = Array.from({ length: 1000 }, (_, id) => ({ id: String(id), label: `Design system component ${id + 1}` }))
 const { screenTitle, ...styles } = screen
-type Journey = "List" | "Form" | "Scopes" | "Measure" | "Gradients"
+type Journey = "List" | "Form" | "Scopes" | "Measure" | "Gradients" | "Token styles"
 const scrollProbeEnabled = __DEV__ && process.env.EXPO_PUBLIC_CRUMBS_SCROLL_PROBE === "true"
 
 function ScopeCard() {
@@ -35,7 +36,7 @@ function Playground({ isDark, toggle }: { isDark: boolean; toggle: () => void })
     <Text style={s.copy}>{process.env.EXPO_PUBLIC_CRUMBS_MODE ?? "unverified"} · Crumbs {process.env.EXPO_PUBLIC_CRUMBS_VERSION ?? "unrecorded"}</Text>
     <Text style={s.copy}>Revision {process.env.EXPO_PUBLIC_CRUMBS_REVISION ?? "unrecorded"}</Text>
     <Pressable accessibilityRole="button" onPress={toggle} style={[...resolveRecipeStyle(s.button)]}><Text style={s.copy}>Switch to {isDark ? "light" : "dark"}</Text></Pressable>
-    <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>{(["List", "Form", "Scopes", "Measure", "Gradients"] as const).map(item =>
+    <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>{(["List", "Form", "Scopes", "Measure", "Gradients", "Token styles"] as const).map(item =>
       <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: journey === item }} onPress={() => setJourney(item)} style={[...resolveRecipeStyle(s.button, { selected: journey === item })]}><Text style={s.copy}>{item}</Text></Pressable>
     )}</View>
     {journey === "List" && __DEV__ && scrollProbeEnabled && <Text testID="crumbs-scroll-probe" style={{ ...s.copy, fontSize: 12 }}>
@@ -71,6 +72,7 @@ function Playground({ isDark, toggle }: { isDark: boolean; toggle: () => void })
     </ScrollView>}
     {journey === "Measure" && <MeasurementPanel />}
     {journey === "Gradients" && <GradientAcceptancePanel />}
+    {journey === "Token styles" && <ScrollView><TokenStylesPanel isDark={isDark} /></ScrollView>}
     <PortalHost />
   </View>
 }

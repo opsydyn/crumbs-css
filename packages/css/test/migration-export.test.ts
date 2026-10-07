@@ -91,7 +91,7 @@ describe("isolated migration tooling export", () => {
 
   it("keeps-migrations-typescript-and-effect-out-of-runtime-graphs", async () => {
     const graphs = await auditPackedRuntimeEntrypoints(packageRoot)
-    const ordinarySubpaths = [".", "./style", "./theme", "./theme/core", "./tokens", "./tokens/optic"]
+    const ordinarySubpaths = [".", "./style", "./theme", "./theme/core", "./theme/token", "./tokens", "./tokens/optic"]
     for (const graph of graphs.filter(candidate => ordinarySubpaths.includes(candidate.subpath))) {
       expect(graph.files.some(file => file === "dist/tooling-migrations.mjs" || file === "dist/tooling-migrations.cjs")).toBe(false)
       expect(graph.externalSpecifiers).not.toContain("typescript")

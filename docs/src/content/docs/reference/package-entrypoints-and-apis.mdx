@@ -401,6 +401,54 @@ It is emitted as an independent graph so consumers that do not need scopes,
 dependency plans or recipe controls do not load those implementations. Both
 theme entrypoints retain a React-only external runtime dependency boundary.
 
+### `@opsydyn/crumbs-css/theme/token`
+
+Use this additive path for flat native style maps whose token references should
+retain the domain and value type from `createTokenContract`:
+
+```tsx
+import { createTokenStyles, themeToken, ThemeProvider, useTokenStyles } from "@opsydyn/crumbs-css/theme/token"
+import { createTokenContract, createTokenTheme, defineToken } from "@opsydyn/crumbs-css/tokens"
+import type { ViewStyle } from "react-native"
+import { View } from "react-native"
+
+const vars = createTokenContract({
+  color: { surface: defineToken("color") },
+  space: { card: defineToken("length") },
+})
+const light = createTokenTheme(vars, { color: { surface: "#ffffff" }, space: { card: 16 } })
+const styles = createTokenStyles<ViewStyle>()({
+  card: {
+    backgroundColor: themeToken(vars.color.surface),
+    padding: themeToken(vars.space.card),
+  },
+})
+
+function Card() {
+  const themed = useTokenStyles(styles)
+  return <View style={themed.card} />
+}
+
+export function App() {
+  return <ThemeProvider theme={light}><Card /></ThemeProvider>
+}
+```
+
+`themeToken` accepts only a domain-branded reference from `createTokenContract`.
+`createTokenStyles<ViewStyle | TextStyle | ImageStyle>()` checks that each token
+domain and its contract-derived value fit the selected native property. Use
+`resolveTokenStyles(styles, theme)` for non-React resolution. The supported
+shape is a flat record of style names to primitive native properties; arrays,
+nested style values, conditions, recipes, component slots, and extensions stay
+on the existing authoring/runtime paths.
+
+This path is opt-in and additive. Its provider shares the canonical theme store
+with the existing theme entries. It does not replace `theme/core`, change an
+existing import, or promise a smaller application bundle, startup time, native
+frame time, or memory use. Use `theme/core` for the general style-resolution
+surface and `theme/token` when contract-derived token/property compatibility is
+the reason to choose a narrower API.
+
 ### Focused theme feature paths
 
 Use these additive paths when a package or application module needs one theme

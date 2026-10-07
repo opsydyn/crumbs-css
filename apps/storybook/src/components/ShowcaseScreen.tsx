@@ -5,6 +5,7 @@ import { labelOfThemeMode } from "../styles/theme"
 import { PrimitiveGallery } from "./PrimitiveGallery"
 import { useAppTheme } from "./AppThemeProvider"
 import { ShowcaseCard } from "./ShowcaseCard"
+import { TokenThemeContractDogfood } from "./TokenThemeContractDogfood"
 import { ReferenceSystem } from "./ReferenceSystem"
 import * as s from "./ShowcaseScreen.css"
 import { ThemeAxisPicker } from "./ThemeAxisPicker"
@@ -34,6 +35,7 @@ export function ShowcaseScreen() {
           onActionPress={() => scrollView.current?.scrollToEnd({ animated: true })}
           title="A native primitives gallery that doubles as the Storybook index surface."
         />
+        <TokenThemeContractDogfood />
         <ReferenceSystem />
         <PrimitiveGallery />
       </View>

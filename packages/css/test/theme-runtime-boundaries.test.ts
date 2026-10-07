@@ -228,4 +228,58 @@ describe("theme runtime package boundary characterization", () => {
       })
     }
   }
+
+  for (const format of ["cjs", "esm"] as const) {
+    for (const providerEntry of ["theme/core", "theme/token"] as const) {
+      it("shares the provider store between " + providerEntry + " and theme/token consumers in " + format, () => {
+        const providerImport = format === "cjs"
+          ? 'const provider = require("@opsydyn/crumbs-css/' + providerEntry + '");'
+          : 'const provider = await import("@opsydyn/crumbs-css/' + providerEntry + '");'
+        const tokenImport = format === "cjs"
+          ? 'const tokenApi = require("@opsydyn/crumbs-css/theme/token");'
+          : 'const tokenApi = await import("@opsydyn/crumbs-css/theme/token");'
+        const coreImport = format === "cjs"
+          ? 'const coreApi = require("@opsydyn/crumbs-css/theme/core");'
+          : 'const coreApi = await import("@opsydyn/crumbs-css/theme/core");'
+        const tokenDefinitionsImport = format === "cjs"
+          ? 'const tokenDefinitions = require("@opsydyn/crumbs-css/tokens");'
+          : 'const tokenDefinitions = await import("@opsydyn/crumbs-css/tokens");'
+        const reader = providerEntry === "theme/token"
+          ? [
+              "  const current = coreApi.useTheme();",
+              '  return React.createElement("span", null, String(current.tokens["--crumbs-boundary-probe"]));',
+            ]
+          : [
+              '  const current = tokenApi.useTokenStyles({card: {backgroundColor: tokenApi.themeToken(vars.color.accent)}});',
+              '  return React.createElement("span", null, current.card.backgroundColor);',
+            ]
+        const script = [
+          format === "cjs"
+            ? 'const React = require("react");'
+            : 'const React = await import("react");',
+          format === "cjs"
+            ? 'const {renderToStaticMarkup} = require("react-dom/server");'
+            : 'const {renderToStaticMarkup} = await import("react-dom/server");',
+          providerImport,
+          tokenImport,
+          coreImport,
+          tokenDefinitionsImport,
+          'const vars = tokenDefinitions.createTokenContract({color: {accent: tokenDefinitions.defineToken("color")}});',
+          'const colorVarName = String(vars.color.accent).slice(4, -1);',
+          'const theme = {contract: {}, values: {}, tokens: {"--crumbs-boundary-probe": 23, [colorVarName]: "#123456"}};',
+          "function Reader() {",
+          ...reader,
+          "}",
+          "const html = renderToStaticMarkup(",
+          "  React.createElement(provider.ThemeProvider, {theme}, React.createElement(Reader)),",
+          ");",
+          providerEntry === "theme/token"
+            ? 'if (html !== "<span>23</span>") throw new Error("Token provider/core hook mismatch: " + html);'
+            : 'if (html !== "<span>#123456</span>") throw new Error("Core provider/token hook mismatch: " + html);',
+        ].join("\n")
+        const args = format === "cjs" ? ["-e"] : ["--input-type=module", "-e"]
+        expect(runNode(args, script)).toBe("")
+      })
+    }
+  }
 })
