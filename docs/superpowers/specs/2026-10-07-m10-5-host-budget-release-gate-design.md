@@ -1,6 +1,6 @@
 # M10.5 host-budget release-gate design
 
-- **Status:** Proposed; design review pending. Implementation is not authorised by this document.
+- **Status:** Approved; implementation plan review pending. Implementation is not authorised by this document.
 - **Date:** 2026-10-07
 - **Roadmap:** M10.5
 - **Source reviewed:** `0d510bc` plus the retained current-source host-budget evidence.
@@ -18,7 +18,7 @@ The current-source comparison contains 21 approved host metrics: 12 pass and nin
 
 ### Host qualification job
 
-Add a `qualify` job before `publish` in `.github/workflows/publish.yml`. It runs on a dedicated self-hosted macOS ARM64 Apple M4 Pro runner with a controlled `crumbs-m4-pro` label. The job records and checks the actual hardware, OS, architecture, and toolchain; a label alone is not proof. It must match the accepted host policy, including macOS 26.6.2, Apple M4 Pro, Bun 1.3.11, exact Node 22.0.0 floor and Node 24.15.0 current runtime, plus the matched Expo 56.0.4 / Metro 0.84.4 / React Native 0.85.3 consumer cohort. Any mismatch fails closed. There is no fallback to a GitHub-hosted runner or a different Mac model.
+Add a `qualify` job before `publish` in `.github/workflows/publish.yml`. It runs on a dedicated self-hosted macOS ARM64 Apple M4 Pro runner with a controlled `crumbs-m4-pro` label. The job records and checks the actual hardware, OS, architecture, and toolchain; a label alone is not proof. It must match the accepted host policy, including macOS 26.6.2, Apple M4 Pro, Bun 1.4.2, npm 11.12.1, exact Node 22.0.0 floor and Node 24.15.0 current runtime, plus the matched Expo 56.0.4 / Metro 0.84.4 / React Native 0.85.3 consumer cohort. The editor-scale row records Bun's Node compatibility identity as v26.3.0; it does not require a separate Node 26 executable. Any mismatch fails closed. There is no fallback to a GitHub-hosted runner or a different Mac model.
 
 The job checks out the requested release tag, verifies dispatch came from `main`, resolves the tag to a commit SHA, and installs the frozen workspace dependencies. It builds the package, prepares the approved locked Metro scaffold from baseline commit `43c5ece39360cf321fdb074d82cee41d5daaba23` with the current package artifacts, Metro config, and five approved fixture files, and verifies the direct `@vanilla-extract/css` edge resolves to the baseline lock's 1.20.1 package. It then runs the full host-budget measurement. `release:check` requires that report and runs the existing package build, typecheck, tests, native-style smoke benchmark, and pack dry-run. Its report validator compares the rebuilt output to the report's artifact identity, so a stale report or a changed build cannot pass.
 
