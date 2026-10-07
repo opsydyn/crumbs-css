@@ -1,0 +1,527 @@
+{
+  "formatVersion": 1,
+  "slice": "M10.5 current warm-transform attribution and context-reuse candidate",
+  "sourceRevision": "0e0c43e",
+  "officialGate": {
+    "baselineMedianMs": 5.664125000000013,
+    "currentMedianMs": 9.754042000000027,
+    "approvedAbsoluteMaximumMs": 6.514,
+    "selector": "maximum of the per-fixture five-process warm medians",
+    "currentResult": "fail",
+    "sourceEvidence": "docs/evidence/2026-10-07-m10-5-current-host-budget-requalification/host-budgets/comparison.json"
+  },
+  "environment": {
+    "bun": "1.4.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "nodeEnv": "unset"
+  },
+  "phaseAttribution": {
+    "runs": 5,
+    "limitations": [
+      "source-level timers are diagnostic and add small overhead",
+      "instrumented samples are not host-budget qualification",
+      "scratch paths differ from the managed worktree path"
+    ],
+    "byFixture": {
+      "README recipe fixture": {
+        "processes": [
+          {
+            "process": 1,
+            "warmSampleP50Ms": 11.479207999999744,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 8.297791499999903,
+              "crumbs-postprocessing-and-emission": 1.5790210000000116,
+              "full-transform": 11.630874999999833,
+              "generated-module-evaluation": 1.3010415000003377,
+              "native-export-capture": 0.042458500000066124,
+              "native-module-processing": 1.4763330000000678,
+              "ve-add-file-scope": 0.02910450000013043,
+              "ve-debug-id-babel": 1.0525209999998424,
+              "ve-esbuild-build-total": 6.8989789999998266,
+              "ve-onload-total": 1.1423540000000685,
+              "ve-transform-total": 1.0858335000000352,
+              "virtual-css-normalization-and-serialization": 0.11139600000001337
+            }
+          },
+          {
+            "process": 2,
+            "warmSampleP50Ms": 10.833500000000186,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.84589549999987,
+              "crumbs-postprocessing-and-emission": 1.487186999999949,
+              "full-transform": 10.847687499999893,
+              "generated-module-evaluation": 1.1689374999998563,
+              "native-export-capture": 0.04587500000002365,
+              "native-module-processing": 1.3606044999999085,
+              "ve-add-file-scope": 0.027979000000186716,
+              "ve-debug-id-babel": 0.9745204999996986,
+              "ve-esbuild-build-total": 6.525208499999962,
+              "ve-onload-total": 1.156854000000294,
+              "ve-transform-total": 1.0062290000000758,
+              "virtual-css-normalization-and-serialization": 0.12508349999984603
+            }
+          },
+          {
+            "process": 3,
+            "warmSampleP50Ms": 10.353499999999713,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.614208499999904,
+              "crumbs-postprocessing-and-emission": 1.4617080000000442,
+              "full-transform": 10.595666000000165,
+              "generated-module-evaluation": 1.2318124999999327,
+              "native-export-capture": 0.04510449999997945,
+              "native-module-processing": 1.4208544999999049,
+              "ve-add-file-scope": 0.026812499999778083,
+              "ve-debug-id-babel": 1.001021000000037,
+              "ve-esbuild-build-total": 6.314562500000193,
+              "ve-onload-total": 1.0948540000001685,
+              "ve-transform-total": 1.0326455000001715,
+              "virtual-css-normalization-and-serialization": 0.10812499999997272
+            }
+          },
+          {
+            "process": 4,
+            "warmSampleP50Ms": 10.55558400000018,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.632333000000017,
+              "crumbs-postprocessing-and-emission": 1.4924795000001723,
+              "full-transform": 10.629187499999944,
+              "generated-module-evaluation": 1.1502494999997452,
+              "native-export-capture": 0.04139600000007704,
+              "native-module-processing": 1.3065210000002025,
+              "ve-add-file-scope": 0.027500000000372893,
+              "ve-debug-id-babel": 0.9969794999999522,
+              "ve-esbuild-build-total": 6.355686999999989,
+              "ve-onload-total": 1.0813755000001493,
+              "ve-transform-total": 1.0290834999998424,
+              "virtual-css-normalization-and-serialization": 0.10552049999978408
+            }
+          },
+          {
+            "process": 5,
+            "warmSampleP50Ms": 10.055665999999746,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.36868800000002,
+              "crumbs-postprocessing-and-emission": 1.5149794999999813,
+              "full-transform": 10.152395999999953,
+              "generated-module-evaluation": 1.1820000000000164,
+              "native-export-capture": 0.046709000000191736,
+              "native-module-processing": 1.3662914999999884,
+              "ve-add-file-scope": 0.02681250000023283,
+              "ve-debug-id-babel": 0.9486670000001141,
+              "ve-esbuild-build-total": 6.022582999999713,
+              "ve-onload-total": 1.0366875000001983,
+              "ve-transform-total": 0.9790624999998272,
+              "virtual-css-normalization-and-serialization": 0.11722900000017944
+            }
+          }
+        ],
+        "crossProcessMedianOfProcessPhaseMediansMs": {
+          "compile-with-stable-resolution": 7.632333000000017,
+          "crumbs-postprocessing-and-emission": 1.4924795000001723,
+          "full-transform": 10.629187499999944,
+          "generated-module-evaluation": 1.1820000000000164,
+          "native-export-capture": 0.04510449999997945,
+          "native-module-processing": 1.3662914999999884,
+          "ve-add-file-scope": 0.027500000000372893,
+          "ve-debug-id-babel": 0.9969794999999522,
+          "ve-esbuild-build-total": 6.355686999999989,
+          "ve-onload-total": 1.0948540000001685,
+          "ve-transform-total": 1.0290834999998424,
+          "virtual-css-normalization-and-serialization": 0.11139600000001337
+        },
+        "instrumentedWarmP50MedianMs": 10.55558400000018
+      },
+      "package-owned consumer button fixture": {
+        "processes": [
+          {
+            "process": 1,
+            "warmSampleP50Ms": 10.048291000000063,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.725271000000248,
+              "crumbs-postprocessing-and-emission": 1.2848330000001624,
+              "full-transform": 10.23077050000029,
+              "generated-module-evaluation": 1.015020999999706,
+              "native-export-capture": 0.03849999999965803,
+              "native-module-processing": 1.1729580000001079,
+              "ve-add-file-scope": 0.040917000000263215,
+              "ve-debug-id-babel": 1.526916500000425,
+              "ve-esbuild-build-total": 6.1922920000001795,
+              "ve-onload-total": 1.7006454999996095,
+              "ve-transform-total": 1.5703960000000734,
+              "virtual-css-normalization-and-serialization": 0.11829149999994115
+            }
+          },
+          {
+            "process": 2,
+            "warmSampleP50Ms": 10.651584000000184,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.956937500000095,
+              "crumbs-postprocessing-and-emission": 1.3135204999998678,
+              "full-transform": 10.683270999999877,
+              "generated-module-evaluation": 1.1344590000001062,
+              "native-export-capture": 0.04264649999959147,
+              "native-module-processing": 1.317270500000177,
+              "ve-add-file-scope": 0.03943700000036188,
+              "ve-debug-id-babel": 1.5246044999996684,
+              "ve-esbuild-build-total": 6.647062499999947,
+              "ve-onload-total": 1.672417500000165,
+              "ve-transform-total": 1.5681875000000218,
+              "virtual-css-normalization-and-serialization": 0.11995799999976953
+            }
+          },
+          {
+            "process": 3,
+            "warmSampleP50Ms": 9.975167000000056,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.45354199999997,
+              "crumbs-postprocessing-and-emission": 1.2688539999999193,
+              "full-transform": 9.993229500000098,
+              "generated-module-evaluation": 1.0244584999998096,
+              "native-export-capture": 0.03964599999994789,
+              "native-module-processing": 1.2051245000000108,
+              "ve-add-file-scope": 0.03783349999980601,
+              "ve-debug-id-babel": 1.3512709999995423,
+              "ve-esbuild-build-total": 6.161041500000238,
+              "ve-onload-total": 1.4924584999998842,
+              "ve-transform-total": 1.3907294999999067,
+              "virtual-css-normalization-and-serialization": 0.11541649999981018
+            }
+          },
+          {
+            "process": 4,
+            "warmSampleP50Ms": 11.457707999999911,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 11.824729500000558,
+              "crumbs-postprocessing-and-emission": 1.387437499999578,
+              "full-transform": 14.47189599999956,
+              "generated-module-evaluation": 1.036687499999971,
+              "native-export-capture": 0.04250000000001819,
+              "native-module-processing": 1.2014169999997648,
+              "ve-add-file-scope": 0.045771000000513595,
+              "ve-debug-id-babel": 1.7791659999993499,
+              "ve-esbuild-build-total": 8.011813000000075,
+              "ve-onload-total": 2.1435835000002044,
+              "ve-transform-total": 1.8306875000002947,
+              "virtual-css-normalization-and-serialization": 0.11183299999993324
+            }
+          },
+          {
+            "process": 5,
+            "warmSampleP50Ms": 9.633499999999913,
+            "phaseMediansMs": {
+              "compile-with-stable-resolution": 7.329999999999927,
+              "crumbs-postprocessing-and-emission": 1.23306249999996,
+              "full-transform": 9.661145999999917,
+              "generated-module-evaluation": 1.0117494999999508,
+              "native-export-capture": 0.039958000000297034,
+              "native-module-processing": 1.179958500000339,
+              "ve-add-file-scope": 0.04008350000049177,
+              "ve-debug-id-babel": 1.4236449999998513,
+              "ve-esbuild-build-total": 5.874333000000206,
+              "ve-onload-total": 1.565686999999798,
+              "ve-transform-total": 1.469291500000054,
+              "virtual-css-normalization-and-serialization": 0.11479199999985212
+            }
+          }
+        ],
+        "crossProcessMedianOfProcessPhaseMediansMs": {
+          "compile-with-stable-resolution": 7.725271000000248,
+          "crumbs-postprocessing-and-emission": 1.2848330000001624,
+          "full-transform": 10.23077050000029,
+          "generated-module-evaluation": 1.0244584999998096,
+          "native-export-capture": 0.039958000000297034,
+          "native-module-processing": 1.2014169999997648,
+          "ve-add-file-scope": 0.04008350000049177,
+          "ve-debug-id-babel": 1.5246044999996684,
+          "ve-esbuild-build-total": 6.1922920000001795,
+          "ve-onload-total": 1.672417500000165,
+          "ve-transform-total": 1.5681875000000218,
+          "virtual-css-normalization-and-serialization": 0.11541649999981018
+        },
+        "instrumentedWarmP50MedianMs": 10.048291000000063
+      }
+    }
+  },
+  "contextProfileAb": {
+    "runsPerMode": 5,
+    "instrumentedByFixture": {
+      "README recipe fixture": {
+        "control": {
+          "perProcessWarmP50Ms": [
+            10.69812499999989,
+            10.544291000000158,
+            10.643041999999696,
+            10.834875000000011,
+            10.422125000000051
+          ],
+          "crossProcessMedianWarmP50Ms": 10.643041999999696,
+          "phaseMediansMs": {
+            "compile-with-stable-resolution": 7.716625000000022,
+            "crumbs-postprocessing-and-emission": 1.5142914999998993,
+            "full-transform": 10.70112499999982,
+            "generated-module-evaluation": 1.213271000000077,
+            "native-export-capture": 0.044520499999862295,
+            "native-module-processing": 1.3739579999999023,
+            "ve-add-file-scope": 0.027124999999841748,
+            "ve-debug-id-babel": 1.0073540000000776,
+            "ve-esbuild-build-total": 6.4503749999998945,
+            "ve-onload-total": 1.123895500000117,
+            "ve-transform-total": 1.036104499999965,
+            "virtual-css-normalization-and-serialization": 0.10835449999990487
+          }
+        },
+        "candidate": {
+          "perProcessWarmP50Ms": [
+            8.223333999999795,
+            8.486333000000286,
+            8.822707999999693,
+            8.697749999999814,
+            8.762541000000056
+          ],
+          "crossProcessMedianWarmP50Ms": 8.697749999999814,
+          "phaseMediansMs": {
+            "compile-with-stable-resolution": 5.875603999999839,
+            "crumbs-postprocessing-and-emission": 1.4511459999998806,
+            "full-transform": 8.81683299999986,
+            "generated-module-evaluation": 1.1915834999999788,
+            "native-export-capture": 0.04220849999978782,
+            "native-module-processing": 1.3730000000002747,
+            "ve-add-file-scope": 0.026728999999932057,
+            "ve-context-rebuild": 4.488229000000047,
+            "ve-debug-id-babel": 0.9560419999997976,
+            "ve-esbuild-build-total": 4.488229000000047,
+            "ve-onload-total": 1.045895999999857,
+            "ve-transform-total": 0.9842499999999745,
+            "virtual-css-normalization-and-serialization": 0.11012549999986732
+          }
+        }
+      },
+      "package-owned consumer button fixture": {
+        "control": {
+          "perProcessWarmP50Ms": [
+            9.7196670000003,
+            10.103667000000314,
+            10.169750000000022,
+            10.099917000000005,
+            10.50500000000011
+          ],
+          "crossProcessMedianWarmP50Ms": 10.103667000000314,
+          "phaseMediansMs": {
+            "compile-with-stable-resolution": 7.637042000000065,
+            "crumbs-postprocessing-and-emission": 1.2592920000001868,
+            "full-transform": 10.180125500000486,
+            "generated-module-evaluation": 1.0209999999999582,
+            "native-export-capture": 0.04087500000014188,
+            "native-module-processing": 1.1850624999999582,
+            "ve-add-file-scope": 0.039020499999878666,
+            "ve-debug-id-babel": 1.4514165000002777,
+            "ve-esbuild-build-total": 6.304417000000058,
+            "ve-onload-total": 1.5989579999998114,
+            "ve-transform-total": 1.497771499999999,
+            "virtual-css-normalization-and-serialization": 0.11135449999983393
+          }
+        },
+        "candidate": {
+          "perProcessWarmP50Ms": [
+            8.637249999999767,
+            8.926542000000154,
+            8.30620799999997,
+            8.342208000000028,
+            8.271124999999756
+          ],
+          "crossProcessMedianWarmP50Ms": 8.342208000000028,
+          "phaseMediansMs": {
+            "compile-with-stable-resolution": 5.963082999999642,
+            "crumbs-postprocessing-and-emission": 1.2488749999997708,
+            "full-transform": 8.425020499999846,
+            "generated-module-evaluation": 0.9877495000000636,
+            "native-export-capture": 0.040582999999969616,
+            "native-module-processing": 1.1628540000001522,
+            "ve-add-file-scope": 0.03841650000003938,
+            "ve-context-rebuild": 4.62072900000021,
+            "ve-debug-id-babel": 1.410895999999866,
+            "ve-esbuild-build-total": 4.62072900000021,
+            "ve-onload-total": 1.5866669999995793,
+            "ve-transform-total": 1.4503544999997757,
+            "virtual-css-normalization-and-serialization": 0.11091699999997218
+          }
+        }
+      }
+    },
+    "candidateDisposition": "promising reduction, not production-admitted; context lifecycle requires explicit disposal"
+  },
+  "unprofiledCandidateAb": {
+    "runsPerMode": 5,
+    "byMode": {
+      "control": {
+        "processes": [
+          {
+            "process": 1,
+            "fixtureP50Ms": {
+              "README recipe fixture": 10.186125000000175,
+              "package-owned consumer button fixture": 9.578791000000365
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 2,
+            "fixtureP50Ms": {
+              "README recipe fixture": 10.223791999999776,
+              "package-owned consumer button fixture": 9.620167000000038
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 3,
+            "fixtureP50Ms": {
+              "README recipe fixture": 10.069332999999915,
+              "package-owned consumer button fixture": 9.49716699999999
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 4,
+            "fixtureP50Ms": {
+              "README recipe fixture": 10.494708999999602,
+              "package-owned consumer button fixture": 9.891583000000082
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 5,
+            "fixtureP50Ms": {
+              "README recipe fixture": 10.114125000000058,
+              "package-owned consumer button fixture": 9.538375000000087
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          }
+        ],
+        "crossProcessMedianP50MsByFixture": {
+          "README recipe fixture": 10.186125000000175,
+          "package-owned consumer button fixture": 9.578791000000365
+        }
+      },
+      "candidate": {
+        "processes": [
+          {
+            "process": 1,
+            "fixtureP50Ms": {
+              "README recipe fixture": 7.788083999999799,
+              "package-owned consumer button fixture": 7.637416999999914
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 2,
+            "fixtureP50Ms": {
+              "README recipe fixture": 7.915791999999783,
+              "package-owned consumer button fixture": 8.09941600000002
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 3,
+            "fixtureP50Ms": {
+              "README recipe fixture": 8.205165999999736,
+              "package-owned consumer button fixture": 8.153541000000132
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 4,
+            "fixtureP50Ms": {
+              "README recipe fixture": 7.782250000000204,
+              "package-owned consumer button fixture": 7.984082999999828
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          },
+          {
+            "process": 5,
+            "fixtureP50Ms": {
+              "README recipe fixture": 8.073958000000403,
+              "package-owned consumer button fixture": 7.661917000000358
+            },
+            "warmedOutputSha256": {
+              "README recipe fixture": "1b40a11892d37cfd2c3a41366620953a8d941a12fd8fc08e25eac0c0d96924b2",
+              "package-owned consumer button fixture": "fb7f7308e3197e9bfcf237f587e88b643559f6d5f238430177549c0ce305c54f"
+            }
+          }
+        ],
+        "crossProcessMedianP50MsByFixture": {
+          "README recipe fixture": 7.915791999999783,
+          "package-owned consumer button fixture": 7.984082999999828
+        }
+      }
+    },
+    "gateStatistic": {
+      "controlMs": 10.186125000000175,
+      "candidateMs": 7.984082999999828,
+      "relativeChangePercent": -21.61805397047758,
+      "pairedPerProcessWorstFixtureChangePercent": [
+        -23.54223023966754,
+        -20.778748237442656,
+        -18.51331165629536,
+        -23.92277861158294,
+        -20.171463176494697
+      ],
+      "approvedCeilingMs": 6.514,
+      "excessOverCeilingMs": 1.4700829999998275,
+      "excessOverCeilingPercent": 22.56805342339312,
+      "result": "fail"
+    },
+    "generatedOutputHashesEqualAcrossModesAndRuns": true,
+    "currentOfficialGateQualification": "not claimed; scratch control/candidate A/B is candidate evidence only"
+  },
+  "invalidation": {
+    "freshBuildAndContextBaselineExactOutputMatch": true,
+    "repeatedContextTransforms": 6,
+    "entryEditMinHeight48To49ChangedOutput": true,
+    "entryRestoreRecoveredBaselineOutput": true,
+    "importedThemeEditColor3559c7To3659c7ChangedOutput": true,
+    "editedImportedCssTsFileRecompiled": true,
+    "dependencyRestoreRecoveredBaselineOutput": true,
+    "scratchHarnessResult": "all assertions passed"
+  },
+  "productionChanges": false,
+  "apiChanges": false,
+  "budgetChanges": false,
+  "decision": "reject context reuse as a production change under the unchanged M10.5 gate; preserve the result as a candidate reference",
+  "contextLifecycle": {
+    "contextBound": 16,
+    "disposalRequired": true,
+    "benchmarkWithoutExplicitDisposal": "completed measurement output but process remained alive; explicit async context disposal was added to the scratch benchmark harness and first-transform worker",
+    "metroProjectLifecycleDisposal": "not demonstrated",
+    "productionAdmission": "blocked independently of the failed performance ceiling"
+  }
+}
