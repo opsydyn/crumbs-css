@@ -2844,3 +2844,11 @@ The [candidate assessment](assessments/2026-10-07-m10-5-debug-id-cache-candidate
 No production source, API, dependency, baseline, threshold, or enforcement rule changed. **M10.5 remains open** for the four runtime-initialisation failures, the warm-transform failure, and four theme graph-size failures. Physical-device work remains deferred.
 
 Next recommended numbered slice: **M10.5 — assess a non-caching compiler-adapter path that removes redundant work within one Vanilla Extract compilation.** First establish a cost model and show that a candidate could recover at least the live 2.942 ms gap to the unchanged 6.514 ms ceiling; then require exact output parity, dependency-edit correctness, and Metro restore evidence before implementation. Keep current host limits and selectors fixed.
+
+### 2026-10-07 — M10.5 non-caching compiler-adapter feasibility
+
+The [assessment](assessments/2026-10-07-m10-5-noncaching-adapter-feasibility.md) and [five-run evidence packet](evidence/2026-10-07-m10-5-noncaching-adapter-feasibility/README.md) find no qualifying non-caching adapter candidate. Instrumented median Vanilla Extract build costs are 6.252 ms for the README fixture and 5.633 ms for the consumer fixture; the duplicate metafile receipt callback is too small to plausibly recover the 2.942 ms focused-gate gap, while the official Vite/Vite-Node compiler retains module and CSS caches. The profiles are diagnostic scratch evidence, not a host-budget pass.
+
+No production source, API, dependency, budget, baseline, or enforcement rule changed. **M10.5 remains open** for four runtime-initialisation failures, the warm-transform failure, and four theme graph-size failures. Physical-device work remains deferred.
+
+Next recommended numbered slice: **M10.5 — run the final host-budget gate** against current tracked source with approved selectors and limits fixed. Record each metric as pass, fail, or incomplete; preserve physical-device acceptance as deferred.

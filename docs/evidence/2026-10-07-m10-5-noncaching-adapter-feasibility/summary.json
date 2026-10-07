@@ -1,0 +1,223 @@
+{
+  "formatVersion": 1,
+  "roadmap": "M10.5",
+  "decision": "no qualifying non-caching compiler-adapter candidate identified; no production change",
+  "protocol": {
+    "freshProcesses": 5,
+    "perFixtureEventsUsedPerProcess": 7,
+    "selection": "last seven events for the named phase/fixture in each process, median per process, then median across five processes",
+    "timingsAreDiagnostic": true,
+    "instrumentedScratchRunsAreHostBudgetQualification": false
+  },
+  "baseSource": {
+    "revision": "a8d597e73e0a19d5250a9b431d4ddbefc61123d4",
+    "currentWorktreeHeadAtCollection": "fe47e5f4421d780ab69e543d540e897ff37ea8ea",
+    "unmodifiedTransformerSha256": "bb080bfe7420bcd5a4a3013e9df84b8d9251a1c8f659caefdd551b1ac8dd5842",
+    "instrumentationPatch": {
+      "path": "../2026-10-07-m10-5-current-warm-transform-attribution/repro/phase-instrumentation.patch.gz",
+      "sha256": "93b00e9f2ebcabcf808976f1b751af4e0abf98a5116f6870e0a2a7512e1c6ea4",
+      "instrumentedTransformerSha256InRawReports": "fc684306ad353774643f7c37fdbc27de9822bfd2c2419739e9e2a3433ce4f8df"
+    }
+  },
+  "environment": {
+    "bun": "1.4.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "nodeEnv": "unset"
+  },
+  "sourceFiles": [
+    {
+      "relative": "bench/native-styles.bench.ts",
+      "sha256": "0c1313ff62a8c63c2179727931742338717a6a1298c2e1adc6198f43e45bcc26"
+    },
+    {
+      "relative": "bench/benchmark-protocol.ts",
+      "sha256": "674f4172ac2ede7cbdfde10d927192eed9f2230523fed3ae99a3edeeafe3c8f3"
+    },
+    {
+      "relative": "bench/selection-workload.ts",
+      "sha256": "11165545db0433df1ae1df61bd6cd67dc66737879a161054d09568d90ba5728c"
+    },
+    {
+      "relative": "bench/first-transform.ts",
+      "sha256": "bec25a624b7582a304de98964a8b1bdc2c0c287d4cab259d75efe1a8866aa989"
+    },
+    {
+      "relative": "bench/perf-harness.ts",
+      "sha256": "2d847624d35dcd3bbc6a4162abe7c72111f8aa18351fa109ef7a7121d80b4610"
+    },
+    {
+      "relative": "src/theme-runtime.ts",
+      "sha256": "a9355afc80ba8c331b1a6ed108558313b3521ce2b6470029df7a470bcb24337f"
+    },
+    {
+      "relative": "src/transformer.ts",
+      "sha256": "fc684306ad353774643f7c37fdbc27de9822bfd2c2419739e9e2a3433ce4f8df"
+    }
+  ],
+  "fixtures": [
+    {
+      "file": "examples/recipe.css.ts",
+      "sha256": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9"
+    },
+    {
+      "file": "fixtures/consumer/styles/button.css.ts",
+      "sha256": "db8546f2baef375412fe03a4fa0d0fad1c40168919453c73eb8fa9229cfdadea"
+    },
+    {
+      "file": "fixtures/consumer/styles/shared.css.ts",
+      "sha256": "bceab75091add774d3eb27c8697622fd41b8404328e027a6dd07c0f60110e1ec"
+    },
+    {
+      "file": "fixtures/consumer/styles/theme.css.ts",
+      "sha256": "568a174e7290bfbe8f6c4fda5cfcb3c292de5be79494a140d5f9c2d5c32045e9"
+    }
+  ],
+  "phaseMediansMs": {
+    "recipe": {
+      "ve-esbuild-build-total": 6.25241700000015,
+      "ve-debug-id-babel": 0.9322910000000775,
+      "generated-module-evaluation": 1.1633330000004207,
+      "native-module-processing": 1.3122920000000704,
+      "crumbs-postprocessing-and-emission": 1.240542000000005,
+      "full-transform": 9.466792000000169
+    },
+    "consumer": {
+      "ve-esbuild-build-total": 5.633374999999887,
+      "ve-debug-id-babel": 0.7882919999997284,
+      "generated-module-evaluation": 0.8055420000000595,
+      "native-module-processing": 0.9577500000000327,
+      "crumbs-postprocessing-and-emission": 1.046875,
+      "full-transform": 8.59762499999988
+    }
+  },
+  "perProcessMediansMs": {
+    "recipe": {
+      "ve-esbuild-build-total": [
+        5.933792000000267,
+        6.25241700000015,
+        6.378208000000086,
+        5.766458000000057,
+        6.347333000000162
+      ],
+      "ve-debug-id-babel": [
+        1.0056250000002365,
+        0.9314170000002377,
+        0.9322910000000775,
+        0.9663340000001881,
+        0.8380839999999807
+      ],
+      "generated-module-evaluation": [
+        1.2355830000001333,
+        1.1633330000004207,
+        1.199500000000171,
+        1.1319579999999405,
+        1.074500000000171
+      ],
+      "native-module-processing": [
+        1.4122500000003129,
+        1.3122920000000704,
+        1.3857920000000377,
+        1.2848340000000462,
+        1.2383340000001226
+      ],
+      "crumbs-postprocessing-and-emission": [
+        1.2155840000000353,
+        1.218166999999994,
+        1.240542000000005,
+        1.2941249999998945,
+        1.2742910000001757
+      ],
+      "full-transform": [
+        10.482082999999875,
+        9.207916999999725,
+        9.92608300000029,
+        9.016708999999992,
+        9.466792000000169
+      ]
+    },
+    "consumer": {
+      "ve-esbuild-build-total": [
+        5.988875000000007,
+        5.609708999999839,
+        5.633374999999887,
+        6.224249999999756,
+        5.44399999999996
+      ],
+      "ve-debug-id-babel": [
+        0.7827499999998508,
+        0.7882919999997284,
+        0.801665999999841,
+        0.789792000000034,
+        0.7616249999996398
+      ],
+      "generated-module-evaluation": [
+        0.7899999999999636,
+        0.8055420000000595,
+        0.8146669999996448,
+        0.8625419999998485,
+        0.7932499999997162
+      ],
+      "native-module-processing": [
+        0.9435840000005555,
+        0.9577500000000327,
+        0.9787499999997635,
+        1.0203750000000582,
+        0.9532090000002427
+      ],
+      "crumbs-postprocessing-and-emission": [
+        1.0247079999999187,
+        1.0495829999999842,
+        1.046875,
+        1.0364159999999174,
+        1.0523330000000897
+      ],
+      "full-transform": [
+        8.907999999999902,
+        8.553332999999839,
+        8.59762499999988,
+        9.21499999999969,
+        8.576125000000047
+      ]
+    }
+  },
+  "rawReports": [
+    {
+      "file": "profile-run-1.json",
+      "sha256": "57cdd2e931086d3ccacaf26661d42078cd53766e826d03832dcb44383000a636",
+      "bytes": 67141,
+      "recordedAt": "2026-10-07T14:30:01.796Z",
+      "phaseProfileEventCount": 238
+    },
+    {
+      "file": "profile-run-2.json",
+      "sha256": "e0045c5b8381b9e386eba7e441686392edf7c2d9e7b25601df7264d10a649e80",
+      "bytes": 67061,
+      "recordedAt": "2026-10-07T14:30:05.810Z",
+      "phaseProfileEventCount": 238
+    },
+    {
+      "file": "profile-run-3.json",
+      "sha256": "f1e9c2a412424a0f7a7e4f7a3385854afee8175ba074a89bf72957af95044992",
+      "bytes": 67050,
+      "recordedAt": "2026-10-07T14:30:09.816Z",
+      "phaseProfileEventCount": 238
+    },
+    {
+      "file": "profile-run-4.json",
+      "sha256": "73801f375a1db38a2f553a18a4ff7a143649f43a1f7eeca5ec773fdec1629cc0",
+      "bytes": 67107,
+      "recordedAt": "2026-10-07T14:30:13.833Z",
+      "phaseProfileEventCount": 238
+    },
+    {
+      "file": "profile-run-5.json",
+      "sha256": "a9afbbebd981b721f1cb63002d3a3aebab7826809513119b1a5fa109a38b2ea3",
+      "bytes": 67120,
+      "recordedAt": "2026-10-07T14:30:17.841Z",
+      "phaseProfileEventCount": 238
+    }
+  ]
+}

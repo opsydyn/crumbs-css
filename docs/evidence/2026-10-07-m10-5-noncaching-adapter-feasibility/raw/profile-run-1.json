@@ -1,0 +1,1712 @@
+{
+  "formatVersion": 2,
+  "recordedAt": "2026-10-07T14:30:01.796Z",
+  "sourceRevision": "",
+  "sourceState": "Working tree; source/fixture hashes identify this pre-commit benchmark",
+  "sourceFiles": [
+    {
+      "relative": "bench/native-styles.bench.ts",
+      "sha256": "0c1313ff62a8c63c2179727931742338717a6a1298c2e1adc6198f43e45bcc26"
+    },
+    {
+      "relative": "bench/benchmark-protocol.ts",
+      "sha256": "674f4172ac2ede7cbdfde10d927192eed9f2230523fed3ae99a3edeeafe3c8f3"
+    },
+    {
+      "relative": "bench/selection-workload.ts",
+      "sha256": "11165545db0433df1ae1df61bd6cd67dc66737879a161054d09568d90ba5728c"
+    },
+    {
+      "relative": "bench/first-transform.ts",
+      "sha256": "bec25a624b7582a304de98964a8b1bdc2c0c287d4cab259d75efe1a8866aa989"
+    },
+    {
+      "relative": "bench/perf-harness.ts",
+      "sha256": "2d847624d35dcd3bbc6a4162abe7c72111f8aa18351fa109ef7a7121d80b4610"
+    },
+    {
+      "relative": "src/theme-runtime.ts",
+      "sha256": "a9355afc80ba8c331b1a6ed108558313b3521ce2b6470029df7a470bcb24337f"
+    },
+    {
+      "relative": "src/transformer.ts",
+      "sha256": "fc684306ad353774643f7c37fdbc27de9822bfd2c2419739e9e2a3433ce4f8df"
+    }
+  ],
+  "environment": {
+    "bun": "1.4.2",
+    "platform": "darwin",
+    "architecture": "arm64",
+    "osRelease": "25.6.0",
+    "cpu": "Apple M4 Pro",
+    "nodeEnv": "unset"
+  },
+  "fixtures": [
+    {
+      "file": "examples/recipe.css.ts",
+      "sha256": "13861486a5392b4d37e7e8e8c18a9da7c7c563e1953a127c663b20d75fcb1cd9"
+    },
+    {
+      "file": "fixtures/consumer/styles/button.css.ts",
+      "sha256": "db8546f2baef375412fe03a4fa0d0fad1c40168919453c73eb8fa9229cfdadea"
+    },
+    {
+      "file": "fixtures/consumer/styles/shared.css.ts",
+      "sha256": "bceab75091add774d3eb27c8697622fd41b8404328e027a6dd07c0f60110e1ec"
+    },
+    {
+      "file": "fixtures/consumer/styles/theme.css.ts",
+      "sha256": "568a174e7290bfbe8f6c4fda5cfcb3c292de5be79494a140d5f9c2d5c32045e9"
+    }
+  ],
+  "protocol": {
+    "quantiles": "Nearest-rank quantiles of batch-average milliseconds per operation, never individual operation/GC tails; one-iteration transform samples are individual transform observations",
+    "ordering": "Sequential scenarios in listed order; warmup excluded; cold transforms use fixture-root cwd; warm transforms use package-root cwd; fixture paths are package-relative; filesystem caches uncontrolled",
+    "warmTransformCwd": "package-root",
+    "budgets": "Existing host smoke ceilings retained with corrected names; new ingress/cold scenarios have no calibrated budget; M1.8 remains open",
+    "runtimeCaching": "createRecipeResolver is an uncached closure. Pre-resolved theme selection amortizes earlier resolution, not a recipe cache hit. React useMemo reuse/invalidation is not measured by this pure host harness."
+  },
+  "selectionsPerCycle": 52,
+  "metrics": [
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.0025,
+        "minHz": 400000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        2.529457999999977,
+        2.1435419999999965,
+        2.108125000000001,
+        2.590167000000008,
+        2.1209580000000017,
+        2.1049159999999745,
+        2.4741249999999866,
+        2.133166999999986,
+        2.0884169999999926,
+        2.431666000000007,
+        2.070875000000001,
+        2.072833000000003
+      ],
+      "hz": 11165595.495262856,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.00010360668000000033,
+      "meanOperationMs": 0.00008956082999999978,
+      "batchMeanMinMs": 0.00008283500000000004,
+      "name": "raw equivalent recipe selection",
+      "batchMeanP50Ms": 0.00008483832000000007,
+      "batchMeanP95Ms": 0.00010360668000000033,
+      "samples": 12,
+      "totalMs": 26.868248999999935,
+      "warmupIterations": 25000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.006,
+        "minHz": 150000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        63.92320799999999,
+        64.39458300000001,
+        63.750249999999994,
+        65.80950000000001,
+        65.25245799999993,
+        65.03166699999997,
+        64.67899999999997,
+        65.96020799999997,
+        65.83941700000003,
+        65.82550000000003,
+        65.85862500000007,
+        66.15387500000008
+      ],
+      "hz": 383397.2181088919,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.0026461550000000033,
+      "meanOperationMs": 0.00260826097,
+      "batchMeanMinMs": 0.0025500099999999997,
+      "name": "resolveRecipeStyle uncached selection",
+      "batchMeanP50Ms": 0.0026100983199999974,
+      "batchMeanP95Ms": 0.0026461550000000033,
+      "samples": 12,
+      "totalMs": 782.478291,
+      "warmupIterations": 25000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.006,
+        "minHz": 150000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        30.442334000000074,
+        29.22504200000003,
+        30.879916999999978,
+        29.659958999999844,
+        30.70233300000018,
+        28.702374999999847,
+        31.191540999999916,
+        29.1596669999999,
+        30.70987500000001,
+        29.576958999999988,
+        31.439624999999978,
+        28.864624999999933
+      ],
+      "hz": 832052.3148344407,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.0012575849999999992,
+      "meanOperationMs": 0.0012018475066666657,
+      "batchMeanMinMs": 0.001148094999999994,
+      "name": "createRecipeResolver uncached selection",
+      "batchMeanP50Ms": 0.0011863983599999938,
+      "batchMeanP95Ms": 0.0012575849999999992,
+      "samples": 12,
+      "totalMs": 360.5542519999997,
+      "warmupIterations": 25000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 0.0075,
+        "minHz": 125000
+      },
+      "iterationsPerSample": 25000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        28.91020800000001,
+        29.882458000000042,
+        27.98129199999994,
+        29.76324999999997,
+        27.901499999999942,
+        31.081040999999914,
+        28.078125,
+        29.387833999999884,
+        28.976791999999932,
+        29.816250000000082,
+        28.4917089999999,
+        31.2037499999999
+      ],
+      "hz": 853547.6923144605,
+      "iterations": 300000,
+      "batchMeanMaxMs": 0.001248149999999996,
+      "meanOperationMs": 0.001171580696666665,
+      "batchMeanMinMs": 0.0011160599999999977,
+      "name": "pre-resolved theme recipe uncached selection",
+      "batchMeanP50Ms": 0.0011590716799999973,
+      "batchMeanP95Ms": 0.001248149999999996,
+      "samples": 12,
+      "totalMs": 351.4742089999995,
+      "warmupIterations": 25000
+    },
+    {
+      "iterationsPerSample": 5000,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        13.873291999999992,
+        13.546041999999943,
+        14.641084000000092,
+        13.611583999999993,
+        13.792875000000095,
+        14.002083999999968,
+        14.056708000000071,
+        13.99695799999995,
+        13.933582999999999,
+        13.466834000000063,
+        13.641875000000027,
+        13.646874999999909
+      ],
+      "hz": 360989.55757083703,
+      "iterations": 60000,
+      "batchMeanMaxMs": 0.0029282168000000185,
+      "meanOperationMs": 0.002770163233333335,
+      "batchMeanMinMs": 0.0026933668000000124,
+      "name": "resolve theme module plus recipe selection per call",
+      "batchMeanP50Ms": 0.0027585750000000187,
+      "batchMeanP95Ms": 0.0029282168000000185,
+      "samples": 12,
+      "totalMs": 166.2097940000001,
+      "warmupIterations": 5000
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 1.5
+      },
+      "iterationsPerSample": 20,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        0.002250000000003638,
+        0.001290999999810083,
+        0.0012500000000272848,
+        0.003333999999995285,
+        0.001334000000042579,
+        0.001334000000042579,
+        0.0012500000000272848,
+        0.001291999999921245,
+        0.0016669999999976426,
+        0.001042000000097687,
+        0.00037500000007639755,
+        0.00033400000006622577
+      ],
+      "hz": 14325792.395299574,
+      "iterations": 240,
+      "batchMeanMaxMs": 0.00016669999999976425,
+      "meanOperationMs": 0.00006980416666711639,
+      "batchMeanMinMs": 0.00001670000000331129,
+      "name": "resolveThemeStyles 240 exports uncached",
+      "batchMeanP50Ms": 0.00006454999999050415,
+      "batchMeanP95Ms": 0.00016669999999976425,
+      "samples": 12,
+      "totalMs": 0.01675300000010793,
+      "warmupIterations": 20
+    },
+    {
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        123.851333,
+        73.95058300000001,
+        77.61237500000001,
+        76.80295899999999,
+        75.60374999999999,
+        77.317291
+      ],
+      "hz": 11.877935422638549,
+      "iterations": 6,
+      "batchMeanMaxMs": 123.851333,
+      "meanOperationMs": 84.18971516666667,
+      "batchMeanMinMs": 73.95058300000001,
+      "name": "first transform README recipe fixture",
+      "batchMeanP50Ms": 76.80295899999999,
+      "batchMeanP95Ms": 123.851333,
+      "samples": 6,
+      "totalMs": 505.13829100000004,
+      "warmupIterations": 0
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 100
+      },
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        10.487291999999798,
+        9.700750000000426,
+        8.502665999999863,
+        12.12191699999994,
+        11.16387500000019,
+        8.422207999999955
+      ],
+      "hz": 99.33987329662719,
+      "iterations": 6,
+      "batchMeanMaxMs": 12.12191699999994,
+      "meanOperationMs": 10.066451333333362,
+      "batchMeanMinMs": 8.422207999999955,
+      "name": "warm transform README recipe fixture",
+      "batchMeanP50Ms": 9.700750000000426,
+      "batchMeanP95Ms": 12.12191699999994,
+      "samples": 6,
+      "totalMs": 60.39870800000017,
+      "warmupIterations": 1
+    },
+    {
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        83.78979199999999,
+        75.00475,
+        76.394166,
+        76.021958,
+        75.16604199999999,
+        75.90258400000002
+      ],
+      "hz": 12.97916671551881,
+      "iterations": 6,
+      "batchMeanMaxMs": 83.78979199999999,
+      "meanOperationMs": 77.04654866666665,
+      "batchMeanMinMs": 75.00475,
+      "name": "first transform package-owned consumer button fixture",
+      "batchMeanP50Ms": 75.90258400000002,
+      "batchMeanP95Ms": 83.78979199999999,
+      "samples": 6,
+      "totalMs": 462.27929199999994,
+      "warmupIterations": 0
+    },
+    {
+      "budget": {
+        "maxBatchMeanP95Ms": 150
+      },
+      "iterationsPerSample": 1,
+      "sampleKind": "batch-mean-ms-per-operation",
+      "sampleDurationsMs": [
+        9.2753330000005,
+        8.677584000000024,
+        8.816667000000052,
+        8.961417000000438,
+        8.163375000000087,
+        9.236041999999543
+      ],
+      "hz": 112.92965923964549,
+      "iterations": 6,
+      "batchMeanMaxMs": 9.2753330000005,
+      "meanOperationMs": 8.855069666666774,
+      "batchMeanMinMs": 8.163375000000087,
+      "name": "warm transform package-owned consumer button fixture",
+      "batchMeanP50Ms": 8.816667000000052,
+      "batchMeanP95Ms": 9.2753330000005,
+      "samples": 6,
+      "totalMs": 53.130418000000645,
+      "warmupIterations": 1
+    }
+  ],
+  "scenarios": [
+    {
+      "name": "raw equivalent recipe selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "resolveRecipeStyle uncached selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "createRecipeResolver uncached selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "pre-resolved theme recipe uncached selection",
+      "phase": "warm-runtime",
+      "work": "Same independent 52-input cycle; defaults/partial/full selections, ordered variants, compound checks and output filtering; no recipe-result cache"
+    },
+    {
+      "name": "resolve theme module plus recipe selection per call",
+      "phase": "warm-runtime-uncached",
+      "work": "Recompute one themed recipe module and select on every operation; differs deliberately from pre-resolved selection"
+    },
+    {
+      "name": "resolveThemeStyles 240 exports uncached",
+      "phase": "warm-runtime-uncached",
+      "work": "Traverse/allocate/resolve all 240 style exports each call; no provider or React memoization"
+    },
+    {
+      "name": "first transform README recipe fixture",
+      "phase": "fresh-process-first-transform",
+      "work": "One transform per fresh Bun process; imports/startup excluded, lazy compiler initialization included; OS caches uncontrolled; no cold budget calibrated"
+    },
+    {
+      "name": "warm transform README recipe fixture",
+      "phase": "same-process-warm-transform",
+      "work": "Repeated full transform calls after setup/warmup; process cwd is package-root; package-info/esbuild state may be warm; no transform-result cache"
+    },
+    {
+      "name": "first transform package-owned consumer button fixture",
+      "phase": "fresh-process-first-transform",
+      "work": "One transform per fresh Bun process; imports/startup excluded, lazy compiler initialization included; OS caches uncontrolled; no cold budget calibrated"
+    },
+    {
+      "name": "warm transform package-owned consumer button fixture",
+      "phase": "same-process-warm-transform",
+      "work": "Repeated full transform calls after setup/warmup; process cwd is package-root; package-info/esbuild state may be warm; no transform-result cache"
+    }
+  ],
+  "transformReceipts": [
+    {
+      "name": "README recipe fixture",
+      "cold": [
+        {
+          "durationMs": 123.851333,
+          "outputSha256": "ed67f9aaed3e2b893804301e2ee8e4e6b9b1764ce7cd77a1c5e0a339dadfc155",
+          "outputBytes": 13713,
+          "pid": 34427
+        },
+        {
+          "durationMs": 73.95058300000001,
+          "outputSha256": "ed67f9aaed3e2b893804301e2ee8e4e6b9b1764ce7cd77a1c5e0a339dadfc155",
+          "outputBytes": 13713,
+          "pid": 34547
+        },
+        {
+          "durationMs": 77.61237500000001,
+          "outputSha256": "ed67f9aaed3e2b893804301e2ee8e4e6b9b1764ce7cd77a1c5e0a339dadfc155",
+          "outputBytes": 13713,
+          "pid": 34644
+        },
+        {
+          "durationMs": 76.80295899999999,
+          "outputSha256": "ed67f9aaed3e2b893804301e2ee8e4e6b9b1764ce7cd77a1c5e0a339dadfc155",
+          "outputBytes": 13713,
+          "pid": 34728
+        },
+        {
+          "durationMs": 75.60374999999999,
+          "outputSha256": "ed67f9aaed3e2b893804301e2ee8e4e6b9b1764ce7cd77a1c5e0a339dadfc155",
+          "outputBytes": 13713,
+          "pid": 34828
+        },
+        {
+          "durationMs": 77.317291,
+          "outputSha256": "ed67f9aaed3e2b893804301e2ee8e4e6b9b1764ce7cd77a1c5e0a339dadfc155",
+          "outputBytes": 13713,
+          "pid": 34923
+        }
+      ],
+      "warmedOutputSha256": "ed67f9aaed3e2b893804301e2ee8e4e6b9b1764ce7cd77a1c5e0a339dadfc155",
+      "coldWarmOutputParity": true
+    },
+    {
+      "name": "package-owned consumer button fixture",
+      "cold": [
+        {
+          "durationMs": 83.78979199999999,
+          "outputSha256": "00d800de8892dc7ea280b1bbb2edb34afed704a3ee7155e1d2f0aec7d7d76877",
+          "outputBytes": 11807,
+          "pid": 35104
+        },
+        {
+          "durationMs": 75.00475,
+          "outputSha256": "00d800de8892dc7ea280b1bbb2edb34afed704a3ee7155e1d2f0aec7d7d76877",
+          "outputBytes": 11807,
+          "pid": 35204
+        },
+        {
+          "durationMs": 76.394166,
+          "outputSha256": "00d800de8892dc7ea280b1bbb2edb34afed704a3ee7155e1d2f0aec7d7d76877",
+          "outputBytes": 11807,
+          "pid": 35298
+        },
+        {
+          "durationMs": 76.021958,
+          "outputSha256": "00d800de8892dc7ea280b1bbb2edb34afed704a3ee7155e1d2f0aec7d7d76877",
+          "outputBytes": 11807,
+          "pid": 35394
+        },
+        {
+          "durationMs": 75.16604199999999,
+          "outputSha256": "00d800de8892dc7ea280b1bbb2edb34afed704a3ee7155e1d2f0aec7d7d76877",
+          "outputBytes": 11807,
+          "pid": 35492
+        },
+        {
+          "durationMs": 75.90258400000002,
+          "outputSha256": "00d800de8892dc7ea280b1bbb2edb34afed704a3ee7155e1d2f0aec7d7d76877",
+          "outputBytes": 11807,
+          "pid": 35589
+        }
+      ],
+      "warmedOutputSha256": "00d800de8892dc7ea280b1bbb2edb34afed704a3ee7155e1d2f0aec7d7d76877",
+      "coldWarmOutputParity": true
+    }
+  ],
+  "phaseProfiles": [
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 35.14320800000041
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.26645900000039546
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 35.42466699999977
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 35.58904200000006
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 47.13454199999978
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 1.6796669999998812
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.034958000000187894
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 1.7165409999997792
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.771874999999909
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 7.784415999999965
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 58.18279200000006
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 5.210417000000234
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.8856249999998909
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.22850000000016735
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 6.572708000000148
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 2.969665999999961
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 68.1933339999996
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 1.3002910000000156
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.032290999999986525
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 1.3347499999999854
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.39850000000024
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 6.946582999999919
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 7.942250000000058
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 1.4337500000001455
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.13999999999987267
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.05837500000006912
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.6456249999996544
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.4695000000001528
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 11.106499999999869
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 1.0574169999999867
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.02295800000001691
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 1.0817919999999503
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.1418749999998
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 6.561083000000053
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 7.44787499999984
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 1.2355830000001333
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.11783400000012989
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.045583000000078755
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.4122500000003129
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.5831249999996544
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 10.482082999999875
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 1.0056250000002365
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.024958999999853404
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 1.0329160000001139
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.0974999999998545
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.933792000000267
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 7.065583000000061
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 1.1894170000000486
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.14566699999977573
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.0502080000001115
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.4014999999999418
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.191957999999886
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 9.696124999999938
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.9191249999998945
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.024167000000034022
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.9455830000001697
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.0045829999999114
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.250750000000153
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 6.071875000000091
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.998540999999932
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.11004100000036487
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.042457999999896856
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.1634170000002086
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.2155840000000353
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 8.498375000000124
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.8601669999998194
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.027999999999792635
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.8899999999998727
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.4240420000000995
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.907208000000082
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 9.335791999999856
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 1.3299590000001444
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.12941600000021936
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.04083400000035908
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.521541999999954
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.2180419999999685
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 12.117707999999766
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.9498329999996713
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.049416999999721156
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 1.014625000000251
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.0642910000001393
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 7.625791999999819
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 8.529625000000124
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 1.267084000000068
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.09750000000030923
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.048166999999921245
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.4265829999999369
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.1553330000001552
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 11.15929099999994
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 1.031582999999955
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.02962500000012369
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 1.0631670000002487
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.1233330000000024
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.388459000000239
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 6.160292000000027
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 1.0400829999998678
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.08720899999980247
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.03495900000007168
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.1709160000000338
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.0467090000001917
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/examples/recipe.css.ts",
+      "phase": "full-transform",
+      "durationMs": 8.414666000000125
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 1.242040999999972
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.02141699999992852
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 1.266458000000057
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 1.3161250000002838
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.6430829999999332
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.015667000000121334
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.6597500000002583
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.7299170000001141
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 8.116041999999652
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.838083000000097
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.0226249999996071
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.8624580000000606
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.922041000000263
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.5800829999998314
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.01704199999994671
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.5985829999999623
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.6475000000000364
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 6.386083000000326
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 16.233708000000206
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 1.5951669999999467
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.13837499999999636
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.04724999999962165
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.7927500000000691
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.1162920000001577
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 19.352416999999605
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.7827499999998508
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.021749999999883585
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.8061250000000655
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.8529169999997066
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.5367909999999938
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.015666999999666587
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.5545000000001892
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.6037919999998849
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.957416999999623
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 6.840707999999722
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.8398329999999987
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.11574999999993452
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.03645799999958399
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.000292000000627
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.0247079999999187
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 8.907999999999902
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.7785000000003492
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.02166600000055041
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.8016250000000582
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.8474999999998545
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.6451669999996739
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.015750000000480213
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.6624579999997877
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.7235840000003009
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 6.0625
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 6.926707999999962
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.847208999999566
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.20729100000062317
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.051124999999956344
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.1168339999994714
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.186000000000604
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 9.27179200000046
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.8016249999991487
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.021625000000312866
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.8246250000001965
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.8740420000003724
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.5105830000002243
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.016290999999910127
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.5282079999997222
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.5839999999998327
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.981416999999965
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 6.804500000000189
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.7196659999999611
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.09287500000027649
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.037792000000081316
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 0.8586660000000848
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 0.9594170000000304
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 8.674708000000464
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.7529999999997017
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.021665999999640917
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.776042000000416
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.8294169999999212
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.458042000000205
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.013791000000310305
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.47295800000028976
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.5199589999992895
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.988875000000007
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 6.856125000000247
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.7637080000004062
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.09504099999958271
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.035208000000238826
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 0.9024580000004789
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.0135000000000218
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 8.813167000000249
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.9012090000005628
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.020332999999482126
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.9252089999999953
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.9644579999994676
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.5907500000002983
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.015833999999813386
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.6072500000000218
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.6488339999996242
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 6.15833400000065
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 7.064041000000543
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.7810829999998532
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.09416699999928824
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.033457999999882304
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 0.9169160000001284
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 0.9342500000002474
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 8.957999999999629
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.7339159999992262
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.021790999999211635
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.7565000000004147
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.7999589999999444
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.3774170000006052
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.01445899999998801
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.3922919999995429
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.43445799999972223
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.209917000000132
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 6.1186250000000655
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.7899999999999636
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.10470900000018446
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.039584000000104425
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 0.9435840000005555
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.05475000000024
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 8.158542000000125
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.8621250000005602
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.02400000000034197
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.8873750000002474
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.9327919999996084
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-debug-id-babel",
+      "durationMs": 0.43758299999990413
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-add-file-scope",
+      "durationMs": 0.013791999999739346
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-transform-total",
+      "durationMs": 0.45187499999974534
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/theme.css.ts",
+      "phase": "ve-onload-total",
+      "durationMs": 0.49708300000020245
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "ve-esbuild-build-total",
+      "durationMs": 5.996041000000332
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "compile-with-stable-resolution",
+      "durationMs": 7.0057919999999285
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "generated-module-evaluation",
+      "durationMs": 0.849833999999646
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "virtual-css-normalization-and-serialization",
+      "durationMs": 0.16904100000010658
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-export-capture",
+      "durationMs": 0.044249999999919964
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "native-module-processing",
+      "durationMs": 1.0750410000000556
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "crumbs-postprocessing-and-emission",
+      "durationMs": 1.1031249999996362
+    },
+    {
+      "filePath": "/private/tmp/crumbs-css-m105-isolated-20261007/packages/css/fixtures/consumer/styles/button.css.ts",
+      "phase": "full-transform",
+      "durationMs": 9.232082999999875
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "recipe result cache",
+      "status": "not-implemented",
+      "reason": "Current createRecipeResolver delegates to resolveRecipeStyle on every call; M4 owns future caches."
+    },
+    {
+      "name": "React theme memo cache hits/invalidation",
+      "status": "not-run",
+      "reason": "useThemedStyles uses React useMemo; this host harness times pure resolution and pre-resolved selection, not render/provider lifecycle."
+    },
+    {
+      "name": "native-device performance",
+      "status": "not-run",
+      "reason": "This host Bun harness does not measure Hermes, rendering or device frame times; native qualification is separate."
+    }
+  ]
+}
