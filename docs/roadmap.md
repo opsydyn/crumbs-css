@@ -2912,3 +2912,11 @@ Build, package and app typechecks, docs build, 1,515 package tests (one exact-No
 The previous 21-metric host report remains 11 pass, nine fail, and one incomplete, but its source digest predates this implementation. It is not current-source qualification. The token-entry graph sizes are diagnostic and are not approved budgets. **M10.5 remains open.**
 
 Next recommended numbered slice: **M10.5 — set up or locate an Android SDK/emulator and complete the packed consumer's native Android token-style journey.** Then rerun the final current-source host-budget gate with all approved selectors and limits unchanged; preserve physical-device work as deferred.
+
+### 2026-10-07 — M10.5 Android packed Expo token-style journey
+
+The [Android evidence packet](evidence/2026-10-07-m10-5-android-packed-consumer/README.md) records a successful native light → dark → light journey for the packed `@opsydyn/crumbs-css@0.1.1-alpha.1` consumer on the dedicated Android 16/API 36 emulator. The token panel rendered with the expected accessibility identity and theme text in all three states; screenshots and UI hierarchies are retained. Maestro 2.11.0 could not discover the online ADB serial, so the focused journey used direct serial-scoped ADB checks. The app source tree matches the current worktree, and the packed `theme.cjs` entry hash matches; its identity marker predates commit `26ee91a`, and a fresh whole-package build was unavailable because of the pre-existing stale `tsdown` link. This run is therefore not represented as an exact-HEAD repack.
+
+This is native emulator rendering evidence only. It adds no performance or host-budget result, does not qualify a standalone app or physical device, and leaves the earlier host report stale for the current source. The protected iOS Simulator was untouched, physical-device work remains deferred, and **M10.5 remains open**. No API, dependency, baseline, selector, or threshold changed.
+
+Next recommended roadmap item: **M10.5 — rerun the final current-source host-budget gate** against the latest tracked source with all approved selectors and thresholds unchanged; record each metric as pass, fail, or incomplete. Keep physical-device acceptance deferred.
