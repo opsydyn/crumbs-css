@@ -13,6 +13,14 @@ const entryFile = join(appRoot, "src/incremental-entry.ts")
 const styleFile = join(appRoot, "src/incremental.css.ts")
 const requireFromApp = createRequire(join(appRoot, "package.json"))
 
+export function resolveExpoMetroVersion(appRoot: string): string {
+  const requireFromAppRoot = createRequire(join(appRoot, "package.json"))
+  const requireFromExpo = createRequire(requireFromAppRoot.resolve("expo/package.json"))
+  const requireFromExpoCli = createRequire(requireFromExpo.resolve("@expo/cli/package.json"))
+  const requireFromExpoMetroConfig = createRequire(requireFromExpoCli.resolve("@expo/metro-config/package.json"))
+  return requireFromExpoMetroConfig("metro/package.json").version as string
+}
+
 type IncrementalRun = {
   repetition: number
   previousCompiledValue: number
@@ -397,7 +405,7 @@ export async function measureMetroIncremental(outputFile: string, repetitions = 
       sourceTreeDirty: Bun.spawnSync(["git", "diff", "--quiet"], { cwd: repoRoot }).exitCode !== 0 ||
         Bun.spawnSync(["git", "diff", "--cached", "--quiet"], { cwd: repoRoot }).exitCode !== 0,
       environment: { platform: process.platform, architecture: process.arch, osRelease: release(), cpu: cpus()[0]?.model ?? "unknown",
-        expo: requireFromApp("expo/package.json").version as string, metro: requireFromApp("metro/package.json").version as string,
+        expo: requireFromApp("expo/package.json").version as string, metro: resolveExpoMetroVersion(appRoot),
         reactNative: requireFromApp("react-native/package.json").version as string },
       packageProvenance: { expoMetroRuntime: requireFromApp("@expo/metro-runtime/package.json").version as string,
         react: requireFromApp("react/package.json").version as string, reactDom: requireFromApp("react-dom/package.json").version as string,

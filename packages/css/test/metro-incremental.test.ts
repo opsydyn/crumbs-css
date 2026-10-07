@@ -1,5 +1,9 @@
 import { describe, expect, it } from "bun:test"
 import { createHash } from "node:crypto"
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import { join } from "node:path"
+import * as metroIncremental from "../bench/metro-incremental"
 import {
   admitMetroIncrementalReport,
   createHistoricalMetroFixture,
@@ -34,7 +38,52 @@ function validReport() {
   }
 }
 
+function writePackage(root: string, name: string, version: string) {
+  mkdirSync(root, { recursive: true })
+  writeFileSync(join(root, "package.json"), JSON.stringify({ name, version }))
+}
+
+function linkPackage(ownerRoot: string, name: string, targetRoot: string) {
+  const link = join(ownerRoot, "node_modules", name)
+  mkdirSync(join(link, ".."), { recursive: true })
+  symlinkSync(targetRoot, link, "dir")
+}
+
 describe("Metro actual-edit evidence", () => {
+  it("declares the Vanilla Extract adapter dependency in the Expo consumer fixture", () => {
+    const appPackage = JSON.parse(readFileSync(join(import.meta.dir, "../../../apps/playground/package.json"), "utf8"))
+    expect(appPackage.dependencies["@vanilla-extract/css"]).toBe("^1.20.1")
+  })
+
+  it("resolves Metro from Expo's configuration dependency when the app does not declare Metro directly", () => {
+    const temporaryRoot = mkdtempSync(join(tmpdir(), "crumbs-metro-resolution-"))
+    const appRoot = join(temporaryRoot, "apps", "playground")
+    const expoRoot = join(temporaryRoot, "packages", "expo")
+    const expoCliRoot = join(temporaryRoot, "packages", "expo-cli")
+    const metroConfigRoot = join(temporaryRoot, "packages", "metro-config")
+    const metroRoot = join(temporaryRoot, "packages", "metro")
+
+    try {
+      writePackage(appRoot, "@crumbs/playground", "0.0.0")
+      writePackage(expoRoot, "expo", "56.0.23")
+      writePackage(expoCliRoot, "@expo/cli", "56.1.26")
+      writePackage(metroConfigRoot, "@expo/metro-config", "56.0.19")
+      writePackage(metroRoot, "metro", "0.84.5")
+      linkPackage(appRoot, "expo", expoRoot)
+      linkPackage(expoRoot, "@expo/cli", expoCliRoot)
+      linkPackage(expoCliRoot, "@expo/metro-config", metroConfigRoot)
+      linkPackage(metroConfigRoot, "metro", metroRoot)
+
+      const resolver = (metroIncremental as unknown as { resolveExpoMetroVersion?: (root: string) => string })
+        .resolveExpoMetroVersion
+      expect(typeof resolver).toBe("function")
+      if (!resolver) return
+      expect(resolver(appRoot)).toBe("0.84.5")
+    } finally {
+      rmSync(temporaryRoot, { recursive: true, force: true })
+    }
+  })
+
   it("creates source without embedding the compiled value as one literal", () => {
     expect(incrementalCompiledValue(17)).toBe(30017)
     const source = createIncrementalTokenSource(17)

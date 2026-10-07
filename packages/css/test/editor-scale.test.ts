@@ -4,6 +4,10 @@ import { resolve } from "node:path"
 import { createEditorFixture, inspectEditorFixture, parseExtendedDiagnostics } from "../../../scripts/editor-scale"
 const root=resolve(import.meta.dir,"../fixtures/editor-scale")
 describe("editor scale fixtures",()=>{
+ it("declares the editor compilers at the workspace root for clean-install measurement runs",()=>{
+  const rootPackage=JSON.parse(readFileSync(resolve(import.meta.dir,"../../../package.json"),"utf8"))
+  expect(rootPackage.devDependencies).toMatchObject({"@typescript/native-preview":"7.0.0-dev.20260519.1",typescript:"~6.0.3"})
+ })
  it("keeps dedicated scale fixtures out of routine package typechecking",()=>{
   const config=JSON.parse(readFileSync(resolve(import.meta.dir,"../tsconfig.json"),"utf8"))
   expect(config.exclude).toContain("fixtures/editor-scale/**/*")

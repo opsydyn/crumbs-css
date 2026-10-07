@@ -81,9 +81,9 @@ beforeAll(() => {
   cpSync(path.join(packageRoot, "package.json"), path.join(packageLink, "package.json"))
   cpSync(distRoot, path.join(packageLink, "dist"), {recursive: true})
   const fixtureModules = path.join(fixtureRoot, "node_modules")
-  const workspaceModules = path.resolve(packageRoot, "../../node_modules")
+  const consumerModules = path.resolve(packageRoot, "../../apps/playground/node_modules")
   for (const peer of ["react", "react-dom"]) {
-    symlinkSync(realpathSync(path.join(workspaceModules, peer)), path.join(fixtureModules, peer), "dir")
+    symlinkSync(realpathSync(path.join(consumerModules, peer)), path.join(fixtureModules, peer), "dir")
   }
 })
 
