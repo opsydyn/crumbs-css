@@ -1,6 +1,6 @@
 # M11.1 — Typed standalone variables and local assignment
 
-**Status:** Proposed. The conversational design was approved on 2026-10-08; written-spec review is pending.
+**Status:** Approved as written by Alan Currie on 2026-10-08 following commit `1825e9e`. Implementation-plan review is pending.
 
 **Date:** 2026-10-08.
 
