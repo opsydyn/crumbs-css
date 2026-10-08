@@ -1,0 +1,26 @@
+{
+  "qualification": "draft-verifier-controls-only",
+  "cases": [
+    {
+      "case": "changed-cap",
+      "exitCode": 1,
+      "rejected": true,
+      "mutatedProposalRehashed": true,
+      "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/crumbs-m105-budget-scope-proposal/negative-changed-cap/verify.py\", line 29, in <module>\n    assert row['proposedAdmissionCapBytes']==cap==((measured['currentMinifiedBytes']*11+9999)//10000)*1000\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+    },
+    {
+      "case": "changed-unaffected-startup-limit",
+      "exitCode": 1,
+      "rejected": true,
+      "mutatedProposalRehashed": true,
+      "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/crumbs-m105-budget-scope-proposal/negative-changed-unaffected-startup-limit/verify.py\", line 33, in <module>\n    assert p['unchangedHostMetrics']==[r for r in rows if r['id']not in expected] and len(p['unchangedHostMetrics'])==17\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+    },
+    {
+      "case": "claimed-approval",
+      "exitCode": 1,
+      "rejected": true,
+      "mutatedProposalRehashed": true,
+      "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/crumbs-m105-budget-scope-proposal/negative-claimed-approval/verify.py\", line 14, in <module>\n    assert p['status']=='proposed-not-approved' and p['activeHostMetricCount']==21\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+    }
+  ]
+}
