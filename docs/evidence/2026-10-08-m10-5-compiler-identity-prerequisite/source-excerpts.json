@@ -1,0 +1,210 @@
+[
+  {
+    "path": "/private/tmp/crumbs-m105-compiler-identity/owned-install/node_modules/esbuild/lib/main.js",
+    "sha256": "bce772de103e1cbb118f1b7313916caa81f0e85461b3b6e3531607e7ed75ec85",
+    "ranges": [
+      {
+        "firstLine": 1889,
+        "lastLine": 1893,
+        "lines": [
+          "var ESBUILD_BINARY_PATH = process.env.ESBUILD_BINARY_PATH || ESBUILD_BINARY_PATH;",
+          "var isValidBinaryPath = (x) => !!x && x !== \"/usr/bin/esbuild\";",
+          "var packageDarwin_arm64 = \"@esbuild/darwin-arm64\";",
+          "var packageDarwin_x64 = \"@esbuild/darwin-x64\";",
+          "var knownWindowsPackages = {"
+        ]
+      },
+      {
+        "firstLine": 1970,
+        "lastLine": 1985,
+        "lines": [
+          "function generateBinPath() {",
+          "  if (isValidBinaryPath(ESBUILD_BINARY_PATH)) {",
+          "    if (!fs.existsSync(ESBUILD_BINARY_PATH)) {",
+          "      console.warn(`[esbuild] Ignoring bad configuration: ESBUILD_BINARY_PATH=${ESBUILD_BINARY_PATH}`);",
+          "    } else {",
+          "      return { binPath: ESBUILD_BINARY_PATH, isWASM: false };",
+          "    }",
+          "  }",
+          "  const { pkg, subpath, isWASM } = pkgAndSubpathForCurrentPlatform();",
+          "  let binPath;",
+          "  try {",
+          "    binPath = require.resolve(`${pkg}/${subpath}`);",
+          "  } catch (e) {",
+          "    binPath = downloadedBinPath(pkg, subpath);",
+          "    if (!fs.existsSync(binPath)) {",
+          "      try {"
+        ]
+      },
+      {
+        "firstLine": 2166,
+        "lastLine": 2168,
+        "lines": [
+          "var build = (options) => ensureServiceIsRunning().build(options);",
+          "var context = (buildOptions) => ensureServiceIsRunning().context(buildOptions);",
+          "var transform = (input, options) => ensureServiceIsRunning().transform(input, options);"
+        ]
+      },
+      {
+        "firstLine": 2246,
+        "lastLine": 2251,
+        "lines": [
+          "var stop = () => {",
+          "  if (stopService) stopService();",
+          "  if (workerThreadService) workerThreadService.stop();",
+          "  return Promise.resolve();",
+          "};",
+          "var initializeWasCalled = false;"
+        ]
+      },
+      {
+        "firstLine": 2262,
+        "lastLine": 2301,
+        "lines": [
+          "var defaultWD = process.cwd();",
+          "var longLivedService;",
+          "var stopService;",
+          "var ensureServiceIsRunning = () => {",
+          "  if (longLivedService) return longLivedService;",
+          "  let [command, args] = esbuildCommandAndArgs();",
+          "  let child = child_process.spawn(command, args.concat(`--service=${\"0.27.7\"}`, \"--ping\"), {",
+          "    windowsHide: true,",
+          "    stdio: [\"pipe\", \"pipe\", \"inherit\"],",
+          "    cwd: defaultWD",
+          "  });",
+          "  let { readFromStdout, afterClose, service } = createChannel({",
+          "    writeToStdin(bytes) {",
+          "      child.stdin.write(bytes, (err) => {",
+          "        if (err) afterClose(err);",
+          "      });",
+          "    },",
+          "    readFileSync: fs2.readFileSync,",
+          "    isSync: false,",
+          "    hasFS: true,",
+          "    esbuild: node_exports",
+          "  });",
+          "  child.stdin.on(\"error\", afterClose);",
+          "  child.on(\"error\", afterClose);",
+          "  const stdin = child.stdin;",
+          "  const stdout = child.stdout;",
+          "  stdout.on(\"data\", readFromStdout);",
+          "  stdout.on(\"end\", afterClose);",
+          "  stopService = () => {",
+          "    stdin.destroy();",
+          "    stdout.destroy();",
+          "    child.kill();",
+          "    initializeWasCalled = false;",
+          "    longLivedService = void 0;",
+          "    stopService = void 0;",
+          "  };",
+          "  let refCount = 0;",
+          "  child.unref();",
+          "  if (stdin.unref) {",
+          "    stdin.unref();"
+        ]
+      },
+      {
+        "firstLine": 2314,
+        "lastLine": 2328,
+        "lines": [
+          "  longLivedService = {",
+          "    build: (options) => new Promise((resolve, reject) => {",
+          "      service.buildOrContext({",
+          "        callName: \"build\",",
+          "        refs,",
+          "        options,",
+          "        isTTY: isTTY(),",
+          "        defaultWD,",
+          "        callback: (err, res) => err ? reject(err) : resolve(res)",
+          "      });",
+          "    }),",
+          "    context: (options) => new Promise((resolve, reject) => service.buildOrContext({",
+          "      callName: \"context\",",
+          "      refs,",
+          "      options,"
+        ]
+      }
+    ]
+  },
+  {
+    "path": "/private/tmp/crumbs-m105-compiler-identity/owned-install/node_modules/@vanilla-extract/integration/dist/vanilla-extract-integration.cjs.dev.js",
+    "sha256": "172d84996b213ed3091b4028c085f399c8b598090c6bda4d84fc6d2b75159fc1",
+    "ranges": [
+      {
+        "firstLine": 16,
+        "lastLine": 22,
+        "lines": [
+          "var esbuild = require('esbuild');",
+          "var babel = require('@babel/core');",
+          "var vanillaBabelPlugin = require('@vanilla-extract/babel-plugin-debug-ids');",
+          "var typescriptSyntax = require('@babel/plugin-syntax-typescript');",
+          "var mlly = require('mlly');",
+          "",
+          "function _interopDefault (e) { return e && e.__esModule ? e : { 'default': e }; }"
+        ]
+      },
+      {
+        "firstLine": 440,
+        "lastLine": 457,
+        "lines": [
+          "  identOption,",
+          "  globalAdapterIdentifier",
+          "}) => {",
+          "  let code = source;",
+          "  if (identOption === 'debug') {",
+          "    const result = await babel__namespace.transformAsync(source, {",
+          "      filename: filePath,",
+          "      cwd: rootPath,",
+          "      plugins: [vanillaBabelPlugin__default[\"default\"], typescriptSyntax__default[\"default\"]],",
+          "      configFile: false,",
+          "      babelrc: false",
+          "    });",
+          "    if (!result || result.code == null) {",
+          "      throw new Error('Error adding debug IDs');",
+          "    }",
+          "    code = result.code;",
+          "  }",
+          "  return addFileScope({"
+        ]
+      },
+      {
+        "firstLine": 493,
+        "lastLine": 524,
+        "lines": [
+          "async function compile({",
+          "  filePath,",
+          "  identOption,",
+          "  cwd = process.cwd(),",
+          "  esbuildOptions",
+          "}) {",
+          "  const result = await esbuild.build({",
+          "    entryPoints: [filePath],",
+          "    metafile: true,",
+          "    bundle: true,",
+          "    external: ['@vanilla-extract', ...((esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.external) ?? [])],",
+          "    platform: 'node',",
+          "    write: false,",
+          "    plugins: [vanillaExtractTransformPlugin({",
+          "      identOption",
+          "    }), ...((esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.plugins) ?? [])],",
+          "    absWorkingDir: cwd,",
+          "    loader: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.loader,",
+          "    define: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.define,",
+          "    tsconfig: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.tsconfig,",
+          "    conditions: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.conditions",
+          "  });",
+          "  const {",
+          "    outputFiles,",
+          "    metafile",
+          "  } = result;",
+          "  if (!outputFiles || outputFiles.length !== 1) {",
+          "    throw new Error('Invalid child compilation');",
+          "  }",
+          "  return {",
+          "    source: outputFiles[0].text,",
+          "    watchFiles: Object.keys((metafile === null || metafile === void 0 ? void 0 : metafile.inputs) || {}).map(filePath => path.join(cwd, filePath))"
+        ]
+      }
+    ]
+  }
+]

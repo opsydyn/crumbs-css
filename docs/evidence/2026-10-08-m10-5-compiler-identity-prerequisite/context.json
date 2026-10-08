@@ -1,0 +1,32 @@
+{
+  "format": "crumbs.m10.5.compiler-identity-prerequisite",
+  "version": 1,
+  "sourceRevision": "491a7695e71994ba1351f9704997e5a5e346b92b",
+  "approvedDesign": "docs/superpowers/specs/2026-10-08-m10-5-compiled-text-identity-design.md",
+  "approval": "User approved the written compiler-identity investigation before these probes; approval is not qualification of the premise.",
+  "disposition": "Identity premise not established; reject memo integration based on the tested predicates; retain fresh compilation.",
+  "integrationVersion": "8.0.10",
+  "esbuildVersion": "0.27.7",
+  "ownedBinaryRestoredSha256": "b82c6243eb58d520d0bc55cddcf6993dd0f5572f3ab8dc2ba6d77058be043e62",
+  "sourceDigest": "0e12a12c4b770dae39a542c4d2c59f467a62402148fbd8b5cc26eb3e3d08a9f0",
+  "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+  "qualification": {
+    "productionMemoImplemented": false,
+    "timedPerformanceRun": false,
+    "completeHostRun": false,
+    "releaseQualified": false
+  },
+  "runtimes": {
+    "node22": "/Users/alancurrie/.local/share/fnm/node-versions/v22.0.0/installation/bin/node",
+    "node24": "/Users/alancurrie/.local/share/fnm/node-versions/v24.15.0/installation/bin/node",
+    "bun": "/Users/alancurrie/.bun/bin/bun"
+  },
+  "limitations": [
+    "One owned adversarial process per runtime, not a performance cohort.",
+    "Snapshot tests shallow module/export identity, not every nested/internal compiler state.",
+    "unsafeReplayOutcome is hypothetical and explicitly not executed.",
+    "Private Node handle observation is not a complete or portable identity guard.",
+    "Full Babel/parser/resolver inventory stopped at the failed native-service prerequisite.",
+    "No proof that every possible complete compiler-identity design is infeasible."
+  ]
+}

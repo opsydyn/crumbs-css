@@ -1,6 +1,6 @@
 # M10.5 bounded compiled-text identity revision
 
-Status: **proposed, awaiting written review**. This is a revision of the compiler portion of the previously approved consolidated design, under the accepted consumer-scoped policy. It does not approve dropping compiler checks, implementing a partial cache, or changing any numerical contract.
+Status: **approved for prerequisite investigation; identity premise not established**. This is a revision of the compiler portion of the previously approved consolidated design, under the accepted consumer-scoped policy. It does not approve dropping compiler checks, implementing a partial cache, or changing any numerical contract.
 
 ## Intent and success
 
@@ -45,3 +45,7 @@ Keep a separate serialisable private Metro receipt for mutable bundled inputs an
 After the compiler identity premise passes, write one inline implementation plan covering proof/memo/transformer/Metro integration, independent control and property tests, genuine Node 22 checks, packed iOS/Android/web export/type checks and complete matched host evidence. One whole-candidate review precedes final qualification. Prepare the matched scaffold only after all builds complete; no concurrent builds/tests while collecting timings.
 
 Admission requires all software/public contracts, exact unchanged workloads, all eleven blocking passes and zero incomplete rows across 21 metrics. Advisory numerical failures stay visible. Any failed premise, correctness or timing gate removes the entire production candidate; retain one reproducible rejection packet. Make one implementation or rejection commit and recommend the next numbered item. The development report cannot qualify a later release SHA/tag. Physical-device/spoken-reader checks remain deferred.
+
+## 2026-10-08 — prerequisite disposition
+
+The user approved this investigation. The [owned three-runtime counterexample](../../assessments/2026-10-08-m10-5-compiler-identity-prerequisite.md) shows that loaded namespace identity and post-load executable hashes cannot certify the native service that supplied compiled text. No complete lifetime/origin guard has been established. The existing specification requires: “If this premise fails, reject this approach before integrating a memo.” That prerequisite has not passed, so no memo implementation plan or production candidate is admitted. The counterexample rejects the tested predicates, not every conceivable identity design. Fresh compilation and all numerical/API contracts remain in force.

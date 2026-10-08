@@ -3088,3 +3088,12 @@ The [diagnostic](assessments/2026-10-08-m10-5-warm-proof-feasibility.md) retains
 Shipping source, all 149 artifacts, the numerical registry and enforcement are unchanged. The previous complete host report remains authoritative: ten blocking passes and one warm failure at 10.1715 ms. No fresh complete host/native qualification or production cache was admitted.
 
 **Next: M10.5 — review the [compiler-identity revision](superpowers/specs/2026-10-08-m10-5-compiled-text-identity-design.md), then execute one complete bounded memo/proof/Metro/host slice if its identity premise is established.** The proposed process-scoped identity must prove every omitted disk check redundant for the actual loaded compiler; otherwise retain fresh compilation. M10.5 remains open and publication blocked. Runner registration stays separate; physical-device/spoken-reader work remains deferred.
+
+
+### 2026-10-08 — M10.5 compiler-identity prerequisite not established
+
+The approved [identity investigation](assessments/2026-10-08-m10-5-compiler-identity-prerequisite.md) retains the same owned counterexample under genuine Node 22, Node 24 and Bun. An existing esbuild service can compile through the original executable after its disk image changes. After public `stop()`, namespace/function/environment/entry/executable-hash predicates remain unchanged, but fresh compilation fails. Restoration recovers source and inputs. This disproves those predicates as sufficient origin/lifetime proof; it does not prove every identity design impossible. No complete guard was established, so the approved prerequisite prevents memo integration and its conditional implementation plan.
+
+All 696 shipping files, 149 artifacts, numerical contracts, enforcement and shared compiler files remain unchanged. Fresh verification confirms restoration and preservation of the primary checkout. No production memo, new performance result or release qualification was admitted. M10.5 remains open with the historical 10.1715 ms warm failure against 6.514 ms / 15%; publication remains blocked.
+
+**Next: M10.5 — assess fresh-compilation cost in the fixed vanilla-extract integration before proposing an upstream remediation.** Stop investing in namespace/post-load hash shortcuts without a complete guard. Dedicated runner registration stays separate; physical-device/spoken-reader work remains deferred. No push/publication.
