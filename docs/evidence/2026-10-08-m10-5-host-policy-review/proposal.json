@@ -1,0 +1,608 @@
+{
+  "status": "proposed-not-active",
+  "roadmap": "M10.5",
+  "reviewedRevision": "c7ebab1",
+  "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+  "shippingSource": {
+    "sha256": "8fe7d6c28c26c9d4214549790d504c62f87c24f6886d7da40e031dd7e9fb4a76",
+    "files": 694
+  },
+  "proposedPolicyId": "crumbs-host-budgets-2026-10-08-consumer-scope-v1",
+  "contracts": [
+    {
+      "id": "runtime-initialization-node22-esm",
+      "selector": "runtime-init.floor.esm.load-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.floor.esm.load-ms.median",
+        "value": 6.293542000000002,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 7.553,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-initialization-node22-cjs",
+      "selector": "runtime-init.floor.cjs.load-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.floor.cjs.load-ms.median",
+        "value": 3.401791000000001,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 4.083,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-initialization-current-esm",
+      "selector": "runtime-init.current.esm.load-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.current.esm.load-ms.median",
+        "value": 2.555624999999999,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 3.067,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-initialization-current-cjs",
+      "selector": "runtime-init.current.cjs.load-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.current.cjs.load-ms.median",
+        "value": 2.036500000000002,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 2.444,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "cold-transform-ms",
+      "selector": "benchmark.cold-transform.max-median-ms",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json",
+        "selector": "benchmark.cold-transform.max-median-ms",
+        "value": 66.404584,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 83.006,
+        "maxRegressionPercent": 25,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "cold-transform",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "warm-transform-ms",
+      "selector": "benchmark.warm-transform.max-median-ms",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json",
+        "selector": "benchmark.warm-transform.max-median-ms",
+        "value": 5.664125000000013,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 6.514,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "warm-transform",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "incremental-rebuild",
+      "selector": "metro-incremental.direct-css-edit-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json",
+        "selector": "metro-incremental.direct-css-edit-ms.median",
+        "value": 123.95049999999901,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 137.506,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T20:31:50Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-incremental-baseline-protocol-reconciliation.md"
+      },
+      "domain": "incremental-rebuild",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-tsc-wall-10000",
+      "selector": "editor.tsc.10000.wall-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.wall-ms.median",
+        "value": 882.1055000000006,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 1014.422,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-tsgo-wall-10000",
+      "selector": "editor.tsgo.10000.wall-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.wall-ms.median",
+        "value": 332.92241699999977,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 382.861,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-tsc-memory-10000",
+      "selector": "editor.tsc.10000.memory-kib.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.memory-kib.median",
+        "value": 285025,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 313528,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-tsgo-memory-10000",
+      "selector": "editor.tsgo.10000.memory-kib.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.memory-kib.median",
+        "value": 140013,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 154015,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-tsc-instantiations-10000",
+      "selector": "editor.tsc.10000.instantiations",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.instantiations",
+        "value": 490410,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 490410,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-tsgo-instantiations-10000",
+      "selector": "editor.tsgo.10000.instantiations",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.instantiations",
+        "value": 490508,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 490508,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-first-completion-10000",
+      "selector": "editor.10000.first-completion-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.10000.first-completion-ms.median",
+        "value": 39.28841699999998,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 43.218,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "editor-warm-completion-10000",
+      "selector": "editor.10000.warm-completion-ms.median",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.10000.warm-completion-ms.median",
+        "value": 30.386750000000006,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 34.945,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      },
+      "domain": "editor",
+      "proposedEnforcement": "blocking"
+    },
+    {
+      "id": "runtime-theme-core-esm-graph-bytes",
+      "selector": "runtime.theme-core.esm.graph-bytes",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-core.esm.graph-bytes",
+        "value": 17271,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 17271,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-theme-core-cjs-graph-bytes",
+      "selector": "runtime.theme-core.cjs.graph-bytes",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-core.cjs.graph-bytes",
+        "value": 17641,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 17641,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-tokens-esm-graph-bytes",
+      "selector": "runtime.tokens.esm.graph-bytes",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.tokens.esm.graph-bytes",
+        "value": 56013,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 56013,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-tokens-cjs-graph-bytes",
+      "selector": "runtime.tokens.cjs.graph-bytes",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.tokens.cjs.graph-bytes",
+        "value": 63308,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 63308,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-theme-compatibility-esm-graph-bytes",
+      "selector": "runtime.theme-compatibility.esm.graph-bytes",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-compatibility.esm.graph-bytes",
+        "value": 44017,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 44017,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    },
+    {
+      "id": "runtime-theme-compatibility-cjs-graph-bytes",
+      "selector": "runtime.theme-compatibility.cjs.graph-bytes",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-compatibility.cjs.graph-bytes",
+        "value": 44764,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 44764,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      },
+      "domain": "runtime-footprint",
+      "proposedEnforcement": "advisory"
+    }
+  ],
+  "currentEnforcementControl": {
+    "syntheticAllPassAccepted": true,
+    "rejection": [
+      {
+        "id": "runtime-initialization-node22-esm",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-initialization-node22-esm is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-initialization-node22-cjs",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-initialization-node22-cjs is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-initialization-current-esm",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-initialization-current-esm is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-initialization-current-cjs",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-initialization-current-cjs is fail; expected pass"
+        ]
+      },
+      {
+        "id": "cold-transform-ms",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric cold-transform-ms is fail; expected pass"
+        ]
+      },
+      {
+        "id": "warm-transform-ms",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric warm-transform-ms is fail; expected pass"
+        ]
+      },
+      {
+        "id": "incremental-rebuild",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric incremental-rebuild is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-tsc-wall-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-tsc-wall-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-tsgo-wall-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-tsgo-wall-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-tsc-memory-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-tsc-memory-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-tsgo-memory-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-tsgo-memory-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-tsc-instantiations-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-tsc-instantiations-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-tsgo-instantiations-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-tsgo-instantiations-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-first-completion-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-first-completion-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "editor-warm-completion-10000",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric editor-warm-completion-10000 is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-theme-core-esm-graph-bytes",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-theme-core-esm-graph-bytes is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-theme-core-cjs-graph-bytes",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-theme-core-cjs-graph-bytes is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-tokens-esm-graph-bytes",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-tokens-esm-graph-bytes is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-tokens-cjs-graph-bytes",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-tokens-cjs-graph-bytes is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-theme-compatibility-esm-graph-bytes",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-theme-compatibility-esm-graph-bytes is fail; expected pass"
+        ]
+      },
+      {
+        "id": "runtime-theme-compatibility-cjs-graph-bytes",
+        "currentlyRejected": true,
+        "blockers": [
+          "Host-budget metric runtime-theme-compatibility-cjs-graph-bytes is fail; expected pass"
+        ]
+      }
+    ]
+  },
+  "numericalChanges": false,
+  "activationApproved": false
+}
