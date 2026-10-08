@@ -1,0 +1,1 @@
+const {getDefaultConfig}=require('expo/metro-config');const config=getDefaultConfig(__dirname);config.resolver.useWatchman=false;config.watchFolders=['/private/tmp/crumbs-css-m105-clean/node_modules'];module.exports=config;
