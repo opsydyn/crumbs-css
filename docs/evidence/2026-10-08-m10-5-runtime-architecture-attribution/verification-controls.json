@@ -1,0 +1,29 @@
+{
+  "qualification": "diagnostic-only",
+  "controls": [
+    {
+      "case": "valid",
+      "exitCode": 0,
+      "stdout": "{\"verified\": \"diagnostic byte attribution\", \"graphs\": 12, \"pairedArtifacts\": 60, \"uniqueReachableArtifacts\": 42, \"qualification\": \"not-run\"}",
+      "stderr": ""
+    },
+    {
+      "case": "changed-raw",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Attribution evidence rejected: Raw file hash"
+    },
+    {
+      "case": "missing-raw",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Attribution evidence rejected: [Errno 2] No such file or directory: '/private/tmp/crumbs-m105-attribution-verifier-controls/missing-raw/mapped-artifacts.tar.gz'"
+    },
+    {
+      "case": "rehashed-allocation",
+      "exitCode": 1,
+      "stdout": "",
+      "stderr": "Attribution evidence rejected: VLQ owner/literal derivation"
+    }
+  ]
+}
