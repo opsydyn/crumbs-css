@@ -2974,6 +2974,14 @@ Next recommended roadmap item: **M10.5 — review the consolidated architecture 
 
 The consolidated design is approved. The [implementation plan](superpowers/plans/2026-10-08-m10-5-consolidated-host-remediation.md) preserves inline execution and one final implementation commit. It fixes a conservative compiler reuse grammar, requires complete bundled-input and resolution witnesses, preserves proxy/error semantics, and screens runtime graph sizes before further compiler/native qualification. Unsupported resolver forms retain fresh compilation; no fixture-specific admission is permitted.
 
-Plan review is pending; no production code has changed. The nine host failures remain unresolved and publication remains blocked. Physical-device and spoken-reader work remain deferred.
+The plan was approved for inline execution. Its result is recorded below. The nine host failures remain unresolved and publication remains blocked. Physical-device and spoken-reader work remain deferred.
 
 Next recommended roadmap item: **M10.5 — review the consolidated plan, then execute its complete inline remediation batch. Admit only a fully passing candidate, or retain one evidence-only rejection and restore shipping source.**
+
+### 2026-10-08 — M10.5 consolidated runtime candidate rejected
+
+The [approved batch assessment](assessments/2026-10-08-m10-5-consolidated-host-remediation.md) records an early rejection: shared admission/arithmetic mechanics and runtime minification retained bounded source parity, but all four theme graphs remained roughly twice the unchanged ceilings. Core ESM/CJS measured **35,074/35,287 B**, compatibility **86,568/89,286 B**. Both token graph limits passed; all five scans were identical. Built boundary checks passed after isolating incomplete peer dependencies.
+
+The complete attempted production candidate was archived and removed. Shipping source and final artifact inventories exactly match the independently built control. Private qualification tooling and a Python-only [rejection packet](evidence/2026-10-08-m10-5-consolidated-host-remediation/README.md) are retained. Compiler memo, complete timing/Metro/host qualification and native checks were not run after graph rejection. This is no new release qualification: **M10.5 remains open, and publication remains blocked**. Physical-device and spoken-reader work stays deferred.
+
+Next recommended roadmap item: **M10.5 — reassess runtime graph architecture against the remaining 49–51% byte reduction; establish a credible API-preserving route from module-level attribution before another complete implementation batch. Preserve all existing limits and release enforcement.**

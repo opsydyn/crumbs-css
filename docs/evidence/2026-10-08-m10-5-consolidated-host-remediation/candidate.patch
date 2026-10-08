@@ -1,0 +1,368 @@
+diff --git a/packages/css/src/components/contracts.ts b/packages/css/src/components/contracts.ts
+index 79f1932..c6a01d8 100644
+--- a/packages/css/src/components/contracts.ts
++++ b/packages/css/src/components/contracts.ts
+@@ -1,3 +1,21 @@
++import { readRuntimeArray, readRuntimeRecord, type RuntimeArrayPolicy, type RuntimeRecordPolicy } from "../runtime/data-admission"
++
++const recordPolicy: RuntimeRecordPolicy = {
++  mode: "repeat-null-prototype-check",
++  fail(reason, context) {
++    throw new TypeError(context + (reason === "record" ? " must be a plain data record." :
++      reason === "symbol" ? " cannot contain symbol keys." : " must contain enumerable data properties."))
++  },
++}
++const arrayPolicy: RuntimeArrayPolicy = {
++  mode: "symbol-preflight-key-snapshot",
++  fail(reason, context) {
++    throw new TypeError(context + (reason === "array" ? " must be an array." :
++      reason === "symbol" ? " cannot contain symbol properties." :
++      reason === "index" ? " must contain only indexed values." : " must contain dense enumerable data values."))
++  },
++}
++
+ export type NativeComponentContractIdentity = {
+   readonly owner: string
+   readonly name: string
+@@ -260,50 +278,11 @@ function readStringList(value: unknown, context: string): string[] {
+ }
+ 
+ function readArray(value: unknown, context: string): unknown[] {
+-  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) {
+-    throw new TypeError(context + " must be an array.")
+-  }
+-  if (Object.getOwnPropertySymbols(value).length > 0) {
+-    throw new TypeError(context + " cannot contain symbol properties.")
+-  }
+-  const keys = Reflect.ownKeys(value)
+-  for (const key of keys) {
+-    if (key === "length") continue
+-    if (typeof key !== "string" || !/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) {
+-      throw new TypeError(context + " must contain only indexed values.")
+-    }
+-  }
+-  // Reuse the validated snapshot instead of enumerating a proxy again.
+-  const descriptors: Record<string, PropertyDescriptor | undefined> = Object.create(null)
+-  for (const key of keys) {
+-    descriptors[String(key)] = Object.getOwnPropertyDescriptor(value, key)
+-  }
+-  const result: unknown[] = []
+-  for (let index = 0; index < value.length; index += 1) {
+-    const descriptor = descriptors[String(index)]
+-    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
+-      throw new TypeError(context + " must contain dense enumerable data values.")
+-    }
+-    result.push(descriptor.value)
+-  }
+-  return result
++  return readRuntimeArray(value, context, arrayPolicy)
+ }
+ 
+ function dataRecordEntries(value: unknown, context: string): Array<[string, unknown]> {
+-  if (typeof value !== "object" || value === null || Array.isArray(value) ||
+-    (Object.getPrototypeOf(value) !== Object.prototype && Object.getPrototypeOf(value) !== null)) {
+-    throw new TypeError(context + " must be a plain data record.")
+-  }
+-  const entries: Array<[string, unknown]> = []
+-  for (const key of Reflect.ownKeys(value)) {
+-    if (typeof key !== "string") throw new TypeError(context + " cannot contain symbol keys.")
+-    const descriptor = Object.getOwnPropertyDescriptor(value, key)
+-    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
+-      throw new TypeError(context + " must contain enumerable data properties.")
+-    }
+-    entries.push([key, descriptor.value])
+-  }
+-  return entries
++  return readRuntimeRecord(value, context, recordPolicy)
+ }
+ 
+ function assertExactKeys(
+diff --git a/packages/css/src/components/extension-contract.ts b/packages/css/src/components/extension-contract.ts
+index 51cfd73..d25f527 100644
+--- a/packages/css/src/components/extension-contract.ts
++++ b/packages/css/src/components/extension-contract.ts
+@@ -1,3 +1,21 @@
++import { readRuntimeArray, readRuntimeRecord, type RuntimeArrayPolicy, type RuntimeRecordPolicy } from "../runtime/data-admission"
++
++const recordPolicy: RuntimeRecordPolicy = {
++  mode: "snapshot-prototype",
++  fail(reason, context, key) {
++    throw new TypeError(reason === "record" ? `${context} must be a plain data record` :
++      reason === "symbol" ? `${context} cannot contain symbol keys` : `${context}.${key} must be an enumerable data property`)
++  },
++}
++const arrayPolicy: RuntimeArrayPolicy = {
++  mode: "keys-then-all-descriptors",
++  fail(reason, context) {
++    throw new TypeError(`${context}` + (reason === "array" ? " must be an array" :
++      reason === "symbol" ? " cannot contain symbol properties" :
++      reason === "index" ? " must contain only indexed data values" : " must contain dense enumerable data values"))
++  },
++}
++
+ import {
+   nativeComponentContractIdentityKey,
+   validateNativeComponentContract,
+@@ -677,44 +695,11 @@ function sameIdentity(left: NativeComponentContractIdentity, right: NativeCompon
+ }
+ 
+ function dataRecordEntries(value: unknown, context: string): Array<[string, unknown]> {
+-  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+-    throw new TypeError(`${context} must be a plain data record`)
+-  }
+-  const prototype = Object.getPrototypeOf(value)
+-  if (prototype !== Object.prototype && prototype !== null) throw new TypeError(`${context} must be a plain data record`)
+-  const entries: Array<[string, unknown]> = []
+-  for (const key of Reflect.ownKeys(value)) {
+-    if (typeof key !== "string") throw new TypeError(`${context} cannot contain symbol keys`)
+-    const descriptor = Object.getOwnPropertyDescriptor(value, key)
+-    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
+-      throw new TypeError(`${context}.${key} must be an enumerable data property`)
+-    }
+-    entries.push([key, descriptor.value])
+-  }
+-  return entries
++  return readRuntimeRecord(value, context, recordPolicy)
+ }
+ 
+ function dataArray(value: unknown, context: string): unknown[] {
+-  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) {
+-    throw new TypeError(`${context} must be an array`)
+-  }
+-  for (const key of Reflect.ownKeys(value)) {
+-    if (key === "length") continue
+-    if (typeof key !== "string") throw new TypeError(`${context} cannot contain symbol properties`)
+-    if (!/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) {
+-      throw new TypeError(`${context} must contain only indexed data values`)
+-    }
+-  }
+-  const descriptors = Object.getOwnPropertyDescriptors(value)
+-  const result: unknown[] = []
+-  for (let index = 0; index < value.length; index += 1) {
+-    const descriptor = descriptors[String(index)]
+-    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) {
+-      throw new TypeError(`${context} must contain dense enumerable data values`)
+-    }
+-    result.push(descriptor.value)
+-  }
+-  return result
++  return readRuntimeArray(value, context, arrayPolicy)
+ }
+ 
+ function assertExactKeys(
+diff --git a/packages/css/src/expressions/index.ts b/packages/css/src/expressions/index.ts
+index 6119793..79f0e5c 100644
+--- a/packages/css/src/expressions/index.ts
++++ b/packages/css/src/expressions/index.ts
+@@ -955,53 +955,21 @@ function evaluateNode<TDomain extends NativeExpressionDomain>(
+     case "add": {
+       const value = (evaluateNode(expression.left, state, matches) as number) +
+         (evaluateNode(expression.right, state, matches) as number)
+-      try {
+-        assertLiteralValue(expression.domain, value)
+-      } catch (error) {
+-        if (error instanceof TypeError) {
+-          throw evaluationError("domain-error", "add result does not satisfy its expression domain")
+-        }
+-        throw error
+-      }
+-      return value as NativeExpressionValue<TDomain>
++      return arithmeticResult(expression.domain, value, "add")
+     }
+     case "subtract": {
+       const value = (evaluateNode(expression.left, state, matches) as number) -
+         (evaluateNode(expression.right, state, matches) as number)
+-      try {
+-        assertLiteralValue(expression.domain, value)
+-      } catch (error) {
+-        if (error instanceof TypeError) {
+-          throw evaluationError("domain-error", "subtract result does not satisfy its expression domain")
+-        }
+-        throw error
+-      }
+-      return value as NativeExpressionValue<TDomain>
++      return arithmeticResult(expression.domain, value, "subtract")
+     }
+     case "scale": {
+       const value = (evaluateNode(expression.expression, state, matches) as number) * expression.factor
+-      try {
+-        assertLiteralValue(expression.domain, value)
+-      } catch (error) {
+-        if (error instanceof TypeError) {
+-          throw evaluationError("domain-error", "scale result does not satisfy its expression domain")
+-        }
+-        throw error
+-      }
+-      return value as NativeExpressionValue<TDomain>
++      return arithmeticResult(expression.domain, value, "scale")
+     }
+     case "clamp": {
+       const input = evaluateNode(expression.expression, state, matches) as number
+       const value = Math.min(expression.maximum, Math.max(expression.minimum, input))
+-      try {
+-        assertLiteralValue(expression.domain, value)
+-      } catch (error) {
+-        if (error instanceof TypeError) {
+-          throw evaluationError("domain-error", "clamp result does not satisfy its expression domain")
+-        }
+-        throw error
+-      }
+-      return value as NativeExpressionValue<TDomain>
++      return arithmeticResult(expression.domain, value, "clamp")
+     }
+     case "match": {
+       const conditionValue = state.conditions[expression.condition]
+@@ -1047,6 +1015,18 @@ export function evaluateNativeExpressionWithTrace<TDomain extends NativeExpressi
+   return Object.freeze({ value, matches: Object.freeze(matches.map(match => Object.freeze(match))) })
+ }
+ 
++function arithmeticResult<TDomain extends NativeExpressionDomain>(
++  domain: TDomain, value: number, operation: "add" | "subtract" | "scale" | "clamp",
++): NativeExpressionValue<TDomain> {
++  try {
++    assertLiteralValue(domain, value)
++  } catch (error) {
++    if (error instanceof TypeError) throw evaluationError("domain-error", operation + " result does not satisfy its expression domain")
++    throw error
++  }
++  return value as NativeExpressionValue<TDomain>
++}
++
+ function foldNode<TDomain extends NativeExpressionDomain>(
+   expression: NativeExpression<TDomain>,
+ ): NativeExpression<TDomain> {
+diff --git a/packages/css/tsdown.config.ts b/packages/css/tsdown.config.ts
+index 03cccea..279cb40 100644
+--- a/packages/css/tsdown.config.ts
++++ b/packages/css/tsdown.config.ts
+@@ -40,8 +40,8 @@ const themeCoreRuntimeEntries = {"theme-core": "src/theme-core.ts"}
+ const themeTokenRuntimeEntries = {"theme-token": "src/theme-token-only.ts"}
+ 
+ export default defineConfig([
+-  { ...common, clean: false, dts: false, entry: themeRuntimeEntries },
+-  { ...common, clean: false, dts: false, entry: themeCoreRuntimeEntries },
++  { ...common, clean: false, dts: false, minify: true, entry: themeRuntimeEntries },
++  { ...common, clean: false, dts: false, minify: true, entry: themeCoreRuntimeEntries },
+   { ...common, clean: false, dts: false, entry: themeTokenRuntimeEntries },
+   {
+     ...common,
+diff --git a/packages/css/src/runtime/data-admission.ts b/packages/css/src/runtime/data-admission.ts
+new file mode 100644
+index 0000000..e6f3a16
+--- /dev/null
++++ b/packages/css/src/runtime/data-admission.ts
+@@ -0,0 +1,49 @@
++export type RuntimeRecordPolicy = Readonly<{
++  mode: "repeat-null-prototype-check" | "snapshot-prototype"
++  fail(reason: "record" | "symbol" | "property", context: string, key?: string): never
++}>
++export type RuntimeArrayPolicy = Readonly<{
++  mode: "symbol-preflight-key-snapshot" | "keys-then-all-descriptors"
++  fail(reason: "array" | "symbol" | "index" | "dense", context: string): never
++}>
++
++/** Boundary policies retain their original proxy inspection and error precedence. */
++export function readRuntimeRecord(value: unknown, context: string, policy: RuntimeRecordPolicy): Array<[string, unknown]> {
++  if (typeof value !== "object" || value === null || Array.isArray(value)) policy.fail("record", context)
++  const prototype = Object.getPrototypeOf(value)
++  if (prototype !== Object.prototype &&
++    (policy.mode === "repeat-null-prototype-check" ? Object.getPrototypeOf(value) : prototype) !== null) {
++    policy.fail("record", context)
++  }
++  const entries: Array<[string, unknown]> = []
++  for (const key of Reflect.ownKeys(value)) {
++    if (typeof key !== "string") policy.fail("symbol", context)
++    const descriptor = Object.getOwnPropertyDescriptor(value, key)
++    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) policy.fail("property", context, key)
++    entries.push([key, descriptor.value])
++  }
++  return entries
++}
++
++export function readRuntimeArray(value: unknown, context: string, policy: RuntimeArrayPolicy): unknown[] {
++  if (!Array.isArray(value) || Object.getPrototypeOf(value) !== Array.prototype) policy.fail("array", context)
++  const snapshotMode = policy.mode === "symbol-preflight-key-snapshot"
++  if (snapshotMode && Object.getOwnPropertySymbols(value).length > 0) policy.fail("symbol", context)
++  const keys = Reflect.ownKeys(value)
++  for (const key of keys) {
++    if (key === "length") continue
++    if (typeof key !== "string") policy.fail("symbol", context)
++    if (!/^(0|[1-9][0-9]*)$/.test(key) || Number(key) >= value.length) policy.fail("index", context)
++  }
++  const descriptors: Record<string, PropertyDescriptor | undefined> = snapshotMode ? Object.create(null) : Object.getOwnPropertyDescriptors(value)
++  if (snapshotMode) {
++    for (const key of keys) descriptors[String(key)] = Object.getOwnPropertyDescriptor(value, key)
++  }
++  const result: unknown[] = []
++  for (let index = 0; index < value.length; index += 1) {
++    const descriptor = descriptors[String(index)]
++    if (descriptor === undefined || !("value" in descriptor) || !descriptor.enumerable) policy.fail("dense", context)
++    result.push(descriptor.value)
++  }
++  return result
++}
+diff --git a/packages/css/test/runtime-data-admission.test.ts b/packages/css/test/runtime-data-admission.test.ts
+new file mode 100644
+index 0000000..212e544
+--- /dev/null
++++ b/packages/css/test/runtime-data-admission.test.ts
+@@ -0,0 +1,59 @@
++import { expect, it } from "bun:test"
++import { readRuntimeArray, readRuntimeRecord, type RuntimeArrayPolicy, type RuntimeRecordPolicy } from "../src/runtime/data-admission"
++
++const fail = (reason: string, context: string, key?: string): never => { throw new TypeError(`${context}:${reason}:${key ?? ""}`) }
++for (const mode of ["repeat-null-prototype-check", "snapshot-prototype"] as const) {
++  const policy: RuntimeRecordPolicy = { mode, fail }
++  it(`${mode} admits only enumerable plain data without calling getters`, () => {
++    expect(readRuntimeRecord({ a: 1 }, "record", policy)).toEqual([["a", 1]])
++    expect(readRuntimeRecord(Object.assign(Object.create(null), { a: 1 }), "record", policy)).toEqual([["a", 1]])
++    for (const value of [null, [], new Date(), Object.create({ custom: true })]) {
++      expect(() => readRuntimeRecord(value, "record", policy)).toThrow("record:record:")
++    }
++    expect(() => readRuntimeRecord({ [Symbol()]: 1 }, "record", policy)).toThrow("record:symbol:")
++    let calls = 0
++    expect(() => readRuntimeRecord(Object.defineProperty({}, "a", { enumerable: true, get() { calls++; return 1 } }), "record", policy)).toThrow("record:property:a")
++    expect(() => readRuntimeRecord(Object.defineProperty({}, "a", { value: 1 }), "record", policy)).toThrow("record:property:a")
++    expect(calls).toBe(0)
++  })
++  it(`${mode} preserves prototype inspection count and descriptor ordering`, () => {
++    const trace: string[] = []
++    const proxy = new Proxy(Object.assign(Object.create(null), { a: 1 }), {
++      getPrototypeOf(target) { trace.push("prototype"); return Reflect.getPrototypeOf(target) },
++      ownKeys(target) { trace.push("keys"); return Reflect.ownKeys(target) },
++      getOwnPropertyDescriptor(target, key) { trace.push(`descriptor:${String(key)}`); return Reflect.getOwnPropertyDescriptor(target, key) },
++    })
++    readRuntimeRecord(proxy, "record", policy)
++    expect(trace).toEqual([...Array(mode === "snapshot-prototype" ? 1 : 2).fill("prototype"), "keys", "descriptor:a"])
++  })
++}
++for (const mode of ["symbol-preflight-key-snapshot", "keys-then-all-descriptors"] as const) {
++  const policy: RuntimeArrayPolicy = { mode, fail }
++  it(`${mode} rejects sparse, decorated and accessor arrays`, () => {
++    expect(readRuntimeArray([1, 2], "array", policy)).toEqual([1, 2])
++    expect(() => readRuntimeArray(new Array(1), "array", policy)).toThrow("array:dense:")
++    expect(() => readRuntimeArray(Object.assign([1], { extra: 1 }), "array", policy)).toThrow("array:index:")
++    expect(() => readRuntimeArray(Object.assign([1], { [Symbol()]: 1 }), "array", policy)).toThrow("array:symbol:")
++    let calls = 0
++    const accessor = Object.defineProperty([1], "0", { enumerable: true, get() { calls++; return 1 } })
++    expect(() => readRuntimeArray(accessor, "array", policy)).toThrow("array:dense:")
++    expect(calls).toBe(0)
++    expect(() => readRuntimeArray(Object.setPrototypeOf([], null), "array", policy)).toThrow("array:array:")
++  })
++  it(`${mode} preserves proxy trap order and throwing length reads`, () => {
++    const trace: string[] = []
++    const proxy = new Proxy([1], {
++      ownKeys(target) { trace.push("keys"); return Reflect.ownKeys(target) },
++      getOwnPropertyDescriptor(target, key) { trace.push(`descriptor:${String(key)}`); return Reflect.getOwnPropertyDescriptor(target, key) },
++    })
++    readRuntimeArray(proxy, "array", policy)
++    expect(trace).toEqual(mode === "symbol-preflight-key-snapshot" ?
++      ["keys", "keys", "descriptor:0", "descriptor:length"] : ["keys", "keys", "descriptor:0", "descriptor:length"])
++    expect(() => readRuntimeArray(new Proxy([1], { get(target, key) {
++      if (key === "length") throw new Error("length trap")
++      return Reflect.get(target, key)
++    } }), "array", policy)).toThrow("length trap")
++    const both = Object.assign([1], { extra: 1, [Symbol()]: 1 })
++    expect(() => readRuntimeArray(both, "array", policy)).toThrow(`array:${mode === "symbol-preflight-key-snapshot" ? "symbol" : "index"}:`)
++  })
++}
