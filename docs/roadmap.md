@@ -2961,3 +2961,11 @@ The committed implementation makes all 21 approved host-budget rows a prerequisi
 The scaffold overlays only the current app's direct Vanilla Extract resolver edge because the approved baseline Playground manifest omits it, and keeps the overlaid Crumbs package connected to the baseline frozen package-local dependencies. Both contexts resolve `@vanilla-extract/css` 1.20.1. The dedicated GitHub runner registration could not be verified from this host, so end-to-end Actions qualification remains unverified. Registry readiness remains separate, and physical-device work remains deferred.
 
 Next recommended roadmap item: **M10.5 — remediate the nine binding host-budget failures through one API-preserving batch, preserving all 21 selectors and approved limits. Start with runtime initialisation and theme graph attribution, then run the matched M4 Pro gate before considering broader changes.**
+
+### 2026-10-08 — M10.5 consolidated remediation design
+
+The [proposed consolidated design](superpowers/specs/2026-10-08-m10-5-consolidated-host-remediation-design.md) keeps all nine host failures in one implementation batch. It combines a semantics-preserving reduction of repeated runtime validation/traversal with bounded compiled-text reuse that repeats authoring evaluation and native emission on every call. Reuse requires a separate complete-resolution admission proof; the current authored-only receipts are insufficient. Neither candidate is yet demonstrated to meet the fixed ceilings.
+
+The latest matched retained report remains **12 pass, nine fail, zero incomplete**, measured before the amended release-gate commit; it does not qualify current HEAD. All APIs, 21 host selectors, limits and release enforcement remain unchanged. There is no production implementation in this planning checkpoint. Physical-device work remains deferred.
+
+Next recommended roadmap item: **M10.5 — review the consolidated architecture design, then prepare one inline implementation plan and execute the complete remediation batch. Admit production changes only after all 21 host rows and behavioural checks pass; otherwise retain one evidence-only result and roll back the complete candidate.**
