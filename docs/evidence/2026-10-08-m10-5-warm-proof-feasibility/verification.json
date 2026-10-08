@@ -1,0 +1,32 @@
+{
+  "packageBuild": {
+    "exitCode": 0,
+    "log": "build.log"
+  },
+  "budgetValidation": {
+    "exitCode": 0,
+    "log": "budgets-validate.log"
+  },
+  "offlineVerification": {
+    "exitCode": 0,
+    "reports": 25,
+    "outputHashes": 300,
+    "artifacts": 149
+  },
+  "resealedNegativeControls": {
+    "rejected": 5,
+    "log": "negative-controls.json"
+  },
+  "siteBuild": {
+    "exitCode": 1,
+    "logs": [
+      "docs-build.log",
+      "docs-build-node.log"
+    ],
+    "reason": "Astro virtual CSS metadata mismatch with dependency realpaths outside docs root; reproduced under Bun and genuine Node 24.15.0; no site source changed"
+  },
+  "completeHostGate": "Not rerun; diagnostic is ineligible",
+  "productionSource": "Unchanged",
+  "specSelfReview": "Checked fixed budgets/current consumer policy, incomplete identity premise, fresh fallback, Metro worker boundary and one complete admission/rejection slice; proposed only",
+  "managedDependencyLinksRestored": true
+}

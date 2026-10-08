@@ -1,0 +1,613 @@
+{
+  "_tag": "CrumbsPerformanceBudgetRegistry",
+  "version": 2,
+  "status": "thresholds-pending-review",
+  "protocol": {
+    "minimumIndependentRepetitions": 5,
+    "comparisonStatistic": "median",
+    "noiseEnvelope": "min-median-max",
+    "environmentPolicy": "exact-or-explicit-equivalence",
+    "approvalPolicy": "reviewer-recorded",
+    "unapprovedBehavior": "incomplete",
+    "regressionRule": "absolute-and-relative-must-pass"
+  },
+  "metrics": [
+    {
+      "id": "js-frame-time",
+      "domain": "js-frames",
+      "scenario": "M1 release Hermes device scenarios",
+      "measure": "p95 JavaScript frame duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "release-hermes-device",
+      "baseline": {
+        "status": "missing",
+        "reason": "M1.6 release device sampling has not run"
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
+    },
+    {
+      "id": "ui-frame-time",
+      "domain": "ui-frames",
+      "scenario": "M1 release Hermes device scenarios",
+      "measure": "p95 UI frame duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "release-hermes-device",
+      "baseline": {
+        "status": "missing",
+        "reason": "M1.6 release device sampling has not run"
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
+    },
+    {
+      "id": "allocation-bytes",
+      "domain": "allocations",
+      "scenario": "M1 repeated theme and recipe workloads",
+      "measure": "allocated bytes per completed scenario",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "controlled-release-hermes-device",
+      "baseline": {
+        "status": "missing",
+        "reason": "No controlled allocation probe has been retained"
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
+    },
+    {
+      "id": "retained-memory-bytes",
+      "domain": "retained-memory",
+      "scenario": "25 themed tree mount and unmount cycles",
+      "measure": "last post-GC heap reading minus baseline",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "controlled-release-hermes-device",
+      "baseline": {
+        "status": "diagnostic",
+        "evidence": "docs/evidence/2026-09-15-expo-memory-workloads/qualification.json",
+        "reason": "Web readings lack forced-GC and release-device provenance",
+        "repetitions": 2
+      },
+      "threshold": {
+        "status": "pending-review",
+        "absoluteMax": null,
+        "maxRegressionPercent": null
+      }
+    },
+    {
+      "id": "runtime-initialization-node22-esm",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime ESM module load on Node 22.0.0",
+      "measure": "median fresh-process module evaluation after excluded warmup",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.floor.esm.load-ms.median",
+        "value": 6.293542000000002,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 7.553,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "runtime-initialization-node22-cjs",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime CJS module load on Node 22.0.0",
+      "measure": "median fresh-process module evaluation after excluded warmup",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.floor.cjs.load-ms.median",
+        "value": 3.401791000000001,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 4.083,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "runtime-initialization-current-esm",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime ESM module load on current Node",
+      "measure": "median fresh-process module evaluation after excluded warmup",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "current-node-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.current.esm.load-ms.median",
+        "value": 2.555624999999999,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 3.067,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "runtime-initialization-current-cjs",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime CJS module load on current Node",
+      "measure": "median fresh-process module evaluation after excluded warmup",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "current-node-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+        "selector": "runtime-init.current.cjs.load-ms.median",
+        "value": 2.036500000000002,
+        "repetitions": 15
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 2.444,
+        "maxRegressionPercent": 20,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "cold-transform-ms",
+      "domain": "cold-transform",
+      "scenario": "README recipe and package-owned consumer fixtures",
+      "measure": "maximum median fresh-process first-transform duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "bun-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json",
+        "selector": "benchmark.cold-transform.max-median-ms",
+        "value": 66.404584,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 83.006,
+        "maxRegressionPercent": 25,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "warm-transform-ms",
+      "domain": "warm-transform",
+      "scenario": "README recipe and package-owned consumer fixtures",
+      "measure": "maximum median same-process warm transform duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "bun-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json",
+        "selector": "benchmark.warm-transform.max-median-ms",
+        "value": 5.664125000000013,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 6.514,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "incremental-rebuild",
+      "domain": "incremental-rebuild",
+      "scenario": "direct consumer .css.ts edit through Expo Metro invalidation",
+      "measure": "median edit-to-updated-full-bundle receipt after the watcher-settle interval",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "expo56-metro084-ios-dev-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json",
+        "selector": "metro-incremental.direct-css-edit-ms.median",
+        "value": 123.95049999999901,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 137.506,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T20:31:50Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-incremental-baseline-protocol-reconciliation.md"
+      }
+    },
+    {
+      "id": "editor-tsc-wall-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsc",
+      "measure": "median fresh-process wall duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.wall-ms.median",
+        "value": 882.1055000000006,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 1014.422,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "editor-tsgo-wall-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsgo",
+      "measure": "median fresh-process wall duration",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.wall-ms.median",
+        "value": 332.92241699999977,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 382.861,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "editor-tsc-memory-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsc",
+      "measure": "median compiler-reported memory",
+      "unit": "KiB",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.memory-kib.median",
+        "value": 285025,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 313528,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "editor-tsgo-memory-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsgo",
+      "measure": "median compiler-reported memory",
+      "unit": "KiB",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.memory-kib.median",
+        "value": 140013,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 154015,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "editor-tsc-instantiations-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsc",
+      "measure": "compiler-reported type instantiations",
+      "unit": "count",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsc.10000.instantiations",
+        "value": 490410,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 490410,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "editor-tsgo-instantiations-10000",
+      "domain": "editor",
+      "scenario": "10,000-token current public token/theme/recipe fixture under tsgo",
+      "measure": "compiler-reported type instantiations",
+      "unit": "count",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.tsgo.10000.instantiations",
+        "value": 490508,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 490508,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "editor-first-completion-10000",
+      "domain": "editor",
+      "scenario": "10,000-token language-service member completion",
+      "measure": "median first completion duration after semantic analysis",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.10000.first-completion-ms.median",
+        "value": 39.28841699999998,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 43.218,
+        "maxRegressionPercent": 10,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "editor-warm-completion-10000",
+      "domain": "editor",
+      "scenario": "10,000-token language-service member completion",
+      "measure": "median repeated completion duration in the same service",
+      "unit": "ms",
+      "direction": "lower-is-better",
+      "environmentClass": "typescript-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-15-editor-scale/raw.json",
+        "selector": "editor.10000.warm-completion-ms.median",
+        "value": 30.386750000000006,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 34.945,
+        "maxRegressionPercent": 15,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-15T09:06:34Z",
+        "evidence": "docs/assessments/2026-09-15-performance-threshold-decisions.md"
+      }
+    },
+    {
+      "id": "runtime-theme-core-esm-graph-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "theme-core ESM emitted local graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "tsdown-node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-core.esm.graph-bytes",
+        "value": 17271,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 17271,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      }
+    },
+    {
+      "id": "runtime-theme-core-cjs-graph-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "theme-core CJS emitted local graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "tsdown-node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-core.cjs.graph-bytes",
+        "value": 17641,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 17641,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      }
+    },
+    {
+      "id": "runtime-tokens-esm-graph-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "tokens ESM emitted local graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "tsdown-node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.tokens.esm.graph-bytes",
+        "value": 56013,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 56013,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      }
+    },
+    {
+      "id": "runtime-tokens-cjs-graph-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "tokens CJS emitted local graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "tsdown-node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.tokens.cjs.graph-bytes",
+        "value": 63308,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 63308,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      }
+    },
+    {
+      "id": "runtime-theme-compatibility-esm-graph-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "theme ESM emitted local graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "tsdown-node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-compatibility.esm.graph-bytes",
+        "value": 44017,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 44017,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      }
+    },
+    {
+      "id": "runtime-theme-compatibility-cjs-graph-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "theme CJS emitted local graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "tsdown-node22-macos-arm64",
+      "baseline": {
+        "status": "recorded",
+        "evidence": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+        "selector": "runtime.theme-compatibility.cjs.graph-bytes",
+        "value": 44764,
+        "repetitions": 5
+      },
+      "threshold": {
+        "status": "approved",
+        "absoluteMax": 44764,
+        "maxRegressionPercent": 0,
+        "approvedBy": "Alan Currie (session approval)",
+        "approvedAt": "2026-09-21T19:54:46Z",
+        "evidence": "docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md"
+      }
+    }
+  ],
+  "diagnostics": [
+    {
+      "id": "runtime-emitted-bytes",
+      "domain": "runtime-footprint",
+      "scenario": "ordinary runtime CommonJS emitted graph",
+      "measure": "sum of emitted local graph bytes",
+      "unit": "bytes",
+      "direction": "lower-is-better",
+      "environmentClass": "node22-and-current-macos-arm64",
+      "baseline": {
+        "status": "diagnostic",
+        "evidence": "docs/evidence/2026-09-14-effect-boundary-audit/audit.json",
+        "selector": "effect.runtime.cjs.graph-bytes",
+        "value": 11307,
+        "reason": "Historical compatibility-entrypoint lineage predates the admitted split graph contract; retain its zero-growth comparison for visibility, not as a current-functionality gate.",
+        "repetitions": 5
+      }
+    }
+  ]
+}
