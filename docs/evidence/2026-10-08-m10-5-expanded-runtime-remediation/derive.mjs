@@ -1,0 +1,10 @@
+import {readFileSync}from"node:fs";
+const raw=JSON.parse(readFileSync(process.argv[2],"utf8")),root=process.argv[3];
+process.env.CRUMBS_INCREMENTAL_REPO_ROOT=root;
+const {budgetRegistryCodec,compareRecordedMetrics,compareRuntimeGraphMetrics,verifyRecordedBaselines}=await import("./budget-comparator.mjs");
+const decoded=budgetRegistryCodec.decodeJson(JSON.stringify(raw.registry));if(!decoded.ok)throw Error("Invalid original registry");
+const registry=decoded.value,issues=verifyRecordedBaselines(registry,root);if(issues.length)throw Error(JSON.stringify(issues));
+const startupIds=["runtime-initialization-node22-esm","runtime-initialization-node22-cjs","runtime-initialization-current-esm","runtime-initialization-current-cjs"];
+const startup=compareRecordedMetrics({...registry,metrics:registry.metrics.filter(m=>startupIds.includes(m.id))},root,{effect:{},runtimeGraph:raw.runtime.runtimeGraph,runtimeInit:raw.runtime.runtimeInit,benchmark:{},incremental:{},editor:{}}).metrics;
+const graphs=compareRuntimeGraphMetrics(registry,root,raw.runtime.runtimeGraph);
+console.log(JSON.stringify({startup,graphs}));

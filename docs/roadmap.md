@@ -3040,3 +3040,12 @@ Alan P Currie approved the [expanded-runtime scope](superpowers/specs/2026-10-08
 The [single complete inline implementation plan](superpowers/plans/2026-10-08-m10-5-expanded-runtime-remediation.md) tests name-preserving minification/shared-helper chunk layout, then the previously unimplemented compiled-text proof/memo, three-build baseline reproducibility and policy/report/manifest enforcement. It requires all 21 host comparisons plus complete software/public API qualification before one production commit. Any failed candidate is removed in full. No shipping source, registry, limit or active release gate changes in this documentation slice; current failures remain unresolved.
 
 **Next: M10.5 — review this plan, then execute the whole batch inline.** Runtime startup and warm-transform benefit are unproven until measured. Physical-device/spoken-reader work stays deferred; dedicated hosted-runner registration remains a separate prerequisite. No push/publication.
+
+
+### 2026-10-08 — M10.5 expanded-runtime candidate rejected and removed
+
+The approved single inline batch reached its runtime gate. The [assessment](assessments/2026-10-08-m10-5-expanded-runtime-remediation.md) records matching bounded built API parity fixtures, four graph failures (41,088/41,751/102,689/106,307 B against approved initial caps 39,000/39,000/96,000/99,000 B), and three unchanged startup failures. Node 22 ESM alone passes this cohort; it is not a complete host qualification. The [retained packet](evidence/2026-10-08-m10-5-expanded-runtime-remediation/README.md) contains full candidate/control sources and artifacts, raw samples, original-comparator rederivation and exact restoration receipts.
+
+The whole production candidate, including private authored checks, is removed. All 694 shipping files and 149 frozen control artifacts are restored. No baseline, policy, limit, dependency or release gate was admitted; original registry/enforcement remain active. The early rejection leaves compiler/memo, policy formats, deterministic baseline admission, native/export application checks and the full 21-row host suite unrun. M10.5 remains open; physical/spoken-reader work deferred and hosted-runner registration still separate.
+
+**Next: M10.5 — assess selective public-function/method name preservation and its startup cost before another complete remediation attempt.** Carry the documented missing parity controls into that assessment. Keep current approved caps and APIs. No push/publication.

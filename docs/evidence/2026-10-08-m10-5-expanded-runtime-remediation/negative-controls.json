@@ -1,0 +1,68 @@
+{
+  "scope": "rejection-verifier-only",
+  "controls": [
+    {
+      "case": "raw-byte-edit",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Raw file hash: candidate.patch.gz"
+    },
+    {
+      "case": "source-digest",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Source digest"
+    },
+    {
+      "case": "restoration-missing",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Incomplete restoration"
+    },
+    {
+      "case": "raw-startup-replay",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Comparator rederivation mismatch"
+    },
+    {
+      "case": "parity-forgery",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Differential mismatch"
+    },
+    {
+      "case": "accepted-disposition",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Cannot certify acceptance"
+    },
+    {
+      "case": "registry-substitution",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Registry substitution"
+    },
+    {
+      "case": "artifact-size-redistribution",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Artifact byte binding"
+    },
+    {
+      "case": "startup-artifact-substitution",
+      "expected": "reject",
+      "exitCode": 1,
+      "outcome": "rejected",
+      "lastError": "AssertionError: Startup artifact binding"
+    }
+  ]
+}
