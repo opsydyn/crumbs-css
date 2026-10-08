@@ -31,6 +31,7 @@ const toolEntries = {
 }
 const themeRuntimeEntries = {
   theme: "src/theme-runtime.ts",
+  "theme-vars": "src/theme-vars.ts",
   "theme-conditions": "src/conditions/index.ts",
   "theme-expressions": "src/expressions/index.ts",
   "theme-recipes": "src/theme-recipes.ts",

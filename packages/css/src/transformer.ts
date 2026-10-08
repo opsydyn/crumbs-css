@@ -1,3 +1,8 @@
+import {NativeLocalVarType,type AnyLocalVar} from "./local-vars/model"
+import {captureLocalVarsIntoNativeIr,replayLocalDeclarations,createLocalStylePlan,type LocalVarCaptureResult} from "./compiler/local-vars"
+import {createLocalVarsMetadata} from "./compiler/local-vars-metadata"
+import {propertyPrimitives} from "./native-property-policy"
+import type {NativePrimitiveDomain,NativePrimitiveKind} from "./compiler/native-capture"
 import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
 import { createRequire } from "node:module"
@@ -196,6 +201,7 @@ async function processVanillaFileForNative({
   identOption = process.env.NODE_ENV === "production" ? "short" : "debug",
   nativeValuesByClass,
   nativeIrByClass,
+  nativeLocalByClass,
   nativeStructuredIrByClass,
   projectRoot,
 }: {
@@ -204,6 +210,7 @@ async function processVanillaFileForNative({
   outputCss?: boolean
   identOption?: ReturnType<Adapter["getIdentOption"]>
   nativeValuesByClass: Map<string, Record<string, unknown>>
+  nativeLocalByClass: Map<string, {capture:LocalVarCaptureResult;primitives:NativePrimitiveDomain}>
   nativeIrByClass: Map<string, ScalarDeclarationBlock>
   nativeStructuredIrByClass: Map<string, StructuredDeclarationBlock>
   projectRoot: string
@@ -222,7 +229,12 @@ async function processVanillaFileForNative({
           sourceId: source.sourceId,
           className: css.selector,
         }
-        const rule = css.rule as Record<string, unknown>
+        let rule = css.rule as Record<string, unknown>
+        const local = captureLocalVarsIntoNativeIr(rule, captureContext)
+        if (local.declarations.length) {
+          nativeLocalByClass.set(css.selector, {capture:local,primitives:getNativeCaptureMetadata(rule)!.primitiveDomain})
+          rule = local.cssRule
+        }
         if (getNativeCaptureMetadata(rule) === undefined) {
           const compatibility = captureCompatibilityIntoNativeIr(rule, captureContext)
           if (compatibility.structuredBlock !== undefined) {
@@ -391,6 +403,7 @@ async function transformCssTsToStyleSheetWithMetadata(
     esbuildOptions: { plugins: [capturePlugin] },
   })
 
+  const nativeLocalByClass = new Map<string, {capture:LocalVarCaptureResult;primitives:NativePrimitiveDomain}>()
   const nativeValuesByClass = new Map<string, Record<string, unknown>>()
   const nativeIrByClass = new Map<string, ScalarDeclarationBlock>()
   const nativeStructuredIrByClass = new Map<string, StructuredDeclarationBlock>()
@@ -400,6 +413,7 @@ async function transformCssTsToStyleSheetWithMetadata(
     identOption,
     nativeValuesByClass,
     nativeIrByClass,
+    nativeLocalByClass,
     nativeStructuredIrByClass,
     projectRoot: cwd,
   })
@@ -442,6 +456,9 @@ async function transformCssTsToStyleSheetWithMetadata(
   for (const [cls, block] of nativeStructuredIrByClass) {
     classStyles.set(cls, { ...classStyles.get(cls), ...lowerStructuredBlock(block) })
   }
+  for (const [cls, local] of nativeLocalByClass) {
+    classStyles.set(cls, replayLocalDeclarations(classStyles.get(cls) ?? {}, local.capture, nativeIrByClass.get(cls)))
+  }
   const classCandidates = includeStyleExplanations
     ? collectStyleExplanationCandidates(nativeIrByClass, nativeStructuredIrByClass)
     : undefined
@@ -483,6 +500,22 @@ async function transformCssTsToStyleSheetWithMetadata(
         resolvedClassOrigins.set(compositeName, mergedOrigins)
       }
     }
+  }
+
+  const localDefinitions:AnyLocalVar[]=[...nativeLocalByClass.values()].flatMap(({capture})=>capture.declarations.flatMap(({value})=>value.$$type===NativeLocalVarType?[value]:value.variables))
+  const localPlans = new Map<string, ReturnType<typeof createLocalStylePlan>>()
+  for (const [name, values] of resolvedClassStyles) {
+    const names=name.trim().split(/\s+/)
+    if (!names.some(cls=>nativeLocalByClass.has(cls))) continue
+    let primitives:NativePrimitiveKind[]=["view","text","image"]
+    for (const cls of names) {
+      for (const domains of [nativeLocalByClass.get(cls)?.primitives, nativeIrByClass.get(cls)?.primitiveDomain, nativeStructuredIrByClass.get(cls)?.primitiveDomain]) {
+        if (domains) primitives = primitives.filter(kind => domains.includes(kind))
+      }
+    }
+    for(const property of Object.keys(values)){const allowed=propertyPrimitives[property as keyof typeof propertyPrimitives];if(allowed)primitives=primitives.filter(kind=>allowed.includes(kind))}
+    if(!primitives.length)throw new TypeError("Local style composition has no shared primitive")
+    localPlans.set(name,createLocalStylePlan(primitives as unknown as NativePrimitiveDomain,Object.entries(values).map(([property,value])=>({property,value}))))
   }
 
   // Convert captured metafile inputs to relative dep paths.
@@ -528,6 +561,7 @@ async function transformCssTsToStyleSheetWithMetadata(
       includeStyleExplanations,
       ...(styleExplanationMetadata === undefined ? {} : { styleExplanationMetadata }),
       cacheIdentity,
+      ...(localPlans.size ? {localPlans,localDefinitions} : {}),
     },
   )
   const manifestSidecar = manifestSidecarOptions === undefined || resolvedClassOrigins === undefined
@@ -537,6 +571,7 @@ async function transformCssTsToStyleSheetWithMetadata(
       exportMap,
       resolvedClassStyles,
       resolvedClassOrigins,
+      ...(localDefinitions.length ? {localDefinitions} : {}),
       ...(manifestSidecarOptions.declaredTokenIds === undefined
         ? {}
         : { declaredTokenIds: manifestSidecarOptions.declaredTokenIds }),

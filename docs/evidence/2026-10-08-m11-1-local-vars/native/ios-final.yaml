@@ -1,0 +1,29 @@
+appId: host.exp.Exponent
+---
+- extendedWaitUntil:
+    visible: "Local card styling"
+    timeout: 120000
+- assertVisible: "Literal sample: 1"
+- assertVisible: "Card A: #2457d6 / 0.25"
+- assertVisible: "Card B: #c42f73 / 0.75"
+- takeScreenshot: ios-initial
+- tapOn: "Change A opacity"
+- assertVisible: "Card A: #2457d6 / 0.5"
+- assertVisible: "Card B: #c42f73 / 0.75"
+- takeScreenshot: ios-opacity
+- tapOn: "Clear A accent"
+- assertVisible: "Card A: #16804a / 0.5"
+- assertVisible: "Card B: #c42f73 / 0.75"
+- takeScreenshot: ios-accent-clear
+- tapOn: "Clear A"
+- assertVisible: "Card A: #16804a / 1"
+- assertVisible: "Card B: #c42f73 / 0.75"
+- takeScreenshot: ios-clear
+- tapOn: "Toggle local theme"
+- assertVisible: "Card A: #9a65de / 1"
+- assertVisible: "Card B: #c42f73 / 0.75"
+- takeScreenshot: ios-dark
+- tapOn: "Toggle local theme"
+- assertVisible: "Card A: #16804a / 1"
+- assertVisible: "Card B: #c42f73 / 0.75"
+- takeScreenshot: ios-restored

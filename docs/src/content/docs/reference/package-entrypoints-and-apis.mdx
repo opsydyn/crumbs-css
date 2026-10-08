@@ -26,6 +26,7 @@ Use this entrypoint in `.css.ts` authoring modules for:
 - `viewStyle`
 - `textStyle`
 - `imageStyle`
+- `createVar`, `fallbackVar` for typed standalone scalar inputs
 - type exports such as `NativeRecipeProps`, `NativeComponentRecipeProps`, `NativeComponentPublicProps`, and `NativeComponentResolvedStyles`
 
 ### Typed component recipes
@@ -535,3 +536,7 @@ Use this entrypoint in `metro.config.js` for:
 ### `@opsydyn/crumbs-css/dist/transformer`
 
 Advanced/debugging surface for direct transformer access. Most consumers should not import this directly in app code.
+
+### `@opsydyn/crumbs-css/theme/vars`
+
+Opt in to `assignVars`, `resolveAssignedStyles` and `useAssignedStyles`. The six type exports are `NativeLocalVar`, `NativeLocalFallback`, `NativeLocalVarShape`, `NativeLocalVarValues`, `NativeVarAssignments` and `ResolvedAssignedStyles`. Authoring declarations share their nominal graph. These APIs are not re-exported by the root or other theme entries. See [local assignments](/crumbs-css/how-to/use-local-variables/). Support requires local-plan-v1 compiler/runtime capability, identified by the M11.1 artifact packet until release closure.

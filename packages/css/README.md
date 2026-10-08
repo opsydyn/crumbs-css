@@ -448,3 +448,9 @@ Spacing Inline/Block aliases now normalize before ordered merging; direction-dep
 Inset aliases now normalize to native sides/start/end before ordered merging for tokens and literals. Unsupported multi-value CSS forms require explicit side properties. Regenerate compiled artifacts together; see [alpha inset migration](./COMPATIBILITY.md#supported).
 
 Generic authoring now rejects unsupported side compound/style borders with actionable compiler migration guidance. Use side width/color plus global borderStyle where the native primitive supports it; literal broad border remains supported. See [side-border admission](./COMPATIBILITY.md#supported).
+
+## Typed local assignment (M11.1)
+
+Declare `createVar` and `fallbackVar` through `/style` in `.css.ts`; use immutable `assignVars` snapshots and `useAssignedStyles` through `/theme/vars`. Clearing replaces a complete instance snapshot and restores its literal or typed theme defaults. The existing provider supplies reached theme fallbacks. See the [local-variable guide](https://opsydyn.github.io/crumbs-css/how-to/use-local-variables/).
+
+This requires local plan v1 support in both compiler and runtime. The exact artifact is identified by the [M11.1 packet](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-08-m11-1-local-vars); the current alpha version alone does not identify support. Release closure and publication remain separate.

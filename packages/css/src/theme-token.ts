@@ -35,6 +35,8 @@ declare const legacyThemeVarBrand: unique symbol
 declare const domainThemeVarBrand: unique symbol
 declare const domainThemeVarVisibilityBrand: unique symbol
 
+export type UnbrandedThemeLiteral = string & {readonly [legacyThemeVarBrand]?: never; readonly [domainThemeVarBrand]?: never}
+
 export type ThemeTokenVisibility = "public" | "private"
 
 /** Type-only marker used to select the already-derived value shape for domain contracts. */
@@ -208,6 +210,12 @@ export function registerThemeTokenContract(
     registerThemeContractIdentity(contract, identityMetadata.identity, identityMetadata.signature)
   }
   domainContracts.set(contract, new Map(entries))
+  for (const [reference, entry] of entries) {
+    const previous = localTerminalDomains.get(reference)
+    const identity = identityMetadata?.identity
+    const compatible = previous === undefined || (domainSignatureForLocal(previous.domain) === domainSignatureForLocal(entry.domain) && JSON.stringify(previous.identity) === JSON.stringify(identity))
+    localTerminalDomains.set(reference, Object.freeze({domain: entry.domain, ...(identity === undefined ? {} : {identity}), ambiguous: previous?.ambiguous === true || !compatible}))
+  }
 }
 
 /** @internal A domain contract owns token references through this local map. */
@@ -357,3 +365,8 @@ function freezeOrigin(origin: ThemeTokenOrigin): ThemeTokenOrigin {
     }))),
   })
 }
+
+// Authoring-only domain metadata for new local fallback terminals; old ownership remains contract-local.
+const localTerminalDomains = sharedRegistry(Symbol.for("crumbs.css.local-terminal-domains.v1"), () => new Map<string,{readonly domain:TokenDomain;readonly identity?:TokenContractIdentity;readonly ambiguous:boolean}>())
+export function getThemeTokenLocalDomain(reference:ThemeVar){return localTerminalDomains.get(reference)}
+function domainSignatureForLocal(domain:TokenDomain):string{return JSON.stringify(domain.kind === "enum" ? {kind:domain.kind,values:[...domain.values].sort()} : domain)}

@@ -4,6 +4,7 @@ import { execFileSync } from "node:child_process"
 import { appendFileSync, chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, readlinkSync, rmSync, symlinkSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
+import {scanRuntimeGraphEvidence} from "../bench/runtime-graph-budget"
 import { summarizeLoadSamples } from "../bench/effect-boundary-audit"
 import { budgetRegistryCodec, compareRecordedMetrics } from "../bench/budget-contract"
 import { captureGuaranteesSourceIdentity } from "../../../scripts/guarantees-matrix/source-identity"
@@ -96,12 +97,14 @@ function makePassingSyntheticReport(reportDirectory: string): void {
   const runtimeInitialization = readJson(join(reportDirectory, "runtime-initialization.json"))
   runtimeInitialization.sourceRevision = expectedRevision
   for (const scenario of runtimeInitialization.scenarios) {
+    // This fixture is deliberately synthetic; bind it to the package under test.
+    scenario.entrySha256 = hash(readFileSync(join(packageRoot,"dist",`theme.${scenario.format === "esm" ? "mjs" : "cjs"}`)))
     for (const sample of scenario.samples) sample.loadMs = 1000000
     scenario.summary = summarizeLoadSamples(scenario.samples)
   }
   writeJson(join(reportDirectory, "runtime-initialization.json"), runtimeInitialization)
 
-  const runtimeGraph = readJson(join(reportDirectory, "runtime-graph.json"))
+  const runtimeGraph = scanRuntimeGraphEvidence(packageRoot, 5)
   runtimeGraph.sourceRevision = expectedRevision
   writeJson(join(reportDirectory, "runtime-graph.json"), runtimeGraph)
 
@@ -139,7 +142,8 @@ function mirrorTrackedRepositoryWithoutDist(): string {
     cwd: repositoryRoot,
     encoding: "utf8",
   }).split("\0").filter(Boolean)
-  for (const path of trackedPaths) {
+  // Mirror the source identity under test, including authored files not yet committed.
+  for (const path of new Set([...trackedPaths, ...sourceIdentity.files.map(file => file.path)])) {
     const source = join(repositoryRoot, path)
     const destination = join(root, path)
     const stat = lstatSync(source)

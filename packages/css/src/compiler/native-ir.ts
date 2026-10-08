@@ -1,3 +1,4 @@
+import {dimensionValueProperties, percentageValueProperties, colorValueProperties, stringValueProperties, numberOrStringValueProperties, literalValueProperties, primitiveLiteralValueProperties, scalarAliasExpansions, propertyPrimitives} from "../native-property-policy"
 import * as Result from "effect/Result"
 import * as Schema from "effect/Schema"
 import * as SchemaIssue from "effect/SchemaIssue"
@@ -127,100 +128,6 @@ export type ScalarCaptureContext = {
 }
 export type OpacityCaptureContext = ScalarCaptureContext
 
-const dimensionValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
-  "flexBasis", "width", "height", "minWidth", "minHeight", "maxWidth", "maxHeight",
-  "top", "right", "bottom", "left", "start", "end",
-  "paddingTop", "paddingRight", "paddingBottom", "paddingLeft",
-  "paddingStart", "paddingEnd",
-  "marginTop", "marginRight", "marginBottom", "marginLeft",
-  "marginStart", "marginEnd",
-])
-const percentageValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
-  ...dimensionValueProperties, "rowGap", "columnGap",
-])
-const colorValueProperties: ReadonlySet<MigratedScalarProperty> = new Set([
-  "backgroundColor", "color", "tintColor", "overlayColor", "shadowColor", "textShadowColor", "textDecorationColor",
-  "borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor",
-  "borderStartColor", "borderEndColor", "outlineColor",
-  "borderBlockColor", "borderBlockStartColor", "borderBlockEndColor",
-])
-const stringValueProperties: ReadonlySet<MigratedScalarProperty> = new Set(["fontFamily"])
-const numberOrStringValueProperties: ReadonlySet<MigratedScalarProperty> = new Set(["aspectRatio"])
-const literalValueProperties: Readonly<Partial<Record<MigratedScalarProperty, ReadonlySet<unknown>>>> = {
-  fontStyle: new Set(["normal", "italic"]),
-  fontWeight: new Set([
-    "normal", "bold", "100", "200", "300", "400", "500", "600", "700", "800", "900",
-    100, 200, 300, 400, 500, 600, 700, 800, 900,
-    "ultralight", "thin", "light", "medium", "regular", "semibold", "condensedBold", "condensed", "heavy", "black",
-  ]),
-  textAlign: new Set(["auto", "left", "right", "center", "justify"]),
-  textAlignVertical: new Set(["auto", "top", "bottom", "center"]),
-  verticalAlign: new Set(["auto", "top", "bottom", "middle"]),
-  textDecorationLine: new Set(["none", "underline", "line-through", "underline line-through"]),
-  textDecorationStyle: new Set(["solid", "double", "dotted", "dashed"]),
-  textTransform: new Set(["none", "capitalize", "uppercase", "lowercase"]),
-  writingDirection: new Set(["auto", "ltr", "rtl"]),
-  userSelect: new Set(["auto", "none", "text", "contain", "all"]),
-  includeFontPadding: new Set([false, true]),
-  display: new Set(["none", "flex", "contents"]),
-  position: new Set(["absolute", "relative", "static"]),
-  direction: new Set(["inherit", "ltr", "rtl"]),
-  overflow: new Set(["visible", "hidden", "scroll"]),
-  flexDirection: new Set(["row", "column", "row-reverse", "column-reverse"]),
-  flexWrap: new Set(["wrap", "nowrap", "wrap-reverse"]),
-  alignContent: new Set(["flex-start", "flex-end", "center", "stretch", "space-between", "space-around", "space-evenly"]),
-  alignItems: new Set(["flex-start", "flex-end", "center", "stretch", "baseline"]),
-  alignSelf: new Set(["auto", "flex-start", "flex-end", "center", "stretch", "baseline"]),
-  justifyContent: new Set(["flex-start", "flex-end", "center", "space-between", "space-around", "space-evenly"]),
-  boxSizing: new Set(["border-box", "content-box"]),
-  backfaceVisibility: new Set(["visible", "hidden"]),
-  cursor: new Set(["auto", "pointer"]),
-  borderCurve: new Set(["circular", "continuous"]),
-  pointerEvents: new Set(["box-none", "none", "box-only", "auto"]),
-  borderStyle: new Set(["solid", "dotted", "dashed"]),
-  outlineStyle: new Set(["solid", "dotted", "dashed"]),
-  isolation: new Set(["auto", "isolate"]),
-  resizeMode: new Set(["cover", "contain", "stretch", "repeat", "center", "none"]),
-  objectFit: new Set(["cover", "contain", "fill", "scale-down", "none"]),
-  mixBlendMode: new Set([
-    "normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn",
-    "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity",
-  ]),
-}
-const primitiveLiteralValueProperties: Readonly<Partial<Record<
-  MigratedScalarProperty,
-  Readonly<Partial<Record<NativePrimitiveKind, ReadonlySet<unknown>>>>
->>> = {
-  overflow: {
-    view: new Set(["visible", "hidden", "scroll"]),
-    text: new Set(["visible", "hidden", "scroll"]),
-    image: new Set(["visible", "hidden"]),
-  },
-}
-const scalarAliasExpansions: Readonly<Record<ScalarAliasProperty, readonly MigratedScalarProperty[]>> = {
-  inset: ["top", "right", "bottom", "left"],
-  insetInline: ["left", "right"],
-  insetBlock: ["top", "bottom"],
-  insetInlineStart: ["start"],
-  insetInlineEnd: ["end"],
-  insetBlockStart: ["top"],
-  insetBlockEnd: ["bottom"],
-  gap: ["rowGap", "columnGap"],
-  padding: ["paddingTop", "paddingRight", "paddingBottom", "paddingLeft"],
-  paddingHorizontal: ["paddingLeft", "paddingRight"],
-  paddingVertical: ["paddingTop", "paddingBottom"],
-  paddingInline: ["paddingLeft", "paddingRight"], paddingBlock: ["paddingTop", "paddingBottom"],
-  paddingInlineStart: ["paddingStart"], paddingInlineEnd: ["paddingEnd"],
-  paddingBlockStart: ["paddingTop"], paddingBlockEnd: ["paddingBottom"],
-  margin: ["marginTop", "marginRight", "marginBottom", "marginLeft"],
-  marginHorizontal: ["marginLeft", "marginRight"], marginVertical: ["marginTop", "marginBottom"],
-  marginInline: ["marginLeft", "marginRight"], marginBlock: ["marginTop", "marginBottom"],
-  marginInlineStart: ["marginStart"], marginInlineEnd: ["marginEnd"],
-  marginBlockStart: ["marginTop"], marginBlockEnd: ["marginBottom"],
-  borderWidth: ["borderTopWidth", "borderRightWidth", "borderBottomWidth", "borderLeftWidth"],
-  borderColor: ["borderTopColor", "borderRightColor", "borderBottomColor", "borderLeftColor"],
-  borderRadius: ["borderTopLeftRadius", "borderTopRightRadius", "borderBottomRightRadius", "borderBottomLeftRadius"],
-}
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
   ? undefined : { path: [], issue: "Expected a non-negative safe integer" }))
@@ -462,79 +369,6 @@ export function isAuthoredScalarProperty(value: string): value is AuthoredScalar
   return capturedScalarPropertySet.has(value)
 }
 
-const propertyPrimitives: Readonly<Record<MigratedScalarProperty, NativePrimitiveDomain>> = {
-  opacity: ["view", "text", "image"],
-  zIndex: ["view", "text", "image"],
-  elevation: ["view", "text"],
-  flex: ["view", "text", "image"],
-  flexBasis: ["view", "text", "image"],
-  flexGrow: ["view", "text", "image"],
-  flexShrink: ["view", "text", "image"],
-  width: ["view", "text", "image"],
-  height: ["view", "text", "image"],
-  minWidth: ["view", "text", "image"],
-  minHeight: ["view", "text", "image"],
-  maxWidth: ["view", "text", "image"],
-  maxHeight: ["view", "text", "image"],
-  top: ["view", "text", "image"],
-  right: ["view", "text", "image"],
-  bottom: ["view", "text", "image"],
-  left: ["view", "text", "image"],
-  start: ["view", "text", "image"],
-  end: ["view", "text", "image"],
-  rowGap: ["view", "text", "image"],
-  columnGap: ["view", "text", "image"],
-  paddingTop: ["view", "text", "image"], paddingRight: ["view", "text", "image"],
-  paddingBottom: ["view", "text", "image"], paddingLeft: ["view", "text", "image"],
-  paddingStart: ["view", "text", "image"], paddingEnd: ["view", "text", "image"],
-  marginTop: ["view", "text", "image"], marginRight: ["view", "text", "image"],
-  marginBottom: ["view", "text", "image"], marginLeft: ["view", "text", "image"],
-  marginStart: ["view", "text", "image"], marginEnd: ["view", "text", "image"],
-  borderTopWidth: ["view", "text", "image"], borderRightWidth: ["view", "text", "image"],
-  borderBottomWidth: ["view", "text", "image"], borderLeftWidth: ["view", "text", "image"],
-  borderStartWidth: ["view", "text", "image"], borderEndWidth: ["view", "text", "image"],
-  borderTopColor: ["view", "text", "image"], borderRightColor: ["view", "text", "image"],
-  borderBottomColor: ["view", "text", "image"], borderLeftColor: ["view", "text", "image"],
-  borderStartColor: ["view", "text", "image"], borderEndColor: ["view", "text", "image"],
-  backgroundColor: ["view", "text", "image"],
-  color: ["text"],
-  tintColor: ["image"],
-  overlayColor: ["image"],
-  shadowColor: ["view", "text", "image"],
-  shadowOpacity: ["view", "text", "image"], shadowRadius: ["view", "text", "image"],
-  textShadowColor: ["text"], textShadowRadius: ["text"],
-  textDecorationColor: ["text"],
-  fontSize: ["text"], letterSpacing: ["text"], lineHeight: ["text"], fontFamily: ["text"],
-  fontStyle: ["text"], fontWeight: ["text"],
-  textAlign: ["text"], textAlignVertical: ["text"], verticalAlign: ["text"],
-  textDecorationLine: ["text"], textDecorationStyle: ["text"],
-  textTransform: ["text"], writingDirection: ["text"], userSelect: ["text"],
-  includeFontPadding: ["text"],
-  display: ["view", "text", "image"], position: ["view", "text", "image"], direction: ["view", "text", "image"],
-  overflow: ["view", "text", "image"],
-  flexDirection: ["view", "text", "image"], flexWrap: ["view", "text", "image"],
-  alignContent: ["view", "text", "image"], alignItems: ["view", "text", "image"],
-  alignSelf: ["view", "text", "image"], justifyContent: ["view", "text", "image"],
-  boxSizing: ["view", "text", "image"],
-  aspectRatio: ["view", "text", "image"],
-  rotation: ["view", "text", "image"],
-  scaleX: ["view", "text", "image"],
-  scaleY: ["view", "text", "image"],
-  translateX: ["view", "text", "image"],
-  translateY: ["view", "text", "image"],
-  backfaceVisibility: ["view", "text", "image"], cursor: ["view", "text", "image"],
-  borderCurve: ["view", "text"], pointerEvents: ["view", "text"],
-  borderStyle: ["view", "text"], outlineStyle: ["view", "text"], isolation: ["view", "text"],
-  resizeMode: ["image"], objectFit: ["image"], mixBlendMode: ["view", "text"],
-  outlineColor: ["view", "text"], outlineOffset: ["view", "text"], outlineWidth: ["view", "text"],
-  borderBlockColor: ["view", "text"], borderBlockStartColor: ["view", "text"], borderBlockEndColor: ["view", "text"],
-  borderTopLeftRadius: ["view", "text", "image"], borderTopRightRadius: ["view", "text", "image"],
-  borderBottomRightRadius: ["view", "text", "image"], borderBottomLeftRadius: ["view", "text", "image"],
-  borderStartStartRadius: ["view", "text", "image"], borderStartEndRadius: ["view", "text", "image"],
-  borderEndStartRadius: ["view", "text", "image"], borderEndEndRadius: ["view", "text", "image"],
-  borderTopStartRadius: ["view", "text", "image"], borderTopEndRadius: ["view", "text", "image"],
-  borderBottomStartRadius: ["view", "text", "image"], borderBottomEndRadius: ["view", "text", "image"],
-}
 
 export function decodeScalarBlock(input: unknown, sourceId = "<unknown>"): ScalarDeclarationBlock {
   const result = Schema.decodeUnknownResult(ScalarDeclarationBlockSchema, schemaOptions)(input)

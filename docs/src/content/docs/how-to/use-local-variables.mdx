@@ -1,0 +1,80 @@
+---
+title: Assign local style variables
+description: Typed native defaults and complete per-instance assignment snapshots.
+---
+
+Standalone variables describe a component's native scalar inputs. Assignments are immutable data owned by each component instance. A fallback supplies the default when an assignment is absent.
+
+This API requires a compiler that emits **local plan v1** and an installed runtime with `@opsydyn/crumbs-css/theme/vars`. The [M11.1 qualification packet](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-08-m11-1-local-vars) identifies the exact tested artifact. A package bearing the existing alpha version alone does not establish this capability. Publication awaits release closure.
+
+```ts
+// card.css.ts
+import {createVar, fallbackVar, viewStyle} from '@opsydyn/crumbs-css/style'
+import {vars} from './theme'
+
+export const accent = createVar('color', {
+  owner: '@acme/cards', name: 'Card.accent', version: 1,
+})
+export const opacity = createVar('opacity', {
+  owner: '@acme/cards', name: 'Card.opacity', version: 1,
+})
+export const card = viewStyle({
+  backgroundColor: fallbackVar(accent, vars.color.accent),
+  opacity: fallbackVar(opacity, 1),
+  padding: 16,
+})
+```
+
+`vars.color.accent` must come from a public typed `createTokenContract` colour definition. Legacy unscoped `createThemeContract` tokens have no domain authority for a local fallback. The owner, name and positive integer version make the local handle portable across modules; conflicting domains for the same identity fail.
+
+```tsx
+// Card.tsx
+import {useMemo} from 'react'
+import {View} from 'react-native'
+import {assignVars, useAssignedStyles} from '@opsydyn/crumbs-css/theme/vars'
+import {accent, opacity, card} from './card.css'
+
+const styles = Object.freeze({card})
+export function Card({colour}: {colour: string}) {
+  const assignments = useMemo(
+    () => assignVars({accent, opacity}, {accent: colour, opacity: 0.5}),
+    [colour],
+  )
+  const resolved = useAssignedStyles(styles, assignments)
+  return <View style={resolved.card} />
+}
+```
+
+Pick style exports explicitly. Passing the entire authoring module also supplies handles and compiler metadata, which are not primitive style rows. Local plans must be resolved before reaching a native `View`, `Text` or `Image` style prop. The existing generic theme resolvers direct local plans to this entrypoint.
+
+## Subsets and clearing
+
+Every assignment completely populates its supplied shape. A subset uses a subset shape, and replaces the previous snapshot:
+
+```ts
+const both = assignVars({accent, opacity}, {accent: '#2457d6', opacity: 0.25})
+const opacityOnly = assignVars({opacity}, {opacity: 0.5})
+const cleared = assignVars({}, {})
+```
+
+`opacityOnly` removes the local accent and reaches its theme fallback. `cleared` restores opacity `1` and the active theme accent. Another instance's snapshot remains independent. No previous value is inherited or mutated.
+
+## Fallback order and provider-free use
+
+`fallbackVar(primary, ...alternatives, terminal)` accepts at most 16 same-domain local handles. Only absence advances the chain; `0` and `-0` are present values. Invalid values fail, even when unused. The terminal is a domain literal or a public typed same-domain theme token. The resolver reads a theme terminal only when reached.
+
+A literal terminal needs no provider:
+
+```ts
+export const dimmed = viewStyle({opacity: fallbackVar(opacity, 1)})
+```
+
+Use `useAssignedStyles({dimmed}, assignments)` or the pure `resolveAssignedStyles(styles, assignments, theme?)`. The Hook shares the existing theme provider and scoped store. A populated local branch also needs no provider. A reached theme terminal requires its owning contract; missing or incompatible themes fail.
+
+## Supported values and costs
+
+Domains are colour strings, lengths with an explicit negative permission, finite non-negative durations, opacity in `[0, 1]`, and finite string enums. Native property restrictions still apply: a length percentage cannot supply a border width. Colour strings retain the existing token boundary; this API does not certify colour rendering or contrast.
+
+Local operands occupy primitive scalar properties. Recipes, Sprinkles, conditions, expressions, structured transforms/shadows and animated objects cannot contain them. Static supported structured values may compose alongside local scalar values. Use explicit React state and native animation APIs separately.
+
+Keep style maps and memoised assignment snapshots stable. Identical immutable inputs reuse resolved maps; the Hook's bounded selector reuses unaffected rows and the whole map after unused changes. Mutable decoded inputs are copied and revalidated. The [diagnostic cost packet](https://github.com/opsydyn/crumbs-css/blob/main/docs/evidence/2026-10-08-m11-1-local-vars/cost.json) records host measurements, not device allocations or a release budget.

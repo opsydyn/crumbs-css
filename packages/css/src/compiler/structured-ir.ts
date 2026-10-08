@@ -1,3 +1,4 @@
+import {structuredPropertyPrimitives,fontVariantValues,isNativeStructuredValue} from "../native-structured-policy"
 import * as Result from "effect/Result"
 import * as Schema from "effect/Schema"
 import * as SchemaIssue from "effect/SchemaIssue"
@@ -251,20 +252,6 @@ export function isStructuredNativeProperty(value: string): value is StructuredNa
 }
 
 const allPrimitives = ["view", "text", "image"] as const
-const structuredPropertyPrimitives: Readonly<Record<StructuredNativeProperty, NativePrimitiveDomain>> = {
-  boxShadow: ["view"],
-  filter: ["view", "text"],
-  experimental_backgroundRepeat: ["view", "text"],
-  experimental_backgroundSize: ["view", "text"],
-  experimental_backgroundPosition: ["view", "text"],
-  experimental_backgroundImage: ["view", "text"],
-  transform: ["view", "text", "image"],
-  shadowOffset: ["view", "text", "image"],
-  textShadowOffset: ["text"],
-  transformOrigin: ["view", "text", "image"],
-  transformMatrix: ["view", "text", "image"],
-  fontVariant: ["text"],
-}
 
 const Index = Schema.Finite.check(Schema.makeFilter<number>(value => Number.isSafeInteger(value) && value >= 0
   ? undefined : { path: [], issue: "Expected a non-negative safe integer" }))
@@ -495,15 +482,7 @@ const BackgroundRadialGradientSchema = Schema.Struct({
 })
 const BackgroundImageValueSchema = Schema.Union([BackgroundLinearGradientSchema, BackgroundRadialGradientSchema])
 const BackgroundImageListSchema = Schema.Array(BackgroundImageValueSchema)
-const fontVariantValues = [
-  "small-caps", "oldstyle-nums", "lining-nums", "tabular-nums", "common-ligatures",
-  "no-common-ligatures", "discretionary-ligatures", "no-discretionary-ligatures", "historical-ligatures",
-  "no-historical-ligatures", "contextual", "no-contextual", "proportional-nums", "stylistic-one",
-  "stylistic-two", "stylistic-three", "stylistic-four", "stylistic-five", "stylistic-six",
-  "stylistic-seven", "stylistic-eight", "stylistic-nine", "stylistic-ten", "stylistic-eleven",
-  "stylistic-twelve", "stylistic-thirteen", "stylistic-fourteen", "stylistic-fifteen", "stylistic-sixteen",
-  "stylistic-seventeen", "stylistic-eighteen", "stylistic-nineteen", "stylistic-twenty",
-] as const
+
 const FontVariantValueSchema = Schema.Array(Schema.Literals(fontVariantValues))
 const StructuredValueSchema = Schema.Union([
   ShadowOffsetValueSchema,
@@ -1425,26 +1404,7 @@ function isFontVariant(value: unknown): value is FontVariant {
 }
 
 function isStructuredValueForProperty(property: StructuredNativeProperty, value: unknown): boolean {
-  if (property === "boxShadow") return isBoxShadowValue(value)
-  if (property === "filter") return isFilterValue(value)
-  if (property === "experimental_backgroundRepeat") return isBackgroundRepeatList(value)
-  if (property === "experimental_backgroundSize") return isBackgroundSizeList(value)
-  if (property === "experimental_backgroundPosition") return isBackgroundPositionList(value)
-  if (property === "experimental_backgroundImage") return isBackgroundImageList(value)
-  if (property === "transform") return isTransformValue(value)
-  if (property === "shadowOffset" || property === "textShadowOffset") {
-    return typeof value === "object" && value !== null && !Array.isArray(value) &&
-      Object.keys(value).length === 2 && "width" in value && "height" in value &&
-      typeof value.width === "number" && Number.isFinite(value.width) &&
-      typeof value.height === "number" && Number.isFinite(value.height)
-  }
-  if (property === "transformOrigin") {
-    return inspectDenseArray(value, [2, 3])?.every(isTransformOriginEntry) === true
-  }
-  if (property === "transformMatrix") {
-    return inspectDenseArray(value, [16])?.every(isFiniteNumber) === true
-  }
-  return inspectDenseArray(value)?.every(isFontVariant) === true
+  return isNativeStructuredValue(property,value)
 }
 
 function isBoxShadowValue(value: unknown): value is BoxShadowValue {

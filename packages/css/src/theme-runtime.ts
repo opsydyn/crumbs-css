@@ -186,8 +186,7 @@ export {
   NativeThemeTokenReferenceType,
 } from "./theme-token"
 
-type NativeThemeContextValue = NativeTheme<Record<string, unknown>>
-type NativeThemeStore = ThemeStore<NativeThemeContextValue>
+import {ThemeStoreContext,type NativeThemeContextValue,type NativeThemeStore} from "./runtime/theme-context"
 type ThemeProviderProps<TContract extends Record<string, unknown>> = {
   readonly children?: ReactNode
   readonly theme: NativeTheme<TContract>
@@ -199,10 +198,6 @@ type TokenThemeScopeState = {
   readonly store: NativeThemeStore
 }
 type TokenThemeContextValue = ReadonlyMap<string, TokenThemeScopeState>
-const ThemeStoreContext: Context<NativeThemeStore | null> = sharedRegistry(
-  Symbol.for("crumbs.css.theme-store-context.v1"),
-  () => createContext<NativeThemeStore | null>(null),
-)
 const TokenThemeContext: Context<TokenThemeContextValue | null> = sharedRegistry(
   Symbol.for("crumbs.css.token-theme-context.v2"),
   () => createContext<TokenThemeContextValue | null>(null),
@@ -463,6 +458,7 @@ export function resolveThemeStyles<TStyles extends Readonly<Record<string, unkno
   styles: TStyles,
   theme: NativeTheme<Record<string, unknown>>,
 ): ResolvedThemeStyles<TStyles> {
+  assertNoLocalStylePlan(styles)
   const cached = getCachedResolution(theme, styles, "styles")
   if (cached.hit) return cached.value as ResolvedThemeStyles<TStyles>
 
@@ -647,6 +643,7 @@ export function resolveThemeTokens<TInput>(
   style: TInput,
   theme: NativeTheme<Record<string, unknown>>,
 ): ResolvedNativeStyleInput<TInput> | undefined {
+  assertNoLocalStylePlan(style)
   const cached = getCachedResolution(theme, style, "tokens")
   if (cached.hit) return cached.value as ResolvedNativeStyleInput<TInput> | undefined
 
@@ -672,6 +669,7 @@ export function resolveThemeTokens<TInput>(
   let resolved: Record<string, unknown> | undefined = Array.isArray(style) ? {} : undefined
   for (const [index, entry] of entries.entries()) {
     const [key, value] = entry
+    assertNoLocalStylePlan(value)
     if (isThemeTokenReferenceCandidate(value)) {
       assertThemeTokenReference(value, key)
       if (resolved === undefined) {
@@ -690,7 +688,29 @@ export function resolveThemeTokens<TInput>(
   return result
 }
 
+const localPlanFreeImmutableGraphs = new WeakSet<object>()
+function assertNoLocalStylePlan(value: unknown): void {
+  if (typeof value !== "object" || value === null || localPlanFreeImmutableGraphs.has(value)) return
+  const pending: object[] = [value], seen = new Set<object>()
+  let immutable = true
+  while (pending.length) {
+    const current = pending.pop()!
+    if (seen.has(current) || localPlanFreeImmutableGraphs.has(current)) continue
+    seen.add(current)
+    if (Object.getOwnPropertyDescriptor(current, "$$type")?.value === "crumbs.css.local-style-plan") {
+      throw new Error(formatNativeStylesDiagnostic(NativeStylesDiagnosticCode.LocalStylePlanRequired, "Local style plans require resolveAssignedStyles or useAssignedStyles from @opsydyn/crumbs-css/theme/vars."))
+    }
+    immutable &&= Object.isFrozen(current)
+    for (const descriptor of Object.values(Object.getOwnPropertyDescriptors(current))) {
+      if (!("value" in descriptor)) { immutable = false; continue }
+      if (typeof descriptor.value === "object" && descriptor.value !== null) pending.push(descriptor.value)
+    }
+  }
+  if (immutable) localPlanFreeImmutableGraphs.add(value)
+}
+
 function flattenStyle(style: unknown): Record<string, unknown> | undefined {
+  assertNoLocalStylePlan(style)
   if (style === null || style === undefined || style === false) return undefined
   if (Array.isArray(style)) {
     const flattened = style.flatMap((item) => {

@@ -1,3 +1,6 @@
+import {copyCompilerLocalData} from "./compiler/local-data"
+import {localOperandCandidate,NativeVarAssignmentsType} from "./local-vars/model"
+import {admitLocalOperand,admitVarAssignments} from "./local-vars/admission"
 import {NativeStylesDiagnosticCode} from "./diagnostics"
 import {NativeStylesCompatibilityError} from "./native-compatibility"
 import {isNativeStyleMap, NativeRecipeClassSymbol, NativeStyleMapSymbol, NativeStyleMapType} from "./native-style-map"
@@ -43,6 +46,8 @@ export function captureNativeExports(exports: Record<string, unknown>, filePath:
       if (!descriptor.enumerable && !(Array.isArray(value) && key === "length")) reject(`${path}.${key}`, "non-enumerable data")
     }
     if (Array.isArray(value) && (Object.keys(value).length !== value.length || Object.keys(value).some((key, index) => key !== String(index)))) reject(path, "sparse array or extra array fields")
+    if (Object.getOwnPropertyDescriptor(value,"$$type")?.value === NativeVarAssignmentsType) return admitVarAssignments(copyCompilerLocalData(value))
+    if (localOperandCandidate(value)) return admitLocalOperand(copyCompilerLocalData(value))
     active.add(value)
     try {
       if (Object.getOwnPropertyDescriptor(value, NativeRecipeClassSymbol)?.value === true) {

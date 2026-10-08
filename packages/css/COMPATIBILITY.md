@@ -881,3 +881,9 @@ function Button({ disabled = false }) {
 
 Recipe merge order is stable: base, selected variants in author-defined variant
 order, then matching compound variants in array order.
+
+## Local variable capability v1 (M11.1)
+
+The additive `/theme/vars` entry supplies assignment/resolution/Hook APIs for the four local payloads at version 1. Only a matching compiler that emits local plans and a runtime exposing this entry are compatible. Existing alpha artifacts can share the package version while lacking this feature; use the tarball SHA and installed entry/artifact hashes in `docs/evidence/2026-10-08-m11-1-local-vars/host/qualification.json`. No release-wide support claim follows from a working-tree artifact.
+
+Primitive scalar local operands preserve view/text/image restrictions and native composition. Structured values must remain static; recipe/Sprinkles/condition/expression placement is rejected. Existing payload versions and exports remain unchanged. Literal and populated local branches need no provider; reached public typed token terminals use the owning existing provider/scope. Mutable decoded local data is revalidated and unsupported versions fail closed. Native emulator/Simulator acceptance, host React evidence, export inventory and physical-device acceptance are recorded separately.

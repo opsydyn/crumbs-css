@@ -1,3 +1,5 @@
+import type {AnyLocalVar} from "../local-vars/model"
+import {createLocalVarsMetadata,type NativeLocalVarsMetadata} from "./local-vars-metadata"
 import {
   getThemeTokenPublicId,
   isRegisteredThemeVar,
@@ -18,6 +20,7 @@ export type ManifestSidecarPropertyOrigin = {
 }
 
 export type CompilerManifestSidecar = {
+  readonly localVariables?: Omit<NativeLocalVarsMetadata,"$$type"> & {readonly $$type:"crumbs.css.local-variable-dependencies";readonly moduleId:string;readonly sourceId:string}
   readonly module: ManifestModule
   readonly dependencies: ReadonlyArray<ManifestDependency>
   readonly capabilities: ReadonlyArray<ManifestCapability>
@@ -25,6 +28,7 @@ export type CompilerManifestSidecar = {
 }
 
 export type CaptureManifestSidecarInput = {
+  readonly localDefinitions?:readonly AnyLocalVar[]
   readonly packageOwner: string
   readonly sourceId: string
   readonly exportMap: ReadonlyMap<string, unknown>
@@ -108,7 +112,9 @@ export function captureManifestSidecar(input: CaptureManifestSidecarInput): Comp
     }
   }
 
+  const localVariables=createLocalVarsMetadata(input.resolvedClassStyles as ReadonlyMap<string,Record<string,unknown>>,input.exportMap,input.localDefinitions)
   return Object.freeze({
+    ...(localVariables ? {localVariables:Object.freeze({...localVariables,$$type:"crumbs.css.local-variable-dependencies" as const,moduleId,sourceId:input.sourceId})} : {}),
     module: Object.freeze({
       id: moduleId,
       origin: Object.freeze({ path: normalizeSourcePath(input.sourceId) }),
