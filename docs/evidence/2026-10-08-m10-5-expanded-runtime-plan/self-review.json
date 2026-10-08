@@ -1,0 +1,28 @@
+{
+  "scope": "documentation and plan review only",
+  "status": "self-reviewed-inline-no-subagent",
+  "specVerificationCoverage": {
+    "cap_and_zero_growth": "Task 4",
+    "three_builds_raw_hashes_and_loads": "Tasks 4 and 6",
+    "timings_closed_set": "Tasks 2, 3, 5 and 6",
+    "policy_registry_source_artifact_replay": "Tasks 4, 5 and 6",
+    "synthetic_not_product": "Tasks 5 and 6",
+    "full_built_API_types_properties": "Tasks 1, 2 and 3",
+    "immutable_history_and_17_unchanged": "Tasks 4 and 6",
+    "complete_admission_or_rollback": "Task 6"
+  },
+  "reviewFocusCoverage": [
+    "Tasks 1\u20132: built callable shapes",
+    "Tasks 1\u20132: chunk cycles, evaluation order and binding identity",
+    "Tasks 3 and 6: resolution alternatives and persisted cache",
+    "Task 4: build independence, hash equality and zero growth",
+    "Tasks 5\u20136: replay/identity checks"
+  ],
+  "ordering": "Task 4 implements admission tooling; Task 6 performs three builds and constructs baselines after Task 5 settles verifiers, before public/software/full-host qualification.",
+  "dependencyBoundary": "Adopts previous approved plan Tasks 3\u20134 only; rejected runtime implementation is not reused.",
+  "unprovenBenefits": [
+    "chunk fusion meets all four startup ceilings",
+    "complete proof/memo path meets full warm-transform ceiling"
+  ],
+  "shippingChange": "none"
+}

@@ -18,3 +18,5 @@ ADRs record consequential architectural choices, their alternatives, and their v
 - Keep future plans outside `src/content/docs/`, whose pages describe the shipped consumer API.
 
 The [assessment](../assessments/2026-09-06-design-system-assessment.md) preserves the evidence behind the first decision. Neither proposed APIs nor unchecked roadmap items are current package guarantees.
+
+The accepted M10.5 consumer-evidence ADR includes a [2026-10-08 conditional expanded-runtime scope amendment](anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md#2026-10-08--accepted-conditional-expanded-runtime-byte-scope). Four caps are approved for later complete admission; current registry/enforcement stay active while the implementation plan awaits review.

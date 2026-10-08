@@ -3031,3 +3031,12 @@ The [proposal snapshot](evidence/2026-10-08-m10-5-budget-scope-proposal/README.m
 Activation belongs to one complete runtime/compiler/policy remediation batch: all **21 host rows pass, none incomplete**, and all public/non-physical acceptance passes. No policy-only or minification-only production slice is admitted; failure restores the entire candidate, registry and gate. This drafting slice changes documentation/evidence only. **M10.5 remains open and publication blocked under the current limits.** Physical-device and spoken-reader work stays deferred.
 
 Next recommended roadmap item: **M10.5 — review the four caps, zero-growth and conditional baseline rules in the written spec, then prepare one inline implementation plan for the complete remediation/policy batch. Spec approval permits planning, not immediate activation or implementation; the implementation plan still needs review.**
+
+
+### 2026-10-08 — M10.5 budget scope approved; complete inline plan prepared
+
+Alan P Currie approved the [expanded-runtime scope](superpowers/specs/2026-10-08-m10-5-expanded-runtime-budget-scope-design.md): four initial byte caps **39,000/39,000/96,000/99,000 B**, actual qualified baselines with zero future growth, seventeen unchanged host contracts, and conditional versioned fail-closed activation. Dated amendments preserve the governing ADR/release-gate history. The [approval packet](evidence/2026-10-08-m10-5-expanded-runtime-plan/README.md) freezes the exact proposal/spec/reference identities; it is planning evidence, not product qualification.
+
+The [single complete inline implementation plan](superpowers/plans/2026-10-08-m10-5-expanded-runtime-remediation.md) tests name-preserving minification/shared-helper chunk layout, then the previously unimplemented compiled-text proof/memo, three-build baseline reproducibility and policy/report/manifest enforcement. It requires all 21 host comparisons plus complete software/public API qualification before one production commit. Any failed candidate is removed in full. No shipping source, registry, limit or active release gate changes in this documentation slice; current failures remain unresolved.
+
+**Next: M10.5 — review this plan, then execute the whole batch inline.** Runtime startup and warm-transform benefit are unproven until measured. Physical-device/spoken-reader work stays deferred; dedicated hosted-runner registration remains a separate prerequisite. No push/publication.

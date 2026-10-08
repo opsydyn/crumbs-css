@@ -1,6 +1,6 @@
 # M10.5 expanded-runtime budget-scope decision proposal
 
-- **Status:** Proposed; numerical policy and implementation are not approved.
+- **Status:** Scope approved on 2026-10-08; implementation awaits written plan review and complete conditional qualification.
 - **Date:** 2026-10-08
 - **Roadmap:** [M10.5](../../roadmap.md)
 - **Reviewed source:** `ecbfc4481bf053bec23fe3f7d3b51daf80c493cc`
@@ -111,3 +111,11 @@ If any acceptance condition fails, remove the entire candidate, including provis
 Review this spec's **four caps, zero-growth rule, conditional baseline admission and versioned fail-closed activation**. Approval of this written proposal changes no active file by itself. It permits preparing one inline implementation plan; implementation still requires that plan's review. Until the complete batch qualifies, the current limits remain binding and publication blocked.
 
 **Next: M10.5 — review this budget-scope spec, then prepare the single complete remediation and policy implementation plan.** Keep the five timing failures and all non-physical qualification in that batch; do not treat policy approval as M10.5 completion.
+
+## 2026-10-08 — accepted scope; implementation plan awaiting review
+
+Alan P Currie explicitly approved the committed proposal in this session. Acceptance covers the four caps (39,000/39,000/96,000/99,000 B), zero post-admission growth, deterministic actual-baseline admission, seventeen unchanged host contracts and versioned fail-closed enforcement. It authorises preparing the [single inline implementation plan](../plans/2026-10-08-m10-5-expanded-runtime-remediation.md); it does not admit a baseline or qualify production code. Existing registry/limits remain active until the whole candidate passes.
+
+The [approval receipt](../../evidence/2026-10-08-m10-5-expanded-runtime-plan/approval.json) binds the exact reviewed proposal/spec and preserves their original reference files. Proposed wording above records the original decision request; this dated acceptance records its outcome. The accepted Expo ADR and release-gate design receive dated conditional amendments; the wider compiler ADR stays proposed.
+
+**Next: M10.5 — review the complete implementation plan, then execute inline as one production batch.** Physical-device and spoken-reader work remain deferred; no push/publication.

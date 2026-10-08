@@ -62,3 +62,12 @@ Workflow validation must show that the qualification job has no npm secret or OI
 The workflow requires a registered, dedicated M4 Pro runner that satisfies the exact host policy. Until it is available, the new gate should remain visibly queued or fail with a clear missing-runner condition; it must never silently substitute a different environment. The current nine approved failures will also block any release until remediated under the unchanged limits.
 
 After review and approval of this design, the next slice is **M10.5 — implement the fail-closed release-check validator and M4 Pro-to-Ubuntu qualification artifact workflow**. Keep runner registration as an explicit infrastructure prerequisite and keep physical-device work deferred.
+
+
+## 2026-10-08 — accepted conditional byte-policy amendment
+
+Explicit approval of the [expanded-runtime scope spec](2026-10-08-m10-5-expanded-runtime-budget-scope-design.md) conditionally revises four byte contracts only: core ESM/CJS initial caps 39,000/39,000 B, compatibility ESM/CJS 96,000/99,000 B. Actual fully qualified baseline bytes govern zero future growth; the caps do not create post-admission headroom. Seventeen other contracts, every timing ceiling, exact matched runner and the closed 21-row pass gate remain unchanged. Original text above records the earlier release-gate decision and continues governing until complete activation.
+
+The [single inline implementation plan](../plans/2026-10-08-m10-5-expanded-runtime-remediation.md) adds policy format 1, comparison format 3, manifest format 2, and the same required policy-ID/policy-SHA/registry-SHA binding to reports, before/after input identities and handoff manifests. Both macOS and Ubuntu verify it alongside current raw/source/artifact/tarball checks. Old comparison/manifest formats remain historical evidence and cannot qualify the new policy. Tarball-only publication and the credential boundary remain unchanged.
+
+Approval admits no production candidate or new baseline. Written plan review and complete API/type/property/packed/software/host qualification precede one final implementation commit. A failed candidate restores all old enforcement and registry files. The [approval receipt](../../evidence/2026-10-08-m10-5-expanded-runtime-plan/approval.json) binds the original decision snapshot; M10.5 remains open and no hosted success, physical acceptance, push or publication is claimed.
