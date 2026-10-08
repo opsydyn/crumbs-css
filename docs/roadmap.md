@@ -2969,3 +2969,11 @@ The [proposed consolidated design](superpowers/specs/2026-10-08-m10-5-consolidat
 The latest matched retained report remains **12 pass, nine fail, zero incomplete**, measured before the amended release-gate commit; it does not qualify current HEAD. All APIs, 21 host selectors, limits and release enforcement remain unchanged. There is no production implementation in this planning checkpoint. Physical-device work remains deferred.
 
 Next recommended roadmap item: **M10.5 — review the consolidated architecture design, then prepare one inline implementation plan and execute the complete remediation batch. Admit production changes only after all 21 host rows and behavioural checks pass; otherwise retain one evidence-only result and roll back the complete candidate.**
+
+### 2026-10-08 — M10.5 consolidated remediation plan
+
+The consolidated design is approved. The [implementation plan](superpowers/plans/2026-10-08-m10-5-consolidated-host-remediation.md) preserves inline execution and one final implementation commit. It fixes a conservative compiler reuse grammar, requires complete bundled-input and resolution witnesses, preserves proxy/error semantics, and screens runtime graph sizes before further compiler/native qualification. Unsupported resolver forms retain fresh compilation; no fixture-specific admission is permitted.
+
+Plan review is pending; no production code has changed. The nine host failures remain unresolved and publication remains blocked. Physical-device and spoken-reader work remain deferred.
+
+Next recommended roadmap item: **M10.5 — review the consolidated plan, then execute its complete inline remediation batch. Admit only a fully passing candidate, or retain one evidence-only rejection and restore shipping source.**

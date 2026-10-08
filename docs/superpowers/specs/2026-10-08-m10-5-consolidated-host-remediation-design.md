@@ -1,6 +1,6 @@
 # M10.5 Consolidated Host-Budget Remediation Design
 
-- **Status:** Proposed; scope approved, concrete architecture awaiting review
+- **Status:** Approved by Alan Currie in this session on 2026-10-08
 - **Date:** 2026-10-08
 - **Roadmap:** [M10.5](../../roadmap.md)
 - **Base:** `c5206d1` — host-budget release gate
