@@ -21,11 +21,15 @@ if (!reportDirectory) {
       expectedRevision,
       expectedArtifacts: collectReleaseHostBudgetArtifactInventory(repositoryRoot),
     })
-    console.log(result.qualified
-      ? `Release host-budget report qualifies for ${result.sourceRevision}`
-      : `Release host-budget report is blocked for ${result.sourceRevision ?? "unknown revision"}`)
+    console.log(result.releasePolicyQualified
+      ? `Release host-budget policy admits ${result.sourceRevision}; releasePolicyQualified=true`
+      : `Release host-budget policy is blocked for ${result.sourceRevision ?? "unknown revision"}; releasePolicyQualified=false`)
+    for (const [label, summary] of [["Blocking", result.blocking], ["Advisory", result.advisory]] as const) {
+      console.log(`${label}: ${summary.passIds.length} pass, ${summary.failIds.length} fail, ${summary.incompleteIds.length} incomplete`)
+    }
+    for (const id of result.advisory.failIds) console.log(`Advisory failure: ${id} (numerical budget exceeded)`)
     for (const blocker of result.blockers) console.error(`- ${blocker}`)
-    if (!result.qualified) process.exitCode = 1
+    if (!result.releasePolicyQualified) process.exitCode = 1
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error))
     process.exitCode = 1

@@ -7,6 +7,8 @@ import { join, resolve } from "node:path"
 import { captureGuaranteesSourceIdentity } from "../../../scripts/guarantees-matrix/source-identity"
 import { verifyReleaseHostBudgetReport } from "../../../scripts/release-host-budget-report"
 
+import { captureHostBudgetPolicyBinding, evaluateReleaseHostBudgetRows, loadHostBudgetPolicy } from "../../../scripts/release-host-budget-policy"
+
 const repositoryRoot = resolve(import.meta.dir, "../../..")
 const retainedReportDirectory = resolve(
   repositoryRoot,
@@ -58,9 +60,14 @@ function copyRetainedReport(normalizeIdentity = false): string {
   if (normalizeIdentity) {
     const comparison = readJson(join(root, "comparison.json"))
     comparison.sourceRevision = expectedRevision
+    comparison.formatVersion = 3
+    comparison.policy = captureHostBudgetPolicyBinding(repositoryRoot)
+    Object.assign(comparison, evaluateReleaseHostBudgetRows(comparison.metrics, loadHostBudgetPolicy(repositoryRoot)))
     writeJson(join(root, "comparison.json"), comparison)
 
     const identity = readJson(join(root, "input-identity.json"))
+    identity.policyBefore = captureHostBudgetPolicyBinding(repositoryRoot)
+    identity.policyAfter = identity.policyBefore
     identity.sourceBefore = currentSourceIdentity
     identity.sourceAfter = currentSourceIdentity
     identity.artifactsBefore = currentArtifacts
@@ -78,7 +85,7 @@ describe("M10.5 release host-budget report verification", () => {
       repositoryRoot,
       expectedRevision,
     })
-    expect(missing.qualified).toBe(false)
+    expect(missing.releasePolicyQualified).toBe(false)
     expect(missing.blockers.join("\n")).toMatch(/comparison\.json/i)
 
     const incompleteDirectory = copyRetainedReport(true)
@@ -89,7 +96,7 @@ describe("M10.5 release host-budget report verification", () => {
       expectedRevision,
       expectedArtifacts: currentArtifacts,
     })
-    expect(incomplete.qualified).toBe(false)
+    expect(incomplete.releasePolicyQualified).toBe(false)
     expect(incomplete.blockers.join("\n")).toMatch(/editor\.json/i)
   })
 
@@ -101,10 +108,11 @@ describe("M10.5 release host-budget report verification", () => {
       expectedRevision: comparison.sourceRevision,
     })
 
-    expect(result.qualified).toBe(false)
+    expect(result.releasePolicyQualified).toBe(false)
     expect(result.sourceRevision).toBe(comparison.sourceRevision)
+    expect(result.blockers.join("\n")).toMatch(/formatVersion must be 3/)
     expect(result.blockers.join("\n")).not.toMatch(/stored metric rows differ from rederived rows/i)
-    for (const row of comparison.metrics.filter((metric: { result: string }) => metric.result !== "pass")) {
+    for (const row of comparison.metrics.filter((metric: { id: string; result: string }) => metric.result !== "pass" && !metric.id.startsWith("runtime-"))) {
       expect(result.blockers.join("\n")).toContain(row.id)
     }
     expect(comparison.metrics.filter((metric: { result: string }) => metric.result === "fail")).toHaveLength(9)
@@ -123,7 +131,7 @@ describe("M10.5 release host-budget report verification", () => {
       expectedRevision,
       expectedArtifacts: currentArtifacts,
     })
-    expect(result.qualified).toBe(false)
+    expect(result.releasePolicyQualified).toBe(false)
     expect(result.blockers.join("\n")).toMatch(/stored metric rows differ from rederived rows/i)
   })
 

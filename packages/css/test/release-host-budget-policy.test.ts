@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test"
-import { readFileSync } from "node:fs"
+import { cpSync, mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { tmpdir } from "node:os"
+import * as policyApi from "../../../scripts/release-host-budget-policy"
 import { resolve } from "node:path"
 import { budgetRegistryCodec } from "../bench/budget-contract"
 import {
@@ -40,6 +42,14 @@ function readRegistry() {
   return decoded.value
 }
 
+const advisoryIds = approvedContracts.filter(([id]) => id.startsWith("runtime-")).map(([id]) => id)
+const policy = {
+  formatVersion: 1,
+  policyId: "crumbs-host-budgets-2026-10-08-consumer-scope-v1",
+  registrySha256: "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+  metrics: approvedContracts.map(([id, selector]) => ({ id, selector, enforcement: advisoryIds.includes(id as any) ? "advisory" : "blocking" })),
+  baselineFiles: JSON.parse(readFileSync(resolve(repositoryRoot, "docs/evidence/2026-10-08-m10-5-consumer-policy-plan/baseline-files.json"), "utf8")),
+} as any
 const passingRows = approvedContracts.map(([id]) => ({ id, result: "pass" }))
 
 describe("M10.5 release host-budget policy", () => {
@@ -51,7 +61,7 @@ describe("M10.5 release host-budget policy", () => {
 
   it("matches the approved host rows in the decoded registry", () => {
     const registry = readRegistry()
-    expect(verifyReleaseHostBudgetRegistry(registry)).toEqual([])
+    expect(verifyReleaseHostBudgetRegistry(registry, policy)).toEqual([])
     const approvedRegistryRows = registry.metrics
       .flatMap(metric => metric.baseline.status === "recorded" && metric.threshold.status === "approved"
         ? [{ id: metric.id, selector: metric.baseline.selector }]
@@ -63,29 +73,26 @@ describe("M10.5 release host-budget policy", () => {
 
   it("qualifies the 21 passing host rows without using whole-registry readiness", () => {
     const comparison = { performanceQualified: false, metrics: passingRows }
-    expect(evaluateReleaseHostBudgetRows(comparison.metrics)).toEqual({
-      qualified: true,
-      blockers: [],
-    })
+    expect(evaluateReleaseHostBudgetRows(comparison.metrics, policy).releasePolicyQualified).toBe(true)
   })
 
   it("names missing, duplicate, and unexpected rows as blockers", () => {
-    const missing = evaluateReleaseHostBudgetRows(passingRows.slice(1))
-    expect(missing.qualified).toBe(false)
+    const missing = evaluateReleaseHostBudgetRows(passingRows.slice(1), policy)
+    expect(missing.releasePolicyQualified).toBe(false)
     expect(missing.blockers.join("\n")).toContain(approvedContracts[0]![0])
 
     const duplicate = evaluateReleaseHostBudgetRows([
       ...passingRows,
       passingRows[0]!,
-    ])
-    expect(duplicate.qualified).toBe(false)
+    ], policy)
+    expect(duplicate.releasePolicyQualified).toBe(false)
     expect(duplicate.blockers.join("\n")).toMatch(/duplicate/i)
 
     const extra = evaluateReleaseHostBudgetRows([
       ...passingRows,
       { id: "unapproved-host-row", result: "pass" },
-    ])
-    expect(extra.qualified).toBe(false)
+    ], policy)
+    expect(extra.releasePolicyQualified).toBe(false)
     expect(extra.blockers.join("\n")).toContain("unapproved-host-row")
   })
 
@@ -95,8 +102,8 @@ describe("M10.5 release host-budget policy", () => {
       : row.id === "incremental-rebuild"
         ? { ...row, result: "incomplete-environment-mismatch" }
         : row)
-    const result = evaluateReleaseHostBudgetRows(rows)
-    expect(result.qualified).toBe(false)
+    const result = evaluateReleaseHostBudgetRows(rows, policy)
+    expect(result.releasePolicyQualified).toBe(false)
     expect(result.blockers.join("\n")).toContain("warm-transform-ms")
     expect(result.blockers.join("\n")).toContain("fail")
     expect(result.blockers.join("\n")).toContain("incremental-rebuild")
@@ -112,8 +119,71 @@ describe("M10.5 release host-budget policy", () => {
     copiedMetric.id = "unapproved-host-row"
     reclassified.metrics.push(copiedMetric)
 
-    const blockers = verifyReleaseHostBudgetRegistry(reclassified).join("\n")
+    const blockers = verifyReleaseHostBudgetRegistry(reclassified, policy).join("\n")
     expect(blockers).toMatch(/warm-transform-ms/i)
     expect(blockers).toMatch(/unapproved-host-row/i)
+  })
+})
+
+describe("approved consumer policy enforcement", () => {
+  it("retains all ten advisory failures while admitting eleven passing blocking rows", () => {
+    expect(advisoryIds).toHaveLength(10)
+    const result = evaluateReleaseHostBudgetRows(passingRows.map(row => ({ ...row, result: advisoryIds.includes(row.id as any) ? "fail" : "pass" })), policy)
+    expect(result.releasePolicyQualified).toBe(true)
+    expect(result.blockers).toEqual([])
+    expect(result.blocking.passIds).toHaveLength(11)
+    expect(result.advisory.failIds).toEqual(advisoryIds)
+  })
+  it("rejects each failed blocking row and each missing or duplicated contract", () => {
+    for (const row of passingRows) {
+      if (!advisoryIds.includes(row.id as any)) expect(evaluateReleaseHostBudgetRows(passingRows.map(other => other.id === row.id ? { ...other, result: "fail" } : other), policy).releasePolicyQualified).toBe(false)
+      expect(evaluateReleaseHostBudgetRows(passingRows.filter(other => other !== row), policy).releasePolicyQualified).toBe(false)
+      expect(evaluateReleaseHostBudgetRows([...passingRows, row], policy).releasePolicyQualified).toBe(false)
+    }
+  })
+  it("rejects every incomplete or unsupported advisory status", () => {
+    for (const id of advisoryIds) for (const status of ["incomplete-environment-mismatch", "incomplete-measurement", "unknown", "", null]) {
+      const result = evaluateReleaseHostBudgetRows(passingRows.map(row => row.id === id ? { ...row, result: status as any } : row), policy)
+      expect(result.releasePolicyQualified).toBe(false)
+      expect(result.advisory.incompleteIds).toContain(id)
+    }
+  })
+  it("pins roles, selectors, registry and evidence inventory independently of caller data", () => {
+    const mutations = [
+      (p: any) => { p.metrics[4].enforcement = "advisory" },
+      (p: any) => { p.metrics[0].enforcement = "blocking" },
+      (p: any) => { p.metrics[0].selector = "other" },
+      (p: any) => { p.metrics.push(p.metrics[0]) },
+      (p: any) => { p.registrySha256 = "0".repeat(64) },
+      (p: any) => { p.baselineFiles[0].path = "../elsewhere" },
+      (p: any) => { p.baselineFiles[0].sha256 = "0".repeat(64) },
+      (p: any) => { p.policyId = "other" },
+    ]
+    for (const mutate of mutations) {
+      const altered = structuredClone(policy)
+      mutate(altered)
+      expect(evaluateReleaseHostBudgetRows(passingRows, altered).releasePolicyQualified).toBe(false)
+    }
+  })
+  it("rejects missing and drifting bindings, and baseline byte edits even with unchanged medians", () => {
+    const api = policyApi as any
+    const binding = api.captureHostBudgetPolicyBinding(repositoryRoot)
+    expect(api.verifyHostBudgetPolicyBinding(binding, repositoryRoot)).toEqual([])
+    for (const bad of [undefined, {}, { ...binding, policyId: "other" }, { ...binding, policySha256: "0".repeat(64) }, { ...binding, registrySha256: "0".repeat(64) }]) expect(api.verifyHostBudgetPolicyBinding(bad, repositoryRoot).length).toBeGreaterThan(0)
+    const root = mkdtempSync(resolve(tmpdir(), "crumbs-policy-"))
+    try {
+      for (const path of ["scripts/release-host-budget-policy.json", "packages/css/bench/budgets.json", ...policy.baselineFiles.map((f: any) => f.path)]) {
+        mkdirSync(resolve(root, path, ".."), { recursive: true })
+        cpSync(resolve(repositoryRoot, path), resolve(root, path))
+      }
+      expect(api.captureHostBudgetPolicyBinding(root)).toEqual(binding)
+      const path = resolve(root, policy.baselineFiles[0].path)
+      writeFileSync(path, readFileSync(path, "utf8") + "\n")
+      expect(() => api.loadHostBudgetPolicy(root)).toThrow(/baseline|evidence/i)
+      const changed = structuredClone(policy)
+      changed.metrics[4].enforcement = "advisory"
+      writeFileSync(resolve(root, "scripts/release-host-budget-policy.json"), JSON.stringify(changed))
+      expect(() => api.loadHostBudgetPolicy(root)).toThrow(/policy|role/i)
+    } finally { rmSync(root, { recursive: true, force: true }) }
   })
 })

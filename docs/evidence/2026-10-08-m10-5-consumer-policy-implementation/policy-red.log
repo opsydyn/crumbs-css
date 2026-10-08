@@ -1,0 +1,119 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/release-host-budget-policy.test.ts:
+(pass) M10.5 release host-budget policy > pins the exact 21 reviewed host IDs to their approved selectors [0.04ms]
+(pass) M10.5 release host-budget policy > matches the approved host rows in the decoded registry [16.11ms]
+71 |       .toEqual(approvedRegistryRows)
+72 |   })
+73 | 
+74 |   it("qualifies the 21 passing host rows without using whole-registry readiness", () => {
+75 |     const comparison = { performanceQualified: false, metrics: passingRows }
+76 |     expect(evaluateReleaseHostBudgetRows(comparison.metrics, policy).releasePolicyQualified).toBe(true)
+                                                                                                  ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:76:94)
+(fail) M10.5 release host-budget policy > qualifies the 21 passing host rows without using whole-registry readiness [0.19ms]
+76 |     expect(evaluateReleaseHostBudgetRows(comparison.metrics, policy).releasePolicyQualified).toBe(true)
+77 |   })
+78 | 
+79 |   it("names missing, duplicate, and unexpected rows as blockers", () => {
+80 |     const missing = evaluateReleaseHostBudgetRows(passingRows.slice(1), policy)
+81 |     expect(missing.releasePolicyQualified).toBe(false)
+                                                ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:81:44)
+(fail) M10.5 release host-budget policy > names missing, duplicate, and unexpected rows as blockers [0.07ms]
+101 |       ? { ...row, result: "fail" }
+102 |       : row.id === "incremental-rebuild"
+103 |         ? { ...row, result: "incomplete-environment-mismatch" }
+104 |         : row)
+105 |     const result = evaluateReleaseHostBudgetRows(rows, policy)
+106 |     expect(result.releasePolicyQualified).toBe(false)
+                                                ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:106:43)
+(fail) M10.5 release host-budget policy > names every failed or incomplete row in blockers [0.05ms]
+(pass) M10.5 release host-budget policy > rejects a changed selector, non-approved threshold, or new approved host row [1.08ms]
+127 | 
+128 | describe("approved consumer policy enforcement", () => {
+129 |   it("retains all ten advisory failures while admitting eleven passing blocking rows", () => {
+130 |     expect(advisoryIds).toHaveLength(10)
+131 |     const result = evaluateReleaseHostBudgetRows(passingRows.map(row => ({ ...row, result: advisoryIds.includes(row.id as any) ? "fail" : "pass" })), policy)
+132 |     expect(result.releasePolicyQualified).toBe(true)
+                                                ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:132:43)
+(fail) approved consumer policy enforcement > retains all ten advisory failures while admitting eleven passing blocking rows [0.13ms]
+135 |     expect(result.advisory.failIds).toEqual(advisoryIds)
+136 |   })
+137 |   it("rejects each failed blocking row and each missing or duplicated contract", () => {
+138 |     for (const row of passingRows) {
+139 |       if (!advisoryIds.includes(row.id as any)) expect(evaluateReleaseHostBudgetRows(passingRows.map(other => other.id === row.id ? { ...other, result: "fail" } : other), policy).releasePolicyQualified).toBe(false)
+140 |       expect(evaluateReleaseHostBudgetRows(passingRows.filter(other => other !== row), policy).releasePolicyQualified).toBe(false)
+                                                                                                                             ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:140:120)
+(fail) approved consumer policy enforcement > rejects each failed blocking row and each missing or duplicated contract [0.12ms]
+142 |     }
+143 |   })
+144 |   it("rejects every incomplete or unsupported advisory status", () => {
+145 |     for (const id of advisoryIds) for (const status of ["incomplete-environment-mismatch", "incomplete-measurement", "unknown", "", null]) {
+146 |       const result = evaluateReleaseHostBudgetRows(passingRows.map(row => row.id === id ? { ...row, result: status as any } : row), policy)
+147 |       expect(result.releasePolicyQualified).toBe(false)
+                                                  ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:147:45)
+(fail) approved consumer policy enforcement > rejects every incomplete or unsupported advisory status [0.12ms]
+160 |       (p: any) => { p.policyId = "other" },
+161 |     ]
+162 |     for (const mutate of mutations) {
+163 |       const altered = structuredClone(policy)
+164 |       mutate(altered)
+165 |       expect(evaluateReleaseHostBudgetRows(passingRows, altered).releasePolicyQualified).toBe(false)
+                                                                                               ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:165:90)
+(fail) approved consumer policy enforcement > pins roles, selectors, registry and evidence inventory independently of caller data [0.09ms]
+165 |       expect(evaluateReleaseHostBudgetRows(passingRows, altered).releasePolicyQualified).toBe(false)
+166 |     }
+167 |   })
+168 |   it("rejects missing and drifting bindings, and baseline byte edits even with unchanged medians", () => {
+169 |     const api = policyApi as any
+170 |     const binding = api.captureHostBudgetPolicyBinding(repositoryRoot)
+                              ^
+TypeError: api.captureHostBudgetPolicyBinding is not a function. (In 'api.captureHostBudgetPolicyBinding(repositoryRoot)', 'api.captureHostBudgetPolicyBinding' is undefined)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-policy.test.ts:170:25)
+(fail) approved consumer policy enforcement > rejects missing and drifting bindings, and baseline byte edits even with unchanged medians [0.20ms]
+
+ 3 pass
+ 8 fail
+ 13 expect() calls
+Ran 11 tests across 1 file. [552.00ms]

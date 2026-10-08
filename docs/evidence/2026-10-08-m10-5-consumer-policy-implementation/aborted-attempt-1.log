@@ -1,0 +1,29 @@
+$ bun scripts/measure-current-host-budgets.ts "/private/tmp/crumbs-m105-consumer-policy/final-host"
+535 |   throw Error(`Metro measurement port ${port} is already in use`)
+536 | }
+537 | async function waitForMetro(port: number, child: ReturnType<typeof Bun.spawn>, logs: string[], timeout: number) {
+538 |   const started = performance.now()
+539 |   while (performance.now() - started < timeout) {
+540 |     if (child.exitCode !== null) throw Error(`Metro exited before readiness with code ${child.exitCode}: ${logs.join("").slice(-2000)}`)
+                                             ^
+error: Metro exited before readiness with code 1: Networking has been disabled
+Starting project at /private/tmp/crumbs-m105-consumer-policy/metro-scaffold/apps/playground
+Error: Cannot find module '/private/tmp/crumbs-m105-consumer-policy/metro-scaffold/apps/playground/node_modules/@opsydyn/crumbs-css/dist/metro-plugin.cjs'
+Error: Cannot find module '/private/tmp/crumbs-m105-consumer-policy/metro-scaffold/apps/playground/node_modules/@opsydyn/crumbs-css/dist/metro-plugin.cjs'
+    at createEsmNotFoundErr (node:internal/modules/cjs/loader:1513:15)
+    at finalizeEsmResolution (node:internal/modules/cjs/loader:1502:9)
+    at resolveExports (node:internal/modules/cjs/loader:685:14)
+    at Module._findPath (node:internal/modules/cjs/loader:752:31)
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1461:27)
+    at wrapResolveFilename (node:internal/modules/cjs/loader:1049:27)
+    at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1073:10)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1094:12)
+    at Module._load (node:internal/modules/cjs/loader:1262:25)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+
+      at waitForMetro (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:540:40)
+      at async startMetro (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:463:9)
+      at async measureMetroIncremental (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:282:31)
+
+Bun v1.4.2 (macOS arm64)
+error: script "measure:host-budgets" exited with code 1

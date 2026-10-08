@@ -1,3 +1,4 @@
+import { verifyHostBudgetPolicyBinding } from "./release-host-budget-policy"
 import { createHash } from "node:crypto"
 import { execFileSync } from "node:child_process"
 import {
@@ -124,13 +125,14 @@ export function createReleaseQualificationManifest(input: ReleaseQualificationIn
   if (reportVerification.sourceDigest !== input.sourceDigest) {
     throw Error("Host-budget report source digest does not match the requested release source digest")
   }
-  if (!reportVerification.qualified) {
+  if (!reportVerification.releasePolicyQualified) {
     throw Error(`Host-budget report is not release-qualified:\n${reportVerification.blockers.map(blocker => `- ${blocker}`).join("\n")}`)
   }
 
   const files = collectDirectoryFiles(reportDirectory)
   const manifest = decodeManifest({
-    formatVersion: 1,
+    formatVersion: 2,
+    policy: reportVerification.policy,
     releaseTag: input.releaseTag,
     sourceRevision: input.sourceRevision,
     sourceDigest: input.sourceDigest,
@@ -175,6 +177,7 @@ export function verifyReleaseQualificationBundle(options: Readonly<{
   if (manifest.releaseTag !== options.expectedTag) addBlocker(blockers, "Release tag does not match the qualified manifest")
   if (manifest.sourceRevision !== options.expectedRevision) addBlocker(blockers, "Release source revision or commit does not match the qualified manifest")
   blockers.push(...verifyReleaseHostEnvironment(manifest.host))
+  blockers.push(...verifyHostBudgetPolicyBinding(manifest.policy, repositoryRoot))
 
   const packageRoot = resolve(repositoryRoot, "packages/css")
   const packageIdentity = readPackageIdentity(packageRoot)
@@ -198,7 +201,8 @@ export function verifyReleaseQualificationBundle(options: Readonly<{
 
     const comparison = readJson(join(reportRoot, "comparison.json"))
     const identity = readJson(join(reportRoot, "input-identity.json"))
-    if (comparison.formatVersion !== 2 || comparison.sourceRevision !== manifest.sourceRevision) {
+    if (!isDeepStrictEqual(comparison.policy, manifest.policy)) addBlocker(blockers, "Report policy binding does not match the qualification manifest")
+    if (comparison.formatVersion !== 3 || comparison.sourceRevision !== manifest.sourceRevision) {
       addBlocker(blockers, "Report source revision or format does not match the manifest")
     }
     if (!identity.sourceBefore || !identity.sourceAfter ||
@@ -244,6 +248,7 @@ export function verifyReleaseQualificationBundle(options: Readonly<{
       expectedRevision: manifest.sourceRevision,
       expectedArtifacts: unpackedArtifacts,
       checkCurrentArtifacts: false,
+      artifactDirectory: join(unpackedPackageRoot, "dist"),
     })
     if (reportVerification.sourceDigest !== manifest.sourceDigest) {
       addBlocker(blockers, "Host-budget report source digest does not match the qualification manifest")

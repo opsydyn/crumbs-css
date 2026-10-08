@@ -166,6 +166,19 @@ describe("M10.5 release policy", () => {
     expect(publishJob.slice(0, publishJob.indexOf("      - name: Publish to npm"))).not.toMatch(/NPM_TOKEN|NODE_AUTH_TOKEN/)
   })
 
+  it("documents consumer enforcement without claiming every numerical budget passed", () => {
+    const protocol = readFileSync(resolve(repoRoot, "packages/css/bench/PERFORMANCE_BUDGETS.md"), "utf8")
+    expect(protocol).toContain("11 blocking")
+    expect(protocol).toContain("10 advisory")
+    expect(protocol).not.toContain("requires all 21 approved host-budget rows to pass")
+    expect(readme).toContain("11 blocking")
+    expect(readme).toContain("10 advisory")
+    expect(readme).toContain("releasePolicyQualified")
+    expect(readme).toContain("comparison format 3")
+    expect(readme).toContain("manifest format 2")
+    expect(readme).not.toContain("requires every approved row to pass")
+  })
+
   it("documents the host gate, current blockers, and device deferral", () => {
     for (const requiredPolicy of [
       "pre-1.0 alpha",

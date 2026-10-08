@@ -1,0 +1,134 @@
+{
+  "formatVersion": 1,
+  "policyId": "crumbs-host-budgets-2026-10-08-consumer-scope-v1",
+  "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+  "metrics": [
+    {
+      "id": "runtime-initialization-node22-esm",
+      "selector": "runtime-init.floor.esm.load-ms.median",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-initialization-node22-cjs",
+      "selector": "runtime-init.floor.cjs.load-ms.median",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-initialization-current-esm",
+      "selector": "runtime-init.current.esm.load-ms.median",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-initialization-current-cjs",
+      "selector": "runtime-init.current.cjs.load-ms.median",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "cold-transform-ms",
+      "selector": "benchmark.cold-transform.max-median-ms",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "warm-transform-ms",
+      "selector": "benchmark.warm-transform.max-median-ms",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "incremental-rebuild",
+      "selector": "metro-incremental.direct-css-edit-ms.median",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-tsc-wall-10000",
+      "selector": "editor.tsc.10000.wall-ms.median",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-tsgo-wall-10000",
+      "selector": "editor.tsgo.10000.wall-ms.median",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-tsc-memory-10000",
+      "selector": "editor.tsc.10000.memory-kib.median",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-tsgo-memory-10000",
+      "selector": "editor.tsgo.10000.memory-kib.median",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-tsc-instantiations-10000",
+      "selector": "editor.tsc.10000.instantiations",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-tsgo-instantiations-10000",
+      "selector": "editor.tsgo.10000.instantiations",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-first-completion-10000",
+      "selector": "editor.10000.first-completion-ms.median",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "editor-warm-completion-10000",
+      "selector": "editor.10000.warm-completion-ms.median",
+      "enforcement": "blocking"
+    },
+    {
+      "id": "runtime-theme-core-esm-graph-bytes",
+      "selector": "runtime.theme-core.esm.graph-bytes",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-theme-core-cjs-graph-bytes",
+      "selector": "runtime.theme-core.cjs.graph-bytes",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-tokens-esm-graph-bytes",
+      "selector": "runtime.tokens.esm.graph-bytes",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-tokens-cjs-graph-bytes",
+      "selector": "runtime.tokens.cjs.graph-bytes",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-theme-compatibility-esm-graph-bytes",
+      "selector": "runtime.theme-compatibility.esm.graph-bytes",
+      "enforcement": "advisory"
+    },
+    {
+      "id": "runtime-theme-compatibility-cjs-graph-bytes",
+      "selector": "runtime.theme-compatibility.cjs.graph-bytes",
+      "enforcement": "advisory"
+    }
+  ],
+  "baselineFiles": [
+    {
+      "path": "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json",
+      "sha256": "1a6103cadc966622bc193db61dcf657d40320914706b4bf3fe02e7a51ad40c7a"
+    },
+    {
+      "path": "docs/evidence/2026-09-15-editor-scale/raw.json",
+      "sha256": "c7a6e4f28fac639e21785b11ebbfbb60e973172f86f2f3df4e8dd65a01c8f62d"
+    },
+    {
+      "path": "docs/evidence/2026-09-15-runtime-initialization/baseline.json",
+      "sha256": "83ecef0a083031fc864705bdeea6b321ec676fc67c079034ac67d012b4dded7e"
+    },
+    {
+      "path": "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json",
+      "sha256": "b0b8bc07f19d6a0f446770b78116ae652a61215caa50cdb0c5d69d18ff63d3c4"
+    },
+    {
+      "path": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
+      "sha256": "a24cd238e72fa951b56ef2c89cb9fab09dafe392f78cad63a7ac46cdb674dda1"
+    }
+  ]
+}

@@ -1,0 +1,39 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/release-qualification-artifact.test.ts:
+(pass) M10.5 release qualification artifact > accepts a complete report and exact package tarball without running package lifecycle scripts [83.62ms]
+(pass) M10.5 release qualification artifact > accepts the qualified bundle from a publisher checkout that has no built dist directory [969.96ms]
+(pass) M10.5 release qualification artifact > refuses to seal a report whose blocking host measurements exceed an approved budget [48.38ms]
+(pass) M10.5 release qualification artifact > rejects consistently hashed failed measurements and forged comparison rows [178.64ms]
+(pass) M10.5 release qualification artifact > exposes the same verification through the publisher CLI [134.70ms]
+(pass) M10.5 release qualification artifact > requires the explicit Node floor when sealing through the create CLI [69.89ms]
+(pass) M10.5 release qualification artifact > rejects changed report files and tarball bytes [122.35ms]
+(pass) M10.5 release qualification artifact > rejects a tag, commit, or source digest that differs from the verified bundle [260.53ms]
+(pass) M10.5 release qualification artifact > rejects package name and version drift [179.29ms]
+(pass) consumer policy handoff integrity > uses comparison 3 and manifest 2 without erasing advisory numerical failures [32.98ms]
+(pass) consumer policy handoff integrity > rejects resealed summaries, rows, legacy formats and bindings at report and publisher boundaries [1979.32ms]
+(pass) consumer policy handoff integrity > rejects resealed missing or unmatched advisory raw evidence [717.93ms]
+(pass) consumer policy handoff integrity > rejects old manifests and a manifest binding different from the report [91.22ms]
+(pass) consumer policy CLI diagnostics > shows the valid advisory failures and a distinct release-policy status [90.40ms]
+(pass) checked-out approval pins at both job boundaries > rejects a changed policy role even after resealing every binding and source identity [696.17ms]
+(pass) checked-out approval pins at both job boundaries > rejects baseline whitespace edits with unchanged numerical medians [654.29ms]
+(pass) checked-out approval pins at both job boundaries > uses the transferred tarball when the publisher has a different local dist [619.49ms]
+586 |       mutate(raw)
+587 |       writeJson(join(report, file), raw)
+588 |       rederiveComparison(report)
+589 |       resealReportHashes(bundle)
+590 |       const checked = verifyReleaseHostBudgetReport({ reportDirectory: report, repositoryRoot, expectedRevision })
+591 |       expect(checked.releasePolicyQualified, file).toBe(false)
+                                                         ^
+error: runtime-graph.json
+
+Expected: false
+Received: true
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-qualification-artifact.test.ts:591:52)
+(fail) runtime raw evidence integrity at both release jobs > rejects rederived and resealed malformed runtime evidence [41.97ms]
+
+ 17 pass
+ 1 fail
+ 97 expect() calls
+Ran 18 tests across 1 file. [8.57s]

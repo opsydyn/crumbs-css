@@ -1,3 +1,4 @@
+import { captureHostBudgetPolicyBinding, evaluateReleaseHostBudgetRows, loadHostBudgetPolicy, verifyReleaseHostBudgetRegistry } from "./release-host-budget-policy"
 import { mkdir, readFile, writeFile } from "node:fs/promises"
 import { join, resolve } from "node:path"
 import {
@@ -25,10 +26,12 @@ const floorNode = process.env.CRUMBS_AUDIT_NODE_FLOOR
 if (!floorNode) throw Error("CRUMBS_AUDIT_NODE_FLOOR is required")
 await mkdir(output, { recursive: true })
 
+const policyBefore = captureHostBudgetPolicyBinding(repoRoot)
+const policy = loadHostBudgetPolicy(repoRoot)
 const sourceBefore = captureGuaranteesSourceIdentity(repoRoot)
 function artifactIdentity(){ const root=join(repoRoot,"packages/css/dist"); return readdirSync(root).sort().filter(name=>!name.endsWith(".map")).map(path=>({path,sha256:createHash("sha256").update(readFileSync(join(root,path))).digest("hex")})) }
 const artifactsBefore = artifactIdentity()
-await writeFile(join(output,"input-identity.json"),JSON.stringify({sourceBefore,artifactsBefore},null,2)+"\n")
+await writeFile(join(output,"input-identity.json"),JSON.stringify({sourceBefore,artifactsBefore,policyBefore},null,2)+"\n")
 const sourceRevision = Bun.spawnSync(["git", "rev-parse", "HEAD"], { cwd: repoRoot }).stdout.toString().trim()
 const effect = (await runEffectBoundaryAudit(floorNode, 5)).result
 await writeFile(join(output, "effect.json"), JSON.stringify(effect, null, 2) + "\n")
@@ -80,19 +83,25 @@ const registryResult = budgetRegistryCodec.decodeJson(await readFile(join(repoRo
 if (!registryResult.ok) throw Error(`Budget registry invalid: ${JSON.stringify(registryResult.issues)}`)
 const baselineIssues = [...verifyRecordedBaselines(registryResult.value, repoRoot), ...verifyDiagnosticBaselines(registryResult.value, repoRoot)]
 if (baselineIssues.length > 0) throw Error(`Budget baseline evidence is invalid: ${JSON.stringify(baselineIssues)}`)
+const policyRegistryIssues = verifyReleaseHostBudgetRegistry(registryResult.value, policy)
+if (policyRegistryIssues.length) throw Error(policyRegistryIssues.join("\n"))
 const comparison = compareRecordedMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor, runtimeGraph })
 const diagnostic = compareDiagnosticMetrics(registryResult.value, repoRoot, { effect, runtimeInit, benchmark, incremental, editor, runtimeGraph })
 const review = createThresholdReviewPacket(registryResult.value, repoRoot)
+const policyAfter = captureHostBudgetPolicyBinding(repoRoot)
+if (JSON.stringify(policyBefore) !== JSON.stringify(policyAfter)) throw Error("Host measurement policy binding drift")
 await writeFile(join(output, "comparison.json"), JSON.stringify({
-  formatVersion: 2,
+  formatVersion: 3,
+  policy: policyBefore,
   recordedAt: new Date().toISOString(),
   sourceRevision,
   sourceState: "Working tree based on sourceRevision; retained reports carry detailed source and environment identity",
   diagnostic,
   ...comparison,
+  ...evaluateReleaseHostBudgetRows(comparison.metrics, policy),
 }, null, 2) + "\n")
 await writeFile(join(output, "threshold-review.json"), JSON.stringify(review, null, 2) + "\n")
 const sourceAfter=captureGuaranteesSourceIdentity(repoRoot), artifactsAfter=artifactIdentity()
 if(sourceBefore.sha256!==sourceAfter.sha256 || JSON.stringify(artifactsBefore)!==JSON.stringify(artifactsAfter)) throw Error("Host measurement input drift")
-await writeFile(join(output,"input-identity.json"),JSON.stringify({sourceBefore,sourceAfter,artifactsBefore,artifactsAfter},null,2)+"\n")
+await writeFile(join(output,"input-identity.json"),JSON.stringify({sourceBefore,sourceAfter,artifactsBefore,artifactsAfter,policyBefore,policyAfter},null,2)+"\n")
 console.log(`HOST_BUDGET_REPORT ${output}`)

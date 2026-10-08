@@ -1,3 +1,4 @@
+import { HostBudgetPolicyBindingSchema } from "./release-host-budget-policy-contract"
 import * as Schema from "effect/Schema"
 import { makeDataCodec } from "../src/contracts/data-codec"
 
@@ -20,7 +21,8 @@ const HostSchema = Schema.Struct({
 })
 
 export const ReleaseQualificationManifestSchema = Schema.Struct({
-  formatVersion: Schema.Literal(1),
+  formatVersion: Schema.Literal(2),
+  policy: HostBudgetPolicyBindingSchema,
   releaseTag: Schema.String.check(Schema.isPattern(/^v\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/u)),
   sourceRevision: Schema.String.check(Schema.isPattern(/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u)),
   sourceDigest: Sha256,

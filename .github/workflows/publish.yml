@@ -105,7 +105,7 @@ jobs:
             cp -R "$CRUMBS_HOST_BUDGET_REPORT/." "$CRUMBS_QUALIFICATION_BUNDLE/host-report/"
           fi
 
-      - name: Require the current report to pass release checks
+      - name: Require the current report to satisfy consumer release policy
         env:
           CRUMBS_HOST_BUDGET_REPORT: ${{ runner.temp }}/crumbs-m10-5-${{ github.run_id }}-${{ github.run_attempt }}/host-report
           CRUMBS_RELEASE_SOURCE_REVISION: ${{ steps.target.outputs.release_commit }}

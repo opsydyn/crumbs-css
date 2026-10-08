@@ -1,0 +1,73 @@
+{
+  "formatVersion": 1,
+  "sourceRevision": "2391eecf2d8126a3e6344ec96f010c0d70f6558b",
+  "sourceState": "Precommit working tree; this receipt does not qualify the later commit or any release tag",
+  "sourceDigest": "0e12a12c4b770dae39a542c4d2c59f467a62402148fbd8b5cc26eb3e3d08a9f0",
+  "policy": {
+    "policyId": "crumbs-host-budgets-2026-10-08-consumer-scope-v1",
+    "policySha256": "cd3f8408c8381591d16525c2cd8e66e1e45e28582c8c96a47ac84d05ef1edc07",
+    "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b"
+  },
+  "completeHostRows": 21,
+  "releasePolicyQualified": false,
+  "blocking": {
+    "passIds": [
+      "cold-transform-ms",
+      "incremental-rebuild",
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ],
+    "failIds": [
+      "warm-transform-ms"
+    ],
+    "incompleteIds": []
+  },
+  "advisory": {
+    "passIds": [
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes"
+    ],
+    "failIds": [
+      "runtime-initialization-node22-esm",
+      "runtime-initialization-node22-cjs",
+      "runtime-initialization-current-esm",
+      "runtime-initialization-current-cjs",
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "incompleteIds": []
+  },
+  "verifierExitCode": 1,
+  "verifierBlockers": [
+    "Host-budget metric warm-transform-ms is fail; expected pass"
+  ],
+  "sourceStable": true,
+  "artifactsStable": true,
+  "policyStable": true,
+  "allRuntimeArtifactHashesUnchangedFromPreSlice": true,
+  "fullCheck": {
+    "exitCode": 0,
+    "packageTests": 1581,
+    "storybookTests": 23
+  },
+  "focusedCheck": {
+    "exitCode": 0,
+    "tests": 70
+  },
+  "registryUnchanged": true,
+  "warmTransform": {
+    "baselineMs": 5.664125000000013,
+    "medianMs": 10.171499999999924,
+    "absoluteMaxMs": 6.514,
+    "regressionPercent": 79.57760466091234,
+    "maxRegressionPercent": 15
+  }
+}

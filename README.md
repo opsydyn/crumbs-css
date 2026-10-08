@@ -41,7 +41,7 @@ At runtime, `ThemeProvider` and `useThemedStyles` resolve token references into 
 | `bun run playground:published --version=alpha --check` | Qualify an exact registry artifact in an isolated consumer. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
-| `bun run release:check` | Build, typecheck, test, bench, pack, and require a passing current-source host-budget report. |
+| `bun run release:check` | Build, typecheck, test, bench, pack, and require a current-source host report admitted by release policy. |
 | `bun run release:preflight --tag v<version>` | Verify a release tag matches the package version and checked-out commit; print its npm dist-tag without publishing. |
 
 ### Workspace layout
@@ -86,7 +86,7 @@ Runs the Expo Storybook app. Use it for visual checks, component examples, and E
 - Release operations require repository secrets and permissions:
   - `RELEASE_PLEASE_TOKEN` for reliable release PR creation
   - `NPM_TOKEN` for the manual npm publish workflow
-- The `publish` workflow is manually dispatched from `main` with an exact `v<version>` tag. Its qualification job runs on the dedicated Apple M4 Pro runner, installs the frozen workspace and approved Expo/Metro baseline, measures all 21 host budgets against the matched scaffold, and supplies that report to `release:check`. That check requires every approved row to pass for the checked-out source and rebuilt package artifacts. The workflow then packs without lifecycle scripts and binds the report and exact tarball in one hashed qualification bundle.
+- The `publish` workflow is manually dispatched from `main` with an exact `v<version>` tag. Its qualification job runs on the dedicated Apple M4 Pro runner, installs the frozen workspace and approved Expo/Metro baseline, measures all 21 host budgets against the matched scaffold, and supplies that report to `release:check`. That check requires 11 blocking compiler, Metro and editor rows to pass; 10 advisory Node startup and emitted runtime graph rows retain their numerical pass/fail results. Missing, malformed, incomplete or unmatched advisory evidence still blocks admission. `releasePolicyQualified` is distinct from whole-registry `performanceQualified`: advisory failures can remain visible while release policy admits the report. No numerical limit or baseline changes. The checked-in policy ID and policy/registry hashes bind comparison format 3, before/after identities and qualification manifest format 2 to the checked-out source and rebuilt package artifacts. Legacy report/manifest formats cannot qualify a new release. The workflow then packs without lifecycle scripts and binds the report and exact tarball in one hashed qualification bundle.
 
 An Ubuntu publisher waits for qualification, checks that the tag still points to the qualified commit and that a published GitHub Release exists, verifies the bundle, and publishes the downloaded tarball with npm provenance. It does not rebuild or repack. The qualification job receives no npm token or OIDC write permission. The dedicated runner and current host-budget result are documented in the [performance budget protocol](packages/css/bench/PERFORMANCE_BUDGETS.md). Branches, raw SHAs, draft releases, and arbitrary refs are not publish targets.
 

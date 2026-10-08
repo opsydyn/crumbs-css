@@ -1,0 +1,70 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/release-qualification-artifact.test.ts:
+123 |   })
+124 |   if (reportVerification.sourceDigest !== input.sourceDigest) {
+125 |     throw Error("Host-budget report source digest does not match the requested release source digest")
+126 |   }
+127 |   if (!reportVerification.qualified) {
+128 |     throw Error(`Host-budget report is not release-qualified:\n${reportVerification.blockers.map(blocker => `- ${blocker}`).join("\n")}`)
+                ^
+error: Host-budget report is not release-qualified:
+- Host-budget comparison formatVersion must be 2
+- Invalid host-budget policy: Expected plain serializable data
+- Invalid host-budget policy: Expected plain serializable data
+      at createReleaseQualificationManifest (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/release-qualification-artifact.ts:128:11)
+      at makeValidBundle (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-qualification-artifact.test.ts:217:20)
+(fail) (unnamed) [447.04ms]
+
+packages/css/test/release-host-budget-report.test.ts:
+83 |     const missing = verifyReleaseHostBudgetReport({
+84 |       reportDirectory: join(tmpdir(), "crumbs-host-report-does-not-exist"),
+85 |       repositoryRoot,
+86 |       expectedRevision,
+87 |     })
+88 |     expect(missing.releasePolicyQualified).toBe(false)
+                                                ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-report.test.ts:88:44)
+(fail) M10.5 release host-budget report verification > requires an explicit report and every raw measurement [2.70ms]
+106 |       reportDirectory: retainedReportDirectory,
+107 |       repositoryRoot,
+108 |       expectedRevision: comparison.sourceRevision,
+109 |     })
+110 | 
+111 |     expect(result.releasePolicyQualified).toBe(false)
+                                                ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-report.test.ts:111:43)
+(fail) M10.5 release host-budget report verification > rederives the retained comparison and names its nine failures and incomplete row [33.07ms]
+129 |       reportDirectory,
+130 |       repositoryRoot,
+131 |       expectedRevision,
+132 |       expectedArtifacts: currentArtifacts,
+133 |     })
+134 |     expect(result.releasePolicyQualified).toBe(false)
+                                                ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-host-budget-report.test.ts:134:43)
+(fail) M10.5 release host-budget report verification > rejects a raw measurement edit even when the identity fields are otherwise current [36.97ms]
+(pass) M10.5 release host-budget report verification > rejects the wrong release revision and source digest [71.17ms]
+(pass) M10.5 release host-budget report verification > rejects unstable before-and-after source or artifact identity [69.44ms]
+(pass) M10.5 release host-budget report verification > rejects stable but changed package artifact hashes [36.36ms]
+(pass) M10.5 release host-budget report verification > requires a report path at the release-check command boundary [34.83ms]
+
+ 4 pass
+ 4 fail
+ 16 expect() calls
+Ran 8 tests across 2 files. [1108.00ms]
