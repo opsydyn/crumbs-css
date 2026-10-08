@@ -1,0 +1,17 @@
+{
+  "qualification": "verifier-negative-controls-only",
+  "cases": [
+    {
+      "case": "rehashed-wrong-gap",
+      "exitCode": 1,
+      "rejected": true,
+      "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/crumbs-m105-budget-api-scope/negative-rehashed-wrong-gap/verify.py\", line 59, in <module>\n    assert r['minifiedGapBytes']==r['currentMinifiedBytes']-r['ceiling']>0\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError\n"
+    },
+    {
+      "case": "corrupt-historical-archive",
+      "exitCode": 1,
+      "rejected": true,
+      "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/crumbs-m105-budget-api-scope/negative-corrupt-historical-archive/verify.py\", line 17, in <module>\n    for name,digest in p['files'].items():assert sha((packet/name).read_bytes())==digest,name\n                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: baseline-package.tar.gz\n"
+    }
+  ]
+}
