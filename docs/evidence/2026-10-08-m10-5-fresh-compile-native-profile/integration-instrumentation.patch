@@ -1,0 +1,36 @@
+--- owned-original-integration.dev.js
++++ owned-profile-integration.dev.js
+@@ -442,6 +442,7 @@
+ }) => {
+   let code = source;
+   if (identOption === 'debug') {
++    const __debugStart = performance.now();
+     const result = await babel__namespace.transformAsync(source, {
+       filename: filePath,
+       cwd: rootPath,
+@@ -452,6 +453,7 @@
+     if (!result || result.code == null) {
+       throw new Error('Error adding debug IDs');
+     }
++    globalThis.__CRUMBS_FRESH_PROFILE.push({kind: 'debugIds', filePath, ms: performance.now() - __debugStart});
+     code = result.code;
+   }
+   return addFileScope({
+@@ -474,7 +476,9 @@
+     }, async ({
+       path: path$1
+     }) => {
++      const __readStart = performance.now();
+       const originalSource = await fs.promises.readFile(path$1, 'utf-8');
++      globalThis.__CRUMBS_FRESH_PROFILE.push({kind: 'cssRead', filePath: path$1, ms: performance.now() - __readStart});
+       const source = await transform({
+         source: originalSource,
+         filePath: path$1,
+@@ -497,6 +501,7 @@
+   esbuildOptions
+ }) {
+   const result = await esbuild.build({
++    logLevel: 'info',
+     entryPoints: [filePath],
+     metafile: true,
+     bundle: true,

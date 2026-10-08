@@ -1,0 +1,199 @@
+{
+  "name": "@opsydyn/crumbs-css",
+  "version": "0.1.1-alpha.1",
+  "description": "Vanilla-extract-shaped React Native style authoring, theming, recipes, and Metro transforms.",
+  "packageManager": "bun@1.3.11",
+  "sideEffects": false,
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
+  "files": [
+    "COMPATIBILITY.md",
+    "LICENSE",
+    "README.md",
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./style": {
+      "types": "./dist/style.d.mts",
+      "import": "./dist/style.mjs",
+      "require": "./dist/style.cjs"
+    },
+    "./theme": {
+      "types": "./dist/theme.d.mts",
+      "import": "./dist/theme.mjs",
+      "require": "./dist/theme.cjs"
+    },
+    "./theme/core": {
+      "types": "./dist/theme-core.d.mts",
+      "import": "./dist/theme-core.mjs",
+      "require": "./dist/theme-core.cjs"
+    },
+    "./theme/token": {
+      "types": "./dist/theme-token.d.mts",
+      "import": "./dist/theme-token.mjs",
+      "require": "./dist/theme-token.cjs"
+    },
+    "./theme/conditions": {
+      "types": "./dist/theme-conditions.d.mts",
+      "import": "./dist/theme-conditions.mjs",
+      "require": "./dist/theme-conditions.cjs"
+    },
+    "./theme/expressions": {
+      "types": "./dist/theme-expressions.d.mts",
+      "import": "./dist/theme-expressions.mjs",
+      "require": "./dist/theme-expressions.cjs"
+    },
+    "./theme/recipes": {
+      "types": "./dist/theme-recipes.d.mts",
+      "import": "./dist/theme-recipes.mjs",
+      "require": "./dist/theme-recipes.cjs"
+    },
+    "./theme/sprinkles": {
+      "types": "./dist/theme-sprinkles.d.mts",
+      "import": "./dist/theme-sprinkles.mjs",
+      "require": "./dist/theme-sprinkles.cjs"
+    },
+    "./tokens": {
+      "types": "./dist/tokens.d.mts",
+      "import": "./dist/tokens.mjs",
+      "require": "./dist/tokens.cjs"
+    },
+    "./tokens/optic": {
+      "types": "./dist/tokens-optic.d.mts",
+      "import": "./dist/tokens-optic.mjs",
+      "require": "./dist/tokens-optic.cjs"
+    },
+    "./tokens/schema": {
+      "types": "./dist/tokens-schema.d.mts",
+      "import": "./dist/tokens-schema.mjs",
+      "require": "./dist/tokens-schema.cjs"
+    },
+    "./tokens/schema/value": {
+      "types": "./dist/tokens-schema-value.d.mts",
+      "import": "./dist/tokens-schema-value.mjs",
+      "require": "./dist/tokens-schema-value.cjs"
+    },
+    "./tooling/manifest": {
+      "types": "./dist/tooling-manifest.d.mts",
+      "import": "./dist/tooling-manifest.mjs",
+      "require": "./dist/tooling-manifest.cjs"
+    },
+    "./tooling/policy": {
+      "types": "./dist/tooling-policy.d.mts",
+      "import": "./dist/tooling-policy.mjs",
+      "require": "./dist/tooling-policy.cjs"
+    },
+    "./tooling/migrations": {
+      "types": "./dist/tooling-migrations.d.mts",
+      "import": "./dist/tooling-migrations.mjs",
+      "require": "./dist/tooling-migrations.cjs"
+    },
+    "./tooling/dtcg": {
+      "types": "./dist/tooling-dtcg.d.mts",
+      "import": "./dist/tooling-dtcg.mjs",
+      "require": "./dist/tooling-dtcg.cjs"
+    },
+    "./tooling/ownership": {
+      "types": "./dist/tooling-ownership.d.mts",
+      "import": "./dist/tooling-ownership.mjs",
+      "require": "./dist/tooling-ownership.cjs"
+    },
+    "./devtools": {
+      "types": "./dist/devtools.d.mts",
+      "import": "./dist/devtools.mjs",
+      "require": "./dist/devtools.cjs"
+    },
+    "./metro-plugin": {
+      "types": "./dist/metro-plugin.d.mts",
+      "import": "./dist/metro-plugin.mjs",
+      "require": "./dist/metro-plugin.cjs"
+    },
+    "./dist/transformer": {
+      "types": "./dist/transformer.d.mts",
+      "import": "./dist/transformer.mjs",
+      "require": "./dist/transformer.cjs"
+    },
+    "./dist/metro-plugin": {
+      "types": "./dist/metro-plugin.d.mts",
+      "import": "./dist/metro-plugin.mjs",
+      "require": "./dist/metro-plugin.cjs"
+    },
+    "./dist/theme": {
+      "types": "./dist/theme.d.mts",
+      "import": "./dist/theme.mjs",
+      "require": "./dist/theme.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "bench:dtcg-import": "bun bench/dtcg-import.bench.ts",
+    "bench:native-styles": "bun bench/native-styles.bench.ts",
+    "build:dev": "CRUMBS_CSS_SKIP_CLEAN=1 tsdown",
+    "build": "tsdown",
+    "prepack": "bun run build",
+    "release:check": "bun run build && bun run typecheck && bun run test && bun run bench:native-styles && bun pm pack --dry-run && bun ../../scripts/check-release-host-budgets.ts",
+    "test": "bun test",
+    "typecheck": "tsgo --noEmit"
+  },
+  "keywords": [
+    "react-native",
+    "vanilla-extract",
+    "metro",
+    "expo",
+    "styles",
+    "theming"
+  ],
+  "author": "Alan P Currie",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/opsydyn/crumbs-css.git"
+  },
+  "homepage": "https://github.com/opsydyn/crumbs-css#readme",
+  "bugs": {
+    "url": "https://github.com/opsydyn/crumbs-css/issues"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "bun": ">=1.3.0"
+  },
+  "dependencies": {
+    "@vanilla-extract/css": "^1.20.1",
+    "@vanilla-extract/integration": "^8.0.10",
+    "css-to-react-native": "^3.2.0",
+    "effect": "4.0.0-rc.115"
+  },
+  "devDependencies": {
+    "@types/bun": "1.3.14",
+    "@types/node": "^22.0.0",
+    "@types/react": "~19.2.10",
+    "@typescript/native-preview": "7.0.0-dev.20260519.1",
+    "fast-check": "^4.7.0",
+    "metro-cache": "0.84.5",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "tsdown": "^0.21.8",
+    "typescript": "~5.9.2"
+  },
+  "peerDependencies": {
+    "metro": ">=0.83 <1",
+    "react": ">=19 <20",
+    "react-native": ">=0.85 <0.86",
+    "typescript": ">=5.9 <7"
+  },
+  "peerDependenciesMeta": {
+    "typescript": {
+      "optional": true
+    }
+  }
+}

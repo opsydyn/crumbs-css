@@ -3097,3 +3097,12 @@ The approved [identity investigation](assessments/2026-10-08-m10-5-compiler-iden
 All 696 shipping files, 149 artifacts, numerical contracts, enforcement and shared compiler files remain unchanged. Fresh verification confirms restoration and preservation of the primary checkout. No production memo, new performance result or release qualification was admitted. M10.5 remains open with the historical 10.1715 ms warm failure against 6.514 ms / 15%; publication remains blocked.
 
 **Next: M10.5 — assess fresh-compilation cost in the fixed vanilla-extract integration before proposing an upstream remediation.** Stop investing in namespace/post-load hash shortcuts without a complete guard. Dedicated runner registration stays separate; physical-device/spoken-reader work remains deferred. No push/publication.
+
+
+### 2026-10-08 — M10.5 fresh compiler profiled; upstream handoff prepared
+
+The approved [fresh-compilation profile](assessments/2026-10-08-m10-5-fresh-compile-native-profile.md) retains five alternating control/profile Bun pairs, 120 timed transforms and 90 native timer blocks. All 60 timed output pairs, compiled text and full inputs match. Native scan prints a 4 ms cohort median; compile/link prints 0 ms at coarse resolution, with JavaScript debug-ID waits nested in scan. Instrumented CJS timings are diagnostic only. No qualifying stateless fix was identified; a single scheduling pilot was slower.
+
+A compact stock-integration graph reproduces compiled text and all nine inputs under Bun and genuine Node 22/24. Shipping source, 149 artifacts, budgets/policy, shared compiler files and primary changes remain intact. No production optimisation or full host qualification was admitted; the historical 10.1715 ms warm failure still leaves M10.5 open and publication blocked.
+
+**Next: M10.5 — review the [local upstream investigation draft](evidence/2026-10-08-m10-5-fresh-compile-native-profile/upstream-investigation-draft.md) before deciding whether to seek maintainer input.** It is not a posted issue or a proven upstream regression. Dedicated runner registration stays separate; physical-device/spoken-reader work remains deferred.

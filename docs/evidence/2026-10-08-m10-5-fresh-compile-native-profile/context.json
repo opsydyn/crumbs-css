@@ -1,0 +1,35 @@
+{
+  "format": "crumbs.m10.5.fresh-compile-native-profile-context",
+  "version": 1,
+  "sourceRevision": "c8be64d6f6a9fdad866752f66b08b73273a2031d",
+  "sourceDigest": "0e12a12c4b770dae39a542c4d2c59f467a62402148fbd8b5cc26eb3e3d08a9f0",
+  "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+  "integrationVersion": "8.0.10",
+  "esbuildVersion": "0.27.7",
+  "protocol": "Five alternating Bun control/profile process pairs; two setup and six retained full transforms per fixture; owned compiled CJS diagnostic",
+  "cohortOrder": [
+    "control/profile",
+    "profile/control",
+    "control/profile",
+    "profile/control",
+    "control/profile"
+  ],
+  "environmentBoundary": "Inherited environment not exhaustively captured per process. Runtime recorded in every report. Scheduling pilot command explicitly sets GOMAXPROCS=1.",
+  "wrapperSha256": "eeb2ab03795dba98e0f98a539ca8fc2d5d75f2d5d982930974e957f2ee900471",
+  "productionCandidateImplemented": false,
+  "completeHostQualification": false,
+  "disposition": "Fresh compilation remains; scan phase is the measured hotspot, but no qualifying stateless fix identified. Upstream request is a local draft only.",
+  "schedulingPilotMs": {
+    "README": 12.107666999999992,
+    "consumer": 11.540958999999987
+  },
+  "ownedRestoration": "Native binary and all 149 copied artifacts unchanged; owned diagnostic JS intentionally retained; SDK services stopped by each harness finally block.",
+  "limitations": [
+    "Compiled CJS and copied project root differ from official source-import workload.",
+    "Both modes wrap compile and add a collector; profile adds timers, SDK info logging and hidden native --timing.",
+    "Native integers are coarse, nested/parallel timings are not exclusive CPU attribution.",
+    "Setup/native timing block alignment derives from actual compilation counts, including initial two-build confirmation.",
+    "Minimal three-runtime smoke checks are compile-only parity, not Node performance or full transform qualification.",
+    "No fresh full host, package/site build, Metro/export or physical/spoken-reader acceptance."
+  ]
+}
