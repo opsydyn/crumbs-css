@@ -1,6 +1,6 @@
 # M10.5 host release-policy review
 
-Date: 2026-10-08. Status: **proposed; not approved or active**. Reviewed checkout: `c7ebab1`, shipping digest `8fe7d6c28c26c9d4214549790d504c62f87c24f6886d7da40e031dd7e9fb4a76` (694 files).
+Date: 2026-10-08. Status: **approved policy; implementation pending**. Reviewed checkout: `c7ebab1`, shipping digest `8fe7d6c28c26c9d4214549790d504c62f87c24f6886d7da40e031dd7e9fb4a76` (694 files).
 
 ## Recommendation
 
@@ -76,5 +76,9 @@ One complete **M10.5 policy implementation slice**, without combining another ru
 - [x] All baseline and threshold objects are retained unchanged in the proposal.
 - [x] Synthetic controls executed the existing evaluator: all-pass input accepted; each of 21 individually failed rows rejected. These prove current enforcement, not native performance or the proposed implementation.
 - [x] Alternatives, weaker-protection risk, conditional amendment interaction and remaining release blockers are explicit.
-- [ ] Alan P Currie accepts this exact enforcement reduction and partition.
+- [x] Alan P Currie accepts this exact enforcement reduction and partition (direct session approval, 2026-10-08).
 - [ ] Later implementation and fresh qualification prove the approved policy; no activation is claimed now.
+
+## 2026-10-08 acceptance
+
+Alan P Currie approved this exact proposal after review commit `60499bf`. The [approval receipt](../evidence/2026-10-08-m10-5-consumer-policy-plan/approval.json) pins the original reviewed document and proposal. The [single-task inline plan](../superpowers/plans/2026-10-08-m10-5-consumer-scoped-host-policy.md) is written for review. Numerical limits remain unchanged; acceptance does not activate the implementation or qualify a release.
