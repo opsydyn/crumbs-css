@@ -1,0 +1,333 @@
+{
+  "qualification": "diagnostic-only",
+  "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+  "registryText": "{\n  \"_tag\": \"CrumbsPerformanceBudgetRegistry\",\n  \"version\": 2,\n  \"status\": \"thresholds-pending-review\",\n  \"protocol\": {\n    \"minimumIndependentRepetitions\": 5,\n    \"comparisonStatistic\": \"median\",\n    \"noiseEnvelope\": \"min-median-max\",\n    \"environmentPolicy\": \"exact-or-explicit-equivalence\",\n    \"approvalPolicy\": \"reviewer-recorded\",\n    \"unapprovedBehavior\": \"incomplete\",\n    \"regressionRule\": \"absolute-and-relative-must-pass\"\n  },\n  \"metrics\": [\n    {\n      \"id\": \"js-frame-time\",\n      \"domain\": \"js-frames\",\n      \"scenario\": \"M1 release Hermes device scenarios\",\n      \"measure\": \"p95 JavaScript frame duration\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"release-hermes-device\",\n      \"baseline\": {\n        \"status\": \"missing\",\n        \"reason\": \"M1.6 release device sampling has not run\"\n      },\n      \"threshold\": {\n        \"status\": \"pending-review\",\n        \"absoluteMax\": null,\n        \"maxRegressionPercent\": null\n      }\n    },\n    {\n      \"id\": \"ui-frame-time\",\n      \"domain\": \"ui-frames\",\n      \"scenario\": \"M1 release Hermes device scenarios\",\n      \"measure\": \"p95 UI frame duration\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"release-hermes-device\",\n      \"baseline\": {\n        \"status\": \"missing\",\n        \"reason\": \"M1.6 release device sampling has not run\"\n      },\n      \"threshold\": {\n        \"status\": \"pending-review\",\n        \"absoluteMax\": null,\n        \"maxRegressionPercent\": null\n      }\n    },\n    {\n      \"id\": \"allocation-bytes\",\n      \"domain\": \"allocations\",\n      \"scenario\": \"M1 repeated theme and recipe workloads\",\n      \"measure\": \"allocated bytes per completed scenario\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"controlled-release-hermes-device\",\n      \"baseline\": {\n        \"status\": \"missing\",\n        \"reason\": \"No controlled allocation probe has been retained\"\n      },\n      \"threshold\": {\n        \"status\": \"pending-review\",\n        \"absoluteMax\": null,\n        \"maxRegressionPercent\": null\n      }\n    },\n    {\n      \"id\": \"retained-memory-bytes\",\n      \"domain\": \"retained-memory\",\n      \"scenario\": \"25 themed tree mount and unmount cycles\",\n      \"measure\": \"last post-GC heap reading minus baseline\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"controlled-release-hermes-device\",\n      \"baseline\": {\n        \"status\": \"diagnostic\",\n        \"evidence\": \"docs/evidence/2026-09-15-expo-memory-workloads/qualification.json\",\n        \"reason\": \"Web readings lack forced-GC and release-device provenance\",\n        \"repetitions\": 2\n      },\n      \"threshold\": {\n        \"status\": \"pending-review\",\n        \"absoluteMax\": null,\n        \"maxRegressionPercent\": null\n      }\n    },\n    {\n      \"id\": \"runtime-initialization-node22-esm\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"ordinary runtime ESM module load on Node 22.0.0\",\n      \"measure\": \"median fresh-process module evaluation after excluded warmup\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-runtime-initialization/baseline.json\",\n        \"selector\": \"runtime-init.floor.esm.load-ms.median\",\n        \"value\": 6.293542000000002,\n        \"repetitions\": 15\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 7.553,\n        \"maxRegressionPercent\": 20,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-initialization-node22-cjs\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"ordinary runtime CJS module load on Node 22.0.0\",\n      \"measure\": \"median fresh-process module evaluation after excluded warmup\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-runtime-initialization/baseline.json\",\n        \"selector\": \"runtime-init.floor.cjs.load-ms.median\",\n        \"value\": 3.401791000000001,\n        \"repetitions\": 15\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 4.083,\n        \"maxRegressionPercent\": 20,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-initialization-current-esm\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"ordinary runtime ESM module load on current Node\",\n      \"measure\": \"median fresh-process module evaluation after excluded warmup\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"current-node-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-runtime-initialization/baseline.json\",\n        \"selector\": \"runtime-init.current.esm.load-ms.median\",\n        \"value\": 2.555624999999999,\n        \"repetitions\": 15\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 3.067,\n        \"maxRegressionPercent\": 20,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-initialization-current-cjs\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"ordinary runtime CJS module load on current Node\",\n      \"measure\": \"median fresh-process module evaluation after excluded warmup\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"current-node-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-runtime-initialization/baseline.json\",\n        \"selector\": \"runtime-init.current.cjs.load-ms.median\",\n        \"value\": 2.036500000000002,\n        \"repetitions\": 15\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 2.444,\n        \"maxRegressionPercent\": 20,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"cold-transform-ms\",\n      \"domain\": \"cold-transform\",\n      \"scenario\": \"README recipe and package-owned consumer fixtures\",\n      \"measure\": \"maximum median fresh-process first-transform duration\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"bun-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json\",\n        \"selector\": \"benchmark.cold-transform.max-median-ms\",\n        \"value\": 66.404584,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 83.006,\n        \"maxRegressionPercent\": 25,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"warm-transform-ms\",\n      \"domain\": \"warm-transform\",\n      \"scenario\": \"README recipe and package-owned consumer fixtures\",\n      \"measure\": \"maximum median same-process warm transform duration\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"bun-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json\",\n        \"selector\": \"benchmark.warm-transform.max-median-ms\",\n        \"value\": 5.664125000000013,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 6.514,\n        \"maxRegressionPercent\": 15,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"incremental-rebuild\",\n      \"domain\": \"incremental-rebuild\",\n      \"scenario\": \"direct consumer .css.ts edit through Expo Metro invalidation\",\n      \"measure\": \"median edit-to-updated-full-bundle receipt after the watcher-settle interval\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"expo56-metro084-ios-dev-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json\",\n        \"selector\": \"metro-incremental.direct-css-edit-ms.median\",\n        \"value\": 123.95049999999901,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 137.506,\n        \"maxRegressionPercent\": 10,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-21T20:31:50Z\",\n        \"evidence\": \"docs/assessments/2026-09-21-m4-6-incremental-baseline-protocol-reconciliation.md\"\n      }\n    },\n    {\n      \"id\": \"editor-tsc-wall-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token current public token/theme/recipe fixture under tsc\",\n      \"measure\": \"median fresh-process wall duration\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.tsc.10000.wall-ms.median\",\n        \"value\": 882.1055000000006,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 1014.422,\n        \"maxRegressionPercent\": 15,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"editor-tsgo-wall-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token current public token/theme/recipe fixture under tsgo\",\n      \"measure\": \"median fresh-process wall duration\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.tsgo.10000.wall-ms.median\",\n        \"value\": 332.92241699999977,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 382.861,\n        \"maxRegressionPercent\": 15,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"editor-tsc-memory-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token current public token/theme/recipe fixture under tsc\",\n      \"measure\": \"median compiler-reported memory\",\n      \"unit\": \"KiB\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.tsc.10000.memory-kib.median\",\n        \"value\": 285025,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 313528,\n        \"maxRegressionPercent\": 10,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"editor-tsgo-memory-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token current public token/theme/recipe fixture under tsgo\",\n      \"measure\": \"median compiler-reported memory\",\n      \"unit\": \"KiB\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.tsgo.10000.memory-kib.median\",\n        \"value\": 140013,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 154015,\n        \"maxRegressionPercent\": 10,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"editor-tsc-instantiations-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token current public token/theme/recipe fixture under tsc\",\n      \"measure\": \"compiler-reported type instantiations\",\n      \"unit\": \"count\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.tsc.10000.instantiations\",\n        \"value\": 490410,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 490410,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"editor-tsgo-instantiations-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token current public token/theme/recipe fixture under tsgo\",\n      \"measure\": \"compiler-reported type instantiations\",\n      \"unit\": \"count\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.tsgo.10000.instantiations\",\n        \"value\": 490508,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 490508,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"editor-first-completion-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token language-service member completion\",\n      \"measure\": \"median first completion duration after semantic analysis\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.10000.first-completion-ms.median\",\n        \"value\": 39.28841699999998,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 43.218,\n        \"maxRegressionPercent\": 10,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"editor-warm-completion-10000\",\n      \"domain\": \"editor\",\n      \"scenario\": \"10,000-token language-service member completion\",\n      \"measure\": \"median repeated completion duration in the same service\",\n      \"unit\": \"ms\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"typescript-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-15-editor-scale/raw.json\",\n        \"selector\": \"editor.10000.warm-completion-ms.median\",\n        \"value\": 30.386750000000006,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 34.945,\n        \"maxRegressionPercent\": 15,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-15T09:06:34Z\",\n        \"evidence\": \"docs/assessments/2026-09-15-performance-threshold-decisions.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-theme-core-esm-graph-bytes\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"theme-core ESM emitted local graph\",\n      \"measure\": \"sum of emitted local graph bytes\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"tsdown-node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json\",\n        \"selector\": \"runtime.theme-core.esm.graph-bytes\",\n        \"value\": 17271,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 17271,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-21T19:54:46Z\",\n        \"evidence\": \"docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-theme-core-cjs-graph-bytes\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"theme-core CJS emitted local graph\",\n      \"measure\": \"sum of emitted local graph bytes\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"tsdown-node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json\",\n        \"selector\": \"runtime.theme-core.cjs.graph-bytes\",\n        \"value\": 17641,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 17641,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-21T19:54:46Z\",\n        \"evidence\": \"docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-tokens-esm-graph-bytes\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"tokens ESM emitted local graph\",\n      \"measure\": \"sum of emitted local graph bytes\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"tsdown-node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json\",\n        \"selector\": \"runtime.tokens.esm.graph-bytes\",\n        \"value\": 56013,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 56013,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-21T19:54:46Z\",\n        \"evidence\": \"docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-tokens-cjs-graph-bytes\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"tokens CJS emitted local graph\",\n      \"measure\": \"sum of emitted local graph bytes\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"tsdown-node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json\",\n        \"selector\": \"runtime.tokens.cjs.graph-bytes\",\n        \"value\": 63308,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 63308,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-21T19:54:46Z\",\n        \"evidence\": \"docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-theme-compatibility-esm-graph-bytes\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"theme ESM emitted local graph\",\n      \"measure\": \"sum of emitted local graph bytes\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"tsdown-node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json\",\n        \"selector\": \"runtime.theme-compatibility.esm.graph-bytes\",\n        \"value\": 44017,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 44017,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-21T19:54:46Z\",\n        \"evidence\": \"docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md\"\n      }\n    },\n    {\n      \"id\": \"runtime-theme-compatibility-cjs-graph-bytes\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"theme CJS emitted local graph\",\n      \"measure\": \"sum of emitted local graph bytes\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"tsdown-node22-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"recorded\",\n        \"evidence\": \"docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json\",\n        \"selector\": \"runtime.theme-compatibility.cjs.graph-bytes\",\n        \"value\": 44764,\n        \"repetitions\": 5\n      },\n      \"threshold\": {\n        \"status\": \"approved\",\n        \"absoluteMax\": 44764,\n        \"maxRegressionPercent\": 0,\n        \"approvedBy\": \"Alan Currie (session approval)\",\n        \"approvedAt\": \"2026-09-21T19:54:46Z\",\n        \"evidence\": \"docs/assessments/2026-09-21-m4-6-runtime-byte-budget-admission.md\"\n      }\n    }\n  ],\n  \"diagnostics\": [\n    {\n      \"id\": \"runtime-emitted-bytes\",\n      \"domain\": \"runtime-footprint\",\n      \"scenario\": \"ordinary runtime CommonJS emitted graph\",\n      \"measure\": \"sum of emitted local graph bytes\",\n      \"unit\": \"bytes\",\n      \"direction\": \"lower-is-better\",\n      \"environmentClass\": \"node22-and-current-macos-arm64\",\n      \"baseline\": {\n        \"status\": \"diagnostic\",\n        \"evidence\": \"docs/evidence/2026-09-14-effect-boundary-audit/audit.json\",\n        \"selector\": \"effect.runtime.cjs.graph-bytes\",\n        \"value\": 11307,\n        \"reason\": \"Historical compatibility-entrypoint lineage predates the admitted split graph contract; retain its zero-growth comparison for visibility, not as a current-functionality gate.\",\n        \"repetitions\": 5\n      }\n    }\n  ]\n}\n",
+  "graphs": [
+    {
+      "cohort": "control",
+      "entry": "theme-core.mjs",
+      "files": [
+        "theme-core.mjs"
+      ],
+      "artifacts": [
+        {
+          "file": "theme-core.mjs",
+          "bytes": 35205,
+          "sha256": "dd990789ad333d1e5852a400a6fc4757dd77d6b86d5d512b6f462f3bb20fa99f"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 35205,
+      "nonliteralLoads": 0,
+      "ceiling": 17271,
+      "gate": "fail"
+    },
+    {
+      "cohort": "control",
+      "entry": "theme-core.cjs",
+      "files": [
+        "theme-core.cjs"
+      ],
+      "artifacts": [
+        {
+          "file": "theme-core.cjs",
+          "bytes": 35426,
+          "sha256": "18b958c467812b19ddabe11649d11b3015b7feeb6680b71f7f9e43ac0bf3e998"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 35426,
+      "nonliteralLoads": 0,
+      "ceiling": 17641,
+      "gate": "fail"
+    },
+    {
+      "cohort": "control",
+      "entry": "theme.mjs",
+      "files": [
+        "conditions-3NgjABSD.mjs",
+        "recipe-resolution-plan-wLBalWHC.mjs",
+        "theme-expressions.mjs",
+        "theme-recipe-resolvers-D6_3J7aX.mjs",
+        "theme-sprinkles-resolver-BoZFCRXO.mjs",
+        "theme.mjs"
+      ],
+      "artifacts": [
+        {
+          "file": "conditions-3NgjABSD.mjs",
+          "bytes": 6926,
+          "sha256": "a6a519aabbec2bd7a770a21afe1749416ff8743884e6821b5dccea946d879074"
+        },
+        {
+          "file": "recipe-resolution-plan-wLBalWHC.mjs",
+          "bytes": 2517,
+          "sha256": "cd9834026e1d472d7069c5f37d8c004cbcb51c35794880e98ddfe6c534a232ae"
+        },
+        {
+          "file": "theme-expressions.mjs",
+          "bytes": 14162,
+          "sha256": "2805a4afecb0da35919766b694780fea3996928692b60bc936e77d36978a20fc"
+        },
+        {
+          "file": "theme-recipe-resolvers-D6_3J7aX.mjs",
+          "bytes": 37032,
+          "sha256": "f0842d6dbe9b2d4f9e5c78cb73e7688705ce6a845ea509243122a9cc3c56aa71"
+        },
+        {
+          "file": "theme-sprinkles-resolver-BoZFCRXO.mjs",
+          "bytes": 3858,
+          "sha256": "5bae45ba6aa955d63e204aa8412fc00c96c2b9d669733d7996ae79963ec878aa"
+        },
+        {
+          "file": "theme.mjs",
+          "bytes": 22501,
+          "sha256": "f91a1e6f9e26dd5d71db4d182a3ae75042944f1294f2fdf032bc787633903c1c"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 86996,
+      "nonliteralLoads": 0,
+      "ceiling": 44017,
+      "gate": "fail"
+    },
+    {
+      "cohort": "control",
+      "entry": "theme.cjs",
+      "files": [
+        "conditions-iCtfQEtp.cjs",
+        "recipe-resolution-plan-0TseJY4L.cjs",
+        "theme-expressions.cjs",
+        "theme-recipe-resolvers-B51BFLQR.cjs",
+        "theme-sprinkles-resolver-C84yxciI.cjs",
+        "theme.cjs"
+      ],
+      "artifacts": [
+        {
+          "file": "conditions-iCtfQEtp.cjs",
+          "bytes": 7817,
+          "sha256": "683711c1963c3a26005dd93c47dc5cdb5855c1fa1fd318f713ec6979af964353"
+        },
+        {
+          "file": "recipe-resolution-plan-0TseJY4L.cjs",
+          "bytes": 3168,
+          "sha256": "d2fd4a6a30e2dd804a1bec2bad8793be23311a0a659a75f463f219e0b490f723"
+        },
+        {
+          "file": "theme-expressions.cjs",
+          "bytes": 14339,
+          "sha256": "f8f08b495ceb3f84b5056f047ad977f9d3d246c7d3ec200a2c90d6a56d9e3c4c"
+        },
+        {
+          "file": "theme-recipe-resolvers-B51BFLQR.cjs",
+          "bytes": 37689,
+          "sha256": "43048aaf2eb958da8f58adf296ac7733d6489e85845459cc5ae64d9a9388b57d"
+        },
+        {
+          "file": "theme-sprinkles-resolver-C84yxciI.cjs",
+          "bytes": 3904,
+          "sha256": "72d5add63e36343d83c26d08574f64d645a83ee6808ea2d6d375b27cda799565"
+        },
+        {
+          "file": "theme.cjs",
+          "bytes": 22794,
+          "sha256": "d55e633f45ea926109b240067566391d32c12cebc513c26a97c23d9711ffe318"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 89711,
+      "nonliteralLoads": 0,
+      "ceiling": 44764,
+      "gate": "fail"
+    },
+    {
+      "cohort": "candidate",
+      "entry": "theme-core.mjs",
+      "files": [
+        "theme-core.mjs"
+      ],
+      "artifacts": [
+        {
+          "file": "theme-core.mjs",
+          "bytes": 87848,
+          "sha256": "9cd8f56526bbf053186b28aa8a34118a6a1580dcb757a09c1243127342c8a0e3"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 87848,
+      "nonliteralLoads": 0,
+      "ceiling": 17271,
+      "gate": "fail"
+    },
+    {
+      "cohort": "candidate",
+      "entry": "theme-core.cjs",
+      "files": [
+        "theme-core.cjs"
+      ],
+      "artifacts": [
+        {
+          "file": "theme-core.cjs",
+          "bytes": 88062,
+          "sha256": "b59ba65be736bb2da5b154766c4f90e2a17c1f17278a0e5a66a7594210197203"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 88062,
+      "nonliteralLoads": 0,
+      "ceiling": 17641,
+      "gate": "fail"
+    },
+    {
+      "cohort": "candidate",
+      "entry": "theme.mjs",
+      "files": [
+        "conditions-3NgjABSD.mjs",
+        "recipe-resolution-plan-wLBalWHC.mjs",
+        "theme-expressions.mjs",
+        "theme-recipe-resolvers-CxCcfvyp.mjs",
+        "theme-sprinkles-resolver-BoZFCRXO.mjs",
+        "theme.mjs"
+      ],
+      "artifacts": [
+        {
+          "file": "conditions-3NgjABSD.mjs",
+          "bytes": 6926,
+          "sha256": "a6a519aabbec2bd7a770a21afe1749416ff8743884e6821b5dccea946d879074"
+        },
+        {
+          "file": "recipe-resolution-plan-wLBalWHC.mjs",
+          "bytes": 2517,
+          "sha256": "cd9834026e1d472d7069c5f37d8c004cbcb51c35794880e98ddfe6c534a232ae"
+        },
+        {
+          "file": "theme-expressions.mjs",
+          "bytes": 14162,
+          "sha256": "2805a4afecb0da35919766b694780fea3996928692b60bc936e77d36978a20fc"
+        },
+        {
+          "file": "theme-recipe-resolvers-CxCcfvyp.mjs",
+          "bytes": 100949,
+          "sha256": "6c9a00605993d00dcddb8ea019b6dc562a7b3bc36fd25207019395fe0d06cb77"
+        },
+        {
+          "file": "theme-sprinkles-resolver-BoZFCRXO.mjs",
+          "bytes": 3858,
+          "sha256": "5bae45ba6aa955d63e204aa8412fc00c96c2b9d669733d7996ae79963ec878aa"
+        },
+        {
+          "file": "theme.mjs",
+          "bytes": 57929,
+          "sha256": "b759b75fa341ef1c66d630ba076b7dd64ab1432dee16ea451d691e86eb90d50f"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 186341,
+      "nonliteralLoads": 0,
+      "ceiling": 44017,
+      "gate": "fail"
+    },
+    {
+      "cohort": "candidate",
+      "entry": "theme.cjs",
+      "files": [
+        "conditions-iCtfQEtp.cjs",
+        "recipe-resolution-plan-0TseJY4L.cjs",
+        "theme-expressions.cjs",
+        "theme-recipe-resolvers-PvLRcZHs.cjs",
+        "theme-sprinkles-resolver-C84yxciI.cjs",
+        "theme.cjs"
+      ],
+      "artifacts": [
+        {
+          "file": "conditions-iCtfQEtp.cjs",
+          "bytes": 7817,
+          "sha256": "683711c1963c3a26005dd93c47dc5cdb5855c1fa1fd318f713ec6979af964353"
+        },
+        {
+          "file": "recipe-resolution-plan-0TseJY4L.cjs",
+          "bytes": 3168,
+          "sha256": "d2fd4a6a30e2dd804a1bec2bad8793be23311a0a659a75f463f219e0b490f723"
+        },
+        {
+          "file": "theme-expressions.cjs",
+          "bytes": 14339,
+          "sha256": "f8f08b495ceb3f84b5056f047ad977f9d3d246c7d3ec200a2c90d6a56d9e3c4c"
+        },
+        {
+          "file": "theme-recipe-resolvers-PvLRcZHs.cjs",
+          "bytes": 101741,
+          "sha256": "c4a14966475ec3bbf5b71968f9803480b954bd77343a1ecb75e37b23f6f5f801"
+        },
+        {
+          "file": "theme-sprinkles-resolver-C84yxciI.cjs",
+          "bytes": 3904,
+          "sha256": "72d5add63e36343d83c26d08574f64d645a83ee6808ea2d6d375b27cda799565"
+        },
+        {
+          "file": "theme.cjs",
+          "bytes": 58310,
+          "sha256": "33a7be4c9eabe803c304be9a5dff0573773dd30eab7d74da9cee8f3d7db8a0df"
+        }
+      ],
+      "externals": [
+        "react"
+      ],
+      "bytes": 189279,
+      "nonliteralLoads": 0,
+      "ceiling": 44764,
+      "gate": "fail"
+    }
+  ],
+  "comparison": [
+    {
+      "entry": "theme-core.mjs",
+      "controlBytes": 35205,
+      "candidateBytes": 87848,
+      "ceiling": 17271,
+      "gapBytes": 70577,
+      "gate": "fail",
+      "growthBytes": 52643
+    },
+    {
+      "entry": "theme-core.cjs",
+      "controlBytes": 35426,
+      "candidateBytes": 88062,
+      "ceiling": 17641,
+      "gapBytes": 70421,
+      "gate": "fail",
+      "growthBytes": 52636
+    },
+    {
+      "entry": "theme.mjs",
+      "controlBytes": 86996,
+      "candidateBytes": 186341,
+      "ceiling": 44017,
+      "gapBytes": 142324,
+      "gate": "fail",
+      "growthBytes": 99345
+    },
+    {
+      "entry": "theme.cjs",
+      "controlBytes": 89711,
+      "candidateBytes": 189279,
+      "ceiling": 44764,
+      "gapBytes": 144515,
+      "gate": "fail",
+      "growthBytes": 99568
+    }
+  ]
+}
