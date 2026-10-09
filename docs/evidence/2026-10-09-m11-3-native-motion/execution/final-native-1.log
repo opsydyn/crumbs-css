@@ -1,0 +1,12 @@
+ 7 | import { assertM113NativeBinding, assertM113DeviceIdentity, assertM113RealNativeMap, failM113NativeQualification, nativeAttributes, nativeXmlAttributes, nativeActionPoint, readM113Observation, assertM113Plateau, inspectM113Png, assertM113Marker } from './m11-3-native-observations';
+ 8 | import type { MotionObservation, PixelMarker } from './m11-3-native-observations';
+ 9 | type Platform = 'ios' | 'android';
+10 | const repository = resolve(import.meta.dir, '..');
+11 | function ensure(condition: unknown, message: string): asserts condition { if (!condition)
+12 |     throw Error(message); }
+               ^
+error: Native qualification failed: Error: Owned device identity drift
+      at ensure (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-3-native-qualification.ts:12:11)
+      at qualify (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-3-native-qualification.ts:292:9)
+
+Bun v1.4.2 (macOS arm64)

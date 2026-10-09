@@ -9,6 +9,7 @@ import { ReferenceButton } from "./ReferenceButton"
 import { ReferenceDialog } from "./ReferenceDialog"
 import { ReferenceSelections } from "./ReferenceSelections"
 import { ReferenceTextField } from "./ReferenceTextField"
+import {NativeMotionDogfood} from "./NativeMotionDogfood"
 import { NativeAccessibilityContexts } from "./NativeAccessibilityContexts"
 import { ShowcaseCard } from "./ShowcaseCard"
 import { brandScopes, modeScopeFor, vars } from "../styles/theme"
@@ -72,6 +73,7 @@ export function ReferenceSystem() {
     <View style={styles.root}>
       <LocalVarsDogfood />
       <ContainerConditionsDogfood />
+      <NativeMotionDogfood />
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.eyebrow}>Typography</Text>

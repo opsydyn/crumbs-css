@@ -1,0 +1,38 @@
+bun test v1.4.2 (744846f84)
+
+test/motion.integration.tsx:
+(pass) native Hook exists in the installed artifact [4.08ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) stable controller, committed options, captured duration and initial lifetime [8.90ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) aborted render cannot publish speculative reduced motion [1.50ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) Strict Mode and three committed Suspense hide/reveal cycles retire runs [2.39ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) replacement owners and two physical copies remain independent [2.74ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+72 | 	"ease-in",
+73 | 	"ease-out",
+74 | 	"ease-in-out"
+75 | ]);
+76 | function motionError(code, path, message) {
+77 | 	throw new Error(formatNativeStylesDiagnostic(code, `${path}: ${message}`));
+                ^
+error: [crumbs-css:CRUMBS_CSS_MOTION_UNSUPPORTED_PLATFORM] motion.platform: expected ios, android or web
+      at motionError (/private/tmp/crumbs-m113-interim-consumer/node_modules/@opsydyn/crumbs-css/dist/theme-motion-native.mjs:77:12)
+      at <anonymous> (/private/tmp/crumbs-m113-interim-consumer/node_modules/@opsydyn/crumbs-css/dist/theme-motion-native.mjs:707:78)
+      at mountMemo (/private/tmp/crumbs-m113-interim-consumer/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:5897:23)
+      at useMemo (/private/tmp/crumbs-m113-interim-consumer/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:15986:18)
+      at useNativeMotion (/private/tmp/crumbs-m113-interim-consumer/node_modules/@opsydyn/crumbs-css/dist/theme-motion-native.mjs:707:16)
+      at Owner (/private/tmp/crumbs-m113-interim-consumer/test/motion.integration.tsx:19:239)
+      at react_stack_bottom_frame (/private/tmp/crumbs-m113-interim-consumer/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:15670:20)
+      at renderWithHooks (/private/tmp/crumbs-m113-interim-consumer/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:4863:22)
+      at updateFunctionComponent (/private/tmp/crumbs-m113-interim-consumer/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:7018:19)
+      at runWithFiberInDEV (/private/tmp/crumbs-m113-interim-consumer/node_modules/react-test-renderer/cjs/react-test-renderer.development.js:2315:13)
+(fail) reduced policy completes current run and unsupported platforms reject [3.26ms]
+
+ 5 pass
+ 1 fail
+ 33 expect() calls
+Ran 6 tests across 1 file. [40.00ms]

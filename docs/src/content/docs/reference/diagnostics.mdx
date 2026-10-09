@@ -54,3 +54,17 @@ Enable strict diagnostics when you want dropped declarations to fail instead of 
 | `CRUMBS_CSS_CONTAINER_REENTRANT_UPDATE` | Different-bucket publication attempted during notification. |
 
 Invalid data never becomes an unmeasured fallback. Diagnostics identify fields/owners without dumping selected application values.
+
+## Native motion diagnostics (M11.3)
+
+| Code | Cause |
+| --- | --- |
+| `CRUMBS_CSS_INVALID_MOTION_DEFINITION` | Invalid closed state/transition descriptor or numeric domain |
+| `CRUMBS_CSS_MOTION_UNSUPPORTED_VERSION` | Unknown definition tag/version |
+| `CRUMBS_CSS_INVALID_MOTION_OPTIONS` | Unknown option, initial state, preference or duration |
+| `CRUMBS_CSS_INVALID_MOTION_TARGET` | Command names an unknown state |
+| `CRUMBS_CSS_MOTION_UNSUPPORTED_PLATFORM` | Native adapter platform is outside iOS/Android/web |
+| `CRUMBS_CSS_MOTION_NOT_ACTIVE` | Command occurs before first committed activation |
+| `CRUMBS_CSS_MOTION_DRIVER_FAILED` | Native stop/read/set/start/completion failed |
+
+Run Promises resolve a failed terminal result rather than rejecting. Imperative `set` failures throw the bounded driver diagnostic; Hook cleanup never throws. Invalid arguments do not stop valid current work.

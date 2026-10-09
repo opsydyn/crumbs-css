@@ -1,0 +1,39 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/motion-machine.test.ts:
+(pass) late_cohort_cannot_write_after_set [0.42ms]
+(pass) same_pending_target_reuses_run [0.04ms]
+(pass) pending_targets_share_one_stopped_cohort [0.39ms]
+(pass) all_channels_must_finish [0.08ms]
+(pass) cancel_does_not_mark_target_reached [0.06ms]
+(pass) reduced_motion_finishes_latest_target [0.08ms]
+(pass) deactivate_retires_every_token [0.05ms]
+(pass) immediate_policy_has_no_read_or_start [0.04ms]
+10 | test('all_channels_must_finish',()=>{const h=harness(),r=h.request();h.sample(r.cohort);h.send({type:'completed',epoch:h.epoch,run:r.run,channel:'opacity',finished:true});expect(h.results(r.run)).toEqual([]);h.send({type:'completed',epoch:h.epoch,run:r.run,channel:'translateX',finished:false});expect(h.results(r.run)).toEqual([{status:'cancelled',target:'selected',reason:'driver-stopped'}]);h.send({type:'completed',epoch:h.epoch,run:r.run,channel:'translateX',finished:true});expect(h.results(r.run)).toHaveLength(1);});
+11 | test('cancel_does_not_mark_target_reached',()=>{const h=harness(),r=h.request();h.sample(r.cohort);h.send({type:'cancel',epoch:h.epoch,run:r.run});const next=h.request();expect(currentMotionRun(h.state)?.token).toBe(next.run);expect(h.results(next.run)).toEqual([]);expect(h.commands.filter(c=>c.type==='read')).toHaveLength(4);});
+12 | test('reduced_motion_finishes_latest_target',()=>{const h=harness(),first=h.request(),last=h.request('resting');h.send({type:'options',epoch:h.epoch,options:{initial:'selected',motion:'reduced',duration:60000}});expect(h.results(first.run)).toEqual([{status:'cancelled',target:'selected',reason:'superseded'}]);expect(h.results(last.run)).toEqual([{status:'finished',target:'resting',mode:'immediate'}]);expect(h.commands.filter(c=>c.type==='start')).toEqual([]);h.sample(first.cohort);expect(h.results(last.run)).toHaveLength(1);h.send({type:'options',epoch:h.epoch,options:{initial:'selected',motion:'full',duration:180}});expect(currentMotionRun(h.state)).toBeUndefined();});
+13 | test('deactivate_retires_every_token',()=>{const h=harness(),r=h.request();h.send({type:'deactivate',epoch:h.epoch});expect(h.results(r.run)).toEqual([{status:'cancelled',target:'selected',reason:'deactivated'}]);const before=h.commands.length;h.sample(r.cohort);h.send({type:'completed',epoch:h.epoch,run:r.run,channel:'opacity',finished:true});expect(h.commands.length).toBe(before);h.send({type:'activate',epoch:{},options:{initial:'resting',motion:'full',duration:180}});h.sample(r.cohort);expect(h.commands.length).toBe(before);});
+14 | test('immediate_policy_has_no_read_or_start',()=>{for(const [motion,duration] of [['reduced',180],['full',0]] as const){const h=harness(motion,duration),r=h.request();expect(h.results(r.run)).toEqual([{status:'finished',target:'selected',mode:'immediate'}]);expect(h.commands.filter(c=>c.type==='start'||c.type==='read')).toEqual([]);}});
+15 | test('cleanup_failure_overrides_pending_success_and_supersession',()=>{let state=createMotionMachine(definition,'resting'),epoch={};state=reduceMotion(state,{type:'activate',epoch,options:{initial:'resting',motion:'reduced',duration:180}}).state;const run={},r=reduceMotion(state,{type:'request',epoch,run,target:'selected',cohort:{}});expect(r.commands.some(c=>c.type==='settle')).toBe(false);const effect=r.commands[0]!;const failed=reduceMotion(r.state,{type:'driverFailed',epoch,operation:effect.operation});expect(failed.commands.filter(c=>c.type==='settle').map(c=>(c as any).result)).toEqual([{status:'failed',target:'selected',code:'CRUMBS_CSS_MOTION_DRIVER_FAILED'}]);});
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^
+error: expect(received).toEqual(expected)
+
+- [
+-   {
+-     "code": "CRUMBS_CSS_MOTION_DRIVER_FAILED",
+-     "status": "failed",
+-     "target": "selected",
+-   },
+- ]
++ []
+
+- Expected  - 7
++ Received  + 1
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/motion-machine.test.ts:15:592)
+(fail) cleanup_failure_overrides_pending_success_and_supersession [0.74ms]
+
+ 8 pass
+ 1 fail
+ 30 expect() calls
+Ran 9 tests across 1 file. [185.00ms]

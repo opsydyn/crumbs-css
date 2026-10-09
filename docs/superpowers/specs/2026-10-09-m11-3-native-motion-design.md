@@ -1,6 +1,6 @@
 # M11.3 — Typed native motion adapter
 
-**Status:** Approved as written by Alan Currie on 2026-10-09 following commit `be88bc2`. The [implementation plan](../plans/2026-10-09-m11-3-native-motion.md) is proposed for native/inline execution and awaits review; product implementation has not started.
+**Status:** Approved as written by Alan Currie on 2026-10-09 following commit `be88bc2`. The [implementation plan](../plans/2026-10-09-m11-3-native-motion.md) was approved for native/inline execution. Implementation and qualification are complete in the implementation commit containing this record. See the [final assessment](../../assessments/2026-10-09-m11-3-native-motion.md); the unchanged M10.5 release gate remains failed.
 
 **Date:** 2026-10-09.
 

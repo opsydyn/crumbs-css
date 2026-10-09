@@ -1,4 +1,12 @@
 export const NativeStylesDiagnosticCode = {
+  InvalidMotionDefinition: "CRUMBS_CSS_INVALID_MOTION_DEFINITION",
+  MotionUnsupportedVersion: "CRUMBS_CSS_MOTION_UNSUPPORTED_VERSION",
+  InvalidMotionOptions: "CRUMBS_CSS_INVALID_MOTION_OPTIONS",
+  InvalidMotionTarget: "CRUMBS_CSS_INVALID_MOTION_TARGET",
+  MotionNotActive: "CRUMBS_CSS_MOTION_NOT_ACTIVE",
+  MotionUnsupportedPlatform: "CRUMBS_CSS_MOTION_UNSUPPORTED_PLATFORM",
+  MotionDriverFailed: "CRUMBS_CSS_MOTION_DRIVER_FAILED",
+
   InvalidContainerDefinition: "CRUMBS_CSS_INVALID_CONTAINER_DEFINITION",
   ContainerUnsupportedVersion: "CRUMBS_CSS_CONTAINER_UNSUPPORTED_VERSION",
   InvalidContainerMeasurement: "CRUMBS_CSS_INVALID_CONTAINER_MEASUREMENT",

@@ -1,0 +1,67 @@
+---
+title: Use native motion
+description: Typed immutable motion states with an instance-owned React Native Animated adapter.
+---
+
+Define motion states in ordinary `.ts` files. The pure entry has no runtime peers. Import the optional Hook only where an `Animated.View` needs it.
+
+```tsx
+import { defineMotion } from '@opsydyn/crumbs-css/theme/motion';
+import { useNativeMotion } from '@opsydyn/crumbs-css/theme/motion/native';
+import { Animated, Pressable } from 'react-native';
+
+const cardMotion = defineMotion({
+  states: {
+    resting: { opacity: 0.8, translateY: 0 },
+    selected: { opacity: 1, translateY: -4 },
+  },
+  transition: { duration: 180, easing: 'ease-out' },
+});
+
+function Card({ motion }: { motion: 'full' | 'reduced' }) {
+  const card = useNativeMotion(cardMotion, { initial: 'resting', motion });
+  return (
+    <Pressable onPress={() => { card.animateTo('selected'); }}>
+      <Animated.View style={[{ padding: 16 }, card.style]} />
+    </Pressable>
+  );
+}
+```
+
+Use the existing [native condition snapshot](/crumbs-css/how-to/use-themes/) or your application's accessibility source for `motion`. Bootstrap conservatively with `reduced` until the native preference resolves; the adapter requires this explicit input and does not query accessibility or mount a provider. Reduced motion during a run stops it and reaches the latest target immediately. Restoring full motion does not replay it.
+
+## Definitions and composition
+
+Each definition has 1–16 named states with the same exact nonempty subset of `opacity`, `translateX`, `translateY`, `scale`, `scaleX`, `scaleY`. State names begin with a letter, contain only letters, numbers, `.`, `_`, `-`, and have at most 64 characters. Reserved prototype names are rejected. Opacity is finite in `[0,1]`; transforms are finite numbers representable as finite native float32 values. Authored precision is preserved and negative zero is normalised. Translation uses native layout units; scale is unitless. Durations are finite milliseconds in `[0,60000]`, including zero and fractions. Easings are exactly `linear`, `ease-in`, `ease-out`, `ease-in-out` (linear or quadratic curves).
+
+Definitions copy and freeze data without freezing your input. Admission rejects accessors, hidden/inherited/symbol/extra properties without executing getters. Fully frozen same-format v1 definitions from another package copy work. Keep the definition reference stable: replacing it creates a new owner; changing `initial` alone does not reset the owner.
+
+The returned transform array replaces the **entire** transform field. Put unrelated static transforms on a wrapper. Order is `translateX`, `translateY`, `scale`, `scaleX`, `scaleY`. Motion does not belong inside `.css.ts`, theme tokens, recipes or Sprinkles. No compiler payload format changes are required.
+
+## Commands and results
+
+`animateTo` accepts only inferred state names. A repeated active target returns the same run; an already reached target finishes immediately. Keep the run when a particular interaction owns cancellation:
+
+```ts
+const run = card.animateTo('selected');
+const result = await run.result;
+// run.cancel() cancels only this run; a retired run cannot stop its replacement.
+```
+
+The Promise resolves exactly once and never rejects:
+
+| Status | Fields |
+| --- | --- |
+| `finished` | `target`, `mode: 'animated' \| 'immediate'` |
+| `cancelled` | `target`, `reason: 'cancelled' \| 'superseded' \| 'set' \| 'deactivated' \| 'driver-stopped'` |
+| `failed` | `target`, `code: 'CRUMBS_CSS_MOTION_DRIVER_FAILED'` |
+
+`card.cancel()` stops the current run and preserves its actual native presentation. `card.set('resting')` supersedes the run and writes that state immediately. Invalid commands fail before disturbing a valid run. Synchronous imperative `set` driver failures throw the bounded diagnostic and do not promise rollback. When native stop synchronisation is pending, completion waits for the owner's corrective writes. A delayed write failure resolves the associated run as `failed`, clears reached-state knowledge and attempts every cleanup channel; it does not throw from the native callback. Ignore obsolete UI observers after unmount or owner replacement; the adapter protects its nodes and settlements, while your component owns the lifetime of its Promise handlers.
+
+Committed `motion` and optional `duration` props affect the owner. Duration changes apply to future requests. Strict Mode and committed Suspense cleanup retire the activation epoch; later setup resumes from stopped presentation without reviving old runs. Before first activation commands fail; after deactivation valid `animateTo` resolves cancelled/deactivated and `set`/`cancel` are no-ops.
+
+## Runtime and qualification boundaries
+
+The adapter uses public React Native `Animated.Value`, `stopAnimation` and timing with `isInteraction: false`. It uses the native driver on iOS/Android and the JS driver for web smoke; other platforms are rejected. Each instance owns at most six values, one current run/read cohort, and bounded pending settlements. It registers no frame listeners, React state updates, theme resolution or history. Interruption reads stopped native presentation through the public callback, never a private JS snapshot. When an interrupted native timing queues a late value synchronisation, a bounded public stop acknowledgement lets the owner repeat the current immediate write before settling its result. Its sample is ignored; retired operations cannot write to a replacement or deactivated owner.
+
+The M11.3 evidence packet records exact packed entry bytes, real React with a synthetic RN host harness, real installed Expo exports, and separate native development interactions. Only completed receipts establish their respective acceptance. Live authored-style HMR, release Hermes performance, physical devices and spoken screen readers remain separate. M10.5's release host-budget gate remains open; this guide does not establish release-wide qualification or publication. Historical artifacts can share the alpha version while lacking these entries: inspect the installed export map and tarball SHA.

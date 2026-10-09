@@ -1,0 +1,34 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/packed-runtime-graph.test.ts:
+469 |   const subpaths = [...new Set(targets.map((target) => target.subpath))]
+470 |   const classifications = new Map<string, PackedRuntimeClassification>()
+471 |   for (const subpath of subpaths) {
+472 |     const classification = exportClasses[subpath]
+473 |     if (classification === undefined) {
+474 |       throw new Error(`Unclassified export subpath ${subpath}; assign a runtime or metadata class`)
+                      ^
+error: Unclassified export subpath ./theme/motion; assign a runtime or metadata class
+      at auditPackedRuntimeEntrypoints (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/packed-runtime-graph.ts:474:17)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/packed-runtime-graph.test.ts:708:21)
+(fail) only the isolated native motion entry admits the public RN peer [6.79ms]
+709 |  for(const specifier of ['react-native/private','effect','node:fs']){await writeFile(join(pkg,'dist/motion-native.mjs'),`import "${specifier}";`);await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow('Forbidden');}
+710 |  await writeFile(join(pkg,'dist/motion-native.mjs'),'import "react-native";');await writeFile(join(pkg,'dist/theme-core.mjs'),'import "react-native";');await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow('Forbidden');
+711 | });
+712 | test('motion entries cannot reach an existing runtime entry',async()=>{
+713 |  const pkg=await createFixturePackage({extraExports:{'./theme/motion':runtimeExport('motion')},overrides:{'dist/motion.mjs':'import "./theme-core.mjs";','dist/motion.cjs':'exports.defineMotion=()=>{};'}});
+714 |  await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow(/isolated motion/);
+                                                                ^
+error: expect(received).toThrow(expected)
+
+Expected pattern: /isolated motion/
+Received message: "Unclassified export subpath ./theme/motion; assign a runtime or metadata class"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/packed-runtime-graph.test.ts:714:59)
+(fail) motion entries cannot reach an existing runtime entry [4.79ms]
+
+ 0 pass
+ 44 filtered out
+ 2 fail
+ 1 expect() calls
+Ran 2 tests across 1 file. [243.00ms]

@@ -1,0 +1,31 @@
+535 |   throw Error(`Metro measurement port ${port} is already in use`)
+536 | }
+537 | async function waitForMetro(port: number, child: ReturnType<typeof Bun.spawn>, logs: string[], timeout: number) {
+538 |   const started = performance.now()
+539 |   while (performance.now() - started < timeout) {
+540 |     if (child.exitCode !== null) throw Error(`Metro exited before readiness with code ${child.exitCode}: ${logs.join("").slice(-2000)}`)
+                                             ^
+error: Metro exited before readiness with code 1: env: load .env.local
+env: export EXPO_PUBLIC_CRUMBS_MODE EXPO_PUBLIC_CRUMBS_REVISION EXPO_PUBLIC_CRUMBS_VERSION
+Networking has been disabled
+Starting project at /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground
+Starting Metro Bundler
+
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Dependency validation is unreliable in offline-mode
+CommandError: It looks like you're trying to use TypeScript but don't have the required
+dependencies installed.
+
+Install @types/react by running:
+
+npx expo install @types/react
+
+If you're not using TypeScript, please remove the TypeScript files from your
+project
+
+
+      at waitForMetro (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:540:40)
+      at async startMetro (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:463:9)
+      at async measureMetroIncremental (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:282:31)
+
+Bun v1.4.2 (macOS arm64)

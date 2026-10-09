@@ -702,3 +702,14 @@ test("auditPackedRuntimeEntrypoints rejects an export with no runtime class", as
 
 for(const denied of ['react-native','node:fs','effect/Schema'])test(`container entry refuses runtime ${denied}`,async()=>{const root=await createFixturePackage({extraExports:{'./theme/containers':runtimeExport('theme-containers')},overrides:{'dist/theme-containers.mjs':`import '${denied}'; export {};`,'dist/theme-containers.cjs':'module.exports = {};'}});await expect(auditPackedRuntimeEntrypoints(root)).rejects.toThrow();});
 test('container graph is independently classified and accepts only React',async()=>{const root=await createFixturePackage({extraExports:{'./theme/containers':runtimeExport('theme-containers')},overrides:{'dist/theme-containers.mjs':"import React from 'react';export const x=React;",'dist/theme-containers.cjs':"exports.x=require('react');"}});const graphs=await auditPackedRuntimeEntrypoints(root);expect(graphs.filter(g=>g.subpath==='./theme/containers').map(g=>g.externalSpecifiers)).toEqual([['react'],['react']]);});
+
+test('only the isolated native motion entry admits the public RN peer',async()=>{
+ const pkg=await createFixturePackage({extraExports:{'./theme/motion':runtimeExport('motion'),'./theme/motion/native':runtimeExport('motion-native')},overrides:{'dist/motion.mjs':'export const defineMotion=()=>{};','dist/motion.cjs':'exports.defineMotion=()=>{};','dist/motion-native.mjs':'import "react"; import "react-native"; export const useNativeMotion=()=>{};','dist/motion-native.cjs':'require("react");require("react-native");exports.useNativeMotion=()=>{};'}});
+ const graphs=await auditPackedRuntimeEntrypoints(pkg);expect(graphs.find(g=>g.subpath==='./theme/motion/native'&&g.format==='esm')?.externalSpecifiers).toEqual(['react','react-native']);
+ for(const specifier of ['react-native/private','effect','node:fs']){await writeFile(join(pkg,'dist/motion-native.mjs'),`import "${specifier}";`);await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow('unauthorized external');}
+ await writeFile(join(pkg,'dist/motion-native.mjs'),'import "react-native";');await writeFile(join(pkg,'dist/theme-core.mjs'),'import "react-native";');await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow('unauthorized external');
+});
+test('motion entries cannot reach an existing runtime entry',async()=>{
+ const pkg=await createFixturePackage({extraExports:{'./theme/motion':runtimeExport('motion')},overrides:{'dist/motion.mjs':'import "./theme-core.mjs";','dist/theme-core.mjs':'export const core=true;','dist/motion.cjs':'exports.defineMotion=()=>{};'}});
+ await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow(/isolated motion/);
+});

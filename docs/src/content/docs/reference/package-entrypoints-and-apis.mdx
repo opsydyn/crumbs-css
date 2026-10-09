@@ -546,3 +546,9 @@ Opt in to `assignVars`, `resolveAssignedStyles` and `useAssignedStyles`. The six
 `@opsydyn/crumbs-css/theme/containers` publishes six values: `defineContainer`, `getContainerBucket`, `resolveContainerValue`, `useContainerLayout`, `ContainerProvider`, `useContainerValue`. Its seven public types are `NativeContainerAxis`, `NativeContainerDefinitionInput`, `NativeContainerDefinition`, `NativeContainerBucket`, `NativeContainerValues`, `NativeContainerLayout` and `ContainerProviderProps`. It is an independent React-only runtime graph.
 
 [Use container conditions](/how-to/use-container-conditions/) describes exhaustive maps, independently constrained owners and portal adapters. These exports are opt-in and are not forwarded from root/theme/core. Availability belongs to the exact tarball, not every historical alpha package with the same version.
+
+## Native motion entries (M11.3)
+
+`@opsydyn/crumbs-css/theme/motion` exports only `defineMotion` at runtime; `NativeMotionChannel`, `NativeMotionTarget`, `NativeMotionDefinitionInput`, `NativeMotionDefinition`, `NativeMotionState` and `NativeMotionEasing` are types. It has no runtime peers.
+
+`@opsydyn/crumbs-css/theme/motion/native` exports only `useNativeMotion`; options/controller/run/result and pure motion types are type-only. This optional graph uses public React/React Native. Both entries build independently and add no values through older entries or aliases. See [native motion](/crumbs-css/how-to/use-native-motion/).

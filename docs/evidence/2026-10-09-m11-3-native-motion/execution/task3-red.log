@@ -1,0 +1,28 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/motion-package.test.ts:
+1 | import {expect,test} from 'bun:test';
+2 | import {readFile} from 'node:fs/promises';
+3 | import {auditPackedRuntimeEntrypoints} from '../../../scripts/packed-runtime-graph';
+4 | test('motion_entries_have_only_the_approved_values_and_isolated_graphs',async()=>{const manifest=JSON.parse(await readFile(new URL('../package.json',import.meta.url),'utf8'));expect(manifest.exports['./theme/motion']).toBeDefined();expect(manifest.exports['./theme/motion/native']).toBeDefined();const root=new URL('..',import.meta.url).pathname;const graphs=await auditPackedRuntimeEntrypoints(root);expect(graphs.filter(g=>g.subpath==='./theme/motion').every(g=>g.externalSpecifiers.length===0)).toBe(true);expect(graphs.filter(g=>g.subpath==='./theme/motion/native').every(g=>g.externalSpecifiers.includes('react-native')&&g.externalSpecifiers.includes('react'))).toBe(true)});
+
+error: expect(received).toBeDefined()
+
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/motion-package.test.ts:4:219)
+(fail) motion_entries_have_only_the_approved_values_and_isolated_graphs [0.32ms]
+
+packages/css/test/motion-owner.test.ts:
+
+# Unhandled error between tests
+-------------------------------
+error: Cannot find module '../src/motion/owner' from '/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/motion-owner.test.ts'
+-------------------------------
+
+
+ 0 pass
+ 2 fail
+ 1 error
+ 1 expect() calls
+Ran 2 tests across 2 files. [240.00ms]

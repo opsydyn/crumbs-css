@@ -1,0 +1,54 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-3-qualification.test.ts:
+(pass) acceptance_requires_host_ios_android_with_failed_dominating [0.06ms]
+(pass) source_artifact_and_installed_consumer_drift_are_rejected [0.58ms]
+(pass) foreign_nonempty_consumer_root_is_refused [0.02ms]
+(pass) native_binding_and_device_drift_are_rejected [0.03ms]
+(pass) fake_peer_native_maps_are_refused [0.05ms]
+(pass) failure_after_passed_phases_invalidates_both_platforms [0.03ms]
+(pass) actual_marker_pixels_determine_displacement_and_opacity [27.39ms]
+(pass) native_hierarchy_parsing_and_enabled_action_bounds [0.33ms]
+(pass) native_plateau_requires_equal_samples_spanning_100ms [0.06ms]
+(pass) native_inputs_include_config_and_generated_style_and_reject_byte_drift [2.86ms]
+(pass) native_input_manifest_rejects_nested_path_escape_before_reading [0.03ms]
+(pass) native_cleanup_failure_retains_the_first_execution_error [0.15ms]
+(pass) owned_launch_overlay_is_bounded_to_expo_and_the_motion_project [0.09ms]
+(pass) ios_reduce_motion_targets_the_observed_switch_not_the_accessibility_row_centre [0.05ms]
+(pass) fast_ios_input_requires_the_owned_booted_simulator_identity [0.03ms]
+81 | });
+82 | 
+83 | import * as m113NativeTools from '../../../scripts/m11-3-native-observations';
+84 | const m113AndroidLaunchNeedsRedirect = (m113NativeTools as unknown as Record<string, (output: string) => boolean>)['m113AndroidLaunchNeedsRedirect']!;
+85 | test('android_launch_redirect_only_retries_the_actual_cold_launcher',()=>{
+86 |  expect(m113AndroidLaunchNeedsRedirect('Status: ok\nLaunchState: UNKNOWN (0)\nActivity: host.exp.exponent/.LauncherActivity\nComplete')).toBe(true);
+             ^
+TypeError: m113AndroidLaunchNeedsRedirect is not a function. (In 'm113AndroidLaunchNeedsRedirect(`Status: ok
+LaunchState: UNKNOWN (0)
+Activity: host.exp.exponent/.LauncherActivity
+Complete`)', 'm113AndroidLaunchNeedsRedirect' is undefined)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-3-qualification.test.ts:86:9)
+(fail) android_launch_redirect_only_retries_the_actual_cold_launcher [0.67ms]
+89 |  expect(()=>m113AndroidLaunchNeedsRedirect('Error: Activity not started')).toThrow();
+90 | });
+91 | test('owned_android_developer_welcome_is_recognised_without_dismissing_foreign_prompts',()=>{
+92 |  const action={text:'Continue',enabled:'true',bounds:'[464,2145][617,2190]'};
+93 |  const welcome=[{text:'Crumbs M11.3 Motion'},{text:'SDK version: 56.0.0'},{text:'This is the developer menu. It gives you access to useful tools in your development builds.'},action];
+94 |  expect(m113LaunchOverlayAction(welcome)).toBe(action);
+                                               ^
+error: expect(received).toBe(expected)
+
+Expected: {
+  text: "Continue",
+  enabled: "true",
+  bounds: "[464,2145][617,2190]",
+}
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-3-qualification.test.ts:94:43)
+(fail) owned_android_developer_welcome_is_recognised_without_dismissing_foreign_prompts [0.80ms]
+
+ 15 pass
+ 2 fail
+ 72 expect() calls
+Ran 17 tests across 1 file. [273.00ms]

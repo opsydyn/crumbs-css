@@ -1,0 +1,20 @@
+bun test v1.4.2 (744846f84)
+
+apps/storybook/test/NativeMotionDogfood.test.ts:
+(pass) fixture_independent_card_commands [0.13ms]
+(pass) bounded_parent_terminal_records_and_retired_mount_rejection [0.09ms]
+1 | import { expect, test } from 'bun:test';
+2 | import { initialMotionScenario, updateMotionScenario } from '../src/components/native-motion/motion-model';
+3 | test('fixture_independent_card_commands', () => { const first = initialMotionScenario(), next = updateMotionScenario(first, { type: 'request', card: 'a', target: 'selected' }); expect(next.requested).toEqual({ a: 'selected', b: 'resting' }); expect(first.requested).toEqual({ a: 'resting', b: 'resting' }); const b = updateMotionScenario(next, { type: 'request', card: 'b', target: 'selected' }); expect(b.requested).toEqual({ a: 'selected', b: 'selected' }); });
+4 | test('bounded_parent_terminal_records_and_retired_mount_rejection', () => { let state = initialMotionScenario(); for (let i = 0; i < 100; i++)
+5 |     state = updateMotionScenario(state, { type: 'terminal', card: 'b', generation: 0, result: { status: 'finished', target: i % 2 ? 'selected' : 'resting', mode: 'animated' } }); expect(state.terminals).toHaveLength(2); state = updateMotionScenario(state, { type: 'unmount' }); expect(updateMotionScenario(state, { type: 'terminal', card: 'a', generation: 0, result: { status: 'cancelled', target: 'selected', reason: 'deactivated' } })).toBe(state); state = updateMotionScenario(state, { type: 'remount' }); expect(state.aGeneration).toBe(1); expect(state.requested.a).toBe('resting'); expect(updateMotionScenario(state, { type: 'terminal', card: 'a', generation: 0, result: { status: 'finished', target: 'selected', mode: 'animated' } })).toBe(state); });
+6 | test('stale_cancel_records_one_bounded_pending_run_observation',()=>{const initial=initialMotionScenario();const pending=updateMotionScenario(initial,{type:'stale-cancel',pending:true} as never);expect(pending.staleCancelDuringPending).toBe(true);const finished=updateMotionScenario(pending,{type:'stale-cancel',pending:false} as never);expect(finished.staleCancelDuringPending).toBe(false);expect(finished.terminals).toEqual([]);expect(finished.requested).toEqual(initial.requested)});
+                                                                                                                                                                                                              ^
+TypeError: undefined is not an object (evaluating 'pending.staleCancelDuringPending')
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/NativeMotionDogfood.test.ts:6:203)
+(fail) stale_cancel_records_one_bounded_pending_run_observation [0.17ms]
+
+ 2 pass
+ 1 fail
+ 8 expect() calls
+Ran 3 tests across 1 file. [627.00ms]

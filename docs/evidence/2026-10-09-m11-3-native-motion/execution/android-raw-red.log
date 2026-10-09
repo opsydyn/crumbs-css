@@ -1,0 +1,36 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-3-qualification.test.ts:
+(pass) acceptance_requires_host_ios_android_with_failed_dominating [0.06ms]
+(pass) source_artifact_and_installed_consumer_drift_are_rejected [0.06ms]
+(pass) foreign_nonempty_consumer_root_is_refused [0.01ms]
+(pass) native_binding_and_device_drift_are_rejected [0.03ms]
+(pass) fake_peer_native_maps_are_refused [0.04ms]
+(pass) failure_after_passed_phases_invalidates_both_platforms [0.03ms]
+(pass) actual_marker_pixels_determine_displacement_and_opacity [27.47ms]
+(pass) native_hierarchy_parsing_and_enabled_action_bounds [0.33ms]
+(pass) native_plateau_requires_equal_samples_spanning_100ms [0.05ms]
+(pass) native_inputs_include_config_and_generated_style_and_reject_byte_drift [1.69ms]
+(pass) native_input_manifest_rejects_nested_path_escape_before_reading [0.05ms]
+(pass) native_cleanup_failure_retains_the_first_execution_error [0.03ms]
+(pass) owned_launch_overlay_is_bounded_to_expo_and_the_motion_project [0.10ms]
+(pass) ios_reduce_motion_targets_the_observed_switch_not_the_accessibility_row_centre [0.06ms]
+(pass) fast_ios_input_requires_the_owned_booted_simulator_identity [0.03ms]
+(pass) android_launch_redirect_only_retries_the_actual_cold_launcher [0.05ms]
+(pass) owned_android_developer_welcome_is_recognised_without_dismissing_foreign_prompts [0.04ms]
+(pass) owned_android_developer_menu_uses_observed_content_description_close [0.03ms]
+105 | import * as rawCaptureTools from '../../../scripts/m11-3-native-observations';
+106 | const encodeAndroidRawCapture=(rawCaptureTools as unknown as Record<string,(bytes:Buffer)=>Buffer>)['encodeM113AndroidRgba']!;
+107 | test('android_raw_capture_preserves_native_rgba_bytes_and_rejects_other_formats',()=>{
+108 |  const width=64,height=64,raw=Buffer.alloc(16+width*height*4);[width,height,1,1].forEach((n,i)=>raw.writeUInt32LE(n,i*4));
+109 |  for(let i=16;i<raw.length;i+=4){raw[i]=37;raw[i+1]=99;raw[i+2]=235;raw[i+3]=255;}
+110 |  const png=encodeAndroidRawCapture(raw),marker=inspectM113Png(png);expect(marker.width).toBe(width);expect(marker.height).toBe(height);expect(marker.a?.x).toBe(0);expect(marker.a?.width).toBe(width);expect(marker.a?.opacity).toBe(1);
+                 ^
+TypeError: encodeAndroidRawCapture is not a function. (In 'encodeAndroidRawCapture(raw)', 'encodeAndroidRawCapture' is undefined)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-3-qualification.test.ts:110:12)
+(fail) android_raw_capture_preserves_native_rgba_bytes_and_rejects_other_formats [0.33ms]
+
+ 18 pass
+ 1 fail
+ 82 expect() calls
+Ran 19 tests across 1 file. [575.00ms]

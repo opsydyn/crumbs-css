@@ -1,0 +1,57 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/motion-animated.test.ts:
+1 | import {expect,test} from 'bun:test';
+2 | import {resolve} from 'node:path';
+3 | test('public_animated_stop_sync_cannot_overwrite_immediate_endpoints_or_revive_retired_writes',()=>{
+4 |  const child=Bun.spawnSync([process.execPath,resolve(import.meta.dir,'support/motion-animated-probe.ts')],{stdout:'pipe',stderr:'pipe'});
+5 |  expect({exitCode:child.exitCode,stderr:child.stderr.toString()}).toEqual({exitCode:0,stderr:''});
+                                                                      ^
+error: expect(received).toEqual(expected)
+
+  {
+-   "exitCode": 0,
+-   "stderr": "",
++   "exitCode": 1,
++   "stderr": 
++ "22 | function begin(){values.length=reads.length=lateSyncs.length=stopAcks.length=0;const owner=createMotionOwner(d,'resting',createAnimatedMotionDriver());owner.activate({initial:'resting',motion:'full',duration:180});const run=owner.controller.animateTo('selected');for(const read of reads.splice(0))read();values[0]!.native=.75;values[1]!.native=42;return {owner,run}}
++ 23 | for(const command of ['reduced','set'] as const){
++ 24 |  const {owner,run}=begin();if(command==='reduced')owner.commitOptions({initial:'resting',motion:'reduced',duration:180});else owner.controller.set('selected');
++ 25 |  const result=await run.result;assert.equal(result.status,command==='reduced'?'finished':'cancelled');
++ 26 |  for(const sync of lateSyncs.splice(0))sync();for(const ack of stopAcks.splice(0))ack();
++ 27 |  assert.deepEqual(values.map(v=>v.rendered),[1,112],command+' must retain the actual endpoint after native stop synchronization');owner.deactivate();
++              ^
++ AssertionError: reduced must retain the actual endpoint after native stop synchronization
++ + actual - expected
++ 
++   [
++ +   0.75,
++ +   42
++ -   1,
++ -   112
++   ]
++ 
++  generatedMessage: false,
++      actual: [ 0.75, 42 ],
++    expected: [ 1, 112 ],
++    operator: "deepStrictEqual",
++        diff: "simple",
++        code: "ERR_ASSERTION"
++ 
++       at /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/support/motion-animated-probe.ts:27:9
++ 
++ Bun v1.4.2 (macOS arm64)
++ "
++ ,
+  }
+
+- Expected  - 2
++ Received  + 31
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/motion-animated.test.ts:5:67)
+(fail) public_animated_stop_sync_cannot_overwrite_immediate_endpoints_or_revive_retired_writes [20.33ms]
+
+ 0 pass
+ 1 fail
+ 1 expect() calls
+Ran 1 test across 1 file. [477.00ms]

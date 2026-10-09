@@ -1,0 +1,12 @@
+49 |     }
+50 |     consumer ??= await mkdtemp(join(tmpdir(), 'crumbs-m113-consumer-'));
+51 |     await mkdir(output, { recursive: true });
+52 |     const sourceBefore = await m113SourceIdentity(), commands: Record<string, unknown>[] = [];
+53 |     const run = async (command: string[], cwd = consumer!, name = 'command', env: Record<string, string> = {}) => { const child = Bun.spawn(command, { cwd, env: { ...process.env, CI: '1', EXPO_NO_METRO_WORKSPACE_ROOT: '1', NODE_OPTIONS: ((process.env.NODE_OPTIONS ?? '') + ' --dns-result-order=ipv4first').trim(), ...env }, stdout: 'pipe', stderr: 'pipe' }); const [stdout, stderr, exitCode] = await Promise.all([new Response(child.stdout).text(), new Response(child.stderr).text(), child.exited]); const log = join(output, `${commands.length}-${name}.log`); await writeFile(log, stdout + stderr); commands.push({ command, cwd, exitCode, log, startedAt: new Date().toISOString() }); if (exitCode !== 0)
+54 |         throw Error(`${name} exited ${exitCode}; ${log}`); return stdout.trim(); };
+                   ^
+error: expo-ios exited 1; /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-3-native-motion/host/13-expo-ios.log
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-3-qualification.ts:54:15)
+      at async qualify (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-3-qualification.ts:185:23)
+
+Bun v1.4.2 (macOS arm64)

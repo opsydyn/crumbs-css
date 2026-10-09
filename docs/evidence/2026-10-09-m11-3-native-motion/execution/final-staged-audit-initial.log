@@ -1,0 +1,11 @@
+4 | import {captureGuaranteesSourceIdentity} from '../../../scripts/guarantees-matrix/source-identity';
+5 | import {m113SourceIdentity,m113Sha} from '../../../scripts/m11-3-qualification';
+6 | const root=process.cwd(),scratch=join(root,'.superpowers/sdd/2026-10-09-m11-3-native-motion'),evidence=join(root,'docs/evidence/2026-10-09-m11-3-native-motion');
+7 | const manifest=JSON.parse(await readFile(join(scratch,'proposed-files.json'),'utf8'));
+8 | const paths=execFileSync('git',['diff','--cached','--name-only','-z',manifest.base],{encoding:'utf8'}).split('\0').filter(Boolean).sort();
+9 | if(JSON.stringify(paths)!==JSON.stringify(manifest.files.map((r:any)=>r.path).sort()))throw Error('Staged manifest paths differ');
+                                                                                                ^
+error: Staged manifest paths differ
+      at /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/sdd/2026-10-09-m11-3-native-motion/final-staged-audit.ts:9:93
+
+Bun v1.4.2 (macOS arm64)

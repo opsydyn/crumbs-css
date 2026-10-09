@@ -1,0 +1,32 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-3-qualification.test.ts:
+(pass) acceptance_requires_host_ios_android_with_failed_dominating [0.06ms]
+(pass) source_artifact_and_installed_consumer_drift_are_rejected [0.06ms]
+(pass) foreign_nonempty_consumer_root_is_refused [0.02ms]
+(pass) native_binding_and_device_drift_are_rejected [0.03ms]
+(pass) fake_peer_native_maps_are_refused [0.04ms]
+(pass) failure_after_passed_phases_invalidates_both_platforms [0.02ms]
+(pass) actual_marker_pixels_determine_displacement_and_opacity [26.81ms]
+(pass) native_hierarchy_parsing_and_enabled_action_bounds [0.33ms]
+(pass) native_plateau_requires_equal_samples_spanning_100ms [0.05ms]
+(pass) native_inputs_include_config_and_generated_style_and_reject_byte_drift [1.75ms]
+58 |     await expect(verifyM113InputFiles(root, files)).rejects.toThrow('Input changed');
+59 | }
+60 | finally {
+61 |     await rm(root, { recursive: true, force: true });
+62 | } });
+63 | test('native_input_manifest_rejects_nested_path_escape_before_reading',async()=>{await expect(verifyM113InputFiles('/owned',[{path:'src/../../foreign',sha256:'foreign'}])).rejects.toThrow('Input escaped')});
+                                                                                                                                                                                         ^
+error: expect(received).toThrow(expected)
+
+Expected substring: "Input escaped"
+Received message: "ENOENT: no such file or directory, open '/foreign'"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-3-qualification.test.ts:63:181)
+(fail) native_input_manifest_rejects_nested_path_escape_before_reading [0.15ms]
+
+ 10 pass
+ 1 fail
+ 54 expect() calls
+Ran 11 tests across 1 file. [284.00ms]

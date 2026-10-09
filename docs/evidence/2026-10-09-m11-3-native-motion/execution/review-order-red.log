@@ -1,0 +1,39 @@
+bun test v1.4.2 (744846f84)
+
+../../../../../../private/tmp/m113-review-order-probe/test/motion.integration.tsx:
+10 | let modules: Awaited<ReturnType<typeof loadModules>> | undefined;
+11 | async function loadModules() { const esm = await import('@opsydyn/crumbs-css/theme/motion/native'); loadedFormats.push('esm'); const cjs = require('@opsydyn/crumbs-css/theme/motion/native') as typeof esm; loadedFormats.push('cjs'); const pure = await import('@opsydyn/crumbs-css/theme/motion'); const first = process.env.CRUMBS_IMPORT_ORDER === 'cjs-first' ? cjs : esm; return { first, second: first === esm ? cjs : esm, pure }; }
+12 | async function load() { return modules ??= await loadModules(); }
+13 | const input = { states: { resting: { opacity: .6, translateX: 0 }, selected: { opacity: 1, translateX: 112 } }, transition: { duration: 180, easing: 'ease-in-out' } } as const;
+14 | const options = { initial: 'resting', motion: 'full', duration: 180 } as const;
+15 | test('native Hook exists in the installed artifact', async () => { const { first, second } = await load(); expect(Object.keys(first)).toEqual(['useNativeMotion']); expect(Object.keys(second)).toEqual(['useNativeMotion']); expect(loadedFormats).toEqual(process.env.CRUMBS_IMPORT_ORDER === 'cjs-first' ? ['cjs', 'esm'] : ['esm', 'cjs']); console.log('actual native import sequence: ' + loadedFormats.join(' -> ')); });
+                                                                                                                                                                                                                                                         ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "cjs",
+    "esm",
++   "cjs",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at <anonymous> (/private/tmp/m113-review-order-probe/test/motion.integration.tsx:15:245)
+(fail) native Hook exists in the installed artifact [3.86ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) stable controller, committed options, captured duration and initial lifetime [5.07ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) aborted render cannot publish speculative reduced motion [1.38ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) Strict Mode and three committed Suspense hide/reveal cycles retire runs [2.06ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) replacement owners and two physical copies remain independent [3.06ms]
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+(pass) reduced policy completes current run and unsupported platforms reject [0.90ms]
+
+ 5 pass
+ 1 fail
+ 36 expect() calls
+Ran 6 tests across 1 file. [31.00ms]

@@ -1,0 +1,1 @@
+Object.defineProperty(exports,Symbol.toStringTag,{value:`Module`});const e=require(`./payloads-CHmGay-D.cjs`),t=require(`./tokens-schema-value.cjs`);function n(t){return e.n.decode(t)}function r(t){return e.n.encode(t)}exports.decodeExternalTokenTheme=n,exports.decodeTokenValue=t.decodeTokenValue,exports.encodeExternalTokenTheme=r,exports.externalTokenThemeCodec=e.n;

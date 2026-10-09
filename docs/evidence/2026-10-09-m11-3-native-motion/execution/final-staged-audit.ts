@@ -1,0 +1,22 @@
+import {readFile,writeFile} from 'node:fs/promises';
+import {execFileSync} from 'node:child_process';
+import {join} from 'node:path';
+import {captureGuaranteesSourceIdentity} from '../../../scripts/guarantees-matrix/source-identity';
+import {m113SourceIdentity,m113Sha} from '../../../scripts/m11-3-qualification';
+const root=process.cwd(),scratch=join(root,'.superpowers/sdd/2026-10-09-m11-3-native-motion'),evidence=join(root,'docs/evidence/2026-10-09-m11-3-native-motion');
+const manifest=JSON.parse(await readFile(join(scratch,'proposed-files.json'),'utf8'));
+const paths=execFileSync('git',['diff','--cached','--name-only','-z',manifest.base],{encoding:'utf8'}).split('\0').filter(Boolean).sort();
+if(JSON.stringify(paths)!==JSON.stringify(manifest.files.map((r:any)=>r.path).sort()))throw Error('Staged manifest paths differ');
+for(const row of manifest.files){const working=await readFile(join(root,row.path));const staged=execFileSync('git',['show',':'+row.path],{maxBuffer:64*1024*1024});if(m113Sha(working)!==row.sha256||m113Sha(staged)!==row.sha256)throw Error('Staged bytes differ: '+row.path)}
+const host=JSON.parse(await readFile(join(evidence,'host/qualification.json'),'utf8')),budget=JSON.parse(await readFile(join(evidence,'host-budgets/input-identity.json'),'utf8')),comparison=JSON.parse(await readFile(join(evidence,'host-budgets/comparison.json'),'utf8'));
+const source=await m113SourceIdentity(),matched=captureGuaranteesSourceIdentity(root);
+if(source.digest!==host.sourceBefore.digest||matched.sha256!==budget.sourceBefore.sha256)throw Error('Current source identity differs');
+if(JSON.stringify(budget.sourceBefore)!==JSON.stringify(budget.sourceAfter)||JSON.stringify(budget.artifactsBefore)!==JSON.stringify(budget.artifactsAfter)||JSON.stringify(budget.policyBefore)!==JSON.stringify(budget.policyAfter))throw Error('Collection identity drift');
+if(comparison.metrics.length!==21||comparison.metrics.some((m:any)=>m.environment!=='exact'||m.measurementIdentity!=='exact'))throw Error('Incomplete comparison');
+if(JSON.stringify(comparison.blocking.failIds)!==JSON.stringify(['warm-transform-ms'])||comparison.blocking.incompleteIds.length||comparison.releasePolicyQualified!==false)throw Error('Unexpected release disposition');
+if(m113Sha(await readFile(join(root,'bun.lock')))!=='61543a5d560ebdcb4ca5ce565ef650c76589c8ad38d972034812b3cab72b87bd')throw Error('Lock drift');
+const authored=manifest.files.map((r:any)=>r.path).filter((p:string)=>!p.startsWith('docs/evidence/')||p==='docs/evidence/2026-10-09-m11-3-native-motion/README.md');
+execFileSync('git',['diff','--check','--',...authored]);execFileSync('git',['diff','--cached','--check','--',...authored]);
+const result={schema:'crumbs.m11.3.staged-integrity.v1',passed:true,base:manifest.base,sourceDigest:source.digest,hostBudgetSourceSha256:matched.sha256,artifactSha256:host.artifact.sha256,files:manifest.files,scope:'complete explicit authorised staged/working bytes; generated report itself is excluded from its initial tree and independently staged/verified in the final manifest; no release waiver; authored whitespace checks exclude lossless raw tool/generated evidence whose unscoped failure is retained'};
+if(process.env.M113_STAGE_AUDIT_OUTPUT)await writeFile(process.env.M113_STAGE_AUDIT_OUTPUT,JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify({passed:true,files:paths.length,source:source.digest,budgetSource:matched.sha256,artifact:host.artifact.sha256,releasePolicyQualified:false}));

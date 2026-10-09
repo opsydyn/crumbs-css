@@ -1,0 +1,12 @@
+520 | }
+521 | function sha256(value: string | Buffer) { return createHash("sha256").update(value).digest("hex") }
+522 | function delay(ms: number) { return new Promise(resolveDelay => setTimeout(resolveDelay, ms)) }
+523 | async function fetchBundle(url: string, timeout: number) {
+524 |   const response = await fetchBundleResult(url, timeout)
+525 |   if (response.status < 200 || response.status >= 300) throw Error(`Metro bundle request failed (${response.status}): ${response.body.slice(0, 500)}`)
+                                                                   ^
+error: Metro bundle request failed (500): {"type":"TransformError","lineNumber":0,"name":"SyntaxError","message":"src/incremental.css.ts: Cannot find module '@vanilla-extract/css/adapter'\nRequire stack:\n- /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/src/incremental.css.ts","stack":"node:internal/modules/cjs/loader:1479\n  throw err;\n  ^\n\nError: Cannot find module '@vanilla-extract/css/adapter'\nRequire stack:\n- /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/playground/src/in
+      at fetchBundle (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:525:62)
+      at async measureMetroIncremental (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/bench/metro-incremental.ts:286:33)
+
+Bun v1.4.2 (macOS arm64)

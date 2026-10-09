@@ -35,6 +35,8 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./theme/token": "ordinary-runtime",
   "./theme/vars": "ordinary-runtime",
   "./theme/containers": "ordinary-runtime",
+  "./theme/motion": "ordinary-runtime",
+  "./theme/motion/native": "ordinary-runtime",
   "./theme/conditions": "ordinary-runtime",
   "./theme/expressions": "ordinary-runtime",
   "./theme/recipes": "ordinary-runtime",
@@ -555,6 +557,10 @@ export async function auditPackedRuntimeEntrypoints(
         externalSpecifiers,
         dynamicLoaderExceptions,
       )
+      if (subpath === "./theme/motion" || subpath === "./theme/motion/native") {
+        const oldTargets = new Set(targets.filter(t => t.subpath !== "./theme/motion" && t.subpath !== "./theme/motion/native" && t.subpath !== "./package.json").map(t => validatedTargets.get(t.target)));
+        if ([...files].some(file => oldTargets.has(file))) throw new Error("Existing entry reached from isolated motion runtime");
+      }
       graphs.push({
         subpath,
         classification,
@@ -940,8 +946,8 @@ function assertExternalAllowed(
   let allowed = false
   if (classification === "ordinary-runtime") {
     const reactRuntimeEntry = subpath === "./theme" || subpath === "./theme/core" || subpath === "./theme/token" ||
-      subpath === "./dist/theme" || subpath === "./theme/conditions" || subpath === "./theme/vars" || subpath === "./theme/containers"
-    allowed = reactRuntimeEntry && (specifier === "react" || specifier.startsWith("react/"))
+      subpath === "./dist/theme" || subpath === "./theme/conditions" || subpath === "./theme/vars" || subpath === "./theme/containers" || subpath === "./theme/motion/native"
+    allowed = (reactRuntimeEntry && (specifier === "react" || specifier.startsWith("react/"))) || (subpath === "./theme/motion/native" && specifier === "react-native")
   } else if (classification === "compiler-tooling") {
     const neverBundle = toPatterns(compilerDependencies.neverBundle)
     const alwaysBundle = toPatterns(compilerDependencies.alwaysBundle)

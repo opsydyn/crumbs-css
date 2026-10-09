@@ -1,0 +1,33 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-3-qualification.test.ts:
+(pass) acceptance_requires_host_ios_android_with_failed_dominating [0.07ms]
+(pass) source_artifact_and_installed_consumer_drift_are_rejected [1.05ms]
+(pass) foreign_nonempty_consumer_root_is_refused [0.03ms]
+(pass) native_binding_and_device_drift_are_rejected [0.05ms]
+(pass) fake_peer_native_maps_are_refused [0.06ms]
+(pass) failure_after_passed_phases_invalidates_both_platforms [0.03ms]
+(pass) actual_marker_pixels_determine_displacement_and_opacity [29.28ms]
+(pass) native_hierarchy_parsing_and_enabled_action_bounds [1.56ms]
+(pass) native_plateau_requires_equal_samples_spanning_100ms [0.06ms]
+(pass) native_inputs_include_config_and_generated_style_and_reject_byte_drift [3.11ms]
+(pass) native_input_manifest_rejects_nested_path_escape_before_reading [0.06ms]
+59 | }
+60 | finally {
+61 |     await rm(root, { recursive: true, force: true });
+62 | } });
+63 | test('native_input_manifest_rejects_nested_path_escape_before_reading',async()=>{await expect(verifyM113InputFiles('/owned',[{path:'src/../../foreign',sha256:'foreign'}])).rejects.toThrow('Input escaped')});
+64 | test('native_cleanup_failure_retains_the_first_execution_error',()=>{const receipt:any={};failM113NativeQualification(receipt,Error('launch error'));failM113NativeQualification(receipt,Error('cleanup error'));expect(receipt.error).toContain('launch error');expect(receipt.errors).toHaveLength(2)});
+                                                                                                                                                                                                                                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "launch error"
+Received: "Error: cleanup error"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-3-qualification.test.ts:64:232)
+(fail) native_cleanup_failure_retains_the_first_execution_error [0.31ms]
+
+ 11 pass
+ 1 fail
+ 55 expect() calls
+Ran 12 tests across 1 file. [368.00ms]

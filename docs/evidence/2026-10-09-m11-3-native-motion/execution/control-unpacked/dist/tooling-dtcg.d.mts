@@ -1,0 +1,7 @@
+import { S as DtcgTokenProvenance, _ as DtcgJsonPrimitive, a as CRUMBS_DTCG_METADATA_FORMAT, b as DtcgOrigin, c as CrumbsDtcgDiagnostic, d as CrumbsDtcgImportResult, f as CrumbsDtcgResolverVersion, g as DtcgJsonObject, h as DtcgImportSidecar, i as CRUMBS_DTCG_IMPORT_VERSION, l as CrumbsDtcgDiagnosticCode, m as DtcgGroupMetadata, n as CRUMBS_DTCG_FORMAT_PROFILE, o as CRUMBS_DTCG_METADATA_VERSION, p as CrumbsDtcgThemeImport, r as CRUMBS_DTCG_IMPORT_FORMAT, s as CRUMBS_DTCG_RESOLVER_VERSIONS, t as CRUMBS_DTCG_DIAGNOSTIC_CODES, u as CrumbsDtcgImportRequest, v as DtcgJsonValue, x as DtcgTokenMetadata, y as DtcgOperationResult } from "./model-CDXYAxVv.mjs";
+
+//#region src/tooling/dtcg/import-theme.d.ts
+/** Synchronously import one explicitly supplied DTCG Resolver/document snapshot into a Crumbs theme payload. */
+declare function importDtcgTheme(input: CrumbsDtcgImportRequest): CrumbsDtcgImportResult;
+//#endregion
+export { CRUMBS_DTCG_DIAGNOSTIC_CODES, CRUMBS_DTCG_FORMAT_PROFILE, CRUMBS_DTCG_IMPORT_FORMAT, CRUMBS_DTCG_IMPORT_VERSION, CRUMBS_DTCG_METADATA_FORMAT, CRUMBS_DTCG_METADATA_VERSION, CRUMBS_DTCG_RESOLVER_VERSIONS, type CrumbsDtcgDiagnostic, type CrumbsDtcgDiagnosticCode, type CrumbsDtcgImportRequest, type CrumbsDtcgImportResult, type CrumbsDtcgResolverVersion, type CrumbsDtcgThemeImport, type DtcgGroupMetadata, type DtcgImportSidecar, type DtcgJsonObject, type DtcgJsonPrimitive, type DtcgJsonValue, type DtcgOperationResult, type DtcgOrigin, type DtcgTokenMetadata, type DtcgTokenProvenance, importDtcgTheme };
