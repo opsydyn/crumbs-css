@@ -699,3 +699,6 @@ test("auditPackedRuntimeEntrypoints rejects an export with no runtime class", as
 
   await expect(auditPackedRuntimeEntrypoints(packageRoot)).rejects.toThrow(/unclassified export.*\.\/unclassified/i)
 })
+
+for(const denied of ['react-native','node:fs','effect/Schema'])test(`container entry refuses runtime ${denied}`,async()=>{const root=await createFixturePackage({extraExports:{'./theme/containers':runtimeExport('theme-containers')},overrides:{'dist/theme-containers.mjs':`import '${denied}'; export {};`,'dist/theme-containers.cjs':'module.exports = {};'}});await expect(auditPackedRuntimeEntrypoints(root)).rejects.toThrow();});
+test('container graph is independently classified and accepts only React',async()=>{const root=await createFixturePackage({extraExports:{'./theme/containers':runtimeExport('theme-containers')},overrides:{'dist/theme-containers.mjs':"import React from 'react';export const x=React;",'dist/theme-containers.cjs':"exports.x=require('react');"}});const graphs=await auditPackedRuntimeEntrypoints(root);expect(graphs.filter(g=>g.subpath==='./theme/containers').map(g=>g.externalSpecifiers)).toEqual([['react'],['react']]);});

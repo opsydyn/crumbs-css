@@ -217,3 +217,11 @@ Configuration and authored dependency edits can refresh styles. Restart Metro af
 No retained esbuild-context cache is enabled in production. The shipping development workflow has bounded iOS simulator and Android emulator Fast Refresh evidence. Local animation state may reset during Fast Refresh; this is not a state-preservation or device-performance guarantee. See the current guarantees matrix for measured scope and failed/incomplete budgets.
 
 Source-current evidence may carry a complete source-content SHA-256 alongside its base revision. Validation checks tracked non-documentation files and newly authored files in the declared source/tool/test roots; stage new files outside those roots before capture. This keeps one code-and-documentation commit verifiable while rejecting code drift. Evidence without this field continues to require the current source commit.
+
+## Container-instance selection
+
+A named one-axis container owner is separate from theme/window conditions and compiler descriptors. Initial/server/hydration selection is `unmeasured`; native calculated dimensions choose finite lower-inclusive buckets without rounding. Owners retain at most 17 snapshots, publish once per crossing and publish nothing for same-bucket events. Selector notifications use `Object.is`, with subscriptions detached on final unsubscribe/replacement/unmount. Parent/context/theme renders can still occur.
+
+Nearest matching owners shadow ancestors, including unmeasured instances; siblings do not share state. Equivalent descriptor copies and ESM/CJS package copies share the versioned React context under one physical React installation. No global owner or definition registry exists. Strict replay and committed Suspense reveal reconnect a live owner without resetting its bucket; keyed remounts reset it; retired callbacks ignore payloads. Shared context admission checks writable React ABI data before exposing the context, rejecting incompatible accessors. One handle has one committed provider and must measure one View. Different-bucket reentrant publication fails; sequential feedback remains an application layout constraint.
+
+[The container guide](/how-to/use-container-conditions/) explains composition, virtualisation, native portal bridges and evidence limits.

@@ -1,0 +1,70 @@
+{
+  "schema": "crumbs.m11.2.readiness.v1",
+  "qualification": "passed",
+  "delivery": "pending-whole-slice-review-and-final-audit",
+  "sourceDigest": "d292aaad380fb4f28f5ecc3fde9ae12a94f5f5bfd4ec8a4edbea46386d73e6c0",
+  "artifact": {
+    "name": "@opsydyn/crumbs-css",
+    "version": "0.1.1-alpha.1",
+    "tarball": "/private/tmp/crumbs-m112-consumer-complete/artifacts/opsydyn-crumbs-css-0.1.1-alpha.1.tgz",
+    "sha256": "ae1fbf36ba217e96ac31e5a507ba42da1bc0aaed7306fbfc72ad8c5399aeb0ff"
+  },
+  "hostReceipt": {
+    "path": "host-complete/qualification.json",
+    "sha256": "a9f3b8d7f21a1796272d0e0653370f43c3dab825ab2adad84236105302a4074d"
+  },
+  "nativeReceipt": {
+    "path": "native-complete/native.json",
+    "sha256": "e95fb6bf648e7e13c1ab5cfd16009b4ee2d0eb1207f863956333d5eadc2188cf"
+  },
+  "nativePhases": {
+    "ios": 14,
+    "android": 14
+  },
+  "hostBudget": {
+    "path": "host-budgets/comparison.json",
+    "sha256": "f11467dc377eacae273763c6f5f1c018dee6df418d1f049b951c241161604c6b",
+    "blocking": {
+      "passIds": [
+        "cold-transform-ms",
+        "incremental-rebuild",
+        "editor-tsc-wall-10000",
+        "editor-tsgo-wall-10000",
+        "editor-tsc-memory-10000",
+        "editor-tsgo-memory-10000",
+        "editor-tsc-instantiations-10000",
+        "editor-tsgo-instantiations-10000",
+        "editor-first-completion-10000",
+        "editor-warm-completion-10000"
+      ],
+      "failIds": [
+        "warm-transform-ms"
+      ],
+      "incompleteIds": []
+    },
+    "advisory": {
+      "passIds": [
+        "runtime-tokens-esm-graph-bytes",
+        "runtime-tokens-cjs-graph-bytes"
+      ],
+      "failIds": [
+        "runtime-initialization-node22-esm",
+        "runtime-initialization-node22-cjs",
+        "runtime-initialization-current-esm",
+        "runtime-initialization-current-cjs",
+        "runtime-theme-core-esm-graph-bytes",
+        "runtime-theme-core-cjs-graph-bytes",
+        "runtime-theme-compatibility-esm-graph-bytes",
+        "runtime-theme-compatibility-cjs-graph-bytes"
+      ],
+      "incompleteIds": []
+    }
+  },
+  "releasePolicyQualified": false,
+  "limits": [
+    "existing M10.5 warm-transform blocker retained",
+    "development Expo Go / Hermes functional evidence only",
+    "physical devices and screen-reader checks deferred",
+    "no publication or exact release-tag qualification"
+  ]
+}

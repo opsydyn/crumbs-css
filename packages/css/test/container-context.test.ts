@@ -1,0 +1,9 @@
+import { test, expect } from 'bun:test';
+import { defineContainer } from '../src/containers/definition';
+import { createContainerOwner } from '../src/containers/owner';
+import { createContainerLayout, admitContainerLayout } from '../src/containers/react';
+import { getSharedContainerContext } from '../src/containers/context';
+const d = defineContainer({ owner: 'x', name: 'card', version: 1, axis: 'width', buckets: { narrow: 0, wide: 240 } });
+test('owner-local closed handle protocol rejects forgery fields without getter execution', () => { const owner = createContainerOwner(d), layout = createContainerLayout(owner); expect(admitContainerLayout(layout)).toBe(owner); let calls = 0; for (const bad of [{ ...layout }, Object.assign({}, layout, { extra: 1 }), Object.defineProperty({}, 'definition', { get() { calls++; return d; } })])
+    expect(() => admitContainerLayout(bad)).toThrow(/INVALID_CONTAINER_DEFINITION/); expect(calls).toBe(0); const slot = Symbol.for('crumbs.css.container-owner.v1'); const bad = Object.defineProperty({ ...layout }, slot, { value: Object.freeze({ ...owner, formatVersion: 2 }) }); expect(() => admitContainerLayout(bad)).toThrow(/CONTAINER_UNSUPPORTED_VERSION/); const mismatch = Object.defineProperty({ ...layout }, slot, { value: Object.freeze({ ...owner, onLayout: () => { } }) }); expect(() => admitContainerLayout(mismatch)).toThrow(/INVALID_CONTAINER_DEFINITION/); expect(Object.isFrozen(layout)).toBe(true); });
+test('shared context holds no owners and is stable across lookups', () => { const context = getSharedContainerContext(); expect(context).toBe(getSharedContainerContext()); expect(context.Provider).toBe(context); const slot = Object.getOwnPropertyDescriptor(globalThis, Symbol.for('crumbs.css.container-context.v1'))!.value; expect(Object.keys(slot).sort()).toEqual(['context', 'formatVersion', 'reactCreateContext']); });

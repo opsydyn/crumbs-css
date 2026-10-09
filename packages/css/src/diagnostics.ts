@@ -1,4 +1,13 @@
 export const NativeStylesDiagnosticCode = {
+  InvalidContainerDefinition: "CRUMBS_CSS_INVALID_CONTAINER_DEFINITION",
+  ContainerUnsupportedVersion: "CRUMBS_CSS_CONTAINER_UNSUPPORTED_VERSION",
+  InvalidContainerMeasurement: "CRUMBS_CSS_INVALID_CONTAINER_MEASUREMENT",
+  InvalidContainerValues: "CRUMBS_CSS_INVALID_CONTAINER_VALUES",
+  ContainerProviderRequired: "CRUMBS_CSS_CONTAINER_PROVIDER_REQUIRED",
+  ContainerContractMismatch: "CRUMBS_CSS_CONTAINER_CONTRACT_MISMATCH",
+  ContainerOwnerInUse: "CRUMBS_CSS_CONTAINER_OWNER_IN_USE",
+  ContainerReentrantUpdate: "CRUMBS_CSS_CONTAINER_REENTRANT_UPDATE",
+
   InvalidLocalVar: "CRUMBS_CSS_INVALID_LOCAL_VAR",
   InvalidLocalAssignments: "CRUMBS_CSS_INVALID_LOCAL_ASSIGNMENTS",
   LocalVarConflict: "CRUMBS_CSS_LOCAL_VAR_CONFLICT",

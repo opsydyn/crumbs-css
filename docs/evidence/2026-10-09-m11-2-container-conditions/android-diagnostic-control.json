@@ -1,0 +1,32 @@
+{
+  "evidenceClass": "Android diagnostic control, not final exact-source acceptance",
+  "passedPhases": [
+    "initial",
+    "same-bucket",
+    "wide",
+    "boundary",
+    "narrow",
+    "unmount",
+    "remount",
+    "nested-wide",
+    "nested",
+    "height-tall",
+    "height-short",
+    "source-portal",
+    "destination-portal",
+    "close-portal"
+  ],
+  "recordSha256": "c592a1610fe2c5508dbdf29bfe33b6f1f4cb37d0761095b9e19ed72bfe7359ec",
+  "emulator": {
+    "serial": "emulator-5568",
+    "avdName": "crumbs_m111\nOK",
+    "pid": 30160,
+    "command": "/private/tmp/crumbs-m105-native/sdk/emulator/qemu/darwin-aarch64/qemu-system-aarch64 -avd crumbs_m111 -port 5568 -no-snapshot-save -no-audio -no-boot-anim -memory 2048 -cores 2 -gpu host"
+  },
+  "metro": {
+    "pid": 34178,
+    "command": "node /private/tmp/crumbs-m112-consumer-final-acceptance/node_modules/.bin/expo start --localhost --port 8202"
+  },
+  "mappingBefore": "host-16 tcp:8202 tcp:8202\n\n",
+  "rootCause": "Single-quoted XML attributes were omitted by the earlier parser; current SDK host GPU avoided the preceding pre-React Expo Go startup ANR."
+}

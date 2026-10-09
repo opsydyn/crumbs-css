@@ -1,0 +1,313 @@
+[ {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "MAESTRO_FILENAME" : "ios-boundary",
+        "MAESTRO_DEVICE_UDID" : "848D36A4-3B2A-41D1-A790-927B0A6A9C98",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546048269,
+    "duration" : 3,
+    "sequenceNumber" : 0,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "MAESTRO_FILENAME" : "ios-boundary",
+          "MAESTRO_DEVICE_UDID" : "848D36A4-3B2A-41D1-A790-927B0A6A9C98",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "host.exp.Exponent"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546048273,
+    "duration" : 2,
+    "sequenceNumber" : 1,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "host.exp.Exponent"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnPointV2Command" : {
+      "point" : "219,108",
+      "retryIfNoChange" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546048275,
+    "duration" : 848,
+    "sequenceNumber" : 2,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "tapOnPointV2Command" : {
+        "point" : "219,108",
+        "retryIfNoChange" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        }
+      },
+      "timeout" : "10000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546049124,
+    "duration" : 122,
+    "sequenceNumber" : 3,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "container-all-telemetry",
+            "optional" : false
+          }
+        },
+        "timeout" : "10000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "repeatCommand" : {
+      "times" : "3",
+      "commands" : [ {
+        "copyTextCommand" : {
+          "selector" : {
+            "idRegex" : "container-all-telemetry",
+            "optional" : false
+          },
+          "optional" : false
+        }
+      }, {
+        "runScriptCommand" : {
+          "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+          "sourceDescription" : "sample.js",
+          "optional" : false,
+          "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+        }
+      } ],
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546049247,
+    "duration" : 1008,
+    "sequenceNumber" : 4,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "repeatCommand" : {
+        "times" : "3",
+        "commands" : [ {
+          "copyTextCommand" : {
+            "selector" : {
+              "idRegex" : "container-all-telemetry",
+              "optional" : false
+            },
+            "optional" : false
+          }
+        }, {
+          "runScriptCommand" : {
+            "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+            "sourceDescription" : "sample.js",
+            "optional" : false,
+            "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+          }
+        } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "container-all-telemetry",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546049252,
+    "duration" : 114,
+    "sequenceNumber" : 5,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+      "sourceDescription" : "sample.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546049367,
+    "duration" : 460,
+    "sequenceNumber" : 6,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+        "sourceDescription" : "sample.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "container-all-telemetry",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546049828,
+    "duration" : 113,
+    "sequenceNumber" : 7,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+      "sourceDescription" : "sample.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546049941,
+    "duration" : 104,
+    "sequenceNumber" : 8,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+        "sourceDescription" : "sample.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "container-all-telemetry",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546050045,
+    "duration" : 106,
+    "sequenceNumber" : 9,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+      "sourceDescription" : "sample.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791546050152,
+    "duration" : 103,
+    "sequenceNumber" : 10,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+        "sourceDescription" : "sample.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-reviewed-final"
+      }
+    }
+  }
+} ]

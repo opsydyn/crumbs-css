@@ -1,0 +1,14 @@
+import assert from 'node:assert/strict';import {createRequire} from 'node:module';import {pathToFileURL} from 'node:url';import React from 'react';import Renderer,{act} from 'react-test-renderer';
+globalThis.IS_REACT_ACT_ENVIRONMENT=true;const require=createRequire(import.meta.url),format=process.argv[2]??'esm',copy=process.argv[3]??'primary';
+const path=copy==='primary'?'@opsydyn/crumbs-css/theme/containers':new URL('../node_modules/@m112/copy/dist/theme-containers.'+(format==='esm'?'mjs':'cjs'),import.meta.url).pathname;
+const api=format==='esm'?await import(path):require(path);const other=format==='esm'?require('@opsydyn/crumbs-css/theme/containers'):await import('@opsydyn/crumbs-css/theme/containers');
+assert.deepEqual(Object.keys(api).filter(x=>x!=='default').sort(),['ContainerProvider','defineContainer','getContainerBucket','resolveContainerValue','useContainerLayout','useContainerValue']);
+const d=api.defineContainer({owner:'@fixture/ui',name:'card',version:1,axis:'width',buckets:{narrow:0,wide:240}});assert.equal(api.getContainerBucket(d,239.5),'narrow');assert.equal(other.getContainerBucket(JSON.parse(JSON.stringify(d)),240),'wide');const ref={};assert.equal(api.resolveContainerValue(d,'wide',{unmeasured:null,narrow:0,wide:ref}),ref);
+const directions=[];
+for(const direction of ['owner-first','provider-first']) {
+ const ownerApi=direction==='owner-first'?api:other,consumerApi=direction==='owner-first'?other:api;
+ let layout,seen;function Reader(){seen=consumerApi.useContainerValue(d,{unmeasured:'initial',narrow:'stacked',wide:'row'});return React.createElement('span',null,seen);}function Owner(){layout=ownerApi.useContainerLayout(d);return React.createElement(consumerApi.ContainerProvider,{layout},React.createElement(Reader));}
+ let root;await act(()=>{root=Renderer.create(React.createElement(Owner))});assert.equal(seen,'initial');await act(()=>layout.onLayout({nativeEvent:{layout:{width:288,height:100,x:0,y:0}}}));assert.equal(seen,'row');await act(()=>root.unmount());assert.equal(layout[Symbol.for('crumbs.css.container-owner.v1')].inspect().listeners,0);assert.equal(layout[Symbol.for('crumbs.css.container-owner.v1')].inspect().providerClaims,0);directions.push(direction);
+ const mismatch=consumerApi.defineContainer({owner:'@fixture/ui',name:'card',version:1,axis:'width',buckets:{narrow:0,wide:300}});function BadReader(){consumerApi.useContainerValue(mismatch,{unmeasured:0,narrow:1,wide:2});return null;}function BadOwner(){const handle=ownerApi.useContainerLayout(d);return React.createElement(consumerApi.ContainerProvider,{layout:handle},React.createElement(BadReader));}await assert.rejects(async()=>{await act(()=>Renderer.create(React.createElement(BadOwner)))},/CONTRACT_MISMATCH/);
+}
+console.log(JSON.stringify({version:process.version,format,copy,directions,status:'passed'}));

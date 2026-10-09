@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible: "Container conditions"
+    timeout: 120000
+- assertVisible: "A: narrow / column / 176"
+- assertVisible: "B: wide / row / 288"
+- tapOn: { id: container-action-same-bucket }
+- assertVisible: "A: narrow / column / 200"
+- tapOn: { id: container-action-wide }
+- assertVisible: "A: wide / row / 288"
+- tapOn: { id: container-action-boundary }
+- assertVisible: "A: wide / row / 240"
+- tapOn: { id: container-action-narrow }
+- assertVisible: "A: narrow / column / 176"
+- tapOn: { id: container-action-unmount }
+- assertVisible: "A unmounted"
+- tapOn: { id: container-action-remount }
+- assertVisible: "A: narrow / column / 176"
+- tapOn: { id: container-action-wide }
+- tapOn: { id: container-action-toggle-nested }
+- tapOn: { id: container-action-height-tall }
+- tapOn: { id: container-action-height-short }
+- tapOn: { id: container-action-open-source-portal }
+- tapOn: { id: container-action-open-destination-portal }
+- tapOn: { id: container-action-close-portal }

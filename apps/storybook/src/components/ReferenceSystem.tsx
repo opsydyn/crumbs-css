@@ -3,6 +3,7 @@ import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as Dialog from "@rn-primitives/dialog"
 import { useState } from "react"
 import { Text, View } from "react-native"
+import {ContainerConditionsDogfood} from "./ContainerConditionsDogfood"
 import {LocalVarsDogfood} from "./LocalVarsDogfood"
 import { ReferenceButton } from "./ReferenceButton"
 import { ReferenceDialog } from "./ReferenceDialog"
@@ -70,6 +71,7 @@ export function ReferenceSystem() {
   return (
     <View style={styles.root}>
       <LocalVarsDogfood />
+      <ContainerConditionsDogfood />
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.eyebrow}>Typography</Text>

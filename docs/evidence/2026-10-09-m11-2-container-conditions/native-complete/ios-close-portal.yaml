@@ -1,0 +1,14 @@
+appId: host.exp.Exponent
+---
+- tapOn:
+    point: "310,200"
+- extendedWaitUntil:
+    visible:
+      id: container-all-telemetry
+    timeout: 10000
+- repeat:
+    times: 3
+    commands:
+      - copyTextFrom:
+          id: container-all-telemetry
+      - runScript: sample.js

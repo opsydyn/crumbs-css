@@ -1,0 +1,85 @@
+---
+title: Use container conditions
+description: Select exhaustive native style branches from a named, independently constrained layout owner.
+---
+
+Import the optional `@opsydyn/crumbs-css/theme/containers` entry. Definitions belong in ordinary `.ts` modules, outside `.css.ts` capture. It selects values you already authored; it adds no CSS syntax or theme/window condition axis.
+
+```tsx
+import { View, Text } from 'react-native';
+import {
+  defineContainer, useContainerLayout, ContainerProvider, useContainerValue,
+} from '@opsydyn/crumbs-css/theme/containers';
+
+export const cardContainer = defineContainer({
+  owner: '@your-team/ui', name: 'card', version: 1, axis: 'width',
+  buckets: { narrow: 0, wide: 240 },
+});
+const compositions = Object.freeze({
+  unmeasured: { flexDirection: 'column' as const, gap: 8 },
+  narrow: { flexDirection: 'column' as const, gap: 8 },
+  wide: { flexDirection: 'row' as const, gap: 8 },
+});
+
+function CardContents() {
+  const composition = useContainerValue(cardContainer, compositions);
+  return <View style={composition}><Text>First</Text><Text>Second</Text></View>;
+}
+export function CardRegion({ width }: { width: number }) {
+  const layout = useContainerLayout(cardContainer);
+  return (
+    <ContainerProvider layout={layout}>
+      <View style={{ width }} onLayout={layout.onLayout}>
+        <CardContents />
+      </View>
+    </ContainerProvider>
+  );
+}
+```
+
+Constrain the queried axis independently of selected content. Two `CardRegion` instances at widths 176 and 288 select independently under the same window and theme. For height selection use a separate definition with `axis: 'height'`; one definition never combines axes.
+
+## Thresholds and exhaustive maps
+
+Every map has every named bucket plus `unmeasured`. Missing or extra keys are type errors and runtime errors. Present `undefined`, `null` and `false` are legitimate selected values. Functions and objects are returned by reference without execution, serialisation or deep freezing.
+
+A fresh owner starts at `unmeasured`, including server rendering and initial hydration. A genuine zero measurement selects the zero-minimum bucket. Lower bounds are inclusive: 239.5 is narrow; 240 and 240.5 are wide. Values are not rounded or given an epsilon. `getContainerBucket(definition, size?)` classifies pure inputs; `resolveContainerValue(definition, bucket, values)` performs exhaustive pure selection.
+
+Definitions have 1–16 buckets, distinct finite non-negative minima and exactly one zero. Names start with a letter, contain letters/digits/dots/underscores/hyphens and are at most 64 characters. `unmeasured`, `__proto__`, `prototype` and `constructor` are reserved. Definitions reject hidden fields, symbols, accessors and unsupported prototypes without invoking getters. Reordered equivalent definitions are compatible; changing the axis or buckets under the same owner/name/version is a contract mismatch. Increase the compatibility version for a changed contract.
+
+## Ownership and callback composition
+
+One hook handle measures one native View and has one committed provider. The provider can wrap the measured View or be inside it. A duplicate provider claim fails; the library cannot prove which native View receives an `onLayout` callback without requiring a ref.
+
+Compose an application callback explicitly:
+
+```tsx
+<View onLayout={event => {
+  layout.onLayout(event);
+  recordLocalMeasurement(event.nativeEvent.layout);
+}} />
+```
+
+The selected `width` or `height` is the calculated native layout dimension. Other dimensions and x/y do not affect selection. It is not a transformed visual bound, scroll extent or separately calculated content box. There are no window listeners, polling timers or frame listeners.
+
+Key the component owning the hook when replacing its measured View, including recycled/virtualised cells. A real keyed remount starts unmeasured. Equivalent descriptor copies preserve a live handle; changed identity or shape creates a fresh owner. Retired callbacks ignore events before reading their payload. React Strict Mode cleanup/setup replay preserves the existing live bucket and can resubscribe. A committed owner hidden and revealed by Suspense reconnects through fresh subscriptions without resetting its bucket.
+
+## Nested owners and portals
+
+A consumer reads the nearest matching owner/name/version. An inner instance shadows its same-identity ancestor even while unmeasured. Different named owners remain accessible; siblings never share measurements. Same-identity incompatible nested definitions fail rather than falling back to an outer owner.
+
+Normal React portals inherit the source React context. To query destination-owned size, create a fresh owner/View/provider at the destination. The reference's `@rn-primitives/portal` adapter re-renders stored children at `PortalHost`; bridge a source-selected value as an ordinary prop, or mount a fresh destination owner. Do not reuse one source handle in two providers.
+
+## Subscription cost and layout feedback
+
+Keep stable value tables outside the component or memoise them when their inputs change. Frozen fully validated tables can reuse weak admission; mutable tables are re-admitted on every render, so changing a branch in place is observed on the next render. Mutating an object without a React render does not schedule one.
+
+Same-bucket layout events publish nothing. Owners retain at most 17 immutable bucket snapshots and no raw-size history. Selection uses `Object.is`: crossing between two buckets returning the same reference sends no selector notification. Parent, context and theme renders can still occur. Unmount/replacement and the final unsubscribe detach listeners.
+
+A reentrant measurement attempting a different-bucket publication fails before a second transaction; the first committed snapshot remains valid. Separate sequential layout feedback can still oscillate. The library adds no hidden debounce, hysteresis or automatic loop repair. Independently constrain the queried axis.
+
+## Availability and evidence
+
+Check the exact package's export map for `/theme/containers`. Historical tarballs sharing the current alpha version can lack this entry. M11.2 qualification records identify source and tarball digests and keep installed Node/DOM, Expo exports and native functional evidence distinct. Development Hermes checks do not establish release-mode or physical-device performance; physical and screen-reader checks remain deferred.
+
+See [diagnostics](/reference/diagnostics/) for validation, missing-provider, contract-mismatch, duplicate-owner and reentrant-update codes.

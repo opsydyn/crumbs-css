@@ -540,3 +540,9 @@ Advanced/debugging surface for direct transformer access. Most consumers should 
 ### `@opsydyn/crumbs-css/theme/vars`
 
 Opt in to `assignVars`, `resolveAssignedStyles` and `useAssignedStyles`. The six type exports are `NativeLocalVar`, `NativeLocalFallback`, `NativeLocalVarShape`, `NativeLocalVarValues`, `NativeVarAssignments` and `ResolvedAssignedStyles`. Authoring declarations share their nominal graph. These APIs are not re-exported by the root or other theme entries. See [local assignments](/crumbs-css/how-to/use-local-variables/). Support requires local-plan-v1 compiler/runtime capability, identified by the M11.1 artifact packet until release closure.
+
+## Optional container ownership
+
+`@opsydyn/crumbs-css/theme/containers` publishes six values: `defineContainer`, `getContainerBucket`, `resolveContainerValue`, `useContainerLayout`, `ContainerProvider`, `useContainerValue`. Its seven public types are `NativeContainerAxis`, `NativeContainerDefinitionInput`, `NativeContainerDefinition`, `NativeContainerBucket`, `NativeContainerValues`, `NativeContainerLayout` and `ContainerProviderProps`. It is an independent React-only runtime graph.
+
+[Use container conditions](/how-to/use-container-conditions/) describes exhaustive maps, independently constrained owners and portal adapters. These exports are opt-in and are not forwarded from root/theme/core. Availability belongs to the exact tarball, not every historical alpha package with the same version.

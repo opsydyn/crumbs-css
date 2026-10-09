@@ -34,6 +34,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./theme/core": "ordinary-runtime",
   "./theme/token": "ordinary-runtime",
   "./theme/vars": "ordinary-runtime",
+  "./theme/containers": "ordinary-runtime",
   "./theme/conditions": "ordinary-runtime",
   "./theme/expressions": "ordinary-runtime",
   "./theme/recipes": "ordinary-runtime",
@@ -939,7 +940,7 @@ function assertExternalAllowed(
   let allowed = false
   if (classification === "ordinary-runtime") {
     const reactRuntimeEntry = subpath === "./theme" || subpath === "./theme/core" || subpath === "./theme/token" ||
-      subpath === "./dist/theme" || subpath === "./theme/conditions" || subpath === "./theme/vars"
+      subpath === "./dist/theme" || subpath === "./theme/conditions" || subpath === "./theme/vars" || subpath === "./theme/containers"
     allowed = reactRuntimeEntry && (specifier === "react" || specifier.startsWith("react/"))
   } else if (classification === "compiler-tooling") {
     const neverBundle = toPatterns(compilerDependencies.neverBundle)

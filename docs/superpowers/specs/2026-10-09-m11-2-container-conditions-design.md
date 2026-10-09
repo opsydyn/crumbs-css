@@ -1,6 +1,6 @@
 # M11.2 — Named native container conditions
 
-**Status:** Approved as written by Alan Currie on 2026-10-09 following commit `99d81fe`. Implementation-plan review is pending; product changes are not yet approved.
+**Status:** Approved as written by Alan Currie on 2026-10-09 following commit `99d81fe`. The implementation plan at `5410f17` was also approved for one native/inline slice. Final qualification passes; whole-slice review and commit remain pending.
 
 **Date:** 2026-10-09.
 

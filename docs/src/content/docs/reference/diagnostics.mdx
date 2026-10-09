@@ -39,3 +39,18 @@ Diagnostics are formatted like:
 Enable strict diagnostics when you want dropped declarations to fail instead of being skipped:
 
 - [Enable strict diagnostics](/crumbs-css/how-to/enable-strict-diagnostics/)
+
+## Container conditions
+
+| Code | Meaning |
+| --- | --- |
+| `CRUMBS_CSS_INVALID_CONTAINER_DEFINITION` | Invalid identity, axis, buckets, descriptor or handle data. |
+| `CRUMBS_CSS_CONTAINER_UNSUPPORTED_VERSION` | Unsupported descriptor/context/owner protocol version. |
+| `CRUMBS_CSS_INVALID_CONTAINER_MEASUREMENT` | Invalid selected dimension or malformed live layout event. |
+| `CRUMBS_CSS_INVALID_CONTAINER_VALUES` | Unknown bucket or incomplete/extra/accessor value-map entry. |
+| `CRUMBS_CSS_CONTAINER_PROVIDER_REQUIRED` | No matching named owner. |
+| `CRUMBS_CSS_CONTAINER_CONTRACT_MISMATCH` | Same identity with a different axis/bucket shape. |
+| `CRUMBS_CSS_CONTAINER_OWNER_IN_USE` | One handle claimed by multiple committed providers. |
+| `CRUMBS_CSS_CONTAINER_REENTRANT_UPDATE` | Different-bucket publication attempted during notification. |
+
+Invalid data never becomes an unmeasured fallback. Diagnostics identify fields/owners without dumping selected application values.

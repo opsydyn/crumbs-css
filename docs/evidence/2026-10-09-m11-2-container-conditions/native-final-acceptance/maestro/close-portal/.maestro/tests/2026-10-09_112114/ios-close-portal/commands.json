@@ -1,0 +1,313 @@
+[ {
+  "command" : {
+    "defineVariablesCommand" : {
+      "env" : {
+        "MAESTRO_FILENAME" : "ios-close-portal",
+        "MAESTRO_DEVICE_UDID" : "848D36A4-3B2A-41D1-A790-927B0A6A9C98",
+        "MAESTRO_SHARD_ID" : "1",
+        "MAESTRO_SHARD_INDEX" : "0"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541278874,
+    "duration" : 4,
+    "sequenceNumber" : 0,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "defineVariablesCommand" : {
+        "env" : {
+          "MAESTRO_FILENAME" : "ios-close-portal",
+          "MAESTRO_DEVICE_UDID" : "848D36A4-3B2A-41D1-A790-927B0A6A9C98",
+          "MAESTRO_SHARD_ID" : "1",
+          "MAESTRO_SHARD_INDEX" : "0"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "applyConfigurationCommand" : {
+      "config" : {
+        "appId" : "host.exp.Exponent"
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541278878,
+    "duration" : 2,
+    "sequenceNumber" : 1,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "applyConfigurationCommand" : {
+        "config" : {
+          "appId" : "host.exp.Exponent"
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "tapOnPointV2Command" : {
+      "point" : "310,200",
+      "retryIfNoChange" : false,
+      "longPress" : false,
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541278880,
+    "duration" : 843,
+    "sequenceNumber" : 2,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "tapOnPointV2Command" : {
+        "point" : "310,200",
+        "retryIfNoChange" : false,
+        "longPress" : false,
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "assertConditionCommand" : {
+      "condition" : {
+        "visible" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        }
+      },
+      "timeout" : "10000",
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541279724,
+    "duration" : 129,
+    "sequenceNumber" : 3,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "assertConditionCommand" : {
+        "condition" : {
+          "visible" : {
+            "idRegex" : "container-all-telemetry",
+            "optional" : false
+          }
+        },
+        "timeout" : "10000",
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "repeatCommand" : {
+      "times" : "3",
+      "commands" : [ {
+        "copyTextCommand" : {
+          "selector" : {
+            "idRegex" : "container-all-telemetry",
+            "optional" : false
+          },
+          "optional" : false
+        }
+      }, {
+        "runScriptCommand" : {
+          "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+          "sourceDescription" : "sample.js",
+          "optional" : false,
+          "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+        }
+      } ],
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541279854,
+    "duration" : 1007,
+    "sequenceNumber" : 4,
+    "depth" : 0,
+    "evaluatedCommand" : {
+      "repeatCommand" : {
+        "times" : "3",
+        "commands" : [ {
+          "copyTextCommand" : {
+            "selector" : {
+              "idRegex" : "container-all-telemetry",
+              "optional" : false
+            },
+            "optional" : false
+          }
+        }, {
+          "runScriptCommand" : {
+            "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+            "sourceDescription" : "sample.js",
+            "optional" : false,
+            "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+          }
+        } ],
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "container-all-telemetry",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541279859,
+    "duration" : 111,
+    "sequenceNumber" : 5,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+      "sourceDescription" : "sample.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541279971,
+    "duration" : 454,
+    "sequenceNumber" : 6,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+        "sourceDescription" : "sample.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "container-all-telemetry",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541280426,
+    "duration" : 120,
+    "sequenceNumber" : 7,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+      "sourceDescription" : "sample.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541280546,
+    "duration" : 105,
+    "sequenceNumber" : 8,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+        "sourceDescription" : "sample.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+      }
+    }
+  }
+}, {
+  "command" : {
+    "copyTextCommand" : {
+      "selector" : {
+        "idRegex" : "container-all-telemetry",
+        "optional" : false
+      },
+      "optional" : false
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541280651,
+    "duration" : 108,
+    "sequenceNumber" : 9,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "copyTextCommand" : {
+        "selector" : {
+          "idRegex" : "container-all-telemetry",
+          "optional" : false
+        },
+        "optional" : false
+      }
+    }
+  }
+}, {
+  "command" : {
+    "runScriptCommand" : {
+      "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+      "sourceDescription" : "sample.js",
+      "optional" : false,
+      "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+    }
+  },
+  "metadata" : {
+    "status" : "COMPLETED",
+    "timestamp" : 1791541280759,
+    "duration" : 102,
+    "sequenceNumber" : 10,
+    "depth" : 1,
+    "evaluatedCommand" : {
+      "runScriptCommand" : {
+        "script" : "console.log('M112Sample:'+JSON.stringify({at:Date.now(),text:maestro.copiedText}));var t=Date.now();while(Date.now()-t<100){}\n",
+        "sourceDescription" : "sample.js",
+        "optional" : false,
+        "scriptDir" : "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-09-m11-2-container-conditions/native-final-acceptance"
+      }
+    }
+  }
+} ]

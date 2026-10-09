@@ -37,10 +37,12 @@ const themeRuntimeEntries = {
   "theme-recipes": "src/theme-recipes.ts",
   "theme-sprinkles": "src/theme-sprinkles.ts",
 }
+const containerRuntimeEntries = { "theme-containers": "src/theme-containers.ts" }
 const themeCoreRuntimeEntries = {"theme-core": "src/theme-core.ts"}
 const themeTokenRuntimeEntries = {"theme-token": "src/theme-token-only.ts"}
 
 export default defineConfig([
+  { ...common, clean: false, dts: false, entry: containerRuntimeEntries },
   { ...common, clean: false, dts: false, entry: themeRuntimeEntries },
   { ...common, clean: false, dts: false, entry: themeCoreRuntimeEntries },
   { ...common, clean: false, dts: false, entry: themeTokenRuntimeEntries },
@@ -62,6 +64,7 @@ export default defineConfig([
     format: ["esm"],
     dts: { emitDtsOnly: true },
     entry: {
+      ...containerRuntimeEntries,
       ...toolEntries,
       ...themeRuntimeEntries,
       ...themeCoreRuntimeEntries,
@@ -73,7 +76,7 @@ export default defineConfig([
         // A dual-format declaration-only build emits CJS JavaScript when its
         // re-export optimization disables the second DTS pass. Write the same
         // canonical re-export stubs without rebuilding that JavaScript graph.
-        for (const name of [...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), ...Object.keys(themeCoreRuntimeEntries), ...Object.keys(themeTokenRuntimeEntries), "devtools"]) {
+        for (const name of [...Object.keys(containerRuntimeEntries), ...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), ...Object.keys(themeCoreRuntimeEntries), ...Object.keys(themeTokenRuntimeEntries), "devtools"]) {
           writeFileSync(`dist/${name}.d.cts`, `export * from "./${name}.mjs";\n`)
         }
       },

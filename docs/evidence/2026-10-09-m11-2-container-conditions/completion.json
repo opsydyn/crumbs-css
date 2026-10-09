@@ -1,0 +1,129 @@
+{
+  "schema": "crumbs.m11.2.completion.v1",
+  "featureAcceptance": "passed",
+  "approval": {
+    "date": "2026-10-09",
+    "authority": "Direct human Approved response to the audited proposal and explicit incremental-deferral/local-commit recommendation",
+    "deferral": {
+      "metric": "incremental-rebuild",
+      "target": "M10.5 release closure",
+      "scope": "M11.2 feature-slice acceptance only; active release enforcement unchanged"
+    }
+  },
+  "sourceDigest": "6923059433c81547f1123870aeec4649726cc4b6143ecde6f435be779338d112",
+  "artifact": {
+    "path": "artifacts/opsydyn-crumbs-css-0.1.1-alpha.1.tgz",
+    "sha256": "9c7d0dad5125f553bb578b4b21da03fc3b998d6a2bfda2df47f9dcc94a057226",
+    "bytes": 536934
+  },
+  "verification": {
+    "sourceFiles": 725,
+    "packedFiles": 167,
+    "cssTests": 1674,
+    "existingOptionalSkips": 1,
+    "storybookTests": 25,
+    "hostCommands": 89,
+    "iosPhases": 14,
+    "androidPhases": 14,
+    "inspectedImages": 30,
+    "losslessArchives": 1823,
+    "docsPages": 30,
+    "referenceMode": "Retained full execution receipts plus fresh unchanged-source/artifact/archive audit; no new live execution"
+  },
+  "references": {
+    "host": {
+      "path": "host-reviewed-final/qualification.json",
+      "sha256": "cf8c00a67ccd977f3fea89c59ada884e1eb89dcd7eecc4254ec1558f97d5c75b"
+    },
+    "native": {
+      "path": "native-reviewed-final/native.json",
+      "sha256": "9fb80c14c44bc98673cf7a97c4caf3ee56c56001ff1cb97953b9133eb1f9ed94"
+    },
+    "budgetFirst": {
+      "path": "host-budgets-reviewed/comparison.json",
+      "sha256": "6f8f341613e316fea4ecf7534d0849c4c9b809697015e21d3333edf7748a2a4d"
+    },
+    "budgetRepeat": {
+      "path": "host-budgets-reviewed-repeat/comparison.json",
+      "sha256": "3ecd15cb8fdd793e771c0294c71d70234cf779160cfea708663aeadc6c734ac7"
+    },
+    "visual": {
+      "path": "visual-inspection-reviewed.json",
+      "sha256": "ea183760cff6a997bb809797092f968655cc5a6004f6037fb9097e2a815570d9"
+    },
+    "docs": {
+      "path": "docs-inputs-reviewed.json",
+      "sha256": "fcdb4e0fce7b130eb48f6b2586f18f848355f7633e9389f2927a37b60d609980"
+    },
+    "restoration": {
+      "path": "restoration-reviewed.json",
+      "sha256": "5818098c14d8ee59abe36e672155716dad8356003c21135fc9e4bef93fde3c13"
+    },
+    "artifactRecovery": {
+      "path": "artifact-recovery.json",
+      "sha256": "8689b8980c67dcc1cc3c0234af4f98f6b15110fe5e037e1199f1142bae91504d"
+    }
+  },
+  "hostBudgetDisposition": {
+    "blocking": {
+      "passIds": [
+        "cold-transform-ms",
+        "editor-tsc-wall-10000",
+        "editor-tsgo-wall-10000",
+        "editor-tsc-memory-10000",
+        "editor-tsgo-memory-10000",
+        "editor-tsc-instantiations-10000",
+        "editor-tsgo-instantiations-10000",
+        "editor-first-completion-10000",
+        "editor-warm-completion-10000"
+      ],
+      "failIds": [
+        "warm-transform-ms",
+        "incremental-rebuild"
+      ],
+      "incompleteIds": []
+    },
+    "advisory": {
+      "passIds": [
+        "runtime-tokens-esm-graph-bytes",
+        "runtime-tokens-cjs-graph-bytes"
+      ],
+      "failIds": [
+        "runtime-initialization-node22-esm",
+        "runtime-initialization-node22-cjs",
+        "runtime-initialization-current-esm",
+        "runtime-initialization-current-cjs",
+        "runtime-theme-core-esm-graph-bytes",
+        "runtime-theme-core-cjs-graph-bytes",
+        "runtime-theme-compatibility-esm-graph-bytes",
+        "runtime-theme-compatibility-cjs-graph-bytes"
+      ],
+      "incompleteIds": []
+    },
+    "releasePolicyQualified": false,
+    "thresholdsAndGateChanged": false
+  },
+  "ephemeralEvidence": {
+    "consumerStillPresent": false,
+    "ownedInstallStillPresent": false,
+    "qualifiedDocsStagingStillPresent": false,
+    "absentLinksInsideRemovedOwnedInstall": [
+      "/private/tmp/crumbs-m11-1-install/apps/playground/node_modules/@opsydyn/crumbs-css",
+      "/private/tmp/crumbs-m11-1-install/apps/storybook/node_modules/@opsydyn/crumbs-css"
+    ],
+    "artifactReproducedExactly": true,
+    "allOriginalReceiptsRetained": true
+  },
+  "review": {
+    "importantFindingsRepaired": 3,
+    "freshWholeSliceReviews": 1,
+    "deferredMinor": "Three documentation links omit deployed /crumbs-css base"
+  },
+  "integration": {
+    "branch": "main",
+    "parent": "5410f17a5c77b42f12e17df408df66948a28ab53",
+    "singleCommitMessage": "feat(m11.2): add named native container conditions",
+    "pushOrPublicationAuthorised": false
+  },
+  "nextRoadmapItem": "M11.3 \u2014 native motion adapter"
+}

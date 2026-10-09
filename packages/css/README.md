@@ -454,3 +454,11 @@ Generic authoring now rejects unsupported side compound/style borders with actio
 Declare `createVar` and `fallbackVar` through `/style` in `.css.ts`; use immutable `assignVars` snapshots and `useAssignedStyles` through `/theme/vars`. Clearing replaces a complete instance snapshot and restores its literal or typed theme defaults. The existing provider supplies reached theme fallbacks. See the [local-variable guide](https://opsydyn.github.io/crumbs-css/how-to/use-local-variables/).
 
 This requires local plan v1 support in both compiler and runtime. The exact artifact is identified by the [M11.1 packet](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-08-m11-1-local-vars); the current alpha version alone does not identify support. Release closure and publication remain separate.
+
+## Named native container conditions (M11.2)
+
+The optional `@opsydyn/crumbs-css/theme/containers` entry exports `defineContainer`, `getContainerBucket`, `resolveContainerValue`, `useContainerLayout`, `ContainerProvider` and `useContainerValue`. Define named width/height buckets in ordinary `.ts` files, attach one handle to one independently constrained View, and select an exhaustive map with an explicit `unmeasured` branch. Thresholds are lower-inclusive and fractional; zero is measured. Siblings are independent and nearest matching nested owners shadow ancestors.
+
+Same-bucket events publish nothing; selected references use `Object.is`. Stable frozen maps reuse admission; mutable maps refresh on the next render. Key the hook owner when replacing a native View. Sequential layout feedback still needs independent axis constraints. Native portal adapters that re-render children at a host require a source-value prop bridge or a fresh destination owner.
+
+The entry builds independently with React as its only runtime dependency. It adds no compiler syntax, recipe/Sprinkles condition or theme/window axis. Check the exact artifact export map: historical tarballs with the same alpha version may lack this entry. See `docs/src/content/docs/how-to/use-container-conditions.mdx` and the M11.2 evidence packet for examples and qualification limits.
