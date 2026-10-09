@@ -1,0 +1,30 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-4-qualification.test.ts:
+(pass) actual_cjs_first_loading_is_observed [0.08ms]
+(pass) late_fixture_input_drift_invalidates_acceptance [1.22ms]
+(pass) foreign_roots_and_path_escapes_are_refused [0.08ms]
+(pass) second_copy_descriptors_work_without_runtime_peers [52.00ms]
+(pass) foreign_device_or_bundle_is_refused [0.11ms]
+(pass) capture_pixel_and_layout_controls_detect_wrong_output [8.58ms]
+(pass) font_preference_phase_requires_real_native_change_and_restoration [0.13ms]
+(pass) late_cleanup_or_input_drift_dominates_prior_passes [0.04ms]
+60 | test('late_cleanup_or_input_drift_dominates_prior_passes', () => { const receipt: any = { ios: 'passed', android: 'passed', acceptance: 'passed' }; failM114Native(receipt, Error('late fixture drift')); expect(receipt.acceptance).toBe('failed'); expect(receipt.ios).toBe('failed'); expect(receipt.android).toBe('failed'); failM114Native(receipt, Error('cleanup failed')); expect(receipt.errors).toHaveLength(2); });
+61 | 
+62 | import {assertM114RealNativeMap} from '../../../scripts/m11-4-native-observations';
+63 | test('native_map_requires_actual_text_and_algebra_modules',()=>{
+64 |  const sources=['node_modules/react-native/Libraries/Text/Text.js','node_modules/@opsydyn/crumbs-css/dist/tokens-algebra.mjs'];
+65 |  expect(()=>assertM114RealNativeMap({sources})).not.toThrow();
+                                                         ^
+error: expect(received).not.toThrow()
+
+Error name: "Error"
+Error message: "Real React Native Text/algebra map required"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-4-qualification.test.ts:65:53)
+(fail) native_map_requires_actual_text_and_algebra_modules [1.09ms]
+
+ 8 pass
+ 1 fail
+ 37 expect() calls
+Ran 9 tests across 1 file. [316.00ms]

@@ -552,3 +552,16 @@ Opt in to `assignVars`, `resolveAssignedStyles` and `useAssignedStyles`. The six
 `@opsydyn/crumbs-css/theme/motion` exports only `defineMotion` at runtime; `NativeMotionChannel`, `NativeMotionTarget`, `NativeMotionDefinitionInput`, `NativeMotionDefinition`, `NativeMotionState` and `NativeMotionEasing` are types. It has no runtime peers.
 
 `@opsydyn/crumbs-css/theme/motion/native` exports only `useNativeMotion`; options/controller/run/result and pure motion types are type-only. This optional graph uses public React/React Native. Both entries build independently and add no values through older entries or aliases. See [native motion](/crumbs-css/how-to/use-native-motion/).
+
+## `@opsydyn/crumbs-css/tokens/algebra` (M11.4)
+
+Pure optional authoring exports: `createColor`, `mixColor`, `setColorAlpha`,
+`multiplyColorAlpha`, `toNativeColor`, `createTypography`, `scaleTypography`,
+`createTypographyScale`, `toNativeTypography`, `TokenAlgebraError`.
+
+Types: `AlgebraColor`, `AlgebraColorInput`, `ColorInterpolationSpace`,
+`ColorMixOptions`, `Typography`, `TypographyInput`, `TypographyScaleOptions`,
+`TypographyScale`, `NativeTypographyStyle`, `TokenAlgebraErrorCode`.
+No existing entry re-exports these values. ESM and CommonJS have separate
+JavaScript graphs and canonical shared type identity. The entry has zero
+runtime externals. See [token algebra](/crumbs-css/how-to/use-token-algebra/).

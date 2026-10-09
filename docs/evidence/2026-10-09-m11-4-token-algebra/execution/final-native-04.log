@@ -1,0 +1,12 @@
+ 7 | import type { M114Observation } from './m11-4-native-observations';
+ 8 | import { nativeAttributes, nativeXmlAttributes, nativeActionPoint } from './m11-3-native-observations';
+ 9 | type Platform = 'ios' | 'android';
+10 | const repository = resolve(import.meta.dir, '..');
+11 | function ensure(value: unknown, message: string): asserts value { if (!value)
+12 |     throw Error(message); }
+               ^
+error: M11.4 native failed: Error: android current native algebra observation not ready
+      at ensure (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-4-native-qualification.ts:12:11)
+      at qualify (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-4-native-qualification.ts:253:9)
+
+Bun v1.4.2 (macOS arm64)

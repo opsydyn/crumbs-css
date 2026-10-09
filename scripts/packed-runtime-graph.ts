@@ -43,6 +43,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./theme/sprinkles": "ordinary-runtime",
   "./dist/theme": "ordinary-runtime",
   "./tokens": "ordinary-runtime",
+  "./tokens/algebra": "ordinary-runtime",
   "./tokens/schema": "advanced-runtime",
   "./tokens/schema/value": "advanced-runtime",
   "./tokens/optic": "advanced-runtime",
@@ -560,6 +561,13 @@ export async function auditPackedRuntimeEntrypoints(
       if (subpath === "./theme/motion" || subpath === "./theme/motion/native") {
         const oldTargets = new Set(targets.filter(t => t.subpath !== "./theme/motion" && t.subpath !== "./theme/motion/native" && t.subpath !== "./package.json").map(t => validatedTargets.get(t.target)));
         if ([...files].some(file => oldTargets.has(file))) throw new Error("Existing entry reached from isolated motion runtime");
+      }
+      const algebraTargets = new Set(targets.filter(t => t.subpath === "./tokens/algebra").map(t => validatedTargets.get(t.target)));
+      if (subpath === "./tokens/algebra") {
+        const otherTargets = new Set(targets.filter(t => t.subpath !== "./tokens/algebra" && t.subpath !== "./package.json").map(t => validatedTargets.get(t.target)));
+        if ([...files].some(file => otherTargets.has(file))) throw new Error("Existing entry reached from isolated token algebra");
+      } else if ([...files].some(file => algebraTargets.has(file))) {
+        throw new Error("Existing entry reaches optional token algebra");
       }
       graphs.push({
         subpath,

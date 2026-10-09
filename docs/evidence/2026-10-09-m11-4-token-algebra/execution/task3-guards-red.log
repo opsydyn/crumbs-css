@@ -1,0 +1,42 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-4-qualification.test.ts:
+1 | import {expect,test} from 'bun:test';import {mkdtemp,writeFile,rm,mkdir,cp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,resolve} from 'node:path';import {assertM114OwnedRoot,verifyM114InputFiles,assertM114LoadOrder,m114Sha,assertM114Stable} from '../../../scripts/m11-4-qualification';
+2 | test('actual_cjs_first_loading_is_observed',()=>{expect(()=>assertM114LoadOrder('cjs-first',[{kind:'require',path:'tokens-algebra.cjs'},{kind:'import',path:'tokens-algebra.mjs'}])).not.toThrow();expect(()=>assertM114LoadOrder('cjs-first',[{kind:'import',path:'tokens-algebra.mjs'},{kind:'require',path:'tokens-algebra.cjs'}])).toThrow();expect(()=>assertM114LoadOrder('esm-first',[{kind:'require',path:'tokens-algebra.cjs'}])).toThrow()});
+                                                                                                                                                                                                                                                                                                                                           ^
+error: expect(received).toThrow()
+
+Received function did not throw
+Received value: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-4-qualification.test.ts:2:328)
+(fail) actual_cjs_first_loading_is_observed [0.17ms]
+1 | import {expect,test} from 'bun:test';import {mkdtemp,writeFile,rm,mkdir,cp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,resolve} from 'node:path';import {assertM114OwnedRoot,verifyM114InputFiles,assertM114LoadOrder,m114Sha,assertM114Stable} from '../../../scripts/m11-4-qualification';
+2 | test('actual_cjs_first_loading_is_observed',()=>{expect(()=>assertM114LoadOrder('cjs-first',[{kind:'require',path:'tokens-algebra.cjs'},{kind:'import',path:'tokens-algebra.mjs'}])).not.toThrow();expect(()=>assertM114LoadOrder('cjs-first',[{kind:'import',path:'tokens-algebra.mjs'},{kind:'require',path:'tokens-algebra.cjs'}])).toThrow();expect(()=>assertM114LoadOrder('esm-first',[{kind:'require',path:'tokens-algebra.cjs'}])).toThrow()});
+3 | test('late_fixture_input_drift_invalidates_acceptance',async()=>{const root=await mkdtemp(join(tmpdir(),'m114-input-'));try{await writeFile(join(root,'fixture.ts'),'original');const files=[{path:'fixture.ts',sha256:m114Sha('original')}];await expect(verifyM114InputFiles(root,files)).resolves.toEqual(files);await writeFile(join(root,'fixture.ts'),'changed');await expect(verifyM114InputFiles(root,files)).rejects.toThrow('Input changed');expect(()=>assertM114Stable('a','b','source')).toThrow()}finally{await rm(root,{recursive:true,force:true})}});
+
+error: expect(received).rejects.toThrow(expected)
+
+Expected promise that rejects
+Received promise that resolved: Promise { <resolved> }
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-4-qualification.test.ts:3:415)
+(fail) late_fixture_input_drift_invalidates_acceptance [0.88ms]
+1 | import {expect,test} from 'bun:test';import {mkdtemp,writeFile,rm,mkdir,cp} from 'node:fs/promises';import {tmpdir} from 'node:os';import {join,resolve} from 'node:path';import {assertM114OwnedRoot,verifyM114InputFiles,assertM114LoadOrder,m114Sha,assertM114Stable} from '../../../scripts/m11-4-qualification';
+2 | test('actual_cjs_first_loading_is_observed',()=>{expect(()=>assertM114LoadOrder('cjs-first',[{kind:'require',path:'tokens-algebra.cjs'},{kind:'import',path:'tokens-algebra.mjs'}])).not.toThrow();expect(()=>assertM114LoadOrder('cjs-first',[{kind:'import',path:'tokens-algebra.mjs'},{kind:'require',path:'tokens-algebra.cjs'}])).toThrow();expect(()=>assertM114LoadOrder('esm-first',[{kind:'require',path:'tokens-algebra.cjs'}])).toThrow()});
+3 | test('late_fixture_input_drift_invalidates_acceptance',async()=>{const root=await mkdtemp(join(tmpdir(),'m114-input-'));try{await writeFile(join(root,'fixture.ts'),'original');const files=[{path:'fixture.ts',sha256:m114Sha('original')}];await expect(verifyM114InputFiles(root,files)).resolves.toEqual(files);await writeFile(join(root,'fixture.ts'),'changed');await expect(verifyM114InputFiles(root,files)).rejects.toThrow('Input changed');expect(()=>assertM114Stable('a','b','source')).toThrow()}finally{await rm(root,{recursive:true,force:true})}});
+4 | test('foreign_roots_and_path_escapes_are_refused',async()=>{expect(()=>assertM114OwnedRoot(['foreign'],undefined)).toThrow();expect(()=>assertM114OwnedRoot(['foreign'],{schema:'other'})).toThrow();expect(()=>assertM114OwnedRoot([],undefined)).not.toThrow();await expect(verifyM114InputFiles('/owned',[{path:'src/../../foreign',sha256:'x'}])).rejects.toThrow('escaped')});
+                                                                                                                       ^
+error: expect(received).toThrow()
+
+Received function did not throw
+Received value: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-4-qualification.test.ts:4:116)
+(fail) foreign_roots_and_path_escapes_are_refused [0.07ms]
+(pass) second_copy_descriptors_work_without_runtime_peers [53.34ms]
+
+ 1 pass
+ 3 fail
+ 13 expect() calls
+Ran 4 tests across 1 file. [213.00ms]

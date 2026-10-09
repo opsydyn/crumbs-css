@@ -1,0 +1,14 @@
+import { expect, test } from 'bun:test';
+import { createColor, mixColor, setColorAlpha, multiplyColorAlpha, toNativeColor } from '../src/token-algebra/color';
+test('encoded_and_linear_midpoints_have_distinct_native_bytes', () => { const b = createColor('#000'), w = createColor('#fff'); expect(toNativeColor(mixColor(b, w, { ratio: .5, space: 'srgb' }))).toBe('#808080ff'); expect(toNativeColor(mixColor(b, w, { ratio: .5, space: 'srgb-linear' }))).toBe('#bcbcbcff'); });
+test('alpha_replacement_and_attenuation_preserve_rgb', () => { const b = createColor('#0000ff40'); expect(toNativeColor(setColorAlpha(b, .5))).toBe('#0000ff80'); expect(toNativeColor(multiplyColorAlpha(b, .5))).toBe('#0000ff20'); expect(toNativeColor(b)).toBe('#0000ff40'); });
+test('unused_endpoint_accessors_never_execute', () => { let reads = 0; const b = createColor('#0000ff00'); const evil = { ...b, get alpha() { reads++; return 1; } }; expect(() => mixColor(b, evil as any, { ratio: 0, space: 'srgb' })).toThrow(); expect(reads).toBe(0); expect(toNativeColor(b)).toBe('#0000ff00'); expect(mixColor(b, createColor('#fff'), { ratio: 0, space: 'srgb' })).toEqual(b); });
+test('native_quantisation_is_a_single_boundary', () => { const b = createColor({ space: 'srgb', components: [.123456789, .5, 0], alpha: .987654321 }); expect(b.components[0]).toBe(.123456789); expect(toNativeColor(b)).toBe('#1f8000fc'); expect(toNativeColor(createColor(toNativeColor(b)))).toBe('#1f8000fc'); });
+test('hex_width_alpha_order_and_case_are_explicit', () => { for (const [input, want] of [['#aBc', '#aabbccff'], ['#1234', '#11223344'], ['#A1b2C3', '#a1b2c3ff'], ['#01020304', '#01020304']] as const)
+    expect(toNativeColor(createColor(input))).toBe(want); });
+test('unequal_alpha_is_premultiplied_and_transparent_interiors_are_black', () => { const r = createColor({ space: 'srgb', components: [1, 0, 0], alpha: 1 }), b = createColor({ space: 'srgb', components: [0, 0, 1], alpha: .5 }); expect(mixColor(r, b, { ratio: .5, space: 'srgb' }).components).toEqual([2 / 3, 0, 1 / 3]); expect(mixColor(r, b, { ratio: .5, space: 'srgb' }).alpha).toBe(.75); const hidden = createColor('#f000'); expect(toNativeColor(mixColor(hidden, hidden, { ratio: .5, space: 'srgb' }))).toBe('#00000000'); expect(toNativeColor(mixColor(hidden, b, { ratio: 0, space: 'srgb' }))).toBe('#ff000000'); });
+test('input_is_copied_and_output_is_deeply_frozen_with_canonical_zero', () => { const components: [
+    number,
+    number,
+    number
+] = [-0, 1, .25]; const input = { space: 'srgb' as const, components, alpha: -0 }; const color = createColor(input); expect(Object.isFrozen(color)).toBe(true); expect(Object.isFrozen(color.components)).toBe(true); expect(Object.isFrozen(input)).toBe(false); expect(Object.isFrozen(components)).toBe(false); components[0] = 1; expect(color.components[0]).toBe(0); expect(Object.is(color.alpha, -0)).toBe(false); });

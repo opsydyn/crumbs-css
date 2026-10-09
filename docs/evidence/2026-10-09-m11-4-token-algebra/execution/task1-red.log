@@ -1,0 +1,111 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/token-algebra-admission.test.ts:
+1 | import {expect,test} from 'bun:test';
+2 | import {createColor,mixColor,setColorAlpha,toNativeColor} from '../src/token-algebra/color';
+3 | const errorCode=(fn:()=>unknown,code:string)=>{let error:unknown;try{fn()}catch(e){error=e}expect(error).toBeInstanceOf(TypeError);expect((error as any)?.code).toBe(code);expect((error as Error)?.message.length).toBeLessThan(180)};
+                                                                                                             ^
+error: expect(received).toBeInstanceOf(expected)
+
+Expected constructor: [class TypeError extends Error]
+Received value: 1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                          ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:55)
+      at errorCode (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:3:70)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:4:179)
+
+
+      at errorCode (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:3:106)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:4:179)
+(fail) invalid_hex_is_bounded_and_uses_invalid_color [1.65ms]
+1 | import {expect,test} from 'bun:test';
+2 | import {createColor,mixColor,setColorAlpha,toNativeColor} from '../src/token-algebra/color';
+3 | const errorCode=(fn:()=>unknown,code:string)=>{let error:unknown;try{fn()}catch(e){error=e}expect(error).toBeInstanceOf(TypeError);expect((error as any)?.code).toBe(code);expect((error as Error)?.message.length).toBeLessThan(180)};
+                                                                                                             ^
+error: expect(received).toBeInstanceOf(expected)
+
+Expected constructor: [class TypeError extends Error]
+Received value: 1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                          ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:55)
+      at errorCode (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:3:70)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:5:528)
+
+
+      at errorCode (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:3:106)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:5:528)
+(fail) admission_rejects_getters_symbols_hidden_extra_and_custom_prototypes [0.15ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:6:82)
+(fail) forged_operands_options_and_numeric_ranges_have_stable_codes [0.04ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-admission.test.ts:7:91)
+(fail) foreign_plain_descriptors_work_but_cycles_and_decorated_tuples_do_not [0.04ms]
+
+packages/css/test/token-algebra-color.test.ts:
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-color.test.ts:4:77)
+(fail) encoded_and_linear_midpoints_have_distinct_native_bytes [0.04ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-color.test.ts:5:68)
+(fail) alpha_replacement_and_attenuation_preserve_rgb [0.02ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-color.test.ts:6:73)
+(fail) unused_endpoint_accessors_never_execute [0.03ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-color.test.ts:7:62)
+(fail) native_quantisation_is_a_single_boundary [0.02ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-color.test.ts:8:208)
+(fail) hex_width_alpha_order_and_case_are_explicit [0.04ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-color.test.ts:9:88)
+(fail) unequal_alpha_is_premultiplied_and_transparent_interiors_are_black [0.03ms]
+1 | // Interface scaffold for behavioural RED; no implemented algebra yet.
+2 | export function createColor(..._args:any[]):any{throw Error('not implemented')}
+                                                                                 ^
+error: not implemented
+      at createColor (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/color.ts:2:78)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-color.test.ts:10:196)
+(fail) input_is_copied_and_output_is_deeply_frozen_with_canonical_zero [0.03ms]
+
+ 0 pass
+ 11 fail
+ 2 expect() calls
+Ran 11 tests across 2 files. [189.00ms]

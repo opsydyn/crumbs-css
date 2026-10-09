@@ -9,6 +9,7 @@ import { ReferenceButton } from "./ReferenceButton"
 import { ReferenceDialog } from "./ReferenceDialog"
 import { ReferenceSelections } from "./ReferenceSelections"
 import { ReferenceTextField } from "./ReferenceTextField"
+import {TokenAlgebraDogfood} from "./TokenAlgebraDogfood"
 import {NativeMotionDogfood} from "./NativeMotionDogfood"
 import { NativeAccessibilityContexts } from "./NativeAccessibilityContexts"
 import { ShowcaseCard } from "./ShowcaseCard"
@@ -74,6 +75,7 @@ export function ReferenceSystem() {
       <LocalVarsDogfood />
       <ContainerConditionsDogfood />
       <NativeMotionDogfood />
+      <TokenAlgebraDogfood />
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Text style={styles.eyebrow}>Typography</Text>

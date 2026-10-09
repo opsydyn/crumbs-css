@@ -1,0 +1,41 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/token-algebra-integration.test.ts:
+✘ [ERROR] Could not resolve "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/tokens/algebra.ts"
+
+    case.css.ts:3:87:
+      3 │ ...phy } from "/Users/alancurrie/.codex/worktrees/crumbs-main-merge...
+        ╵               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1743 |     let { file, line, column } = e.location;
+1744 |     let pluginText = e.pluginName ? `[plugin: ${e.pluginName}] ` : "";
+1745 |     return `
+1746 | ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
+1747 |   }).join("");
+1748 |   let error = new Error(text);
+                         ^
+error: Build failed with 1 error:
+case.css.ts:3:87: ERROR: Could not resolve "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/tokens/algebra.ts"
+      at failureErrorWithLog (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:19)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1207:25)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1626:9)
+(fail) algebra_values_use_existing_scalar_contracts [65.98ms]
+
+packages/css/test/token-algebra-package.test.ts:
+1 | import {expect,test} from 'bun:test';import {readFileSync} from 'node:fs';import {resolve} from 'node:path';import ts from 'typescript';import {auditPackedRuntimeEntrypoints} from '../../../scripts/packed-runtime-graph';
+2 | const root=resolve(import.meta.dir,'..');const manifest=()=>JSON.parse(readFileSync(resolve(root,'package.json'),'utf8'));
+3 | const names=(file:string)=>{const ast=ts.createSourceFile(file,readFileSync(file,'utf8'),ts.ScriptTarget.Latest,true);return ast.statements.flatMap(n=>ts.isExportDeclaration(n)&&n.exportClause&&ts.isNamedExports(n.exportClause)?n.exportClause.elements.filter(e=>!e.isTypeOnly).map(e=>e.name.text):[]).sort()};
+4 | test('algebra_entry_has_ten_values_and_zero_externals',async()=>{const m=manifest();expect(m.exports['./tokens/algebra']).toBeDefined();const api=await import(resolve(root,m.exports['./tokens/algebra'].import));expect(Object.keys(api).sort()).toEqual(['TokenAlgebraError','createColor','createTypography','createTypographyScale','mixColor','multiplyColorAlpha','scaleTypography','setColorAlpha','toNativeColor','toNativeTypography'].sort());const graphs=(await auditPackedRuntimeEntrypoints(root)).filter(g=>g.subpath==='./tokens/algebra');expect(graphs).toHaveLength(2);for(const g of graphs){expect(g.externalSpecifiers).toEqual([]);expect(g.files.every(f=>f.includes('tokens-algebra'))).toBe(true)}});
+
+error: expect(received).toBeDefined()
+
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-package.test.ts:4:123)
+(fail) algebra_entry_has_ten_values_and_zero_externals [0.34ms]
+(pass) existing_entry_values_and_aliases_match_control [50.64ms]
+
+ 1 pass
+ 2 fail
+ 83 expect() calls
+Ran 3 tests across 2 files. [504.00ms]

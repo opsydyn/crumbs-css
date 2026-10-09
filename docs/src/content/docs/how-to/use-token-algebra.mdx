@@ -1,0 +1,126 @@
+---
+title: Derive colour and typography tokens
+description: Pure colour mixing and exact named typography scales for native design systems.
+---
+
+Import the optional pure authoring entry. It has no React, React Native,
+Effect, compiler or other runtime dependency.
+
+```ts
+import {
+  createColor, mixColor, setColorAlpha, multiplyColorAlpha, toNativeColor,
+  createTypography, createTypographyScale, toNativeTypography,
+} from '@opsydyn/crumbs-css/tokens/algebra';
+
+const brand = createColor('#087f8c');
+const tint = mixColor(brand, createColor('#fff'), {
+  ratio: 0.2,
+  space: 'srgb-linear',
+});
+const translucent = toNativeColor(setColorAlpha(brand, 0.25));
+const attenuated = toNativeColor(multiplyColorAlpha(brand, 0.5));
+const tintColor = toNativeColor(tint);
+
+const base = createTypography({
+  fontSize: 16,
+  lineHeight: { ratio: 1.5 },
+  letterSpacing: -0.25,
+});
+const scale = createTypographyScale(base, {
+  ratio: 1.25,
+  steps: { caption: -1, body: 0, title: 2 },
+});
+const bodyMetrics = toNativeTypography(scale.body);
+// scale.unknown is a type error.
+```
+
+## Choose the colour operation explicitly
+
+`createColor` admits exactly `#RGB`, `#RGBA`, `#RRGGBB`, `#RRGGBBAA`, or
+`{space: 'srgb', components: [r, g, b], alpha?}` with finite fractions in
+`[0,1]`. Hex alpha comes last. Whitespace, named colours, RGB/HSL strings,
+platform colours and token/variable handles are refused. Existing native
+colour strings still work through the existing styling and token APIs.
+
+`mixColor` interpolates alpha-premultiplied channels. Choose encoded
+`srgb` or linear-light `srgb-linear`; black/white midpoints emit
+`#808080ff` and `#bcbcbcff` respectively. This is interpolation, not
+source-over compositing, palette generation or automatic contrast selection.
+
+`setColorAlpha` replaces alpha. `multiplyColorAlpha` attenuates existing
+alpha. For `#0000ff40` with factor `0.5`, they emit `#0000ff80` and
+`#0000ff20`. Both preserve RGB and leave view opacity alone.
+
+Descriptors retain binary64 fractions and are deeply frozen copies.
+`toNativeColor` quantises once to lowercase `#rrggbbaa` using
+`Math.round(component * 255)`. Endpoint selection preserves invisible RGB;
+a zero-alpha interior mixture produces transparent black. Floating-point
+transcendental results have no universal bit-identity or associativity promise.
+
+## Feed existing native values into contracts and styles
+
+Use the emitted strings and metrics as ordinary existing scalar values.
+For example, in a `.css.ts` file:
+
+```ts
+import { textStyle } from '@opsydyn/crumbs-css/style';
+import {
+  createTypography, toNativeTypography, createColor, toNativeColor,
+} from '@opsydyn/crumbs-css/tokens/algebra';
+
+export const label = textStyle({
+  ...toNativeTypography(createTypography({
+    fontSize: 16,
+    lineHeight: { value: 24 },
+    letterSpacing: -0.25,
+  })),
+  color: toNativeColor(createColor('#087f8c')),
+});
+```
+
+Colour contracts accept emitted strings. Length contracts accept emitted
+numbers; a negative letter-spacing token requires
+`defineToken({kind: 'length', allowNegative: true})`. The helpers add no
+composite token domain or expression nodes. Pass native conversions to
+styles rather than descriptor records.
+
+## Keep typography and native font preferences separate
+
+`lineHeight` is exactly a positive `{ratio}` or `{value}`. Font size and
+line height must be positive finite numbers, remain positive under
+`Math.fround`, and remain finite along with signed letter spacing.
+Returned metrics preserve binary64 precision; admission does not round.
+A positive line height below font size is allowed and remains your layout
+responsibility.
+
+`scaleTypography` multiplies all three metrics by a positive finite factor.
+Named scales calculate each `base * ratio ** step` directly. Use 1–32
+statically known names matching `[A-Za-z][A-Za-z0-9_-]{0,63}` and integer
+steps `[-16,16]`. Broad index signatures are rejected by the typed API.
+Results use lexical key order, are frozen, and publish only after every
+metric has admitted.
+
+Numbers use ordinary unscaled React Native style units. Keep `Text`
+`allowFontScaling={true}`. Do not multiply base metrics by device pixel
+ratio, `PixelRatio.getFontScale()` or native accessibility preferences.
+For fixed foundations derive once at module definition time. For application
+controls, use `useMemo` against the actual foundation, space, ratio and
+step inputs. Native font scaling belongs to Text and does not enter that memo.
+
+## Errors and evidence
+
+`TokenAlgebraError` extends `TypeError` and carries a stable readonly
+`code`: `algebra.invalid-color`, `algebra.invalid-typography`,
+`algebra.invalid-option`, `algebra.invalid-descriptor`, or
+`algebra.out-of-range`. Check the code across package copies rather than
+relying only on `instanceof`. Diagnostics are bounded; getters/setters,
+extra/hidden/symbol/inherited fields, decorated tuples and unsupported
+versions/prototypes are refused without invoking accessors.
+
+The shared Storybook/playground reference shows generated values beside
+independently authored controls. The M11.4 assessment records exact packed,
+host and iOS Simulator/Android emulator evidence and costs. Host timings
+are diagnostic; they establish no native frame-rate improvement. Physical
+hardware, spoken readers, live authored HMR and release FPS remain deferred;
+interactive browser acceptance is unperformed. M10.5 release-policy closure
+and publication remain separate.

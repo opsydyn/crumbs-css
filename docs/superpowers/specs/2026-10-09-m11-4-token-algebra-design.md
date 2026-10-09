@@ -1,6 +1,6 @@
 # M11.4 — Pure colour and typography token algebra
 
-**Status:** Approved as written by Alan Currie on 2026-10-09 following commit `a29867e`. The [proposed implementation plan](../plans/2026-10-09-m11-4-token-algebra.md) awaits review; implementation remains pending.
+**Status:** Approved as written by Alan Currie on 2026-10-09 following commit `a29867e`. The approved [implementation plan](../plans/2026-10-09-m11-4-token-algebra.md) is complete in the implementation commit containing this record; see the [assessment](../../assessments/2026-10-09-m11-4-token-algebra.md) for reviewed host/native qualification and limits.
 
 **Date:** 2026-10-09.
 

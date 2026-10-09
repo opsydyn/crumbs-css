@@ -1,0 +1,85 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/token-algebra-typography.test.ts:
+1 | // Behavioural RED interface scaffold.
+2 | export function createTypography(..._args:any[]):any{throw Error('not implemented')}
+                                                                                      ^
+error: not implemented
+      at createTypography (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/typography.ts:2:83)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:6:69)
+(fail) named_steps_are_computed_directly_from_base [0.16ms]
+1 | // Behavioural RED interface scaffold.
+2 | export function createTypography(..._args:any[]):any{throw Error('not implemented')}
+                                                                                      ^
+error: not implemented
+      at createTypography (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/typography.ts:2:83)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:7:140)
+(fail) metric_emission_contains_only_native_fields [0.04ms]
+1 | // Behavioural RED interface scaffold.
+2 | export function createTypography(..._args:any[]):any{throw Error('not implemented')}
+                                                                                      ^
+error: not implemented
+      at createTypography (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/typography.ts:2:83)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:8:68)
+(fail) invalid_late_step_cannot_publish_partial_scale [0.04ms]
+1 | // Behavioural RED interface scaffold.
+2 | export function createTypography(..._args:any[]):any{throw Error('not implemented')}
+                                                                                      ^
+error: not implemented
+      at createTypography (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/typography.ts:2:83)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:9:64)
+(fail) foreign_typography_accessors_never_execute [0.04ms]
+1 | // Behavioural RED interface scaffold.
+2 | export function createTypography(..._args:any[]):any{throw Error('not implemented')}
+                                                                                      ^
+error: not implemented
+      at createTypography (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/typography.ts:2:83)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:10:95)
+(fail) named_scale_count_names_and_exponents_are_bounded_and_constructor_is_safe [0.06ms]
+1 | import {expect,test} from 'bun:test';import {createTypography,scaleTypography,createTypographyScale,toNativeTypography} from '../src/token-algebra/typography';
+2 | const base=()=>createTypography({fontSize:16,lineHeight:{ratio:1.5},letterSpacing:-.25});
+3 | const unsafeCreate=createTypography as (value:unknown)=>ReturnType<typeof createTypography>;
+4 | const unsafeScale=createTypographyScale as (base:unknown,options:unknown)=>any;
+5 | const code=(fn:()=>unknown,want:string)=>{let error:any;try{fn()}catch(e){error=e}expect(error).toBeInstanceOf(TypeError);expect(error?.code).toBe(want)};
+                                                                                                    ^
+error: expect(received).toBeInstanceOf(expected)
+
+Expected constructor: [class TypeError extends Error]
+Received value: 1 | // Behavioural RED interface scaffold.
+2 | export function createTypography(..._args:any[]):any{throw Error('not implemented')}
+                                                               ^
+error: not implemented
+      at createTypography (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/typography.ts:2:60)
+      at code (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:5:61)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:11:161)
+
+
+      at code (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:5:97)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:11:161)
+(fail) metrics_reject_nonfinite_float32_overflow_and_positive_underflow [0.17ms]
+1 | import {expect,test} from 'bun:test';import {createTypography,scaleTypography,createTypographyScale,toNativeTypography} from '../src/token-algebra/typography';
+2 | const base=()=>createTypography({fontSize:16,lineHeight:{ratio:1.5},letterSpacing:-.25});
+3 | const unsafeCreate=createTypography as (value:unknown)=>ReturnType<typeof createTypography>;
+4 | const unsafeScale=createTypographyScale as (base:unknown,options:unknown)=>any;
+5 | const code=(fn:()=>unknown,want:string)=>{let error:any;try{fn()}catch(e){error=e}expect(error).toBeInstanceOf(TypeError);expect(error?.code).toBe(want)};
+                                                                                                    ^
+error: expect(received).toBeInstanceOf(expected)
+
+Expected constructor: [class TypeError extends Error]
+Received value: 1 | // Behavioural RED interface scaffold.
+2 | export function createTypography(..._args:any[]):any{throw Error('not implemented')}
+                                                               ^
+error: not implemented
+      at createTypography (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/token-algebra/typography.ts:2:60)
+      at code (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:5:61)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:12:301)
+
+
+      at code (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:5:97)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/token-algebra-typography.test.ts:12:301)
+(fail) closed_typography_options_reject_hidden_inherited_and_conflicting_fields [0.09ms]
+
+ 0 pass
+ 7 fail
+ 2 expect() calls
+Ran 7 tests across 1 file. [186.00ms]

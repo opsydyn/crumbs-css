@@ -68,3 +68,13 @@ Invalid data never becomes an unmeasured fallback. Diagnostics identify fields/o
 | `CRUMBS_CSS_MOTION_DRIVER_FAILED` | Native stop/read/set/start/completion failed |
 
 Run Promises resolve a failed terminal result rather than rejecting. Imperative `set` failures throw the bounded driver diagnostic; Hook cleanup never throws. Invalid arguments do not stop valid current work.
+
+## Token algebra errors (M11.4)
+
+The optional `/tokens/algebra` entry throws synchronous `TokenAlgebraError`
+values extending `TypeError`. Stable codes are `algebra.invalid-color`,
+`algebra.invalid-typography`, `algebra.invalid-option`,
+`algebra.invalid-descriptor`, `algebra.out-of-range`. Constructor shape,
+operand descriptor, option shape and admitted numeric bounds are distinct.
+Messages never echo arbitrary inputs or execute accessors. Native callers
+from another installed copy should identify errors by code.

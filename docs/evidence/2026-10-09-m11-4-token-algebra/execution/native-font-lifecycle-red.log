@@ -1,0 +1,19 @@
+react-test-renderer is deprecated. See https://react.dev/warnings/react-test-renderer
+17 | const ids=['algebra-generated-text','algebra-control-text'],before=ids.map(sample);
+18 | await act(async()=>{tree.root.findByProps({testID:'algebra-unrelated'}).props.onPress();});
+19 | assert(ids.map(sample).every((x,i)=>x.instance===before[i].instance),'Unrelated control remounted text');
+20 | await act(async()=>{tree.update(React.createElement(AlgebraPanel,{nativeFontScale:1.353}));});
+21 | const after=ids.map(sample);
+22 | assert(after.every((x,i)=>x.instance!==before[i].instance),'Native font change left cached Text measurements mounted');
+     ^
+AssertionError: Native font change left cached Text measurements mounted
+ generatedMessage: false,
+     actual: false,
+   expected: true,
+   operator: "==",
+       diff: "simple",
+       code: "ERR_ASSERTION"
+
+      at /private/tmp/crumbs-m114-final-consumer-03/test/algebra-font-layout.bun.mjs:22:1
+
+Bun v1.4.2 (macOS arm64)

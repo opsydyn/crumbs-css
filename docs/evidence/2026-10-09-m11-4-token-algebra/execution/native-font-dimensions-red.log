@@ -1,0 +1,31 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-4-qualification.test.ts:
+(pass) actual_cjs_first_loading_is_observed [0.66ms]
+(pass) late_fixture_input_drift_invalidates_acceptance [1.72ms]
+(pass) foreign_roots_and_path_escapes_are_refused [0.11ms]
+(pass) second_copy_descriptors_work_without_runtime_peers [54.14ms]
+(pass) foreign_device_or_bundle_is_refused [0.15ms]
+(pass) capture_pixel_and_layout_controls_detect_wrong_output [7.15ms]
+(pass) font_preference_phase_requires_real_native_change_and_restoration [0.11ms]
+(pass) late_cleanup_or_input_drift_dominates_prior_passes [0.05ms]
+(pass) native_map_requires_actual_text_and_algebra_modules [0.09ms]
+67 |  expect(()=>assertM114RealNativeMap({sources:[sources[0]!,'workspace/algebra.ts']})).toThrow();
+68 | });
+69 | 
+70 | test('native_font_width_change_qualifies_when_authored_line_height_stays_fixed',()=>{
+71 |  const increased=observed(1.353,38);increased.layouts.generated.width=135;increased.layouts.control.width=135;
+72 |  expect(()=>assertM114FontProof({originalPreference:'large',baselinePreference:'large',increasedPreference:'extra-extra-extra-large',restoredPreference:'large',original:observed(),baseline:observed(),increased,restored:observed()})).not.toThrow();
+                                                                                                                                                                                                                                                  ^
+error: expect(received).not.toThrow()
+
+Error name: "Error"
+Error message: "Real native font scale/layout did not increase"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-4-qualification.test.ts:72:238)
+(fail) native_font_width_change_qualifies_when_authored_line_height_stays_fixed [0.56ms]
+
+ 9 pass
+ 1 fail
+ 40 expect() calls
+Ran 10 tests across 1 file. [548.00ms]

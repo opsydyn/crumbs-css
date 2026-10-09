@@ -1,0 +1,41 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/token-algebra.property.test.ts:
+2443 | 	return error;
+2444 | }
+2445 | /** @internal */
+2446 | function throwIfFailed(out) {
+2447 | 	if (!out.failed) return;
+2448 | 	throw buildError(defaultReportMessage(out), out);
+                                                       ^
+error: Property failed after 14 tests
+{ seed: 20261009, path: "13:0:0:0:6:7:0:0:0:0:6:0:0:0:2:0:0:2:0:0:0:1:1:1:1:1:2:5:1:0:0:1:1:1:1:1", endOnFailure: true }
+Counterexample: [[0,0,0,1.0000000000010002e-12],[0,0,0,0],0,false]
+Shrunk 35 time(s)
+
+Hint: Enable verbose mode in order to have the list of all failing values encountered during the run
+      at throwIfFailed (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2448:49)
+      at assert (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2521:7)
+(fail) color_laws_match_independent_oracle_and_native_quantisation_bound [5.80ms]
+(pass) premultiplied_symmetry_includes_subnormal_alpha [4.08ms]
+(pass) well_conditioned_rgb_symmetry_uses_visible_channels [0.09ms]
+
+packages/css/test/token-algebra-admission.test.ts:
+(pass) invalid_hex_is_bounded_and_uses_invalid_color [0.10ms]
+(pass) admission_rejects_getters_symbols_hidden_extra_and_custom_prototypes [0.07ms]
+(pass) forged_operands_options_and_numeric_ranges_have_stable_codes [0.11ms]
+(pass) foreign_plain_descriptors_work_but_cycles_and_decorated_tuples_do_not [0.09ms]
+
+packages/css/test/token-algebra-color.test.ts:
+(pass) encoded_and_linear_midpoints_have_distinct_native_bytes [0.02ms]
+(pass) alpha_replacement_and_attenuation_preserve_rgb [0.02ms]
+(pass) unused_endpoint_accessors_never_execute [0.03ms]
+(pass) native_quantisation_is_a_single_boundary [0.01ms]
+(pass) hex_width_alpha_order_and_case_are_explicit [0.02ms]
+(pass) unequal_alpha_is_premultiplied_and_transparent_interiors_are_black [0.03ms]
+(pass) input_is_copied_and_output_is_deeply_frozen_with_canonical_zero [0.02ms]
+
+ 13 pass
+ 1 fail
+ 2461 expect() calls
+Ran 14 tests across 3 files. [201.00ms]

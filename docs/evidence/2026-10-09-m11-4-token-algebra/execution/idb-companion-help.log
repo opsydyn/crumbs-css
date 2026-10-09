@@ -1,0 +1,40 @@
+Usage:
+  Modes of operation, only one of these may be specified:
+    --udid UDID|mac|only       Launches a companion server for the specified UDID, 'mac' for a mac companion, or 'only' to run a companion for the only simulator/device available.
+    --boot UDID                Boots the simulator with the specified UDID.
+    --reboot UDID              Reboots the target with the specified UDID.
+    --shutdown UDID            Shuts down the target with the specified UDID.
+    --erase UDID               Erases the target with the specified UDID.
+    --clean UDID               Performs a soft reset to the specified UDID.
+    --delete UDID|all          Deletes the simulator with the specified UDID, or 'all' to delete all simulators in the set.
+    --create DEVICE[,RUNTIME]  Creates a simulator by device/runtime name or CoreSimulator identifier. Omitting RUNTIME selects the newest available compatible version.
+    --clone UDID               Clones a simulator by a given UDID
+    --clone-destination-set    A path to the destination device set in a clone operation, --device-set-path specifies the source simulator.
+    --recover ecid:ECID        Causes the targeted device ECID to enter recovery mode
+    --unrecover ecid:ECID      Causes the targeted device ECID to exit recovery mode
+    --activate ecid:ECID       Causes the device to activate
+    --notify PATH|stdout       Launches a companion notifier which will stream availability updates to the specified path, or stdout.
+    --forward UDID:PORT        Forwards the remote socket for the specified UDID to the specified remote PORT. Input and output is relayed via stdin/stdout
+    --list 1                   Lists all available devices and simulators in the current context. If Xcode is not correctly installed, only devices will be listed.
+    --version                  Writes companion version information to stdout.
+    --help                     Show this help message and exit.
+
+  Options:
+    --grpc-port PORT           Port to start the grpc companion server on (default: 10882).
+    --tls-cert-path PATH       If specified exposed GRPC server will be listening on a TLS enabled socket.
+    --grpc-domain-sock PATH    Unix Domain Socket path to start the companion server on, will supersede TCP binding via --grpc-port.
+    --debug-port PORT          Port to connect debugger on (default: 10881).
+    --log-file-path PATH       Path to write a log file to e.g ./output.log (default: logs to stdErr).
+    --log-level info|debug     The log level to use, 'debug' for a higher level of debugging 'info' for a lower level of logging (default 'debug').
+    --device-set-path PATH     Path to a custom Simulator device set.
+    --only FILTER_OPTION       If provided, will limit interaction to a subset of all available targets
+    --headless VALUE           If VALUE is a true value, the Simulator boot's lifecycle will be tied to the lifecycle of this invocation.
+    --verify-booted VALUE      If VALUE is a true value, will verify that the Simulator is in a known-booted state before --boot completes. Default is true.
+    --terminate-offline VALUE  Terminate if the target goes offline, otherwise the companion will stay alive.
+    --idle-shutdown-time SECS  Exit after SECS seconds with no active or newly received gRPC requests (default: stays alive).
+    --log-hid-details VALUE    If VALUE is a true value, HID log lines include touch coordinates, buttons and key codes (default: the FBSIMULATORCONTROL_LOG_HID_DETAILS environment variable, otherwise false).
+
+ Filter Options:
+    simulator                  Limit interactions to Simulators only.
+    device                     Limit interactions to Devices only.
+    ecid:ECID                  Limit interactions to a specific Device ECID

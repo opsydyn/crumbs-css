@@ -901,3 +901,16 @@ The entry builds independently with React as its only runtime dependency. It add
 The additive `/theme/motion` entry exports only `defineMotion`; `/theme/motion/native` exports only `useNativeMotion`. Define immutable named opacity/translation/scale states in ordinary `.ts`; the optional Hook owns public Animated nodes with safe interruption, scoped cancellation, committed preferences and lifetime cleanup. Pass `motion: 'full' | 'reduced'` explicitly from the application accessibility source, starting reduced until resolved. Numeric duration is milliseconds in `[0,60000]`. Returned transforms replace the whole field; put static transforms on a wrapper.
 
 The pure graph has no runtime peers; the native graph uses public React/React Native only. Existing exports, compiler payloads, dependencies and token durations remain unchanged. See the [native-motion guide](https://opsydyn.github.io/crumbs-css/how-to/use-native-motion/) for result/lifetime semantics and `docs/evidence/2026-10-09-m11-3-native-motion` for exact artifact and distinct host/native acceptance. Physical devices, spoken readers, live authored-style HMR and release performance remain separate; M10.5 release qualification remains open. Same-version historical alpha tarballs may lack these entries.
+
+## M11.4 optional token algebra
+
+`/tokens/algebra` emits existing colour strings and scalar text metrics;
+existing token domains, expressions and native admission remain unchanged.
+The frozen qualification cohort uses React/RTR19.2.3, React Native0.85.3,
+Expo56.0.4, Metro0.87.1 and TypeScript6.0.3. Pure probes target genuine
+Node22.0.0/current supported Node, both ESM/CommonJS and two physical copies
+with runtime peers absent. The evidence index records actual outcomes and
+source/artifact bindings. Simulator/emulator functional acceptance, host
+costs and release-policy qualification are separate. Physical hardware,
+spoken readers, authored HMR and release FPS remain deferred; interactive
+browser acceptance remains unperformed.
