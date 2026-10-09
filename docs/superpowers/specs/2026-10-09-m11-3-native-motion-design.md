@@ -1,6 +1,6 @@
 # M11.3 — Typed native motion adapter
 
-**Status:** Proposed written spec; awaiting review. The selected M11 roadmap and native Animated boundary are authorised; this document does not claim approval of its detailed API or implementation plan.
+**Status:** Approved as written by Alan Currie on 2026-10-09 following commit `be88bc2`. The [implementation plan](../plans/2026-10-09-m11-3-native-motion.md) is proposed for native/inline execution and awaits review; product implementation has not started.
 
 **Date:** 2026-10-09.
 
