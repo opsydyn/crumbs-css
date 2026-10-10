@@ -10,23 +10,22 @@ recipes and atomic utilities; add themes, scoped design tokens, conditions, moti
 factories through explicit package entrypoints.
 
 **Crumbs CSS v1 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases).**
-The `1.0.1` documentation patch corrects the npm README and compatibility notes. Runtime JavaScript, declarations and public APIs are unchanged from the verified `1.0.0` release.
-The v1-only release approvals cover the recorded warm-transform failure and 0.174 ms incremental overrun;
-failed measurements remain visible. See [release status](docs/releases/1.0.1.md) and [publication evidence](docs/evidence/2026-10-10-v1-publication/README.md).
+Version `1.1.0` adds **Expo SDK 57 / React Native 0.86** support while retaining SDK 56 / React Native 0.85 and the complete v1 API.
+Its version-specific publication disposition retains the recorded warm-transform failure; generic future-release limits remain unchanged. See [release status](docs/releases/1.1.0.md) and [verification evidence](docs/evidence/2026-10-10-m1-9b-expo57/README.md).
 
 ## Get started
 
-The published `1.0.1` baseline is **Expo SDK 56, React 19.2 and React Native 0.85**. The `1.1.0` compatibility candidate adds **Expo SDK 57 / React Native 0.86** while retaining SDK 56; see [release status](docs/releases/1.1.0.md). Node `>=22.0.0` is required
-for Crumbs tooling (SDK 57 requires Node `>=22.13.0`). The candidate peer ranges are React `>=19 <20`, React Native `>=0.85 <0.87` and Metro `>=0.83 <1`. TypeScript
+The published `1.1.0` supports **Expo SDK 56 / React Native 0.85** and **Expo SDK 57 / React Native 0.86**, with React 19.2. Node `>=22.0.0` is required
+for Crumbs tooling; SDK 57 requires Node `>=22.13.0`. Peer ranges are React `>=19 <20`, React Native `>=0.85 <0.87` and Metro `>=0.83 <1`. TypeScript
 `>=5.9 <7` is optional for source migration tooling. Effect 4 is Crumbs' implementation dependency; applications
 do not need an Effect import, service or runner.
 
 Install the stable package into your Expo app:
 
 ```sh
-npm install @opsydyn/crumbs-css@1.0.1
+npm install @opsydyn/crumbs-css@1.1.0
 # or
-bun add @opsydyn/crumbs-css@1.0.1
+bun add @opsydyn/crumbs-css@1.1.0
 ```
 
 Wrap Expo's Metro configuration:
@@ -69,7 +68,7 @@ APIs in components. Prefer the specific entry you use so optional tooling stays 
 To build the immutable v1 source yourself:
 
 ```sh
-git clone --branch v1.0.1 https://github.com/opsydyn/crumbs-css.git
+git clone --branch v1.1.0 https://github.com/opsydyn/crumbs-css.git
 cd crumbs-css
 bun install --frozen-lockfile
 bun run build
@@ -536,7 +535,7 @@ Package metadata, including the exact installed version, peer ranges and public 
 | `bun run playground` | Run the Expo consumer with Crumbs build watching and Metro restarts. |
 | `bun run playground:packed --check` | Typecheck and bundle an isolated consumer of the working-tree tarball. |
 | `bun run playground:distribution --check` | Qualify packed Crumbs, token, and component packages in Expo on iOS and web. |
-| `bun run playground:published --version=1.0.1 --check` | Verify v1 in an isolated registry consumer after publication. |
+| `bun run playground:published --version=1.1.0 --check` | Verify v1 in an isolated registry consumer after publication. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
 | `bun run release:check` | Build, typecheck, test, bench, pack, and require a current-source host report admitted by release policy. |

@@ -1,6 +1,6 @@
 # M1.9b — v1.1.0 publication disposition for review
 
-Status: **approved for execution**. The user explicitly chose “Approve v1.1.0-only exception and publish (Recommended)”; [approval record](release-approval.json). Execution and independent registry acceptance remain pending. npm publication was skipped; `latest` remains 1.0.1.
+Status: **approved for execution**. The user explicitly chose “Approve v1.1.0-only exception and publish (Recommended)”; [approval record](release-approval.json). Execution and independent registry acceptance are complete; [publication status](publication-status.json). The earlier generic run skipped publication; the approved execution below publishes 1.1.0/latest.
 
 Expo SDK 57 / RN 0.86 compatibility and SDK 56 / RN 0.85 retention are qualified. The immutable v1.1.0 source is `f08a58d022f9237cf3f4aae8bc9bd77d5c75f204`. [Clean CI](https://github.com/opsydyn/crumbs-css/actions/runs/38085552585) passes both SDKs. The [exact candidate receipt](exact-candidate/sdk57-qualification.json) separately records clean source, strict npm resolution, all 185 installed file hashes, consumer types, both motion module orders, peer-free motion and iOS/Android/web exports. This qualification uses Expo 57.0.27, React/DOM/renderer 19.2.8, RN 0.86.3, actual Node 24.15.0 and Bun 1.4.2.
 
@@ -33,3 +33,7 @@ Bind approval to the [machine-readable review packet](release-review.json):
 After approval, implement a narrowly scoped publisher/verifier for that exact binding, preserve every failed row, independently verify the transferred bundle, publish with npm provenance and verify registry version/latest and exact tarball integrity. The generic policy, baseline limits and future-version gates stay unchanged. Do not retag or rebuild into a different approved artifact. Agent-skill authoring remains deferred until npm publication is verified.
 
 The earlier v1.0.0/v1.0.1 dispositions do not authorise this release. The fresh user disposition above authorises only the exact v1.1.0 binding; compatibility approval alone does not waive this gate.
+
+## Executed disposition
+
+[Run 38088014069](https://github.com/opsydyn/crumbs-css/actions/runs/38088014069) successfully executes the approved disposition after Mac sealing and independent hosted verification. Exact tarball bytes, provenance and fresh SDK 56/57 consumers are independently verified in [the publication packet](README.md). npm and GitHub latest are 1.1.0. The source tag, raw failure and generic future-release policy are unchanged.
