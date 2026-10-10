@@ -105,9 +105,10 @@ package for compiler and runtime, so separately versioned compiler/runtime
 release pairs remain **Unqualified**.
 
 The exact host row is limited to Expo `56.0.4`, React `19.2.5` and React Native
-`0.85.3`. Android exports and all Android/device behavior remain unqualified and
-were not run in M8.2; physical-device rendering, startup, accessibility and
-performance are separate acceptance work. This matrix does not broaden the
+`0.85.3`. Android exports and device behavior were not run in M8.2; this historical
+row does not qualify them. The later v1 installed consumer passed Android
+exports. Physical-device rendering, startup, accessibility and performance
+remain separate acceptance work. This matrix does not broaden the
 supported SDK range, claim ESM/CommonJS/Metro graph completeness, or publish
 packages. Effect 4 remains an implementation dependency; application consumers
 do not add an Effect peer dependency or use an Effect runner.
@@ -131,14 +132,16 @@ guard. Resolver set expansion uses an iterative traversal to avoid JavaScript
 call-stack limits. The host benchmark completed 1,000 generated tokens and
 rejected 10,000 and 50,000 tokens with `resource.limit-exceeded`; a separate
 15,000-document Resolver chain imported one token. These are tooling-host
-observations, not device/runtime measurements. Package publication, visual
-acceptance, Android, and physical-device acceptance remain unqualified;
-Android is parked.
+observations, not device/runtime measurements. These DTCG checks do not
+qualify native visual or physical-device acceptance. Stable package publication
+and the later installed Android exports are recorded in the release section.
 
 ## Release, compatibility, and deprecation policy (M8.5)
 
-The stable npm/GitHub release is `1.0.0`, with independently verified registry
-bytes, integrity, provenance and installed Expo consumer exports. Its explicit
+The stable v1 surface is published on npm and GitHub. Version `1.0.1` corrects
+packaged documentation; runtime JavaScript and declarations are byte-identical
+to the independently verified `1.0.0` release. The original release
+passed registry integrity, provenance and installed Expo consumer checks. Its explicit
 v1-only disposition admits the recorded warm-transform failure and capped
 0.174 ms incremental overrun. Raw failed rows, baselines, numerical limits and
 generic future-release policy remain unchanged. Publication does not establish

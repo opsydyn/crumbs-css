@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Version `1.0.0` is published on npm with provenance and is the `latest` stable release. The public tarball and an isolated installed Expo consumer are verified. The v1-only release decision admits the recorded warm-transform failure and 0.174 ms incremental overrun; measurements and future-release gates remain unchanged. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.0.md).
+Crumbs CSS v1 is available on npm. Version `1.0.1` corrects the packaged README and compatibility notes; every runtime JavaScript and declaration file is unchanged from the verified `1.0.0` release. The complete v1 API is included. The original v1 performance disposition and deferred acceptance remain recorded in the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.1.md).
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -76,9 +76,9 @@ See the full compatibility matrix in
 Install the verified stable release in your Expo app:
 
 ```sh
-bun add @opsydyn/crumbs-css@1.0.0
+bun add @opsydyn/crumbs-css@1.0.1
 # or
-npm install @opsydyn/crumbs-css@1.0.0
+npm install @opsydyn/crumbs-css@1.0.1
 ```
 
 Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.

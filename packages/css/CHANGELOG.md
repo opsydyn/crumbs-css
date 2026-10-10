@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.0.1](https://github.com/opsydyn/crumbs-css/compare/v1.0.0...v1.0.1) (2026-10-10)
+
+### Documentation
+
+- Correct the npm README and packaged compatibility notes to describe the complete published v1 API.
+- Update onboarding to install 1.0.1 and clarify historical qualification scope.
+- Preserve every runtime JavaScript and declaration file, export, dependency and peer range from verified 1.0.0. No functional or performance-policy change.
+
 ## [1.0.0](https://github.com/opsydyn/crumbs-css/compare/v0.1.2-alpha.1...v1.0.0) (2026-10-10)
 
 ### Stable API baseline
@@ -24,7 +32,7 @@ Existing APIs and declared peer ranges are preserved.
 
 - Expand the repository and npm READMEs, complete every public entrypoint/value/type index, and expose delivered guides in the docs navigation.
 - M11.5 passes1,828 CSS/33 Storybook tests, full packed host qualification and12 functional phases each on iOS/Android; native evidence belongs to the exact M11.5 artifacts, not an untested v1 tarball.
-- M10.5 cold/warm host budgets remain failed and the required hosted Mac runner is unregistered. GitHub release creation does not publish to npm or waive those gates. Physical-device, spoken-reader, live authored HMR and release-FPS checks remain deferred.
+- v1.0.0 subsequently passed guarded npm publication, registry integrity/provenance and installed Expo exports. Cold transform and all editor rows pass; the recorded warm-transform and capped incremental failures have explicit v1-only approval. Physical-device, spoken-reader, live authored HMR and release-FPS checks remain deferred. See [v1 release evidence](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.0.md).
 
 ## [0.1.2-alpha.1](https://github.com/opsydyn/crumbs-css/compare/v0.1.1-alpha.1...v0.1.2-alpha.1) (2026-05-25)
 

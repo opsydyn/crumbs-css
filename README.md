@@ -9,10 +9,10 @@ Crumbs compiles `.css.ts` files into native styles at Metro transform time. Comp
 recipes and atomic utilities; add themes, scoped design tokens, conditions, motion and reusable runtime
 factories through explicit package entrypoints.
 
-**v1.0.0 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases/tag/v1.0.0).**
-The public registry tarball, integrity, provenance and an isolated installed Expo consumer are verified.
+**Crumbs CSS v1 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases).**
+The `1.0.1` documentation patch corrects the npm README and compatibility notes. Runtime JavaScript, declarations and public APIs are unchanged from the verified `1.0.0` release.
 The v1-only release approvals cover the recorded warm-transform failure and 0.174 ms incremental overrun;
-failed measurements remain visible. See [release status](docs/releases/1.0.0.md) and [publication evidence](docs/evidence/2026-10-10-v1-publication/README.md).
+failed measurements remain visible. See [release status](docs/releases/1.0.1.md) and [publication evidence](docs/evidence/2026-10-10-v1-publication/README.md).
 
 ## Get started
 
@@ -24,9 +24,9 @@ do not need an Effect import, service or runner.
 Install the stable package into your Expo app:
 
 ```sh
-npm install @opsydyn/crumbs-css@1.0.0
+npm install @opsydyn/crumbs-css@1.0.1
 # or
-bun add @opsydyn/crumbs-css@1.0.0
+bun add @opsydyn/crumbs-css@1.0.1
 ```
 
 Wrap Expo's Metro configuration:
@@ -69,7 +69,7 @@ APIs in components. Prefer the specific entry you use so optional tooling stays 
 To build the immutable v1 source yourself:
 
 ```sh
-git clone --branch v1.0.0 https://github.com/opsydyn/crumbs-css.git
+git clone --branch v1.0.1 https://github.com/opsydyn/crumbs-css.git
 cd crumbs-css
 bun install --frozen-lockfile
 bun run build
@@ -536,7 +536,7 @@ Package metadata, including the exact installed version, peer ranges and public 
 | `bun run playground` | Run the Expo consumer with Crumbs build watching and Metro restarts. |
 | `bun run playground:packed --check` | Typecheck and bundle an isolated consumer of the working-tree tarball. |
 | `bun run playground:distribution --check` | Qualify packed Crumbs, token, and component packages in Expo on iOS and web. |
-| `bun run playground:published --version=1.0.0 --check` | Verify v1 in an isolated registry consumer after publication. |
+| `bun run playground:published --version=1.0.1 --check` | Verify v1 in an isolated registry consumer after publication. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
 | `bun run release:check` | Build, typecheck, test, bench, pack, and require a current-source host report admitted by release policy. |
