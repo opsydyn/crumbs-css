@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/opsydyn/crumbs-css/compare/v1.1.0...v1.1.1) (2026-10-10)
+
+
+### Bug Fixes
+
+* **ci:** expose the locked matched-Metro dependency (M1.9b) ([6f4390b](https://github.com/opsydyn/crumbs-css/commit/6f4390b2ee456e569562d6cb7aea2be74cd80155))
+
 ## 1.1.0 (2026-10-10)
 
 ### Compatibility
