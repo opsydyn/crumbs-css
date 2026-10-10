@@ -90,6 +90,7 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.8e: Record reviewer approval of the direct `.css.ts` Metro threshold and re-evaluate the retained exact-environment comparison without activating the incomplete registry.
 - [x] M1.9: Extend the Expo playground with version/source identification and repeatable measurement scenarios. Install SDK-compatible dependencies with a committed lockfile; test the newest SDK in a separate upgrade configuration before broadening support. Published mode resolves npm tags to exact versions, while packed mode qualifies unreleased artifacts without publishing.
 - [x] M1.9a: Audit workspace, packed and published isolation against current evidence; lock the supported Expo 56 contract; and add a fail-closed, non-workspace Expo 57 candidate that verifies live registry/template identity and preserves the React Native peer boundary.
+- [ ] M1.9b: Qualify Expo 57 / React Native 0.86 with strict packed-consumer types, motion contracts and iOS/Android/web exports; retain Expo 56 support; widen only the tested RN peer range and publish 1.1.0 through unchanged future-release gates. Defer the Crumbs consumer agent skill until this release is available.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
 

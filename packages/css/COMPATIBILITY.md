@@ -3,13 +3,18 @@
 `@opsydyn/crumbs-css` intentionally implements a React Native subset of
 vanilla-extract authoring. It is not a browser CSS runtime.
 
-## Validated native baseline
+## Supported SDK lines (M1.9b)
 
-The current workspace/packed consumer baseline is:
+Version `1.1.0` retains Expo SDK 56 / React Native 0.85 and adds Expo SDK 57 / React Native 0.86. The workspace and internal Storybook remain on SDK 56; a separate packed consumer qualifies SDK 57 without workspace links or npm peer overrides.
 
-- Expo SDK 56
-- React 19.2
-- React Native 0.85
+| Consumer | Exact stack | Checks |
+| --- | --- | --- |
+| SDK 56 | Expo `56.0.23`, React `19.2.3`, React Native `0.85.3` | Existing workspace types and packed iOS/Android/web Metro exports. |
+| SDK 57 | Expo `57.0.27`, React / React DOM `19.2.8`, React Native `0.86.3`, TypeScript `6.0.3` | Strict npm resolution and installation, all installed Crumbs bytes, consumer types, ESM/CommonJS motion contracts, iOS/Android/web Metro exports and ordinary runtime source maps. |
+
+The official SDK 57 blank template pins React `19.2.3`; the current optional Expo CLI/router graph requires `19.2.8`. Qualification uses that compatible patch across React, React DOM and the renderer, with no `--force` or `--legacy-peer-deps`. Crumbs' tooling floor remains Node `22.0.0`; SDK 57 requires Node `22.13.0` or newer. See [M1.9b evidence](https://github.com/opsydyn/crumbs-css/blob/main/docs/evidence/2026-10-10-m1-9b-expo57/README.md).
+
+These checks cover package/type and bundle compatibility. Motion renderer probes use real React and a controlled public Animated peer; they are not native-device acceptance. Physical devices, spoken readers and release performance remain separate. Historical qualification rows below retain their exact versions and scope.
 
 When the Storybook consumer app is installed with Bun, `expo-doctor` may still
 report duplicate Expo packages from Bun's `.bun/` symlink layout even when the
@@ -17,7 +22,7 @@ duplicate versions are identical. Treat that remaining warning as advisory until
 Expo Doctor and Bun converge on the same install model.
 
 The package currently declares `react-native` peer compatibility as
-`>=0.85 <0.86`. Earlier React Native baselines should not be assumed supported
+`>=0.85 <0.87`. Earlier or later React Native baselines should not be assumed supported
 unless they are exercised explicitly in a future compatibility pass.
 
 ## Compiler, artifact and runtime matrix (M8.2)
