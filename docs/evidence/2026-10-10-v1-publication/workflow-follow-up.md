@@ -1,0 +1,9 @@
+# M10.5 v1 workflow qualification follow-up
+
+The first qualifier attempt on run `38058134282` failed with `ENOSPC` while installing the packed `@acme/ui` fixture. Package tests and app types had passed; no host report was produced and npm publication was skipped. The one-job runner automatically unregistered. Only verified inactive dependencies/cache directories created by this release work and the checksum-verified runner download archive were removed; source, artifacts and logs were preserved.
+
+Attempt 2 passed the full package/consumer functional step, including strict types, packed iOS/web exports and the native-style benchmark. Scaffold preparation then rejected the missing app resolver edge for Vanilla Extract. The approved baseline's frozen isolated Bun installation contains Vanilla Extract 1.20.1 under the CSS package, but its app does not declare a direct edge. The released scaffold adds that manifest edge without adding the corresponding isolated-linker dependency link.
+
+The one-off workflow now exposes the existing locked package through a link in the disposable baseline app dependency directory, checks its exact version and baseline-contained real path, then invokes the unchanged scaffold preparer. A real reproduction with immutable v1 source and the exact baseline fails before the link and passes after it, resolving all eight approved Expo/Metro/React versions. All tracked baseline bytes are unchanged. All repository workflows pass actionlint. The immutable release tag, shipping code, lock, tarball pin, numerical budgets, original verifier and generic publication workflow are unchanged.
+
+Next: **M10.5 — run the complete qualification and exact-tarball publisher using this verified workflow setup.** The warm-transform exception remains the only approved numerical exception. The full report, provenance and independent registry proof are still required.

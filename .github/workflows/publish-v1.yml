@@ -120,7 +120,28 @@ jobs:
           bun pm pack --dry-run
 
       - name: Prepare matched Expo and Metro scaffold
-        run: bun scripts/prepare-matched-metro-scaffold.ts "$GITHUB_WORKSPACE/.m10-5-metro-baseline" "$V1_ROOT/metro-scaffold"
+        run: |
+          # Expose the already locked baseline dependency to its disposable app.
+          # Bun's isolated linker does not hoist this transitive package.
+          node - "$GITHUB_WORKSPACE/.m10-5-metro-baseline" <<'NODE'
+          const assert = require("node:assert/strict")
+          const fs = require("node:fs")
+          const path = require("node:path")
+          const { createRequire } = require("node:module")
+          const baseline = fs.realpathSync(process.argv[2])
+          const fromCss = createRequire(path.join(baseline, "packages/css/package.json"))
+          const manifest = fs.realpathSync(fromCss.resolve("@vanilla-extract/css/package.json"))
+          assert.ok(manifest.startsWith(baseline + path.sep))
+          assert.equal(JSON.parse(fs.readFileSync(manifest, "utf8")).version, "1.20.1")
+          const app = path.join(baseline, "apps/playground")
+          const scope = path.join(app, "node_modules/@vanilla-extract")
+          fs.mkdirSync(scope, { recursive: true })
+          fs.symlinkSync(path.dirname(manifest), path.join(scope, "css"), "dir")
+          const fromApp = createRequire(path.join(app, "package.json"))
+          assert.equal(fs.realpathSync(fromApp.resolve("@vanilla-extract/css/package.json")), manifest)
+          console.log("Matched baseline app resolves the locked Vanilla Extract 1.20.1")
+          NODE
+          bun scripts/prepare-matched-metro-scaffold.ts "$GITHUB_WORKSPACE/.m10-5-metro-baseline" "$V1_ROOT/metro-scaffold"
 
       - name: Measure all unchanged host budgets
         env:
