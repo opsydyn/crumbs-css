@@ -56,14 +56,14 @@ jobs:
       - name: Typecheck Storybook consumer
         run: bun run app:typecheck
 
-      - name: Qualify packed Expo consumer on iOS and web
-        run: bun run playground:distribution --check
-
       - name: Retain SDK 56 packed types and iOS, Android and web exports
         run: bun run playground:packed --check
 
       - name: Qualify packed SDK 57 consumer on iOS, Android and web
         run: bun run playground:sdk-candidate --pinned "${{ runner.temp }}/crumbs-sdk-57/qualification.json"
+
+      - name: Qualify packed Expo consumer on iOS and web
+        run: bun run playground:distribution --check
 
       - name: Retain SDK 57 qualification receipt and logs
         if: always()
