@@ -1,0 +1,217 @@
+name: publish-v1-approved-exception
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  V1_TOOLING_SHA256: ad850f53b28531731dc55c76137bce9d8e7d673f9296e6866900aeb7f0af823e
+
+concurrency:
+  group: crumbs-css-npm-publish-v1.0.0
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    runs-on: [self-hosted, macOS, ARM64, crumbs-m4-pro, crumbs-v1-1.0.0]
+    timeout-minutes: 40
+    env:
+      BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/crumbs-v1-${{ github.run_id }}-${{ github.run_attempt }}/bun-cache
+      npm_config_cache: ${{ runner.temp }}/crumbs-v1-${{ github.run_id }}-${{ github.run_attempt }}/npm-cache
+      V1_ROOT: ${{ runner.temp }}/crumbs-v1-${{ github.run_id }}-${{ github.run_attempt }}
+
+    steps:
+      - name: Require manual dispatch from main
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: exit 1
+
+      - name: Check out immutable v1 source and all qualification baselines
+        uses: actions/checkout@v4
+        with:
+          ref: v1.0.0
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            /docs/
+
+      - name: Use the isolated pinned Bun executable
+        run: |
+          test -n "$CRUMBS_V1_BUN_BINARY"
+          test "$("$CRUMBS_V1_BUN_BINARY" --version)" = "1.4.2"
+          test "$(shasum -a 256 "$CRUMBS_V1_BUN_BINARY" | cut -d ' ' -f 1)" = "35d20dd0263e5c950194434b925454fdfa9ba6e4467da960410fa05b08a7a5b5"
+          dirname "$CRUMBS_V1_BUN_BINARY" >> "$GITHUB_PATH"
+
+      - name: Set up exact Node floor
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.0.0
+
+      - name: Record floor executable
+        id: floor
+        run: echo "binary=$(command -v node)" >> "$GITHUB_OUTPUT"
+
+      - name: Set up exact current Node and npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Install isolated exact npm
+        run: |
+          npm install --ignore-scripts --prefix "$V1_ROOT/npm-tool" npm@11.12.1
+          export PATH="$V1_ROOT/npm-tool/node_modules/.bin:$PATH"
+          echo "$V1_ROOT/npm-tool/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Load exception tooling from the dispatched main commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$V1_ROOT"
+          gh api "repos/$GITHUB_REPOSITORY/contents/scripts/v1-publication.ts?ref=$GITHUB_SHA" --jq .content \
+            | python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' > "$V1_ROOT/v1-publication.ts"
+          test -s "$V1_ROOT/v1-publication.ts"
+          test "$(shasum -a 256 "$V1_ROOT/v1-publication.ts" | cut -d ' ' -f 1)" = "$V1_TOOLING_SHA256"
+
+      - name: Validate release and frozen dependencies
+        env:
+          CRUMBS_AUDIT_NODE_FLOOR: ${{ steps.floor.outputs.binary }}
+        run: |
+          bun run release:preflight --tag v1.0.0
+          bun install --frozen-lockfile
+          bun scripts/release-host-environment.ts
+
+      - name: Check out approved Metro baseline
+        uses: actions/checkout@v4
+        with:
+          ref: 43c5ece39360cf321fdb074d82cee41d5daaba23
+          path: .m10-5-metro-baseline
+          fetch-depth: 1
+          persist-credentials: false
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/docs/
+            /docs/package.json
+
+      - name: Install locked baseline dependencies
+        working-directory: .m10-5-metro-baseline
+        run: bun install --frozen-lockfile
+
+      - name: Require package and consumer functional qualification
+        run: |
+          bun run --filter @opsydyn/crumbs-css build
+          bun run --filter @opsydyn/crumbs-css typecheck
+          bun run test
+          bun run app:typecheck
+          bun run playground:distribution --check
+          bun run --filter @opsydyn/crumbs-css bench:native-styles
+          cd packages/css
+          bun pm pack --dry-run
+
+      - name: Prepare matched Expo and Metro scaffold
+        run: bun scripts/prepare-matched-metro-scaffold.ts "$GITHUB_WORKSPACE/.m10-5-metro-baseline" "$V1_ROOT/metro-scaffold"
+
+      - name: Measure all unchanged host budgets
+        env:
+          CRUMBS_AUDIT_NODE_FLOOR: ${{ steps.floor.outputs.binary }}
+          CRUMBS_INCREMENTAL_REPO_ROOT: ${{ env.V1_ROOT }}/metro-scaffold
+          CRUMBS_INCREMENTAL_APP_ROOT: ${{ env.V1_ROOT }}/metro-scaffold/apps/playground
+          CRUMBS_RELEASE_SOURCE_REVISION: 382768a45f429f4c039e7584cd7c31e4f8821fc0
+        run: bun run measure:host-budgets "$V1_ROOT/host-report"
+
+      - name: Retain the complete measured report
+        if: always()
+        run: |
+          if [ -d "$V1_ROOT/host-report" ]; then
+            mkdir -p "$V1_ROOT/bundle/host-report"
+            cp -R "$V1_ROOT/host-report/." "$V1_ROOT/bundle/host-report/"
+          fi
+
+      - name: Pack qualified bytes and seal the v1-only exception
+        env:
+          CRUMBS_AUDIT_NODE_FLOOR: ${{ steps.floor.outputs.binary }}
+        run: |
+          mkdir -p "$V1_ROOT/bundle"
+          npm pack ./packages/css --ignore-scripts --json --pack-destination "$V1_ROOT/bundle" > "$V1_ROOT/npm-pack.json"
+          bun "$V1_ROOT/v1-publication.ts" create --repo "$GITHUB_WORKSPACE" --report "$V1_ROOT/host-report" --bundle "$V1_ROOT/bundle"
+
+      - name: Upload complete qualification evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crumbs-v1-exception-qualification
+          path: ${{ env.V1_ROOT }}/bundle
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      V1_ROOT: ${{ runner.temp }}/crumbs-v1-publication
+
+    steps:
+      - name: Check out the immutable published release
+        uses: actions/checkout@v4
+        with:
+          ref: v1.0.0
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Set up exact current Node and npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Load identical tooling from the dispatched commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$V1_ROOT"
+          gh api "repos/$GITHUB_REPOSITORY/contents/scripts/v1-publication.ts?ref=$GITHUB_SHA" --jq .content \
+            | python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' > "$V1_ROOT/v1-publication.ts"
+          test -s "$V1_ROOT/v1-publication.ts"
+          test "$(shasum -a 256 "$V1_ROOT/v1-publication.ts" | cut -d ' ' -f 1)" = "$V1_TOOLING_SHA256"
+
+      - name: Download the sealed report and tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: crumbs-v1-exception-qualification
+          path: ${{ env.V1_ROOT }}/bundle
+
+      - name: Require published release and exact qualified source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bun run release:preflight --tag v1.0.0
+          gh release view v1.0.0 --json isDraft,publishedAt | jq -e '.isDraft == false and .publishedAt != null' >/dev/null
+
+      - name: Install verifier dependencies
+        run: bun install --filter @opsydyn/crumbs-css --frozen-lockfile
+
+      - name: Independently verify all evidence and the scoped exception
+        run: bun "$V1_ROOT/v1-publication.ts" verify --repo "$GITHUB_WORKSPACE" --bundle "$V1_ROOT/bundle"
+
+      - name: Publish only the verified v1 tarball
+        working-directory: packages/css
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish "$V1_ROOT/bundle/opsydyn-crumbs-css-1.0.0.tgz" --access public --provenance --tag latest

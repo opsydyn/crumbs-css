@@ -1,0 +1,54 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/release-qualification-artifact.test.ts:
+(pass) M10.5 release qualification artifact > accepts a complete report and exact package tarball without running package lifecycle scripts [133.76ms]
+(pass) M10.5 release qualification artifact > accepts the qualified bundle from a publisher checkout that has no built dist directory [218.51ms]
+(pass) M10.5 release qualification artifact > refuses to seal a report whose blocking host measurements exceed an approved budget [78.15ms]
+(pass) M10.5 release qualification artifact > rejects consistently hashed failed measurements and forged comparison rows [256.13ms]
+(pass) M10.5 release qualification artifact > exposes the same verification through the publisher CLI [261.52ms]
+(pass) M10.5 release qualification artifact > requires the explicit Node floor when sealing through the create CLI [134.76ms]
+(pass) M10.5 release qualification artifact > rejects changed report files and tarball bytes [165.10ms]
+(pass) M10.5 release qualification artifact > rejects a tag, commit, or source digest that differs from the verified bundle [387.82ms]
+(pass) M10.5 release qualification artifact > rejects package name and version drift [258.81ms]
+(pass) consumer policy handoff integrity > uses comparison 3 and manifest 2 without erasing advisory numerical failures [65.45ms]
+(pass) consumer policy handoff integrity > rejects resealed summaries, rows, legacy formats and bindings at report and publisher boundaries [2983.61ms]
+(pass) consumer policy handoff integrity > rejects resealed missing or unmatched advisory raw evidence [953.64ms]
+(pass) consumer policy handoff integrity > rejects old manifests and a manifest binding different from the report [124.08ms]
+(pass) consumer policy CLI diagnostics > shows the valid advisory failures and a distinct release-policy status [207.96ms]
+(pass) checked-out approval pins at both job boundaries > rejects a changed policy role even after resealing every binding and source identity [300.91ms]
+(pass) checked-out approval pins at both job boundaries > rejects baseline whitespace edits with unchanged numerical medians [283.00ms]
+(pass) checked-out approval pins at both job boundaries > uses the transferred tarball when the publisher has a different local dist [228.02ms]
+(pass) runtime raw evidence integrity at both release jobs > rejects rederived and resealed malformed runtime evidence [2159.35ms]
+
+packages/css/test/release-host-budget-policy.test.ts:
+(pass) M10.5 release host-budget policy > pins the exact 21 reviewed host IDs to their approved selectors [0.49ms]
+(pass) M10.5 release host-budget policy > matches the approved host rows in the decoded registry [0.55ms]
+(pass) M10.5 release host-budget policy > qualifies the 21 passing host rows without using whole-registry readiness [0.07ms]
+(pass) M10.5 release host-budget policy > names missing, duplicate, and unexpected rows as blockers [0.15ms]
+(pass) M10.5 release host-budget policy > names every failed or incomplete row in blockers [0.05ms]
+(pass) M10.5 release host-budget policy > rejects a changed selector, non-approved threshold, or new approved host row [1.29ms]
+(pass) approved consumer policy enforcement > retains all ten advisory failures while admitting eleven passing blocking rows [0.06ms]
+(pass) approved consumer policy enforcement > rejects each failed blocking row and each missing or duplicated contract [1.23ms]
+(pass) approved consumer policy enforcement > rejects every incomplete or unsupported advisory status [1.18ms]
+(pass) approved consumer policy enforcement > pins roles, selectors, registry and evidence inventory independently of caller data [0.46ms]
+(pass) approved consumer policy enforcement > rejects missing and drifting bindings, and baseline byte edits even with unchanged medians [3.60ms]
+
+packages/css/test/v1-publication-exception.test.ts:
+(pass) approved v1 publication exception > admits exactly the published tag, source, package and qualified tarball [0.07ms]
+(pass) approved v1 publication exception > retains an honest distinction between a pass and the approved numerical failure [0.03ms]
+(pass) approved v1 publication exception > rejects every failure beyond the one exact numerical warm result [0.05ms]
+(pass) approved v1 publication exception > binds the immutable approval, report manifest and trusted workflow tooling independently [0.09ms]
+
+packages/css/test/release-host-budget-report.test.ts:
+(pass) M10.5 release host-budget report verification > requires an explicit report and every raw measurement [38.66ms]
+(pass) M10.5 release host-budget report verification > rederives the retained comparison and names its nine failures and incomplete row [41.23ms]
+(pass) M10.5 release host-budget report verification > rejects a raw measurement edit even when the identity fields are otherwise current [42.41ms]
+(pass) M10.5 release host-budget report verification > rejects the wrong release revision and source digest [77.05ms]
+(pass) M10.5 release host-budget report verification > rejects unstable before-and-after source or artifact identity [79.04ms]
+(pass) M10.5 release host-budget report verification > rejects stable but changed package artifact hashes [43.81ms]
+(pass) M10.5 release host-budget report verification > requires a report path at the release-check command boundary [171.08ms]
+
+ 40 pass
+ 0 fail
+ 390 expect() calls
+Ran 40 tests across 4 files. [11.12s]
