@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/opsydyn/crumbs-css/compare/v1.1.0...v1.1.1) (2026-10-10)
+
+### Documentation
+
+* Refresh the npm README and compatibility documentation for the complete stable API and the repository Crumbs consumer agent skill (M1.9c/M1.9d).
+* Inherit all JavaScript, declarations, exports, dependencies and peer ranges byte-for-byte from published 1.1.0. No runtime or API changes.
+
 ## 1.1.0 (2026-10-10)
 
 ### Compatibility
