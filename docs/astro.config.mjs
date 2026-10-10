@@ -25,6 +25,7 @@ export default defineConfig({
 					label: 'How-to Guides',
 					items: [
 						{ label: 'Configure Metro', slug: 'how-to/configure-metro' },
+                        { label: 'Use the coding-agent skill', slug: 'how-to/use-agent-skill' },
 						{ label: 'Use themes', slug: 'how-to/use-themes' },
                         { label: 'Assign local variables', slug: 'how-to/use-local-variables' },
                         { label: 'Generate manifests', slug: 'how-to/generate-design-system-manifests' },

@@ -1,0 +1,94 @@
+{
+  "slice": "M1.9c",
+  "status": "qualified",
+  "publishedApiVersion": "1.1.0",
+  "baselineCommit": "c770ddc165d7ce3ed35649db7db96d28371d2d6f",
+  "artifact": {
+    "source": "retained downloaded npm registry tarball",
+    "version": "1.1.0",
+    "sha256": "51b36b137a97364a30e401dc97f017890b6d3e09ad14d2319ad5cd03925baeda",
+    "dependencySource": "existing isolated frozen repo dependencies",
+    "react": "19.2.3",
+    "reactNative": "0.85.3",
+    "typescript": "6.0.3",
+    "skipLibCheck": true,
+    "scope": "consumer examples and host compiler; not a fresh SDK 57 native install"
+  },
+  "skillFiles": {
+    ".agents/skills/crumbs-css/SKILL.md": "7124a405e39615ba9e63e045151fa495dff7288a16badcbebea3b94ec2ee08e2",
+    ".agents/skills/crumbs-css/agents/openai.yaml": "0b484f4b88dcb2c7aaf17ddb4c9339d583be2a5a95706023c5dcb700eb1e4078",
+    ".agents/skills/crumbs-css/references/design-system.md": "1b1a72db8f5671fc090377f6cd0162e1607aead6783389fec152895f6944dabb"
+  },
+  "typecheck": {
+    "exitCode": 0,
+    "files": [
+      "foundation.ts",
+      "card.css.ts",
+      "ActionCard.tsx",
+      "App.tsx"
+    ],
+    "negativeFixtures": 3,
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "compilerAndHostRuntime": {
+    "artifactVersion": "1.1.0",
+    "compiler": "passed",
+    "runtime": "passed",
+    "checks": [
+      "both typed slot variants",
+      "resolved label token",
+      "finite padding scales",
+      "recipe reference reuse",
+      "two independent local assignments",
+      "clearing restores typed theme fallback",
+      "prior instance and shared theme unchanged"
+    ],
+    "nativeInteraction": "not run; documentation-only slice",
+    "dependencyEnvironment": "React 19.2.3 / RN declarations 0.85.3"
+  },
+  "independentForwardChecks": [
+    {
+      "name": "forward-types",
+      "exitCode": 0,
+      "output": ""
+    },
+    {
+      "name": "forward-compiler",
+      "exitCode": 0,
+      "output": "Strict iOS host transform passed\n"
+    },
+    {
+      "name": "forward-runtime",
+      "exitCode": 0,
+      "output": "PASS: themed slots, atomic padding, isolated accent assignment/reset, immutable patch, container boundaries, motion admission\n"
+    }
+  ],
+  "skillValidator": {
+    "command": "quick_validate.py .agents/skills/crumbs-css",
+    "exitCode": 0,
+    "output": "Skill is valid!",
+    "dependency": "PyYAML 6.0.3 in a task-owned temporary venv"
+  },
+  "portability": {
+    "wholeFolderCopiedToAnotherApp": true,
+    "relativeReferenceLinks": "passed"
+  },
+  "docsBuild": {
+    "command": "bun run docs:build",
+    "exitCode": 0,
+    "pages": 34
+  },
+  "review": {
+    "agent": "crumbs_skill_docs_review",
+    "result": "no actionable findings",
+    "mode": "read-only; no rerun of checks"
+  },
+  "limitations": [
+    "Not a fresh dependency install or SDK 57 native run",
+    "skipLibCheck validates consumer code rather than every third-party declaration",
+    "No native interaction, physical-device, screen-reader or release-performance acceptance added",
+    "No npm publication; registry package and packaged README remain at 1.1.0",
+    "No quantitative claim about agent effectiveness; baseline agent also corrected its initial errors"
+  ]
+}

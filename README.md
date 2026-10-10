@@ -108,6 +108,10 @@ and the [complete export index below](#complete-public-api) for every value and 
 validation helpers and compatibility aliases. Runtime resolvers expose bounded caches and explicit lifetime controls;
 Sprinkles plans select from finite scales without enumerating a Cartesian product.
 
+## Coding agents
+
+Use the repository [Crumbs consumer skill](.agents/skills/crumbs-css/SKILL.md) for the published `1.1.0` APIs. It covers Expo/Metro setup, import selection, typed design systems and native runtime boundaries, with a checked ActionCard example. [Copy the complete skill into your app repository](docs/src/content/docs/how-to/use-agent-skill.mdx), then invoke it as `$crumbs-css` in Codex. The skill is maintained in Git; it is not included in the npm 1.1.0 tarball.
+
 ## Guides and architecture
 
 - [Package quickstart](packages/css/README.md) and [compatibility matrix](packages/css/COMPATIBILITY.md).

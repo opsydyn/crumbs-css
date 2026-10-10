@@ -1,0 +1,69 @@
+---
+title: Use Crumbs with a coding agent
+description: Install the repository consumer skill for the published Crumbs 1.1.0 APIs.
+---
+
+The repository ships a portable **`crumbs-css` consumer skill** for Expo apps and
+React Native design systems. It targets published `@opsydyn/crumbs-css@1.1.0`,
+including Expo 56 / RN 0.85 and Expo 57 / RN 0.86. It covers Metro setup, specific
+package imports, typed tokens, slots, atomic utilities, instance variables and
+native boundaries, with a complete themed ActionCard example.
+
+The skill is maintained in
+[`.agents/skills/crumbs-css`](https://github.com/opsydyn/crumbs-css/tree/main/.agents/skills/crumbs-css).
+It is repository content, not part of the npm 1.1.0 tarball. Installing the package
+does not install the skill; installing the skill does not change app dependencies.
+
+## Add it to your app repository
+
+From your app's root, obtain the skill from the Crumbs repository:
+
+```sh
+git clone --depth 1 --filter=blob:none --sparse https://github.com/opsydyn/crumbs-css.git crumbs-skill-source
+git -C crumbs-skill-source sparse-checkout set .agents/skills/crumbs-css
+```
+
+Copy the **whole folder**, including `references/` and `agents/`. If a copy already
+exists, review its changes before replacing it. For a first install:
+
+```sh
+if [ -e .agents/skills/crumbs-css ]; then
+  echo "Crumbs skill already exists; review the update before replacing it."
+else
+  mkdir -p .agents/skills
+  cp -R crumbs-skill-source/.agents/skills/crumbs-css .agents/skills/
+fi
+```
+
+Commit the copied skill to your app repository so the team shares it. The command
+fetches the current repository version; teams requiring an immutable copy should
+record and review the source commit from `git -C crumbs-skill-source rev-parse HEAD`.
+Check the skill's version target against your installed Crumbs package when updating.
+
+Codex scans repository `.agents/skills` folders and can select the skill implicitly
+when its description matches. You can also invoke it explicitly as `$crumbs-css`.
+See [OpenAI's skill discovery documentation](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills).
+Other agents can read `SKILL.md` and its relative reference directly; automatic
+discovery depends on their own skill support.
+
+## Give the agent a concrete task
+
+```text
+Use $crumbs-css to add a typed ActionCard to this Expo app.
+Use our existing tokens, root and label slots, primary/secondary variants,
+finite padding utilities, and an independent per-card accent override.
+Preserve the existing Metro config and native onActionPress behaviour.
+Check our installed package version, typecheck the app, and export the
+platform we are targeting. Report native checks separately.
+```
+
+The skill helps the agent avoid browser CSS assumptions and keeps runtime imports
+separate from authoring/tooling. Typed identified token themes live in ordinary
+`.ts`; local variables use their own primitive plans and resolver; extension
+factories use explicit named package exports. The agent remains responsible for
+reading the app's existing code and validating its changes.
+
+For capability and setup details, use the [quickstart](/crumbs-css/tutorials/get-started/),
+[API index](/crumbs-css/reference/package-entrypoints-and-apis/), and
+[reference design system](/crumbs-css/how-to/build-a-reference-design-system/).
+The skill adds guidance; it changes no public API or native/performance guarantee.
