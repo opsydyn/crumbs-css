@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.0.0](https://github.com/opsydyn/crumbs-css/compare/v0.1.2-alpha.1...v1.0.0) (2026-10-10)
+
+### Stable API baseline
+
+Promote the additive native styling and design-system surface to v1. Public APIs
+and published artifact formats follow SemVer, with a documented replacement and
+at least one minor release of deprecation before removal in a major release.
+Existing APIs and declared peer ranges are preserved.
+
+### Features
+
+- Typed view/text/image composition, mapped variants, component recipes and finite Sprinkles lookup plans.
+- Typed token contracts, aliases, scoped theme stores, selectors, codecs, optics and functional expressions.
+- Standalone `createVar`/`fallbackVar` inputs and immutable `assignVars` snapshots.
+- Named container ownership and exhaustive native layout conditions.
+- Native motion definitions and an instance-owned public Animated adapter.
+- Encoded/linear sRGB colour operations and immutable typography scales.
+- Typed runtime factories backed by explicit named runtime imports and bounded frozen argument snapshots.
+- Manifest compatibility, policy presets, ownership reports, DTCG import, migration planning and style explanations.
+
+### Documentation and qualification
+
+- Expand the repository and npm READMEs, complete every public entrypoint/value/type index, and expose delivered guides in the docs navigation.
+- M11.5 passes1,828 CSS/33 Storybook tests, full packed host qualification and12 functional phases each on iOS/Android; native evidence belongs to the exact M11.5 artifacts, not an untested v1 tarball.
+- M10.5 cold/warm host budgets remain failed and the required hosted Mac runner is unregistered. GitHub release creation does not publish to npm or waive those gates. Physical-device, spoken-reader, live authored HMR and release-FPS checks remain deferred.
+
 ## [0.1.2-alpha.1](https://github.com/opsydyn/crumbs-css/compare/v0.1.1-alpha.1...v0.1.2-alpha.1) (2026-05-25)
 
 

@@ -8,7 +8,7 @@ const sha256 = (bytes: Uint8Array | string) => createHash('sha256').update(bytes
 /** Content identity across a final commit, excluding documentation and unrelated untracked native/dependency trees. */
 export function captureGuaranteesSourceIdentity(repositoryRoot: string) {
  const list=(args:string[])=>execFileSync('git',['ls-files','-z',...args],{cwd:repositoryRoot,encoding:'utf8'}).split('\0').filter(Boolean)
- const paths=[...new Set([...list(['--cached']),...list(['--others','--exclude-standard','--',...authoredRoots])])].filter(path=>!path.startsWith('docs/')).sort()
+ const paths=[...new Set([...list(['--cached','--',':(top,exclude)docs/**']),...list(['--others','--exclude-standard','--',...authoredRoots])])].filter(path=>!path.startsWith('docs/')).sort()
  const files=paths.map(path=>{
   const absolute=resolve(repositoryRoot,path),stat=lstatSync(absolute)
   if(!stat.isFile()&&!stat.isSymbolicLink()) throw Error('Source identity requires a file: '+path)

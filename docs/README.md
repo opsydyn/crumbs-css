@@ -49,4 +49,4 @@ Repository planning documents live outside the site's `src/content/docs/` collec
 - [Design-system roadmap](./roadmap.md)
 - [2026-09-06 assessment](./assessments/2026-09-06-design-system-assessment.md)
 
-The ADR and roadmap are proposed. Their acceptance criteria describe future work; update consumer-facing reference pages only when the corresponding behavior ships.
+The roadmap records delivered work and parked proposals separately. M11.1–M11.5 are the delivered feature scope for the v1 source release; M10.5 release qualification remains open and M11.6 is parked. Keep historical evidence labelled with its exact artifact and expose current APIs in consumer pages.

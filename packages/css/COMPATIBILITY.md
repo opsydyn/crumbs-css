@@ -137,21 +137,23 @@ Android is parked.
 
 ## Release, compatibility, and deprecation policy (M8.5)
 
-The current package version is `0.1.1-alpha.1`, a pre-1.0 alpha. Crumbs makes
-no backward-compatibility promise between alpha releases for public APIs or
-generated artifacts. Breaking changes are allowed on this line only with a
-Conventional Commit breaking-change notice, a changelog entry, an update to
-this compatibility matrix, and actionable migration guidance. Artifact/runtime
-compatibility claims remain limited to the exact combinations with retained
-qualification evidence; unknown artifact versions continue to fail closed.
+The v1 source/GitHub release is `1.0.0`. npm publication remains pending the
+unchanged M10.5 host gate and required hosted Mac runner; the release tag alone
+is not registry publication or release-wide performance qualification.
 
-Once Crumbs reaches `1.0.0`, public APIs and published artifact formats follow
-SemVer: compatible fixes use patch releases, additive compatible changes use
-minor releases, and breaking changes or removals use major releases. Deprecate
-a stable API or artifact field in a minor release with its replacement and
-migration path documented, and retain it for at least one minor release before
-removing it in a major release. Alpha removals have no fixed deprecation window,
-but still require release notes and migration guidance.
+Public APIs and published artifact formats follow SemVer: compatible fixes use
+patch releases, additive compatible changes use minor releases, and breaking
+changes or removals use major releases. Deprecate a stable API or artifact field
+in a minor release with its replacement and migration guidance documented, and
+retain it for at least one minor release before removal in a major release.
+Unknown artifact versions continue to fail closed. Promotion to v1 removes no
+existing public API and does not broaden the declared peer ranges.
+
+Historical pre-1.0 alpha releases made no backward-compatibility promise between
+alpha releases. Their breaking changes required a changelog, updated compatibility
+matrix and migration guidance; this paragraph describes the historical line.
+The retained baseline/qualification tables identify their actual artifacts,
+not a claim that those old tarballs contain every current API.
 
 Release-please creates release pull requests, tags, and GitHub Releases; it
 never publishes to npm. The separate manual publish workflow accepts only a
@@ -159,7 +161,7 @@ published GitHub Release tag matching `v<packages/css/package.json version>`
 and pointing at the checked-out commit. `bun run release:preflight --tag
 v<version>` applies the same local tag and npm dist-tag checks without
 publishing. Prerelease versions use their first named prerelease identifier as
-the npm dist-tag (`alpha` for the current line); stable versions use `latest`.
+the npm dist-tag (`alpha` for the historical alpha line); stable versions use `latest`.
 
 ## Coverage and qualification
 
@@ -884,7 +886,7 @@ order, then matching compound variants in array order.
 
 ## Local variable capability v1 (M11.1)
 
-The additive `/theme/vars` entry supplies assignment/resolution/Hook APIs for the four local payloads at version 1. Only a matching compiler that emits local plans and a runtime exposing this entry are compatible. Existing alpha artifacts can share the package version while lacking this feature; use the tarball SHA and installed entry/artifact hashes in `docs/evidence/2026-10-08-m11-1-local-vars/host/qualification.json`. No release-wide support claim follows from a working-tree artifact.
+The additive `/theme/vars` entry supplies assignment/resolution/Hook APIs for the four local payloads at version 1. Only a matching compiler that emits local plans and a runtime exposing this entry are compatible. The v1 source release includes these APIs. Historical alpha artifacts can share the package version while lacking this feature; use the tarball SHA and installed entry/artifact hashes in `docs/evidence/2026-10-08-m11-1-local-vars/host/qualification.json`. Source/native feature evidence remains separate from npm release-policy qualification.
 
 Primitive scalar local operands preserve view/text/image restrictions and native composition. Structured values must remain static; recipe/Sprinkles/condition/expression placement is rejected. Existing payload versions and exports remain unchanged. Literal and populated local branches need no provider; reached public typed token terminals use the owning existing provider/scope. Mutable decoded local data is revalidated and unsupported versions fail closed. Native emulator/Simulator acceptance, host React evidence, export inventory and physical-device acceptance are recorded separately.
 

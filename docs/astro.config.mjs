@@ -26,6 +26,11 @@ export default defineConfig({
 					items: [
 						{ label: 'Configure Metro', slug: 'how-to/configure-metro' },
 						{ label: 'Use themes', slug: 'how-to/use-themes' },
+                        { label: 'Assign local variables', slug: 'how-to/use-local-variables' },
+                        { label: 'Generate manifests', slug: 'how-to/generate-design-system-manifests' },
+                        { label: 'Check policy', slug: 'how-to/check-design-system-policy' },
+                        { label: 'Plan source migrations', slug: 'how-to/migrate-design-system-sources' },
+                        { label: 'Import DTCG tokens', slug: 'how-to/import-dtcg-tokens' },
                         { label: 'Use container conditions', slug: 'how-to/use-container-conditions' },
                         { label: 'Use native motion', slug: 'how-to/use-native-motion' },
                         { label: 'Derive colour and typography', slug: 'how-to/use-token-algebra' },

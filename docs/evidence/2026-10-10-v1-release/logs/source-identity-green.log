@@ -1,0 +1,39 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/guarantees-source-identity.test.ts:
+(pass) source content identity survives docs and commit changes but rejects code drift and newly authored scripts [72.62ms]
+(pass) a large tracked documentation inventory cannot overflow source identity collection [565.61ms]
+
+packages/css/test/guarantees-matrix.test.ts:
+(pass) M10.5 guarantees matrix contract and renderer > accepts content-pinned evidence across commits and rejects source drift even at the same revision [86.89ms]
+(pass) M10.5 guarantees matrix contract and renderer > accepts a complete representative matrix [32.03ms]
+(pass) M10.5 guarantees matrix contract and renderer > retains historical evidence revision, environment, and scope [26.55ms]
+(pass) M10.5 guarantees matrix contract and renderer > rejects unknown versions and fields [36.24ms]
+(pass) M10.5 guarantees matrix contract and renderer > rejects duplicate row IDs and missing required domains [36.38ms]
+(pass) M10.5 guarantees matrix contract and renderer > rejects invalid status combinations and unsupported claims without a contract or policy basis [40.11ms]
+(pass) M10.5 guarantees matrix contract and renderer > rejects absolute, traversing, Windows-style, and symlink-escaping references [46.44ms]
+(pass) M10.5 guarantees matrix contract and renderer > keeps evidence paths below docs/evidence and rejects evidence symlink escapes [36.87ms]
+(pass) M10.5 guarantees matrix contract and renderer > requires complete evidence identity and scope metadata [29.64ms]
+(pass) M10.5 guarantees matrix contract and renderer > detects evidence hash mismatches [32.30ms]
+(pass) M10.5 guarantees matrix contract and renderer > does not promote evidence from a historical revision to a current measurement [30.72ms]
+(pass) M10.5 guarantees matrix contract and renderer > rejects evidence outcomes that contradict the row measurement status [35.28ms]
+(pass) M10.5 guarantees matrix contract and renderer > does not promote absent, stale, failed, or uncalibrated evidence to a passed guarantee [28.15ms]
+(pass) M10.5 guarantees matrix contract and renderer > keeps a pending budget out of performance guarantees [27.62ms]
+(pass) M10.5 guarantees matrix contract and renderer > escapes MDX-sensitive text and preserves declared row order [27.86ms]
+(pass) M10.5 guarantees matrix contract and renderer > renders byte-identically for repeated input [28.20ms]
+(pass) M10.5 guarantees matrix contract and renderer > detects stale generated MDX [24.14ms]
+(pass) M10.5 guarantees matrix contract and renderer > keeps source evidence current across a docs-only commit and rejects a generated-page symlink [50.99ms]
+
+packages/css/test/release-host-budget-report.test.ts:
+(pass) M10.5 release host-budget report verification > requires an explicit report and every raw measurement [45.90ms]
+(pass) M10.5 release host-budget report verification > rederives the retained comparison and names its nine failures and incomplete row [56.77ms]
+(pass) M10.5 release host-budget report verification > rejects a raw measurement edit even when the identity fields are otherwise current [42.29ms]
+(pass) M10.5 release host-budget report verification > rejects the wrong release revision and source digest [84.03ms]
+(pass) M10.5 release host-budget report verification > rejects unstable before-and-after source or artifact identity [81.06ms]
+(pass) M10.5 release host-budget report verification > rejects stable but changed package artifact hashes [42.53ms]
+(pass) M10.5 release host-budget report verification > requires a report path at the release-check command boundary [167.38ms]
+
+ 27 pass
+ 0 fail
+ 76 expect() calls
+Ran 27 tests across 3 files. [2.12s]

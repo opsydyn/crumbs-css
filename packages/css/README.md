@@ -2,9 +2,11 @@
   <img src="https://raw.githubusercontent.com/opsydyn/crumbs-css/main/packages/css/crumbs-css-header.png" alt="Crumbs CSS" width="100%" />
 </p>
 
-# @opsydyn/crumbs-css
+# @opsydyn/crumbs-css v1
 
-React Native style authoring with a familiar vanilla-extract-shaped API.
+Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
+
+Version `1.0.0` is the source/GitHub release. npm publication remains pending the unchanged M10.5 host gate and required hosted Mac runner. Registry alpha artifacts do not contain the complete v1 surface. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.0.md).
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -20,14 +22,33 @@ Validated consumer baseline:
 
 ## What it is
 
-`@opsydyn/crumbs-css` compiles `.css.ts` modules into React Native style payloads at Metro transform time. It gives React Native apps a familiar authoring surface for:
+`@opsydyn/crumbs-css` compiles `.css.ts` modules into React Native style payloads at Metro transform time. It provides native style composition, component recipes, finite atomic utilities, typed/scoped tokens, standalone variables, container conditions, native motion, colour/typography algebra, and typed runtime factories. Optional tooling covers token codecs/optics, manifests, policy, ownership, migrations, DTCG import and style explanations.
 
-- `style`
-- `styleVariants`
-- `recipe`
-- `defineProperties` and `createSprinkles`
-- `createThemeContract`
-- `createTheme`
+## API map
+
+| Need | Import suffix | APIs to start with |
+| --- | --- | --- |
+| Native style authoring | `/style` | `style`, `styleVariants`, `viewStyle`, `textStyle`, `imageStyle` |
+| Component variants and typed slots | `/style`, `/theme/recipes` | `recipe`, `componentRecipe`, `componentRecipeFromRecipe`, `extendComponentRecipe`, `createRecipeResolver`, `createComponentRecipeResolver` |
+| Atomic utility scales | `/style`, `/theme/sprinkles` | `defineProperties`, `createSprinkles`, `createSprinklesLookupPlan`, `createSprinklesResolver` |
+| Theme contracts and React resolution | `/style`, `/theme/core` | `createThemeContract`, `createTheme`, `ThemeProvider`, `useThemedStyle`, `useThemedStyles`, `useThemeSelector` |
+| Typed design tokens and scoped themes | `/tokens`, `/theme` | `token`, `alias`, `createTokenContract`, `createTokenTheme`, `applyTokenThemePatch`, `TokenThemeProvider`, `TokenThemeScopeProvider`, `useTokenTheme` |
+| Token-only runtime styles | `/theme/token` | `themeToken`, `createTokenStyles`, `resolveTokenStyles`, `useTokenStyles` |
+| Standalone variables and local assignment | `/style`, `/theme/vars` | `createVar`, `fallbackVar`, `assignVars`, `resolveAssignedStyles`, `useAssignedStyles` |
+| Responsive and accessibility conditions | `/theme/conditions` | `createNativeConditionStore`, `createNativeConditionResolver`, `useNativeConditionSnapshot`, `traceNativeConditionBranches` |
+| Named container conditions | `/theme/containers` | `defineContainer`, `useContainerLayout`, `ContainerProvider`, `useContainerValue`, `getContainerBucket`, `resolveContainerValue` |
+| Native motion | `/theme/motion`, `/theme/motion/native` | `defineMotion`, `useNativeMotion` |
+| Functional token expressions | `/theme/expressions` | `createNativeExpressionLiteral`, `createNativeExpressionTokenReference`, `createNativeExpressionAdd`, `createNativeExpressionClamp`, `createNativeExpressionMatch`, `evaluateNativeExpression`, `foldNativeExpression` |
+| Immutable token lookup and codecs | `/tokens/optic`, `/tokens/schema`, `/tokens/schema/value` | `createTokenThemeFocus`, `externalTokenThemeCodec`, `decodeExternalTokenTheme`, `encodeExternalTokenTheme`, `decodeTokenValue` |
+| Colour and typography algebra | `/tokens/algebra` | `createColor`, `mixColor`, `setColorAlpha`, `multiplyColorAlpha`, `toNativeColor`, `createTypography`, `scaleTypography`, `createTypographyScale`, `toNativeTypography` |
+| Typed runtime factories | `/extensions` | `defineExtension`, `ExtensionError` |
+| Design-system manifests | `/tooling/manifest` | `assembleManifest`, `projectTokenContract`, `projectComponentRecipe`, `compareManifests`, `checkManifestConsumers` |
+| Policy and governance | `/tooling/policy`, `/tooling/ownership` | `checkDesignSystemPolicy`, `getBuiltInPolicyPreset`, `annotateDesignSystemReport` |
+| DTCG import and source migrations | `/tooling/dtcg`, `/tooling/migrations` | `importDtcgTheme`, `planSourceMigration` |
+| Explain styles | `/devtools` | `explainStyle`, `StyleExplanationInputError` |
+| Metro integration and diagnostics | `/metro-plugin`, package root | `withNativeStyles`, `createNativeStylesCacheStore`, `NativeStylesDiagnosticCode`, `formatNativeStylesDiagnostic` |
+
+Every public value and type is listed in the [complete API index](https://github.com/opsydyn/crumbs-css#complete-public-api) and the [API reference](https://opsydyn.github.io/crumbs-css/reference/package-entrypoints-and-apis/).
 
 ## Current guarantees
 
@@ -52,10 +73,13 @@ See the full compatibility matrix in
 
 ## Install
 
+After npm publication, install the exact v1 version below. Before then, use the
+[source-release tarball quickstart](https://github.com/opsydyn/crumbs-css#get-started).
+
 ```sh
-bun add @opsydyn/crumbs-css
+bun add @opsydyn/crumbs-css@1.0.0
 # or
-npm install @opsydyn/crumbs-css
+npm install @opsydyn/crumbs-css@1.0.0
 ```
 
 Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.

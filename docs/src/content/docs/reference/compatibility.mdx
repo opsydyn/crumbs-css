@@ -59,18 +59,18 @@ M9.6 qualification covers checked-in source fixtures and generated host
 workloads. A 1,000-token workload completed on the recorded Bun host; 10,000
 and 50,000-token workloads stopped at the 100,000 JSON-node resource guard.
 Those are tooling-side observations, not runtime or device performance
-measurements. Package publication, visual acceptance, Android and physical
-device acceptance remain unqualified; Android remains parked.
+measurements. This historical M9.6 packet did not qualify publication or native acceptance.
+Later native evidence belongs to its own exact feature/artifact receipts;
+physical-device and spoken-reader acceptance remain deferred.
 
 ## Release lifecycle and deprecations
 
-The current package version, `0.1.1-alpha.1`, is pre-1.0 alpha. Breaking
-changes may occur between alpha releases, with a changelog entry, an updated
-compatibility matrix, and migration guidance. Once Crumbs reaches `1.0.0`,
-public APIs and published artifact formats follow SemVer. Stable APIs and
-artifact fields receive a documented replacement and at least one minor
-release of deprecation before removal in a major release. Alpha removals have
-no fixed deprecation window but still require migration guidance.
+The v1 source/GitHub release is `1.0.0`. npm publication is pending the unchanged
+M10.5 host gate and required hosted Mac runner. Public APIs and published artifact
+formats follow SemVer; stable removals require a documented replacement, migration
+guidance and at least one minor release of deprecation before a major release.
+The earlier alpha release policy and retained qualification tables are historical
+records of those exact artifacts. Promotion to v1 removes no existing APIs.
 
 Release-please creates GitHub releases and tags but never publishes to npm.
 Publishing is a separate manual workflow gated on a completed, version-matched

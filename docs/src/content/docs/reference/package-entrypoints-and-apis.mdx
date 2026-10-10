@@ -539,13 +539,13 @@ Advanced/debugging surface for direct transformer access. Most consumers should 
 
 ### `@opsydyn/crumbs-css/theme/vars`
 
-Opt in to `assignVars`, `resolveAssignedStyles` and `useAssignedStyles`. The six type exports are `NativeLocalVar`, `NativeLocalFallback`, `NativeLocalVarShape`, `NativeLocalVarValues`, `NativeVarAssignments` and `ResolvedAssignedStyles`. Authoring declarations share their nominal graph. These APIs are not re-exported by the root or other theme entries. See [local assignments](/crumbs-css/how-to/use-local-variables/). Support requires local-plan-v1 compiler/runtime capability, identified by the M11.1 artifact packet until release closure.
+Opt in to `assignVars`, `resolveAssignedStyles` and `useAssignedStyles`. The six type exports are `NativeLocalVar`, `NativeLocalFallback`, `NativeLocalVarShape`, `NativeLocalVarValues`, `NativeVarAssignments` and `ResolvedAssignedStyles`. Authoring declarations share their nominal graph. These APIs are not re-exported by the root or other theme entries. See [local assignments](/crumbs-css/how-to/use-local-variables/). Support requires local-plan-v1 compiler/runtime capability, included in the v1 source release; npm availability follows release qualification.
 
 ## Optional container ownership
 
 `@opsydyn/crumbs-css/theme/containers` publishes six values: `defineContainer`, `getContainerBucket`, `resolveContainerValue`, `useContainerLayout`, `ContainerProvider`, `useContainerValue`. Its seven public types are `NativeContainerAxis`, `NativeContainerDefinitionInput`, `NativeContainerDefinition`, `NativeContainerBucket`, `NativeContainerValues`, `NativeContainerLayout` and `ContainerProviderProps`. It is an independent React-only runtime graph.
 
-[Use container conditions](/how-to/use-container-conditions/) describes exhaustive maps, independently constrained owners and portal adapters. These exports are opt-in and are not forwarded from root/theme/core. Availability belongs to the exact tarball, not every historical alpha package with the same version.
+[Use container conditions](/crumbs-css/how-to/use-container-conditions/) describes exhaustive maps, independently constrained owners and portal adapters. These exports are opt-in and are not forwarded from root/theme/core. Availability belongs to the exact tarball, not every historical alpha package with the same version.
 
 ## Native motion entries (M11.3)
 
@@ -573,3 +573,404 @@ runtime externals. See [token algebra](/crumbs-css/how-to/use-token-algebra/).
 factory's argument tuple and callable result. The entry has no runtime peers.
 Generated modules statically import the real runtime factory; their dependencies
 come from that explicit endpoint. See [Create typed runtime extensions](/crumbs-css/how-to/create-runtime-extensions/).
+
+## Complete public API
+
+This index lists every public runtime value and type-only export in the v1 declarations and JavaScript.
+Import paths are relative to `@opsydyn/crumbs-css`; type-only exports use `import type`. Internal `dist` files
+outside the export map are not public APIs.
+
+<details>
+<summary>All values and types by entrypoint</summary>
+
+### `.`
+
+**Values:** `NATIVE_RESPONSIVE_CONDITION_MATCHERS`, `NATIVE_RESPONSIVE_CONDITION_NAMES`,
+`NativeExpressionEvaluationError`, `NativeExpressionProgramType`, `NativeExpressionProgramVersion`,
+`NativeExpressionType`, `NativeExpressionVersion`, `NativeSprinklesLookupPlanType`,
+`NativeSprinklesLookupPlanVersion`, `NativeStylesDiagnosticCode`, `NativeThemeTokenReferenceType`,
+`createNativeExpressionAdd`, `createNativeExpressionAlias`, `createNativeExpressionClamp`,
+`createNativeExpressionCompose`, `createNativeExpressionConditionReference`, `createNativeExpressionDomain`,
+`createNativeExpressionFallback`, `createNativeExpressionLiteral`, `createNativeExpressionMatch`,
+`createNativeExpressionProgram`, `createNativeExpressionRuntime`, `createNativeExpressionScale`,
+`createNativeExpressionSubtract`, `createNativeExpressionTokenReference`, `createNativeMapValueFn`,
+`createNativeNormalizeValueFn`, `createSprinkles`, `createSprinklesLookupPlan`, `createTheme`,
+`createThemeContract`, `createThemeTokenReference`, `defineProperties`, `evaluateNativeExpression`,
+`foldNativeExpression`, `formatNativeStylesDiagnostic`, `getThemeTokenPath`, `getThemeVarName`, `imageStyle`,
+`isNativeExpression`, `isNativeExpressionProgram`, `isThemeTokenReference`, `isThemeVar`,
+`mapNativeConditionValueToBranches`, `nativeExpressionDependencyKey`, `nativeExpressionDomainKey`, `recipe`,
+`style`, `styleVariants`, `textStyle`, `viewStyle`, `withNativeStyles`.
+
+**Type-only exports:** `NativeConditionDefinitions`, `NativeConditionKey`, `NativeConditionNameList`, `NativeConditionValue`,
+`NativeConditionValueMapper`, `NativeConditionalRecord`, `NativeConditionalTuple`, `NativeConditionalValue`,
+`NativeExpression`, `NativeExpressionAdd`, `NativeExpressionAlias`, `NativeExpressionClamp`,
+`NativeExpressionColorDomain`, `NativeExpressionCompose`, `NativeExpressionConditionReference`,
+`NativeExpressionDependency`, `NativeExpressionDomain`, `NativeExpressionDomainInput`,
+`NativeExpressionDurationDomain`, `NativeExpressionEnumDomain`, `NativeExpressionEvaluationErrorCode`,
+`NativeExpressionEvaluationState`, `NativeExpressionFallback`, `NativeExpressionLengthDomain`,
+`NativeExpressionLiteral`, `NativeExpressionMatch`, `NativeExpressionMatchCase`,
+`NativeExpressionMatchOptions`, `NativeExpressionNumberDomain`, `NativeExpressionOpacityDomain`,
+`NativeExpressionProgram`, `NativeExpressionRuntime`, `NativeExpressionRuntimeStats`, `NativeExpressionScale`,
+`NativeExpressionSubtract`, `NativeExpressionTokenReference`, `NativeExpressionValue`,
+`NativeImageStyleInput`, `NativeMapValueFn`, `NativeNormalizeValueFn`, `NativeNormalizedConditionalValue`,
+`NativeRecipe`, `NativeRecipeCompoundVariant`, `NativeRecipeConfig`, `NativeRecipeProps`,
+`NativeRecipeSelection`, `NativeRecipeStyleInput`, `NativeRecipeVariants`, `NativeSprinkleDefinition`,
+`NativeSprinklePropertyConfig`, `NativeSprinklePropertyKey`, `NativeSprinkleShorthandConfig`,
+`NativeSprinkleStaticResult`, `NativeSprinklesConfig`, `NativeSprinklesLookupPlan`,
+`NativeSprinklesSelection`, `NativeStyle`, `NativeStyleComposition`, `NativeStyleInput`, `NativeStyleRule`,
+`NativeStyleVariants`, `NativeStylesDiagnosticCodeValue`, `NativeTextStyleInput`, `NativeTheme`,
+`NativeThemeTokenReference`, `NativeThemeValue`, `NativeThemeVar`, `NativeViewStyleInput`, `ThemeContract`,
+`ThemeContractInput`, `ThemeValues`.
+
+### `./style`
+
+**Values:** `NATIVE_RESPONSIVE_CONDITION_MATCHERS`, `NATIVE_RESPONSIVE_CONDITION_NAMES`,
+`NativeComponentRecipeContractVersion`, `NativeComponentRecipeExtensionType`,
+`NativeComponentRecipeExtensionVersion`, `NativeComponentRecipeType`, `NativeComponentRecipeVersion`,
+`NativeExpressionEvaluationError`, `NativeExpressionProgramType`, `NativeExpressionProgramVersion`,
+`NativeExpressionType`, `NativeExpressionVersion`, `NativeRecipeClassType`, `NativeRecipeType`,
+`NativeSprinklesLookupPlanType`, `NativeSprinklesLookupPlanVersion`, `NativeThemeTokenReferenceType`,
+`componentRecipe`, `componentRecipeFromRecipe`, `createNativeExpressionAdd`, `createNativeExpressionAlias`,
+`createNativeExpressionClamp`, `createNativeExpressionCompose`, `createNativeExpressionConditionReference`,
+`createNativeExpressionDomain`, `createNativeExpressionFallback`, `createNativeExpressionLiteral`,
+`createNativeExpressionMatch`, `createNativeExpressionProgram`, `createNativeExpressionRuntime`,
+`createNativeExpressionScale`, `createNativeExpressionSubtract`, `createNativeExpressionTokenReference`,
+`createNativeMapValueFn`, `createNativeNormalizeValueFn`, `createSprinkles`, `createSprinklesLookupPlan`,
+`createTheme`, `createThemeContract`, `createThemeTokenReference`, `createVar`, `defineProperties`,
+`evaluateNativeExpression`, `extendComponentRecipe`, `fallbackVar`, `foldNativeExpression`,
+`getThemeTokenPath`, `getThemeVarName`, `imageStyle`, `isNativeExpression`, `isNativeExpressionProgram`,
+`isThemeTokenReference`, `isThemeVar`, `mapNativeConditionValueToBranches`, `nativeExpressionDependencyKey`,
+`nativeExpressionDomainKey`, `recipe`, `style`, `styleVariants`, `textStyle`, `viewStyle`.
+
+**Type-only exports:** `DomainThemeVar`, `LegacyNativeThemeVar`, `NativeComponentCompoundVariant`, `NativeComponentContract`,
+`NativeComponentContractExtensionPoints`, `NativeComponentContractIdentity`, `NativeComponentPublicProps`,
+`NativeComponentRecipe`, `NativeComponentRecipeConfig`, `NativeComponentRecipeExtensionConfig`,
+`NativeComponentRecipeExtensionDescriptor`, `NativeComponentRecipeProps`, `NativeComponentResolvedStyles`,
+`NativeComponentSlotKind`, `NativeComponentSlotStyleInput`, `NativeComponentSlotStyles`,
+`NativeComponentSlots`, `NativeComponentStateVariants`, `NativeComponentVariantSelection`,
+`NativeComponentVariantsConfig`, `NativeConditionDefinitions`, `NativeConditionKey`,
+`NativeConditionNameList`, `NativeConditionValue`, `NativeConditionValueMapper`, `NativeConditionalRecord`,
+`NativeConditionalTuple`, `NativeConditionalValue`, `NativeExpression`, `NativeExpressionAdd`,
+`NativeExpressionAlias`, `NativeExpressionClamp`, `NativeExpressionColorDomain`, `NativeExpressionCompose`,
+`NativeExpressionConditionReference`, `NativeExpressionDependency`, `NativeExpressionDomain`,
+`NativeExpressionDomainInput`, `NativeExpressionDurationDomain`, `NativeExpressionEnumDomain`,
+`NativeExpressionEvaluationErrorCode`, `NativeExpressionEvaluationState`, `NativeExpressionFallback`,
+`NativeExpressionLengthDomain`, `NativeExpressionLiteral`, `NativeExpressionMatch`,
+`NativeExpressionMatchCase`, `NativeExpressionMatchOptions`, `NativeExpressionNumberDomain`,
+`NativeExpressionOpacityDomain`, `NativeExpressionProgram`, `NativeExpressionRuntime`,
+`NativeExpressionRuntimeStats`, `NativeExpressionScale`, `NativeExpressionSubtract`,
+`NativeExpressionTokenReference`, `NativeExpressionValue`, `NativeImageStyleInput`, `NativeMapValueFn`,
+`NativeNormalizeValueFn`, `NativeNormalizedConditionalValue`, `NativeRecipe`, `NativeRecipeCompoundVariant`,
+`NativeRecipeConfig`, `NativeRecipeProps`, `NativeRecipeSelection`, `NativeRecipeStyleInput`,
+`NativeRecipeVariantSelection`, `NativeRecipeVariantValue`, `NativeRecipeVariants`,
+`NativeRecipeVariantsConfig`, `NativeSprinkleDefinition`, `NativeSprinklePropertyConfig`,
+`NativeSprinklePropertyKey`, `NativeSprinkleShorthandConfig`, `NativeSprinkleStaticResult`,
+`NativeSprinklesConfig`, `NativeSprinklesLookupPlan`, `NativeSprinklesSelection`, `NativeStyle`,
+`NativeStyleComposition`, `NativeStyleInput`, `NativeStyleRule`, `NativeStyleTokenDomainForProperty`,
+`NativeStyleVariants`, `NativeTextStyleInput`, `NativeTheme`, `NativeThemeTokenReference`, `NativeThemeValue`,
+`NativeThemeVar`, `NativeViewStyleInput`, `ThemeContract`, `ThemeContractInput`, `ThemeValues`, `ThemeVar`,
+`TokenDomain`, `TokenDomainValue`.
+
+### `./theme`
+
+**Values:** `NATIVE_CONDITION_BREAKPOINTS`, `NATIVE_RESPONSIVE_CONDITION_MATCHERS`, `NATIVE_RESPONSIVE_CONDITION_NAMES`,
+`NativeExpressionEvaluationError`, `NativeThemeTokenReferenceType`, `ThemeProvider`, `TokenThemeProvider`,
+`TokenThemeScopeProvider`, `createComponentRecipeResolutionPlan`, `createComponentRecipeResolver`,
+`createNativeConditionResolver`, `createNativeConditionStore`, `createNativeExpressionRuntime`,
+`createNativeMapValueFn`, `createNativeNormalizeValueFn`, `createRecipeResolver`, `createSprinklesResolver`,
+`createThemeDependencyPlan`, `createThemeDependencyResolver`, `createThemeTokenReference`,
+`defaultNativeConditionSnapshot`, `evaluateNativeExpression`, `foldNativeExpression`, `isThemeTokenReference`,
+`isTokenThemeCompatible`, `mapNativeConditionValueToBranches`, `nativeConditionSnapshotKey`,
+`normalizeNativeConditionInput`, `resolveComponentRecipeResolutionPlan`, `resolveComponentRecipeStyles`,
+`resolveRecipeStyle`, `resolveThemeStyles`, `resolveThemeTokens`, `useNativeConditionSnapshot`, `useTheme`,
+`useThemeSelector`, `useThemedStyle`, `useThemedStyles`, `useTokenTheme`.
+
+**Type-only exports:** `BoundedNativeComponentRecipeResolver`, `BoundedNativeRecipeResolver`, `BoundedNativeSprinklesResolver`,
+`ComponentRecipeCompoundMatcher`, `ComponentRecipeInvalidVariantReporter`, `ComponentRecipeResolutionPlan`,
+`ComponentRecipeResolutionVariant`, `ComponentRecipeResolverControls`, `ComponentRecipeResolverOptions`,
+`NativeComponentRecipeResolver`, `NativeConditionBranch`, `NativeConditionDefinitions`,
+`NativeConditionInput`, `NativeConditionMatcher`, `NativeConditionNameList`, `NativeConditionSnapshot`,
+`NativeConditionSource`, `NativeConditionStore`, `NativeConditionStoreOptions`, `NativeConditionStoreStats`,
+`NativeConditionValueMapper`, `NativeConditionalRecord`, `NativeConditionalTuple`, `NativeConditionalValue`,
+`NativeContrastPreference`, `NativeDirection`, `NativeExpressionEvaluationErrorCode`,
+`NativeExpressionEvaluationState`, `NativeExpressionRuntime`, `NativeExpressionRuntimeStats`,
+`NativeFontScaleBucket`, `NativeHeightBucket`, `NativeMapValueFn`, `NativeMotionPreference`,
+`NativeNormalizeValueFn`, `NativeNormalizedConditionalValue`, `NativeOrientation`, `NativePlatform`,
+`NativeRecipeResolver`, `NativeSprinklesLookupPlan`, `NativeSprinklesResolutionPlan`,
+`NativeSprinklesResolutionSelection`, `NativeSprinklesResolver`, `NativeSprinklesSelection`,
+`NativeThemeTokenReference`, `NativeWidthBucket`, `RecipeCompoundMatcher`, `RecipeResolutionInput`,
+`RecipeResolutionPlan`, `RecipeResolutionVariant`, `RecipeResolverCacheStats`, `RecipeResolverControls`,
+`RecipeResolverOptions`, `ResolvedThemeStyles`, `SprinklesResolverControls`, `SprinklesResolverOptions`,
+`ThemeDependencyPathSegment`, `ThemeDependencyPlan`, `ThemeDependencyPlanEntry`, `ThemeDependencyResolution`,
+`ThemeDependencyResolutionMetrics`, `ThemeDependencyResolver`, `TokenThemeProviderProps`,
+`TokenThemeScopeProviderProps`.
+
+### `./theme/core`
+
+**Values:** `NATIVE_CONDITION_BREAKPOINTS`, `NATIVE_RESPONSIVE_CONDITION_MATCHERS`, `NATIVE_RESPONSIVE_CONDITION_NAMES`,
+`NativeThemeTokenReferenceType`, `ThemeProvider`, `createNativeConditionResolver`,
+`createNativeConditionStore`, `createNativeMapValueFn`, `createNativeNormalizeValueFn`,
+`createThemeTokenReference`, `defaultNativeConditionSnapshot`, `isThemeTokenReference`,
+`mapNativeConditionValueToBranches`, `nativeConditionSnapshotKey`, `normalizeNativeConditionInput`,
+`resolveThemeStyles`, `resolveThemeTokens`, `useNativeConditionSnapshot`, `useTheme`, `useThemeSelector`,
+`useThemedStyle`, `useThemedStyles`.
+
+**Type-only exports:** `NativeConditionBranch`, `NativeConditionDefinitions`, `NativeConditionInput`, `NativeConditionMatcher`,
+`NativeConditionNameList`, `NativeConditionSnapshot`, `NativeConditionSource`, `NativeConditionStore`,
+`NativeConditionStoreOptions`, `NativeConditionStoreStats`, `NativeConditionValueMapper`,
+`NativeConditionalRecord`, `NativeConditionalTuple`, `NativeConditionalValue`, `NativeContrastPreference`,
+`NativeDirection`, `NativeFontScaleBucket`, `NativeHeightBucket`, `NativeMapValueFn`,
+`NativeMotionPreference`, `NativeNormalizeValueFn`, `NativeNormalizedConditionalValue`, `NativeOrientation`,
+`NativePlatform`, `NativeThemeTokenReference`, `NativeWidthBucket`, `ResolvedThemeStyles`.
+
+### `./theme/token`
+
+**Values:** `ThemeProvider`, `createTokenStyles`, `resolveTokenStyles`, `themeToken`, `useTokenStyles`.
+
+**Type-only exports:** `ResolvedTokenNativeStyle`, `ResolvedTokenStyleMap`, `ThemeStyleToken`.
+
+### `./theme/conditions`
+
+**Values:** `NATIVE_CONDITION_BREAKPOINTS`, `NATIVE_RESPONSIVE_CONDITION_MATCHERS`, `NATIVE_RESPONSIVE_CONDITION_NAMES`,
+`createNativeConditionResolver`, `createNativeConditionStore`, `createNativeMapValueFn`,
+`createNativeNormalizeValueFn`, `defaultNativeConditionSnapshot`, `mapNativeConditionValueToBranches`,
+`nativeConditionSnapshotKey`, `normalizeNativeConditionInput`, `traceNativeConditionBranches`,
+`useNativeConditionSnapshot`.
+
+**Type-only exports:** `NativeConditionBranch`, `NativeConditionBranchDecision`, `NativeConditionBranchTrace`,
+`NativeConditionDefinitions`, `NativeConditionInput`, `NativeConditionMatcher`, `NativeConditionNameList`,
+`NativeConditionSnapshot`, `NativeConditionSource`, `NativeConditionStore`, `NativeConditionStoreOptions`,
+`NativeConditionStoreStats`, `NativeConditionValueMapper`, `NativeConditionalRecord`,
+`NativeConditionalTuple`, `NativeConditionalValue`, `NativeContrastPreference`, `NativeDirection`,
+`NativeFontScaleBucket`, `NativeHeightBucket`, `NativeMapValueFn`, `NativeMotionPreference`,
+`NativeNormalizeValueFn`, `NativeNormalizedConditionalValue`, `NativeOrientation`, `NativePlatform`,
+`NativeWidthBucket`.
+
+### `./theme/expressions`
+
+**Values:** `NativeExpressionEvaluationError`, `NativeExpressionProgramType`, `NativeExpressionProgramVersion`,
+`NativeExpressionType`, `NativeExpressionVersion`, `createNativeExpressionAdd`, `createNativeExpressionAlias`,
+`createNativeExpressionClamp`, `createNativeExpressionCompose`, `createNativeExpressionConditionReference`,
+`createNativeExpressionDomain`, `createNativeExpressionFallback`, `createNativeExpressionLiteral`,
+`createNativeExpressionMatch`, `createNativeExpressionProgram`, `createNativeExpressionRuntime`,
+`createNativeExpressionScale`, `createNativeExpressionSubtract`, `createNativeExpressionTokenReference`,
+`evaluateNativeExpression`, `evaluateNativeExpressionWithTrace`, `foldNativeExpression`, `isNativeExpression`,
+`isNativeExpressionProgram`, `nativeExpressionDependencyKey`, `nativeExpressionDomainKey`.
+
+**Type-only exports:** `NativeConditionKey`, `NativeConditionValue`, `NativeExpression`, `NativeExpressionAdd`,
+`NativeExpressionAlias`, `NativeExpressionClamp`, `NativeExpressionColorDomain`, `NativeExpressionCompose`,
+`NativeExpressionConditionReference`, `NativeExpressionDependency`, `NativeExpressionDomain`,
+`NativeExpressionDomainInput`, `NativeExpressionDurationDomain`, `NativeExpressionEnumDomain`,
+`NativeExpressionEvaluationErrorCode`, `NativeExpressionEvaluationState`, `NativeExpressionFallback`,
+`NativeExpressionLengthDomain`, `NativeExpressionLiteral`, `NativeExpressionMatch`,
+`NativeExpressionMatchCase`, `NativeExpressionMatchOptions`, `NativeExpressionMatchTrace`,
+`NativeExpressionNumberDomain`, `NativeExpressionOpacityDomain`, `NativeExpressionProgram`,
+`NativeExpressionRuntime`, `NativeExpressionRuntimeStats`, `NativeExpressionScale`,
+`NativeExpressionSubtract`, `NativeExpressionTokenReference`, `NativeExpressionValue`.
+
+### `./theme/recipes`
+
+**Values:** `createComponentRecipeResolutionPlan`, `createComponentRecipeResolver`, `createRecipeResolver`,
+`resolveComponentRecipeResolutionPlan`, `resolveComponentRecipeStyles`, `resolveRecipeStyle`.
+
+**Type-only exports:** `BoundedNativeComponentRecipeResolver`, `BoundedNativeRecipeResolver`, `ComponentRecipeCompoundMatcher`,
+`ComponentRecipeInvalidVariantReporter`, `ComponentRecipeResolutionPlan`, `ComponentRecipeResolutionVariant`,
+`ComponentRecipeResolverControls`, `ComponentRecipeResolverOptions`, `NativeComponentRecipeResolver`,
+`NativeRecipeResolver`, `RecipeCompoundMatcher`, `RecipeResolutionInput`, `RecipeResolutionPlan`,
+`RecipeResolutionVariant`, `RecipeResolverCacheStats`, `RecipeResolverControls`, `RecipeResolverOptions`.
+
+### `./theme/sprinkles`
+
+**Values:** `createSprinklesResolver`.
+
+**Type-only exports:** `BoundedNativeSprinklesResolver`, `NativeSprinklesLookupPlan`, `NativeSprinklesResolutionPlan`,
+`NativeSprinklesResolutionSelection`, `NativeSprinklesResolver`, `NativeSprinklesSelection`,
+`SprinklesResolverControls`, `SprinklesResolverOptions`.
+
+### `./tokens`
+
+**Values:** `TOKEN_THEME_CONTEXT_PRECEDENCE`, `TokenAliasDefinitionType`, `TokenDefinitionType`, `alias`,
+`applyTokenThemePatch`, `createTokenContract`, `createTokenTheme`, `createTokenThemeFromExternalPayload`,
+`createTokenThemeScope`, `createTokenThemeScopedSnapshot`, `createTokenThemeSnapshot`, `defineAlias`,
+`defineToken`, `getTokenContractIdentity`, `getTokenContractKey`, `getTokenId`, `getTokenOrigin`,
+`isTokenAliasDefinition`, `isTokenDefinition`, `isTokenDomainValue`, `token`.
+
+**Type-only exports:** `DomainThemeVar`, `ExternalTokenThemePayload`, `ExternalTokenThemeResult`, `LegacyNativeThemeVar`,
+`NativeThemeVar`, `PrivateDomainThemeVar`, `PublicDomainThemeVar`, `ThemeTokenOrigin`, `ThemeTokenOriginStep`,
+`ThemeTokenVisibility`, `TokenAliasDefinition`, `TokenAliasTarget`, `TokenContract`, `TokenContractIdentity`,
+`TokenContractIdentityInput`, `TokenContractInput`, `TokenContractOptions`, `TokenContractVisibility`,
+`TokenContractVisibilityPath`, `TokenDefinition`, `TokenDefinitionInput`, `TokenDomain`,
+`TokenDomainDefinition`, `TokenDomainValue`, `TokenThemeContextName`, `TokenThemeContexts`, `TokenThemeLayer`,
+`TokenThemeOperationError`, `TokenThemePatchResult`, `TokenThemeSnapshotInput`, `TokenThemeValues`.
+
+### `./tokens/optic`
+
+**Values:** `createTokenThemeFocus`.
+
+**Type-only exports:** `TokenThemeFocus`, `TokenThemeFocusResult`.
+
+### `./tokens/schema`
+
+**Values:** `decodeExternalTokenTheme`, `decodeTokenValue`, `encodeExternalTokenTheme`, `externalTokenThemeCodec`.
+
+**Type-only exports:** `ExternalTokenTheme`.
+
+### `./tokens/schema/value`
+
+**Values:** `decodeTokenValue`.
+
+**Type-only exports:** none.
+
+### `./tooling/manifest`
+
+**Values:** `DESIGN_SYSTEM_MANIFEST_FORMAT`, `DESIGN_SYSTEM_MANIFEST_VERSION`, `MANIFEST_COMPATIBILITY_REPORT_FORMAT`,
+`MANIFEST_COMPATIBILITY_REPORT_VERSION`, `assembleManifest`, `checkManifestConsumers`, `compareManifests`,
+`decodeManifest`, `decodeManifestCompatibilityReport`, `decodeManifestContractIdentity`,
+`decodeManifestLifecycleAnnotation`, `decodeManifestSourceOrigin`, `decodeManifestUnresolvedReference`,
+`encodeCanonicalManifest`, `encodeCanonicalManifestCompatibilityReport`, `projectComponentRecipe`,
+`projectTokenContract`, `transformCssTsToStyleSheetWithManifestSidecar`.
+
+**Type-only exports:** `CompilerManifestSidecar`, `ComponentRecipeRoot`, `DesignSystemManifest`, `ManifestAnalysisLimit`,
+`ManifestAnalysisLimitCode`, `ManifestArtifact`, `ManifestAssemblyInput`, `ManifestCapability`,
+`ManifestCompatibilityFinding`, `ManifestCompatibilityFindingCode`, `ManifestCompatibilityFindingLevel`,
+`ManifestCompatibilityReport`, `ManifestCompatibilityReportMode`, `ManifestCompiler`, `ManifestComponent`,
+`ManifestConsumerReference`, `ManifestContractIdentity`, `ManifestCoverageRoot`, `ManifestDependency`,
+`ManifestLifecycle`, `ManifestLifecycleAnnotation`, `ManifestModule`, `ManifestPackage`, `ManifestProducer`,
+`ManifestReportJson`, `ManifestSidecarPropertyOrigin`, `ManifestSourceOrigin`, `ManifestStateConstraint`,
+`ManifestToken`, `ManifestTokenAlias`, `ManifestTokenDomain`, `ManifestUnresolvedReference`,
+`TokenContractRoot`, `TransformCssTsManifestSidecarOptions`, `TransformCssTsOptions`,
+`TransformCssTsWithManifestSidecarResult`.
+
+### `./tooling/policy`
+
+**Values:** `DESIGN_SYSTEM_POLICY_FORMAT`, `DESIGN_SYSTEM_POLICY_PRESET_VERSION`, `DESIGN_SYSTEM_POLICY_REPORT_FORMAT`,
+`DESIGN_SYSTEM_POLICY_REPORT_VERSION`, `DESIGN_SYSTEM_POLICY_VERSION`, `POLICY_RULE_IDS`,
+`checkDesignSystemPolicy`, `decodeDesignSystemPolicy`, `decodeDesignSystemPolicyReport`,
+`decodePolicyEvaluationDate`, `decodePolicyMeasurements`, `encodeCanonicalDesignSystemPolicyReport`,
+`getBuiltInPolicyPreset`.
+
+**Type-only exports:** `BuiltInPolicyPreset`, `CheckDesignSystemPolicyInput`, `DesignSystemManifest`, `DesignSystemPolicy`,
+`DesignSystemPolicyFinding`, `DesignSystemPolicyReport`, `PolicyAnalysisLimit`, `PolicyAnalysisLimitCode`,
+`PolicyException`, `PolicyExceptionDiagnostic`, `PolicyFindingException`, `PolicyLevel`, `PolicyMeasurement`,
+`PolicyOutputBudget`, `PolicyPresetIdentity`, `PolicyPresetName`, `PolicyPropertyScope`,
+`PolicyProviderIdentity`, `PolicyReportJson`, `PolicyRuleId`, `PolicyTargetCapability`, `PolicyTargetProfile`,
+`StyleExplanationMetadata`.
+
+### `./tooling/migrations`
+
+**Values:** `SOURCE_MIGRATION_DIAGNOSTIC_CODES`, `SOURCE_MIGRATION_FORMAT`, `SOURCE_MIGRATION_REPORT_FORMAT`,
+`SOURCE_MIGRATION_REPORT_VERSION`, `SOURCE_MIGRATION_VERSION`, `decodeSourceMigration`,
+`decodeSourceMigrationReport`, `encodeCanonicalSourceMigrationReport`, `planSourceMigration`.
+
+**Type-only exports:** `SourceComponentMigration`, `SourceImportBinding`, `SourceMigration`, `SourceMigrationAnalysisLimit`,
+`SourceMigrationDiagnostic`, `SourceMigrationDiagnosticCode`, `SourceMigrationFileReport`,
+`SourceMigrationFileStatus`, `SourceMigrationPlan`, `SourceMigrationReport`, `SourceTokenMigration`.
+
+### `./tooling/dtcg`
+
+**Values:** `CRUMBS_DTCG_DIAGNOSTIC_CODES`, `CRUMBS_DTCG_FORMAT_PROFILE`, `CRUMBS_DTCG_IMPORT_FORMAT`,
+`CRUMBS_DTCG_IMPORT_VERSION`, `CRUMBS_DTCG_METADATA_FORMAT`, `CRUMBS_DTCG_METADATA_VERSION`,
+`CRUMBS_DTCG_RESOLVER_VERSIONS`, `importDtcgTheme`.
+
+**Type-only exports:** `CrumbsDtcgDiagnostic`, `CrumbsDtcgDiagnosticCode`, `CrumbsDtcgImportRequest`, `CrumbsDtcgImportResult`,
+`CrumbsDtcgResolverVersion`, `CrumbsDtcgThemeImport`, `DtcgGroupMetadata`, `DtcgImportSidecar`,
+`DtcgJsonObject`, `DtcgJsonPrimitive`, `DtcgJsonValue`, `DtcgOperationResult`, `DtcgOrigin`,
+`DtcgTokenMetadata`, `DtcgTokenProvenance`.
+
+### `./tooling/ownership`
+
+**Values:** `DESIGN_SYSTEM_OWNED_REPORT_FORMAT`, `DESIGN_SYSTEM_OWNED_REPORT_VERSION`, `DESIGN_SYSTEM_OWNERSHIP_FORMAT`,
+`DESIGN_SYSTEM_OWNERSHIP_VERSION`, `OWNERSHIP_ANALYSIS_LIMIT_CODES`, `OWNERSHIP_MAX_REPORT_REFERENCES`,
+`OWNERSHIP_UNRESOLVED_REASON_CODES`, `annotateDesignSystemReport`, `decodeDesignSystemOwnership`,
+`decodeOwnedReport`, `encodeCanonicalOwnedReport`.
+
+**Type-only exports:** `DesignSystemOwnership`, `OwnedReport`, `OwnershipAnalysisLimit`, `OwnershipAnalysisLimitCode`,
+`OwnershipAssignment`, `OwnershipAttribution`, `OwnershipOwner`, `OwnershipUnresolvedReason`,
+`SupportedSourceReport`.
+
+### `./devtools`
+
+**Values:** `STYLE_EXPLANATION_METADATA_TYPE`, `STYLE_EXPLANATION_REPORT_TYPE`, `STYLE_EXPLANATION_VALUE_TYPE`,
+`STYLE_EXPLANATION_VERSION`, `StyleExplanationInputError`, `explainStyle`.
+
+**Type-only exports:** `ExplainStyleInput`, `StyleExplanationBranchDecision`, `StyleExplanationBranchKind`,
+`StyleExplanationBranchMetadata`, `StyleExplanationBranchReason`, `StyleExplanationChangedInput`,
+`StyleExplanationConditionDecision`, `StyleExplanationCoverage`, `StyleExplanationCoverageReason`,
+`StyleExplanationDeclaration`, `StyleExplanationExportMetadata`, `StyleExplanationExpressionDecision`,
+`StyleExplanationInputErrorCode`, `StyleExplanationJsonValue`, `StyleExplanationMetadata`,
+`StyleExplanationNegativeZero`, `StyleExplanationOpaqueReason`, `StyleExplanationOpaqueValue`,
+`StyleExplanationPath`, `StyleExplanationPathSegment`, `StyleExplanationPropertyExplanation`,
+`StyleExplanationReport`, `StyleExplanationSnapshot`, `StyleExplanationThemeToken`,
+`StyleExplanationThemeTokenIdentity`, `StyleExplanationTransitionStatus`, `StyleExplanationUndefined`,
+`StyleExplanationValue`, `StyleExplanationValueArray`, `StyleExplanationValueRecord`.
+
+### `./metro-plugin`
+
+**Values:** `createNativeStylesCacheStore`, `withNativeStyles`.
+
+**Type-only exports:** none.
+
+### `./dist/transformer`
+
+**Values:** `buildStyleSheetCode`, `getCacheKey`, `transform`, `transformCssTsToStyleSheet`,
+`transformCssTsToStyleSheetWithManifestSidecar`.
+
+**Type-only exports:** `TransformCssTsManifestSidecarOptions`, `TransformCssTsOptions`, `TransformCssTsWithManifestSidecarResult`.
+
+### `./dist/metro-plugin`
+
+Compatibility alias of `/metro-plugin`; the values and types are identical.
+
+### `./dist/theme`
+
+Compatibility alias of `/theme`; the values and types are identical.
+
+### `./theme/vars`
+
+**Values:** `assignVars`, `resolveAssignedStyles`, `useAssignedStyles`.
+
+**Type-only exports:** `NativeLocalFallback`, `NativeLocalVar`, `NativeLocalVarShape`, `NativeLocalVarValues`,
+`NativeVarAssignments`, `ResolvedAssignedStyles`.
+
+### `./theme/containers`
+
+**Values:** `ContainerProvider`, `defineContainer`, `getContainerBucket`, `resolveContainerValue`, `useContainerLayout`,
+`useContainerValue`.
+
+**Type-only exports:** `ContainerProviderProps`, `NativeContainerAxis`, `NativeContainerBucket`, `NativeContainerDefinition`,
+`NativeContainerDefinitionInput`, `NativeContainerLayout`, `NativeContainerValues`.
+
+### `./theme/motion`
+
+**Values:** `defineMotion`.
+
+**Type-only exports:** `NativeMotionChannel`, `NativeMotionDefinition`, `NativeMotionDefinitionInput`, `NativeMotionEasing`,
+`NativeMotionState`, `NativeMotionTarget`.
+
+### `./theme/motion/native`
+
+**Values:** `useNativeMotion`.
+
+**Type-only exports:** `NativeMotionChannel`, `NativeMotionController`, `NativeMotionDefinition`, `NativeMotionDefinitionInput`,
+`NativeMotionEasing`, `NativeMotionOptions`, `NativeMotionResult`, `NativeMotionRun`, `NativeMotionState`,
+`NativeMotionTarget`.
+
+### `./tokens/algebra`
+
+**Values:** `TokenAlgebraError`, `createColor`, `createTypography`, `createTypographyScale`, `mixColor`,
+`multiplyColorAlpha`, `scaleTypography`, `setColorAlpha`, `toNativeColor`, `toNativeTypography`.
+
+**Type-only exports:** `AlgebraColor`, `AlgebraColorInput`, `ColorInterpolationSpace`, `ColorMixOptions`, `NativeTypographyStyle`,
+`TokenAlgebraErrorCode`, `Typography`, `TypographyInput`, `TypographyScale`, `TypographyScaleOptions`.
+
+### `./extensions`
+
+**Values:** `ExtensionError`, `defineExtension`.
+
+**Type-only exports:** `ExtensionConfig`, `ExtensionErrorCode`, `ExtensionFactory`, `ExtensionModule`.
+
+### `./package.json`
+
+Package metadata, including the exact installed version, peer ranges and public export map.
+
+</details>

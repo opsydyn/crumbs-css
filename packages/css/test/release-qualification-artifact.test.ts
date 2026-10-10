@@ -138,12 +138,14 @@ function mirrorTrackedRepositoryWithoutDist(): string {
   const root = mkdtempSync(join(tmpdir(), "crumbs-publisher-no-dist-"))
   temporaryRoots.push(root)
   symlinkSync(resolve(repositoryRoot, ".git"), join(root, ".git"))
-  const trackedPaths = execFileSync("git", ["ls-files", "--cached", "-z"], {
-    cwd: repositoryRoot,
-    encoding: "utf8",
-  }).split("\0").filter(Boolean)
-  // Mirror the source identity under test, including authored files not yet committed.
-  for (const path of new Set([...trackedPaths, ...sourceIdentity.files.map(file => file.path)])) {
+  const registry = budgetRegistryCodec.decodeJson(readFileSync(join(repositoryRoot, "packages/css/bench/budgets.json"), "utf8"))
+  if (!registry.ok) throw Error("Could not decode the checked-in budget registry")
+  const evidencePaths = [...registry.value.metrics, ...registry.value.diagnostics]
+    .flatMap(metric => "evidence" in metric.baseline ? [metric.baseline.evidence] : [])
+  const approvalPaths = loadHostBudgetPolicy(repositoryRoot).baselineFiles.map(file => file.path)
+  // Mirror every source-identity input plus every measured/approval baseline.
+  // Unrelated archived docs are not release inputs and need not be copied.
+  for (const path of new Set([...sourceIdentity.files.map(file => file.path), ...evidencePaths, ...approvalPaths])) {
     const source = join(repositoryRoot, path)
     const destination = join(root, path)
     const stat = lstatSync(source)

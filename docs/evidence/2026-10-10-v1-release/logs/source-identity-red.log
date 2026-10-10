@@ -1,0 +1,22 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/guarantees-source-identity.test.ts:
+(pass) source content identity survives docs and commit changes but rejects code drift and newly authored scripts [62.37ms]
+37 |   const bytes=execFileSync('git',['ls-files','-z','--cached'],{cwd:root,maxBuffer:8*1024*1024})
+38 |   expect(bytes.length).toBeGreaterThan(1024*1024)
+39 |   let actual:ReturnType<typeof captureGuaranteesSourceIdentity>|undefined
+40 |   let failure:string|undefined
+41 |   try {actual=captureGuaranteesSourceIdentity(root)} catch(error) {failure=(error as NodeJS.ErrnoException).code ?? String(error)}
+42 |   expect(failure).toBeUndefined()
+                       ^
+error: expect(received).toBeUndefined()
+
+Received: "ENOBUFS"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/guarantees-source-identity.test.ts:42:19)
+(fail) a large tracked documentation inventory cannot overflow source identity collection [547.91ms]
+
+ 1 pass
+ 1 fail
+ 6 expect() calls
+Ran 2 tests across 1 file. [1138.00ms]
