@@ -1,11 +1,20 @@
-# Expo SDK upgrade candidate
+# Expo SDK compatibility profile (M1.9b)
 
-This nested configuration is outside the root `apps/*` workspace. It records the newest stable Expo stack observed from npm and is used only by `bun run playground:sdk-candidate`. The runner verifies the live `latest` and official blank-template metadata, packs the current Crumbs working tree, and asks npm to resolve that tarball against the candidate.
+This nested configuration is outside the root `apps/*` workspace. Internal apps stay on Expo 56 / React Native 0.85. The SDK 57 profile qualifies one packed Crumbs artifact in an isolated npm consumer.
 
-The 2026-09-15 candidate is Expo 57.0.22 / React Native 0.86.3. Its expected result is an npm peer-dependency block because the supported Crumbs range remains React Native `>=0.85 <0.86`. A matching block proves the upgrade is isolated and support was not broadened; it does not qualify Expo 57. When Expo publishes a new stable line, refresh the exact configuration and evidence together. When Crumbs intentionally supports the candidate React Native line, change the expected outcome and extend the runner to require typechecking and all-platform export before updating compatibility documentation.
-
-Pass an output path to retain the machine-readable receipt:
+The 2026-10-10 profile pins Expo 57.0.27, React / React DOM / react-test-renderer 19.2.8, React Native 0.86.3 and TypeScript 6.0.3. The official blank template 57.0.29 uses React 19.2.3; current Expo CLI/router optional peers require 19.2.8. The runner permits compatible React patches within the template's major/minor and exact SDK/RN pins. It uses strict npm peers, with no force or legacy-peer overrides.
 
 ```sh
-bun run playground:sdk-candidate docs/evidence/YYYY-MM-DD-expo-sdk-candidate/qualification.json
+# Check against live npm latest and official template metadata.
+bun run playground:sdk-candidate /tmp/crumbs-sdk-57/qualification.json
+# Repeat the committed profile in CI after npm latest moves.
+bun run playground:sdk-candidate --pinned /tmp/crumbs-sdk-57/qualification.json
+# Qualify the exact already-built release tarball; no rebuild or repack.
+bun run playground:sdk-candidate --pinned --tarball /tmp/crumbs.tgz /tmp/crumbs-sdk-57/qualification.json
 ```
+
+A passing supported profile requires strict resolution and install, complete installed package inventory and byte identity, consumer typechecking, motion renderer/import-order and peer-free ESM/CommonJS probes, production iOS/Android/web exports, and ordinary runtime source maps free of compiler/Effect dependencies. The app's explicit runtime factory imports remain inside the staged consumer. Logs and receipt survive success/failure; the runner removes its owned install/cache/artifact staging directory.
+
+Use a separate output directory per run. A dirty-source receipt is diagnostic; clean CI and exact release-tarball checks establish their own qualification identities. Physical-device, spoken-reader and performance acceptance are not inferred from these checks. SDK 57 requires Node 22.13.0 or newer.
+
+M1.9a's earlier peer-block receipt remains historical evidence for the original `>=0.85 <0.86` contract. The new `>=0.85 <0.87` range admits only the two tested React Native lines. Refresh exact pins and evidence before broadening support again.

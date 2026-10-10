@@ -1,6 +1,6 @@
 # Crumbs Expo playground
 
-This public-API consumer complements the internal Storybook. It uses the existing Expo 56 / React Native 0.85 / React 19 baseline. Upgrade that baseline separately from qualifying a Crumbs artifact.
+This public-API consumer complements the internal Storybook. It uses the existing Expo 56 / React Native 0.85 / React 19 baseline. M1.9b qualifies Expo 57 / React Native 0.86 in the [isolated SDK profile](upgrade/README.md), retaining the SDK 56 workspace baseline. Run `bun run playground:sdk-candidate --pinned /tmp/crumbs-sdk-57/qualification.json` to check types, motion contracts and iOS/Android/web exports against a fresh packed artifact.
 
 From the repository root:
 

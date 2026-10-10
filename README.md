@@ -16,8 +16,8 @@ failed measurements remain visible. See [release status](docs/releases/1.0.1.md)
 
 ## Get started
 
-The supported consumer baseline is **Expo SDK 56, React 19.2 and React Native 0.85**. Node `>=22.0.0` is required
-for tooling; peer ranges are React `>=19 <20`, React Native `>=0.85 <0.86` and Metro `>=0.83 <1`. TypeScript
+The published `1.0.1` baseline is **Expo SDK 56, React 19.2 and React Native 0.85**. The `1.1.0` compatibility candidate adds **Expo SDK 57 / React Native 0.86** while retaining SDK 56; see [release status](docs/releases/1.1.0.md). Node `>=22.0.0` is required
+for Crumbs tooling (SDK 57 requires Node `>=22.13.0`). The candidate peer ranges are React `>=19 <20`, React Native `>=0.85 <0.87` and Metro `>=0.83 <1`. TypeScript
 `>=5.9 <7` is optional for source migration tooling. Effect 4 is Crumbs' implementation dependency; applications
 do not need an Effect import, service or runner.
 

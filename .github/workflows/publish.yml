@@ -123,6 +123,12 @@ jobs:
           TARBALL_NAME="$(node -e 'process.stdout.write(JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"))[0].filename)' "$PACK_RESULT")"
           echo "path=$BUNDLE_DIRECTORY/$TARBALL_NAME" >> "$GITHUB_OUTPUT"
 
+      - name: Qualify the exact release tarball on SDK 57
+        env:
+          PACKAGE_TARBALL: ${{ steps.package-tarball.outputs.path }}
+          BUNDLE_DIRECTORY: ${{ runner.temp }}/crumbs-m10-5-${{ github.run_id }}-${{ github.run_attempt }}/qualification-bundle
+        run: bun run playground:sdk-candidate --pinned --tarball "$PACKAGE_TARBALL" "$BUNDLE_DIRECTORY/sdk-57-qualification.json"
+
       - name: Seal report and exact tarball
         env:
           CRUMBS_AUDIT_NODE_FLOOR: ${{ steps.node-floor.outputs.binary }}

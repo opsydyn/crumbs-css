@@ -5,6 +5,12 @@ description: Supported features, dropped features, and browser CSS features that
 
 `@opsydyn/crumbs-css` is a React Native subset of vanilla-extract-shaped authoring. It is not a browser CSS runtime.
 
+## Expo SDK compatibility
+
+Crumbs `1.1.0` adds Expo SDK 57 / React Native 0.86 while retaining SDK 56 / React Native 0.85. The isolated SDK 57 profile uses Expo `57.0.27`, React / React DOM `19.2.8` and React Native `0.86.3`; it passes strict npm installation, packed types, motion contracts and production iOS/Android/web exports. React Native peers are `>=0.85 <0.87`.
+
+The SDK 57 profile uses a compatible React patch to satisfy current Expo CLI/router optional peers without overrides. SDK 57 requires Node `>=22.13.0`; Crumbs tooling retains its `>=22.0.0` floor. Internal apps remain on SDK 56. [Release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.0.md) records publication separately from compatibility. Physical-device and performance acceptance remain deferred.
+
 ## Supported
 
 - `style`

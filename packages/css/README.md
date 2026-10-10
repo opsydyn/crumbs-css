@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Crumbs CSS v1 is available on npm. Version `1.0.1` corrects the packaged README and compatibility notes; every runtime JavaScript and declaration file is unchanged from the verified `1.0.0` release. The complete v1 API is included. The original v1 performance disposition and deferred acceptance remain recorded in the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.1.md).
+Version `1.1.0` adds Expo SDK 57 / React Native 0.86 compatibility while retaining Expo SDK 56 / React Native 0.85. The complete v1 API remains available with no breaking API changes. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.0.md) for publication and qualification evidence.
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -16,9 +16,11 @@ Published docs are also available at
 
 Validated consumer baseline:
 
-- Expo SDK 56
-- React 19.2
-- React Native 0.85
+- Expo SDK 56 / React Native 0.85
+- Expo SDK 57 / React Native 0.86
+- React 19.2 (SDK 57 qualification uses React / React DOM 19.2.8)
+
+React Native peers are bounded to `>=0.85 <0.87`. Crumbs tooling requires Node `>=22.0.0`; SDK 57 requires Node `>=22.13.0`. Packed consumers pass types, motion contracts and production Metro exports for iOS, Android and web. Physical-device and performance acceptance are separate.
 
 ## What it is
 
@@ -76,14 +78,14 @@ See the full compatibility matrix in
 Install the verified stable release in your Expo app:
 
 ```sh
-bun add @opsydyn/crumbs-css@1.0.1
+bun add @opsydyn/crumbs-css@1.1.0
 # or
-npm install @opsydyn/crumbs-css@1.0.1
+npm install @opsydyn/crumbs-css@1.1.0
 ```
 
 Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.
 
-Current `react-native` peer range: `>=0.85 <0.86`.
+Current `react-native` peer range: `>=0.85 <0.87`.
 
 ## Minimal Metro setup
 

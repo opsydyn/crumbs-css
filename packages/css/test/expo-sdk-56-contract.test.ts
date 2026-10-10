@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test"
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
+import { assessPeerCompatibility, assertCandidateExpectation } from "../../../scripts/playground-sdk-candidate"
+import type { SdkCandidate } from "../../../scripts/playground-sdk-candidate"
 
 type PackageJson = {
   readonly dependencies?: Readonly<Record<string, string>>
@@ -59,29 +61,22 @@ describe("@opsydyn/crumbs-css Expo SDK 56 contract", () => {
     expect(lockfile).toContain('"@expo/metro-runtime": ["@expo/metro-runtime@56.0.21"')
   })
 
-  it("isolates the observed newest SDK candidate from supported workspaces", () => {
+  it("keeps the supported SDK 57 consumer outside the SDK 56 workspaces", () => {
     const root = readJson<{ readonly workspaces: readonly string[] }>(resolve(repoRoot, "package.json"))
-    const candidate = readJson<{
-      readonly schemaVersion: number
-      readonly observed: { readonly expoTag: string; readonly expoVersion: string; readonly templateVersion: string }
-      readonly dependencies: Readonly<Record<string, string>>
-      readonly expectedOutcome: { readonly kind: string; readonly packagePeer: string }
-    }>(resolve(playgroundRoot, "upgrade", "expo-57.json"))
-
-    expect(root.workspaces).not.toContain("apps/playground/upgrade/*")
-    expect(candidate.schemaVersion).toBe(1)
-    expect(candidate.observed).toEqual({ expoTag: "latest", expoVersion: "57.0.22", templateVersion: "57.0.24" })
-    expect(candidate.dependencies.expo).toBe("57.0.22")
-    expect(candidate.dependencies.react).toBe("19.2.3")
-    expect(candidate.dependencies["react-native"]).toBe("0.86.3")
-    expect(candidate.expectedOutcome).toEqual({ kind: "peer-blocked", packagePeer: ">=0.85 <0.86" })
+    const candidate = readJson<SdkCandidate>(resolve(playgroundRoot, "upgrade", "expo-57.json"))
+    const packageJson = readJson<PackageJson>(resolve(packageRoot, "package.json"))
+    expect(root.workspaces.some(pattern => new Bun.Glob(pattern).match("apps/playground/upgrade"))).toBe(false)
+    expect(assertCandidateExpectation(candidate, packageJson.peerDependencies!["react-native"]!).compatible).toBe(true)
   })
 
-  it("declares React Native 0.85 package compatibility and tests against it locally", () => {
+  it("admits the tested SDK 56 and 57 React Native lines while rejecting unqualified neighbours", () => {
     const packageJson = readJson<PackageJson>(resolve(packageRoot, "package.json"))
-
-    expect(packageJson.peerDependencies?.react).toBe(">=19 <20")
-    expect(packageJson.peerDependencies?.["react-native"]).toBe(">=0.85 <0.86")
+    const candidate = readJson<SdkCandidate>(resolve(playgroundRoot, "upgrade", "expo-57.json"))
+    const peer = packageJson.peerDependencies!["react-native"]!
+    for (const [reactNative, compatible] of [["0.84.0", false], ["0.85.3", true], ["0.86.3", true], ["0.87.0", false]] as const) {
+      const input = { ...candidate, dependencies: { ...candidate.dependencies, "react-native": reactNative } }
+      expect(assessPeerCompatibility(input, peer).compatible).toBe(compatible)
+    }
     expect(packageJson.devDependencies?.react).toBe("19.2.3")
     expect(packageJson.devDependencies?.["react-native"]).toBe("0.85.3")
   })

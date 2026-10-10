@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.1.0 (2026-10-10)
+
+### Compatibility
+
+- Add Expo SDK 57 / React Native 0.86 support while retaining Expo SDK 56 / React Native 0.85; bound the React Native peer range to `>=0.85 <0.87`. No public API removals or changes.
+- Qualify the isolated SDK 57 packed consumer with strict npm peers, installed byte identity, types, motion contracts and production iOS/Android/web Metro exports. Preserve explicit app runtime imports when staging consumers.
+- Run the committed SDK 57 profile in CI and against the exact future-release tarball; keep existing host budgets and generic release policy unchanged. Physical-device acceptance remains separate.
+
 ## [1.0.1](https://github.com/opsydyn/crumbs-css/compare/v1.0.0...v1.0.1) (2026-10-10)
 
 ### Documentation
