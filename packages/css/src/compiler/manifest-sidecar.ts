@@ -1,3 +1,4 @@
+import {isCapturedRuntimeExtension} from './runtime-extension-model'
 import type {AnyLocalVar} from "../local-vars/model"
 import {createLocalVarsMetadata,type NativeLocalVarsMetadata} from "./local-vars-metadata"
 import {
@@ -54,10 +55,17 @@ type LogicalStyleExport = {
 export function captureManifestSidecar(input: CaptureManifestSidecarInput): CompilerManifestSidecar {
   const moduleId = createModuleId(input.packageOwner, input.sourceId)
   const exports = collectLogicalStyleExports(input.exportMap)
-  const exportPaths = [...new Set(exports.map(styleExport => styleExport.exportPath))].sort(compare)
+  const callables: {path:string;endpoint:string}[]=[]
+  const visit=(value:unknown,path:string):void=>{
+    if(isCapturedRuntimeExtension(value)){callables.push({path,endpoint:`${value.importPath}#${value.importName}`});return}
+    if(Array.isArray(value)){value.forEach((v,i)=>visit(v,`${path}.${i}`));return}
+    if(isRecord(value) && value.$$type==="crumbs.css.export-record" && Array.isArray(value.entries))for(const [k,v] of value.entries)visit(v,`${path}.${k}`)
+  }
+  for(const [name,value] of input.exportMap)visit(value,name)
+  const exportPaths = [...new Set([...exports.map(styleExport => styleExport.exportPath),...callables.map(c=>c.path)])].sort(compare)
   const dependencies: ManifestDependency[] = []
   const capabilities: ManifestCapability[] = []
-  const unresolved: ManifestUnresolvedReference[] = []
+  const unresolved: ManifestUnresolvedReference[] = callables.map(c=>({reference:c.endpoint,reason:"Runtime factory result is opaque; component capabilities are not inferred.",origin:{moduleId,exportPath:c.path}}))
 
   for (const styleExport of exports) {
     const style = input.resolvedClassStyles.get(styleExport.className)
@@ -139,6 +147,7 @@ function collectStyleExports(
   path: ReadonlyArray<string>,
   output: LogicalStyleExport[],
 ): void {
+  if (isCapturedRuntimeExtension(value)) return
   if (isRecord(value) && value.$$type === "crumbs.css.class" && typeof value.className === "string") {
     output.push({ className: value.className, exportPath: path.join(".") })
     return

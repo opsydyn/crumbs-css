@@ -1,3 +1,5 @@
+import {createRuntimeExtensionCapture} from './compiler/runtime-extension-capture'
+import {RuntimeExtensionSymbol} from './extensions/model'
 import {copyCompilerLocalData} from "./compiler/local-data"
 import {localOperandCandidate,NativeVarAssignmentsType} from "./local-vars/model"
 import {admitLocalOperand,admitVarAssignments} from "./local-vars/admission"
@@ -14,6 +16,7 @@ const reservedBindings = new Set("await break case catch class const continue de
 
 // ADR D1/D2: capture kinds before upstream serialization can discard native data.
 export function captureNativeExports(exports: Record<string, unknown>, filePath: string, styleHandles: ReadonlySet<string>, unusedCompositionRegex: RegExp | null): Record<string, unknown> {
+  const extensions = createRuntimeExtensionCapture(filePath,styleHandles,unusedCompositionRegex)
   const active = new Set<object>()
   function reject(path: string, reason: string): never {
     throw new NativeStylesCompatibilityError(NativeStylesDiagnosticCode.UnsupportedExport,
@@ -28,6 +31,7 @@ export function captureNativeExports(exports: Record<string, unknown>, filePath:
       return Object.is(value, -0) ? {$$type: ExportNegativeZeroType} : value
     }
     if (value === null || typeof value === "boolean") return value
+    if (typeof value === "function" && Object.getOwnPropertyDescriptor(value,RuntimeExtensionSymbol)) return extensions.capture(value,path)
     if (typeof value !== "object") reject(path, `unsupported ${typeof value}`)
     if (active.has(value)) reject(path, "cyclic data")
     const prototype = Object.getPrototypeOf(value)
@@ -61,9 +65,12 @@ export function captureNativeExports(exports: Record<string, unknown>, filePath:
     } finally {active.delete(value)}
   }
   // esbuild emits getters for module exports; evaluate those bindings once here.
-  return Object.fromEntries(Object.keys(exports).map(name => {
+  const bindings = Object.keys(exports).map(name => [name,exports[name]] as const)
+  const captured = new Map<string,unknown>()
+  for (const [name,value] of [...bindings].sort(([a],[b])=>a<b?-1:a>b?1:0)) {
     if (reservedBindings.has(name) || !/^[A-Za-z_$][\w$]*$/.test(name)) reject(name, "only named ASCII binding identifiers are supported")
     if (name === NativeModuleMetadataExportName) reject(name, `"${NativeModuleMetadataExportName}" is reserved for generated native module metadata`)
-    return [name, capture(exports[name], name)]
-  }))
+    captured.set(name,capture(value,name))
+  }
+  return Object.fromEntries(bindings.map(([name])=>[name,captured.get(name)]))
 }

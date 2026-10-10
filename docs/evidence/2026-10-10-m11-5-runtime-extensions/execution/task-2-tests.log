@@ -1,0 +1,56 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/ownership-export.test.ts:
+(pass) isolated ownership tooling export > resolves the ESM and CommonJS build targets and their declaration companions [0.15ms]
+(pass) isolated ownership tooling export > loads the exact narrow ESM and CommonJS API [13.06ms]
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [0.67ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [0.20ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [0.25ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [0.28ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [3.98ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [0.62ms]
+(pass) rejects inherited protocol descriptors and invalid intrinsic fields independently of helper identity [0.07ms]
+(pass) native composition still validates property domains before an extension can be emitted [69.79ms]
+
+packages/css/test/local-vars-metadata.test.ts:
+(pass) local exports are frozen and never reach StyleSheet.create true [37.14ms]
+(pass) local exports are frozen and never reach StyleSheet.create false [31.06ms]
+(pass) last-write composition keeps shorthand/local order and shadowed required locals [32.77ms]
+(pass) compiler rejects local values in the wrong primitive or structured property [54.53ms]
+(pass) a marked primitive map receives its marker before freezing [26.52ms]
+(pass) unexported shadowed operands still emit a portable frozen plan [29.47ms]
+(pass) recipes reject local operands rather than emitting partially resolvable recipes [24.73ms]
+(pass) changed and removed definitions do not retain stale compiled identities [110.73ms]
+(pass) conflicting captured identities fail across separate style declarations [25.37ms]
+(pass) same-path imported definition edit/remove/restore has fresh-transform parity [88.02ms]
+(pass) null-prototype local export maps freeze the final object and memoise resolution [28.05ms]
+(pass) generic local styles intersect structured-property primitive domains [55.53ms]
+(pass) compiler rejects custom prototypes spoofing the evaluator native constructor [26.33ms]
+(pass) companion metadata records locals separately and preserves native module v2 shape [27.95ms]
+(pass) companion name is reserved only when the module uses local variables [50.91ms]
+
+packages/css/test/style-explanation-metadata.test.ts:
+(pass) M9.3 compiler style explanation metadata > captures source-ordered composed candidates, alias provenance, tokens, and package-relative identities [13.02ms]
+(pass) M9.3 compiler style explanation metadata > marks compatibility-only output partial without manufacturing declarations [0.05ms]
+(pass) M9.3 compiler style explanation metadata > rejects an authored reserved __crumbsDev export [3.25ms]
+
+packages/css/test/runtime-extension-metadata.test.ts:
+(pass) opaque callables have no phantom dependency or ownership paths; genuine argument styles contribute global tokens [0.21ms]
+(pass) opaque manifest identifies the export and endpoint without claiming component capabilities [0.32ms]
+
+packages/css/test/ordinary-exports.test.ts:
+(pass) ordinary CSS module exports > preserves named primitive values, undefined fields and negative zero [12.07ms]
+(pass) ordinary CSS module exports > preserves tag-shaped ordinary data and own prototype-like keys alongside real metadata [16.38ms]
+(pass) ordinary CSS module exports > preserves null-prototype data and leaves unrelated class-like text unchanged [14.55ms]
+(pass) ordinary CSS module exports > rejects unsupported values before lossy serialization with file/export path diagnostics [203.89ms]
+(pass) ordinary CSS module exports > cleans composition handles without rewriting ordinary strings [0.25ms]
+(pass) ordinary CSS module exports > matches generated nested ordinary data independently of style exports [1235.03ms]
+
+packages/css/test/local-vars-compiler.test.ts:
+
+ 36 pass
+ 0 fail
+ 259 expect() calls
+Ran 36 tests across 7 files. [2.53s]

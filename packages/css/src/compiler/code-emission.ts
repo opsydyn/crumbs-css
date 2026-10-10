@@ -1,3 +1,8 @@
+import {createRuntimeExtensionEmissionPlan,type RuntimeExtensionEmissionPlan} from './runtime-extension-emission'
+import {collectRuntimeExtensions} from './runtime-extension-capture'
+import {isCapturedRuntimeExtension} from './runtime-extension-model'
+import type {RuntimeExtensionLinkage} from './runtime-extension-linkage'
+import {ExtensionError} from '../extensions/error'
 import {NativeLocalStylePlanType,localOperandCandidate,NativeVarAssignmentsType,type AnyLocalVar,type NativeLocalStylePlan} from "../local-vars/model"
 import {createLocalVarsMetadata} from "./local-vars-metadata"
 import { ExportNegativeZeroType, ExportRecordType, ExportStringType, ExportUndefinedType } from "../export-values"
@@ -8,6 +13,7 @@ import type { StyleExplanationMetadata } from "../devtools/style-explanation-mod
 import { sortedOwnEnumerableDataEntries } from "./record-admission"
 
 export type BuildStyleSheetCodeOptions = {
+  readonly runtimeExtensionLinkage?: RuntimeExtensionLinkage
   readonly localDefinitions?:readonly AnyLocalVar[]
   readonly localPlans?: ReadonlyMap<string, NativeLocalStylePlan<unknown>>
   readonly useStyleSheet?: boolean
@@ -40,6 +46,9 @@ export function emitStyleSheetModule(
   const localPlans=options.localPlans ?? new Map<string,NativeLocalStylePlan<unknown>>()
   const localMetadata=createLocalVarsMetadata(classStyles,exportMap,options.localDefinitions)
   if(localMetadata && exportMap.has("__crumbsLocalVars"))throw new TypeError('Native module export "__crumbsLocalVars" is reserved for local metadata')
+  const capturedExtensions=collectRuntimeExtensions(exportMap)
+  if(capturedExtensions.length && !options.runtimeExtensionLinkage)throw new ExtensionError('extension.unresolved-import','emission','verified runtime linkage required')
+  const extensionPlan=capturedExtensions.length && options.runtimeExtensionLinkage ? createRuntimeExtensionEmissionPlan(exportMap,classStyles,localPlans,options.runtimeExtensionLinkage) : undefined
   const useStyleSheet = options.useStyleSheet ?? true
   const createEntries = [...classStyles.entries()].filter(([name])=>!localPlans.has(name))
     .sort(([left], [right]) => left.localeCompare(right))
@@ -48,7 +57,7 @@ export function emitStyleSheetModule(
 
   const exports = [...exportMap.entries()]
     .sort(([left], [right]) => left.localeCompare(right))
-    .map(([name, value]) => serializeStyleExport(name, value, classStyles,localPlans))
+    .map(([name, value]) => serializeStyleExport(name, value, classStyles,localPlans,extensionPlan))
     .join("\n")
 
   const depImports = [...new Set(depRelativePaths)]
@@ -63,6 +72,7 @@ export function emitStyleSheetModule(
     cacheMarker,
     useStyleSheet ? `import { StyleSheet } from "react-native";` : "",
     depImports,
+    extensionPlan?.imports ?? "",
     useStyleSheet
       ? `const _s = StyleSheet.create({\n${createEntries}\n});`
       : `const _s = {\n${createEntries}\n};`,
@@ -75,6 +85,7 @@ export function emitStyleSheetModule(
       `const _l = _crumbsFreeze({${[...localPlans].sort(([a],[b])=>a.localeCompare(b)).map(([name,plan])=>`${JSON.stringify(name)}:${serializeRuntimeValue(plan)}`).join(",")}});`,
       `export const __crumbsLocalVars = _crumbsFreeze(${serializeRuntimeValue(localMetadata)});`,
     ] : []),
+    extensionPlan?.declarations ?? "",
     exports,
   ].filter(Boolean)
 
@@ -103,6 +114,7 @@ function serializeStyleExport(
   value: unknown,
   classStyles: ReadonlyMap<string, Record<string, unknown>>,
   localPlans:ReadonlyMap<string, NativeLocalStylePlan<unknown>>,
+  extensionPlan?:RuntimeExtensionEmissionPlan,
 ): string {
   if (typeof value === "string") {
     return classStyles.has(value)
@@ -110,7 +122,7 @@ function serializeStyleExport(
       : `export const ${name} = undefined;`
   }
 
-  return `export const ${name} = ${serializeExportValue(value, classStyles,localPlans)};`
+  return `export const ${name} = ${serializeExportValue(value, classStyles,localPlans,true,extensionPlan)};`
 }
 
 function serializeExportValue(
@@ -118,7 +130,9 @@ function serializeExportValue(
   classStyles: ReadonlyMap<string, Record<string, unknown>>,
   localPlans:ReadonlyMap<string,NativeLocalStylePlan<unknown>>,
   freezeCurrent=true,
+  extensionPlan?:RuntimeExtensionEmissionPlan,
 ): string {
+  if(isCapturedRuntimeExtension(value)){if(!extensionPlan)throw new ExtensionError('extension.unresolved-import',value.exportPath,'verified runtime linkage required');return extensionPlan.expressionFor(value.id)}
   if(isEncodedUnsupportedLocalPlacement(value,localPlans))throw new TypeError("Unsupported local variables in recipes, Sprinkles, conditions or expressions; resolve primitive local styles separately")
   if(localOperandCandidate(value)||isLocalAssignments(value))return `_crumbsFreeze(${serializeRuntimeValue(value)})`
   if (typeof value === "object" && value !== null && "$$type" in value) {
@@ -127,7 +141,7 @@ function serializeExportValue(
     if (value.$$type === ExportNegativeZeroType) return "-0"
     if (value.$$type === ExportRecordType && "entries" in value) {
       const entries = (value.entries as Array<[string, unknown]>).map(([key, entry]) =>
-        `${key === "__proto__" ? `[${JSON.stringify(key)}]` : JSON.stringify(key)}: ${serializeExportValue(entry, classStyles,localPlans)}`,
+        `${key === "__proto__" ? `[${JSON.stringify(key)}]` : JSON.stringify(key)}: ${serializeExportValue(entry, classStyles,localPlans,true,extensionPlan)}`,
       ).join(", ")
       const plainRecord = `{ ${entries} }`
       const record = "nullPrototype" in value && value.nullPrototype === true
@@ -136,7 +150,7 @@ function serializeExportValue(
     }
   }
   if (typeof value === "object" && value !== null && "$$type" in value && value.$$type === NativeStyleMapType && "styles" in value) {
-    const marked=`Object.defineProperty(${serializeExportValue(value.styles, classStyles,localPlans,false)}, Symbol.for(${JSON.stringify(NativeStyleMapType)}), { value: true, enumerable: true })`
+    const marked=`Object.defineProperty(${serializeExportValue(value.styles, classStyles,localPlans,false,extensionPlan)}, Symbol.for(${JSON.stringify(NativeStyleMapType)}), { value: true, enumerable: true })`
     return exportUsesLocal(value,classStyles,localPlans) ? `_crumbsFreeze(${marked})` : marked
   }
   if (isRecipeClassRef(value)) {
@@ -149,14 +163,14 @@ function serializeExportValue(
     return JSON.stringify(value)
   }
   if (Array.isArray(value)) {
-    const array=`[${value.map(entry=>serializeExportValue(entry,classStyles,localPlans)).join(", ")}]`
+    const array=`[${value.map(entry=>serializeExportValue(entry,classStyles,localPlans,true,extensionPlan)).join(", ")}]`
     return exportUsesLocal(value,classStyles,localPlans)?`_crumbsFreeze(${array})`:array
   }
   if (typeof value === "object") {
     const entries = sortedOwnEnumerableDataEntries(value, "compiled export")
       .map(([key, entry]) => {
         const property = key === "__proto__" ? `[${JSON.stringify(key)}]` : JSON.stringify(key)
-        return `${property}: ${serializeExportValue(entry, classStyles,localPlans)}`
+        return `${property}: ${serializeExportValue(entry, classStyles,localPlans,true,extensionPlan)}`
       })
       .join(", ")
     return `{ ${entries} }`
@@ -177,6 +191,7 @@ function isRecipeClassRef(value: unknown): value is { readonly className: string
 }
 
 function exportUsesLocal(value:unknown,classes:ReadonlyMap<string,Record<string,unknown>>,plans:ReadonlyMap<string,NativeLocalStylePlan<unknown>>):boolean{
+ if(isCapturedRuntimeExtension(value))return false
  if(localOperandCandidate(value))return true
  if(isRecipeClassRef(value))return plans.has(value.className)
  if(typeof value==="string")return plans.has(value)

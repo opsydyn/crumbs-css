@@ -1,0 +1,35 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [111.35ms]
+(pass) factory exceptions propagate unchanged and are not retried [30.22ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [56.32ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [40.31ms]
+(pass) ordinary modules retain their exact emission bytes [0.07ms]
+(pass) direct module emission refuses an unverified endpoint [0.14ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [27.67ms]
+1 | import {ExtensionError} from './error';
+2 | import type {ExtensionConfig} from './model';
+3 | const reserved = new Set('await break case catch class const continue debugger default delete do else enum export extends false finally for function if implements import in instanceof interface let new null package private protected public return static super switch this throw true try typeof var void while with yield eval arguments'.split(' '));
+4 | const builtins = new Set('assert async_hooks buffer child_process cluster console constants crypto dgram diagnostics_channel dns domain events fs http http2 https inspector module net os path perf_hooks process punycode querystring readline repl sqlite stream string_decoder sys timers tls trace_events tty url util v8 vm wasi worker_threads zlib'.split(' '));
+5 | export function extensionFailure(path: string, reason: string): never { throw new ExtensionError('extension.invalid-argument',path,reason); }
+                                                                                  ^
+ExtensionError: extension.invalid-argument at result.args["0"]: unresolved native style handle
+ path: "result.args[\"0\"]",
+ code: "extension.invalid-argument"
+
+      at extensionFailure (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/extensions/admission.ts:5:79)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-capture.ts:55:58)
+      at mapData (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-capture.ts:12:15)
+      at mapData (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-capture.ts:16:149)
+      at lowerRuntimeExtensionArguments (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-capture.ts:52:17)
+      at transformCssTsToStyleSheetWithMetadata (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/transformer.ts:524:38)
+      at async transformCssTsToStyleSheet (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/transformer.ts:342:17)
+      at async fixture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:15:23)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:37:85)
+(fail) an empty genuine native style becomes an empty argument record [15.85ms]
+
+ 7 pass
+ 1 fail
+ 36 expect() calls
+Ran 8 tests across 1 file. [605.00ms]

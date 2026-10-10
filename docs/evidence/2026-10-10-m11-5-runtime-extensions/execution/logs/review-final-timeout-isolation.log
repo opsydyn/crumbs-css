@@ -1,0 +1,26 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/release-qualification-artifact.test.ts:
+(pass) M10.5 release qualification artifact > accepts a complete report and exact package tarball without running package lifecycle scripts [129.00ms]
+(pass) M10.5 release qualification artifact > accepts the qualified bundle from a publisher checkout that has no built dist directory [1339.51ms]
+(pass) M10.5 release qualification artifact > refuses to seal a report whose blocking host measurements exceed an approved budget [81.64ms]
+(pass) M10.5 release qualification artifact > rejects consistently hashed failed measurements and forged comparison rows [303.18ms]
+(pass) M10.5 release qualification artifact > exposes the same verification through the publisher CLI [279.90ms]
+(pass) M10.5 release qualification artifact > requires the explicit Node floor when sealing through the create CLI [147.23ms]
+(pass) M10.5 release qualification artifact > rejects changed report files and tarball bytes [170.67ms]
+(pass) M10.5 release qualification artifact > rejects a tag, commit, or source digest that differs from the verified bundle [384.38ms]
+(pass) M10.5 release qualification artifact > rejects package name and version drift [270.94ms]
+(pass) consumer policy handoff integrity > uses comparison 3 and manifest 2 without erasing advisory numerical failures [68.53ms]
+(pass) consumer policy handoff integrity > rejects resealed summaries, rows, legacy formats and bindings at report and publisher boundaries [3211.13ms]
+(pass) consumer policy handoff integrity > rejects resealed missing or unmatched advisory raw evidence [1042.40ms]
+(pass) consumer policy handoff integrity > rejects old manifests and a manifest binding different from the report [136.05ms]
+(pass) consumer policy CLI diagnostics > shows the valid advisory failures and a distinct release-policy status [210.93ms]
+(pass) checked-out approval pins at both job boundaries > rejects a changed policy role even after resealing every binding and source identity [1516.61ms]
+(pass) checked-out approval pins at both job boundaries > rejects baseline whitespace edits with unchanged numerical medians [1614.37ms]
+(pass) checked-out approval pins at both job boundaries > uses the transferred tarball when the publisher has a different local dist [1480.82ms]
+(pass) runtime raw evidence integrity at both release jobs > rejects rederived and resealed malformed runtime evidence [2445.65ms]
+
+ 18 pass
+ 0 fail
+ 148 expect() calls
+Ran 18 tests across 1 file. [18.34s]

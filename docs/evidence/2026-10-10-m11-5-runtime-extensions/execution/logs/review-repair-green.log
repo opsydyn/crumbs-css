@@ -1,0 +1,87 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [0.67ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [0.18ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [0.27ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [0.26ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [1.33ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [0.42ms]
+(pass) rejects inherited protocol descriptors and invalid intrinsic fields independently of helper identity [0.06ms]
+(pass) native composition still validates property domains before an extension can be emitted [70.10ms]
+(pass) capture admits exactly 32 nested containers and lowering retains the scalar leaf [0.38ms]
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [22.02ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [9.95ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [17.32ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [29.84ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [13.43ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [2.69ms]
+(pass) mixed ESM-to-CommonJS reexports fail closed before a missing runtime name can ship [3.71ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) Node default conditions are not replaced by compiler development or production branches [4.22ms]
+123 |         const api = await linker();
+124 |         writeFileSync(path.join(f.pkg, 'package.json'), JSON.stringify({name:'@acme/runtime',type:'module',main:'./runtime'}));
+125 |         writeFileSync(path.join(f.pkg, 'runtime.js'), `export function make(){return ()=>0;}`);
+126 |         const options = {...f.options,platform:'ios'};
+127 |         const result = await api.linkRuntimeExtensions(captured(), options);
+128 |         expect(result.endpoints[0]!.targets.every(t=>t.logicalPath.endsWith('runtime.js'))).toBe(true);
+                                                                                                  ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:128:93)
+(fail) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [9.97ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) stock Expo conditions select react-native default rather than an unasserted ios branch [2.64ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [26.33ms]
+(pass) factory exceptions propagate unchanged and are not retried [29.43ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [53.48ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [27.96ms]
+(pass) ordinary modules retain their exact emission bytes [0.09ms]
+(pass) direct module emission refuses an unverified endpoint [0.07ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [23.72ms]
+(pass) an empty genuine native style becomes an empty argument record [24.91ms]
+(pass) the runtime factory owns its rest tuple; only supplied argument data is frozen [27.93ms]
+(pass) documented maximum container depth survives actual compiled reconstruction [24.68ms]
+
+1 tests failed:
+(fail) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [9.97ms]
+
+ 28 pass
+ 1 fail
+ 178 expect() calls
+Ran 29 tests across 3 files. [689.00ms]

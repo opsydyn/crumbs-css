@@ -1,0 +1,23 @@
+bun test v1.4.3 (c6da4a4d3)
+
+packages/css/test/release-qualification-artifact.test.ts:
+116 | 
+117 |   cpSync(incrementalBaselinePath, join(reportDirectory, "metro-incremental.json"))
+118 |   rederiveComparison(reportDirectory)
+119 |   const resultingComparison = readJson(join(reportDirectory, "comparison.json"))
+120 |   expect(resultingComparison.metrics).toHaveLength(21)
+121 |   expect(resultingComparison.releasePolicyQualified).toBe(true)
+                                                           ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at makePassingSyntheticReport (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-qualification-artifact.test.ts:121:54)
+      at makeValidBundle (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/release-qualification-artifact.test.ts:172:3)
+(fail) (unnamed) [346.83ms]
+
+ 0 pass
+ 1 fail
+ 2 expect() calls
+Ran 1 test across 1 file. [1421.00ms]

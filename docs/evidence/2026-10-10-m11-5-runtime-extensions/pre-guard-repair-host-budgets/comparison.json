@@ -1,0 +1,485 @@
+{
+  "formatVersion": 3,
+  "policy": {
+    "policyId": "crumbs-host-budgets-2026-10-08-consumer-scope-v1",
+    "policySha256": "cd3f8408c8381591d16525c2cd8e66e1e45e28582c8c96a47ac84d05ef1edc07",
+    "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b"
+  },
+  "recordedAt": "2026-10-10T09:24:38.041Z",
+  "sourceRevision": "ed6c499137db0d385a14d12e5823a949ac5cf13f",
+  "sourceState": "Working tree based on sourceRevision; retained reports carry detailed source and environment identity",
+  "diagnostic": {
+    "metrics": [
+      {
+        "id": "runtime-emitted-bytes",
+        "unit": "bytes",
+        "baseline": 11307,
+        "current": {
+          "min": 182163,
+          "median": 182163,
+          "max": 182163,
+          "maxDeviationPercent": 0
+        },
+        "delta": 170856,
+        "deltaPercent": 1511.0639426903688,
+        "environment": "exact",
+        "environmentDifferences": [],
+        "measurementIdentity": "exact",
+        "measurementIdentityDifferences": [],
+        "result": "fail",
+        "qualification": "diagnostic-only"
+      }
+    ],
+    "limits": [
+      "Diagnostic comparisons preserve historical visibility but never contribute to performance qualification",
+      "A diagnostic result uses the retained baseline as a zero-growth reference; current functionality is gated by admitted split metrics"
+    ]
+  },
+  "performanceQualified": false,
+  "metrics": [
+    {
+      "id": "runtime-initialization-node22-esm",
+      "unit": "ms",
+      "baseline": 6.293542000000002,
+      "current": {
+        "min": 7.733499999999999,
+        "median": 8.283625,
+        "max": 9.260124999999999,
+        "maxDeviationPercent": 11.788317312770651
+      },
+      "delta": 1.9900829999999985,
+      "deltaPercent": 31.62103311616889,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "runtime-initialization-node22-cjs",
+      "unit": "ms",
+      "baseline": 3.401791000000001,
+      "current": {
+        "min": 4.89025,
+        "median": 5.241875,
+        "max": 5.679791999999999,
+        "maxDeviationPercent": 8.354205317753642
+      },
+      "delta": 1.8400839999999992,
+      "deltaPercent": 54.09162408860505,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "runtime-initialization-current-esm",
+      "unit": "ms",
+      "baseline": 2.555624999999999,
+      "current": {
+        "min": 4.324999999999999,
+        "median": 4.576999999999998,
+        "max": 5.314792000000001,
+        "maxDeviationPercent": 16.119554293205216
+      },
+      "delta": 2.021374999999999,
+      "deltaPercent": 79.0951332844216,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "runtime-initialization-current-cjs",
+      "unit": "ms",
+      "baseline": 2.036500000000002,
+      "current": {
+        "min": 3.518250000000002,
+        "median": 3.5580419999999986,
+        "max": 4.188333,
+        "maxDeviationPercent": 17.714546371290776
+      },
+      "delta": 1.5215419999999966,
+      "deltaPercent": 74.7135772158112,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "cold-transform-ms",
+      "unit": "ms",
+      "baseline": 66.404584,
+      "current": {
+        "min": 76.29016699999998,
+        "median": 76.694792,
+        "max": 82.23279099999999,
+        "maxDeviationPercent": 7.2208279800797746
+      },
+      "delta": 10.290208000000007,
+      "deltaPercent": 15.49623140474761,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "warm-transform-ms",
+      "unit": "ms",
+      "baseline": 5.664125000000013,
+      "current": {
+        "min": 9.251792000000023,
+        "median": 10.129541000000245,
+        "max": 10.510999999999967,
+        "maxDeviationPercent": 8.665239619447718
+      },
+      "delta": 4.465416000000232,
+      "deltaPercent": 78.83681945578923,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "incremental-rebuild",
+      "unit": "ms",
+      "baseline": 123.95049999999901,
+      "current": {
+        "min": 135.19683299999997,
+        "median": 135.59320800000023,
+        "max": 136.4077500000003,
+        "maxDeviationPercent": 0.6007247796660086
+      },
+      "delta": 11.642708000001221,
+      "deltaPercent": 9.393030282250828,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-tsc-wall-10000",
+      "unit": "ms",
+      "baseline": 882.1055000000006,
+      "current": {
+        "min": 613.6083339999996,
+        "median": 625.49975,
+        "max": 642.2115840000006,
+        "maxDeviationPercent": 2.6717571030205267
+      },
+      "delta": -256.6057500000006,
+      "deltaPercent": -29.09014284572542,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-tsgo-wall-10000",
+      "unit": "ms",
+      "baseline": 332.92241699999977,
+      "current": {
+        "min": 176.93929200000093,
+        "median": 179.87137500000063,
+        "max": 183.05399999999827,
+        "maxDeviationPercent": 1.7693893761570632
+      },
+      "delta": -153.05104199999914,
+      "deltaPercent": -45.97198451794228,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-tsc-memory-10000",
+      "unit": "KiB",
+      "baseline": 285025,
+      "current": {
+        "min": 230372,
+        "median": 230883,
+        "max": 233897,
+        "maxDeviationPercent": 1.3054230930817774
+      },
+      "delta": -54142,
+      "deltaPercent": -18.995526708183494,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-tsgo-memory-10000",
+      "unit": "KiB",
+      "baseline": 140013,
+      "current": {
+        "min": 114189,
+        "median": 114274,
+        "max": 114302,
+        "maxDeviationPercent": 0.07438262421898245
+      },
+      "delta": -25739,
+      "deltaPercent": -18.383292979937575,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-tsc-instantiations-10000",
+      "unit": "count",
+      "baseline": 490410,
+      "current": {
+        "min": 136366,
+        "median": 136366,
+        "max": 136366,
+        "maxDeviationPercent": 0
+      },
+      "delta": -354044,
+      "deltaPercent": -72.19347076935625,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-tsgo-instantiations-10000",
+      "unit": "count",
+      "baseline": 490508,
+      "current": {
+        "min": 134807,
+        "median": 134807,
+        "max": 134807,
+        "maxDeviationPercent": 0
+      },
+      "delta": -355701,
+      "deltaPercent": -72.51686007159924,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-first-completion-10000",
+      "unit": "ms",
+      "baseline": 39.28841699999998,
+      "current": {
+        "min": 31.672250000000076,
+        "median": 31.829500000000053,
+        "max": 32.23870899999997,
+        "maxDeviationPercent": 1.2856281122855158
+      },
+      "delta": -7.4589169999999285,
+      "deltaPercent": -18.985028080922504,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "editor-warm-completion-10000",
+      "unit": "ms",
+      "baseline": 30.386750000000006,
+      "current": {
+        "min": 24.278792000000067,
+        "median": 24.335166000000072,
+        "max": 24.47616699999992,
+        "maxDeviationPercent": 0.579412525888856
+      },
+      "delta": -6.051583999999934,
+      "deltaPercent": -19.91520646334318,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "runtime-theme-core-esm-graph-bytes",
+      "unit": "bytes",
+      "baseline": 17271,
+      "current": {
+        "min": 67728,
+        "median": 67728,
+        "max": 67728,
+        "maxDeviationPercent": 0
+      },
+      "delta": 50457,
+      "deltaPercent": 292.1486885530658,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "runtime-theme-core-cjs-graph-bytes",
+      "unit": "bytes",
+      "baseline": 17641,
+      "current": {
+        "min": 68587,
+        "median": 68587,
+        "max": 68587,
+        "maxDeviationPercent": 0
+      },
+      "delta": 50946,
+      "deltaPercent": 288.7931523156284,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "runtime-tokens-esm-graph-bytes",
+      "unit": "bytes",
+      "baseline": 56013,
+      "current": {
+        "min": 32127,
+        "median": 32127,
+        "max": 32127,
+        "maxDeviationPercent": 0
+      },
+      "delta": -23886,
+      "deltaPercent": -42.64367200471319,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "runtime-tokens-cjs-graph-bytes",
+      "unit": "bytes",
+      "baseline": 63308,
+      "current": {
+        "min": 36138,
+        "median": 36138,
+        "max": 36138,
+        "maxDeviationPercent": 0
+      },
+      "delta": -27170,
+      "deltaPercent": -42.9171668667467,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "pass"
+    },
+    {
+      "id": "runtime-theme-compatibility-esm-graph-bytes",
+      "unit": "bytes",
+      "baseline": 44017,
+      "current": {
+        "min": 171565,
+        "median": 171565,
+        "max": 171565,
+        "maxDeviationPercent": 0
+      },
+      "delta": 127548,
+      "deltaPercent": 289.7698616443647,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    },
+    {
+      "id": "runtime-theme-compatibility-cjs-graph-bytes",
+      "unit": "bytes",
+      "baseline": 44764,
+      "current": {
+        "min": 182163,
+        "median": 182163,
+        "max": 182163,
+        "maxDeviationPercent": 0
+      },
+      "delta": 137399,
+      "deltaPercent": 306.94084532213384,
+      "environment": "exact",
+      "environmentDifferences": [],
+      "measurementIdentity": "exact",
+      "measurementIdentityDifferences": [],
+      "thresholdStatus": "approved",
+      "result": "fail"
+    }
+  ],
+  "reviewAttention": {
+    "highNoise": []
+  },
+  "limits": [
+    "Only recorded host/editor metrics are adapted; missing and diagnostic domains remain blockers"
+  ],
+  "releasePolicyQualified": false,
+  "blockers": [
+    "Host-budget metric warm-transform-ms is fail; expected pass"
+  ],
+  "blocking": {
+    "passIds": [
+      "cold-transform-ms",
+      "incremental-rebuild",
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ],
+    "failIds": [
+      "warm-transform-ms"
+    ],
+    "incompleteIds": []
+  },
+  "advisory": {
+    "passIds": [
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes"
+    ],
+    "failIds": [
+      "runtime-initialization-node22-esm",
+      "runtime-initialization-node22-cjs",
+      "runtime-initialization-current-esm",
+      "runtime-initialization-current-cjs",
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "incompleteIds": []
+  }
+}

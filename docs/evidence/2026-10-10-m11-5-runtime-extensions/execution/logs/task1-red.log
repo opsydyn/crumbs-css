@@ -1,0 +1,100 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-authoring.test.ts:
+1 | import {test,expect} from 'bun:test';
+2 | const api = await import('../src/extensions').catch(() => ({})) as typeof import('../src/extensions');
+3 | function builder() { expect(typeof api.defineExtension).toBe('function'); return api.defineExtension<{make:(label:string,count?:number)=>(suffix:string)=>string}>().factory({importPath:'@acme/extensions/pure',importName:'make'}); }
+                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "undefined"
+
+      at builder (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-authoring.test.ts:3:57)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-authoring.test.ts:4:59)
+(fail) factory_never_loads_or_calls_runtime [0.20ms]
+1 | import {test,expect} from 'bun:test';
+2 | const api = await import('../src/extensions').catch(() => ({})) as typeof import('../src/extensions');
+3 | function builder() { expect(typeof api.defineExtension).toBe('function'); return api.defineExtension<{make:(label:string,count?:number)=>(suffix:string)=>string}>().factory({importPath:'@acme/extensions/pure',importName:'make'}); }
+                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "undefined"
+
+      at builder (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-authoring.test.ts:3:57)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-authoring.test.ts:5:52)
+(fail) placeholder_call_is_build_only [0.05ms]
+1 | import {test,expect} from 'bun:test';
+2 | const api = await import('../src/extensions').catch(() => ({})) as typeof import('../src/extensions');
+3 | function builder() { expect(typeof api.defineExtension).toBe('function'); return api.defineExtension<{make:(label:string,count?:number)=>(suffix:string)=>string}>().factory({importPath:'@acme/extensions/pure',importName:'make'}); }
+4 | test('factory_never_loads_or_calls_runtime',()=>{ const f=builder();const v=f('card',undefined);const d=Object.getOwnPropertyDescriptor(v,Symbol.for('crumbs.css.runtime-extension'))!;expect([d.enumerable,d.writable,d.configurable]).toEqual([false,false,false]);expect(d.value.args).toEqual(['card',undefined]);expect(Object.isFrozen(d.value)).toBe(true);expect(Object.isFrozen(d.value.args)).toBe(true);});
+5 | test('placeholder_call_is_build_only',()=>{const v=builder()('card');try{v('!');throw Error('unexpected call')}catch(e){expect((e as {code:string}).code).toBe('extension.build-only-call')}});
+6 | test('invalid_config_is_closed_and_does_not_coerce',()=>{expect(typeof api.defineExtension).toBe('function');const b=api.defineExtension<{make:()=>()=>void}>();for(const importPath of ['./runtime','/runtime','node:fs','fs','assert/strict','@bad','pkg//x','pkg/../x','pkg/%20','Pkg'])expect(()=>b.factory({importPath,importName:'make'})).toThrow();let calls=0;expect(()=>b.factory(Object.defineProperty({},'importPath',{enumerable:true,get(){calls++;return 'pkg'}}) as never)).toThrow();expect(calls).toBe(0);expect(()=>b.factory({importPath:'pkg',importName:'make',extra:true} as never)).toThrow();});
+
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "undefined"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-authoring.test.ts:6:93)
+(fail) invalid_config_is_closed_and_does_not_coerce [0.06ms]
+2 | const api = await import('../src/extensions').catch(() => ({})) as typeof import('../src/extensions');
+3 | function builder() { expect(typeof api.defineExtension).toBe('function'); return api.defineExtension<{make:(label:string,count?:number)=>(suffix:string)=>string}>().factory({importPath:'@acme/extensions/pure',importName:'make'}); }
+4 | test('factory_never_loads_or_calls_runtime',()=>{ const f=builder();const v=f('card',undefined);const d=Object.getOwnPropertyDescriptor(v,Symbol.for('crumbs.css.runtime-extension'))!;expect([d.enumerable,d.writable,d.configurable]).toEqual([false,false,false]);expect(d.value.args).toEqual(['card',undefined]);expect(Object.isFrozen(d.value)).toBe(true);expect(Object.isFrozen(d.value.args)).toBe(true);});
+5 | test('placeholder_call_is_build_only',()=>{const v=builder()('card');try{v('!');throw Error('unexpected call')}catch(e){expect((e as {code:string}).code).toBe('extension.build-only-call')}});
+6 | test('invalid_config_is_closed_and_does_not_coerce',()=>{expect(typeof api.defineExtension).toBe('function');const b=api.defineExtension<{make:()=>()=>void}>();for(const importPath of ['./runtime','/runtime','node:fs','fs','assert/strict','@bad','pkg//x','pkg/../x','pkg/%20','Pkg'])expect(()=>b.factory({importPath,importName:'make'})).toThrow();let calls=0;expect(()=>b.factory(Object.defineProperty({},'importPath',{enumerable:true,get(){calls++;return 'pkg'}}) as never)).toThrow();expect(calls).toBe(0);expect(()=>b.factory({importPath:'pkg',importName:'make',extra:true} as never)).toThrow();});
+7 | test('invalid_js_error_code_has_safe_fallback',()=>{expect(typeof api.ExtensionError).toBe('function');let calls=0;const e=new api.ExtensionError({toString(){calls++;return 'bad'}} as never,'x\n'.repeat(200),'invalid');expect(e.code).toBe('extension.invalid-config');expect(e.path.length).toBeLessThanOrEqual(256);expect(e.path.includes('\n')).toBe(false);expect(calls).toBe(0)});
+                                                                                          ^
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "undefined"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-authoring.test.ts:7:87)
+(fail) invalid_js_error_code_has_safe_fallback [0.07ms]
+
+packages/css/test/runtime-extension-admission.test.ts:
+1 | import {test,expect} from 'bun:test';
+2 | const api=await import('../src/extensions').catch(()=>({})) as typeof import('../src/extensions');
+3 | function capture(...args:unknown[]) {expect(typeof api.defineExtension).toBe('function');const f=api.defineExtension<{make:(...args:unknown[])=>()=>void}>().factory({importPath:'pkg/runtime',importName:'make'});return Object.getOwnPropertyDescriptor(f(...args),Symbol.for('crumbs.css.runtime-extension'))!.value.args as readonly unknown[];}
+                                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "undefined"
+
+      at capture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-admission.test.ts:3:73)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-admission.test.ts:4:261)
+(fail) argument_snapshot_preserves_undefined_negative_zero_and_null_proto [0.07ms]
+1 | import {test,expect} from 'bun:test';
+2 | const api=await import('../src/extensions').catch(()=>({})) as typeof import('../src/extensions');
+3 | function capture(...args:unknown[]) {expect(typeof api.defineExtension).toBe('function');const f=api.defineExtension<{make:(...args:unknown[])=>()=>void}>().factory({importPath:'pkg/runtime',importName:'make'});return Object.getOwnPropertyDescriptor(f(...args),Symbol.for('crumbs.css.runtime-extension'))!.value.args as readonly unknown[];}
+                                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "undefined"
+
+      at capture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-admission.test.ts:3:73)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-admission.test.ts:5:100)
+(fail) later_input_mutation_does_not_change_snapshot [0.03ms]
+(pass) invalid_late_accessor_has_zero_calls [0.02ms]
+(pass) rejects_nonportable_hidden_decorated_and_cyclic_data [0.07ms]
+1 | import {test,expect} from 'bun:test';
+2 | const api=await import('../src/extensions').catch(()=>({})) as typeof import('../src/extensions');
+3 | function capture(...args:unknown[]) {expect(typeof api.defineExtension).toBe('function');const f=api.defineExtension<{make:(...args:unknown[])=>()=>void}>().factory({importPath:'pkg/runtime',importName:'make'});return Object.getOwnPropertyDescriptor(f(...args),Symbol.for('crumbs.css.runtime-extension'))!.value.args as readonly unknown[];}
+                                                                            ^
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "undefined"
+
+      at capture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-admission.test.ts:3:73)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-admission.test.ts:8:61)
+(fail) resource_limits_at_boundary_and_one_over [0.06ms]
+
+ 2 pass
+ 7 fail
+ 39 expect() calls
+Ran 9 tests across 2 files. [261.00ms]

@@ -1,0 +1,31 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m11-5-qualification.test.ts:
+(pass) foreign nonempty roots and escaped or linked inputs are refused [91.45ms]
+(pass) actual load order must match extensions entry format and both independent loads [0.11ms]
+(pass) runtime package and generated input drift is rejected [0.67ms]
+(pass) preparation and mismatched sources cannot qualify host or native acceptance [0.06ms]
+(pass) source identity includes private self-reference configuration and new authored inputs [63.88ms]
+(pass) native binding refuses preparation, foreign devices and missing real runtime maps [2.94ms]
+(pass) labels-only captures and late cleanup cannot establish native acceptance [0.14ms]
+(pass) native lifetime and font guards reject remounts, labels without layouts and unobserved scaling [0.49ms]
+(pass) shared native runtime bytes and packed adapter semantics remain identical [0.73ms]
+32 | test('shared native runtime bytes and packed adapter semantics remain identical', async () => { const { readFile } = await import('node:fs/promises'); expect(await readFile(new URL('../../../apps/storybook/src/components/runtime-extensions/runtime.tsx', import.meta.url), 'utf8')).toBe(await readFile(new URL('../fixtures/packed-distribution/extensions/src/runtime.tsx', import.meta.url), 'utf8')); });
+33 | 
+34 | test('native spacing and radius comparison accepts expanded shorthand semantics and refuses a changed edge',async()=>{
+35 |  const m=await native();
+36 |  const expanded={paddingTop:12,paddingRight:12,paddingBottom:12,paddingLeft:12,borderTopLeftRadius:8,borderTopRightRadius:8,borderBottomRightRadius:8,borderBottomLeftRadius:8};
+37 |  expect(()=>m.assertM115BaseStyle(expanded)).not.toThrow();
+                                                      ^
+error: expect(received).not.toThrow()
+
+Error name: "TypeError"
+Error message: "m.assertM115BaseStyle is not a function. (In 'm.assertM115BaseStyle(expanded)', 'm.assertM115BaseStyle' is undefined)"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/m11-5-qualification.test.ts:37:50)
+(fail) native spacing and radius comparison accepts expanded shorthand semantics and refuses a changed edge [0.79ms]
+
+ 9 pass
+ 1 fail
+ 42 expect() calls
+Ran 10 tests across 1 file. [687.00ms]

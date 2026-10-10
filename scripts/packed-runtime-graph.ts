@@ -44,6 +44,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./dist/theme": "ordinary-runtime",
   "./tokens": "ordinary-runtime",
   "./tokens/algebra": "ordinary-runtime",
+  "./extensions": "ordinary-runtime",
   "./tokens/schema": "advanced-runtime",
   "./tokens/schema/value": "advanced-runtime",
   "./tokens/optic": "advanced-runtime",

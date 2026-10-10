@@ -1,0 +1,27 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [224.04ms]
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [10.70ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [24.85ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [32.01ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [17.49ms]
+22 |   return value;
+23 |  }) as typeof fs.readFileSync);
+24 |  try{await expect(api.linkRuntimeExtensions(captured(),f.options)).rejects.toThrow(/extension.unresolved-import.*changed during linkage/);expect(edits).toBeGreaterThan(0);}
+25 |  finally{spy.mockRestore();f.clean();}
+26 | });
+27 | it('an ESM-only package must prove the requested named export',async()=>{const f=fixture();try{const api=await linker();writeFileSync(path.join(f.pkg,'package.json'),JSON.stringify({name:'@acme/runtime',type:'module',exports:{'.':'./runtime.mjs'}}));await expect(api.linkRuntimeExtensions(captured('@acme/runtime','missing'),f.options)).rejects.toThrow(/extension.unresolved-import/);}finally{f.clean();}});
+                                                                                                                                                                                                                                                                                                                                                              ^
+error: expect(received).rejects.toThrow(expected)
+
+Expected promise that rejects
+Received promise that resolved: Promise { <resolved> }
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:27:346)
+(fail) an ESM-only package must prove the requested named export [12.18ms]
+
+ 5 pass
+ 1 fail
+ 21 expect() calls
+Ran 6 tests across 1 file. [577.00ms]

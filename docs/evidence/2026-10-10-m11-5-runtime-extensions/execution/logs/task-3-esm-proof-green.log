@@ -1,0 +1,26 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [183.94ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [8.73ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [24.92ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [32.47ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [16.64ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [3.18ms]
+
+ 6 pass
+ 0 fail
+ 21 expect() calls
+Ran 6 tests across 1 file. [516.00ms]

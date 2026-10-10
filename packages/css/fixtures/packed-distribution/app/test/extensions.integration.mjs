@@ -1,0 +1,7 @@
+import assert from 'node:assert/strict';import {createRequire} from 'node:module';import {dirname,resolve} from 'node:path';import {pathToFileURL} from 'node:url';
+const require=createRequire(import.meta.url),order=process.argv[2];assert(['esm-first','cjs-first'].includes(order));const root=dirname(require.resolve('@opsydyn/crumbs-css/package.json')),trace=[];
+async function load(path,kind){const value=kind==='require'?require(path):await import(pathToFileURL(path).href);trace.push({kind,path});return value;}
+const first=order==='cjs-first'?'require':'import',a=await load(resolve(root,`dist/extensions.${first==='require'?'cjs':'mjs'}`),first),second=first==='require'?'import':'require',b=await load(resolve(root,`../crumbs-css-copy/dist/extensions.${second==='require'?'cjs':'mjs'}`),second);
+assert.deepEqual(Object.keys(a).sort(),Object.keys(b).sort());const descriptor=a.defineExtension().factory({importPath:'@acme/crumbs-extensions/pure-runtime',importName:'make'})({value:undefined});assert.throws(()=>descriptor(),e=>e.code==='extension.build-only-call');assert.equal(Object.getOwnPropertyDescriptor(descriptor,Symbol.for('crumbs.css.runtime-extension')).value.version,1);
+const style=await import('@opsydyn/crumbs-css/style'),theme=await import('@opsydyn/crumbs-css/theme/core'),vars=style.createThemeContract({space:{gap:null}}),active=style.createTheme(vars,{space:{gap:12}});assert.equal(active.tokens[style.getThemeVarName(vars.space.gap)],12);
+console.log(JSON.stringify({order,trace,copies:2,status:'passed'}));

@@ -1,0 +1,48 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-metadata.test.ts:
+ 9 | import {createThemeTokenReference} from '../src/theme-token';
+10 | const make=defineExtension<{make:(x:unknown)=>()=>void}>().factory({importPath:'@acme/runtime',importName:'make'});
+11 | function fixture(){const exported=new Map(Object.entries(captureNativeExports({Component:make('base'),ordinary:'base'},'test.css.ts',new Set(['base']),null)));const styles=new Map([['base',{backgroundColor:createThemeTokenReference('--crumbs-panel')}]]);return {exported,styles};}
+12 | it('opaque callables have no phantom dependency or ownership paths; genuine argument styles contribute global tokens',()=>{
+13 |  const {exported,styles}=fixture();const index=indexStyleExportOwnership(exported);
+14 |  expect(index.classNames).toEqual(['base']);expect(index.exportNameForClass('base')).toBe('Component');
+                               ^
+error: expect(received).toEqual(expected)
+
+  [
++   "@acme/runtime",
+    "base",
++   "Component",
++   "make",
+  ]
+
+- Expected  - 0
++ Received  + 3
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-metadata.test.ts:14:27)
+(fail) opaque callables have no phantom dependency or ownership paths; genuine argument styles contribute global tokens [2.38ms]
+18 |  expect(explanations.exports.map(e=>e.path)).toEqual([['ordinary']]);
+19 | });
+20 | it('opaque manifest identifies the export and endpoint without claiming component capabilities',()=>{
+21 |  const {exported,styles}=fixture();const origins=new Map([['base',new Map([['backgroundColor',{packageOwner:'@acme/ui',sourceId:'panel.css.ts',primitiveDomain:['view']}]])]]);
+22 |  const sidecar=captureManifestSidecar({packageOwner:'@acme/ui',sourceId:'panel.css.ts',exportMap:exported,resolvedClassStyles:styles,resolvedClassOrigins:origins});
+23 |  expect(sidecar.module.exports).toEqual(['Component','ordinary']);
+                                     ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "Component",
+    "ordinary",
+  ]
+
+- Expected  - 1
++ Received  + 0
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-metadata.test.ts:23:33)
+(fail) opaque manifest identifies the export and endpoint without claiming component capabilities [0.60ms]
+
+ 0 pass
+ 2 fail
+ 2 expect() calls
+Ran 2 tests across 1 file. [254.00ms]

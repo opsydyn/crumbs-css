@@ -1,0 +1,72 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [0.65ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [0.17ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [0.25ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [0.26ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [1.34ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [0.51ms]
+(pass) rejects inherited protocol descriptors and invalid intrinsic fields independently of helper identity [0.08ms]
+(pass) native composition still validates property domains before an extension can be emitted [69.40ms]
+(pass) capture admits exactly 32 nested containers and lowering retains the scalar leaf [0.49ms]
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [22.18ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [6.75ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [18.63ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [35.27ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [15.66ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [3.63ms]
+(pass) mixed ESM-to-CommonJS reexports fail closed before a missing runtime name can ship [3.69ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) Node default conditions are not replaced by compiler development or production branches [5.76ms]
+(pass) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [12.78ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) stock Expo conditions select react-native default rather than an unasserted ios branch [3.02ms]
+(pass) Node-only built-in conditions cannot bypass the supported cross-version proof [5.47ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [27.02ms]
+(pass) factory exceptions propagate unchanged and are not retried [25.16ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [54.88ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [28.01ms]
+(pass) ordinary modules retain their exact emission bytes [0.08ms]
+(pass) direct module emission refuses an unverified endpoint [0.09ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [23.56ms]
+(pass) an empty genuine native style becomes an empty argument record [24.92ms]
+(pass) the runtime factory owns its rest tuple; only supplied argument data is frozen [23.00ms]
+(pass) documented maximum container depth survives actual compiled reconstruction [29.81ms]
+
+ 30 pass
+ 0 fail
+ 185 expect() calls
+Ran 30 tests across 3 files. [705.00ms]

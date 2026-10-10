@@ -1,0 +1,42 @@
+bun test v1.4.2 (744846f84)
+
+apps/storybook/test/RuntimeExtensionDogfood.test.ts:
+3 | import {runInNewContext} from 'node:vm';
+4 | import path from 'node:path';
+5 | const require=createRequire(path.resolve(import.meta.dir,'../../../packages/css/package.json'));
+6 | const React=require('react'),theme=require('./dist/theme-core.cjs');
+7 | const storyRequire=createRequire(path.resolve(import.meta.dir,'../package.json')),server=storyRequire('react-dom/server');
+8 | async function runtime(){const result=await Bun.build({entrypoints:[path.resolve(import.meta.dir,'../src/components/runtime-extensions/runtime.tsx')],target:'node',format:'cjs',external:['react','react-native','@opsydyn/crumbs-css/theme/core']});expect(result.success).toBe(true);const module={exports:{} as Record<string,any>};let observed:any;const View=(props:any)=>{observed=props;return React.createElement('div',null,props.children)};const flatten=(input:any):any=>Array.isArray(input)?Object.assign({},...input.map(flatten)):input||{};runInNewContext(await result.outputs[0]!.text(),{module,exports:module.exports,require:(name:string)=>name==='react'?React:name==='react-native'?{View,StyleSheet:{flatten}}:name==='@opsydyn/crumbs-css/theme/core'?theme:(()=>{throw Error('Unexpected test peer '+name)})()});return {...module.exports,props:()=>observed};}
+
+error: ENOENT: failed to open root directory: /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/src/components/runtime-extensions
+      at runtime (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/RuntimeExtensionDogfood.test.ts:8:49)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/RuntimeExtensionDogfood.test.ts:10:123)
+(fail) literal factory is provider independent and forwards props, children and style overrides [5.21ms]
+3 | import {runInNewContext} from 'node:vm';
+4 | import path from 'node:path';
+5 | const require=createRequire(path.resolve(import.meta.dir,'../../../packages/css/package.json'));
+6 | const React=require('react'),theme=require('./dist/theme-core.cjs');
+7 | const storyRequire=createRequire(path.resolve(import.meta.dir,'../package.json')),server=storyRequire('react-dom/server');
+8 | async function runtime(){const result=await Bun.build({entrypoints:[path.resolve(import.meta.dir,'../src/components/runtime-extensions/runtime.tsx')],target:'node',format:'cjs',external:['react','react-native','@opsydyn/crumbs-css/theme/core']});expect(result.success).toBe(true);const module={exports:{} as Record<string,any>};let observed:any;const View=(props:any)=>{observed=props;return React.createElement('div',null,props.children)};const flatten=(input:any):any=>Array.isArray(input)?Object.assign({},...input.map(flatten)):input||{};runInNewContext(await result.outputs[0]!.text(),{module,exports:module.exports,require:(name:string)=>name==='react'?React:name==='react-native'?{View,StyleSheet:{flatten}}:name==='@opsydyn/crumbs-css/theme/core'?theme:(()=>{throw Error('Unexpected test peer '+name)})()});return {...module.exports,props:()=>observed};}
+
+error: ENOENT: failed to open root directory: /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/src/components/runtime-extensions
+      at runtime (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/RuntimeExtensionDogfood.test.ts:8:49)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/RuntimeExtensionDogfood.test.ts:11:112)
+(fail) themed factory always requires the existing provider, even for literal styles [0.07ms]
+3 | import {runInNewContext} from 'node:vm';
+4 | import path from 'node:path';
+5 | const require=createRequire(path.resolve(import.meta.dir,'../../../packages/css/package.json'));
+6 | const React=require('react'),theme=require('./dist/theme-core.cjs');
+7 | const storyRequire=createRequire(path.resolve(import.meta.dir,'../package.json')),server=storyRequire('react-dom/server');
+8 | async function runtime(){const result=await Bun.build({entrypoints:[path.resolve(import.meta.dir,'../src/components/runtime-extensions/runtime.tsx')],target:'node',format:'cjs',external:['react','react-native','@opsydyn/crumbs-css/theme/core']});expect(result.success).toBe(true);const module={exports:{} as Record<string,any>};let observed:any;const View=(props:any)=>{observed=props;return React.createElement('div',null,props.children)};const flatten=(input:any):any=>Array.isArray(input)?Object.assign({},...input.map(flatten)):input||{};runInNewContext(await result.outputs[0]!.text(),{module,exports:module.exports,require:(name:string)=>name==='react'?React:name==='react-native'?{View,StyleSheet:{flatten}}:name==='@opsydyn/crumbs-css/theme/core'?theme:(()=>{throw Error('Unexpected test peer '+name)})()});return {...module.exports,props:()=>observed};}
+
+error: ENOENT: failed to open root directory: /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/src/components/runtime-extensions
+      at runtime (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/RuntimeExtensionDogfood.test.ts:8:49)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/RuntimeExtensionDogfood.test.ts:12:105)
+(fail) unrelated inputs retain the same factory result without reconstructing [0.09ms]
+error: Cannot find module '../src/components/runtime-extensions/extension-model' from '/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/apps/storybook/test/RuntimeExtensionDogfood.test.ts'
+(fail) independent manual controls define finite foundations and theme/override expectations [1.75ms]
+
+ 0 pass
+ 4 fail
+Ran 4 tests across 1 file. [594.00ms]

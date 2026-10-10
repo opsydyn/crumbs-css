@@ -1,0 +1,62 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [73.66ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [7.20ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [20.32ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [27.99ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [14.43ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [2.70ms]
+(pass) mixed ESM-to-CommonJS reexports fail closed before a missing runtime name can ship [3.05ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) Node default conditions are not replaced by compiler development or production branches [4.83ms]
+(pass) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [10.89ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) stock Expo conditions select react-native default rather than an unasserted ios branch [2.67ms]
+184 |     try {
+185 |         const api = await linker();
+186 |         writeFileSync(path.join(f.pkg, 'other.mjs'), `export function other(){return ()=>0;}`);
+187 |         for (const condition of ['module-sync','node-addons']) {
+188 |             writeFileSync(path.join(f.pkg, 'package.json'), JSON.stringify({name:'@acme/runtime',type:'module',exports:{'.':{[condition]:'./other.mjs',default:'./runtime.mjs'}}}));
+189 |             await expect(api.linkRuntimeExtensions(captured(), f.options)).rejects.toThrow(/extension.unresolved-import/);
+                                                                                         ^
+error: expect(received).rejects.toThrow(expected)
+
+Expected promise that rejects
+Received promise that resolved: Promise { <resolved> }
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:189:84)
+(fail) Node-only built-in conditions cannot bypass the supported cross-version proof [8.63ms]
+
+ 10 pass
+ 1 fail
+ 35 expect() calls
+Ran 11 tests across 1 file. [379.00ms]

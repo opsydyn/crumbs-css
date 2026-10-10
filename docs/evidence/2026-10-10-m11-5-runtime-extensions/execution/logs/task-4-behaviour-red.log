@@ -1,0 +1,87 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-emission.test.ts:
+14 |  const file=path.join(dir,'case.css.ts');writeFileSync(file,`import {viewStyle} from '@opsydyn/crumbs-css/style';import {defineExtension} from '@opsydyn/crumbs-css/extensions';const factory=defineExtension<{make:(...args:unknown[])=>()=>unknown}>().factory({importPath:'@acme/runtime',importName:'make'});${authoring}`);
+15 |  try{const code=await transformCssTsToStyleSheet(file,dir,{useStyleSheet:false,includeStyleExplanations:false});const output=path.join(dir,'compiled.mjs');writeFileSync(output,code);const control=await import(path.join(pkg,'runtime.mjs'));await check(code,control,()=>import(output));}finally{rmSync(dir,{recursive:true,force:true});}
+16 | }
+17 | it('aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct',async()=>{
+18 |  await fixture(`export const calls=[];export function make(){const args=Array.from(arguments);calls.push({argc:arguments.length,thisValue:this,args});return function result(){return args;};}`,`export const first=factory({missing:undefined,n:-0},undefined);export const firstAlias=first;export const nested=[first];export const second=factory({missing:undefined,n:-0},undefined);`,async(code,control,load)=>{
+19 |   expect(control.calls).toEqual([]);const runtime=await load();expect(typeof runtime.first).toBe('function');expect(runtime.first).toBe(runtime.firstAlias);expect(runtime.nested[0]).toBe(runtime.first);expect(runtime.second).not.toBe(runtime.first);expect(control.calls.map((c:any)=>c.argc)).toEqual([2,2]);expect(control.calls.every((c:any)=>c.thisValue===undefined)).toBe(true);expect(Object.is(control.calls[0].args[0].n,-0)).toBe(true);expect(Object.hasOwn(control.calls[0].args[0],'missing')).toBe(true);expect(Object.isFrozen(control.calls[0].args[0])).toBe(true);expect(code).not.toContain('@opsydyn/crumbs-css/extensions');expect(code).not.toContain('Symbol.for("crumbs.css.runtime-extension")');
+
+error: expect(received).toBe(expected)
+
+Expected: "function"
+Received: "object"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:19:93)
+      at async fixture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:15:246)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:18:8)
+(fail) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [118.22ms]
+17 | it('aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct',async()=>{
+18 |  await fixture(`export const calls=[];export function make(){const args=Array.from(arguments);calls.push({argc:arguments.length,thisValue:this,args});return function result(){return args;};}`,`export const first=factory({missing:undefined,n:-0},undefined);export const firstAlias=first;export const nested=[first];export const second=factory({missing:undefined,n:-0},undefined);`,async(code,control,load)=>{
+19 |   expect(control.calls).toEqual([]);const runtime=await load();expect(typeof runtime.first).toBe('function');expect(runtime.first).toBe(runtime.firstAlias);expect(runtime.nested[0]).toBe(runtime.first);expect(runtime.second).not.toBe(runtime.first);expect(control.calls.map((c:any)=>c.argc)).toEqual([2,2]);expect(control.calls.every((c:any)=>c.thisValue===undefined)).toBe(true);expect(Object.is(control.calls[0].args[0].n,-0)).toBe(true);expect(Object.hasOwn(control.calls[0].args[0],'missing')).toBe(true);expect(Object.isFrozen(control.calls[0].args[0])).toBe(true);expect(code).not.toContain('@opsydyn/crumbs-css/extensions');expect(code).not.toContain('Symbol.for("crumbs.css.runtime-extension")');
+20 |  });
+21 | });
+22 | it('factory exceptions propagate unchanged and are not retried',async()=>{await fixture(`export let calls=0;export const sentinel={error:'factory failure'};export function make(){calls++;throw sentinel;}`,`export const result=factory();`,async(_code,control,load)=>{let failure:unknown;try{await load();}catch(error){failure=error;}expect(failure).toBe(control.sentinel);expect(control.calls).toBe(1);});});
+                                                                                                                                                                                                                                                                                                                                                                 ^
+error: expect(received).toBe(expected)
+
+Expected: {
+  error: "factory failure",
+}
+Received: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:22:349)
+      at async fixture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:15:246)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:22:81)
+(fail) factory exceptions propagate unchanged and are not retried [29.63ms]
+19 |   expect(control.calls).toEqual([]);const runtime=await load();expect(typeof runtime.first).toBe('function');expect(runtime.first).toBe(runtime.firstAlias);expect(runtime.nested[0]).toBe(runtime.first);expect(runtime.second).not.toBe(runtime.first);expect(control.calls.map((c:any)=>c.argc)).toEqual([2,2]);expect(control.calls.every((c:any)=>c.thisValue===undefined)).toBe(true);expect(Object.is(control.calls[0].args[0].n,-0)).toBe(true);expect(Object.hasOwn(control.calls[0].args[0],'missing')).toBe(true);expect(Object.isFrozen(control.calls[0].args[0])).toBe(true);expect(code).not.toContain('@opsydyn/crumbs-css/extensions');expect(code).not.toContain('Symbol.for("crumbs.css.runtime-extension")');
+20 |  });
+21 | });
+22 | it('factory exceptions propagate unchanged and are not retried',async()=>{await fixture(`export let calls=0;export const sentinel={error:'factory failure'};export function make(){calls++;throw sentinel;}`,`export const result=factory();`,async(_code,control,load)=>{let failure:unknown;try{await load();}catch(error){failure=error;}expect(failure).toBe(control.sentinel);expect(control.calls).toBe(1);});});
+23 | it('invalid imported factory and returned shape have stable own code/path TypeErrors',async()=>{
+24 |  for(const [runtime,expected] of [[`export const make=3;`,'extension.invalid-factory'],[`export function make(){return 3;}`,'extension.invalid-result']] as const){await fixture(runtime,`export const nested={result:factory()};`,async(_code,_control,load)=>{let failure:any;try{await load();}catch(error){failure=error;}expect(failure).toBeInstanceOf(TypeError);expect(Object.hasOwn(failure,'code')).toBe(true);expect(failure.code).toBe(expected);expect(failure.path).toBe('nested.result');});}
+                                                                                                                                                                                                                                                                                                                                                   ^
+error: expect(received).toBeInstanceOf(expected)
+
+Expected constructor: [class TypeError extends Error]
+Received value: undefined
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:24:335)
+      at async fixture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:15:246)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:24:170)
+(fail) invalid imported factory and returned shape have stable own code/path TypeErrors [28.96ms]
+22 | it('factory exceptions propagate unchanged and are not retried',async()=>{await fixture(`export let calls=0;export const sentinel={error:'factory failure'};export function make(){calls++;throw sentinel;}`,`export const result=factory();`,async(_code,control,load)=>{let failure:unknown;try{await load();}catch(error){failure=error;}expect(failure).toBe(control.sentinel);expect(control.calls).toBe(1);});});
+23 | it('invalid imported factory and returned shape have stable own code/path TypeErrors',async()=>{
+24 |  for(const [runtime,expected] of [[`export const make=3;`,'extension.invalid-factory'],[`export function make(){return 3;}`,'extension.invalid-result']] as const){await fixture(runtime,`export const nested={result:factory()};`,async(_code,_control,load)=>{let failure:any;try{await load();}catch(error){failure=error;}expect(failure).toBeInstanceOf(TypeError);expect(Object.hasOwn(failure,'code')).toBe(true);expect(failure.code).toBe(expected);expect(failure.path).toBe('nested.result');});}
+25 | });
+26 | it('fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports',async()=>{
+27 |  await fixture(`export function make(...args){return ()=>args;}`,`export const style=viewStyle({opacity:0.5});const data=Object.assign(Object.create(null),JSON.parse('{"__proto__":{"safe":true}}'),{missing:undefined,n:-0});export const result=factory(style,data);`,async(_code,_control,load)=>{const out=await load();const args=out.result();expect(args[0]).toEqual({opacity:0.5});expect(args[0]).not.toBe(out.style);expect(Object.isFrozen(args[0])).toBe(true);expect(Object.isFrozen(out.style)).toBe(false);out.style.opacity=1;expect(args[0].opacity).toBe(0.5);expect(Object.getPrototypeOf(args[1])).toBeNull();expect(Object.hasOwn(args[1],'__proto__')).toBe(true);expect(Object.hasOwn(args[1],'missing')).toBe(true);expect(Object.is(args[1].n,-0)).toBe(true);});
+
+TypeError: out.result is not a function. (In 'out.result()', 'out.result' is an instance of Object)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:27:333)
+      at async fixture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:15:246)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:27:8)
+(fail) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [39.34ms]
+(pass) ordinary modules retain their exact emission bytes [0.12ms]
+28 | });
+29 | it('ordinary modules retain their exact emission bytes',()=>{
+30 |  const captured=captureNativeExports({label:'plain',view:'base'},'control.css.ts',new Set(['base']),null);
+31 |  expect(buildStyleSheetCode(new Map(Object.entries(captured)),new Map([['base',{opacity:0.5}]]),[],{useStyleSheet:false})).toBe(`const _s = {\n  "base": {"opacity":0.5}\n};\nexport const __crumbsModule = Object.freeze({$$type:"crumbs.css.native-module",version:2,tokens:Object.freeze([]),dependencyPlan:Object.freeze({$$type:"crumbs.css.theme-dependency-plan",version:1,entries:Object.freeze([])}),conditions:Object.freeze([])});\nexport const label = "plain";\nexport const view = _s["base"];`);
+32 | });
+33 | it('direct module emission refuses an unverified endpoint',()=>{const factory=defineExtension<{make:()=>()=>void}>().factory({importPath:'@acme/runtime',importName:'make'});const out=captureNativeExports({result:factory()},'case.css.ts',new Set(),null);expect(()=>buildStyleSheetCode(new Map(Object.entries(out)),new Map(),[],{useStyleSheet:false})).toThrow(/extension.unresolved-import/);});
+                                                                                                                                                                                                                                                                                                                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected pattern: /extension.unresolved-import/
+
+Received function did not throw
+Received value: "const _s = {\n\n};\nexport const __crumbsModule = Object.freeze({$$type:\"crumbs.css.native-module\",version:2,tokens:Object.freeze([]),dependencyPlan:Object.freeze({$$type:\"crumbs.css.theme-dependency-plan\",version:1,entries:Object.freeze([])}),conditions:Object.freeze([])});\nexport const result = { \"args\": [], \"exportPath\": \"result\", \"id\": 0, \"importName\": \"make\", \"importPath\": \"@acme/runtime\" };"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:33:351)
+(fail) direct module emission refuses an unverified endpoint [0.19ms]
+
+ 1 pass
+ 5 fail
+ 6 expect() calls
+Ran 6 tests across 1 file. [584.00ms]

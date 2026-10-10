@@ -29,6 +29,7 @@ export default defineConfig({
                         { label: 'Use container conditions', slug: 'how-to/use-container-conditions' },
                         { label: 'Use native motion', slug: 'how-to/use-native-motion' },
                         { label: 'Derive colour and typography', slug: 'how-to/use-token-algebra' },
+                        { label: 'Create typed runtime extensions', slug: 'how-to/create-runtime-extensions' },
 						{ label: 'Use typed helpers', slug: 'how-to/use-typed-helpers' },
 						{ label: 'Use recipes and state variants', slug: 'how-to/use-recipes-and-state-variants' },
 						{ label: 'Build a reference design system', slug: 'how-to/build-a-reference-design-system' },

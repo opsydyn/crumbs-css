@@ -1,0 +1,29 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [0.68ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [0.18ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [0.26ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [0.27ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [1.64ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [0.51ms]
+(pass) rejects inherited protocol descriptors and invalid intrinsic fields independently of helper identity [0.07ms]
+66 | it('native composition still validates property domains before an extension can be emitted',async()=>{
+67 |  const root=path.resolve(import.meta.dir,'..'),dir=mkdtempSync(path.join(root,'fixtures/.extension-capture-'));
+68 |  const file=path.join(dir,'case.css.ts');
+69 |  try{
+70 |   writeFileSync(file,`import {defineExtension} from '@opsydyn/crumbs-css/extensions';import {viewStyle,textStyle} from '@opsydyn/crumbs-css/style';const factory=defineExtension<{make:(x:unknown)=>()=>void}>().factory({importPath:'@acme/runtime',importName:'make'});export const Component=factory(viewStyle([textStyle({fontSize:16}),{opacity:0.5}]));`);
+71 |   await expect(transformCssTsToStyleSheet(file,root,{useStyleSheet:false})).rejects.toThrow(/primitive|CRUMBS_SCALAR_IR/);
+                                                                                         ^
+error: expect(received).rejects.toThrow(expected)
+
+Expected promise that rejects
+Received promise that resolved: Promise { <resolved> }
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-capture.test.ts:71:85)
+(fail) native composition still validates property domains before an extension can be emitted [76.00ms]
+
+ 7 pass
+ 1 fail
+ 40 expect() calls
+Ran 8 tests across 1 file. [370.00ms]

@@ -1,0 +1,114 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m2-6-native-module-emission.test.ts:
+(pass) M2.6 direct native module emission > emits only explicit development metadata as a deeply frozen __crumbsDev sidecar [4.25ms]
+(pass) M2.6 direct native module emission > reserves the generated devtools metadata binding at the final emitter boundary [0.63ms]
+(pass) M2.6 direct native module emission > emits immutable minimal token and condition metadata from final native styles [0.62ms]
+(pass) M2.6 direct native module emission > sorts and deduplicates multiple surviving token references [0.17ms]
+(pass) M2.6 direct native module emission > preserves structured styles, ordinary exports, empty styles and theme descriptors on the direct path [136.22ms]
+(pass) M2.6 direct native module emission > emits per-export dependency paths for variants and recipe branches [19.10ms]
+(pass) M2.6 direct native module emission > feeds emitted dependency plans into the selective runtime resolver [18.11ms]
+(pass) M2.6 direct native module emission > uses captured exports rather than reserialising and re-evaluating a vanilla module [0.40ms]
+(pass) M2.6 direct native module emission > reserves the generated module descriptor binding [13.13ms]
+(pass) M2.6 direct native module emission > rejects the reserved binding at the final emitter boundary [0.04ms]
+
+packages/css/test/runtime-extension-metadata.test.ts:
+(pass) opaque callables have no phantom dependency or ownership paths; genuine argument styles contribute global tokens [0.57ms]
+(pass) opaque manifest identifies the export and endpoint without claiming component capabilities [0.36ms]
+
+packages/css/test/ordinary-exports.test.ts:
+(pass) ordinary CSS module exports > preserves named primitive values, undefined fields and negative zero [14.88ms]
+(pass) ordinary CSS module exports > preserves tag-shaped ordinary data and own prototype-like keys alongside real metadata [18.17ms]
+(pass) ordinary CSS module exports > preserves null-prototype data and leaves unrelated class-like text unchanged [14.65ms]
+(pass) ordinary CSS module exports > rejects unsupported values before lossy serialization with file/export path diagnostics [232.84ms]
+(pass) ordinary CSS module exports > cleans composition handles without rewriting ordinary strings [0.24ms]
+(pass) ordinary CSS module exports > matches generated nested ordinary data independently of style exports [1336.18ms]
+
+packages/css/test/runtime-extension.property.test.ts:
+(pass) snapshot_meaning_matches_independent_ordinary_value_oracle [2.69ms]
+(pass) separate_invocations_are_never_interned [2.00ms]
+2436 | 	return defaultReportMessageInternal(out, stringifySecond);
+2437 | }
+2438 | /** @internal */
+2439 | function buildError(errorMessage, out) {
+2440 | 	if (out.runConfiguration.includeErrorInReport) throw new SError(errorMessage);
+2441 | 	const error = new SError(errorMessage, { cause: out.errorInstance });
+                      ^
+error: Property failed after 1 tests
+{ seed: 20261009, path: "0", endOnFailure: true }
+Counterexample: [{"$$type":"crumbs.css.class","className":"ordinary"}]
+Shrunk 0 time(s)
+
+Hint: Enable verbose mode in order to have the list of all failing values encountered during the run
+      at buildError (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2441:16)
+      at asyncThrowIfFailed (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2453:8)
+
+22 |  const proof=await linkRuntimeExtensions(collectRuntimeExtensions(new Map(Object.entries(captured))),{cwd:dir,absoluteEntryPath:entry,platform:null,dev:true});let ordinal=0;
+23 |  const code=(bindings:Record<string,unknown>)=>buildStyleSheetCode(new Map(Object.entries(captureNativeExports(bindings,entry,new Set(),null))),new Map(),[],{useStyleSheet:false,runtimeExtensionLinkage:proof});
+24 |  try{await run({make,code,async load(bindings){const file=path.join(dir,`generated-${ordinal++}.mjs`);writeFileSync(file,code(bindings));return await import(file);}});}finally{rmSync(dir,{recursive:true,force:true});}
+25 | }
+26 | function frozenTree(value:unknown):boolean{return value===null || typeof value!=='object' || Object.isFrozen(value)&&Object.values(value).every(frozenTree);}
+27 | test('emitted portable meaning matches the independent oracle',async()=>{await propertyFixture(async ctx=>{await fc.assert(fc.asyncProperty(sample,async input=>{const runtime=await ctx.load({result:ctx.make(input)});expect(extensionValueShape(runtime.result()[0])).toEqual(extensionValueShape(input));expect(frozenTree(runtime.result())).toBe(true);}),{seed:20261009,numRuns:200});});});
+                                                                                                                                                                                                                                                                                                                                                       ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension.property.test.ts:27:339)
+      at async run (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:1197:30)
+      at async asyncRunIt (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2495:30)
+(fail) emitted portable meaning matches the independent oracle [20.37ms]
+(pass) named export permutations produce identical emitted bytes [218.05ms]
+2436 | 	return defaultReportMessageInternal(out, stringifySecond);
+2437 | }
+2438 | /** @internal */
+2439 | function buildError(errorMessage, out) {
+2440 | 	if (out.runConfiguration.includeErrorInReport) throw new SError(errorMessage);
+2441 | 	const error = new SError(errorMessage, { cause: out.errorInstance });
+                      ^
+error: Property failed after 1 tests
+{ seed: 20261009, path: "0", endOnFailure: true }
+Counterexample: [{"$$type":"crumbs.css.class","className":"ordinary","mutation":true}]
+Shrunk 0 time(s)
+
+Hint: Enable verbose mode in order to have the list of all failing values encountered during the run
+      at buildError (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2441:16)
+      at asyncThrowIfFailed (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2453:8)
+
+24 |  try{await run({make,code,async load(bindings){const file=path.join(dir,`generated-${ordinal++}.mjs`);writeFileSync(file,code(bindings));return await import(file);}});}finally{rmSync(dir,{recursive:true,force:true});}
+25 | }
+26 | function frozenTree(value:unknown):boolean{return value===null || typeof value!=='object' || Object.isFrozen(value)&&Object.values(value).every(frozenTree);}
+27 | test('emitted portable meaning matches the independent oracle',async()=>{await propertyFixture(async ctx=>{await fc.assert(fc.asyncProperty(sample,async input=>{const runtime=await ctx.load({result:ctx.make(input)});expect(extensionValueShape(runtime.result()[0])).toEqual(extensionValueShape(input));expect(frozenTree(runtime.result())).toBe(true);}),{seed:20261009,numRuns:200});});});
+28 | test('named export permutations produce identical emitted bytes',async()=>{await propertyFixture(async ctx=>{await fc.assert(fc.asyncProperty(sample,fc.shuffledSubarray(['z','A','a','control'],{minLength:4,maxLength:4}),async(input,order)=>{const a=ctx.make(input),b=ctx.make(input),bindings={z:[a,b],A:{alias:a},a:b,control:7};const expected=ctx.code(bindings);expect(ctx.code(Object.fromEntries(order.map(k=>[k,bindings[k as keyof typeof bindings]])))).toBe(expected);}),{seed:20261009,numRuns:200});});});
+29 | test('captured snapshots survive caller mutation and remain frozen after real module import',async()=>{await propertyFixture(async ctx=>{await fc.assert(fc.asyncProperty(sample,async input=>{const expected=extensionValueShape(input),placeholder=ctx.make(input);if(input && typeof input==='object'){if(Array.isArray(input))input.push('mutation');else Object.defineProperty(input,'mutation',{value:true,enumerable:true,writable:true,configurable:true});}const runtime=await ctx.load({result:placeholder});expect(extensionValueShape(runtime.result()[0])).toEqual(expected);expect(frozenTree(runtime.result())).toBe(true);}),{seed:20261009,numRuns:200});});});
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension.property.test.ts:29:608)
+      at async run (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:1197:30)
+      at async asyncRunIt (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/fast-check@4.8.0/node_modules/fast-check/lib/fast-check.js:2495:30)
+(fail) captured snapshots survive caller mutation and remain frozen after real module import [13.00ms]
+(pass) alias versus distinct identity and unrelated data are independent [202.25ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [32.91ms]
+(pass) factory exceptions propagate unchanged and are not retried [30.32ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [61.52ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [31.62ms]
+(pass) ordinary modules retain their exact emission bytes [0.10ms]
+(pass) direct module emission refuses an unverified endpoint [0.14ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [28.45ms]
+(pass) an empty genuine native style becomes an empty argument record [28.52ms]
+
+2 tests failed:
+(fail) emitted portable meaning matches the independent oracle [20.37ms]
+(fail) captured snapshots survive caller mutation and remain frozen after real module import [13.00ms]
+
+ 30 pass
+ 2 fail
+ 2357 expect() calls
+Ran 32 tests across 5 files. [2.89s]

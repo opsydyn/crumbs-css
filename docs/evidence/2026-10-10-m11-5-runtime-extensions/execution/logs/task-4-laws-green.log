@@ -1,0 +1,49 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m2-6-native-module-emission.test.ts:
+(pass) M2.6 direct native module emission > emits only explicit development metadata as a deeply frozen __crumbsDev sidecar [1.19ms]
+(pass) M2.6 direct native module emission > reserves the generated devtools metadata binding at the final emitter boundary [0.04ms]
+(pass) M2.6 direct native module emission > emits immutable minimal token and condition metadata from final native styles [0.22ms]
+(pass) M2.6 direct native module emission > sorts and deduplicates multiple surviving token references [0.12ms]
+(pass) M2.6 direct native module emission > preserves structured styles, ordinary exports, empty styles and theme descriptors on the direct path [81.70ms]
+(pass) M2.6 direct native module emission > emits per-export dependency paths for variants and recipe branches [18.87ms]
+(pass) M2.6 direct native module emission > feeds emitted dependency plans into the selective runtime resolver [17.74ms]
+(pass) M2.6 direct native module emission > uses captured exports rather than reserialising and re-evaluating a vanilla module [0.08ms]
+(pass) M2.6 direct native module emission > reserves the generated module descriptor binding [12.74ms]
+(pass) M2.6 direct native module emission > rejects the reserved binding at the final emitter boundary [0.03ms]
+
+packages/css/test/runtime-extension-metadata.test.ts:
+(pass) opaque callables have no phantom dependency or ownership paths; genuine argument styles contribute global tokens [0.52ms]
+(pass) opaque manifest identifies the export and endpoint without claiming component capabilities [0.33ms]
+
+packages/css/test/ordinary-exports.test.ts:
+(pass) ordinary CSS module exports > preserves named primitive values, undefined fields and negative zero [15.71ms]
+(pass) ordinary CSS module exports > preserves tag-shaped ordinary data and own prototype-like keys alongside real metadata [17.80ms]
+(pass) ordinary CSS module exports > preserves null-prototype data and leaves unrelated class-like text unchanged [13.90ms]
+(pass) ordinary CSS module exports > rejects unsupported values before lossy serialization with file/export path diagnostics [235.76ms]
+(pass) ordinary CSS module exports > cleans composition handles without rewriting ordinary strings [0.24ms]
+(pass) ordinary CSS module exports > matches generated nested ordinary data independently of style exports [1340.00ms]
+
+packages/css/test/runtime-extension.property.test.ts:
+(pass) snapshot_meaning_matches_independent_ordinary_value_oracle [2.81ms]
+(pass) separate_invocations_are_never_interned [1.90ms]
+(pass) emitted portable meaning matches the independent oracle [177.24ms]
+(pass) named export permutations produce identical emitted bytes [198.41ms]
+(pass) captured snapshots survive caller mutation and remain frozen after real module import [167.15ms]
+(pass) alias versus distinct identity and unrelated data are independent [171.76ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [30.43ms]
+(pass) factory exceptions propagate unchanged and are not retried [27.24ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [54.37ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [27.15ms]
+(pass) ordinary modules retain their exact emission bytes [0.09ms]
+(pass) direct module emission refuses an unverified endpoint [0.12ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [27.29ms]
+(pass) an empty genuine native style becomes an empty argument record [29.91ms]
+(pass) the runtime factory owns its rest tuple; only supplied argument data is frozen [27.19ms]
+
+ 33 pass
+ 0 fail
+ 3156 expect() calls
+Ran 33 tests across 5 files. [3.00s]

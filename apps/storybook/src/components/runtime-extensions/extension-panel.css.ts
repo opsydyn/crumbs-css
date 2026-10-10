@@ -1,0 +1,17 @@
+import { viewStyle, textStyle, createTheme, createThemeContract } from '@opsydyn/crumbs-css/style';
+import { styledView, themedView } from './authoring';
+export const vars = createThemeContract({ colors: { blue: null, red: null } });
+export const lightTheme = createTheme(vars, { colors: { blue: '#0000ff', red: '#ff0000' } });
+export const darkTheme = createTheme(vars, { colors: { blue: '#000080', red: '#800000' } });
+export const LiteralBlue = styledView(viewStyle({ backgroundColor: '#0000ff', padding: 12, borderRadius: 8 }));
+export const LiteralRed = styledView(viewStyle({ backgroundColor: '#ff0000', padding: 12, borderRadius: 8 }));
+export const ThemedBlue = themedView(viewStyle({ backgroundColor: vars.colors.blue, padding: 12, borderRadius: 8 }));
+export const ThemedRed = themedView(viewStyle({ backgroundColor: vars.colors.red, padding: 12, borderRadius: 8 }));
+export const panel = viewStyle({ padding: 8, gap: 6, backgroundColor: '#ffffff' });
+export const row = viewStyle({ flexDirection: 'row', gap: 6, alignItems: 'flex-start', flexWrap: 'wrap' });
+export const control = viewStyle({ padding: 6, minHeight: 32, borderWidth: 1, borderColor: '#64748b', borderRadius: 4, backgroundColor: '#ffffff' });
+export const card = viewStyle({ width: 152, minHeight: 110, gap: 4 });
+export const swatch = viewStyle({ width: 24, height: 12 });
+export const label = textStyle({ fontSize: 12, color: '#111827' });
+export const heading = textStyle({ fontSize: 18, fontWeight: '700', color: '#111827' });
+export const sample = textStyle({ fontSize: 16, lineHeight: 24, color: '#ffffff', alignSelf: 'flex-start' });

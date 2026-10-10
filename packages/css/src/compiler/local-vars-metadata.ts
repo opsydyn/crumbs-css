@@ -1,3 +1,4 @@
+import {isCapturedRuntimeExtension} from './runtime-extension-model'
 import { localOperandCandidate, NativeLocalVarType, nativeLocalVarKey, type AnyLocalVar } from "../local-vars/model";
 import { admitLocalOperand, assertLocalDefinitions } from "../local-vars/admission";
 import { isThemeTokenReference } from "../theme-token";
@@ -37,6 +38,7 @@ export function createLocalVarsMetadata(classes: ReadonlyMap<string, Record<stri
         operands(item, vars, tokens);
   }
   function visit(value: unknown, path: string): void {
+    if (isCapturedRuntimeExtension(value)) return
     if (value && typeof value === "object" && "$$type" in value && value.$$type === "crumbs.css.class" && "className" in value && typeof value.className === "string") {
       const style = classes.get(value.className);
       if (style)

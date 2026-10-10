@@ -1,0 +1,703 @@
+Activity Resolver Table:
+  Schemes:
+      expauth:
+        c85236d host.exp.exponent/.home.auth.AuthActivity filter 8c97ba2
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "expauth"
+      stripe:
+        25d8969 host.exp.exponent/com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity filter 1e7afee
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "stripe-auth"
+          Scheme: "stripe"
+          Authority: "link-accounts": -1
+          Authority: "link-native-accounts": -1
+          Authority: "link-accounts": -1
+          Authority: "link-accounts": -1
+          Authority: "native-redirect": -1
+          Authority: "auth-redirect": -1
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent/authentication_return}"
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent/authentication_return}"
+          Path: "PatternMatcher{LITERAL: /host.exp.exponent/success}"
+          Path: "PatternMatcher{LITERAL: /host.exp.exponent/cancel}"
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent}"
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent}"
+        a0872ab host.exp.exponent/com.stripe.android.financialconnections.lite.FinancialConnectionsSheetLiteRedirectActivity filter 3cb1d08
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "stripe"
+          Authority: "financial-connections-lite": -1
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent/auth_redirect}"
+      stripe-connect:
+        2c13033 host.exp.exponent/com.reactnativestripesdk.StripeConnectDeepLinkInterceptorActivity filter 3633ff0
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "stripe-connect"
+      link-popup:
+        7549c8f host.exp.exponent/com.stripe.android.link.LinkRedirectHandlerActivity filter c546b1c
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "link-popup"
+          Authority: "complete": -1
+          Path: "PatternMatcher{LITERAL: /host.exp.exponent}"
+      stripesdk:
+        c3c5325 host.exp.exponent/com.stripe.android.payments.StripeBrowserProxyReturnActivity filter aa2dcfa
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "stripesdk"
+          Authority: "payment_return_url": -1
+          Path: "PatternMatcher{LITERAL: /host.exp.exponent}"
+      exp:
+        aadaff9 host.exp.exponent/.LauncherActivity filter b27fb3e
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "exp"
+          Scheme: "exps"
+      exps:
+        aadaff9 host.exp.exponent/.LauncherActivity filter b27fb3e
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "exp"
+          Scheme: "exps"
+      http:
+        aadaff9 host.exp.exponent/.LauncherActivity filter e870d9f
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "https"
+          Scheme: "http"
+          Authority: "expo.io": -1
+          Authority: "expo.io": -1
+          Authority: "expo.dev": -1
+          Authority: "expo.dev": -1
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          AutoVerify=true
+        aadaff9 host.exp.exponent/.LauncherActivity filter da16eec
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "exp.host": -1
+          Authority: "exp.host": -1
+          Authority: ".exp.direct": -1 WILD
+          Authority: ".exp.direct": -1 WILD
+          Path: "PatternMatcher{PREFIX: /@}"
+          Path: "PatternMatcher{PREFIX: /@}"
+          Path: "PatternMatcher{GLOB: .*}"
+          Path: "PatternMatcher{GLOB: .*}"
+      https:
+        aadaff9 host.exp.exponent/.LauncherActivity filter e870d9f
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "https"
+          Scheme: "http"
+          Authority: "expo.io": -1
+          Authority: "expo.io": -1
+          Authority: "expo.dev": -1
+          Authority: "expo.dev": -1
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          Path: "PatternMatcher{LITERAL: /expo-go}"
+          AutoVerify=true
+        aadaff9 host.exp.exponent/.LauncherActivity filter da16eec
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "http"
+          Scheme: "https"
+          Authority: "exp.host": -1
+          Authority: "exp.host": -1
+          Authority: ".exp.direct": -1 WILD
+          Authority: ".exp.direct": -1 WILD
+          Path: "PatternMatcher{PREFIX: /@}"
+          Path: "PatternMatcher{PREFIX: /@}"
+          Path: "PatternMatcher{GLOB: .*}"
+          Path: "PatternMatcher{GLOB: .*}"
+      stripe-auth:
+        25d8969 host.exp.exponent/com.stripe.android.financialconnections.FinancialConnectionsSheetRedirectActivity filter 1e7afee
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "stripe-auth"
+          Scheme: "stripe"
+          Authority: "link-accounts": -1
+          Authority: "link-native-accounts": -1
+          Authority: "link-accounts": -1
+          Authority: "link-accounts": -1
+          Authority: "native-redirect": -1
+          Authority: "auth-redirect": -1
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent/authentication_return}"
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent/authentication_return}"
+          Path: "PatternMatcher{LITERAL: /host.exp.exponent/success}"
+          Path: "PatternMatcher{LITERAL: /host.exp.exponent/cancel}"
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent}"
+          Path: "PatternMatcher{PREFIX: /host.exp.exponent}"
+      host.exp.exponent:
+        4a71197 host.exp.exponent/net.openid.appauth.RedirectUriReceiverActivity filter 448af84
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "host.exp.exponent"
+          Authority: "host.exp.exponent": -1
+          Path: "PatternMatcher{LITERAL: /oauthredirect}"
+      expo-home:
+        1248d4a host.exp.exponent/.experience.HomeActivity filter 5ac8dd8
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "expo-home"
+
+  Non-Data Actions:
+      expo.modules.notifications.OPEN_APP_ACTION:
+        aadaff9 host.exp.exponent/.LauncherActivity filter 41052b5
+          Action: "expo.modules.notifications.OPEN_APP_ACTION"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+      android.intent.action.MAIN:
+        1248d4a host.exp.exponent/.experience.HomeActivity filter d8e4bb
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.LAUNCHER"
+        ac06531 host.exp.exponent/.experience.TvActivity filter 7a63416
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LEANBACK_LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      android.intent.action.BATTERY_OKAY:
+        5ef5c9b host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy filter 3d838
+          Action: "android.intent.action.BATTERY_OKAY"
+          Action: "android.intent.action.BATTERY_LOW"
+      android.intent.action.ACTION_POWER_DISCONNECTED:
+        a614f95 host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy filter 3ec78aa
+          Action: "android.intent.action.ACTION_POWER_DISCONNECTED"
+          Action: "android.intent.action.ACTION_POWER_CONNECTED"
+      android.intent.action.QUICKBOOT_POWERON:
+        bd98e87 host.exp.exponent/.notifications.receivers.SchedulingTriggerReceiver filter 87901b4
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.TIME_CHANGED"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.REBOOT"
+        f42c1dd host.exp.exponent/.notifications.ExpoNotificationsService filter 46c1152
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+        6b68c23 host.exp.exponent/expo.modules.notifications.service.NotificationsService filter 7e8520
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      com.htc.intent.action.QUICKBOOT_POWERON:
+        f42c1dd host.exp.exponent/.notifications.ExpoNotificationsService filter 46c1152
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+        6b68c23 host.exp.exponent/expo.modules.notifications.service.NotificationsService filter 7e8520
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        8bb8e6f host.exp.exponent/androidx.profileinstaller.ProfileInstallReceiver filter c6c605a
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      android.intent.action.TIME_CHANGED:
+        bd98e87 host.exp.exponent/.notifications.receivers.SchedulingTriggerReceiver filter 87901b4
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.TIME_CHANGED"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.REBOOT"
+      android.intent.action.DEVICE_STORAGE_LOW:
+        d45011 host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy filter 8f17576
+          Action: "android.intent.action.DEVICE_STORAGE_LOW"
+          Action: "android.intent.action.DEVICE_STORAGE_OK"
+      android.net.conn.CONNECTIVITY_CHANGE:
+        fdd2777 host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxy$NetworkStateProxy filter 3a3fe4
+          Action: "android.net.conn.CONNECTIVITY_CHANGE"
+      expo.modules.taskManager.TaskBroadcastReceiver.INTENT_ACTION:
+        92e9ed9 host.exp.exponent/expo.modules.taskManager.TaskBroadcastReceiver filter 215f09e
+          Action: "expo.modules.taskManager.TaskBroadcastReceiver.INTENT_ACTION"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+      com.google.android.gms.analytics.ANALYTICS_DISPATCH:
+        c83fca1 host.exp.exponent/com.google.android.gms.analytics.AnalyticsReceiver filter b1cec6
+          Action: "com.google.android.gms.analytics.ANALYTICS_DISPATCH"
+      expo.modules.notifications.NOTIFICATION_EVENT:
+        f42c1dd host.exp.exponent/.notifications.ExpoNotificationsService filter 46c1152
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+        6b68c23 host.exp.exponent/expo.modules.notifications.service.NotificationsService filter 7e8520
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      android.intent.action.DEVICE_STORAGE_OK:
+        d45011 host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxy$StorageNotLowProxy filter 8f17576
+          Action: "android.intent.action.DEVICE_STORAGE_LOW"
+          Action: "android.intent.action.DEVICE_STORAGE_OK"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        8bb8e6f host.exp.exponent/androidx.profileinstaller.ProfileInstallReceiver filter 61ba77c
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      com.google.android.c2dm.intent.RECEIVE:
+        adbc77f host.exp.exponent/com.google.firebase.iid.FirebaseInstanceIdReceiver filter 196d34c
+          Action: "com.google.android.c2dm.intent.RECEIVE"
+      android.intent.action.BATTERY_LOW:
+        5ef5c9b host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryNotLowProxy filter 3d838
+          Action: "android.intent.action.BATTERY_OKAY"
+          Action: "android.intent.action.BATTERY_LOW"
+      android.intent.action.TIMEZONE_CHANGED:
+        bd98e87 host.exp.exponent/.notifications.receivers.SchedulingTriggerReceiver filter 87901b4
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.TIME_CHANGED"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.REBOOT"
+        69cdc4d host.exp.exponent/androidx.work.impl.background.systemalarm.RescheduleReceiver filter c777302
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.BOOT_COMPLETED"
+      android.intent.action.TIME_SET:
+        69cdc4d host.exp.exponent/androidx.work.impl.background.systemalarm.RescheduleReceiver filter c777302
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.BOOT_COMPLETED"
+      androidx.profileinstaller.action.SKIP_FILE:
+        8bb8e6f host.exp.exponent/androidx.profileinstaller.ProfileInstallReceiver filter cb64805
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        8bb8e6f host.exp.exponent/androidx.profileinstaller.ProfileInstallReceiver filter f1ca28b
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+      android.intent.action.BOOT_COMPLETED:
+        bd98e87 host.exp.exponent/.notifications.receivers.SchedulingTriggerReceiver filter 87901b4
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.TIME_CHANGED"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.REBOOT"
+        f42c1dd host.exp.exponent/.notifications.ExpoNotificationsService filter 46c1152
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+        6b68c23 host.exp.exponent/expo.modules.notifications.service.NotificationsService filter 7e8520
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+        92e9ed9 host.exp.exponent/expo.modules.taskManager.TaskBroadcastReceiver filter 215f09e
+          Action: "expo.modules.taskManager.TaskBroadcastReceiver.INTENT_ACTION"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+        69cdc4d host.exp.exponent/androidx.work.impl.background.systemalarm.RescheduleReceiver filter c777302
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.TIME_SET"
+          Action: "android.intent.action.BOOT_COMPLETED"
+      android.intent.action.ACTION_POWER_CONNECTED:
+        a614f95 host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxy$BatteryChargingProxy filter 3ec78aa
+          Action: "android.intent.action.ACTION_POWER_DISCONNECTED"
+          Action: "android.intent.action.ACTION_POWER_CONNECTED"
+      androidx.work.diagnostics.REQUEST_DIAGNOSTICS:
+        7e7f049 host.exp.exponent/androidx.work.impl.diagnostics.DiagnosticsReceiver filter a6dbd4e
+          Action: "androidx.work.diagnostics.REQUEST_DIAGNOSTICS"
+      android.intent.action.MY_PACKAGE_REPLACED:
+        f42c1dd host.exp.exponent/.notifications.ExpoNotificationsService filter 46c1152
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+        6b68c23 host.exp.exponent/expo.modules.notifications.service.NotificationsService filter 7e8520
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+        92e9ed9 host.exp.exponent/expo.modules.taskManager.TaskBroadcastReceiver filter 215f09e
+          Action: "expo.modules.taskManager.TaskBroadcastReceiver.INTENT_ACTION"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+      androidx.work.impl.background.systemalarm.UpdateProxies:
+        972c413 host.exp.exponent/androidx.work.impl.background.systemalarm.ConstraintProxyUpdateReceiver filter 74d7650
+          Action: "androidx.work.impl.background.systemalarm.UpdateProxies"
+      android.intent.action.REBOOT:
+        bd98e87 host.exp.exponent/.notifications.receivers.SchedulingTriggerReceiver filter 87901b4
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "android.intent.action.TIME_CHANGED"
+          Action: "android.intent.action.TIMEZONE_CHANGED"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.REBOOT"
+        f42c1dd host.exp.exponent/.notifications.ExpoNotificationsService filter 46c1152
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+        6b68c23 host.exp.exponent/expo.modules.notifications.service.NotificationsService filter 7e8520
+          Action: "android.intent.action.QUICKBOOT_POWERON"
+          Action: "com.htc.intent.action.QUICKBOOT_POWERON"
+          Action: "expo.modules.notifications.NOTIFICATION_EVENT"
+          Action: "android.intent.action.BOOT_COMPLETED"
+          Action: "android.intent.action.MY_PACKAGE_REPLACED"
+          Action: "android.intent.action.REBOOT"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+
+Service Resolver Table:
+  Non-Data Actions:
+      androidx.media3.session.MediaSessionService:
+        b39bf68 host.exp.exponent/expo.modules.video.playbackService.ExpoVideoPlaybackService filter 2585f81
+          Action: "androidx.media3.session.MediaSessionService"
+      com.google.firebase.MESSAGING_EVENT:
+        b802826 host.exp.exponent/.fcm.ExpoFcmMessagingService filter 530dc67
+          Action: "com.google.firebase.MESSAGING_EVENT"
+        2b6a0b2 host.exp.exponent/expo.modules.notifications.service.ExpoFirebaseMessagingService filter 864d803
+          Action: "com.google.firebase.MESSAGING_EVENT"
+          mPriority=-1, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+        2131380 host.exp.exponent/com.google.firebase.messaging.FirebaseMessagingService filter 7107db9
+          Action: "com.google.firebase.MESSAGING_EVENT"
+          mPriority=-500, mOrder=0, mHasStaticPartialTypes=false, mHasDynamicPartialTypes=false
+      com.google.android.gms.metadata.MODULE_DEPENDENCIES:
+        79f6a14 host.exp.exponent/com.google.android.gms.metadata.ModuleDependencies filter aa72bd
+          Action: "com.google.android.gms.metadata.MODULE_DEPENDENCIES"
+
+Domain verification status:
+  host.exp.exponent:
+    ID: c11ead74-9f29-4296-9d01-4b6cf6617b34
+    Signatures: [9E:B6:B9:63:1C:EC:BB:D8:64:EF:60:78:26:E0:A3:0F:67:3D:C6:4C:F8:FB:57:53:26:3E:CA:AE:4B:C5:0F:AE]
+    Domain verification state:
+      expo.dev: verified
+      expo.io: none
+    User all:
+      Verification link handling allowed: true
+      Selection state:
+        Disabled:
+          exp.host
+          *.exp.direct
+          expo.dev
+          expo.io
+
+Permissions:
+  Permission [host.exp.exponent.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (688a6cd):
+    sourcePackage=host.exp.exponent
+    uid=10213 gids=[] type=0 prot=signature
+    perm=PermissionInfo{a8fab82 host.exp.exponent.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+    flags=0x0
+
+Permissions:
+  Permission [host.exp.exponent.permission.C2D_MESSAGE] (df9d293):
+    sourcePackage=host.exp.exponent
+    uid=10213 gids=[] type=0 prot=signature
+    perm=PermissionInfo{239a2d0 host.exp.exponent.permission.C2D_MESSAGE}
+    flags=0x0
+
+Registered ContentProviders:
+  host.exp.exponent/expo.modules.imagepicker.fileprovider.ImagePickerFileProvider:
+    Provider{f05e2c9 host.exp.exponent/expo.modules.imagepicker.fileprovider.ImagePickerFileProvider}
+  host.exp.exponent/expo.modules.clipboard.ClipboardFileProvider:
+    Provider{110fdce host.exp.exponent/expo.modules.clipboard.ClipboardFileProvider}
+  host.exp.exponent/com.canhub.cropper.CropFileProvider:
+    Provider{ce504ef host.exp.exponent/com.canhub.cropper.CropFileProvider}
+  host.exp.exponent/androidx.startup.InitializationProvider:
+    Provider{4de1bfc host.exp.exponent/androidx.startup.InitializationProvider}
+  host.exp.exponent/com.reactnativecommunity.webview.RNCWebViewFileProvider:
+    Provider{e285 host.exp.exponent/com.reactnativecommunity.webview.RNCWebViewFileProvider}
+  host.exp.exponent/expo.modules.sharing.SharingFileProvider:
+    Provider{d4328da host.exp.exponent/expo.modules.sharing.SharingFileProvider}
+  host.exp.exponent/com.reactnativestripesdk.StripeFileProvider:
+    Provider{ea7010b host.exp.exponent/com.reactnativestripesdk.StripeFileProvider}
+  host.exp.exponent/org.jetbrains.compose.resources.AndroidContextProvider:
+    Provider{8eefbe8 host.exp.exponent/org.jetbrains.compose.resources.AndroidContextProvider}
+  host.exp.exponent/androidx.core.content.FileProvider:
+    Provider{bf22201 host.exp.exponent/androidx.core.content.FileProvider}
+  host.exp.exponent/expo.modules.mailcomposer.MailComposerFileProvider:
+    Provider{a3af8a6 host.exp.exponent/expo.modules.mailcomposer.MailComposerFileProvider}
+  host.exp.exponent/com.google.mlkit.common.internal.MlKitInitProvider:
+    Provider{942a2e7 host.exp.exponent/com.google.mlkit.common.internal.MlKitInitProvider}
+  host.exp.exponent/expo.modules.filesystem.FileSystemFileProvider:
+    Provider{4abee94 host.exp.exponent/expo.modules.filesystem.FileSystemFileProvider}
+  host.exp.exponent/com.google.firebase.provider.FirebaseInitProvider:
+    Provider{a5ddd3d host.exp.exponent/com.google.firebase.provider.FirebaseInitProvider}
+
+ContentProvider Authorities:
+  [host.exp.exponent.ClipboardFileProvider]:
+    Provider{110fdce host.exp.exponent/expo.modules.clipboard.ClipboardFileProvider}
+      applicationInfo=ApplicationInfo{d8df932 host.exp.exponent}
+  [host.exp.exponent.mlkitinitprovider]:
+    Provider{942a2e7 host.exp.exponent/com.google.mlkit.common.internal.MlKitInitProvider}
+      applicationInfo=ApplicationInfo{60c8683 host.exp.exponent}
+  [host.exp.exponent.resources.AndroidContextProvider]:
+    Provider{8eefbe8 host.exp.exponent/org.jetbrains.compose.resources.AndroidContextProvider}
+      applicationInfo=ApplicationInfo{a36000 host.exp.exponent}
+  [host.exp.exponent.cropper.fileprovider]:
+    Provider{ce504ef host.exp.exponent/com.canhub.cropper.CropFileProvider}
+      applicationInfo=ApplicationInfo{cd01039 host.exp.exponent}
+  [host.exp.exponent.ImagePickerFileProvider]:
+    Provider{f05e2c9 host.exp.exponent/expo.modules.imagepicker.fileprovider.ImagePickerFileProvider}
+      applicationInfo=ApplicationInfo{e9e767e host.exp.exponent}
+  [host.exp.exponent.SharingFileProvider]:
+    Provider{d4328da host.exp.exponent/expo.modules.sharing.SharingFileProvider}
+      applicationInfo=ApplicationInfo{50707df host.exp.exponent}
+  [host.exp.exponent.MailComposerFileProvider]:
+    Provider{a3af8a6 host.exp.exponent/expo.modules.mailcomposer.MailComposerFileProvider}
+      applicationInfo=ApplicationInfo{dde7c2c host.exp.exponent}
+  [host.exp.exponent.androidx-startup]:
+    Provider{4de1bfc host.exp.exponent/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{79876f5 host.exp.exponent}
+  [host.exp.exponent.firebaseinitprovider]:
+    Provider{a5ddd3d host.exp.exponent/com.google.firebase.provider.FirebaseInitProvider}
+      applicationInfo=ApplicationInfo{6a77c8a host.exp.exponent}
+  [host.exp.exponent.fileprovider]:
+    Provider{e285 host.exp.exponent/com.reactnativecommunity.webview.RNCWebViewFileProvider}
+      applicationInfo=ApplicationInfo{9fe42fb host.exp.exponent}
+  [host.exp.exponent.provider]:
+    Provider{bf22201 host.exp.exponent/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{2cd2f18 host.exp.exponent}
+  [host.exp.exponent.FileSystemFileProvider]:
+    Provider{4abee94 host.exp.exponent/expo.modules.filesystem.FileSystemFileProvider}
+      applicationInfo=ApplicationInfo{a468d71 host.exp.exponent}
+
+Key Set Manager:
+  [host.exp.exponent]
+      Signing KeySets: 61
+
+Packages:
+  Package [host.exp.exponent] (54ec930):
+    appId=10213
+    pkg=Package{ef879a9 host.exp.exponent}
+    codePath=/data/app/~~ygsAGPXW9nj4x5FOsKQ3ZQ==/host.exp.exponent-zwi2xmai_gLaShBUq9oToQ==
+    resourcePath=/data/app/~~ygsAGPXW9nj4x5FOsKQ3ZQ==/host.exp.exponent-zwi2xmai_gLaShBUq9oToQ==
+    legacyNativeLibraryDir=/data/app/~~ygsAGPXW9nj4x5FOsKQ3ZQ==/host.exp.exponent-zwi2xmai_gLaShBUq9oToQ==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=441 minSdk=24 targetSdk=36
+    minExtensionVersions=[]
+    versionName=56.0.4
+    hiddenApiEnforcementPolicy=2
+    usesNonSdkApi=false
+    splits=[base]
+    apkSigningVersion=2
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE HAS_DOMAIN_URLS PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    pageSizeCompat=0
+    queriesPackages=[com.android.chrome, com.google.android.apps.maps]
+    queriesIntents=[Intent { act=org.chromium.intent.action.PAY }, Intent { act=org.chromium.intent.action.IS_READY_TO_PAY }, Intent { act=org.chromium.intent.action.UPDATE_PAYMENT_DETAILS }, Intent { act=android.intent.action.OPEN_DOCUMENT_TREE }, Intent { act=android.intent.action.SEND dat=content://*/... typ=*/* }, Intent { act=android.intent.action.VIEW dat=http:/... }, Intent { act=android.intent.action.VIEW dat=content:/... }, Intent { act=android.intent.action.SEND cat=[android.intent.category.DEFAULT] dat=content://*/... typ=application/octet-stream }, Intent { act=android.intent.action.SEND cat=[android.intent.category.DEFAULT] dat=content://*/... typ=text/x-vcard }, Intent { act=android.intent.action.SEND cat=[android.intent.category.DEFAULT] dat=content://*/... typ=text/vcard }, Intent { act=android.intent.action.EDIT }, Intent { act=android.intent.action.INSERT }, Intent { act=android.intent.action.OPEN_DOCUMENT cat=[android.intent.category.DEFAULT,android.intent.category.OPENABLE] dat=content://*/... typ=*/* }, Intent { act=android.media.action.IMAGE_CAPTURE }, Intent { act=android.media.action.ACTION_VIDEO_CAPTURE }, Intent { act=android.intent.action.SENDTO dat=mailto:xx }, Intent { act=android.intent.action.SEND_MULTIPLE cat=[android.intent.category.DEFAULT] dat=content://*/... typ=*/* }, Intent { act=android.intent.action.SENDTO cat=[android.intent.category.DEFAULT,android.intent.category.BROWSABLE] dat=sms:xx }, Intent { act=android.intent.action.SENDTO cat=[android.intent.category.DEFAULT,android.intent.category.BROWSABLE] dat=smsto:xx }, Intent { act=android.intent.action.TTS_SERVICE }, Intent { act=android.support.customtabs.action.CustomTabsService }, Intent { act=androidx.camera.extensions.action.VENDOR_ACTION }, Intent { act=android.intent.action.GET_CONTENT cat=[android.intent.category.OPENABLE] dat=content://*/... typ=*/* }]
+    scannedAsStoppedSystemApp=false
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    usesOptionalLibraries:
+      androidx.camera.extensions.impl
+      org.apache.http.legacy
+      androidx.window.extensions
+      androidx.window.sidecar
+    usesLibraryFiles:
+      /system/framework/org.apache.http.legacy.jar
+      /system_ext/framework/androidx.window.extensions.jar
+      /system_ext/framework/androidx.window.sidecar.jar
+    timeStamp=2026-10-10 10:31:11
+    lastUpdateTime=2026-10-10 10:31:15
+    installerPackageName=null
+    installerPackageUid=-1
+    initiatingPackageName=com.android.shell
+    originatingPackageName=null
+    packageSource=1
+    appMetadataFilePath=null
+    appMetadataSource=0
+    signatures=PackageSignatures{76cbb66 version:2, signatures:[57f52fdb], past signatures:[]}
+    installPermissionsFixed=false
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP ]
+    privatePkgFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE PRIVATE_FLAG_REQUEST_LEGACY_EXTERNAL_STORAGE HAS_DOMAIN_URLS PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    apexModuleName=null
+    declared permissions:
+      host.exp.exponent.permission.C2D_MESSAGE: prot=signature
+      host.exp.exponent.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature
+    requested permissions:
+      android.permission.WRITE_SETTINGS
+      com.google.android.finsky.permission.BIND_GET_INSTALL_REFERRER_SERVICE
+      com.sonyericsson.home.permission.BROADCAST_BADGE
+      android.permission.READ_CALENDAR
+      android.permission.POST_NOTIFICATIONS
+      com.google.android.c2dm.permission.RECEIVE
+      android.permission.ACCESS_FINE_LOCATION
+      android.permission.MODIFY_AUDIO_SETTINGS
+      android.permission.SYSTEM_ALERT_WINDOW
+      com.oppo.launcher.permission.WRITE_SETTINGS
+      android.permission.DETECT_SCREEN_CAPTURE
+      me.everything.badger.permission.BADGE_COUNT_READ
+      com.anddoes.launcher.permission.UPDATE_COUNT
+      com.sec.android.provider.badge.permission.READ
+      android.permission.FOREGROUND_SERVICE
+      me.everything.badger.permission.BADGE_COUNT_WRITE
+      android.permission.READ_MEDIA_VISUAL_USER_SELECTED
+      com.huawei.android.launcher.permission.WRITE_SETTINGS
+      android.permission.RECEIVE_BOOT_COMPLETED
+      android.permission.HIGH_SAMPLING_RATE_SENSORS
+      android.permission.FOREGROUND_SERVICE_LOCATION
+      android.permission.INTERNET
+      host.exp.exponent.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+      android.permission.READ_INTERNAL_STORAGE
+      host.exp.exponent.permission.C2D_MESSAGE
+      android.permission.ACCESS_COARSE_LOCATION
+      android.permission.READ_PHONE_STATE
+      android.permission.READ_APP_BADGE
+      android.permission.WRITE_CONTACTS
+      com.majeur.launcher.permission.UPDATE_BADGE
+      android.permission.ACCESS_NETWORK_STATE
+      com.oppo.launcher.permission.READ_SETTINGS
+      android.permission.CAMERA
+      com.sonymobile.home.permission.PROVIDER_INSERT_BADGE
+      android.permission.WRITE_CALENDAR
+      com.huawei.android.launcher.permission.READ_SETTINGS
+      android.permission.USE_FINGERPRINT
+      com.sec.android.provider.badge.permission.WRITE
+      android.permission.SCHEDULE_EXACT_ALARM
+      android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK
+      android.permission.VIBRATE
+      com.huawei.android.launcher.permission.CHANGE_BADGE
+      android.permission.ACCESS_WIFI_STATE
+      android.permission.USE_BIOMETRIC
+      com.htc.launcher.permission.UPDATE_SHORTCUT
+      com.android.launcher.permission.INSTALL_SHORTCUT
+      android.permission.RECORD_AUDIO
+      com.google.android.gms.permission.AD_ID
+      com.htc.launcher.permission.READ_SETTINGS
+      android.permission.WAKE_LOCK
+      android.permission.READ_CONTACTS
+      android.permission.ACCESS_BACKGROUND_LOCATION
+      android.permission.ACCESS_MEDIA_LOCATION
+    install permissions:
+      com.google.android.c2dm.permission.RECEIVE: granted=true
+      android.permission.MODIFY_AUDIO_SETTINGS: granted=true
+      android.permission.DETECT_SCREEN_CAPTURE: granted=true
+      android.permission.FOREGROUND_SERVICE: granted=true
+      android.permission.RECEIVE_BOOT_COMPLETED: granted=true
+      android.permission.HIGH_SAMPLING_RATE_SENSORS: granted=true
+      android.permission.FOREGROUND_SERVICE_LOCATION: granted=true
+      android.permission.INTERNET: granted=true
+      host.exp.exponent.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      host.exp.exponent.permission.C2D_MESSAGE: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+      android.permission.USE_FINGERPRINT: granted=true
+      android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK: granted=true
+      android.permission.VIBRATE: granted=true
+      android.permission.ACCESS_WIFI_STATE: granted=true
+      android.permission.USE_BIOMETRIC: granted=true
+      com.android.launcher.permission.INSTALL_SHORTCUT: granted=true
+      com.google.android.gms.permission.AD_ID: granted=true
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=557779 deDataInode=401742 installed=true hidden=false suspended=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false
+      installReason=0
+      dataDir=/data/user/0/host.exp.exponent
+      firstInstallTime=2026-10-09 16:17:42
+      uninstallReason=0
+      overlay paths:
+        /product/overlay/EmulationPixel7/EmulationPixel7Overlay.apk
+        /product/overlay/NavigationBarModeGestural/NavigationBarModeGesturalOverlay.apk
+      legacy overlay paths:
+        /product/overlay/EmulationPixel7/EmulationPixel7Overlay.apk
+        /product/overlay/NavigationBarModeGestural/NavigationBarModeGesturalOverlay.apk
+      gids=[3003]
+      runtime permissions:
+        android.permission.READ_CALENDAR: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.POST_NOTIFICATIONS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_FINE_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_MEDIA_VISUAL_USER_SELECTED: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_COARSE_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_PHONE_STATE: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.WRITE_CONTACTS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.CAMERA: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.WRITE_CALENDAR: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.RECORD_AUDIO: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.READ_CONTACTS: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+        android.permission.ACCESS_BACKGROUND_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED|RESTRICTION_INSTALLER_EXEMPT]
+        android.permission.ACCESS_MEDIA_LOCATION: granted=false, flags=[ USER_SENSITIVE_WHEN_GRANTED|USER_SENSITIVE_WHEN_DENIED]
+      enabledComponents:
+        androidx.work.impl.background.systemjob.SystemJobService
+
+Queries:
+  system apps queryable: false
+  queries via forceQueryable:
+  queries via package name:
+    host.exp.exponent:
+      com.google.android.apps.maps
+      com.android.chrome
+  queries via component:
+    com.google.android.settings.intelligence:
+      host.exp.exponent
+    com.google.android.as:
+      host.exp.exponent
+    com.google.android.apps.messaging:
+      host.exp.exponent
+    com.google.android.apps.accessibility.voiceaccess:
+      host.exp.exponent
+    host.exp.exponent:
+      [com.android.bluetooth,com.google.android.bluetooth]
+      com.google.android.documentsui
+      com.google.android.apps.messaging
+      com.google.android.googlequicksearchbox
+      com.google.android.calendar
+      com.google.android.apps.maps
+      com.android.chrome
+      com.google.android.apps.docs
+      com.google.android.gm
+      com.android.camera2
+      com.google.android.youtube
+      com.google.android.apps.photos
+      com.google.android.photopicker
+  queryable via interaction:
+    User 0:
+  queryable via uses-library:
+
+Dexopt state:
+  [host.exp.exponent]
+    path: /data/app/~~ygsAGPXW9nj4x5FOsKQ3ZQ==/host.exp.exponent-zwi2xmai_gLaShBUq9oToQ==/base.apk
+      arm64: [status=verify] [reason=install] [primary-abi]
+        [location is /data/app/~~ygsAGPXW9nj4x5FOsKQ3ZQ==/host.exp.exponent-zwi2xmai_gLaShBUq9oToQ==/oat/arm64/base.odex]
+
+Compiler stats:
+  [host.exp.exponent]
+     base.apk - 3057

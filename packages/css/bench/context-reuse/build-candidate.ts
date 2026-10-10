@@ -34,6 +34,10 @@ export function patchTransformer(source: string) {
   const inputs = declaration("capturedInputs"); const plugin = declaration("capturePlugin");
   const compiled = exact(native.body.statements.filter(statement => ts.isVariableStatement(statement) && statement.declarationList.declarations.some(item => item.initializer && ts.isAwaitExpression(item.initializer) && ts.isCallExpression(item.initializer.expression) && item.initializer.expression.expression.getText(file) === "compile")), "compile call");
   const compileDeclaration = (compiled as ts.VariableStatement).declarationList.declarations[0]!;
+  if(!ts.isObjectBindingPattern(compileDeclaration.name))throw new Error("Unsupported compile receipt binding")
+  const resolutionBinding=exact(compileDeclaration.name.elements.filter(element=>(element.propertyName?.getText(file) ?? element.name.getText(file))==="resolutionIdentity"),"resolution binding")
+  if(!ts.isIdentifier(resolutionBinding.name))throw new Error("Unsupported resolution receipt name")
+  const resolutionName=resolutionBinding.name.text
   const compileCall = (compileDeclaration.initializer as ts.AwaitExpression).expression as ts.CallExpression;
   const argument = compileCall.arguments[0];
   if (compileCall.arguments.length !== 1 || !argument || !ts.isObjectLiteralExpression(argument)) throw new Error("Unsupported compile argument shape");
@@ -52,7 +56,7 @@ export function patchTransformer(source: string) {
   const edits = [
     { start: native.name.getStart(file), end: native.name.end, text: "__crumbsTransformFromReceipt" },
     { start: native.parameters[0]!.getStart(file), end: native.parameters[0]!.getStart(file), text: "receipt: CompileReceipt, " },
-    { start: inputs.getFullStart(), end: compiled.end, text: "\n  const { source, inputs: capturedInputs } = receipt\n  const resolutionIdentity = captureResolutionIdentity(capturedInputs, { cwd, absoluteEntryPath: absoluteFilePath, verification: true })" },
+    { start: inputs.getFullStart(), end: compiled.end, text: `\n  const { source, inputs: capturedInputs } = receipt\n  const ${resolutionName} = captureResolutionIdentity(capturedInputs, { cwd, absoluteEntryPath: absoluteFilePath, verification: true })` },
     { start: native.getFullStart(), end: native.getFullStart(), text: wrapper },
     { start: call.arguments.end, end: call.arguments.end, text: ", undefined, data" },
     { start: 0, end: 0, text: 'import { captureResolutionIdentity } from "./compiler/resolution-identity"\nimport { qualificationRequest, qualificationRunNative } from "./qualification-adapter"\nimport type { CompileReceipt } from "../bench/context-reuse/compile-session"\nexport { __crumbsQualificationSnapshot, __crumbsQualificationClose, __crumbsQualificationDrainReceipts, __crumbsQualificationStaleInputsOnce, __crumbsQualificationOptionsOnce, __crumbsQualificationUnstableOnce } from "./qualification-adapter"\n' },

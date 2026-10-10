@@ -78,3 +78,13 @@ values extending `TypeError`. Stable codes are `algebra.invalid-color`,
 operand descriptor, option shape and admitted numeric bounds are distinct.
 Messages never echo arbitrary inputs or execute accessors. Native callers
 from another installed copy should identify errors by code.
+
+## Runtime extension diagnostics
+
+`ExtensionError` exposes bounded `path` and a closed `code`: invalid-config,
+invalid-argument, resource-limit, build-only-call, unsupported-version,
+unresolved-import, invalid-factory or invalid-result, each prefixed
+`extension.`. Compiler ingress/link failures include the stylesheet path.
+Accessors are rejected without invocation. Generated factory/result guards throw
+TypeErrors with the same code/path fields; exceptions thrown by a valid runtime
+factory propagate unchanged. An untransformed placeholder must never be rendered.

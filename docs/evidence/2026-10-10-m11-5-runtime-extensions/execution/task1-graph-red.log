@@ -1,0 +1,20 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-package.test.ts:
+472 |   const subpaths = [...new Set(targets.map((target) => target.subpath))]
+473 |   const classifications = new Map<string, PackedRuntimeClassification>()
+474 |   for (const subpath of subpaths) {
+475 |     const classification = exportClasses[subpath]
+476 |     if (classification === undefined) {
+477 |       throw new Error(`Unclassified export subpath ${subpath}; assign a runtime or metadata class`)
+                      ^
+error: Unclassified export subpath ./extensions; assign a runtime or metadata class
+      at auditPackedRuntimeEntrypoints (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/packed-runtime-graph.ts:477:17)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-package.test.ts:5:79)
+(fail) extensions_entry_has_no_runtime_externals [5.67ms]
+(pass) esm_cjs_public_values_and_cross_copy_protocol_match [3.79ms]
+
+ 1 pass
+ 1 fail
+ 3 expect() calls
+Ran 2 tests across 1 file. [585.00ms]

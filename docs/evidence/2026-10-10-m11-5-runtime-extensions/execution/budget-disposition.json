@@ -1,0 +1,50 @@
+{
+  "schema": "crumbs.m11.5.budget-disposition.v1",
+  "comparisonSha256": "275b3225412910b1da59f9ae15a0aa9466444955fe9c0214c1b0613a9e2ea8b8",
+  "blocking": {
+    "passIds": [
+      "incremental-rebuild",
+      "editor-tsc-wall-10000",
+      "editor-tsgo-wall-10000",
+      "editor-tsc-memory-10000",
+      "editor-tsgo-memory-10000",
+      "editor-tsc-instantiations-10000",
+      "editor-tsgo-instantiations-10000",
+      "editor-first-completion-10000",
+      "editor-warm-completion-10000"
+    ],
+    "failIds": [
+      "cold-transform-ms",
+      "warm-transform-ms"
+    ],
+    "incompleteIds": []
+  },
+  "advisory": {
+    "passIds": [
+      "runtime-tokens-esm-graph-bytes",
+      "runtime-tokens-cjs-graph-bytes"
+    ],
+    "failIds": [
+      "runtime-initialization-node22-esm",
+      "runtime-initialization-node22-cjs",
+      "runtime-initialization-current-esm",
+      "runtime-initialization-current-cjs",
+      "runtime-theme-core-esm-graph-bytes",
+      "runtime-theme-core-cjs-graph-bytes",
+      "runtime-theme-compatibility-esm-graph-bytes",
+      "runtime-theme-compatibility-cjs-graph-bytes"
+    ],
+    "incompleteIds": []
+  },
+  "newBlocker": "cold-transform-ms",
+  "newBlockerDisposition": "Retained under M10.5 release closure by the direct user instruction to commit, push and prepare major v1 after the pending-disposition handoff.",
+  "proposal": "Retain cold failure under M10.5 release closure without changing limits or waiving the release gate; complete the M11.5 functional slice.",
+  "existingDispositions": [
+    "warm-transform-ms under M10.5",
+    "historical incremental-rebuild under M10.5"
+  ],
+  "currentIncremental": "pass",
+  "releasePolicyQualified": false,
+  "limitsOrPolicyChanged": false,
+  "humanInstruction": "Let\u2019s ensure our docs are up to date - main read me with all apis commit and push and create a release we\u2019ll call this v1 its major"
+}

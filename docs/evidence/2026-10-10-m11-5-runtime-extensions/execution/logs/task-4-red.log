@@ -1,0 +1,169 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/m2-6-native-module-emission.test.ts:
+(pass) M2.6 direct native module emission > emits only explicit development metadata as a deeply frozen __crumbsDev sidecar [2.76ms]
+(pass) M2.6 direct native module emission > reserves the generated devtools metadata binding at the final emitter boundary [0.05ms]
+(pass) M2.6 direct native module emission > emits immutable minimal token and condition metadata from final native styles [0.28ms]
+(pass) M2.6 direct native module emission > sorts and deduplicates multiple surviving token references [0.12ms]
+(pass) M2.6 direct native module emission > preserves structured styles, ordinary exports, empty styles and theme descriptors on the direct path [180.43ms]
+(pass) M2.6 direct native module emission > emits per-export dependency paths for variants and recipe branches [20.70ms]
+(pass) M2.6 direct native module emission > feeds emitted dependency plans into the selective runtime resolver [18.12ms]
+(pass) M2.6 direct native module emission > uses captured exports rather than reserialising and re-evaluating a vanilla module [0.76ms]
+(pass) M2.6 direct native module emission > reserves the generated module descriptor binding [13.23ms]
+(pass) M2.6 direct native module emission > rejects the reserved binding at the final emitter boundary [0.04ms]
+
+packages/css/test/ordinary-exports.test.ts:
+(pass) ordinary CSS module exports > preserves named primitive values, undefined fields and negative zero [15.65ms]
+(pass) ordinary CSS module exports > preserves tag-shaped ordinary data and own prototype-like keys alongside real metadata [19.18ms]
+(pass) ordinary CSS module exports > preserves null-prototype data and leaves unrelated class-like text unchanged [14.68ms]
+(pass) ordinary CSS module exports > rejects unsupported values before lossy serialization with file/export path diagnostics [248.84ms]
+(pass) ordinary CSS module exports > cleans composition handles without rewriting ordinary strings [0.31ms]
+(pass) ordinary CSS module exports > matches generated nested ordinary data independently of style exports [1386.96ms]
+
+packages/css/test/runtime-extension.property.test.ts:
+(pass) snapshot_meaning_matches_independent_ordinary_value_oracle [3.29ms]
+(pass) separate_invocations_are_never_interned [2.14ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/style"
+
+    case.css.ts:3:32:
+      3 │       import { viewStyle } from '@opsydyn/crumbs-css/style';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/style" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/extensions"
+
+    case.css.ts:4:32:
+      4 │ import { defineExtension } from '@opsydyn/crumbs-css/extensions';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/extensions" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+1743 |     let { file, line, column } = e.location;
+1744 |     let pluginText = e.pluginName ? `[plugin: ${e.pluginName}] ` : "";
+1745 |     return `
+1746 | ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
+1747 |   }).join("");
+1748 |   let error = new Error(text);
+                         ^
+error: Build failed with 2 errors:
+case.css.ts:3:32: ERROR: Could not resolve "@opsydyn/crumbs-css/style"
+case.css.ts:4:32: ERROR: Could not resolve "@opsydyn/crumbs-css/extensions"
+      at failureErrorWithLog (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:19)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1207:25)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1626:9)
+(fail) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [6.55ms]
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/style"
+
+    case.css.ts:3:32:
+      3 │       import { viewStyle } from '@opsydyn/crumbs-css/style';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/style" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/extensions"
+
+    case.css.ts:4:32:
+      4 │ import { defineExtension } from '@opsydyn/crumbs-css/extensions';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/extensions" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+1743 |     let { file, line, column } = e.location;
+1744 |     let pluginText = e.pluginName ? `[plugin: ${e.pluginName}] ` : "";
+1745 |     return `
+1746 | ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
+1747 |   }).join("");
+1748 |   let error = new Error(text);
+                         ^
+error: Build failed with 2 errors:
+case.css.ts:3:32: ERROR: Could not resolve "@opsydyn/crumbs-css/style"
+case.css.ts:4:32: ERROR: Could not resolve "@opsydyn/crumbs-css/extensions"
+      at failureErrorWithLog (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:19)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1207:25)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1626:9)
+(fail) factory exceptions propagate unchanged and are not retried [4.01ms]
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/style"
+
+    case.css.ts:3:32:
+      3 │       import { viewStyle } from '@opsydyn/crumbs-css/style';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/style" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/extensions"
+
+    case.css.ts:4:32:
+      4 │ import { defineExtension } from '@opsydyn/crumbs-css/extensions';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/extensions" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+1743 |     let { file, line, column } = e.location;
+1744 |     let pluginText = e.pluginName ? `[plugin: ${e.pluginName}] ` : "";
+1745 |     return `
+1746 | ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
+1747 |   }).join("");
+1748 |   let error = new Error(text);
+                         ^
+error: Build failed with 2 errors:
+case.css.ts:3:32: ERROR: Could not resolve "@opsydyn/crumbs-css/style"
+case.css.ts:4:32: ERROR: Could not resolve "@opsydyn/crumbs-css/extensions"
+      at failureErrorWithLog (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:19)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1207:25)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1626:9)
+(fail) invalid imported factory and returned shape have stable own code/path TypeErrors [4.03ms]
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/style"
+
+    case.css.ts:3:32:
+      3 │       import { viewStyle } from '@opsydyn/crumbs-css/style';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/style" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/extensions"
+
+    case.css.ts:4:32:
+      4 │ import { defineExtension } from '@opsydyn/crumbs-css/extensions';
+        ╵                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+  You can mark the path "@opsydyn/crumbs-css/extensions" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+
+1743 |     let { file, line, column } = e.location;
+1744 |     let pluginText = e.pluginName ? `[plugin: ${e.pluginName}] ` : "";
+1745 |     return `
+1746 | ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
+1747 |   }).join("");
+1748 |   let error = new Error(text);
+                         ^
+error: Build failed with 2 errors:
+case.css.ts:3:32: ERROR: Could not resolve "@opsydyn/crumbs-css/style"
+case.css.ts:4:32: ERROR: Could not resolve "@opsydyn/crumbs-css/extensions"
+      at failureErrorWithLog (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1748:19)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1207:25)
+      at <anonymous> (/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.js:1626:9)
+(fail) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [3.30ms]
+(pass) ordinary modules retain their exact emission bytes [0.13ms]
+27 | });
+28 | it('ordinary modules retain their exact emission bytes',()=>{
+29 |  const captured=captureNativeExports({label:'plain',view:'base'},'control.css.ts',new Set(['base']),null);
+30 |  expect(buildStyleSheetCode(new Map(Object.entries(captured)),new Map([['base',{opacity:0.5}]]),[],{useStyleSheet:false})).toBe(`const _s = {\n  "base": {"opacity":0.5}\n};\nexport const __crumbsModule = Object.freeze({$$type:"crumbs.css.native-module",version:2,tokens:Object.freeze([]),dependencyPlan:Object.freeze({$$type:"crumbs.css.theme-dependency-plan",version:1,entries:Object.freeze([])}),conditions:Object.freeze([])});\nexport const label = "plain";\nexport const view = _s["base"];`);
+31 | });
+32 | it('direct module emission refuses an unverified endpoint',()=>{const factory=defineExtension<{make:()=>()=>void}>().factory({importPath:'@acme/runtime',importName:'make'});const out=captureNativeExports({result:factory()},'case.css.ts',new Set(),null);expect(()=>buildStyleSheetCode(new Map(Object.entries(out)),new Map(),[],{useStyleSheet:false})).toThrow(/extension.unresolved-import/);});
+                                                                                                                                                                                                                                                                                                                                                                   ^
+error: expect(received).toThrow(expected)
+
+Expected pattern: /extension.unresolved-import/
+
+Received function did not throw
+Received value: "const _s = {\n\n};\nexport const __crumbsModule = Object.freeze({$$type:\"crumbs.css.native-module\",version:2,tokens:Object.freeze([]),dependencyPlan:Object.freeze({$$type:\"crumbs.css.theme-dependency-plan\",version:1,entries:Object.freeze([])}),conditions:Object.freeze([])});\nexport const result = { \"args\": [], \"exportPath\": \"result\", \"id\": 0, \"importName\": \"make\", \"importPath\": \"@acme/runtime\" };"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:32:351)
+(fail) direct module emission refuses an unverified endpoint [1.25ms]
+
+ 19 pass
+ 5 fail
+ 906 expect() calls
+Ran 24 tests across 4 files. [2.30s]

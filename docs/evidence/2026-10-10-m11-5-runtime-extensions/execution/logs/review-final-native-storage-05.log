@@ -1,0 +1,12 @@
+ 8 | import { nativeAttributes, nativeXmlAttributes, nativeActionPoint } from './m11-3-native-observations';
+ 9 | type Platform = 'ios' | 'android';
+10 | const repository = resolve(import.meta.dir, '..');
+11 | function ensure(value: unknown, message: string): asserts value {
+12 |     if (!value)
+13 |         throw Error(message);
+                   ^
+error: M11.5 native failed: Error: Owned emulator not booted
+      at ensure (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-5-native-qualification.ts:13:15)
+      at qualify (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-5-native-qualification.ts:324:9)
+
+Bun v1.4.2 (macOS arm64)

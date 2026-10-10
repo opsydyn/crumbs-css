@@ -1,3 +1,4 @@
+import {isCapturedRuntimeExtension} from './runtime-extension-model'
 import { isThemeTokenReference } from "../theme-token"
 import { NativeStyleMapType } from "../native-style-map"
 import { sortedOwnEnumerableDataEntries } from "./record-admission"
@@ -97,6 +98,7 @@ function collectDependencyPlanEntries(
   active: Set<object>,
   output: ThemeDependencyPlanEntry[],
 ): void {
+  if (isCapturedRuntimeExtension(value)) return
   const className = classReferenceName(value)
   if (className !== undefined) {
     const style = classStyles.get(className)

@@ -1,0 +1,64 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-linkage.test.ts:
+✘ [ERROR] Could not resolve "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/fixtures/.extension-linkage-aeiurZ/entry.css.ts.crumbs-runtime-probe.ts"
+
+ 9 | type Options={readonly cwd:string;readonly absoluteEntryPath:string;readonly platform:string|null;readonly dev:boolean};
+10 | type ResolveResult={path:string;external:boolean;errors:readonly unknown[]};
+11 | type Build={initialOptions:{conditions?:string[];preserveSymlinks?:boolean};resolve:(p:string,o:{resolveDir:string;kind:'import-statement'|'require-call';pluginData:unknown})=>Promise<ResolveResult>;onLoad:(o:{filter:RegExp},cb:(a:{path:string})=>unknown)=>void;onResolve:(o:{filter:RegExp},cb:(a:{path:string;pluginData:unknown;kind:string;importer:string})=>unknown)=>void;onEnd:(cb:(r:{metafile?:{inputs:Record<string,unknown>}})=>void)=>void};
+12 | const key=(v:{importPath:string;importName:string})=>JSON.stringify([v.importPath,v.importName]);
+13 | const compare=(a:string,b:string)=>a<b?-1:a>b?1:0;
+14 | function fail(endpoint:string,reason:string):never{throw new ExtensionError('extension.unresolved-import',endpoint,reason);}
+                                                              ^
+ExtensionError: extension.unresolved-import at @acme/runtime: static named-link probe failed
+ path: "@acme/runtime",
+ code: "extension.unresolved-import"
+
+      at fail (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-linkage.ts:14:58)
+      at linkRuntimeExtensions (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-linkage.ts:64:64)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:11:169)
+(fail) runtime sentinel and native peer code are not evaluated by inert named-link probes [271.54ms]
+✘ [ERROR] Could not resolve "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/fixtures/.extension-linkage-gOPgxt/entry.css.ts.crumbs-runtime-probe.ts"
+
+✘ [ERROR] Could not resolve "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/fixtures/.extension-linkage-gOPgxt/entry.css.ts.crumbs-runtime-probe.ts"
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [8.92ms]
+✘ [ERROR] Could not resolve "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/fixtures/.extension-linkage-AN0fMz/entry.css.ts.crumbs-runtime-probe.ts"
+
+ 9 | type Options={readonly cwd:string;readonly absoluteEntryPath:string;readonly platform:string|null;readonly dev:boolean};
+10 | type ResolveResult={path:string;external:boolean;errors:readonly unknown[]};
+11 | type Build={initialOptions:{conditions?:string[];preserveSymlinks?:boolean};resolve:(p:string,o:{resolveDir:string;kind:'import-statement'|'require-call';pluginData:unknown})=>Promise<ResolveResult>;onLoad:(o:{filter:RegExp},cb:(a:{path:string})=>unknown)=>void;onResolve:(o:{filter:RegExp},cb:(a:{path:string;pluginData:unknown;kind:string;importer:string})=>unknown)=>void;onEnd:(cb:(r:{metafile?:{inputs:Record<string,unknown>}})=>void)=>void};
+12 | const key=(v:{importPath:string;importName:string})=>JSON.stringify([v.importPath,v.importName]);
+13 | const compare=(a:string,b:string)=>a<b?-1:a>b?1:0;
+14 | function fail(endpoint:string,reason:string):never{throw new ExtensionError('extension.unresolved-import',endpoint,reason);}
+                                                              ^
+ExtensionError: extension.unresolved-import at @acme/runtime: static named-link probe failed
+ path: "@acme/runtime",
+ code: "extension.unresolved-import"
+
+      at fail (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-linkage.ts:14:58)
+      at linkRuntimeExtensions (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-linkage.ts:64:64)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:13:622)
+(fail) conditional exports and self references/static reexports resolve to recorded endpoints [3.75ms]
+✘ [ERROR] Could not resolve "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/fixtures/.extension-linkage-DMelFD/entry.css.ts.crumbs-runtime-probe.ts"
+
+ 9 | type Options={readonly cwd:string;readonly absoluteEntryPath:string;readonly platform:string|null;readonly dev:boolean};
+10 | type ResolveResult={path:string;external:boolean;errors:readonly unknown[]};
+11 | type Build={initialOptions:{conditions?:string[];preserveSymlinks?:boolean};resolve:(p:string,o:{resolveDir:string;kind:'import-statement'|'require-call';pluginData:unknown})=>Promise<ResolveResult>;onLoad:(o:{filter:RegExp},cb:(a:{path:string})=>unknown)=>void;onResolve:(o:{filter:RegExp},cb:(a:{path:string;pluginData:unknown;kind:string;importer:string})=>unknown)=>void;onEnd:(cb:(r:{metafile?:{inputs:Record<string,unknown>}})=>void)=>void};
+12 | const key=(v:{importPath:string;importName:string})=>JSON.stringify([v.importPath,v.importName]);
+13 | const compare=(a:string,b:string)=>a<b?-1:a>b?1:0;
+14 | function fail(endpoint:string,reason:string):never{throw new ExtensionError('extension.unresolved-import',endpoint,reason);}
+                                                              ^
+ExtensionError: extension.unresolved-import at @acme/runtime: static named-link probe failed
+ path: "@acme/runtime",
+ code: "extension.unresolved-import"
+
+      at fail (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-linkage.ts:14:58)
+      at linkRuntimeExtensions (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-linkage.ts:64:64)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:14:160)
+(fail) runtime body and package or symlink retargets invalidate current receipts [4.32ms]
+
+ 1 pass
+ 3 fail
+ 6 expect() calls
+Ran 4 tests across 1 file. [1006.00ms]

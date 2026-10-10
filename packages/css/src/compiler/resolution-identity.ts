@@ -55,7 +55,7 @@ function ancestors(start: string): string[] {
 /** Compiler-only receipts. No configuration or package code is executed. */
 export function captureResolutionIdentity(
   inputs: Readonly<Record<string, unknown>>,
-  options: { readonly cwd: string; readonly absoluteEntryPath: string; readonly verification?: boolean },
+  options: { readonly cwd: string; readonly absoluteEntryPath: string; readonly verification?: boolean; readonly runtimeEndpoints?: readonly {readonly importPath:string;readonly importer:string;readonly resolvedPaths:readonly string[]}[] },
 ): ResolutionIdentity {
   const files = new Map<string, ResolutionFileReceipt>(), links = new Map<string, string | null>()
   let cacheable = true
@@ -159,10 +159,15 @@ export function captureResolutionIdentity(
     } catch { cacheable = false }
     finally { active.delete(absolute) }
   }
+  for(const endpoint of options.runtimeEndpoints ?? []) {
+    packageReceipt(endpoint.importPath,endpoint.importer)
+    for(const target of endpoint.resolvedPaths){admit(target);linkReceipt(target)}
+  }
+  if(options.runtimeEndpoints)for(const input of Object.keys(inputs)){const absolute=path.resolve(options.cwd,input);admit(absolute);linkReceipt(absolute)}
   admit(options.absoluteEntryPath)
   const authoredInputs = Object.keys(inputs).map(input => path.resolve(options.cwd, input)).filter(input => !input.split(path.sep).some(segment => segment === "node_modules" || segment === "dist"))
   for (const input of authoredInputs) admit(input)
-  const dirs = new Set([...ancestors(path.dirname(options.absoluteEntryPath)), ...ancestors(options.cwd), ...authoredInputs.flatMap(input => ancestors(path.dirname(input)))])
+  const dirs = new Set([...ancestors(path.dirname(options.absoluteEntryPath)), ...ancestors(options.cwd), ...(options.runtimeEndpoints ? Object.keys(inputs).map(input=>path.resolve(options.cwd,input)) : authoredInputs).flatMap(input => ancestors(path.dirname(input)))])
   for (const dir of dirs) {
     for (const name of ["tsconfig.json", "jsconfig.json"]) { const file = path.join(dir, name); if (admit(file)?.sourceHash !== null) config(file) }
     for (const name of ["package.json", "bun.lock", "bun.lockb", "package-lock.json", "yarn.lock", "pnpm-lock.yaml"]) admit(path.join(dir, name))
@@ -173,7 +178,7 @@ export function captureResolutionIdentity(
   const aliasBases = new Set([options.cwd, ...aliasConfigs.map(config => config.directory), ...aliasConfigs.filter(config => config.baseUrl !== undefined).map(config => path.resolve(config.directory, config.baseUrl!))])
   for (const [input, info] of Object.entries(inputs)) {
     const absolute = path.resolve(options.cwd, input)
-    if (absolute.split(path.sep).some(segment => segment === "node_modules" || segment === "dist")) continue
+    if (!options.runtimeEndpoints && absolute.split(path.sep).some(segment => segment === "node_modules" || segment === "dist")) continue
     const imports = info !== null && typeof info === "object" && "imports" in info ? info.imports : undefined
     if (!Array.isArray(imports)) continue
     for (const item of imports) {
@@ -230,4 +235,11 @@ export function assertPackageScopeIdentity(cwd: string, cached: { readonly name:
     return
   }
   throw new Error(`Restart Metro after changing package scope: ${cwd}`)
+}
+
+/** Combine receipts without silently choosing different versions of the same input. */
+export function combineResolutionIdentities(...identities:readonly ResolutionIdentity[]):ResolutionIdentity {
+ const files=new Map<string,ResolutionFileReceipt>(),links=new Map<string,string|null>();
+ for(const identity of identities){for(const receipt of identity.files){const prior=files.get(receipt.sourcePath);if(prior && JSON.stringify(prior)!==JSON.stringify(receipt))throw new Error('Native runtime resolution changed between compiler stages');files.set(receipt.sourcePath,receipt)}for(const link of identity.links){if(links.has(link.sourcePath)&&links.get(link.sourcePath)!==link.canonicalPath)throw new Error('Native runtime link changed between compiler stages');links.set(link.sourcePath,link.canonicalPath)}}
+ return Object.freeze({cacheable:identities.every(i=>i.cacheable),files:Object.freeze([...files.values()].sort((a,b)=>a.sourcePath.localeCompare(b.sourcePath))),links:Object.freeze([...links].sort(([a],[b])=>a.localeCompare(b)).map(([sourcePath,canonicalPath])=>Object.freeze({sourcePath,canonicalPath})))})
 }

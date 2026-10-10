@@ -1,3 +1,4 @@
+import {isCapturedRuntimeExtension} from './runtime-extension-model'
 import type {
   StyleExplanationCoverage,
   StyleExplanationDeclaration,
@@ -108,6 +109,7 @@ function collectLogicalStyleExports(exportMap: ReadonlyMap<string, unknown>): Re
   const result: LogicalStyleExport[] = []
   const active = new Set<object>()
   const visit = (value: unknown, path: ReadonlyArray<string | number>): void => {
+    if (isCapturedRuntimeExtension(value)) return
     if (isClassReference(value)) {
       result.push({ path: [...path], className: value.className })
       return

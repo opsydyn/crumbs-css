@@ -1,0 +1,87 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [0.65ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [0.18ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [0.23ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [0.26ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [1.33ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [0.38ms]
+(pass) rejects inherited protocol descriptors and invalid intrinsic fields independently of helper identity [0.05ms]
+(pass) native composition still validates property domains before an extension can be emitted [70.06ms]
+142 |     expect(() => factory([value])).toThrow(/extension.resource-limit/);
+143 |     const original = factory(value), descriptor = Object.getOwnPropertyDescriptor(original, marker)!.value;
+144 |     const forged = () => undefined;
+145 |     Object.defineProperty(forged, marker, {value:Object.freeze({...descriptor,args:Object.freeze([Object.freeze([value])])})});
+146 |     Object.freeze(forged);
+147 |     expect(() => cap({result:forged})).toThrow(/extension.resource-limit/);
+                                             ^
+error: expect(received).toThrow(expected)
+
+Expected pattern: /extension.resource-limit/
+Received message: "[crumbs-css:CRUMBS_CSS_UNSUPPORTED_EXPORT] Unsupported export in test.css.ts at result: extension.invalid-argument at result.args[\"0\"][\"0\"]: protocol snapshots must be deeply frozen"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-capture.test.ts:147:40)
+(fail) capture admits exactly 32 nested containers and lowering retains the scalar leaf [1.32ms]
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [22.01ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [7.11ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [18.03ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [29.23ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [14.44ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [2.70ms]
+(pass) mixed ESM-to-CommonJS reexports fail closed before a missing runtime name can ship [4.14ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) Node default conditions are not replaced by compiler development or production branches [4.47ms]
+(pass) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [11.03ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) stock Expo conditions select react-native default rather than an unasserted ios branch [3.39ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [28.01ms]
+(pass) factory exceptions propagate unchanged and are not retried [24.23ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [54.31ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [25.59ms]
+(pass) ordinary modules retain their exact emission bytes [0.08ms]
+(pass) direct module emission refuses an unverified endpoint [0.08ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [24.75ms]
+(pass) an empty genuine native style becomes an empty argument record [22.90ms]
+(pass) the runtime factory owns its rest tuple; only supplied argument data is frozen [24.60ms]
+(pass) documented maximum container depth survives actual compiled reconstruction [26.57ms]
+
+1 tests failed:
+(fail) capture admits exactly 32 nested containers and lowering retains the scalar leaf [1.32ms]
+
+ 28 pass
+ 1 fail
+ 182 expect() calls
+Ran 29 tests across 3 files. [690.00ms]

@@ -1,0 +1,51 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/stable-resolution-compile.test.ts:
+(pass) M10.5 discovery verifies newly observed inputs once and warm requests compile once [18.11ms]
+(pass) M10.5 changing configuration during every compile rejects output within a bounded retry [6.01ms]
+(pass) M10.5 Metro refuses entry-buffer/disk conflicts before upstream transformation [135.93ms]
+(pass) M10.5 large graphs verify every input without retaining a truncated plan [132.54ms]
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [52.09ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [9.94ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [22.66ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [33.19ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [16.25ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [3.33ms]
+
+packages/css/test/resolution-identity.test.ts:
+(pass) M10.5 compiler resolution identity > detects inherited JSONC config edits with unchanged entry and token bytes [1.48ms]
+(pass) M10.5 compiler resolution identity > detects newly created nearest config and missing extends appearing [1.46ms]
+(pass) M10.5 compiler resolution identity > detects package exports edits and canonical link retargets even with equal file content [2.51ms]
+(pass) M10.5 compiler resolution identity > tracks package based extends and installation files [2.00ms]
+(pass) M10.5 compiler resolution identity > fails closed for cyclic or malformed config instead of accepting cached styles [1.41ms]
+(pass) M10.5 compiler resolution identity > cache-store and graph keys include resolution identity while legacy metadata remains valid [2.33ms]
+(pass) M10.5 malformed resolution cache metadata is a miss, never a cache crash [0.13ms]
+(pass) M10.5 JSONC extends arrays preserve quoted comment/comma text and commented trailing commas [1.04ms]
+(pass) M10.5 emitted identity distinguishes unchanged styles from entry/config resolution edits [0.10ms]
+(pass) M10.5 cached package scope requires restart only when name or nearest named manifest changes [0.84ms]
+(pass) M10.5 imported workspace config and package config links participate in invalidation [2.37ms]
+(pass) M10.5 entry bytes are checked when a restored source hits a prior Metro transform key [0.79ms]
+(pass) M10.5 relative imports retain their logical symlink identity [1.30ms]
+(pass) M10.5 paths aliases observe retargeted logical symlinks with unchanged config [1.60ms]
+(pass) M10.5 package config edits after link retarget use the current target without Node resolution cache [2.57ms]
+(pass) M10.5 resolution captures sample each receipt once per pass and resample on the next pass [1.50ms]
+(pass) M10.5 missing candidates are recorded without exception-driven reads and newly created config is observed [1.71ms]
+
+ 27 pass
+ 0 fail
+ 68 expect() calls
+Ran 27 tests across 3 files. [723.00ms]

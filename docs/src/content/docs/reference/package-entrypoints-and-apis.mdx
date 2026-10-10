@@ -565,3 +565,11 @@ Types: `AlgebraColor`, `AlgebraColorInput`, `ColorInterpolationSpace`,
 No existing entry re-exports these values. ESM and CommonJS have separate
 JavaScript graphs and canonical shared type identity. The entry has zero
 runtime externals. See [token algebra](/crumbs-css/how-to/use-token-algebra/).
+
+## Runtime extensions
+
+`@opsydyn/crumbs-css/extensions` exports only `defineExtension` and
+`ExtensionError` as values. A type-only module witness preserves a selected named
+factory's argument tuple and callable result. The entry has no runtime peers.
+Generated modules statically import the real runtime factory; their dependencies
+come from that explicit endpoint. See [Create typed runtime extensions](/crumbs-css/how-to/create-runtime-extensions/).

@@ -914,3 +914,32 @@ source/artifact bindings. Simulator/emulator functional acceptance, host
 costs and release-policy qualification are separate. Physical hardware,
 spoken readers, authored HMR and release FPS remain deferred; interactive
 browser acceptance remains unperformed.
+
+## M11.5 typed runtime extensions
+
+The additive `/extensions` entry exposes `defineExtension` and `ExtensionError`,
+with no runtime peers or Effect dependency in its emitted graph. Existing entry
+exports and payload versions stay unchanged. Authoring requires a matching
+compiler for protocol version 1, typed named synchronous factories and explicit
+package runtime imports. Generated components use their library's real peer
+dependencies. Literal factories require no provider; themed factories always use
+the existing theme provider. Arbitrary closures/upstream serializers, local
+operands and dynamic CJS namespace exports are unsupported.
+
+Qualified source, tarball, installed package, runtime endpoint and maps must be
+bound together; a same-version alpha label is insufficient. See the guide and
+M11.5 evidence index for exact outcomes. Native Simulator/emulator function,
+physical hardware, browser interaction, live HMR and release FPS are distinct
+acceptance classes. M10.5 release closure remains required.
+
+Runtime-extension linkage uses stock Expo/Node conditions without synthetic platform
+or development/production branches. Version 1 refuses ambiguous platform/native
+sibling files and mixed static ESM-to-CommonJS imports/reexports; use explicit
+variant export targets and a pure ESM graph or direct static CommonJS facade.
+Missing sibling candidates remain receipt inputs, so later file creation invalidates
+linkage. Custom resolver conditions/aliases are outside this integration contract.
+
+For Node factory graphs, version 1 also refuses package export maps containing
+`module-sync` or `node-addons` conditions. Those built-in branches cannot share a
+reliable proof across the qualified Node floor/current versions and the integration
+compiler. Use the supported `node`/`import`/`require`/`default` export branches.

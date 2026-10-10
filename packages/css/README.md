@@ -480,3 +480,30 @@ or memoise design inputs; let native Text own accessibility font scaling.
 See the [guide](https://opsydyn.github.io/crumbs-css/how-to/use-token-algebra/)
 and [M11.4 evidence](../../docs/evidence/2026-10-09-m11-4-token-algebra/README.md)
 for admission, precision, qualification and release limits.
+
+## Typed runtime extensions (M11.5)
+
+Library authors can pair a type-only runtime namespace with
+`defineExtension<typeof Runtime>().factory({importPath, importName})` from
+`@opsydyn/crumbs-css/extensions`. A stylesheet exports the typed component result;
+an app imports it directly. Literal wrappers need no provider; themed wrappers
+use the existing `ThemeProvider`. Arguments become bounded, immutable module
+snapshots and named factories reconstruct once per module evaluation. Aliases
+share results; separate calls stay distinct. No arbitrary closures are serialised.
+
+See the [runtime-extension guide](https://opsydyn.github.io/crumbs-css/how-to/create-runtime-extensions/)
+for a complete library/app example, portable data and endpoint limits. This is
+additive working-tree functionality; historical alpha tarballs may lack it.
+M10.5 release closure and exact publication qualification remain separate.
+
+Runtime-extension linkage uses stock Expo/Node conditions without synthetic platform
+or development/production branches. Version 1 refuses ambiguous platform/native
+sibling files and mixed static ESM-to-CommonJS imports/reexports; use explicit
+variant export targets and a pure ESM graph or direct static CommonJS facade.
+Missing sibling candidates remain receipt inputs, so later file creation invalidates
+linkage. Custom resolver conditions/aliases are outside this integration contract.
+
+For Node factory graphs, version 1 also refuses package export maps containing
+`module-sync` or `node-addons` conditions. Those built-in branches cannot share a
+reliable proof across the qualified Node floor/current versions and the integration
+compiler. Use the supported `node`/`import`/`require`/`default` export branches.

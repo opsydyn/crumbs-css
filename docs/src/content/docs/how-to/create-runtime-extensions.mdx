@@ -1,0 +1,165 @@
+---
+title: Create typed runtime extensions
+description: Export reusable native components from stylesheets with explicit runtime factories.
+---
+
+M11.5 adds `@opsydyn/crumbs-css/extensions`. It lets a library author package a
+native component factory and an application export its typed result from a
+`.css.ts` file. This is additive working-tree functionality: qualify the exact
+compiler/runtime artifact before shipping. Historical tarballs sharing the alpha
+version may lack this entry.
+
+## A library's runtime
+
+Publish this as the explicit `@acme/ui/runtime` package export, with declarations
+and a real implementation. React and React Native remain the library's peers.
+
+```tsx
+// runtime.tsx
+import {createElement} from 'react';
+import {View} from 'react-native';
+import type {ViewProps, ViewStyle} from 'react-native';
+import {useThemedStyle} from '@opsydyn/crumbs-css/theme/core';
+
+export function createStyledView(baseStyle: ViewStyle) {
+  return function StyledView(props: ViewProps) {
+    return createElement(View, {...props, style: [baseStyle, props.style]});
+  };
+}
+
+export function createThemedView(baseStyle: ViewStyle) {
+  return function ThemedView(props: ViewProps) {
+    const resolved = useThemedStyle(baseStyle);
+    return createElement(View, {...props, style: [resolved, props.style]});
+  };
+}
+```
+
+The literal factory needs no provider. The themed factory always uses the existing
+`ThemeProvider`, even when its base style happens to contain only literals. Hooks
+belong inside the returned component. Keep component creation outside renders;
+consumer overrides follow the base style, and children/native props pass through.
+
+## A library's authoring entry
+
+```ts
+// authoring.ts, published as @acme/ui/authoring
+import type * as Runtime from '@acme/ui/runtime';
+import {defineExtension} from '@opsydyn/crumbs-css/extensions';
+
+const ui = defineExtension<typeof Runtime>();
+export const styledView = ui.factory({
+  importPath: '@acme/ui/runtime',
+  importName: 'createStyledView',
+});
+export const themedView = ui.factory({
+  importPath: '@acme/ui/runtime',
+  importName: 'createThemedView',
+});
+```
+
+The namespace import is **type-only**. Authoring never imports or executes the
+native implementation. The compiler verifies the named endpoint using its
+integration resolver and records the selected package, conditions, source bodies
+and links. Generated code contains an ordinary static named runtime import.
+Ensure the Expo/Metro conditions select that same endpoint. Runtime body edits
+remain normal Metro dependencies; acceptance of live HMR is separate.
+
+## An application's component
+
+```tsx
+// card.css.ts
+import {styledView} from '@acme/ui/authoring';
+export const Card = styledView({
+  backgroundColor: '#16324f', padding: 16, borderRadius: 8,
+});
+
+// Screen.tsx
+import {Text, Pressable} from 'react-native';
+import {Card} from './card.css';
+export function Screen({onActionPress}: {onActionPress: () => void}) {
+  return <Card testID="welcome-card" accessibilityLabel="Welcome"
+    style={{padding: 20}}>
+    <Text>Welcome</Text>
+    <Pressable onPress={onActionPress}><Text>Continue</Text></Pressable>
+  </Card>;
+}
+```
+
+The `.css.ts` result has the factory's argument tuple and returned component's
+props. Wrong arguments, absent/non-factory names, async factories and widened
+name unions fail type checking. `View` does not gain an `onPress` prop: use an
+actual child `Pressable`, as above. Genuine `viewStyle(...)` handles also work as
+arguments; the compiler expands their resolved native styles. A class-tag-shaped
+ordinary record stays data.
+
+Today the equivalent setup exports a style object and writes a separate component
+wrapper to import it and forward props. This API moves that repeated wrapper into
+a library's runtime factory and lets an app directly import `Card`. It costs the
+library an explicit authoring entry, runtime export and declarations. We have no
+adoption or time-saving study; use it for wrappers you actually repeat.
+
+## Data, identity and limits
+
+Each invocation creates a distinct placeholder; aliases of the same invocation
+share one runtime result. Distinct calls with equal arguments stay distinct.
+Snapshots are copied and deeply frozen without freezing the caller or the shared
+style table. Generated reconstruction calls each factory once per module
+evaluation, with exactly the supplied positional arguments and undefined `this`.
+Factories own their returned internals; factory exceptions propagate unchanged
+without retries. An untransformed placeholder call throws `extension.build-only-call`.
+
+Arguments admit finite numbers (including `-0`), strings, booleans, null, undefined,
+dense arrays and ordinary/null-prototype own enumerable data records. Omission
+and explicit undefined differ. Getters/setters are rejected without invocation;
+functions, symbols, bigint, nonfinite numbers, cycles, hidden fields, decorated
+arrays, promises and class instances are rejected. Arbitrary proxies and unrelated
+realms are outside the supported contract. Local variables/fallbacks/assignments
+and local style plans are refused inside extension arguments.
+
+Per call: at most 16 arguments, depth 32, 4,096 visited values, 256 entries per
+container, keys of 128 characters, strings of 16,384 characters and 65,536 total
+key/string characters. These limits also apply after native style expansion.
+Per module: 128 unique results and 32 distinct path/name pairs. Aliases consume
+one result. Package names/subpaths must be explicit; relative paths, URLs,
+built-ins, default factories and computed/union names are unsupported.
+
+Use named **monomorphic adapters** for generic or overloaded APIs. The witness is
+a type contract, not proof that arbitrary JavaScript matches its declarations.
+Runtime guards reject a non-callable factory/result. CommonJS named exports need
+a statically provable facade such as `exports.createStyledView = require('./impl.cjs').createStyledView`;
+dynamic namespace exports are refused. ESM named facades are the simplest option.
+Only marked Crumbs factory results are serialised: arbitrary closures and upstream
+vanilla-extract function serializers are not supported.
+
+Manifest entries treat results as opaque, with explicit unresolved factory
+dependencies. The compiler does not infer component capabilities or token
+behaviour by inspecting a function body. Existing style ownership still follows
+genuine style arguments.
+
+### Runtime resolution boundary
+
+Linkage follows the supported stock Expo conditions (`react-native` on native,
+`browser` on web) and Node's `node`/`import`/`require` branches. It does not assert
+`ios`, `android`, `development` or `production` as additional condition names.
+Native source extensions use Expo's TypeScript-first order; Node uses its JavaScript
+main-field resolution. Custom Metro resolver aliases/conditions require a separate
+integration rather than an inferred promise from a successful stock probe.
+
+Version 1 fails closed when a runtime input has a platform/native sibling that
+could change Metro's selected file. Give variants explicit package-export targets
+(for example `native-card.tsx` and `web-card.tsx`) rather than relying on automatic
+platform filename selection. Missing sibling candidates are part of the receipt,
+so creating one later invalidates the compiled proof.
+
+ESM runtime graphs cannot statically import or re-export CommonJS in version 1:
+the integration cannot prove those named bindings without executing the module.
+Use a pure ESM graph or a direct closed static CommonJS facade whose implementation
+uses CommonJS `require`. This restriction also applies to otherwise valid mixed
+imports; compilation reports `extension.unresolved-import` instead of admitting an
+unverified runtime name.
+
+For Node factory graphs, version 1 also refuses package export maps containing
+`module-sync` or `node-addons` conditions. Those built-in branches cannot share a
+reliable proof across the qualified Node floor/current versions and the integration
+compiler. Use the supported `node`/`import`/`require`/`default` export branches.

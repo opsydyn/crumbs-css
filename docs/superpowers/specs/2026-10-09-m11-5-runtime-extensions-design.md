@@ -1,6 +1,6 @@
 # M11.5 — Typed factories with explicit runtime imports
 
-**Status:** Written spec approved by Alan Currie on 2026-10-10 following spec commit `f58f4f1`. Typed Crumbs factories backed by explicit runtime imports remain the selected direction. The [implementation plan](../plans/2026-10-10-m11-5-runtime-extensions.md) is proposed for written review; implementation is not yet authorised.
+**Status:** Written spec approved by Alan Currie on 2026-10-10 following spec commit `f58f4f1`. Typed Crumbs factories backed by explicit runtime imports remain the selected direction. The [implementation plan](../plans/2026-10-10-m11-5-runtime-extensions.md) was approved as written on 2026-10-10. The single fresh review and Important repair pass are complete; final repaired-source host/types/cost/docs and12 iOS/12 Android phases pass with2,171 verified bindings. Original dependency roots/owned links and native settings/processes are restored and independently checked. The direct subsequent user request to commit, push and prepare v1 closes functional M11.5 while retaining the new cold-transform blocker under M10.5 without a release waiver. Complete in the single implementation commit containing this record, subject to independent commit verification.
 
 **Date:** 2026-10-09.
 

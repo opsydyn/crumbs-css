@@ -1,0 +1,71 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [0.66ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [0.21ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [0.26ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [0.26ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [1.34ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [0.41ms]
+(pass) rejects inherited protocol descriptors and invalid intrinsic fields independently of helper identity [0.06ms]
+(pass) native composition still validates property domains before an extension can be emitted [71.37ms]
+(pass) capture admits exactly 32 nested containers and lowering retains the scalar leaf [0.49ms]
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [21.55ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [6.79ms]
+(pass) conditional exports and self references/static reexports resolve to recorded endpoints [17.45ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [30.79ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [12.70ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [3.65ms]
+(pass) mixed ESM-to-CommonJS reexports fail closed before a missing runtime name can ship [3.20ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) Node default conditions are not replaced by compiler development or production branches [4.19ms]
+(pass) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [10.62ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/actual.mjs" for import "make"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {make as factory0} from "@acme/runtime";
+        ╵         ~~~~
+
+(pass) stock Expo conditions select react-native default rather than an unasserted ios branch [2.55ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [28.18ms]
+(pass) factory exceptions propagate unchanged and are not retried [28.38ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [49.09ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [25.79ms]
+(pass) ordinary modules retain their exact emission bytes [0.10ms]
+(pass) direct module emission refuses an unverified endpoint [0.10ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [25.12ms]
+(pass) an empty genuine native style becomes an empty argument record [23.41ms]
+(pass) the runtime factory owns its rest tuple; only supplied argument data is frozen [27.68ms]
+(pass) documented maximum container depth survives actual compiled reconstruction [27.16ms]
+
+ 29 pass
+ 0 fail
+ 182 expect() calls
+Ran 29 tests across 3 files. [687.00ms]

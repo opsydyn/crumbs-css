@@ -1,3 +1,5 @@
+import {linkRuntimeExtensions} from './compiler/runtime-extension-linkage'
+import {collectRuntimeExtensions,lowerRuntimeExtensionArguments,extensionStyleNames} from './compiler/runtime-extension-capture'
 import {NativeLocalVarType,type AnyLocalVar} from "./local-vars/model"
 import {captureLocalVarsIntoNativeIr,replayLocalDeclarations,createLocalStylePlan,type LocalVarCaptureResult} from "./compiler/local-vars"
 import {createLocalVarsMetadata} from "./compiler/local-vars-metadata"
@@ -35,7 +37,7 @@ import {
   analyseDependencyInputs,
   createDependencyCacheIdentity,
 } from "./compiler/dependency-analysis"
-import { assertPackageScopeIdentity, hasChangedResolutionIdentity } from "./compiler/resolution-identity"
+import { assertPackageScopeIdentity, hasChangedResolutionIdentity, combineResolutionIdentities } from "./compiler/resolution-identity"
 import { compileWithStableResolution } from "./compiler/stable-resolution-compile"
 import { indexStyleExportOwnership } from "./compiler/export-ownership"
 import {
@@ -396,7 +398,7 @@ async function transformCssTsToStyleSheetWithMetadata(
     },
   }
 
-  const { source, resolutionIdentity } = await compile({
+  const { source, resolutionIdentity: authoringResolutionIdentity } = await compile({
     filePath: absoluteFilePath,
     cwd,
     identOption,
@@ -518,6 +520,15 @@ async function transformCssTsToStyleSheetWithMetadata(
     localPlans.set(name,createLocalStylePlan(primitives as unknown as NativePrimitiveDomain,Object.entries(values).map(([property,value])=>({property,value}))))
   }
 
+  const extensions=collectRuntimeExtensions(exportMap)
+  for(const extension of extensions){
+    // A registered empty class has no CSS rule; it is still a genuine empty argument style.
+    for(const name of extensionStyleNames(extension))if(!resolvedClassStyles.has(name))resolvedClassStyles.set(name,{})
+    lowerRuntimeExtensionArguments(extension,resolvedClassStyles,localPlans)
+  }
+  const runtimeExtensionLinkage=extensions.length ? await linkRuntimeExtensions(extensions,{cwd,absoluteEntryPath:absoluteFilePath,platform:options.platform??null,dev:options.dev??process.env.NODE_ENV!=="production"}) : undefined
+  const resolutionIdentity=runtimeExtensionLinkage ? combineResolutionIdentities(authoringResolutionIdentity,runtimeExtensionLinkage.resolutionIdentity) : authoringResolutionIdentity
+
   // Convert captured metafile inputs to relative dep paths.
   // Exclude the entry file itself, third-party packages, and this package's
   // compiled internals. Only user-authored project files should be emitted as
@@ -561,6 +572,7 @@ async function transformCssTsToStyleSheetWithMetadata(
       includeStyleExplanations,
       ...(styleExplanationMetadata === undefined ? {} : { styleExplanationMetadata }),
       cacheIdentity,
+      ...(runtimeExtensionLinkage ? {runtimeExtensionLinkage} : {}),
       ...(localPlans.size ? {localPlans,localDefinitions} : {}),
     },
   )

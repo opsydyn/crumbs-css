@@ -1,3 +1,4 @@
+import {isCapturedRuntimeExtension,isCapturedExtensionStyleRef} from './runtime-extension-model'
 import { ownEnumerableDataEntries } from "./record-admission"
 
 export type StyleExportOwnershipIndex = {
@@ -34,6 +35,7 @@ export function indexStyleExportOwnership(
 }
 
 function collectClassNamesFromExportValue(value: unknown): ReadonlyArray<string> {
+  if (isCapturedRuntimeExtension(value)) return collectExtensionStyles(value.args)
   if (isRecipeClassRef(value)) return [value.className]
   if (typeof value === "string") return [value]
   if (Array.isArray(value)) return value.flatMap(collectClassNamesFromExportValue)
@@ -52,4 +54,11 @@ function isRecipeClassRef(value: unknown): value is { readonly className: string
     "className" in value &&
     typeof value.className === "string"
   )
+}
+
+function collectExtensionStyles(value:unknown):ReadonlyArray<string>{
+ if(isCapturedExtensionStyleRef(value))return [value.className]
+ if(Array.isArray(value))return value.flatMap(collectExtensionStyles)
+ if(value && typeof value==="object")return Object.values(value).flatMap(collectExtensionStyles)
+ return []
 }

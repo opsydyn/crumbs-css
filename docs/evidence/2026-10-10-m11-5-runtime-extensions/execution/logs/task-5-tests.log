@@ -1,0 +1,69 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/pack-consumer-contract.test.ts:
+(pass) @opsydyn/crumbs-css packed consumer contract > ships only the compiled npm surface and can be consumed outside the monorepo [6608.67ms]
+
+packages/css/test/runtime-extension-package.test.ts:
+(pass) extensions_entry_has_no_runtime_externals [3145.91ms]
+(pass) esm_cjs_public_values_and_cross_copy_protocol_match [1.89ms]
+(pass) old export controls retain every target and built value name [28.79ms]
+
+packages/css/test/m11-5-qualification.test.ts:
+(pass) foreign nonempty roots and escaped or linked inputs are refused [1.82ms]
+(pass) actual load order must match extensions entry format and both independent loads [0.11ms]
+(pass) runtime package and generated input drift is rejected [0.63ms]
+(pass) preparation and mismatched sources cannot qualify host or native acceptance [0.06ms]
+(pass) source identity includes private self-reference configuration and new authored inputs [66.21ms]
+
+packages/css/test/packed-runtime-graph.test.ts:
+(pass) auditPackedRuntimeEntrypoints traverses ESM and CommonJS local edges and classifies every export [21.80ms]
+(pass) ordinary runtime entrypoints cannot reach compiler tooling targets [10.44ms]
+(pass) no runtime or existing tooling entrypoint can reach the isolated DTCG tooling graph [59.80ms]
+(pass) runtime entrypoints cannot reach isolated migration tooling [25.53ms]
+(pass) TypeScript is admitted only for the isolated migration subpath [17.14ms]
+(pass) ordinary runtime entrypoints cannot reach the policy tooling graph [8.01ms]
+(pass) ordinary runtime entrypoints cannot reach the isolated devtools graph [6.86ms]
+(pass) auditPackedRuntimeEntrypoints fails when an exported local file is missing [8.77ms]
+(pass) auditPackedRuntimeEntrypoints fails closed on malformed emitted JavaScript [9.73ms]
+(pass) auditPackedRuntimeEntrypoints fails closed on non-literal dynamic imports [9.81ms]
+(pass) auditPackedRuntimeEntrypoints fails closed on non-literal CommonJS require [11.04ms]
+(pass) only the configured Metro transformer can use its runtime-supplied upstream path [36.39ms]
+(pass) the Metro upstream property binding remains allowlisted after identifier mangling [35.79ms]
+(pass) the Metro exception rejects its canonical name when the value is not from Metro config [19.07ms]
+(pass) the Metro exception rejects its property when it comes from a non-config parameter [16.05ms]
+(pass) the Metro exception is limited to the transform function rather than helper config parameters [15.57ms]
+(pass) the Metro exception rejects an identifier shadowed outside the loader call scope [16.09ms]
+(pass) the Metro exception rejects a reassigned upstream property binding [16.45ms]
+(pass) the Metro exception rejects a destructuring reassignment of its upstream binding [18.62ms]
+(pass) the manifest tooling graph allows the transformer’s approved Metro loader in emitted chunks [18.82ms]
+(pass) the direct transformer export allows its approved Metro loader in emitted chunks [18.09ms]
+(pass) minified transformer chunks remain allowlisted through the public transform export [31.01ms]
+(pass) the ESM Metro loader recognizes a createRequire instance [15.06ms]
+(pass) a shadowed CommonJS require cannot receive the Metro exception [15.37ms]
+(pass) a shadowed __require cannot receive the Metro exception [14.44ms]
+(pass) a reassigned createRequire instance cannot receive the Metro exception [15.37ms]
+(pass) the Metro exception rejects a reassigned first config parameter [15.21ms]
+(pass) writing a config property does not count as reassigning the config parameter [15.87ms]
+(pass) a shadowed CJS require binding cannot redirect the public transformer export [16.72ms]
+(pass) a literal call to shadowed CommonJS require cannot add a packed dependency [18.41ms]
+(pass) a reassigned CommonJS module alias cannot identify the public transformer [7.91ms]
+(pass) duplicate CommonJS module alias initializers cannot identify the public transformer [8.32ms]
+(pass) a loop-scoped CommonJS alias does not shadow the exported module binding [16.02ms]
+(pass) an ambiguous CJS transform getter cannot receive a loader exception [16.90ms]
+(pass) a minified transformer chunk cannot lend its export exception to a helper [16.79ms]
+(pass) ordinary runtime entrypoints cannot reach an advanced entry target [7.50ms]
+(pass) ordinary and advanced runtime classes reject unauthorized external imports [24.75ms]
+(pass) the devtools graph admits Effect and React but rejects Node and authoring imports [29.52ms]
+(pass) compiler entries allow only build-policy externals and reject Effect [58.24ms]
+(pass) auditPackedRuntimeEntrypoints rejects an export with no runtime class [6.22ms]
+(pass) container entry refuses runtime react-native [16.32ms]
+(pass) container entry refuses runtime node:fs [15.14ms]
+(pass) container entry refuses runtime effect/Schema [14.50ms]
+(pass) container graph is independently classified and accepts only React [17.30ms]
+(pass) only the isolated native motion entry admits the public RN peer [48.04ms]
+(pass) motion entries cannot reach an existing runtime entry [16.85ms]
+
+ 55 pass
+ 0 fail
+ 228 expect() calls
+Ran 55 tests across 4 files. [11.30s]

@@ -1,0 +1,12 @@
+157 |         const [stdout, stderr, exitCode] = await Promise.all([new Response(child.stdout).text(), new Response(child.stderr).text(), child.exited]);
+158 |         const log = join(output!, `${commands.length}-${name}.log`);
+159 |         await writeFile(log, stdout + stderr);
+160 |         commands.push({ command, cwd, startedAt, exitCode, log, sha256: m115Sha(stdout + stderr) });
+161 |         if (exitCode !== 0)
+162 |             throw Error(name + ' exited ' + exitCode + '; ' + log);
+                        ^
+error: installed-types-bundler exited 2; /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-10-m11-5-runtime-extensions/host/5-installed-types-bundler.log
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-5-qualification.ts:162:19)
+      at async qualify (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/m11-5-qualification.ts:268:15)
+
+Bun v1.4.2 (macOS arm64)

@@ -1,0 +1,22 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [5.28ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [1.69ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [2.37ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [1.46ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [4.73ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [1.83ms]
+
+packages/css/test/ordinary-exports.test.ts:
+(pass) ordinary CSS module exports > preserves named primitive values, undefined fields and negative zero [142.53ms]
+(pass) ordinary CSS module exports > preserves tag-shaped ordinary data and own prototype-like keys alongside real metadata [32.14ms]
+(pass) ordinary CSS module exports > preserves null-prototype data and leaves unrelated class-like text unchanged [15.21ms]
+(pass) ordinary CSS module exports > rejects unsupported values before lossy serialization with file/export path diagnostics [242.12ms]
+(pass) ordinary CSS module exports > cleans composition handles without rewriting ordinary strings [0.26ms]
+(pass) ordinary CSS module exports > matches generated nested ordinary data independently of style exports [1320.20ms]
+
+ 12 pass
+ 0 fail
+ 176 expect() calls
+Ran 12 tests across 2 files. [2.50s]

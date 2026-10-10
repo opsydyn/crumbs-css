@@ -1,0 +1,24 @@
+57 |   return decorateSystemError(@makeErrorWithCode(323, context.message), "Cannot overwrite symlink in subdirectory of self", context);
+58 | }
+59 | function fsCpUnknownError(context) {
+60 |   return decorateSystemError(@makeErrorWithCode(60, context.message), "Cannot copy an unknown file type", context);
+61 | }
+62 |   return decorateSystemError(@makeErrorWithCode(61, context.message), "Path is a directory", context);
+                                                    ^
+SystemError: Path is a directory: rm returned EISDIR (is a directory) /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/sdd/2026-10-10-m11-5-runtime-extensions/docs-backups
+    info: {
+  code: "EISDIR",
+  message: "is a directory",
+  path: "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/sdd/2026-10-10-m11-5-runtime-extensions/docs-backups",
+  syscall: "rm",
+  errno: 21,
+},
+   errno: 21,
+ syscall: "rm",
+    path: "/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/.superpowers/sdd/2026-10-10-m11-5-runtime-extensions/docs-backups",
+    code: "ERR_FS_EISDIR"
+
+      at fsEisdirError (internal:fs/cp-sync:62:48)
+      at rm (node:fs/promises:210:110)
+
+Bun v1.4.2 (macOS arm64)

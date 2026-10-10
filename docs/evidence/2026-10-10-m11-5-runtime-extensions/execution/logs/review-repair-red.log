@@ -1,0 +1,163 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-extension-capture.test.ts:
+(pass) nested aliases share one capture; distinct invocations remain distinct; ids follow code-unit export order [0.87ms]
+(pass) spoofed class and extension records remain ordinary data; unmarked and upstream functions stay rejected [0.19ms]
+(pass) known evaluator realm copies frozen data safely without inspecting a function body [0.61ms]
+(pass) independently rejects forged versions, marker accessors, mutable snapshots and decorated placeholders [0.26ms]
+(pass) enforces per-module unique placeholder and endpoint quotas, counting aliases once [1.81ms]
+(pass) lowers genuine composed style refs into fresh snapshots and rejects nested local operands and expanded limits [0.59ms]
+(pass) rejects inherited protocol descriptors and invalid intrinsic fields independently of helper identity [0.07ms]
+(pass) native composition still validates property domains before an extension can be emitted [114.25ms]
+66 |                 captured.push(result);
+67 |                 return result;
+68 |             }
+69 |             catch (error) {
+70 |                 if (error instanceof ExtensionError)
+71 |                     throw new NativeStylesCompatibilityError(NativeStylesDiagnosticCode.UnsupportedExport, `Unsupported export in ${filePath} at ${exportPath}: ${error.message}`);
+                               ^
+NativeStylesCompatibilityError: [crumbs-css:CRUMBS_CSS_UNSUPPORTED_EXPORT] Unsupported export in test.css.ts at result: extension.resource-limit at result.args["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]: portable data limit exceeded
+ code: "CRUMBS_CSS_UNSUPPORTED_EXPORT"
+
+      at capture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-capture.ts:71:27)
+      at captureNativeExports (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/export-values.ts:73:23)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-capture.test.ts:136:17)
+(fail) capture admits exactly 32 nested containers and lowering retains the scalar leaf [1.27ms]
+
+packages/css/test/runtime-extension-linkage.test.ts:
+(pass) runtime sentinel and native peer code are not evaluated by inert named-link probes [21.34ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) missing named exports and dynamically manufactured CommonJS names are refused [7.09ms]
+36 |     const api = await linker();
+37 |     writeFileSync(path.join(f.pkg, 'package.json'), JSON.stringify({ name: '@acme/runtime', type: 'module', exports: { '.': { 'react-native': { ios: { import: './ios.mjs', require: './runtime.cjs' }, default: { import: './runtime.mjs', require: './runtime.cjs' } }, import: './runtime.mjs', require: './runtime.cjs' } } }));
+38 |     writeFileSync(path.join(f.pkg, 'ios.mjs'), `export {make} from './runtime.mjs';`);
+39 |     writeFileSync(path.join(f.dir, 'self.mjs'), `export function make(){return ()=>0;}`);
+40 |     const result = await api.linkRuntimeExtensions(captured(), { ...f.options, platform: 'ios' });
+41 |     expect(result.endpoints[0]!.targets.map(t => path.basename(t.logicalPath))).toEqual(['runtime.mjs', 'runtime.cjs']);
+                                                                                     ^
+error: expect(received).toEqual(expected)
+
+  [
+-   "runtime.mjs",
++   "ios.mjs",
+    "runtime.cjs",
+  ]
+
+- Expected  - 1
++ Received  + 1
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:41:81)
+(fail) conditional exports and self references/static reexports resolve to recorded endpoints [12.98ms]
+(pass) runtime body and package or symlink retargets invalidate current receipts [30.05ms]
+(pass) sources changing during every linkage pass fail rather than publishing a stale receipt [13.83ms]
+✘ [ERROR] No matching export in "node_modules/@acme/runtime/runtime.mjs" for import "missing"
+
+    entry.css.ts.crumbs-runtime-probe.ts:1:8:
+      1 │ import {missing as factory0} from "@acme/runtime";
+        ╵         ~~~~~~~
+
+(pass) an ESM-only package must prove the requested named export [2.74ms]
+103 |     const f = fixture();
+104 |     try {
+105 |         const api = await linker();
+106 |         writeFileSync(path.join(f.pkg, 'runtime.mjs'), `export { missing as make } from './actual.cjs';`);
+107 |         writeFileSync(path.join(f.pkg, 'actual.cjs'), `exports.other=function other(){return ()=>0;};`);
+108 |         await expect(api.linkRuntimeExtensions(captured(), f.options)).rejects.toThrow(/extension.unresolved-import/);
+                                                                                     ^
+error: expect(received).rejects.toThrow(expected)
+
+Expected promise that rejects
+Received promise that resolved: Promise { <resolved> }
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:108:80)
+(fail) mixed ESM-to-CommonJS reexports fail closed before a missing runtime name can ship [10.26ms]
+112 |     const f = fixture();
+113 |     try {
+114 |         const api = await linker();
+115 |         writeFileSync(path.join(f.pkg, 'package.json'), JSON.stringify({name:'@acme/runtime',type:'module',exports:{'.':{development:'./runtime.mjs',production:'./runtime.mjs',default:'./actual.mjs'}}}));
+116 |         writeFileSync(path.join(f.pkg, 'actual.mjs'), `export function other(){return ()=>0;}`);
+117 |         for (const dev of [true,false]) await expect(api.linkRuntimeExtensions(captured(), {...f.options,dev})).rejects.toThrow(/extension.unresolved-import/);
+                                                                                                                              ^
+error: expect(received).rejects.toThrow(expected)
+
+Expected promise that rejects
+Received promise that resolved: Promise { <resolved> }
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:117:121)
+(fail) Node default conditions are not replaced by compiler development or production branches [8.98ms]
+126 |         const options = {...f.options,platform:'ios'};
+127 |         const result = await api.linkRuntimeExtensions(captured(), options);
+128 |         expect(result.endpoints[0]!.targets.every(t=>t.logicalPath.endsWith('runtime.js'))).toBe(true);
+129 |         expect(hasChangedResolutionIdentity(result.resolutionIdentity)).toBe(false);
+130 |         writeFileSync(path.join(f.pkg, 'runtime.ios.js'), `export function other(){return ()=>0;}`);
+131 |         expect(hasChangedResolutionIdentity(result.resolutionIdentity)).toBe(true);
+                                                                              ^
+error: expect(received).toBe(expected)
+
+Expected: true
+Received: false
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:131:73)
+(fail) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [9.50ms]
+136 |     const f = fixture();
+137 |     try {
+138 |         const api = await linker();
+139 |         writeFileSync(path.join(f.pkg, 'package.json'), JSON.stringify({name:'@acme/runtime',type:'module',exports:{'.':{'react-native':{ios:'./runtime.mjs',default:'./actual.mjs'},default:'./runtime.mjs'}}}));
+140 |         writeFileSync(path.join(f.pkg, 'actual.mjs'), `export function other(){return ()=>0;}`);
+141 |         await expect(api.linkRuntimeExtensions(captured(), {...f.options,platform:'ios'})).rejects.toThrow(/extension.unresolved-import/);
+                                                                                                         ^
+error: expect(received).rejects.toThrow(expected)
+
+Expected promise that rejects
+Received promise that resolved: Promise { <resolved> }
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-linkage.test.ts:141:100)
+(fail) stock Expo conditions select react-native default rather than an unasserted ios branch [10.06ms]
+
+packages/css/test/runtime-extension-emission.test.ts:
+(pass) aliases reconstruct once with exact arity and undefined this; separate invocations remain distinct [28.19ms]
+(pass) factory exceptions propagate unchanged and are not retried [29.64ms]
+(pass) invalid imported factory and returned shape have stable own code/path TypeErrors [49.94ms]
+(pass) fresh argument snapshots preserve null prototypes and own prototype-like keys without freezing shared style exports [29.09ms]
+(pass) ordinary modules retain their exact emission bytes [0.10ms]
+(pass) direct module emission refuses an unverified endpoint [0.08ms]
+(pass) omitted and explicit undefined arguments remain different and private aliases avoid authored names [24.31ms]
+(pass) an empty genuine native style becomes an empty argument record [27.42ms]
+(pass) the runtime factory owns its rest tuple; only supplied argument data is frozen [24.42ms]
+66 |                 captured.push(result);
+67 |                 return result;
+68 |             }
+69 |             catch (error) {
+70 |                 if (error instanceof ExtensionError)
+71 |                     throw new NativeStylesCompatibilityError(NativeStylesDiagnosticCode.UnsupportedExport, `Unsupported export in ${filePath} at ${exportPath}: ${error.message}`);
+                               ^
+NativeStylesCompatibilityError: [crumbs-css:CRUMBS_CSS_UNSUPPORTED_EXPORT] Unsupported export in /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/fixtures/.extension-emission-ZbC4wR/case.css.ts at result: extension.resource-limit at result.args["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]["0"]: portable data limit exceeded
+ code: "CRUMBS_CSS_UNSUPPORTED_EXPORT"
+
+      at capture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/compiler/runtime-extension-capture.ts:71:27)
+      at captureNativeExports (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/export-values.ts:73:23)
+      at processVanillaFileForNative (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/transformer.ts:325:14)
+      at transformCssTsToStyleSheetWithMetadata (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/transformer.ts:412:30)
+      at async transformCssTsToStyleSheet (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/src/transformer.ts:342:17)
+      at async fixture (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:22:28)
+      at async <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-extension-emission.test.ts:82:11)
+(fail) documented maximum container depth survives actual compiled reconstruction [15.09ms]
+
+7 tests failed:
+(fail) capture admits exactly 32 nested containers and lowering retains the scalar leaf [1.27ms]
+(fail) conditional exports and self references/static reexports resolve to recorded endpoints [12.98ms]
+(fail) mixed ESM-to-CommonJS reexports fail closed before a missing runtime name can ship [10.26ms]
+(fail) Node default conditions are not replaced by compiler development or production branches [8.98ms]
+(fail) ambiguous Metro platform siblings are refused and missing candidates invalidate receipts [9.50ms]
+(fail) stock Expo conditions select react-native default rather than an unasserted ios branch [10.06ms]
+(fail) documented maximum container depth survives actual compiled reconstruction [15.09ms]
+
+ 22 pass
+ 7 fail
+ 110 expect() calls
+Ran 29 tests across 3 files. [776.00ms]
