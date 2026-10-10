@@ -3155,3 +3155,5 @@ PR [#7](https://github.com/opsydyn/crumbs-css/pull/7) merges SDK 57/RN0.86 admis
 ## 2026-10-10 — M1.9b fresh gate disposition pending
 
 The repaired generic workflow completes all unchanged host measurements on a free isolated Metro port. Ten blocking rows pass, one warm-transform numerical row fails, none are incomplete. The exact measured 1.1.0 artifact also passes the SDK 57 consumer; all 105 JavaScript files match public 1.0.1. [Review the proposed v1.1.0-only release disposition](evidence/2026-10-10-m1-9b-expo57/release-review.md). No exception is applied; npm/latest remains 1.0.1. M1.9b publication stays open and the consumer agent skill stays deferred until publication is verified.
+
+M1.9b disposition is explicitly approved for the exact retained source, report and artifact. The scoped publisher requires independent hosted verification before npm publication. Generic gates and failed measurements stay unchanged; M1.9b remains open until registry acceptance.

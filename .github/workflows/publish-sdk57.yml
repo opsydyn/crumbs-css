@@ -1,0 +1,157 @@
+name: publish-sdk57-approved-release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  M19B_TOOLING_SHA256: 0d1bfbee617596004a907985e08aced9c404ea04b497248c3dbc00029993aa41
+
+concurrency:
+  group: crumbs-css-npm-publish-v1.1.0
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read
+    steps:
+      - name: Require manual dispatch from main
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: exit 1
+
+      - name: Check out immutable compatibility release
+        uses: actions/checkout@v4
+        with:
+          ref: v1.1.0
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Load pinned disposition verifier from dispatched main
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/contents/scripts/m19b-publication.ts?ref=$GITHUB_SHA" --jq .content \
+            | python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' > "$RUNNER_TEMP/m19b-publication.ts"
+          test "$(shasum -a 256 "$RUNNER_TEMP/m19b-publication.ts" | cut -d ' ' -f 1)" = "$M19B_TOOLING_SHA256"
+
+      - name: Require published source release and original full measurement run
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.1.0 --json tagName,isDraft,isPrerelease,publishedAt \
+            | jq -e '.tagName == "v1.1.0" and .isDraft == false and .isPrerelease == false and .publishedAt != null'
+          gh api repos/$GITHUB_REPOSITORY/actions/runs/38087033318 > "$RUNNER_TEMP/retained-run.json"
+          gh api repos/$GITHUB_REPOSITORY/actions/runs/38087033318/attempts/1/jobs > "$RUNNER_TEMP/retained-jobs.json"
+          python3 - "$RUNNER_TEMP" <<'PYTHON'
+          import json,sys,pathlib
+          root=pathlib.Path(sys.argv[1])
+          run=json.loads((root/'retained-run.json').read_text())
+          assert run['head_sha']=='6f4390b2ee456e569562d6cb7aea2be74cd80155'
+          assert run['id']==38087033318 and run['run_attempt']==1
+          assert run['path']=='.github/workflows/publish.yml' and run['event']=='workflow_dispatch'
+          assert run['head_branch']=='main' and run['status']=='completed' and run['conclusion']=='failure'
+          jobs=json.loads((root/'retained-jobs.json').read_text())['jobs']
+          qualifiers=[j for j in jobs if j['name']=='qualify']
+          assert len(qualifiers)==1
+          steps=qualifiers[0]['steps']
+          for name in ['Prepare matched Expo and Metro scaffold','Measure approved host budgets','Upload qualification evidence']:
+              matches=[s for s in steps if s['name']==name]
+              assert len(matches)==1 and matches[0]['conclusion']=='success', name
+          assert [s['name'] for s in steps if s['conclusion']=='failure']==['Require the current report to satisfy consumer release policy']
+          PYTHON
+
+      - name: Download approved Mac-sealed bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p "$RUNNER_TEMP/m19b-download"
+          gh release download v1.1.0 --pattern m19b-v1.1.0-qualification.tar.gz --dir "$RUNNER_TEMP/m19b-download"
+          python3 - "$RUNNER_TEMP" <<'PYTHON'
+          import pathlib,sys,tarfile
+          root=pathlib.Path(sys.argv[1])
+          with tarfile.open(root/'m19b-download/m19b-v1.1.0-qualification.tar.gz','r:gz') as archive:
+              for member in archive.getmembers():
+                  path=pathlib.PurePosixPath(member.name)
+                  assert not path.is_absolute() and '..' not in path.parts
+                  assert path.parts and path.parts[0]=='bundle'
+                  assert member.isfile() or member.isdir()
+              archive.extractall(root/'m19b-download',filter='data')
+          PYTHON
+
+      - name: Install only frozen verifier dependencies
+        run: bun install --filter @opsydyn/crumbs-css --frozen-lockfile
+
+      - name: Independently verify exact source, report, SDK receipt and tarball
+        run: bun "$RUNNER_TEMP/m19b-publication.ts" verify --repo "$GITHUB_WORKSPACE" --bundle "$RUNNER_TEMP/m19b-download/bundle"
+
+      - name: Upload independently verified bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: crumbs-m19b-verified-v1.1.0
+          path: ${{ runner.temp }}/m19b-download/bundle
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out the same immutable source release
+        uses: actions/checkout@v4
+        with:
+          ref: v1.1.0
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Set up publication Node and registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Load identical pinned disposition verifier
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/contents/scripts/m19b-publication.ts?ref=$GITHUB_SHA" --jq .content \
+            | python3 -c 'import base64,sys; sys.stdout.buffer.write(base64.b64decode(sys.stdin.read()))' > "$RUNNER_TEMP/m19b-publication.ts"
+          test "$(shasum -a 256 "$RUNNER_TEMP/m19b-publication.ts" | cut -d ' ' -f 1)" = "$M19B_TOOLING_SHA256"
+          gh release view v1.1.0 --json tagName,isDraft,isPrerelease,publishedAt \
+            | jq -e '.tagName == "v1.1.0" and .isDraft == false and .isPrerelease == false and .publishedAt != null'
+
+      - name: Download independently verified bundle
+        uses: actions/download-artifact@v4
+        with:
+          name: crumbs-m19b-verified-v1.1.0
+          path: ${{ runner.temp }}/m19b-bundle
+
+      - name: Install only frozen verifier dependencies
+        run: bun install --filter @opsydyn/crumbs-css --frozen-lockfile
+
+      - name: Reverify transferred bytes and exact release disposition
+        run: bun "$RUNNER_TEMP/m19b-publication.ts" verify --repo "$GITHUB_WORKSPACE" --bundle "$RUNNER_TEMP/m19b-bundle"
+
+      - name: Publish only the approved v1.1.0 tarball
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish "$RUNNER_TEMP/m19b-bundle/opsydyn-crumbs-css-1.1.0.tgz" --access public --provenance --tag latest
