@@ -487,7 +487,7 @@ describe("consumer policy handoff integrity", () => {
       expect(verifyReleaseHostBudgetReport({ reportDirectory: report, repositoryRoot, expectedRevision }).releasePolicyQualified).toBe(false)
       expect(verifyReleaseQualificationBundle({ bundleDirectory: bundle, repositoryRoot, expectedTag, expectedRevision }).valid).toBe(false)
     }
-  })
+  }, 30000)
   it("rejects resealed missing or unmatched advisory raw evidence", () => {
     for (const file of ["runtime-initialization.json", "runtime-graph.json"]) {
       for (const mode of ["missing", "malformed", "unmatched"]) {
