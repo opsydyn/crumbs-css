@@ -1,4 +1,4 @@
-# Typed component pattern (Crumbs 1.1.0)
+# Typed component pattern (Crumbs 1.1.0 / 1.1.1)
 
 Use identified typed contracts for shared design-system domains. Keep brand, mode
 and density as independent `TokenThemeScopeProvider` layers when the app needs

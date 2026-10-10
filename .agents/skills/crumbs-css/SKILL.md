@@ -5,11 +5,11 @@ description: Use when an Expo or React Native app uses @opsydyn/crumbs-css, or w
 
 # Crumbs CSS
 
-Build consumer apps and design systems with the installed public API. This reference targets published **1.1.0**; check the app's lockfile and installed export map before using it for another version. Preserve the app's architecture and requested scope.
+Build consumer apps and design systems with the installed public API. This reference targets published **1.1.0 and 1.1.1** (identical executable and declaration bytes); check the app's lockfile and installed export map before using it for another version. Preserve the app's architecture and requested scope.
 
 ## Setup and imports
 
-1. Inspect the app's Expo, React Native and Crumbs versions and existing Metro config. Version 1.1.0 supports SDK 56 / RN 0.85 and SDK 57 / RN 0.86, with React 19. Crumbs tooling needs Node >=22; SDK 57 needs >=22.13. Use Expo-compatible dependencies; establish a new SDK's support before widening peers or bypassing installation checks.
+1. Inspect the app's Expo, React Native and Crumbs versions and existing Metro config. Versions 1.1.0 and 1.1.1 support SDK 56 / RN 0.85 and SDK 57 / RN 0.86, with React 19. Crumbs tooling needs Node >=22; SDK 57 needs >=22.13. Use Expo-compatible dependencies; establish a new SDK's support before widening peers or bypassing installation checks.
 2. Wrap the existing Expo config with `withNativeStyles` from `/metro-plugin`, preserving its other customisations. Restart Metro after configuration changes. Applications need no Effect import, service or runner.
 3. Put native style authoring in `.css.ts`; import its compiled exports via `./card.css`. Use specific runtime entries in components. The package root is not a universal React runtime entry.
 
