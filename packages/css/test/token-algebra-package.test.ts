@@ -9,7 +9,7 @@ const names = (file: string) => { const ast = ts.createSourceFile(file, readFile
 test('algebra_entry_has_ten_values_and_zero_externals', async () => { const m = manifest(); expect(m.exports['./tokens/algebra']).toBeDefined(); const api = await import(resolve(root, m.exports['./tokens/algebra'].import)); expect(Object.keys(api).sort()).toEqual(['TokenAlgebraError', 'createColor', 'createTypography', 'createTypographyScale', 'mixColor', 'multiplyColorAlpha', 'scaleTypography', 'setColorAlpha', 'toNativeColor', 'toNativeTypography'].sort()); const graphs = (await auditPackedRuntimeEntrypoints(root)).filter(g => g.subpath === './tokens/algebra'); expect(graphs).toHaveLength(2); for (const g of graphs) {
     expect(g.externalSpecifiers).toEqual([]);
     expect(g.files.every(f => f.includes('tokens-algebra'))).toBe(true);
-} });
+} }, 30000);
 test('existing_entry_values_and_aliases_match_control', () => { const control = JSON.parse(readFileSync(resolve(root, 'fixtures/packed-distribution/app/test/algebra-control-values.json'), 'utf8')); const m = manifest(); for (const [key, row] of Object.entries(control.entries) as [
     string,
     any

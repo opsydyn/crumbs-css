@@ -1,4 +1,8 @@
-import { test, expect } from 'bun:test';
+import { afterAll, test, expect } from 'bun:test';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+const temporaryRoots: string[] = [];
+afterAll(async () => { for (const root of temporaryRoots) await rm(root, { recursive: true, force: true }); });
 import { assertM112SourceStable, assertM112InstalledRoot, m112Acceptance, assertM112OwnedRoot, assertM112ArtifactIdentity } from '../../../scripts/m11-2-qualification';
 test('drift and workspace escapes cannot qualify the installed cohort', () => { expect(() => assertM112SourceStable('before', 'after')).toThrow(/Source changed/); expect(() => assertM112InstalledRoot('/tmp/consumer', '/workspace/packages/css')).toThrow(/escaped/); expect(() => assertM112ArtifactIdentity('sha-a', 'sha-b')).toThrow(/Tarball identity/); expect(() => assertM112OwnedRoot(['node_modules'], undefined)).toThrow(/nonempty/); expect(() => assertM112OwnedRoot([], undefined)).not.toThrow(); });
 test('host pass cannot stand in for required native platforms', () => { expect(m112Acceptance({ host: 'passed', ios: 'not-run', android: 'passed' })).toBe('incomplete'); expect(m112Acceptance({ host: 'passed', ios: 'passed', android: 'passed' })).toBe('passed'); expect(m112Acceptance({ host: 'passed', ios: 'failed', android: 'passed' })).toBe('failed'); });
@@ -10,10 +14,10 @@ import {readM112NativeObservations} from '../../../scripts/m11-2-native-qualific
 test('native accessibility telemetry decodes the complete JSON payload',()=>{const data={state:{a:{width:176,mounted:true,key:0},nested:false,height:120,portal:'closed'},telemetry:{}};expect(readM112NativeObservations([{accessibilityText:'M112All:'+JSON.stringify(data)}])).toEqual(data);expect(()=>readM112NativeObservations([{text:'different app'}])).toThrow(/Missing native/);});
 
 import { relocateM112AuthoredStyle, restoreM112AuthoredStyle } from '../../../scripts/m11-2-qualification';
-import { mkdtemp, mkdir, writeFile, readFile, access } from 'node:fs/promises';
+import { mkdtemp, mkdir, writeFile, readFile, access, rm } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
 test('owned precompiled delivery preserves authored source and rejects source drift',async()=>{
- const root=await mkdtemp('/private/tmp/m112-style-stage-'); await mkdir(root+'/src');
+ const root=await mkdtemp(join(tmpdir(), 'm112-style-stage-')); temporaryRoots.push(root); await mkdir(root+'/src');
  const source='export const card = {};'; const hash=createHash('sha256').update(source).digest('hex');
  await writeFile(root+'/src/container-panel.css.ts',source);
  await expect(relocateM112AuthoredStyle(root,'different')).rejects.toThrow(/Fixture changed/);
@@ -29,7 +33,7 @@ test('owned precompiled delivery preserves authored source and rejects source dr
 
 import { verifyM112NativeInputs, assertM112NativePlateau } from '../../../scripts/m11-2-native-qualification';
 test('native input guard verifies bytes, archived authoring and generated styles',async()=>{
- const root=await mkdtemp('/private/tmp/m112-native-input-');await mkdir(root+'/src');await mkdir(root+'/authoring');
+ const root=await mkdtemp(join(tmpdir(), 'm112-native-input-'));temporaryRoots.push(root);await mkdir(root+'/src');await mkdir(root+'/authoring');
  const hash=(s:string)=>createHash('sha256').update(s).digest('hex');
  await writeFile(root+'/app.json','app');await writeFile(root+'/authoring/container-panel.css.ts','source');
  await writeFile(root+'/src/container-panel.css.native.js','native');await writeFile(root+'/src/container-panel.css.web.js','web');

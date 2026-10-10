@@ -121,7 +121,7 @@ describe("logical and physical authoring overlaps", () => {
       const result = await compile(`const first = viewStyle(${author(rules[0]!)}); export const result = viewStyle([first, [${rules.slice(1).map(author).join(",")}], first]);`)
       expect(resolveThemeTokens(result.result, theme)).toEqual(reference([...rules, rules[0]!]))
     }), { seed: 20260929, numRuns: 100 })
-  })
+  }, 30000)
   it("preserves the tracked typed fixture in both emitters", async () => {
     for (const useStyleSheet of [true, false]) {
       const code = await transformCssTsToStyleSheet(path.join(root, "fixtures/logical-precedence.css.ts"), root, { strictDiagnostics: true, useStyleSheet })

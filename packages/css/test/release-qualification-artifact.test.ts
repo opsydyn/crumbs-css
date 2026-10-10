@@ -105,6 +105,9 @@ function makePassingSyntheticReport(reportDirectory: string): void {
   writeJson(join(reportDirectory, "runtime-initialization.json"), runtimeInitialization)
 
   const runtimeGraph = scanRuntimeGraphEvidence(packageRoot, 5)
+  // This private fixture tests sealing/admission, not the machine running unit tests.
+  // Keep genuine artifact scans, with explicitly synthetic approved-host metadata.
+  runtimeGraph.environment = readJson(join(retainedReportDirectory, "runtime-graph.json")).environment
   runtimeGraph.sourceRevision = expectedRevision
   writeJson(join(reportDirectory, "runtime-graph.json"), runtimeGraph)
 

@@ -539,7 +539,7 @@ See the [Expo playground guide](apps/playground/README.md) for consumer modes an
 ### CI checks
 
 Pull requests that change `apps/` run the same CI workflow as package changes;
-docs-only pull requests remain path-ignored. CI uses Bun 1.3.11, Node 24, and
+docs-only pull requests remain path-ignored. CI uses Bun 1.4.2, Node 24, and
 `bun install --frozen-lockfile` across all workspaces. `bun run test` covers the
 package and Storybook test suites, `bun run app:typecheck` checks the Storybook
 consumer, and `bun run playground:distribution --check` builds packed package

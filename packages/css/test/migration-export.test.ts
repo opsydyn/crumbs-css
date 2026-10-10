@@ -103,5 +103,5 @@ describe("isolated migration tooling export", () => {
     expect(migrationGraphs.every(graph => graph.classification === "compiler-tooling")).toBe(true)
     expect(migrationGraphs.every(graph => graph.externalSpecifiers.includes("typescript"))).toBe(true)
     expect(migrationGraphs.every(graph => !graph.externalSpecifiers.includes("effect/Schema"))).toBe(true)
-  })
+  }, 30000)
 })

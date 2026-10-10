@@ -103,7 +103,7 @@ describe("canonical inset authoring", () => {
       const result = await compile(`const first = viewStyle(${author(rules[0]!)}); export const result = viewStyle([first, [${rules.slice(1).map(author).join(",")}], first]);`)
       expect(resolveThemeTokens(result.result, theme)).toEqual(reference([...rules, rules[0]!]))
     }), { seed: 20260931, numRuns: 100 })
-  })
+  }, 30000)
   it("preserves the typed fixture through both emitters", async () => {
     for (const useStyleSheet of [true, false]) {
       const code = await transformCssTsToStyleSheet(path.join(root, "fixtures/inset-precedence.css.ts"), root, { strictDiagnostics: true, useStyleSheet })

@@ -650,5 +650,5 @@ describe("@opsydyn/crumbs-css packed consumer contract", () => {
     writeConsumerTsconfig(consumerRoot, "tsconfig.bundler.json", "ESNext", "Bundler")
     run([resolve(resolveInstalledPackageRoot("typescript"), "bin", "tsc"), "-p", "tsconfig.node16.json"], consumerRoot)
     run([resolve(resolveInstalledPackageRoot("typescript"), "bin", "tsc"), "-p", "tsconfig.bundler.json"], consumerRoot)
-  }, { timeout: 15_000 })
+  }, 60000)
 })

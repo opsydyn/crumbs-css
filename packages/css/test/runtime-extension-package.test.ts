@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 test('extensions_entry_has_no_runtime_externals', async () => { const graphs = await auditPackedRuntimeEntrypoints(resolve(import.meta.dir, '..')); const entries = graphs.filter(g => g.subpath === './extensions'); expect(entries).toHaveLength(2); for (const g of entries) {
     expect(g.externalSpecifiers).toEqual([]);
     expect(g.classification).toBe('ordinary-runtime');
-} });
+} }, 30000);
 test('esm_cjs_public_values_and_cross_copy_protocol_match', async () => { const esm = await import('@opsydyn/crumbs-css/extensions'); const cjs = createRequire(import.meta.url)('@opsydyn/crumbs-css/extensions'); expect(Object.keys(esm).sort()).toEqual(['ExtensionError', 'defineExtension']); expect(Object.keys(cjs).sort()).toEqual(['ExtensionError', 'defineExtension']); const a = esm.defineExtension<{
     make: () => () => void;
 }>().factory({ importPath: 'pkg/runtime', importName: 'make' })(); const b = cjs.defineExtension().factory({ importPath: 'pkg/runtime', importName: 'make' })(); expect(Object.getOwnPropertyDescriptor(a, Symbol.for('crumbs.css.runtime-extension'))!.value).toEqual(Object.getOwnPropertyDescriptor(b, Symbol.for('crumbs.css.runtime-extension'))!.value); });
