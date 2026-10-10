@@ -1,0 +1,36 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/playground-consumer.test.ts:
+(pass) isolated Expo consumer > rejects ambiguous modes and unknown flags before installation [0.16ms]
+(pass) isolated Expo consumer > replaces only the Crumbs dependency and rejects links [0.04ms]
+(pass) isolated Expo consumer > copies a standalone app without workspace dependencies or build state [5.33ms]
+61 |             try { resolved = await realpath(target + suffix); break } catch {}
+62 |           }
+63 |           if (!resolved || !resolved.startsWith(directory + sep)) unresolved.push(file + " -> " + module.text)
+64 |         }
+65 |       }
+66 |       expect(unresolved).toEqual([])
+                              ^
+error: expect(received).toEqual(expected)
+
+- []
++ [
++   "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-stage-demo-test-8RQWE7/crumbs-playground-6aouiY/src/NativeMotionPanel.tsx -> ../../storybook/src/accessibility/native-condition-source",
++   "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-stage-demo-test-8RQWE7/crumbs-playground-6aouiY/src/NativeMotionPanel.tsx -> ../../storybook/src/components/native-motion/MotionPanel",
++   "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-stage-demo-test-8RQWE7/crumbs-playground-6aouiY/src/incremental.css.ts -> ../../../packages/css/fixtures/m2-7-workspace-token",
++   "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-stage-demo-test-8RQWE7/crumbs-playground-6aouiY/src/TokenAlgebraPanel.tsx -> ../../storybook/src/components/token-algebra/AlgebraPanel",
++   "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-stage-demo-test-8RQWE7/crumbs-playground-6aouiY/src/RuntimeExtensionPanel.tsx -> ../../storybook/src/components/runtime-extensions/ExtensionPanel",
++   "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-stage-demo-test-8RQWE7/crumbs-playground-6aouiY/src/ContainerConditionsPanel.tsx -> ../../storybook/src/components/container-conditions/ContainerPanel",
++ ]
+
+- Expected  - 1
++ Received  + 8
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/playground-consumer.test.ts:66:26)
+(fail) isolated Expo consumer > stages every relative demo import and its explicit runtime factory inside the standalone app [32.40ms]
+(pass) isolated Expo consumer > verifies actual installed metadata and rejects an external package link [3.50ms]
+
+ 4 pass
+ 1 fail
+ 18 expect() calls
+Ran 5 tests across 1 file. [618.00ms]

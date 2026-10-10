@@ -1,7 +1,7 @@
 import { cp, mkdtemp, readFile, realpath, rm, writeFile } from "node:fs/promises"
 import { watch } from "node:fs"
 import { tmpdir } from "node:os"
-import { dirname, join, resolve } from "node:path"
+import { basename, dirname, join, resolve } from "node:path"
 import { createRequire } from "node:module"
 import { verifyRuntimeBundles } from "./runtime-bundle-contract"
 
@@ -37,9 +37,32 @@ export async function stage(specifier: string, stagingParent = tmpdir()) {
   const directory = await mkdtemp(join(stagingParent, "crumbs-playground-"))
   // Explicit copy allowlist excludes node_modules, .expo, generated exports and local env.
   for (const name of ["src", "index.js", "app.json", "babel.config.js", "metro.config.js", "tsconfig.json", "README.md"]) {
-    await cp(join(template, name), join(directory, name), { recursive: true })
+    await cp(join(template, name), join(directory, name), {
+      recursive: true,
+      filter: source => !basename(source).startsWith("incremental"),
+    })
+  }
+  // Keep shared demo sources inside the installed app, where its own peers resolve.
+  const sharedRoot = join(directory, "src/shared-storybook")
+  for (const name of ["container-conditions", "native-motion", "token-algebra", "runtime-extensions"]) {
+    await cp(join(root, "apps/storybook/src/components", name), join(sharedRoot, "components", name), { recursive: true })
+  }
+  await cp(join(root, "apps/storybook/src/accessibility/native-condition-source.ts"), join(sharedRoot, "accessibility/native-condition-source.ts"))
+  for (const name of ["ContainerConditionsPanel", "NativeMotionPanel", "TokenAlgebraPanel", "RuntimeExtensionPanel"]) {
+    const file = join(directory, "src", name + ".tsx")
+    await writeFile(file, (await readFile(file, "utf8")).replaceAll("../../storybook/src/", "./shared-storybook/"))
   }
   const manifest = JSON.parse(await readFile(join(template, "package.json"), "utf8"))
+  const runtimeEntry = `${manifest.name}/runtime-extensions`
+  const authoring = join(sharedRoot, "components/runtime-extensions/authoring.ts")
+  await writeFile(authoring, (await readFile(authoring, "utf8")).replaceAll("@crumbs/storybook/runtime-extensions", runtimeEntry))
+  manifest.exports = {
+    ...manifest.exports,
+    "./runtime-extensions": {
+      types: "./src/shared-storybook/components/runtime-extensions/runtime.tsx",
+      default: "./src/shared-storybook/components/runtime-extensions/runtime.tsx",
+    },
+  }
   await writeFile(join(directory, "package.json"), JSON.stringify(installedManifest(manifest, specifier), null, 2) + "\n")
   return await realpath(directory)
 }

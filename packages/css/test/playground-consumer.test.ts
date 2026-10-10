@@ -1,7 +1,9 @@
 import { describe, expect, it } from "bun:test"
-import { mkdtemp, readFile, rm, access, mkdir, writeFile, symlink } from "node:fs/promises"
+import { mkdtemp, readFile, rm, access, mkdir, writeFile, symlink, readdir, realpath } from "node:fs/promises"
 import { tmpdir } from "node:os"
-import { join } from "node:path"
+import { join, dirname, resolve, sep } from "node:path"
+import { createRequire } from "node:module"
+import ts from "typescript"
 import { identity, installedManifest, packageName, parseArgs, stage } from "../../../scripts/playground"
 
 describe("isolated Expo consumer", () => {
@@ -30,6 +32,41 @@ describe("isolated Expo consumer", () => {
       expect(Object.values(manifest.dependencies).some(value => String(value).startsWith("workspace:"))).toBe(false)
       await access(join(directory, "src/screen.css.ts"))
       for (const name of ["node_modules", ".expo", "dist", ".env.local"]) await expect(access(join(directory, name))).rejects.toThrow()
+    } finally { await rm(parent, { recursive: true, force: true }) }
+  })
+
+  it("stages every relative demo import and its explicit runtime factory inside the standalone app", async () => {
+    const parent = await mkdtemp(join(tmpdir(), "crumbs-stage-demo-test-"))
+    try {
+      const directory = await stage("1.0.0", parent)
+      const files: string[] = []
+      async function visit(folder: string) {
+        for (const item of await readdir(folder, { withFileTypes: true })) {
+          const path = join(folder, item.name)
+          if (item.isDirectory()) await visit(path)
+          else if (/\.[jt]sx?$/.test(item.name)) files.push(path)
+        }
+      }
+      await visit(join(directory, "src"))
+      const unresolved: string[] = []
+      for (const file of files) {
+        const source = ts.createSourceFile(file, await readFile(file, "utf8"), ts.ScriptTarget.Latest, true)
+        for (const statement of source.statements) {
+          if (!ts.isImportDeclaration(statement) && !ts.isExportDeclaration(statement)) continue
+          const module = statement.moduleSpecifier
+          if (!module || !ts.isStringLiteral(module) || !module.text.startsWith(".")) continue
+          const target = resolve(dirname(file), module.text)
+          let resolved: string | undefined
+          for (const suffix of ["", ".ts", ".tsx", ".js", ".jsx", ".json", "/index.ts", "/index.tsx"]) {
+            try { resolved = await realpath(target + suffix); break } catch {}
+          }
+          if (!resolved || !resolved.startsWith(directory + sep)) unresolved.push(file + " -> " + module.text)
+        }
+      }
+      expect(unresolved).toEqual([])
+      const runtime = createRequire(join(directory, "package.json")).resolve("@crumbs/playground/runtime-extensions")
+      expect(await realpath(runtime)).toStartWith(directory + sep)
+      await access(runtime)
     } finally { await rm(parent, { recursive: true, force: true }) }
   })
 

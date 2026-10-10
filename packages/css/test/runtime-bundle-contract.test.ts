@@ -33,6 +33,17 @@ describe('Metro runtime bundle source contract', () => {
    '/app/node_modules/@opsydyn/crumbs-css/dist/tooling-manifest.mjs',
   ]) expect(() => assertRuntimeBundleSources([source])).toThrow(/Non-runtime Crumbs/)
  })
+ it('admits the isolated v1 runtime feature graphs while rejecting compiler and tooling lookalikes', () => {
+  const entries = ['theme-vars', 'theme-containers', 'theme-motion', 'theme-motion-native', 'tokens-algebra', 'extensions']
+  for (const format of ['mjs', 'cjs']) {
+   const sources = entries.map(name => `/app/node_modules/@opsydyn/crumbs-css/dist/${name}.${format}`)
+   sources.push(`/app/node_modules/@opsydyn/crumbs-css/dist/domain-values-AbC123.${format}`)
+   expect(assertRuntimeBundleSources(sources)).toBe(7)
+  }
+  for (const name of ['extensions-evaluator-AbC123.mjs', 'native-runtime-extensions-AbC123.cjs', 'tokens-algebra-extra.mjs', 'theme-motion-driver-AbC123.cjs', 'Schema-AbC123.mjs']) {
+   expect(() => assertRuntimeBundleSources([`/app/node_modules/@opsydyn/crumbs-css/dist/${name}`])).toThrow(/Non-runtime Crumbs/)
+  }
+ })
  it('rejects Effect in ordinary app maps including Bun and Windows paths', () => {
   for (const source of ['/app/node_modules/effect/dist/Schema.js', '/repo/node_modules/.bun/effect@4.0.0-rc.115/node_modules/effect/dist/Schema.js', 'C:\\app\\node_modules\\effect\\dist\\Schema.js']) expect(() => assertRuntimeBundleSources([source])).toThrow(/Effect dependency/)
  })

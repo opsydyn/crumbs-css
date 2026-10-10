@@ -1,0 +1,23 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/runtime-bundle-contract.test.ts:
+(pass) Metro runtime bundle source contract > rejects compiler sources and accepts the emitted runtime in both modes [0.33ms]
+(pass) Metro runtime bundle source contract > admits only the built focused theme entries and their observed shared runtime chunks [0.03ms]
+15 |     }
+16 |     if (/(?:node_modules\/@opsydyn\/crumbs-css|packages\/css)\/(?:dist|src)\//.test(source)) {
+17 |       const runtimeEntry = /\/(?:theme(?:-(?:core|token))?|tokens|theme-(?:conditions|expressions|recipes|sprinkles))\.(?:mjs|cjs)$/
+18 |       const runtimeChunk = /\/(?:domains|identity|native-tags|theme-contract|theme-token|conditions|theme-recipe-resolvers|theme-runtime|theme-sprinkles-resolver|recipe-resolution-plan)-[^/]+\.(?:mjs|cjs)$/
+19 |       if (!runtimeEntry.test(source) && !runtimeChunk.test(source)) {
+20 |         throw new Error(`Non-runtime Crumbs module in runtime bundle: ${source}`)
+                                                                                     ^
+error: Non-runtime Crumbs module in runtime bundle: /app/node_modules/@opsydyn/crumbs-css/dist/theme-vars.mjs
+      at assertRuntimeBundleSources (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/runtime-bundle-contract.ts:20:81)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/runtime-bundle-contract.test.ts:41:11)
+(fail) Metro runtime bundle source contract > admits the isolated v1 runtime feature graphs while rejecting compiler and tooling lookalikes [0.15ms]
+(pass) Metro runtime bundle source contract > rejects Effect in ordinary app maps including Bun and Windows paths [0.02ms]
+(pass) Metro runtime bundle source contract > fails absent or incomplete retained maps and accepts indexed source maps [2.10ms]
+
+ 4 pass
+ 1 fail
+ 29 expect() calls
+Ran 5 tests across 1 file. [264.00ms]

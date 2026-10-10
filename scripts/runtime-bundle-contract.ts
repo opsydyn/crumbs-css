@@ -14,8 +14,8 @@ export function assertRuntimeBundleSources(sources: ReadonlyArray<string>): numb
       throw new Error(`Compiler dependency in runtime bundle: ${source}`)
     }
     if (/(?:node_modules\/@opsydyn\/crumbs-css|packages\/css)\/(?:dist|src)\//.test(source)) {
-      const runtimeEntry = /\/(?:theme(?:-(?:core|token))?|tokens|theme-(?:conditions|expressions|recipes|sprinkles))\.(?:mjs|cjs)$/
-      const runtimeChunk = /\/(?:domains|identity|native-tags|theme-contract|theme-token|conditions|theme-recipe-resolvers|theme-runtime|theme-sprinkles-resolver|recipe-resolution-plan)-[^/]+\.(?:mjs|cjs)$/
+      const runtimeEntry = /\/(?:theme(?:-(?:core|token))?|tokens(?:-algebra)?|extensions|theme-(?:conditions|expressions|recipes|sprinkles|vars|containers|motion(?:-native)?))\.(?:mjs|cjs)$/
+      const runtimeChunk = /\/(?:domains|domain-values|identity|native-tags|theme-contract|theme-token|conditions|theme-recipe-resolvers|theme-runtime|theme-sprinkles-resolver|recipe-resolution-plan)-[^/]+\.(?:mjs|cjs)$/
       if (!runtimeEntry.test(source) && !runtimeChunk.test(source)) {
         throw new Error(`Non-runtime Crumbs module in runtime bundle: ${source}`)
       }
