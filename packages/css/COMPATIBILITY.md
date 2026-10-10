@@ -137,9 +137,13 @@ Android is parked.
 
 ## Release, compatibility, and deprecation policy (M8.5)
 
-The v1 source/GitHub release is `1.0.0`. npm publication remains pending the
-unchanged M10.5 host gate and required hosted Mac runner; the release tag alone
-is not registry publication or release-wide performance qualification.
+The stable npm/GitHub release is `1.0.0`, with independently verified registry
+bytes, integrity, provenance and installed Expo consumer exports. Its explicit
+v1-only disposition admits the recorded warm-transform failure and capped
+0.174 ms incremental overrun. Raw failed rows, baselines, numerical limits and
+generic future-release policy remain unchanged. Publication does not establish
+physical-device or release-wide performance qualification. See the
+[release evidence](https://github.com/opsydyn/crumbs-css/blob/main/docs/evidence/2026-10-10-v1-publication/README.md).
 
 Public APIs and published artifact formats follow SemVer: compatible fixes use
 patch releases, additive compatible changes use minor releases, and breaking

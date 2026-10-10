@@ -25,3 +25,7 @@ The [incremental approval](incremental-approval.json) records the user's exact r
 The subsequent separate response “Approved” explicitly adopts the fresh `0cdbdb65…` tarball. The superseded `89b14b8…` artifact and any changed or missing report digest now reject. The historical pipeline rejection and skipped publication are retained; npm still requires execution and independent verification. Automatic approval review rejected restoring retained `dist` files after normalization because that would weaken source-to-tarball integrity beyond the approved scope; the rejected write did not execute. The accepted decision uses the explicitly approved fresh build and exact retained report instead.
 
 Publication now awaits full bundle verification/publishing and independent npm acceptance. No repeated measurement has been selected to erase this result. Physical devices/readers/release FPS and M11.6 remain deferred or parked.
+
+## Executed disposition
+
+The approved disposition was executed by successful [run 38066766715](https://github.com/opsydyn/crumbs-css/actions/runs/38066766715). Frozen source reproduction and both independent verifiers pass; the exact approved tarball is public npm `1.0.0` and `latest`. Registry integrity, cryptographic provenance and a fresh installed Expo consumer are verified in [the publication packet](README.md). The historical pending and rejected states above describe pre-execution boundaries; the current status is [complete](publication-status.json). Raw failed numerical rows and generic future-release gates are unchanged.

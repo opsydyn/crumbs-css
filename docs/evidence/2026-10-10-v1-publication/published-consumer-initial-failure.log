@@ -1,0 +1,24 @@
+Preparing published consumer: /private/tmp/crumbs-v1-publish-20261010/published-consumer-tmp/crumbs-playground-8Ji0JF; requested Crumbs 1.0.0
+npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+
+added 570 packages in 1m
+Consumer: /private/tmp/crumbs-v1-publish-20261010/published-consumer-tmp/crumbs-playground-8Ji0JF
+{"mode":"published","version":"1.0.0","entry":"/private/tmp/crumbs-v1-publish-20261010/published-consumer-tmp/crumbs-playground-8Ji0JF/node_modules/@opsydyn/crumbs-css/dist/theme.cjs"}
+src/ContainerConditionsPanel.tsx(2,32): error TS2307: Cannot find module '../../storybook/src/components/container-conditions/ContainerPanel' or its corresponding type declarations.
+src/NativeMotionPanel.tsx(5,58): error TS2307: Cannot find module '../../storybook/src/accessibility/native-condition-source' or its corresponding type declarations.
+src/NativeMotionPanel.tsx(6,29): error TS2307: Cannot find module '../../storybook/src/components/native-motion/MotionPanel' or its corresponding type declarations.
+src/NativeMotionPanel.tsx(7,513): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/NativeMotionPanel.tsx(7,520): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+src/RuntimeExtensionPanel.tsx(2,32): error TS2307: Cannot find module '../../storybook/src/components/runtime-extensions/ExtensionPanel' or its corresponding type declarations.
+src/TokenAlgebraPanel.tsx(2,30): error TS2307: Cannot find module '../../storybook/src/components/token-algebra/AlgebraPanel' or its corresponding type declarations.
+27 | }
+28 | 
+29 | async function run(command: string[], cwd: string, env = process.env, capture = false) {
+30 |   const child = Bun.spawn(command, { cwd, env, stdout: capture ? "pipe" : "inherit", stderr: "inherit" })
+31 |   const output = capture ? await new Response(child.stdout).text() : ""
+32 |   if (await child.exited !== 0) throw new Error(`Command failed: ${command.join(" ")}`)
+                                               ^
+error: Command failed: /private/tmp/crumbs-v1-publish-20261010/published-consumer-tmp/crumbs-playground-8Ji0JF/node_modules/.bin/tsc --noEmit
+      at run (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/playground.ts:32:43)
+      at async main (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/playground.ts:91:11)
+

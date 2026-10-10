@@ -9,11 +9,10 @@ Crumbs compiles `.css.ts` files into native styles at Metro transform time. Comp
 recipes and atomic utilities; add themes, scoped design tokens, conditions, motion and reusable runtime
 factories through explicit package entrypoints.
 
-**v1.0.0 is published on GitHub; npm publication is authorised and pending final verification.**
-The complete matched host report passes cold transform and all eight editor budgets, while warm transform and
-incremental rebuild remain failed. The v1-only approvals cover warm transform and the 0.174 ms incremental overrun.
-The fresh source-built tarball and complete retained report are explicitly approved. Registry alpha releases do not provide the complete v1 API
-below. See [release status](docs/releases/1.0.0.md) and the [concrete release decision](docs/evidence/2026-10-10-v1-publication/revised-release-decision.md).
+**v1.0.0 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases/tag/v1.0.0).**
+The public registry tarball, integrity, provenance and an isolated installed Expo consumer are verified.
+The v1-only release approvals cover the recorded warm-transform failure and 0.174 ms incremental overrun;
+failed measurements remain visible. See [release status](docs/releases/1.0.0.md) and [publication evidence](docs/evidence/2026-10-10-v1-publication/README.md).
 
 ## Get started
 
@@ -22,19 +21,13 @@ for tooling; peer ranges are React `>=19 <20`, React Native `>=0.85 <0.86` and M
 `>=5.9 <7` is optional for source migration tooling. Effect 4 is Crumbs' implementation dependency; applications
 do not need an Effect import, service or runner.
 
-To try the complete v1 API before npm publication, build and pack this source release:
+Install the stable package into your Expo app:
 
 ```sh
-git clone --branch v1.0.0 https://github.com/opsydyn/crumbs-css.git
-cd crumbs-css
-bun install --frozen-lockfile
-bun run build
-cd packages/css
-npm pack --ignore-scripts
+npm install @opsydyn/crumbs-css@1.0.0
+# or
+bun add @opsydyn/crumbs-css@1.0.0
 ```
-
-Install that tarball into your Expo app. After registry publication, use `npm install @opsydyn/crumbs-css@1.0.0`
-or `bun add @opsydyn/crumbs-css@1.0.0` instead.
 
 Wrap Expo's Metro configuration:
 
@@ -70,6 +63,22 @@ export function Card() {
 Restart Metro after changing its configuration. Literal styles need no provider; token-bearing styles use
 `ThemeProvider` and the resolution Hooks from `/theme/core`. Import authoring APIs in `.css.ts` files and runtime
 APIs in components. Prefer the specific entry you use so optional tooling stays outside the native runtime graph.
+
+### Build from source (optional)
+
+To build the immutable v1 source yourself:
+
+```sh
+git clone --branch v1.0.0 https://github.com/opsydyn/crumbs-css.git
+cd crumbs-css
+bun install --frozen-lockfile
+bun run build
+cd packages/css
+npm pack --ignore-scripts
+```
+
+Install the resulting tarball into your Expo app. The source build and published artifact have their own
+recorded qualification identities; the supported registry quickstart above uses the verified release.
 
 ## API map
 

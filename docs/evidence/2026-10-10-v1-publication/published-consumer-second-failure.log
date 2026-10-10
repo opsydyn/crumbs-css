@@ -1,0 +1,41 @@
+Preparing published consumer: /private/tmp/crumbs-v1-publish-20261010/published-consumer-tmp/crumbs-playground-b45deh; requested Crumbs 1.0.0
+npm warn deprecated uuid@7.0.3: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+
+added 570 packages in 1m
+Consumer: /private/tmp/crumbs-v1-publish-20261010/published-consumer-tmp/crumbs-playground-b45deh
+{"mode":"published","version":"1.0.0","entry":"/private/tmp/crumbs-v1-publish-20261010/published-consumer-tmp/crumbs-playground-b45deh/node_modules/@opsydyn/crumbs-css/dist/theme.cjs"}
+Starting Metro Bundler
+
+Web Bundled 4500ms index.js (331 modules)
+Android Bundled 6486ms index.js (613 modules)
+iOS Bundled 8263ms index.js (631 modules)
+
+› web bundles (2):
+_expo/static/js/web/index-e178c7adcef457c2979344eaf2c4d326.js (862KB)
+_expo/static/js/web/index-e178c7adcef457c2979344eaf2c4d326.js.map (3.1MB)
+
+› android bundles (2):
+_expo/static/js/android/index-9c6d14581057bfe86291bab91ca9c68e.hbc (1.7MB)
+_expo/static/js/android/index-9c6d14581057bfe86291bab91ca9c68e.hbc.map (4.8MB)
+
+› ios bundles (2):
+_expo/static/js/ios/index-a684c83579f613dea5afd8db9aeb5ab8.hbc (1.7MB)
+_expo/static/js/ios/index-a684c83579f613dea5afd8db9aeb5ab8.hbc.map (4.7MB)
+
+› Files (2):
+index.html (1.2KB)
+metadata.json (244B)
+
+Exported: dist
+15 |     }
+16 |     if (/(?:node_modules\/@opsydyn\/crumbs-css|packages\/css)\/(?:dist|src)\//.test(source)) {
+17 |       const runtimeEntry = /\/(?:theme(?:-(?:core|token))?|tokens|theme-(?:conditions|expressions|recipes|sprinkles))\.(?:mjs|cjs)$/
+18 |       const runtimeChunk = /\/(?:domains|identity|native-tags|theme-contract|theme-token|conditions|theme-recipe-resolvers|theme-runtime|theme-sprinkles-resolver|recipe-resolution-plan)-[^/]+\.(?:mjs|cjs)$/
+19 |       if (!runtimeEntry.test(source) && !runtimeChunk.test(source)) {
+20 |         throw new Error(`Non-runtime Crumbs module in runtime bundle: ${source}`)
+                       ^
+error: Non-runtime Crumbs module in runtime bundle: /node_modules/@opsydyn/crumbs-css/dist/extensions.mjs
+      at assertRuntimeBundleSources (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/runtime-bundle-contract.ts:20:19)
+      at verifyRuntimeBundles (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/runtime-bundle-contract.ts:57:34)
+      at async main (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/playground.ts:117:34)
+

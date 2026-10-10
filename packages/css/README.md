@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Version `1.0.0` is the source/GitHub release. npm publication remains pending the final M10.5 release decision. A complete isolated host run is retained; warm and incremental numerical failures and fresh tarball identity require explicit disposition. Registry alpha artifacts do not contain the complete v1 surface. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.0.md).
+Version `1.0.0` is published on npm with provenance and is the `latest` stable release. The public tarball and an isolated installed Expo consumer are verified. The v1-only release decision admits the recorded warm-transform failure and 0.174 ms incremental overrun; measurements and future-release gates remain unchanged. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.0.md).
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -73,8 +73,7 @@ See the full compatibility matrix in
 
 ## Install
 
-After npm publication, install the exact v1 version below. Before then, use the
-[source-release tarball quickstart](https://github.com/opsydyn/crumbs-css#get-started).
+Install the verified stable release in your Expo app:
 
 ```sh
 bun add @opsydyn/crumbs-css@1.0.0
