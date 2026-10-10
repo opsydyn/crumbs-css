@@ -77,6 +77,34 @@ jobs:
       - name: Build package for host measurement
         run: bun run --filter @opsydyn/crumbs-css build
 
+      - name: Expose locked Vanilla Extract to matched baseline app
+        env:
+          BASELINE_ROOT: ${{ github.workspace }}/.m10-5-metro-baseline
+        run: |
+          node - "$BASELINE_ROOT" <<'NODE'
+          const { createRequire } = require("node:module")
+          const { mkdirSync, readFileSync, realpathSync, lstatSync, symlinkSync } = require("node:fs")
+          const { dirname, join } = require("node:path")
+          const baseline = process.argv[2]
+          const fromPackage = createRequire(join(baseline, "packages/css/package.json"))
+          const manifest = fromPackage.resolve("@vanilla-extract/css/package.json")
+          const installed = JSON.parse(readFileSync(manifest, "utf8"))
+          if (installed.name !== "@vanilla-extract/css" || installed.version !== "1.20.1") {
+            throw new Error("Locked Vanilla Extract must be 1.20.1")
+          }
+          const target = realpathSync(dirname(manifest))
+          const edge = join(baseline, "apps/playground/node_modules/@vanilla-extract/css")
+          let exists = false
+          try { lstatSync(edge); exists = true } catch (error) { if (error.code !== "ENOENT") throw error }
+          if (exists) {
+            if (realpathSync(edge) !== target) throw new Error("Existing baseline edge differs")
+          } else {
+            mkdirSync(dirname(edge), { recursive: true })
+            symlinkSync(target, edge, "dir")
+          }
+          console.log("Matched baseline app resolves locked Vanilla Extract 1.20.1")
+          NODE
+
       - name: Prepare matched Expo and Metro scaffold
         env:
           BASELINE_ROOT: ${{ github.workspace }}/.m10-5-metro-baseline
