@@ -1,0 +1,39 @@
+bun test v1.4.2 (744846f84)
+
+packages/css/test/v1-publication-exception.test.ts:
+(pass) approved v1 publication exception > rejects changed or injected authoring source even when HEAD still names the released commit [76.37ms]
+(pass) approved v1 publication exception > admits exactly the published tag, source, package and qualified tarball [0.09ms]
+(pass) approved v1 publication exception > retains an honest distinction between a pass and the approved numerical failure [1.03ms]
+31 | }
+32 | export function assertV1BudgetAdmission(result: { valid: boolean; blockers: readonly string[] }, bundle: boolean): "normal-pass" | "approved-warm-exception" {
+33 |   if (result.valid === true && isDeepStrictEqual(result.blockers, [])) return "normal-pass"
+34 |   const expected = bundle ? `Host-budget report is not release-qualified: ${warmFailure}` : warmFailure
+35 |   if (result.valid === false && isDeepStrictEqual(result.blockers, [expected])) return "approved-warm-exception"
+36 |   throw Error(`v1 publication blocked: ${result.blockers.join("; ") || "Verifier did not admit the report"}`)
+                                                                                                                 ^
+error: v1 publication blocked: Host-budget metric incremental-rebuild is fail; expected pass
+      at assertV1BudgetAdmission (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/v1-publication.ts:36:109)
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/v1-publication-exception.test.ts:45:11)
+(fail) approved v1 publication exception > admits the approved incremental overrun alone or alongside warm, including sealed bundle failures [1.81ms]
+(pass) approved v1 publication exception > rejects a larger incremental regression or missing measured median [0.04ms]
+(pass) approved v1 publication exception > keeps the unapproved fresh artifact blocked despite the new numerical approval [0.03ms]
+(pass) approved v1 publication exception > rejects every failure beyond the approved complete numerical results [0.52ms]
+68 |    }
+69 |    expect(() => assertV1BudgetAdmission({ valid: true, blockers: [wrap(incremental)] }, bundle, approvedIncrementalMedian)).toThrow()
+70 |   }
+71 |  })
+72 |  it("binds the immutable approval, report manifest and trusted workflow tooling independently", () => {
+73 |   expect(() => assertV1ExceptionReceipt(receipt(), "a".repeat(64), "b".repeat(40), "c".repeat(64))).not.toThrow()
+                                                                                                             ^
+error: expect(received).not.toThrow()
+
+Error name: "Error"
+Error message: "v1 exception approval, manifest or trusted workflow tooling does not match"
+
+      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/test/v1-publication-exception.test.ts:73:105)
+(fail) approved v1 publication exception > binds the immutable approval, report manifest and trusted workflow tooling independently [1.82ms]
+
+ 6 pass
+ 2 fail
+ 45 expect() calls
+Ran 8 tests across 1 file. [521.00ms]

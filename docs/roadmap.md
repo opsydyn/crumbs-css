@@ -38,7 +38,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M7 | Typed component slots, states, and extension contracts | M5, M6 | Complete; M7.1–M7.5 delivered |
 | M8 | Distributed package/artifact compatibility | M2, M3, M7 | Complete; M8.1–M8.6 delivered |
 | M9 | Manifests, change impact, policy, migrations, DTCG, and local ownership | M7, M8 | Complete; M9.1–M9.7 complete |
-| M10 | Qualify a reference design system and enterprise journeys | M8, M9 | M10.1–M10.4 delivered; M10.5 full report retained, revised v1 publication disposition pending |
+| M10 | Qualify a reference design system and enterprise journeys | M8, M9 | M10.1–M10.4 delivered; M10.5 numerical exceptions approved, fresh v1 artifact identity decision pending |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Selected M11.1–M11.5 delivered; M11.6 integrations parked |
 
 Reference examples should grow with each milestone. M10 qualifies their combined behavior; it is not the first time earlier features receive consumer or device tests. M8 extends the initial packed-consumer/import checks with a complete distribution contract.
@@ -3116,3 +3116,10 @@ The v1.0.0 source/GitHub release is immutable at `382768a45f429f4c039e7584cd7c31
 The [complete retained report](evidence/2026-10-10-v1-publication/run-38059803838-bundle/host-report/comparison.json) and [independent rederivation](evidence/2026-10-10-v1-publication/full-report-verification.json) establish nine blocking passes, warm/incremental failures, and no incomplete rows. Cold passes at 75.752375 ms; warm fails at 9.344542 ms; incremental 136.519166 ms exceeds its 136.34555 ms cap by 0.173616 ms. The warm-only approval does not cover this result. The fresh frozen build preserves all 105 JavaScript files but three declaration path/comment references change the tarball hash, so the previous exact artifact pin also rejects it. All original controls remain binding; npm publication was skipped and independently returns E404.
 
 **Next: M10.5 — review the [concrete revised v1 disposition](evidence/2026-10-10-v1-publication/revised-release-decision.md): add only the complete incremental numerical exception and explicitly adopt the fresh source-built tarball, retaining all other checks and failed raw rows.** No restoration/normalization of built artifacts was admitted. The automatic review rejection and safer fresh-artifact proposal are recorded. Generic policy, limits, baselines and v1 tag remain unchanged. No repeated measurement was selected to erase failures. Physical devices/readers/release FPS remain deferred; M11.6 is parked.
+
+
+## 2026-10-10 — M10.5 approved incremental publication exception
+
+The user explicitly approved the **0.174 ms incremental overrun** in the complete retained v1 report. The [approval amendment](evidence/2026-10-10-v1-publication/incremental-approval.json) preserves the original warm-transform approval and artifact pin. The one-off publication helper admits only complete numerical warm/incremental failures, and caps incremental admission at the recorded **136.51916600000004 ms** median. Missing or larger medians, incomplete evidence, duplicate blockers, unrelated failures, changed source/tag/package/artifact identities and mismatched approval/manifest/tooling receipts remain rejected. Failed raw rows, budgets, baselines, generic release policy and the immutable v1 tag are unchanged.
+
+**Next: M10.5 — explicitly approve the fresh source-built tarball identity in the [revised disposition](evidence/2026-10-10-v1-publication/revised-release-decision.md), then complete full bundle verification and authorised npm publication.** This incremental approval does not repin the tarball or admit artifact restoration. Physical devices/readers/release FPS remain deferred; M11.6 is parked.

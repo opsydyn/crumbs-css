@@ -7,19 +7,22 @@ import { pathToFileURL } from "node:url"
 import { isDeepStrictEqual } from "node:util"
 
 export const approvedV1Exception = Object.freeze({
-  id: "crumbs-v1-warm-transform-2026-10-10",
+  id: "crumbs-v1-warm-and-incremental-2026-10-10",
   releaseTag: "v1.0.0",
   sourceRevision: "382768a45f429f4c039e7584cd7c31e4f8821fc0",
   packageName: "@opsydyn/crumbs-css",
   packageVersion: "1.0.0",
   tarballSha256: "89b14b8fb70f8c07931c180b81b3a45cc4e8452d31ea43a768c041c7fe297baf",
-  metric: "warm-transform-ms",
+  metrics: Object.freeze(["warm-transform-ms", "incremental-rebuild"] as const),
+  incrementalMedianCeilingMs: 136.51916600000004,
   approvedBy: "Alan Currie",
   approvedOn: "2026-10-10",
-  approvalMessage: "Approved",
-  scope: "Only the complete numerical warm-transform failure for this exact release; all other verification remains required. No baseline or numerical budget changes. No future-release exception.",
+  warmApprovalMessage: "Approved",
+  incrementalApprovalMessage: "requests approval for the 0.174 ms incremental overrun  is approved",
+  scope: "Only complete numerical warm-transform and incremental-rebuild failures for this exact release; incremental median must not exceed the approved 136.51916600000004 ms; all other verification remains required. No baseline or numerical budget changes. No future-release exception.",
 })
 const warmFailure = "Host-budget metric warm-transform-ms is fail; expected pass"
+const incrementalFailure = "Host-budget metric incremental-rebuild is fail; expected pass"
 const sha256 = (bytes: string | Uint8Array): string => createHash("sha256").update(bytes).digest("hex")
 const readJson = (path: string): any => JSON.parse(readFileSync(path, "utf8"))
 
@@ -29,15 +32,28 @@ export function assertV1ReleaseContext(value: unknown): void {
     if ((value as Record<string, unknown>)[key] !== approvedV1Exception[key]) throw Error(`Release exception does not cover ${key}`)
   }
 }
-export function assertV1BudgetAdmission(result: { valid: boolean; blockers: readonly string[] }, bundle: boolean): "normal-pass" | "approved-warm-exception" {
+export function assertV1BudgetAdmission(
+  result: { valid: boolean; blockers: readonly string[] },
+  bundle: boolean,
+  incrementalMedian?: number,
+): "normal-pass" | "approved-warm-exception" | "approved-incremental-exception" | "approved-warm-and-incremental-exception" {
   if (result.valid === true && isDeepStrictEqual(result.blockers, [])) return "normal-pass"
-  const expected = bundle ? `Host-budget report is not release-qualified: ${warmFailure}` : warmFailure
-  if (result.valid === false && isDeepStrictEqual(result.blockers, [expected])) return "approved-warm-exception"
+  const wrap = (failure: string) => bundle ? `Host-budget report is not release-qualified: ${failure}` : failure
+  const warm = wrap(warmFailure), incremental = wrap(incrementalFailure)
+  if (result.valid === false && result.blockers.length > 0 &&
+      new Set(result.blockers).size === result.blockers.length &&
+      result.blockers.every(blocker => blocker === warm || blocker === incremental)) {
+    if (!result.blockers.includes(incremental)) return "approved-warm-exception"
+    if (typeof incrementalMedian === "number" && Number.isFinite(incrementalMedian) &&
+        incrementalMedian > 0 && incrementalMedian <= approvedV1Exception.incrementalMedianCeilingMs) {
+      return result.blockers.includes(warm) ? "approved-warm-and-incremental-exception" : "approved-incremental-exception"
+    }
+  }
   throw Error(`v1 publication blocked: ${result.blockers.join("; ") || "Verifier did not admit the report"}`)
 }
 export function assertV1ExceptionReceipt(value: unknown, manifestSha256: string, toolingRevision: string, toolingSha256: string): void {
   if (!/^[a-f0-9]{64}$/u.test(manifestSha256) || !/^[a-f0-9]{40}$/u.test(toolingRevision) || !/^[a-f0-9]{64}$/u.test(toolingSha256)) throw Error("Invalid trusted tooling or manifest identity")
-  if (!isDeepStrictEqual(value, { format: "crumbs.v1.publication-exception.v1", approval: approvedV1Exception, manifestSha256, toolingRevision, toolingSha256 })) throw Error("v1 exception approval, manifest or trusted workflow tooling does not match")
+  if (!isDeepStrictEqual(value, { format: "crumbs.v1.publication-exception.v2", approval: approvedV1Exception, manifestSha256, toolingRevision, toolingSha256 })) throw Error("v1 exception approval, manifest or trusted workflow tooling does not match")
 }
 function inventory(root: string, directory = root): { path: string; sha256: string }[] {
   const files: { path: string; sha256: string }[] = []
@@ -90,7 +106,8 @@ export async function createV1Bundle(root: string, reportSource: string, bundle:
   } else cpSync(reportSource,reportDirectory,{recursive:true,errorOnExist:true})
   const artifacts = m.report.collectReleaseHostBudgetArtifactInventory(root)
   const verified = m.report.verifyReleaseHostBudgetReport({reportDirectory,repositoryRoot:root,expectedRevision:approvedV1Exception.sourceRevision,expectedArtifacts:artifacts})
-  const admission = assertV1BudgetAdmission({valid:verified.releasePolicyQualified,blockers:verified.blockers},false)
+  const incrementalMedian = readJson(join(reportDirectory,"comparison.json")).metrics?.find((row: any) => row.id === "incremental-rebuild")?.current?.median
+  const admission = assertV1BudgetAdmission({valid:verified.releasePolicyQualified,blockers:verified.blockers},false,incrementalMedian)
   const host = m.environment.collectReleaseHostEnvironment(root)
   const hostBlockers = m.environment.verifyReleaseHostEnvironment(host)
   if(hostBlockers.length) throw Error(hostBlockers.join("; "))
@@ -104,7 +121,7 @@ export async function createV1Bundle(root: string, reportSource: string, bundle:
   })
   if(!decoded.ok) throw Error(`Invalid qualification manifest: ${JSON.stringify(decoded.issues)}`)
   const manifestBytes = JSON.stringify(decoded.value,null,2)+"\n"
-  const receipt = {format:"crumbs.v1.publication-exception.v1",approval:approvedV1Exception,manifestSha256:sha256(manifestBytes),...tooling}
+  const receipt = {format:"crumbs.v1.publication-exception.v2",approval:approvedV1Exception,manifestSha256:sha256(manifestBytes),...tooling}
   assertV1ExceptionReceipt(receipt,sha256(manifestBytes),tooling.toolingRevision,tooling.toolingSha256)
   writeFileSync(join(bundle,"manifest.json"),manifestBytes,{flag:"wx"})
   writeFileSync(join(bundle,"v1-exception.json"),JSON.stringify(receipt,null,2)+"\n",{flag:"wx"})
@@ -119,7 +136,8 @@ export async function verifyV1Bundle(root: string, bundle: string): Promise<void
   assertV1ReleaseContext(manifest)
   assertV1ExceptionReceipt(readJson(join(bundle,"v1-exception.json")),sha256(manifestBytes),tooling.toolingRevision,tooling.toolingSha256)
   const result = m.artifact.verifyReleaseQualificationBundle({bundleDirectory:bundle,repositoryRoot:root,expectedTag:approvedV1Exception.releaseTag,expectedRevision:approvedV1Exception.sourceRevision})
-  const admission = assertV1BudgetAdmission(result,true)
+  const incrementalMedian = readJson(join(bundle,manifest.reportDirectory,"comparison.json")).metrics?.find((row: any) => row.id === "incremental-rebuild")?.current?.median
+  const admission = assertV1BudgetAdmission(result,true,incrementalMedian)
   console.log(`Verified exact v1 tarball with ${admission}; all other released integrity and budget checks satisfied.`)
 }
 if(import.meta.main) {
