@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Version `1.0.0` is the source/GitHub release. npm publication remains pending the unchanged M10.5 host gate and required hosted Mac runner. Registry alpha artifacts do not contain the complete v1 surface. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.0.md).
+Version `1.0.0` is the source/GitHub release. npm publication remains pending the final M10.5 release decision. A complete isolated host run is retained; warm and incremental numerical failures and fresh tarball identity require explicit disposition. Registry alpha artifacts do not contain the complete v1 surface. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.0.0.md).
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)

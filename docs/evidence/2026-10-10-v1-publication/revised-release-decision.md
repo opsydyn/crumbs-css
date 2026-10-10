@@ -1,0 +1,25 @@
+# M10.5: revised v1 publication decision for review
+
+Status: proposed; no amended approval or publication is inferred.
+
+The exact immutable `v1.0.0` source remains `382768a45f429f4c039e7584cd7c31e4f8821fc0`. [Run 38059803838](https://github.com/opsydyn/crumbs-css/actions/runs/38059803838) passes source/host setup, 1,829 CSS and 33 Storybook tests, package and app types, real packed Expo iOS/web qualification, and the native-style smoke benchmark. It completes all 21 unchanged measurements. Independent rederivation verifies source, artifact, policy and raw measurement bindings; nine blocking rows pass, two fail, none are incomplete. All ten advisory rows are complete; their two passes and eight failures remain visible.
+
+| Blocking measurement | Recorded median | Effective unchanged cap | Result |
+| --- | ---: | ---: | --- |
+| Cold transform | 75.752375 ms | 83.00573 ms (+25% baseline) | Pass |
+| Warm transform | 9.344542 ms | 6.51374375 ms (+15% baseline; 6.514 ms absolute) | Fail; current v1-only approval covers this row |
+| Incremental rebuild | 136.519166 ms | 136.34555 ms (+10% baseline) | Fail; 0.173616 ms / 0.1273% above cap; currently not covered |
+
+The fresh frozen source build packs to SHA-256 `0cdbdb65f89c875e8376fb3dfff749fbd7190416170f93e3855b47ac705b2b50`. Its 185 files match the earlier pinned artifact except for three declarations: one `metro-cache` region source-path comment changes a type-only chunk filename and its references. All 105 JavaScript files are byte-identical. An independently retained diagnostic confirms identical type content after only that comment/path-reference normalization, and rejects a semantic type mutation. This diagnostic does not admit the artifact or replace a gate. The complete new report binds the actual fresh build artifacts.
+
+## Recommended explicit disposition
+
+For this exact v1 source only, retain the approved numerical warm-transform exception and additionally admit the complete numerical `incremental-rebuild` failure. Explicitly adopt the fresh source-built tarball SHA-256 above instead of the earlier `89b14b8…` pin. Keep every other blocking metric required, complete advisory evidence and all source/host/policy/report/artifact/tarball checks. Preserve the failed rows, existing limits/baselines, generic workflow and policy. Future versions receive neither exception.
+
+Update the one-off approval receipt, exact tarball pin and rejection controls together. Verify the fresh artifact directly against the immutable checkout and full report; build-generated artifacts must not be replaced by retained artifacts or normalized into a pass. Publish only the newly approved, sealed tarball with npm provenance, then independently check registry version/latest, integrity and a real installed consumer. The v1 tag remains unchanged.
+
+## Current boundary
+
+The existing warm-only approval does not cover this incremental failure or new tarball identity. The pipeline remains rejected; npm publication was skipped and independently returns E404. Automatic approval review rejected restoring retained `dist` files after normalization because that would weaken source-to-tarball integrity beyond the approved scope; the rejected write did not execute. The recommendation uses the fresh build, requiring a new explicit artifact identity decision instead.
+
+Retaining the current approval leaves publication pending incremental remediation and exact-artifact qualification. No repeated measurement has been selected to erase this result. Physical devices/readers/release FPS and M11.6 remain deferred or parked.

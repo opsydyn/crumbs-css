@@ -9,10 +9,11 @@ Crumbs compiles `.css.ts` files into native styles at Metro transform time. Comp
 recipes and atomic utilities; add themes, scoped design tokens, conditions, motion and reusable runtime
 factories through explicit package entrypoints.
 
-**v1.0.0 is the source/GitHub release. npm publication remains pending the M10.5 release gate and the required
-hosted Mac runner.** Cold and warm transform budgets are currently failed; naming this release v1 does not
-change those limits. Until publication is independently verified, the registry's alpha releases do not provide
-the complete v1 API below. See [release status](docs/releases/1.0.0.md).
+**v1.0.0 is published on GitHub; npm publication is pending the final M10.5 release decision.**
+The complete matched host report passes cold transform and all eight editor budgets, while warm transform and
+incremental rebuild remain failed. The current v1-only approval covers warm transform; the new incremental result
+and fresh tarball identity need an explicit disposition. Registry alpha releases do not provide the complete v1 API
+below. See [release status](docs/releases/1.0.0.md) and the [concrete release decision](docs/evidence/2026-10-10-v1-publication/revised-release-decision.md).
 
 ## Get started
 
@@ -526,7 +527,7 @@ Package metadata, including the exact installed version, peer ranges and public 
 | `bun run playground` | Run the Expo consumer with Crumbs build watching and Metro restarts. |
 | `bun run playground:packed --check` | Typecheck and bundle an isolated consumer of the working-tree tarball. |
 | `bun run playground:distribution --check` | Qualify packed Crumbs, token, and component packages in Expo on iOS and web. |
-| `bun run playground:published --version=alpha --check` | Qualify an exact registry artifact in an isolated consumer. |
+| `bun run playground:published --version=1.0.0 --check` | Verify v1 in an isolated registry consumer after publication. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
 | `bun run release:check` | Build, typecheck, test, bench, pack, and require a current-source host report admitted by release policy. |

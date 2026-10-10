@@ -1,7 +1,7 @@
 # Crumbs design-system architecture roadmap
 
 Date: 2026-09-06\
-Status: proposed delivery roadmap; the first bounded M0 implementation slice started on 2026-09-14.\
+Status: v1 source release delivered; npm publication awaits the explicit M10.5 release disposition. Physical acceptance and parked integrations remain separate.\
 Architecture: [Adopt a native design-system compiler](decisions/adopt-native-design-system-compiler.md).\
 Evidence: [Current assessment and reproducible counterexamples](assessments/2026-09-06-design-system-assessment.md).
 
@@ -29,17 +29,17 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | Milestone | Outcome | Depends on | Status |
 | --- | --- | --- | --- |
 | M0 | Repair native semantics and isolate runtime imports | ADR review | Complete; M0.1–M0.9 closed, including Android Expo playground journey acceptance |
-| M1 | Select Effect 4 boundary implementation and establish budgets | M0 | In progress; M1.1/M1.2 artifact/API and initial shape contracts complete; M1.6 release-device performance remains open |
-| M2 | Introduce and qualify native IR/compiler artifacts | M1 | Not started |
-| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | In progress; M3.1 through M3.5 closed |
-| M4 | Shared resolution, compiled selection, and bounded caches | M2, M3 | Not started |
-| M5 | Native Sprinkles and composition API completeness | M2, M3, M4 | Not started |
-| M6 | Native conditions and functional style programs | M3, M4, M5 | Not started |
-| M7 | Typed component slots, states, and extension contracts | M5, M6 | Not started |
-| M8 | Distributed package/artifact compatibility | M2, M3, M7 | Not started |
+| M1 | Select Effect 4 boundary implementation and establish budgets | M0 | Software contract/host measurement slices delivered; umbrella measurement and device acceptance items remain open |
+| M2 | Introduce and qualify native IR/compiler artifacts | M1 | M2.1 and M2.2a–ao/M2.3–M2.7 delivered; native-capture umbrella M2.2 remains open |
+| M3 | Typed token domains, identity, aliases, scopes, and atomic updates | M2 | Complete; M3.1–M3.7 delivered |
+| M4 | Shared resolution, compiled selection, and bounded caches | M2, M3 | M4.1–M4.5 delivered; M4.6 measurement/device acceptance remains open |
+| M5 | Native Sprinkles and composition API completeness | M2, M3, M4 | Complete; M5.1–M5.5 delivered |
+| M6 | Native conditions and functional style programs | M3, M4, M5 | Complete; M6.1–M6.5 delivered |
+| M7 | Typed component slots, states, and extension contracts | M5, M6 | Complete; M7.1–M7.5 delivered |
+| M8 | Distributed package/artifact compatibility | M2, M3, M7 | Complete; M8.1–M8.6 delivered |
 | M9 | Manifests, change impact, policy, migrations, DTCG, and local ownership | M7, M8 | Complete; M9.1–M9.7 complete |
-| M10 | Qualify a reference design system and enterprise journeys | M8, M9 | Not started |
-| M11 | Evaluate optional extensions against concrete consumer needs | M10 | Deferred |
+| M10 | Qualify a reference design system and enterprise journeys | M8, M9 | M10.1–M10.4 delivered; M10.5 full report retained, revised v1 publication disposition pending |
+| M11 | Evaluate optional extensions against concrete consumer needs | M10 | Selected M11.1–M11.5 delivered; M11.6 integrations parked |
 
 Reference examples should grow with each milestone. M10 qualifies their combined behavior; it is not the first time earlier features receive consumer or device tests. M8 extends the initial packed-consumer/import checks with a complete distribution contract.
 
@@ -3108,3 +3108,11 @@ The approved [fresh-compilation profile](assessments/2026-10-08-m10-5-fresh-comp
 A compact stock-integration graph reproduces compiled text and all nine inputs under Bun and genuine Node 22/24. Shipping source, 149 artifacts, budgets/policy, shared compiler files and primary changes remain intact. No production optimisation or full host qualification was admitted; the historical 10.1715 ms warm failure still leaves M10.5 open and publication blocked.
 
 **Next: M10.5 — review the [local upstream investigation draft](evidence/2026-10-08-m10-5-fresh-compile-native-profile/upstream-investigation-draft.md) before deciding whether to seek maintainer input.** It is not a posted issue or a proven upstream regression. Dedicated runner registration stays separate; physical-device/spoken-reader work remains deferred.
+
+### 2026-10-10 — M10.5 v1 publication: complete report and explicit final decision
+
+The v1.0.0 source/GitHub release is immutable at `382768a45f429f4c039e7584cd7c31e4f8821fc0`. The dedicated ephemeral M4 Pro qualifier now runs through fresh frozen source/baseline installation, strict package/app types, 1,829 CSS/33 Storybook tests, genuine packed iOS/web consumer checks and all 21 unchanged host measurements. The isolated baseline resolver-edge setup is repaired with real RED/GREEN proof. Each one-job runner automatically unregistered.
+
+The [complete retained report](evidence/2026-10-10-v1-publication/run-38059803838-bundle/host-report/comparison.json) and [independent rederivation](evidence/2026-10-10-v1-publication/full-report-verification.json) establish nine blocking passes, warm/incremental failures, and no incomplete rows. Cold passes at 75.752375 ms; warm fails at 9.344542 ms; incremental 136.519166 ms exceeds its 136.34555 ms cap by 0.173616 ms. The warm-only approval does not cover this result. The fresh frozen build preserves all 105 JavaScript files but three declaration path/comment references change the tarball hash, so the previous exact artifact pin also rejects it. All original controls remain binding; npm publication was skipped and independently returns E404.
+
+**Next: M10.5 — review the [concrete revised v1 disposition](evidence/2026-10-10-v1-publication/revised-release-decision.md): add only the complete incremental numerical exception and explicitly adopt the fresh source-built tarball, retaining all other checks and failed raw rows.** No restoration/normalization of built artifacts was admitted. The automatic review rejection and safer fresh-artifact proposal are recorded. Generic policy, limits, baselines and v1 tag remain unchanged. No repeated measurement was selected to erase failures. Physical devices/readers/release FPS remain deferred; M11.6 is parked.
