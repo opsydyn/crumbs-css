@@ -3151,3 +3151,7 @@ The `1.0.1` [documentation correction is published and independently verified](e
 ## 2026-10-10 — M1.9b Expo 57 source compatibility
 
 PR [#7](https://github.com/opsydyn/crumbs-css/pull/7) merges SDK 57/RN0.86 admission while retaining SDK 56/RN0.85. Clean CI and both SDK packed checks pass; the 1.1.0 source tag matches the tested tree. npm remains pending the unchanged generic host-budget gate. The first release run stops before measurement at an isolated-Bun dependency-edge prerequisite; a reviewed workflow repair preserves the locked baseline versions and fixed release source. [Current release status](releases/1.1.0.md). Agent-skill authoring stays deferred until publication.
+
+## 2026-10-10 — M1.9b fresh gate disposition pending
+
+The repaired generic workflow completes all unchanged host measurements on a free isolated Metro port. Ten blocking rows pass, one warm-transform numerical row fails, none are incomplete. The exact measured 1.1.0 artifact also passes the SDK 57 consumer; all 105 JavaScript files match public 1.0.1. [Review the proposed v1.1.0-only release disposition](evidence/2026-10-10-m1-9b-expo57/release-review.md). No exception is applied; npm/latest remains 1.0.1. M1.9b publication stays open and the consumer agent skill stays deferred until publication is verified.

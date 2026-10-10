@@ -1,0 +1,32 @@
+qualify	Measure approved host budgets	﻿2026-10-10T21:15:04.3745640Z ##[group]Run mkdir -p "$CRUMBS_HOST_BUDGET_REPORT"
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3745890Z [36;1mmkdir -p "$CRUMBS_HOST_BUDGET_REPORT"[0m
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3746100Z [36;1mbun run measure:host-budgets "$CRUMBS_HOST_BUDGET_REPORT"[0m
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3769760Z shell: /bin/bash -e {0}
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3769890Z env:
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3770080Z   NPM_CONFIG_USERCONFIG: /private/tmp/crumbs-v1-runner-20261010/_work/_temp/.npmrc
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3770320Z   NODE_AUTH_TOKEN: XXXXX-XXXXX-XXXXX-XXXXX
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3770580Z   CRUMBS_AUDIT_NODE_FLOOR: /private/tmp/crumbs-v1-runner-20261010/_work/_tool/node/22.0.0/arm64/bin/node
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3770990Z   CRUMBS_HOST_BUDGET_REPORT: /private/tmp/crumbs-v1-runner-20261010/_work/_temp/crumbs-m10-5-38086830759-1/host-report
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3771420Z   CRUMBS_INCREMENTAL_REPO_ROOT: /private/tmp/crumbs-v1-runner-20261010/_work/_temp/crumbs-m10-5-38086830759-1/metro-scaffold
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3771880Z   CRUMBS_INCREMENTAL_APP_ROOT: /private/tmp/crumbs-v1-runner-20261010/_work/_temp/crumbs-m10-5-38086830759-1/metro-scaffold/apps/playground
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3772630Z   CRUMBS_RELEASE_SOURCE_REVISION: f08a58d022f9237cf3f4aae8bc9bd77d5c75f204
+qualify	Measure approved host budgets	2026-10-10T21:15:04.3772840Z ##[endgroup]
+qualify	Measure approved host budgets	2026-10-10T21:15:04.4055520Z $ bun scripts/measure-current-host-budgets.ts "/private/tmp/crumbs-v1-runner-20261010/_work/_temp/crumbs-m10-5-38086830759-1/host-report"
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9469750Z 530 |   return { status: response.status, body: await response.text() }
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9470010Z 531 | }
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9470210Z 532 | async function assertPortUnused(port: number) {
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9470580Z 533 |   try { await fetch(`http://127.0.0.1:${port}/status`, { signal: AbortSignal.timeout(300) }) }
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9470850Z 534 |   catch { return }
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9471090Z 535 |   throw Error(`Metro measurement port ${port} is already in use`)
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9471290Z               ^
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9471460Z error: Metro measurement port 8093 is already in use
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9471990Z       at assertPortUnused (/private/tmp/crumbs-v1-runner-20261010/_work/crumbs-css/crumbs-css/packages/css/bench/metro-incremental.ts:535:9)
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9472630Z       at async measureMetroIncremental (/private/tmp/crumbs-v1-runner-20261010/_work/crumbs-css/crumbs-css/packages/css/bench/metro-incremental.ts:281:11)
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9472950Z 
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9485670Z ##[error]
+qualify	Measure approved host budgets	      at assertPortUnused (/private/tmp/crumbs-v1-runner-20261010/_work/crumbs-css/crumbs-css/packages/css/bench/metro-incremental.ts:535:9)
+qualify	Measure approved host budgets	      at async measureMetroIncremental (/private/tmp/crumbs-v1-runner-20261010/_work/crumbs-css/crumbs-css/packages/css/bench/metro-incremental.ts:281:11)
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9488760Z 
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9488850Z Bun v1.4.2 (macOS arm64)
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9636670Z error: script "measure:host-budgets" exited with code 1
+qualify	Measure approved host budgets	2026-10-10T21:15:12.9646970Z ##[error]Process completed with exit code 1.
