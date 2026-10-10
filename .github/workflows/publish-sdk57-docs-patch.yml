@@ -1,0 +1,99 @@
+name: publish-sdk57-documentation-patch
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crumbs-css-npm-publish-v1.1.1
+  cancel-in-progress: false
+
+jobs:
+  qualify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Require manual dispatch from main
+        if: ${{ github.ref != 'refs/heads/main' }}
+        run: exit 1
+
+      - name: Check out the documentation patch
+        uses: actions/checkout@v4
+        with:
+          ref: v1.1.1
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Require a published stable GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.1.1 --json tagName,isDraft,isPrerelease,publishedAt \
+            | jq -e '.tagName == "v1.1.1" and .isDraft == false and .isPrerelease == false and .publishedAt != null'
+
+      - name: Test unchanged-runtime and metadata rejection controls
+        env:
+          PYTHONDONTWRITEBYTECODE: 1
+        run: python3 -m unittest discover -s scripts -p test_sdk57_docs_patch.py -v
+
+      - name: Prepare only the verified 1.1.0 documentation patch
+        run: |
+          python3 scripts/sdk57-docs-patch.py prepare --repo "$GITHUB_WORKSPACE" --bundle "$RUNNER_TEMP/crumbs-sdk57-docs-patch"
+          python3 scripts/sdk57-docs-patch.py verify --repo "$GITHUB_WORKSPACE" --bundle "$RUNNER_TEMP/crumbs-sdk57-docs-patch"
+
+      - name: Upload the sealed documentation patch
+        uses: actions/upload-artifact@v4
+        with:
+          name: crumbs-v1.1.1-documentation-patch
+          path: ${{ runner.temp }}/crumbs-sdk57-docs-patch
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    needs: qualify
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check out the same documentation patch
+        uses: actions/checkout@v4
+        with:
+          ref: v1.1.1
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up exact Node and npm registry
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.15.0
+          registry-url: https://registry.npmjs.org
+
+      - name: Install exact publication tooling
+        run: |
+          npm install --ignore-scripts --prefix "$RUNNER_TEMP/crumbs-docs-npm" npm@11.12.1
+          echo "$RUNNER_TEMP/crumbs-docs-npm/node_modules/.bin" >> "$GITHUB_PATH"
+
+      - name: Download the sealed documentation patch
+        uses: actions/download-artifact@v4
+        with:
+          name: crumbs-v1.1.1-documentation-patch
+          path: ${{ runner.temp }}/crumbs-sdk57-docs-patch
+
+      - name: Recheck published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view v1.1.1 --json tagName,isDraft,isPrerelease,publishedAt \
+            | jq -e '.tagName == "v1.1.1" and .isDraft == false and .isPrerelease == false and .publishedAt != null'
+
+      - name: Independently verify inherited 1.1.0 bytes and exact corrected docs
+        run: python3 scripts/sdk57-docs-patch.py verify --repo "$GITHUB_WORKSPACE" --bundle "$RUNNER_TEMP/crumbs-sdk57-docs-patch"
+
+      - name: Publish only the verified documentation patch
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish "$RUNNER_TEMP/crumbs-sdk57-docs-patch/opsydyn-crumbs-css-1.1.1.tgz" --access public --provenance --tag latest
