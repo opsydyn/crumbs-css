@@ -1,0 +1,152 @@
+{
+  "schema": "crumbs.v1.fresh-artifact-prepublication-verification.v1",
+  "checkedAt": "2026-10-10T16:06:10.976896+00:00",
+  "baseCommit": "bb8fe8773884ead103174234a1b2f5a915e564dd",
+  "red": {
+    "exitCode": 1,
+    "pass": 6,
+    "fail": 3
+  },
+  "focused": {
+    "exitCode": 0,
+    "pass": 9,
+    "fail": 0,
+    "assertions": 67
+  },
+  "fullSuite": {
+    "command": "bun run test",
+    "exitCode": 0,
+    "cssPass": 1838,
+    "cssFail": 0,
+    "cssOptionalNodeFloorSkip": 1,
+    "storybookPass": 33,
+    "storybookFail": 0
+  },
+  "types": {
+    "command": "bun run typecheck",
+    "exitCode": 0
+  },
+  "workflow": {
+    "actionlintExitCode": 0,
+    "helperSha256": "6b8aa4346aed420146dba06bf025d0cac102b8669afccd7edacab3f1f06cbd78",
+    "helperHashMatchesWorkflow": true,
+    "actualProvenanceStepControls": "retained-provenance-controls.json"
+  },
+  "unchangedGenericControls": [
+    {
+      "path": ".github/workflows/publish.yml",
+      "sha256": "bec7014c5eb5302e5306c0e6a2c48f490b46462ac0f6e46522ceca7b746ead7c",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/release-host-budget-policy.json",
+      "sha256": "cd3f8408c8381591d16525c2cd8e66e1e45e28582c8c96a47ac84d05ef1edc07",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/release-host-budget-policy.ts",
+      "sha256": "2c855ca38cad5619394ee17d759c586911076e0561e99171649049229dc14149",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/release-host-budget-report.ts",
+      "sha256": "290765f554822c7ea3e2175878379f7fde8cae07c9a1a497450c8b3430928665",
+      "unchanged": true
+    },
+    {
+      "path": "scripts/release-qualification-artifact.ts",
+      "sha256": "44c858abcc1bdfdad6f50cfca5d038023be71745e943dfddaeead5bbde64301d",
+      "unchanged": true
+    },
+    {
+      "path": "packages/css/bench/budgets.json",
+      "sha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+      "unchanged": true
+    }
+  ],
+  "newMeasurementsRun": false,
+  "sourceArtifactRestorationPerformed": false,
+  "publicationPerformed": false,
+  "postpublicationChecks": "pending",
+  "review": {
+    "agent": "v1_final_artifact_workflow_review",
+    "critical": 0,
+    "important": 1,
+    "finding": "Cross-run artifact download requires actions: read",
+    "fixed": "Added job-scoped qualify permissions contents: read and actions: read; publisher permissions unchanged",
+    "remainingActionableFindings": 0,
+    "independentFocusedPass": 9,
+    "independentAssertions": 67,
+    "independentPins": "Retained tarball, 20-file report digest and helper digest verified",
+    "permissionSource": "https://github.com/actions/download-artifact/blob/v4/README.md#download-artifacts-from-other-workflow-runs-or-repositories",
+    "permissionBehaviorProof": "Final live guarded workflow will exercise this exact read permission before any publication"
+  },
+  "dependencyRestoration": {
+    "schema": "crumbs.v1.dependency-restoration.v1",
+    "roots": [
+      {
+        "path": "node_modules",
+        "inode": 157302297,
+        "kind": "symlink",
+        "target": "/Users/alancurrie/Projects/crumbs-css/node_modules",
+        "backup": "/private/tmp/crumbs-v1-20261010/dependency-backups/0"
+      },
+      {
+        "path": "packages/css/node_modules",
+        "inode": 157302298,
+        "kind": "symlink",
+        "target": "/Users/alancurrie/Projects/crumbs-css/packages/css/node_modules",
+        "backup": "/private/tmp/crumbs-v1-20261010/dependency-backups/1"
+      },
+      {
+        "path": "apps/playground/node_modules",
+        "inode": 130515073,
+        "kind": "directory",
+        "target": null,
+        "backup": "/private/tmp/crumbs-v1-20261010/dependency-backups/2"
+      },
+      {
+        "path": "apps/storybook/node_modules",
+        "inode": 127498689,
+        "kind": "directory",
+        "target": null,
+        "backup": "/private/tmp/crumbs-v1-20261010/dependency-backups/3"
+      },
+      {
+        "path": "docs/node_modules",
+        "inode": 127498728,
+        "kind": "directory",
+        "target": null,
+        "backup": "/private/tmp/crumbs-v1-20261010/dependency-backups/4"
+      }
+    ],
+    "rootCount": 5,
+    "ownedLinksRestored": [
+      {
+        "path": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/apps/storybook/node_modules/@opsydyn/crumbs-css",
+        "target": "../../../../packages/css"
+      },
+      {
+        "path": "/private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-m113-install-7lg64y_0/apps/playground/node_modules/@opsydyn/crumbs-css",
+        "target": "../../../../packages/css"
+      }
+    ],
+    "originalInventoryBindingsVerified": 128,
+    "primaryFilesPreserved": [
+      {
+        "path": "/Users/alancurrie/Projects/crumbs-css/.release-please-manifest.json",
+        "sha256": "ca6737546e9e49ef5d00f5a98f5a267d486db23e0ca367926b812269ca106427"
+      },
+      {
+        "path": "/Users/alancurrie/Projects/crumbs-css/bun.lock",
+        "sha256": "ad4181665818c4df75d97516566258009bc419881cc4ffca5fd056cd83a623f6"
+      },
+      {
+        "path": "/Users/alancurrie/Projects/crumbs-css/packages/css/package.json",
+        "sha256": "3c308a71928fee6a3f942ad3fe57ef4f9baef25151f8be7e99d26027c4cc022e"
+      }
+    ],
+    "allPassed": true,
+    "checkedAt": "2026-10-10T16:08:17.924409+00:00"
+  }
+}

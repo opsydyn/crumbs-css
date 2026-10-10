@@ -11,7 +11,7 @@ defaults:
     shell: bash
 
 env:
-  V1_TOOLING_SHA256: e5585f95432fcbf2b70c2a3501c523b42d3d277cbdfd3fb3c33e613bb625a638
+  V1_TOOLING_SHA256: 6b8aa4346aed420146dba06bf025d0cac102b8669afccd7edacab3f1f06cbd78
 
 concurrency:
   group: crumbs-css-npm-publish-v1.0.0
@@ -19,6 +19,9 @@ concurrency:
 
 jobs:
   qualify:
+    permissions:
+      contents: read
+      actions: read
     runs-on: [self-hosted, macOS, ARM64, crumbs-m4-pro, crumbs-v1-1.0.0]
     timeout-minutes: 40
     steps:
@@ -91,23 +94,6 @@ jobs:
           bun install --frozen-lockfile
           bun scripts/release-host-environment.ts
 
-      - name: Check out approved Metro baseline
-        uses: actions/checkout@v4
-        with:
-          ref: 43c5ece39360cf321fdb074d82cee41d5daaba23
-          path: .m10-5-metro-baseline
-          fetch-depth: 1
-          persist-credentials: false
-          sparse-checkout-cone-mode: false
-          sparse-checkout: |
-            /*
-            !/docs/
-            /docs/package.json
-
-      - name: Install locked baseline dependencies
-        working-directory: .m10-5-metro-baseline
-        run: bun install --frozen-lockfile
-
       - name: Require package and consumer functional qualification
         run: |
           bun run --filter @opsydyn/crumbs-css build
@@ -119,44 +105,59 @@ jobs:
           cd packages/css
           bun pm pack --dry-run
 
-      - name: Prepare matched Expo and Metro scaffold
+      - name: Verify retained qualification provenance
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          # Expose the already locked baseline dependency to its disposable app.
-          # Bun's isolated linker does not hoist this transitive package.
-          node - "$GITHUB_WORKSPACE/.m10-5-metro-baseline" <<'NODE'
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/38059803838" > "$V1_ROOT/retained-run.json"
+          gh api "repos/$GITHUB_REPOSITORY/actions/runs/38059803838/attempts/1/jobs" > "$V1_ROOT/retained-jobs.json"
+          node - "$V1_ROOT/retained-run.json" "$V1_ROOT/retained-jobs.json" <<'NODE'
           const assert = require("node:assert/strict")
           const fs = require("node:fs")
-          const path = require("node:path")
-          const { createRequire } = require("node:module")
-          const baseline = fs.realpathSync(process.argv[2])
-          const fromCss = createRequire(path.join(baseline, "packages/css/package.json"))
-          const manifest = fs.realpathSync(fromCss.resolve("@vanilla-extract/css/package.json"))
-          assert.ok(manifest.startsWith(baseline + path.sep))
-          assert.equal(JSON.parse(fs.readFileSync(manifest, "utf8")).version, "1.20.1")
-          const app = path.join(baseline, "apps/playground")
-          const scope = path.join(app, "node_modules/@vanilla-extract")
-          fs.mkdirSync(scope, { recursive: true })
-          fs.symlinkSync(path.dirname(manifest), path.join(scope, "css"), "dir")
-          const fromApp = createRequire(path.join(app, "package.json"))
-          assert.equal(fs.realpathSync(fromApp.resolve("@vanilla-extract/css/package.json")), manifest)
-          console.log("Matched baseline app resolves the locked Vanilla Extract 1.20.1")
+          const run = JSON.parse(fs.readFileSync(process.argv[2], "utf8"))
+          const jobs = JSON.parse(fs.readFileSync(process.argv[3], "utf8")).jobs
+          assert.equal(run.id, 38059803838)
+          assert.equal(run.head_sha, "f995e5595af55f23af8ae428dc0de8423e85464e")
+          assert.equal(run.path, ".github/workflows/publish-v1.yml")
+          assert.equal(run.event, "workflow_dispatch")
+          assert.equal(run.head_branch, "main")
+          assert.equal(run.run_attempt, 1)
+          assert.equal(run.status, "completed")
+          assert.equal(run.conclusion, "failure")
+          const qualifiers = jobs.filter(job => job.name === "qualify")
+          assert.equal(qualifiers.length, 1)
+          const steps = qualifiers[0].steps
+          for (const name of [
+            "Check out immutable v1 source and all qualification baselines",
+            "Use the isolated pinned Bun executable",
+            "Validate release and frozen dependencies",
+            "Require package and consumer functional qualification",
+            "Prepare matched Expo and Metro scaffold",
+            "Measure all unchanged host budgets",
+            "Upload complete qualification evidence",
+          ]) {
+            const matches = steps.filter(step => step.name === name)
+            assert.equal(matches.length, 1)
+            assert.equal(matches[0].conclusion, "success", name)
+          }
+          assert.deepEqual(steps.filter(step => step.conclusion === "failure").map(step => step.name), ["Pack qualified bytes and seal the v1-only exception"])
+          console.log("Verified successful functional qualification and all 21 measurements from the fixed retained run")
           NODE
-          bun scripts/prepare-matched-metro-scaffold.ts "$GITHUB_WORKSPACE/.m10-5-metro-baseline" "$V1_ROOT/metro-scaffold"
 
-      - name: Measure all unchanged host budgets
-        env:
-          CRUMBS_AUDIT_NODE_FLOOR: ${{ steps.floor.outputs.binary }}
-          CRUMBS_INCREMENTAL_REPO_ROOT: ${{ env.V1_ROOT }}/metro-scaffold
-          CRUMBS_INCREMENTAL_APP_ROOT: ${{ env.V1_ROOT }}/metro-scaffold/apps/playground
-          CRUMBS_RELEASE_SOURCE_REVISION: 382768a45f429f4c039e7584cd7c31e4f8821fc0
-        run: bun run measure:host-budgets "$V1_ROOT/host-report"
+      - name: Download the exact approved report and source-built tarball
+        uses: actions/download-artifact@v4
+        with:
+          name: crumbs-v1-exception-qualification
+          run-id: 38059803838
+          github-token: ${{ github.token }}
+          path: ${{ env.V1_ROOT }}/retained
 
-      - name: Retain the complete measured report
+      - name: Retain the exact approved report
         if: always()
         run: |
-          if [ -d "$V1_ROOT/host-report" ]; then
+          if [ -d "$V1_ROOT/retained/host-report" ]; then
             mkdir -p "$V1_ROOT/bundle/host-report"
-            cp -R "$V1_ROOT/host-report/." "$V1_ROOT/bundle/host-report/"
+            cp -R "$V1_ROOT/retained/host-report/." "$V1_ROOT/bundle/host-report/"
           fi
 
       - name: Pack qualified bytes and seal the v1-only exception
@@ -165,7 +166,8 @@ jobs:
         run: |
           mkdir -p "$V1_ROOT/bundle"
           npm pack ./packages/css --ignore-scripts --json --pack-destination "$V1_ROOT/bundle" > "$V1_ROOT/npm-pack.json"
-          bun "$V1_ROOT/v1-publication.ts" create --repo "$GITHUB_WORKSPACE" --report "$V1_ROOT/host-report" --bundle "$V1_ROOT/bundle"
+          cmp "$V1_ROOT/retained/opsydyn-crumbs-css-1.0.0.tgz" "$V1_ROOT/bundle/opsydyn-crumbs-css-1.0.0.tgz"
+          bun "$V1_ROOT/v1-publication.ts" create --repo "$GITHUB_WORKSPACE" --report "$V1_ROOT/retained/host-report" --bundle "$V1_ROOT/bundle"
 
       - name: Upload complete qualification evidence
         if: always()

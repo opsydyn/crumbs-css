@@ -12,12 +12,15 @@ export const approvedV1Exception = Object.freeze({
   sourceRevision: "382768a45f429f4c039e7584cd7c31e4f8821fc0",
   packageName: "@opsydyn/crumbs-css",
   packageVersion: "1.0.0",
-  tarballSha256: "89b14b8fb70f8c07931c180b81b3a45cc4e8452d31ea43a768c041c7fe297baf",
+  tarballSha256: "0cdbdb65f89c875e8376fb3dfff749fbd7190416170f93e3855b47ac705b2b50",
+  reportDigest: "ee73e90d9a6400eb21827b63bc6c656e6f60ca0d4bf2e4fe70d55eaa9f026101",
+  retainedQualificationRun: 38059803838,
   metrics: Object.freeze(["warm-transform-ms", "incremental-rebuild"] as const),
   incrementalMedianCeilingMs: 136.51916600000004,
   approvedBy: "Alan Currie",
   approvedOn: "2026-10-10",
   warmApprovalMessage: "Approved",
+  freshArtifactApprovalMessage: "Approved",
   incrementalApprovalMessage: "requests approval for the 0.174 ms incremental overrun  is approved",
   scope: "Only complete numerical warm-transform and incremental-rebuild failures for this exact release; incremental median must not exceed the approved 136.51916600000004 ms; all other verification remains required. No baseline or numerical budget changes. No future-release exception.",
 })
@@ -28,7 +31,7 @@ const readJson = (path: string): any => JSON.parse(readFileSync(path, "utf8"))
 
 export function assertV1ReleaseContext(value: unknown): void {
   if (typeof value !== "object" || value === null) throw Error("Missing v1 release context")
-  for (const key of ["releaseTag", "sourceRevision", "packageName", "packageVersion", "tarballSha256"] as const) {
+  for (const key of ["releaseTag", "sourceRevision", "packageName", "packageVersion", "tarballSha256", "reportDigest"] as const) {
     if ((value as Record<string, unknown>)[key] !== approvedV1Exception[key]) throw Error(`Release exception does not cover ${key}`)
   }
 }
@@ -99,7 +102,7 @@ export async function createV1Bundle(root: string, reportSource: string, bundle:
   if (existsSync(join(bundle,"manifest.json")) || existsSync(join(bundle,"v1-exception.json"))) throw Error("Refusing to replace sealed v1 qualification")
   const tarballName = "opsydyn-crumbs-css-1.0.0.tgz", tarball = join(bundle,tarballName)
   const packageRoot = join(root,"packages/css"), pkg = readJson(join(packageRoot,"package.json"))
-  assertV1ReleaseContext({ ...approvedV1Exception, packageName:pkg.name, packageVersion:pkg.version, tarballSha256:sha256(readFileSync(tarball)) })
+  assertV1ReleaseContext({ ...approvedV1Exception, packageName:pkg.name, packageVersion:pkg.version, tarballSha256:sha256(readFileSync(tarball)), reportDigest:sha256(JSON.stringify(inventory(reportSource))) })
   const reportDirectory = join(bundle,"host-report")
   if (existsSync(reportDirectory)) {
     if (!isDeepStrictEqual(inventory(reportSource),inventory(reportDirectory))) throw Error("Staged report differs from measured report")

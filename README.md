@@ -9,10 +9,10 @@ Crumbs compiles `.css.ts` files into native styles at Metro transform time. Comp
 recipes and atomic utilities; add themes, scoped design tokens, conditions, motion and reusable runtime
 factories through explicit package entrypoints.
 
-**v1.0.0 is published on GitHub; npm publication is pending the final M10.5 release decision.**
+**v1.0.0 is published on GitHub; npm publication is authorised and pending final verification.**
 The complete matched host report passes cold transform and all eight editor budgets, while warm transform and
 incremental rebuild remain failed. The v1-only approvals cover warm transform and the 0.174 ms incremental overrun.
-The fresh source-built tarball identity still requires explicit approval. Registry alpha releases do not provide the complete v1 API
+The fresh source-built tarball and complete retained report are explicitly approved. Registry alpha releases do not provide the complete v1 API
 below. See [release status](docs/releases/1.0.0.md) and the [concrete release decision](docs/evidence/2026-10-10-v1-publication/revised-release-decision.md).
 
 ## Get started

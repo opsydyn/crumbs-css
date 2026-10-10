@@ -9,7 +9,7 @@ const warm = "Host-budget metric warm-transform-ms is fail; expected pass"
 const incremental = "Host-budget metric incremental-rebuild is fail; expected pass"
 const approvedIncrementalMedian = 136.51916600000004
 const wrappedWarm = `Host-budget report is not release-qualified: ${warm}`
-const context = { releaseTag: "v1.0.0", sourceRevision: "382768a45f429f4c039e7584cd7c31e4f8821fc0", packageName: "@opsydyn/crumbs-css", packageVersion: "1.0.0", tarballSha256: "89b14b8fb70f8c07931c180b81b3a45cc4e8452d31ea43a768c041c7fe297baf" }
+const context = { releaseTag: "v1.0.0", sourceRevision: "382768a45f429f4c039e7584cd7c31e4f8821fc0", packageName: "@opsydyn/crumbs-css", packageVersion: "1.0.0", tarballSha256: "0cdbdb65f89c875e8376fb3dfff749fbd7190416170f93e3855b47ac705b2b50", reportDigest: "ee73e90d9a6400eb21827b63bc6c656e6f60ca0d4bf2e4fe70d55eaa9f026101" }
 const receipt = () => ({ format: "crumbs.v1.publication-exception.v2", approval: approvedV1Exception, manifestSha256: "a".repeat(64), toolingRevision: "b".repeat(40), toolingSha256: "c".repeat(64) })
 
 describe("approved v1 publication exception", () => {
@@ -52,8 +52,15 @@ describe("approved v1 publication exception", () => {
    expect(() => assertV1BudgetAdmission({ valid: false, blockers: [warm, incremental] }, false, median)).toThrow()
   }
  })
- it("keeps the unapproved fresh artifact blocked despite the new numerical approval", () => {
-  expect(() => assertV1ReleaseContext({ ...context, tarballSha256: "0cdbdb65f89c875e8376fb3dfff749fbd7190416170f93e3855b47ac705b2b50" })).toThrow("Release exception does not cover tarballSha256")
+ it("rejects the superseded tarball after explicit fresh-artifact approval", () => {
+  expect(() => assertV1ReleaseContext({ ...context, tarballSha256: "89b14b8fb70f8c07931c180b81b3a45cc4e8452d31ea43a768c041c7fe297baf" })).toThrow("Release exception does not cover tarballSha256")
+ })
+ it("rejects missing or changed report identity even when the tarball is currently approved", () => {
+  const admittedTarball = { ...context, tarballSha256: approvedV1Exception.tarballSha256 }
+  expect(() => assertV1ReleaseContext(admittedTarball)).not.toThrow()
+  for (const reportDigest of [undefined, null, "", "a".repeat(64)]) {
+   expect(() => assertV1ReleaseContext({ ...admittedTarball, reportDigest })).toThrow("Release exception does not cover reportDigest")
+  }
  })
  it("rejects every failure beyond the approved complete numerical results", () => {
   for (const blockers of [[], [warm, warm], ["Host-budget metric cold-transform-ms is fail; expected pass"], [warm, "Source digest mismatch"], [warm.replace("fail;", "incomplete-environment-mismatch;")], [warm, "Invalid runtime graph evidence"], ["Unapproved host-budget policy"], ["Missing report"], [warm+" extra"]]) {

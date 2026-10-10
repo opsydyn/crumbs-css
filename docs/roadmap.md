@@ -38,7 +38,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M7 | Typed component slots, states, and extension contracts | M5, M6 | Complete; M7.1–M7.5 delivered |
 | M8 | Distributed package/artifact compatibility | M2, M3, M7 | Complete; M8.1–M8.6 delivered |
 | M9 | Manifests, change impact, policy, migrations, DTCG, and local ownership | M7, M8 | Complete; M9.1–M9.7 complete |
-| M10 | Qualify a reference design system and enterprise journeys | M8, M9 | M10.1–M10.4 delivered; M10.5 numerical exceptions approved, fresh v1 artifact identity decision pending |
+| M10 | Qualify a reference design system and enterprise journeys | M8, M9 | M10.1–M10.4 delivered; M10.5 exact v1 source/artifact/report disposition approved; publication execution pending |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Selected M11.1–M11.5 delivered; M11.6 integrations parked |
 
 Reference examples should grow with each milestone. M10 qualifies their combined behavior; it is not the first time earlier features receive consumer or device tests. M8 extends the initial packed-consumer/import checks with a complete distribution contract.
@@ -3123,3 +3123,12 @@ The [complete retained report](evidence/2026-10-10-v1-publication/run-3805980383
 The user explicitly approved the **0.174 ms incremental overrun** in the complete retained v1 report. The [approval amendment](evidence/2026-10-10-v1-publication/incremental-approval.json) preserves the original warm-transform approval and artifact pin. The one-off publication helper admits only complete numerical warm/incremental failures, and caps incremental admission at the recorded **136.51916600000004 ms** median. Missing or larger medians, incomplete evidence, duplicate blockers, unrelated failures, changed source/tag/package/artifact identities and mismatched approval/manifest/tooling receipts remain rejected. Failed raw rows, budgets, baselines, generic release policy and the immutable v1 tag are unchanged.
 
 **Next: M10.5 — explicitly approve the fresh source-built tarball identity in the [revised disposition](evidence/2026-10-10-v1-publication/revised-release-decision.md), then complete full bundle verification and authorised npm publication.** This incremental approval does not repin the tarball or admit artifact restoration. Physical devices/readers/release FPS remain deferred; M11.6 is parked.
+
+
+## 2026-10-10 — M10.5 approved exact fresh artifact and retained report
+
+The user separately approved the [fresh-artifact decision](evidence/2026-10-10-v1-publication/fresh-artifact-approval.json): exact tarball `0cdbdb65…`, immutable v1 source, and the complete run **38059803838** report. The one-off helper pins the report’s 20-file digest, rejecting any changed/missing report identity and the superseded artifact. All numerical, source/host/policy/integrity and future-release controls remain unchanged.
+
+Ruling: reuse the exact approved completed report, with independent raw rederivation against a frozen source rebuild that must reproduce the approved tarball byte-for-byte. The original run’s successful functional/measurement steps are verified and functional checks run again. This implements the approved artifact/report disposition without timing resampling; it admits no artifact normalization or restoration. The cost if incorrect would be publishing against a report whose source/artifacts no longer match, which the exact inventory/hash and unchanged generic verifier must reject.
+
+**Next: M10.5 — execute the isolated guarded publication, independently verify npm version/latest, integrity/provenance and a real installed consumer, then update current onboarding and close the authorised release scope.** Physical devices/readers/release FPS remain deferred; M11.6 is parked.
