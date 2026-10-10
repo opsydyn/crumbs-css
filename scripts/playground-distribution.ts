@@ -119,7 +119,18 @@ async function preparePackedConsumer(
 }>> {
   const appRoot = join(artifacts.buildRoot, "consumer")
   await mkdir(appRoot, { recursive: true })
-  await cp(join(repositoryRoot, appTemplateName), appRoot, { recursive: true })
+  const templateRoot = join(repositoryRoot, appTemplateName)
+  // M11 entry harnesses need their own generated panels/extension package.
+  // Their dedicated qualifiers stage those inputs; the generic consumer retains
+  // App, public-prop and portable algebra/container/motion type controls.
+  const dedicatedHarnessFiles = new Set([
+    "src/AlgebraApp.tsx", "src/ContainerApp.tsx", "src/ExtensionApp.tsx",
+    "src/MotionApp.tsx", "src/extensions.types.tsx",
+  ])
+  await cp(templateRoot, appRoot, {
+    recursive: true,
+    filter: (source) => !dedicatedHarnessFiles.has(relative(templateRoot, source).split(sep).join("/")),
+  })
 
   const sourceManifest = await readManifest(appRoot)
   assertNoWorkspaceOrLinkDependencies(sourceManifest)

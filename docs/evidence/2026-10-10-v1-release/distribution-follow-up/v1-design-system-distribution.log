@@ -1,0 +1,32 @@
+$ bun scripts/playground-distribution.ts --check
+71 |     child.exited,
+72 |   ])
+73 |   const output = [stdout.trim(), stderr.trim()].filter(Boolean).join("\n")
+74 |   await writeFile(logPath, `${output}\n`)
+75 |   if (exitCode !== 0) {
+76 |     throw new Error(
+                   ^
+error: $ bun run build (exit 1) in /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css; output retained at /private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-packed-distribution-CBJwx4/logs/build-crumbs.log
+ℹ tsdown v0.21.10 powered by rolldown v1.0.0-rc.17
+$ tsdown
+
+ ERROR  Error: Cannot find package '/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/node_modules/tsdown/index.js' imported from /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/packages/css/tsdown.config.ts
+Did you mean to import "tsdown/dist/index.mjs"?
+    at legacyMainResolve (node:internal/modules/esm/resolve:201:26)
+    at packageResolve (node:internal/modules/esm/resolve:774:12)
+    at moduleResolve (node:internal/modules/esm/resolve:855:18)
+    at defaultResolve (node:internal/modules/esm/resolve:988:11)
+    at #cachedDefaultResolve (node:internal/modules/esm/loader:697:20)
+    at #resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:714:38)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolve (file:///Users/alancurrie/Projects/crumbs-css/node_modules/import-without-cache/dist/index.mjs:26:21)
+    at nextStep (node:internal/modules/customization_hooks:189:26)
+    at resolveWithHooks (node:internal/modules/customization_hooks:417:10)
+
+error: script "build" exited with code 1
+      at run (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/packed-distribution-build.ts:76:15)
+      at async buildPackedDistributionArtifacts (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/packed-distribution-build.ts:224:9)
+      at async qualifyConsumer (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/playground-distribution.ts:797:27)
+      at async main (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/playground-distribution.ts:907:11)
+
+error: script "playground:distribution" exited with code 1

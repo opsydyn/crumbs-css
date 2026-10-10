@@ -1,0 +1,27 @@
+$ bun scripts/playground-distribution.ts --check
+83 |     child.exited,
+84 |   ])
+85 |   const output = [stdout.trim(), stderr.trim()].filter(Boolean).join("\n")
+86 |   await writeFile(logPath, `${output}\n`)
+87 |   if (exitCode !== 0) {
+88 |     throw new Error(
+                   ^
+error: $ /private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-packed-distribution-1L67aM/consumer/node_modules/.bin/tsc --project tsconfig.json --noEmit (exit 2) in /private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-packed-distribution-1L67aM/consumer; output retained at /private/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-packed-distribution-1L67aM/logs/typecheck-consumer.log
+src/AlgebraApp.tsx(2,30): error TS2307: Cannot find module './AlgebraPanel' or its corresponding type declarations.
+src/ContainerApp.tsx(2,32): error TS2307: Cannot find module './ContainerPanel' or its corresponding type declarations.
+src/ExtensionApp.tsx(2,32): error TS2307: Cannot find module './ExtensionPanel' or its corresponding type declarations.
+src/extensions.types.tsx(1,31): error TS2307: Cannot find module '@acme/crumbs-extensions/runtime' or its corresponding type declarations.
+src/extensions.types.tsx(4,40): error TS2307: Cannot find module '@acme/crumbs-extensions/authoring' or its corresponding type declarations.
+src/extensions.types.tsx(11,1): error TS2578: Unused '@ts-expect-error' directive.
+src/extensions.types.tsx(13,1): error TS2578: Unused '@ts-expect-error' directive.
+src/extensions.types.tsx(15,1): error TS2578: Unused '@ts-expect-error' directive.
+src/extensions.types.tsx(17,1): error TS2578: Unused '@ts-expect-error' directive.
+src/extensions.types.tsx(19,1): error TS2578: Unused '@ts-expect-error' directive.
+src/MotionApp.tsx(5,58): error TS2307: Cannot find module './native-condition-source' or its corresponding type declarations.
+src/MotionApp.tsx(6,29): error TS2307: Cannot find module './MotionPanel' or its corresponding type declarations.
+src/MotionApp.tsx(7,505): error TS7006: Parameter 'event' implicitly has an 'any' type.
+src/MotionApp.tsx(7,512): error TS7006: Parameter 'listener' implicitly has an 'any' type.
+      at run (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/playground-distribution.ts:88:15)
+      at async qualifyConsumer (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/scripts/playground-distribution.ts:820:9)
+
+error: script "playground:distribution" exited with code 1

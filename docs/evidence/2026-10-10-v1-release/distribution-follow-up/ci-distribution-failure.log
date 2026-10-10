@@ -1,0 +1,56 @@
+check	Qualify packed Expo consumer on iOS and web	﻿2026-10-10T12:11:56.3986626Z ##[group]Run bun run playground:distribution --check
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:11:56.3987031Z [36;1mbun run playground:distribution --check[0m
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:11:56.4058848Z shell: /usr/bin/bash -e {0}
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:11:56.4059313Z ##[endgroup]
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:11:56.4169777Z $ bun scripts/playground-distribution.ts --check
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9448270Z 71 |     child.exited,
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9448725Z 72 |   ])
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9449838Z 73 |   const output = [stdout.trim(), stderr.trim()].filter(Boolean).join("\n")
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9450614Z 74 |   await writeFile(logPath, `${output}\n`)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9451258Z 75 |   if (exitCode !== 0) {
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9451657Z 76 |     throw new Error(
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9451995Z                    ^
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9452835Z error: $ npm run build (exit 1) in /tmp/crumbs-packed-distribution-i3P75q/build/ui; output retained at /tmp/crumbs-packed-distribution-i3P75q/logs/build-@acme-ui.log
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9453934Z > @acme/ui@1.0.0 build
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9454313Z > bun build.ts
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9454909Z ✘ [ERROR] Could not resolve "@opsydyn/crumbs-css/tokens"
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9455157Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9455509Z     node_modules/@acme/design-tokens/dist/index.js:1:76:
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9456377Z       1 │ ...kenThemeSnapshot, defineToken, } from "@opsydyn/crumbs-css/tokens";
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9456921Z         ╵                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9457153Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9457608Z   The path "./tokens" is not exported by package "@opsydyn/crumbs-css":
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9458060Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9458442Z     node_modules/@acme/design-tokens/node_modules/@opsydyn/crumbs-css/package.json:17:13:
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9458917Z       17 │   "exports": {
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9459189Z          ╵              ^
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9461217Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9462354Z   You can mark the path "@opsydyn/crumbs-css/tokens" as external to exclude it from the bundle, which will remove this error and leave the unresolved path in the bundle.
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9463340Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9463705Z 1747 |     let { file, line, column } = e.location;
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9464502Z 1748 |     let pluginText = e.pluginName ? `[plugin: ${e.pluginName}] ` : "";
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9464892Z 1749 |     return `
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9465242Z 1750 | ${file}:${line}:${column}: ERROR: ${pluginText}${e.text}`;
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9465728Z 1751 |   }).join("");
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9466142Z 1752 |   let error = new Error(text);
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9466508Z                          ^
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9466789Z error: Build failed with 1 error:
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9467404Z node_modules/@acme/design-tokens/dist/index.js:1:76: ERROR: Could not resolve "@opsydyn/crumbs-css/tokens"
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9468756Z       at failureErrorWithLog (/tmp/crumbs-packed-distribution-i3P75q/build/ui/node_modules/esbuild/lib/main.js:1752:19)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9480144Z       at <anonymous> (/tmp/crumbs-packed-distribution-i3P75q/build/ui/node_modules/esbuild/lib/main.js:1211:25)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9481520Z       at <anonymous> (/tmp/crumbs-packed-distribution-i3P75q/build/ui/node_modules/esbuild/lib/main.js:1630:9)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9482206Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9521815Z ##[error]node_modules/@acme/design-tokens/dist/index.js:1:76: ERROR: Could not resolve "@opsydyn/crumbs-css/tokens"
+check	Qualify packed Expo consumer on iOS and web	      at failureErrorWithLog (/tmp/crumbs-packed-distribution-i3P75q/build/ui/node_modules/esbuild/lib/main.js:1752:19)
+check	Qualify packed Expo consumer on iOS and web	      at <anonymous> (/tmp/crumbs-packed-distribution-i3P75q/build/ui/node_modules/esbuild/lib/main.js:1211:25)
+check	Qualify packed Expo consumer on iOS and web	      at <anonymous> (/tmp/crumbs-packed-distribution-i3P75q/build/ui/node_modules/esbuild/lib/main.js:1630:9)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9537325Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9537578Z Bun v1.4.2 (Linux x64)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9546060Z       at run (/home/runner/work/crumbs-css/crumbs-css/scripts/packed-distribution-build.ts:76:15)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9547487Z       at async buildAndPackFixture (/home/runner/work/crumbs-css/crumbs-css/scripts/packed-distribution-build.ts:199:9)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9548826Z       at async buildPackedDistributionArtifacts (/home/runner/work/crumbs-css/crumbs-css/scripts/packed-distribution-build.ts:252:20)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9551559Z       at async qualifyConsumer (/home/runner/work/crumbs-css/crumbs-css/scripts/playground-distribution.ts:797:27)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9552789Z       at async main (/home/runner/work/crumbs-css/crumbs-css/scripts/playground-distribution.ts:907:11)
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9553177Z 
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9553431Z error: script "playground:distribution" exited with code 1
+check	Qualify packed Expo consumer on iOS and web	2026-10-10T12:12:30.9556235Z ##[error]Process completed with exit code 1.
