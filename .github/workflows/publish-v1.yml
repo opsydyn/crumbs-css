@@ -21,12 +21,15 @@ jobs:
   qualify:
     runs-on: [self-hosted, macOS, ARM64, crumbs-m4-pro, crumbs-v1-1.0.0]
     timeout-minutes: 40
-    env:
-      BUN_INSTALL_CACHE_DIR: ${{ runner.temp }}/crumbs-v1-${{ github.run_id }}-${{ github.run_attempt }}/bun-cache
-      npm_config_cache: ${{ runner.temp }}/crumbs-v1-${{ github.run_id }}-${{ github.run_attempt }}/npm-cache
-      V1_ROOT: ${{ runner.temp }}/crumbs-v1-${{ github.run_id }}-${{ github.run_attempt }}
-
     steps:
+      - name: Initialise isolated paths after runner assignment
+        run: |
+          V1_ROOT="$RUNNER_TEMP/crumbs-v1-$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT"
+          mkdir -p "$V1_ROOT"
+          echo "V1_ROOT=$V1_ROOT" >> "$GITHUB_ENV"
+          echo "BUN_INSTALL_CACHE_DIR=$V1_ROOT/bun-cache" >> "$GITHUB_ENV"
+          echo "npm_config_cache=$V1_ROOT/npm-cache" >> "$GITHUB_ENV"
+
       - name: Require manual dispatch from main
         if: ${{ github.ref != 'refs/heads/main' }}
         run: exit 1
@@ -159,10 +162,13 @@ jobs:
     permissions:
       contents: read
       id-token: write
-    env:
-      V1_ROOT: ${{ runner.temp }}/crumbs-v1-publication
-
     steps:
+      - name: Initialise isolated publication paths
+        run: |
+          V1_ROOT="$RUNNER_TEMP/crumbs-v1-publication"
+          mkdir -p "$V1_ROOT"
+          echo "V1_ROOT=$V1_ROOT" >> "$GITHUB_ENV"
+
       - name: Check out the immutable published release
         uses: actions/checkout@v4
         with:
