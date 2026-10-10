@@ -90,7 +90,9 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.8e: Record reviewer approval of the direct `.css.ts` Metro threshold and re-evaluate the retained exact-environment comparison without activating the incomplete registry.
 - [x] M1.9: Extend the Expo playground with version/source identification and repeatable measurement scenarios. Install SDK-compatible dependencies with a committed lockfile; test the newest SDK in a separate upgrade configuration before broadening support. Published mode resolves npm tags to exact versions, while packed mode qualifies unreleased artifacts without publishing.
 - [x] M1.9a: Audit workspace, packed and published isolation against current evidence; lock the supported Expo 56 contract; and add a fail-closed, non-workspace Expo 57 candidate that verifies live registry/template identity and preserves the React Native peer boundary.
-- [ ] M1.9b: Qualify Expo 57 / React Native 0.86 with strict packed-consumer types, motion contracts and iOS/Android/web exports; retain Expo 56 support; widen only the tested RN peer range and publish 1.1.0 through unchanged future-release gates. Defer the Crumbs consumer agent skill until this release is available.
+- [x] M1.9b: Qualify Expo 57 / React Native 0.86 with strict packed-consumer types, motion contracts and iOS/Android/web exports; retain Expo 56 support; widen only the tested RN peer range and publish 1.1.0 through unchanged future-release gates. Defer the Crumbs consumer agent skill until this release is available.
+- [x] M1.9c: Add a portable repository Crumbs consumer agent skill for verified npm 1.1.0, with import/setup/native boundaries, a checked typed ActionCard example, baseline/forward usage exercises and current consumer documentation.
+- [ ] M1.9d: Publish a documentation-only npm patch carrying the corrected package README and agent-skill links, with unchanged runtime/declarations/exports/dependencies and independently verified registry README/artifact identity. This follow-up requires its own release decision; M1.9c does not publish or extend any prior version-specific budget disposition.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
 
@@ -3151,3 +3153,22 @@ The `1.0.1` [documentation correction is published and independently verified](e
 ## 2026-10-10 — M1.9b Expo 57 source compatibility
 
 PR [#7](https://github.com/opsydyn/crumbs-css/pull/7) merges SDK 57/RN0.86 admission while retaining SDK 56/RN0.85. Clean CI and both SDK packed checks pass; the 1.1.0 source tag matches the tested tree. npm remains pending the unchanged generic host-budget gate. The first release run stops before measurement at an isolated-Bun dependency-edge prerequisite; a reviewed workflow repair preserves the locked baseline versions and fixed release source. [Current release status](releases/1.1.0.md). Agent-skill authoring stays deferred until publication.
+
+## 2026-10-10 — M1.9b fresh gate disposition pending
+
+The repaired generic workflow completes all unchanged host measurements on a free isolated Metro port. Ten blocking rows pass, one warm-transform numerical row fails, none are incomplete. The exact measured 1.1.0 artifact also passes the SDK 57 consumer; all 105 JavaScript files match public 1.0.1. [Review the proposed v1.1.0-only release disposition](evidence/2026-10-10-m1-9b-expo57/release-review.md). No exception is applied; npm/latest remains 1.0.1. M1.9b publication stays open and the consumer agent skill stays deferred until publication is verified.
+
+M1.9b disposition is explicitly approved for the exact retained source, report and artifact. The scoped publisher requires independent hosted verification before npm publication. Generic gates and failed measurements stay unchanged; M1.9b remains open until registry acceptance.
+
+## 2026-10-10 — M1.9b publication complete
+
+[The approved 1.1.0 compatibility release](releases/1.1.0.md) is public on npm and GitHub and selected as latest on both. Independent integrity, cryptographic provenance, npm README, fresh SDK 56/57 consumers and 33-page documentation build pass. The exact retained warm failure is admitted only by the user-approved 1.1.0 disposition; generic future gates are unchanged. **M1.9b is closed. Next recommended bounded slice: M1.9c consumer agent skill for the verified latest release.** Physical acceptance remains deferred; M11.6 remains parked.
+
+## 2026-10-10 — M1.9c consumer agent skill complete
+
+The portable [Crumbs consumer skill](../.agents/skills/crumbs-css/SKILL.md) targets published `1.1.0` and has a complete checked typed ActionCard example. The [usage guide](src/content/docs/how-to/use-agent-skill.mdx) covers copying the whole folder into an app. Baseline and forward agent exercises, exact-registry-artifact strict types/compiler/host assertions, portability/metadata validation, independent review and a 34-page docs build pass; see [qualification](evidence/2026-10-10-m1-9c-agent-skill/README.md). Current package/site guides now describe the published APIs consistently. No API, dependency, lockfile or release gate changes. **M1.9c is closed. Recommended next slice: M1.9d, a documentation-only npm patch to refresh the registry's packaged README.** That publication is not performed here. Physical acceptance remains deferred; M11.6 remains parked.
+
+
+## 2026-10-10 — M1.9d approved documentation publication
+
+The user approves the recommended 1.1.1 docs-only npm patch. [The narrow decision](evidence/2026-10-10-m1-9d-docs-patch/release-decision.md) pins verified public 1.1.0 and requires unchanged source/build configuration, JavaScript, declarations, exports, dependencies and inventory. A dedicated sealed publisher admits only exact source docs and the version field. Local preflight changes three package files and retains 182, both publisher control suites pass (22 tests), and docs build 34 pages. [Release status](releases/1.1.1.md) remains prepared until source/GitHub/npm publication and independent verification complete. M1.9d stays open; the 1.1.0 numerical failure remains visible and generic future-release gates stay unchanged.

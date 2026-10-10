@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Version `1.1.0` adds Expo SDK 57 / React Native 0.86 compatibility while retaining Expo SDK 56 / React Native 0.85. The complete v1 API remains available with no breaking API changes. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.0.md) for publication and qualification evidence.
+Version `1.1.1` refreshes the package documentation and links the repository consumer agent skill. It inherits the exact JavaScript, declarations, exports and dependencies from `1.1.0`, including Expo SDK 56 / React Native 0.85 and SDK 57 / React Native 0.86 support and the complete v1 API. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.1.md) for publication and verification evidence. The [1.1.0 disposition](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.0.md) retains its recorded warm-transform failure; this patch adds no new performance pass or numerical exception, and generic future-release limits remain unchanged.
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -21,6 +21,10 @@ Validated consumer baseline:
 - React 19.2 (SDK 57 qualification uses React / React DOM 19.2.8)
 
 React Native peers are bounded to `>=0.85 <0.87`. Crumbs tooling requires Node `>=22.0.0`; SDK 57 requires Node `>=22.13.0`. Packed consumers pass types, motion contracts and production Metro exports for iOS, Android and web. Physical-device and performance acceptance are separate.
+
+## Coding agents
+
+The repository provides a [Crumbs consumer skill](https://github.com/opsydyn/crumbs-css/tree/main/.agents/skills/crumbs-css) for the published `1.1.1` APIs, including typed theme/slot patterns and native boundaries. [Copy the whole skill into your app](https://opsydyn.github.io/crumbs-css/how-to/use-agent-skill/) and invoke `$crumbs-css` in Codex. It is repository content; the npm 1.1.1 tarball does not contain the skill.
 
 ## What it is
 
@@ -78,9 +82,9 @@ See the full compatibility matrix in
 Install the verified stable release in your Expo app:
 
 ```sh
-bun add @opsydyn/crumbs-css@1.1.0
+bun add @opsydyn/crumbs-css@1.1.1
 # or
-npm install @opsydyn/crumbs-css@1.1.0
+npm install @opsydyn/crumbs-css@1.1.1
 ```
 
 Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.
@@ -478,7 +482,7 @@ Generic authoring now rejects unsupported side compound/style borders with actio
 
 Declare `createVar` and `fallbackVar` through `/style` in `.css.ts`; use immutable `assignVars` snapshots and `useAssignedStyles` through `/theme/vars`. Clearing replaces a complete instance snapshot and restores its literal or typed theme defaults. The existing provider supplies reached theme fallbacks. See the [local-variable guide](https://opsydyn.github.io/crumbs-css/how-to/use-local-variables/).
 
-This requires local plan v1 support in both compiler and runtime. The exact artifact is identified by the [M11.1 packet](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-08-m11-1-local-vars); the current alpha version alone does not identify support. Release closure and publication remain separate.
+Published `1.1.1` includes matching local plan v1 compiler/runtime support. The [M11.1 packet](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-08-m11-1-local-vars) records earlier feature checks; the [1.1.1 release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.1.md) records publication and Expo 56/57 compatibility.
 
 ## Named native container conditions (M11.2)
 
@@ -486,13 +490,13 @@ The optional `@opsydyn/crumbs-css/theme/containers` entry exports `defineContain
 
 Same-bucket events publish nothing; selected references use `Object.is`. Stable frozen maps reuse admission; mutable maps refresh on the next render. Key the hook owner when replacing a native View. Sequential layout feedback still needs independent axis constraints. Native portal adapters that re-render children at a host require a source-value prop bridge or a fresh destination owner.
 
-The entry builds independently with React as its only runtime dependency. It adds no compiler syntax, recipe/Sprinkles condition or theme/window axis. Check the exact artifact export map: historical tarballs with the same alpha version may lack this entry. See `docs/src/content/docs/how-to/use-container-conditions.mdx` and the M11.2 evidence packet for examples and qualification limits.
+The entry builds independently with React as its only runtime dependency. It adds no compiler syntax, recipe/Sprinkles condition or theme/window axis. Published `1.1.1` includes this entry. See the [container guide](https://opsydyn.github.io/crumbs-css/how-to/use-container-conditions/) and the M11.2 evidence packet for examples and qualification limits; historical alpha artifacts may lack the entry.
 
 ## Typed native motion (M11.3)
 
 The additive `/theme/motion` entry exports only `defineMotion`; `/theme/motion/native` exports only `useNativeMotion`. Define immutable named opacity/translation/scale states in ordinary `.ts`; the optional Hook owns public Animated nodes with safe interruption, scoped cancellation, committed preferences and lifetime cleanup. Pass `motion: 'full' | 'reduced'` explicitly from the application accessibility source, starting reduced until resolved. Numeric duration is milliseconds in `[0,60000]`. Returned transforms replace the whole field; put static transforms on a wrapper.
 
-The pure graph has no runtime peers; the native graph uses public React/React Native only. Existing exports, compiler payloads, dependencies and token durations remain unchanged. See the [native-motion guide](https://opsydyn.github.io/crumbs-css/how-to/use-native-motion/) for result/lifetime semantics and `docs/evidence/2026-10-09-m11-3-native-motion` for exact artifact and distinct host/native acceptance. Physical devices, spoken readers, live authored-style HMR and release performance remain separate; M10.5 release qualification remains open. Same-version historical alpha tarballs may lack these entries.
+The pure graph has no runtime peers; the native graph uses public React/React Native only. Existing exports, compiler payloads, dependencies and token durations remain unchanged. See the [native-motion guide](https://opsydyn.github.io/crumbs-css/how-to/use-native-motion/) for result/lifetime semantics and `docs/evidence/2026-10-09-m11-3-native-motion` for exact artifact and distinct host/native acceptance. Published `1.1.1` includes both entries with qualification inherited byte-for-byte from 1.1.0. Physical devices, spoken readers, live authored-style HMR and release performance remain separate; historical alpha artifacts may lack the entries.
 
 ### Pure colour and typography algebra (M11.4)
 
@@ -517,9 +521,9 @@ snapshots and named factories reconstruct once per module evaluation. Aliases
 share results; separate calls stay distinct. No arbitrary closures are serialised.
 
 See the [runtime-extension guide](https://opsydyn.github.io/crumbs-css/how-to/create-runtime-extensions/)
-for a complete library/app example, portable data and endpoint limits. This is
-additive working-tree functionality; historical alpha tarballs may lack it.
-M10.5 release closure and exact publication qualification remain separate.
+for a complete library/app example, portable data and endpoint limits. Published
+`1.1.1` includes this API; historical alpha artifacts may lack it. Publication
+and physical-device/performance acceptance have separate evidence.
 
 Runtime-extension linkage uses stock Expo/Node conditions without synthetic platform
 or development/production branches. Version 1 refuses ambiguous platform/native
