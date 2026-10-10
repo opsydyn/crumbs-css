@@ -1,6 +1,6 @@
 # M11.5 — Typed factories with explicit runtime imports
 
-**Status:** Conversational direction approved by Alan Currie on 2026-10-09: typed Crumbs factories backed by explicit runtime imports. This detailed written spec is proposed for review; it does not authorise implementation yet.
+**Status:** Written spec approved by Alan Currie on 2026-10-10 following spec commit `f58f4f1`. Typed Crumbs factories backed by explicit runtime imports remain the selected direction. The [implementation plan](../plans/2026-10-10-m11-5-runtime-extensions.md) is proposed for written review; implementation is not yet authorised.
 
 **Date:** 2026-10-09.
 
