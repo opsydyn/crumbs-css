@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2-alpha.1](https://github.com/opsydyn/crumbs-css/compare/v0.1.1-alpha.1...v0.1.2-alpha.1) (2026-05-25)
+
+
+### Bug Fixes
+
+* **css:** finalize expo 56 compatibility contract ([64f9934](https://github.com/opsydyn/crumbs-css/commit/64f9934e65eb25fe32cc3cae584d0268be28e349))
+
 ## [0.1.1-alpha.1](https://github.com/opsydyn/crumbs-css/compare/v0.1.0-alpha.1...v0.1.1-alpha.1) (2026-05-20)
 
 
