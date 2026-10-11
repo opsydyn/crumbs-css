@@ -67,3 +67,18 @@ For capability and setup details, use the [quickstart](/crumbs-css/tutorials/get
 [API index](/crumbs-css/reference/package-entrypoints-and-apis/), and
 [reference design system](/crumbs-css/how-to/build-a-reference-design-system/).
 The skill adds guidance; it changes no public API or native/performance guarantee.
+
+## Check the generated component in your app
+
+Keep the example inside your app's existing root layout and safe-area handling.
+Give the agent an observable native outcome: wire `onActionPress` to a visible
+counter, tap both variants, and verify one increment per press. Inspect their
+button semantics and appearance on the actual target. Typechecking and exporting
+Android or iOS alone do not establish interaction on those platforms.
+
+The [M1.9e dogfood exercise](https://github.com/opsydyn/crumbs-css/blob/main/docs/evidence/2026-10-11-m1-9e-skill-dogfood/README.md)
+ran the four-file example unchanged against public 1.1.1. Strict types and all three
+Expo exports passed, and actual iOS simulator and Android emulator presses advanced
+the callback counter from 0 to 1 to 2. It reused an SDK 56 dependency installation;
+SDK 57 native interaction was not run. This is a bounded consumer check,
+not a claim about screen-reader speech, physical devices or release performance.
