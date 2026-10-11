@@ -3,7 +3,24 @@
   "compilerOptions": {
     "moduleResolution": "bundler",
     "strict": true,
-    "types": ["react", "react-native", "@storybook/react-native"]
+    "types": [
+      "react",
+      "react-native",
+      "@storybook/react-native"
+    ],
+    "paths": {
+      "react-native": [
+        "./node_modules/react-native"
+      ],
+      "react-native/*": [
+        "./node_modules/react-native/*"
+      ]
+    }
   },
-  "include": ["src", ".rnstorybook/**/*.ts", ".rnstorybook/**/*.tsx", "test-types/**/*.ts"]
+  "include": [
+    "src",
+    ".rnstorybook/**/*.ts",
+    ".rnstorybook/**/*.tsx",
+    "test-types/**/*.ts"
+  ]
 }

@@ -1,0 +1,65 @@
+{
+  "roadmap": "M1.9g",
+  "status": "passed-selected-host-ios-and-android-scope",
+  "date": "2026-10-11",
+  "node": "24.15.0",
+  "bun": "1.4.2",
+  "checks": {
+    "frozenInstall": "passed",
+    "focusedSdkTests": 14,
+    "isolatedFullLibrarySuite": {
+      "pass": 1858,
+      "skip": 1,
+      "fail": 0
+    },
+    "isolatedFullStorybookSuite": {
+      "pass": 33,
+      "fail": 0
+    },
+    "laterExportGuardRegression": {
+      "pass": 6,
+      "fail": 0
+    },
+    "finalLibraryTypes": "passed",
+    "finalAppCheck": "passed: strict types, clean export, runtime isolation and LiteUI/addon presence on all three platforms",
+    "showcaseExports": "passed all platforms; correctly rejected as Storybook by later guard",
+    "expoInstallCheck": "passed, qualified React/react-dom patch recommendations excluded",
+    "expoDoctor": "19/21: SDK56 library development-peer and preserved generated ios config warnings",
+    "ios": "passed selected native Controls/Actions/variants",
+    "android": "passed native LiteUI Controls edit/restore, onActionPress event, Light/Disabled/Dark visits and disabled button state",
+    "finalDocsBuild": {
+      "passed": true,
+      "pages": 34
+    },
+    "precommitFocused": {
+      "command": "bun test packages/css/test/runtime-bundle-contract.test.ts packages/css/test/expo-sdk-56-contract.test.ts apps/storybook/test/RuntimeExtensionDogfood.test.ts",
+      "passed": 16,
+      "failed": 0,
+      "assertions": 96
+    }
+  },
+  "notQualified": [
+    "custom native build/autolinking",
+    "physical devices",
+    "spoken readers",
+    "live HMR",
+    "release performance"
+  ],
+  "sdk56Packed": "fixture/CI retained; not freshly executed in this slice",
+  "publication": false,
+  "push": false,
+  "M11.6": "parked",
+  "androidRetry": {
+    "at": "2026-10-11T10:37:44.776424+00:00",
+    "diskFreeGiB": 1.7132987976074219,
+    "result": "emulator exits 1: hasSufficientDiskSpace failure; no native app session started",
+    "disposition": "Retained failure superseded by later passing native session after available storage recovered; no gate waived"
+  },
+  "cleanup": "owned read-only emulator/reverse/Metro stopped; one shut-down iOS device cache cleared by user request; active device preserved",
+  "cleanupVerification": {
+    "ownedMetroExited": true,
+    "ownedEmulatorAbsent": true,
+    "primaryHashesUnchanged": true,
+    "freeGiB": 7.1
+  }
+}

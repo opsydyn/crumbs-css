@@ -76,3 +76,30 @@ describe('Metro runtime bundle source contract', () => {
   } finally {rmSync(dir,{recursive:true,force:true})}
  })
 })
+
+
+describe('Storybook entry qualification', () => {
+ it('rejects a showcase-only export and requires LiteUI and both addons on every platform', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'crumbs-storybook-maps-'))
+  const runtime = '/repo/packages/css/dist/theme-core.mjs'
+  const addons = ['react-native-ui-lite', 'addon-ondevice-controls', 'addon-ondevice-actions']
+  try {
+   for (const platform of ['ios', 'android', 'web']) {
+    mkdirSync(path.join(dir, platform))
+    writeFileSync(path.join(dir, platform, 'index.js.map'), JSON.stringify({sources: [runtime]}))
+   }
+   await expect(verifyRuntimeBundles(dir)).resolves.toHaveLength(3)
+   await expect(verifyRuntimeBundles(dir, {storybook: true})).rejects.toThrow(/Storybook/)
+   for (const platform of ['ios', 'android', 'web']) {
+    writeFileSync(path.join(dir, platform, 'addons.js.map'), JSON.stringify({sections: [{map: {sources:
+     addons.map(name => `/repo/node_modules/.bun/storybook-peer/node_modules/@storybook/${name}/dist/index.js`),
+    }}]}))
+   }
+   await expect(verifyRuntimeBundles(dir, {storybook: true})).resolves.toHaveLength(6)
+   writeFileSync(path.join(dir, 'android', 'addons.js.map'), JSON.stringify({sources: addons.slice(0, 2).map(
+    name => `/app/node_modules/@storybook/${name}/dist/index.js`,
+   )}))
+   await expect(verifyRuntimeBundles(dir, {storybook: true})).rejects.toThrow(/android.*addon-ondevice-actions/)
+  } finally {rmSync(dir, {recursive: true, force: true})}
+ })
+})

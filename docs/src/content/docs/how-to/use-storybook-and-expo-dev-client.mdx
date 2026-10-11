@@ -9,6 +9,11 @@ The repo includes an Expo Storybook app in `apps/storybook/`. It is useful for:
 - verifying Metro transform behavior
 - smoke testing Expo Dev Client support
 
+The internal app uses Expo SDK 57 / React Native 0.86 and requires Node >=22.13.0.
+Its native animation dependencies follow Expo's SDK 57 map: Reanimated 4.5.1,
+Worklets 0.10.1 and Gesture Handler 2.32.0. The independent packed consumer still
+checks SDK 56; this internal upgrade does not narrow published compatibility.
+
 ## Start Storybook
 
 From the repo root:
@@ -23,6 +28,21 @@ For web:
 bun run app:storybook:web
 ```
 
+## Check types and platform exports
+
+```sh
+bun run app:check
+```
+
+This checks Storybook types, exports its LiteUI browser on iOS, Android and web,
+and rejects compiler dependencies in the runtime bundles. Run `bun run app:dev`
+to inspect the showcase app without the Storybook browser. The supported LiteUI
+includes Controls and Actions; the animated FullUI is not qualified.
+
+After an SDK upgrade, regenerate local native projects and rebuild custom development
+clients before using them. An existing `ios/` or `android/` folder is not upgraded
+by changing JavaScript dependencies. Expo Go checks do not qualify a custom build.
+
 ## What to check
 
 - `.css.ts` modules compile without Metro errors
@@ -33,3 +53,5 @@ bun run app:storybook:web
 ## When to use this instead of unit tests
 
 Use Storybook when the question is visual or integration-oriented. Use package tests when the question is type contract, transform behavior, or runtime invariants.
+
+`app:check` clears the Metro export cache and requires LiteUI, Controls and Actions in each platform’s source maps, preventing a cached showcase entry from passing the Storybook check.

@@ -31,7 +31,8 @@ function packageRuntimeSourcePath(original: string): string | undefined {
   return match === null ? undefined : `${match[1]}/${match[2]}`
 }
 
-export async function verifyRuntimeBundles(directory: string) {
+export async function verifyRuntimeBundles(directory: string, options: { storybook?: boolean } = {}) {
+  const storybookPackages = new Map<string, Set<string>>()
   const maps: string[] = []
   async function walk(root: string) {
     for (const entry of await readdir(root, { withFileTypes: true })) {
@@ -51,6 +52,17 @@ export async function verifyRuntimeBundles(directory: string) {
   for (const file of maps) {
     const map = JSON.parse(await readFile(file, "utf8")) as SourceMap
     const bundleSources = sources(map)
+    if (options.storybook) {
+      const platform = ["ios", "android", "web"].find(platform => file.replaceAll("\\", "/").includes(`/${platform}/`))
+      if (platform !== undefined) {
+        const packages = storybookPackages.get(platform) ?? new Set<string>()
+        for (const source of bundleSources) {
+          const name = source.replaceAll("\\", "/").match(/(?:^|\/)node_modules\/@storybook\/([^/]+)\//)?.[1]
+          if (name !== undefined) packages.add(name)
+        }
+        storybookPackages.set(platform, packages)
+      }
+    }
     const crumbsSources = [...new Set(bundleSources.map(packageRuntimeSourcePath).filter(
       (source): source is string => source !== undefined,
     ))].sort()
@@ -62,9 +74,18 @@ export async function verifyRuntimeBundles(directory: string) {
   if (missingPlatform) {
     throw new Error("Runtime qualification requires iOS, Android and web source maps containing Crumbs runtime code")
   }
+  if (options.storybook) {
+    for (const platform of ["ios", "android", "web"]) {
+      for (const name of ["react-native-ui-lite", "addon-ondevice-controls", "addon-ondevice-actions"]) {
+        if (!storybookPackages.get(platform)?.has(name)) {
+          throw new Error(`Storybook qualification requires ${platform} source maps containing @storybook/${name}`)
+        }
+      }
+    }
+  }
   return results
 }
 
 if (import.meta.main) {
-  console.log(JSON.stringify(await verifyRuntimeBundles(process.argv[2]!), null, 2))
+  console.log(JSON.stringify(await verifyRuntimeBundles(process.argv[2]!, { storybook: process.argv.includes("--storybook") }), null, 2))
 }

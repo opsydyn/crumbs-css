@@ -534,7 +534,8 @@ Package metadata, including the exact installed version, peer ranges and public 
 | `bun run build` | Build the published package. |
 | `bun run test` | Run the package and Storybook test suites. |
 | `bun run typecheck` | Typecheck the published package. |
-| `bun run app:storybook` | Start the Expo Storybook app for component development. |
+| `bun run app:storybook` | Start the Expo SDK 57 Storybook LiteUI for component development (Node >=22.13.0). |
+| `bun run app:check` | Typecheck Storybook and export iOS, Android and web with runtime-source isolation checks. |
 | `bun run app:typecheck` | Typecheck the Storybook consumer against the workspace package. |
 | `bun run playground` | Run the Expo SDK 57 consumer with Crumbs build watching and Metro restarts (Node >=22.13.0). |
 | `bun run playground:packed --check` | Typecheck and bundle an isolated SDK 57 consumer of the working-tree tarball. |
@@ -556,7 +557,8 @@ Pull requests that change `apps/` run the same CI workflow as package changes;
 docs-only pull requests remain path-ignored. CI uses Bun 1.4.2, Node 24, and
 `bun install --frozen-lockfile` across all workspaces. `bun run test` covers the
 package and Storybook test suites, `bun run app:typecheck` checks the Storybook
-consumer on SDK 56. `bun run playground:check` checks the SDK 57 workspace;
+consumer on SDK 57. `bun run app:check` also exports its native Storybook browser
+on iOS, Android and web with runtime-source isolation checks. `bun run playground:check` checks the SDK 57 workspace;
 `bun run playground:packed --sdk=56 --check` retains SDK 56, and the independent
 SDK 57 packed profile also requires iOS, Android and web exports with runtime
 source isolation. `bun run playground:distribution --check` builds packed package

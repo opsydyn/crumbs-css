@@ -1,6 +1,6 @@
 # Expo SDK compatibility profile (M1.9b)
 
-This nested configuration is outside the root `apps/*` workspace. The playground defaults to Expo 57 / React Native 0.86 after M1.9f; Storybook stays on Expo 56 / React Native 0.85. This SDK 57 profile still qualifies one packed Crumbs artifact in an isolated npm consumer. `bun run playground:packed --sdk=56 --check` retains the full SDK 56 playground regression alongside the default SDK 57 workspace check.
+This nested configuration is outside the root `apps/*` workspace. The playground and Storybook default to Expo 57 / React Native 0.86 after M1.9f and M1.9g. This SDK 57 profile still qualifies one packed Crumbs artifact in an isolated npm consumer. `bun run playground:packed --sdk=56 --check` retains the full SDK 56 playground regression alongside the default SDK 57 workspace check.
 
 The 2026-10-10 profile pins Expo 57.0.27, React / React DOM / react-test-renderer 19.2.8, React Native 0.86.3 and TypeScript 6.0.3. The official blank template 57.0.29 uses React 19.2.3; current Expo CLI/router optional peers require 19.2.8. The runner permits compatible React patches within the template's major/minor and exact SDK/RN pins. It uses strict npm peers, with no force or legacy-peer overrides.
 

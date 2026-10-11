@@ -2,9 +2,24 @@ import { expect, test } from 'bun:test';
 import { createRequire } from 'node:module';
 import { runInNewContext } from 'node:vm';
 import path from 'node:path';
-const require = createRequire(path.resolve(import.meta.dir, '../../../packages/css/package.json'));
-const React = require('react'), theme = require('./dist/theme-core.cjs');
-const storyRequire = createRequire(path.resolve(import.meta.dir, '../package.json')), server = storyRequire('react-dom/server');
+const storyRequire = createRequire(path.resolve(import.meta.dir, '../package.json'));
+const React = storyRequire('react'), server = storyRequire('react-dom/server');
+// Match Metro's app-owned React peer while exercising the built Crumbs runtime.
+// Direct Node loading from packages/css would select its SDK 56 test peer instead.
+const themeBuild = await Bun.build({
+  entrypoints: [path.resolve(import.meta.dir, '../../../packages/css/dist/theme-core.cjs')],
+  target: 'node', format: 'cjs', external: ['react'],
+});
+if (!themeBuild.success) throw new Error('Could not build the Crumbs theme test runtime');
+const themeModule = { exports: {} as Record<string, any> };
+runInNewContext(await themeBuild.outputs[0]!.text(), {
+  module: themeModule, exports: themeModule.exports,
+  require: (name: string) => {
+    if (name === 'react') return React;
+    throw new Error('Unexpected theme test peer ' + name);
+  },
+});
+const theme = themeModule.exports;
 async function runtime() { const result = await Bun.build({ entrypoints: [path.resolve(import.meta.dir, '../src/components/runtime-extensions/runtime.tsx')], target: 'node', format: 'cjs', external: ['react', 'react-native', '@opsydyn/crumbs-css/theme/core'] }); expect(result.success).toBe(true); const module = { exports: {} as Record<string, any> }; let observed: any; const View = (props: any) => { observed = props; return React.createElement('div', null, props.children); }; const flatten = (input: any): any => Array.isArray(input) ? Object.assign({}, ...input.map(flatten)) : input || {}; runInNewContext(await result.outputs[0]!.text(), { module, exports: module.exports, require: (name: string) => name === 'react' ? React : name === 'react-native' ? { View, StyleSheet: { flatten } } : name === '@opsydyn/crumbs-css/theme/core' ? theme : (() => { throw Error('Unexpected test peer ' + name); })() }); return { ...module.exports, props: () => observed }; }
 async function render(element: any) { return server.renderToStaticMarkup(element); }
 test('literal factory is provider independent and forwards props, children and style overrides', async () => { const api = await runtime(), base = { backgroundColor: '#0000ff', padding: 12 }, Card = api.createStyledView(base), onLayout = () => { }; await render(React.createElement(Card, { testID: 'extensions-generated-card', accessibilityLabel: 'Forwarded', onLayout, style: { padding: 20 } }, 'child')); const props = api.props(); expect(props.testID).toBe('extensions-generated-card'); expect(props.accessibilityLabel).toBe('Forwarded'); expect(props.onLayout).toBe(onLayout); expect(props.children).toBe('child'); expect(props.style).toEqual([base, { padding: 20 }]); });
