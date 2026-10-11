@@ -1,0 +1,121 @@
+{
+  "slice": "M1.9f",
+  "status": "passed",
+  "source": {
+    "baseCommit": "243154354f526b169d6ca3f26aaf8e806190f13e",
+    "state": "verified working tree; source-input-hashes.json pins functional inputs; not clean CI evidence"
+  },
+  "environment": {
+    "node": "24.15.0",
+    "bun": "1.4.2",
+    "host": "macOS arm64",
+    "sdk57NodeFloor": ">=22.13.0"
+  },
+  "playground": {
+    "expo": "57.0.27",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-native": "0.86.3",
+    "react-native-web": "0.21.2",
+    "@opsydyn/crumbs-css": "1.1.1"
+  },
+  "retainedSdk56": {
+    "expo": "56.0.4",
+    "react": "19.2.3",
+    "react-dom": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-web": "0.21.2",
+    "@opsydyn/crumbs-css": "1.1.1"
+  },
+  "storybook": {
+    "expo": "56.0.23",
+    "react": "19.2.3",
+    "reactNative": "0.85.3",
+    "portal": "1.5.3",
+    "note": "manifest unchanged; existing ^1.4.0 portal range resolves the qualified shared 1.5.3 pin"
+  },
+  "checks": {
+    "frozenInstall": "passed",
+    "libraryTypes": "passed",
+    "storybookTypes": "passed",
+    "libraryTests": {
+      "passed": 1858,
+      "skipped": 1,
+      "failed": 0
+    },
+    "storybookTests": {
+      "passed": 33,
+      "failed": 0
+    },
+    "workspaceSdk57": {
+      "types": "passed",
+      "exports": [
+        "ios",
+        "android",
+        "web"
+      ],
+      "runtimeSourceIsolation": "passed",
+      "physicalPeerRoots": "one React and one native/web renderer per platform"
+    },
+    "packedSdk56": {
+      "types": "passed",
+      "exports": [
+        "ios",
+        "android",
+        "web"
+      ],
+      "runtimeSourceIsolation": "passed",
+      "install": "passed; standard npm without peer overrides",
+      "strictLockValidation": "npm ci --strict-peer-deps --dry-run --ignore-scripts --no-audit --no-fund passed"
+    },
+    "packedSdk57": {
+      "types": "passed",
+      "exports": [
+        "ios",
+        "android",
+        "web"
+      ],
+      "runtimeSourceIsolation": "passed",
+      "install": "passed; standard npm without peer overrides",
+      "strictLockValidation": "npm ci --strict-peer-deps --dry-run --ignore-scripts --no-audit --no-fund passed"
+    },
+    "expoInstallCheck": "passed with qualified React/react-dom patch exclusions",
+    "doctorStandaloneSdk57": "21/21 passed",
+    "doctorWorkspace": "20/21; duplicate SDK development dependencies reported and retained",
+    "docsBuild": "34 pages passed",
+    "nativeIos": "final restored source passed via live axbridge; original ax backend returned stale telemetry",
+    "nativeAndroid": "passed via ADB; owned AVD read-only",
+    "review": "independent tracked-diff review reported no findings"
+  },
+  "artifacts": [
+    {
+      "sdk": "sdk56",
+      "tarball": "/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-artifacts-1ChcZG/opsydyn-crumbs-css-1.1.1.tgz",
+      "sha256": "bef32b7f9ce3ba842bf9596356dd7de670845c5a2ee42728cab0cdd881927f32",
+      "kind": "working-tree npm pack; not a new npm publication"
+    },
+    {
+      "sdk": "sdk57",
+      "tarball": "/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-artifacts-nxsMFR/opsydyn-crumbs-css-1.1.1.tgz",
+      "sha256": "bef32b7f9ce3ba842bf9596356dd7de670845c5a2ee42728cab0cdd881927f32",
+      "kind": "working-tree npm pack; not a new npm publication"
+    }
+  ],
+  "cleanup": {
+    "iosSimulatorDeleted": true,
+    "androidReadOnlySessionStopped": true,
+    "androidReverseRemoved": true,
+    "metroStopped": true,
+    "otherDevicesPreserved": true
+  },
+  "notClaimed": [
+    "new library publication",
+    "clean hosted CI",
+    "custom development-build/autolinking qualification",
+    "spoken screen reader",
+    "physical device acceptance",
+    "live HMR",
+    "release performance"
+  ],
+  "scope": "internal playground baseline only; no library API/dependency/peer or release-budget policy change"
+}

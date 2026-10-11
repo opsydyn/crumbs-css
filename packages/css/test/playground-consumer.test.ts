@@ -13,6 +13,9 @@ describe("isolated Expo consumer", () => {
     expect(() => parseArgs(["published", "--version=latest;pwd"])).toThrow("Unknown option")
     expect(parseArgs(["published", "--version=0.1.2-alpha.2", "--check"]).version).toBe("0.1.2-alpha.2")
     expect(parseArgs(["published"]).version).toBe("alpha")
+    expect(parseArgs(["packed", "--sdk=56", "--check"]).sdk56).toBe(true)
+    expect(() => parseArgs(["workspace", "--sdk=56"])).toThrow("installed modes")
+    expect(() => parseArgs(["packed", "--sdk=58"])).toThrow("Unknown option")
   })
 
   it("replaces only the Crumbs dependency and rejects links", () => {
@@ -68,6 +71,60 @@ describe("isolated Expo consumer", () => {
       expect(await realpath(runtime)).toStartWith(directory + sep)
       await access(runtime)
     } finally { await rm(parent, { recursive: true, force: true }) }
+  })
+
+  it("retains a standalone SDK 56 regression consumer while the default advances to SDK 57", async () => {
+    const parent = await mkdtemp(join(tmpdir(), "crumbs-stage-sdk-test-"))
+    try {
+      const modern = await stage("1.1.1", parent)
+      const legacy = await stage("1.1.1", parent, {sdk56: true})
+      const read = async (directory: string) => JSON.parse(await readFile(join(directory, "package.json"), "utf8"))
+      const current = await read(modern), baseline = await read(legacy)
+      expect(current.dependencies.expo).toBe("57.0.27")
+      expect(current.dependencies["react-native"]).toBe("0.86.3")
+      expect(baseline.dependencies.expo).toBe("56.0.4")
+      expect(baseline.dependencies["react-native"]).toBe("0.85.3")
+      expect(baseline.dependencies.react).toBe(baseline.devDependencies["react-test-renderer"])
+      expect(baseline.dependencies[packageName]).toBe("1.1.1")
+      expect(baseline.dependencies["@vanilla-extract/css"]).toBe(current.dependencies["@vanilla-extract/css"])
+      expect(baseline.dependencies["@acme/ui"]).toBeUndefined()
+      const runtime = createRequire(join(legacy, "package.json")).resolve("@crumbs/playground/runtime-extensions")
+      expect(await realpath(runtime)).toStartWith(legacy + sep)
+    } finally { await rm(parent, {recursive: true, force: true}) }
+  })
+
+  it("resolves native types from the app even when declarations and demos live in SDK 56 workspaces", () => {
+    const app = resolve(import.meta.dir, "../../../apps/playground")
+    const config = ts.readConfigFile(join(app, "tsconfig.json"), ts.sys.readFile)
+    const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, app)
+    const expected = createRequire(join(app, "package.json")).resolve("react-native/types/index.d.ts")
+    for (const origin of ["packages/css/dist/theme.d.mts", "apps/storybook/src/components/native-motion/MotionPanel.tsx"]) {
+      const actual = ts.resolveModuleName("react-native", resolve(app, "../..", origin), parsed.options, ts.sys)
+      expect(actual.resolvedModule?.resolvedFileName).toBe(expected)
+    }
+  })
+
+  it("pins native Metro peers to the playground while leaving web aliases to Expo", () => {
+    const app = resolve(import.meta.dir, "../../../apps/playground")
+    const require = createRequire(join(app, "package.json"))
+    const config = require("./metro.config.js")
+    const calls: Array<{context: any; moduleName: string; platform: string}> = []
+    const context = {resolveRequest: (context: any, moduleName: string, platform: string) => calls.push({context, moduleName, platform})}
+    for (const platform of ["ios", "android"]) {
+      for (const moduleName of ["react", "react/jsx-runtime", "react-native", "react-native/Libraries/Animated/Animated"]) {
+        config.resolver.resolveRequest(context, moduleName, platform)
+        const resolved = calls.at(-1)!
+        const peer = moduleName.startsWith("react-native") ? "react-native" : "react"
+        const expected = dirname(dirname(require.resolve(peer + "/package.json")))
+        expect(resolved.context.nodeModulesPaths).toEqual([expected])
+        expect(resolved.context.disableHierarchicalLookup).toBe(true)
+      }
+    }
+    config.resolver.resolveRequest(context, "react-native", "web")
+    expect(calls.at(-1)!.context.nodeModulesPaths).toEqual([dirname(dirname(require.resolve("react-native-web/package.json")))])
+    expect(calls.at(-1)!.moduleName).toBe("react-native")
+    config.resolver.resolveRequest(context, "expo", "ios")
+    expect(calls.at(-1)!.context).toBe(context)
   })
 
   it("verifies actual installed metadata and rejects an external package link", async () => {

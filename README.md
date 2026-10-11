@@ -536,8 +536,9 @@ Package metadata, including the exact installed version, peer ranges and public 
 | `bun run typecheck` | Typecheck the published package. |
 | `bun run app:storybook` | Start the Expo Storybook app for component development. |
 | `bun run app:typecheck` | Typecheck the Storybook consumer against the workspace package. |
-| `bun run playground` | Run the Expo consumer with Crumbs build watching and Metro restarts. |
-| `bun run playground:packed --check` | Typecheck and bundle an isolated consumer of the working-tree tarball. |
+| `bun run playground` | Run the Expo SDK 57 consumer with Crumbs build watching and Metro restarts (Node >=22.13.0). |
+| `bun run playground:packed --check` | Typecheck and bundle an isolated SDK 57 consumer of the working-tree tarball. |
+| `bun run playground:packed --sdk=56 --check` | Retain SDK 56 types and iOS, Android and web exports against the working-tree tarball. |
 | `bun run playground:distribution --check` | Qualify packed Crumbs, token, and component packages in Expo on iOS and web. |
 | `bun run playground:published --version=1.1.1 --check` | Verify v1 in an isolated registry consumer after publication. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
@@ -555,10 +556,14 @@ Pull requests that change `apps/` run the same CI workflow as package changes;
 docs-only pull requests remain path-ignored. CI uses Bun 1.4.2, Node 24, and
 `bun install --frozen-lockfile` across all workspaces. `bun run test` covers the
 package and Storybook test suites, `bun run app:typecheck` checks the Storybook
-consumer, and `bun run playground:distribution --check` builds packed package
+consumer on SDK 56. `bun run playground:check` checks the SDK 57 workspace;
+`bun run playground:packed --sdk=56 --check` retains SDK 56, and the independent
+SDK 57 packed profile also requires iOS, Android and web exports with runtime
+source isolation. `bun run playground:distribution --check` builds packed package
 artifacts, typechecks an independent Expo consumer, and requires iOS and web
 bundle provenance. Missing required compiler fixtures or consumer maps fail
-the gate. This CI coverage does not include Android or device acceptance.
+the gate. These exports include Android JavaScript; CI does not establish native
+interaction or device acceptance.
 
 ```
 packages/

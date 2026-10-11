@@ -12,21 +12,23 @@ if (fs.existsSync(path.join(workspace, "packages/css/tsdown.config.ts"))) {
     : [path.join(workspace, "node_modules"), path.join(workspace, "packages/css")]
   config.resolver.nodeModulesPaths = [path.join(__dirname, "node_modules"), path.join(workspace, "node_modules")]
 
-  // Workspace packages can reach the same React installation through both the
-  // checkout and a linked worktree path. Metro treats those paths as separate
-  // modules, which gives React Native components a different hooks dispatcher.
-  // Resolve React (including jsx-runtime subpaths) through one physical package.
-  const reactPackageJson = require.resolve("react/package.json", { paths: [__dirname] })
-  const reactPackage = path.dirname(fs.realpathSync(reactPackageJson))
-  const reactNodeModules = path.dirname(reactPackage)
+  // Shared demos and Crumbs resolve through different SDK workspaces. Keep
+  // their React dispatcher and native renderer on this app's physical peers.
+  // Expo still owns the react-native -> react-native-web alias on web.
+  const peerNodeModules = Object.fromEntries(["react", "react-native", "react-native-web", "react-dom"].map(name => {
+    const packageJson = require.resolve(`${name}/package.json`, { paths: [__dirname] })
+    return [name, path.dirname(path.dirname(fs.realpathSync(packageJson)))]
+  }))
   config.resolver.resolveRequest = (context, moduleName, platform) => {
-    if (moduleName === "react" || moduleName.startsWith("react/")) {
+    const requestedPeer = Object.keys(peerNodeModules).find(name => moduleName === name || moduleName.startsWith(`${name}/`))
+    const peer = requestedPeer === "react-native" && platform === "web" ? "react-native-web" : requestedPeer
+    if (peer) {
       return context.resolveRequest(
         {
           ...context,
           disableHierarchicalLookup: true,
           extraNodeModules: {},
-          nodeModulesPaths: [reactNodeModules],
+          nodeModulesPaths: [peerNodeModules[peer]],
         },
         moduleName,
         platform,

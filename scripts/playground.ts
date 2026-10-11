@@ -13,12 +13,13 @@ type Mode = "workspace" | "packed" | "published"
 export function parseArgs(args: string[]) {
   const mode = args.shift() ?? "workspace"
   if (!["workspace", "packed", "published"].includes(mode)) throw new Error(`Unknown mode: ${mode}`)
-  const allowed = ["--check", "--prepare-only", "--web", "--ios", "--android"]
+  const allowed = ["--check", "--prepare-only", "--web", "--ios", "--android", "--sdk=56"]
   for (const arg of args) {
     if (!allowed.includes(arg) && !/^--version=[a-zA-Z0-9.+-]+$/.test(arg)) throw new Error(`Unknown option: ${arg}`)
   }
+  if (args.includes("--sdk=56") && mode === "workspace") throw new Error("--sdk=56 is only valid in installed modes")
   if (args.some(arg => arg.startsWith("--version=")) && mode !== "published") throw new Error("--version is only valid in published mode")
-  return { mode: mode as Mode, check: args.includes("--check"), prepareOnly: args.includes("--prepare-only"), version: args.findLast(arg => arg.startsWith("--version="))?.slice(10) ?? "alpha", expoArgs: args.filter(arg => ["--web", "--ios", "--android"].includes(arg)) }
+  return { mode: mode as Mode, check: args.includes("--check"), sdk56: args.includes("--sdk=56"), prepareOnly: args.includes("--prepare-only"), version: args.findLast(arg => arg.startsWith("--version="))?.slice(10) ?? "alpha", expoArgs: args.filter(arg => ["--web", "--ios", "--android"].includes(arg)) }
 }
 
 export function installedManifest(manifest: { dependencies: Record<string, string>; [key: string]: unknown }, specifier: string) {
@@ -33,7 +34,7 @@ async function run(command: string[], cwd: string, env = process.env, capture = 
   return output.trim()
 }
 
-export async function stage(specifier: string, stagingParent = tmpdir()) {
+export async function stage(specifier: string, stagingParent = tmpdir(), options: { sdk56?: boolean } = {}) {
   const directory = await mkdtemp(join(stagingParent, "crumbs-playground-"))
   // Explicit copy allowlist excludes node_modules, .expo, generated exports and local env.
   for (const name of ["src", "index.js", "app.json", "babel.config.js", "metro.config.js", "tsconfig.json", "README.md"]) {
@@ -53,6 +54,15 @@ export async function stage(specifier: string, stagingParent = tmpdir()) {
     await writeFile(file, (await readFile(file, "utf8")).replaceAll("../../storybook/src/", "./shared-storybook/"))
   }
   const manifest = JSON.parse(await readFile(join(template, "package.json"), "utf8"))
+  if (options.sdk56) {
+    // Reuse the pinned SDK 56 fixture without its unrelated design-system packages.
+    // Keep the playground's own authoring dependencies and self-export contract.
+    const baseline = JSON.parse(await readFile(join(root, "packages/css/fixtures/packed-distribution/app/package.json"), "utf8"))
+    for (const [name, version] of Object.entries(baseline.dependencies)) {
+      if (name in manifest.dependencies && name !== packageName) manifest.dependencies[name] = version
+    }
+    manifest.devDependencies = { ...manifest.devDependencies, ...baseline.devDependencies }
+  }
   const runtimeEntry = `${manifest.name}/runtime-extensions`
   const authoring = join(sharedRoot, "components/runtime-extensions/authoring.ts")
   await writeFile(authoring, (await readFile(authoring, "utf8")).replaceAll("@crumbs/storybook/runtime-extensions", runtimeEntry))
@@ -89,7 +99,7 @@ async function main() {
   if (options.mode === "published") {
     version = JSON.parse(await run(["npm", "view", `${packageName}@${options.version}`, "version", "--json"], root, process.env, true))
     if (typeof version !== "string" || !/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$/.test(version)) throw new Error("Registry selector must resolve to one exact version")
-    directory = await stage(version)
+    directory = await stage(version, tmpdir(), {sdk56: options.sdk56})
   } else {
     await run(["bun", "run", "build:dev"], join(root, "packages/css"))
     if (options.mode === "packed") {
@@ -97,7 +107,7 @@ async function main() {
       console.log(`Packed artifacts: ${artifacts}`)
       // Build completed above. Suppress prepack's build logs so stdout remains machine-readable JSON.
       const packed = JSON.parse(await run(["npm", "pack", "--ignore-scripts", "--json", "--pack-destination", artifacts], join(root, "packages/css"), process.env, true))
-      directory = await stage(`file:${join(artifacts, packed[0].filename)}`)
+      directory = await stage(`file:${join(artifacts, packed[0].filename)}`, tmpdir(), {sdk56: options.sdk56})
     }
   }
   console.log(`Preparing ${options.mode} consumer: ${directory}; requested Crumbs ${version}`)

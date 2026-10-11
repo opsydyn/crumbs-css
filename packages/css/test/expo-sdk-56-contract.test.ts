@@ -46,22 +46,23 @@ describe("@opsydyn/crumbs-css Expo SDK 56 contract", () => {
     expect(packageJson.scripts?.storybook).toBeUndefined()
   })
 
-  it("keeps the playground on the compatible supported stack with committed resolutions", () => {
+  it("promotes the playground to the qualified SDK 57 profile while retaining Storybook SDK 56", () => {
     const storybook = readJson<PackageJson>(resolve(storybookRoot, "package.json"))
     const playground = readJson<PackageJson>(resolve(playgroundRoot, "package.json"))
+    const profile = readJson<SdkCandidate>(resolve(playgroundRoot, "upgrade", "expo-57.json"))
     const lockfile = readFileSync(resolve(repoRoot, "bun.lock"), "utf8")
-
-    for (const dependency of ["react", "react-dom", "react-native"] as const) {
-      expect(playground.dependencies?.[dependency]).toBe(storybook.dependencies?.[dependency])
+    for (const [name, version] of Object.entries(profile.dependencies)) {
+      expect(playground.dependencies?.[name]).toBe(version)
     }
     expect(storybook.dependencies?.expo).toBe("^56.0.0")
-    expect(playground.dependencies?.expo).toBe("~56.0.23")
-    expect(lockfile).toContain('"expo": ["expo@56.0.23"')
-    expect(lockfile).toContain('"react-native": ["react-native@0.85.3"')
-    expect(lockfile).toContain('"@expo/metro-runtime": ["@expo/metro-runtime@56.0.21"')
+    expect(storybook.dependencies?.react).toBe("19.2.3")
+    expect(storybook.dependencies?.["react-native"]).toBe("0.85.3")
+    expect(lockfile).toContain("expo@57.0.27")
+    expect(lockfile).toContain("react-native@0.86.3")
+    expect(lockfile).toContain("react-native@0.85.3")
   })
 
-  it("keeps the supported SDK 57 consumer outside the SDK 56 workspaces", () => {
+  it("keeps the independent SDK 57 qualification profile outside the workspaces", () => {
     const root = readJson<{ readonly workspaces: readonly string[] }>(resolve(repoRoot, "package.json"))
     const candidate = readJson<SdkCandidate>(resolve(playgroundRoot, "upgrade", "expo-57.json"))
     const packageJson = readJson<PackageJson>(resolve(packageRoot, "package.json"))

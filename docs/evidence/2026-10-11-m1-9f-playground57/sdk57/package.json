@@ -1,0 +1,44 @@
+{
+  "name": "@crumbs/playground",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start --port 8091",
+    "typecheck": "tsc --noEmit",
+    "export": "expo export --platform all"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "57.0.16",
+    "@opsydyn/crumbs-css": "file:/var/folders/wv/3m5dhh6x5pv9w0fbfzymldnw0000gn/T/crumbs-artifacts-nxsMFR/opsydyn-crumbs-css-1.1.1.tgz",
+    "@rn-primitives/portal": "1.5.3",
+    "@vanilla-extract/css": "^1.20.1",
+    "expo": "57.0.27",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-native": "0.86.3",
+    "react-native-web": "0.21.2"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.14",
+    "babel-preset-expo": "57.0.14",
+    "typescript": "6.0.3"
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "expo": {
+    "install": {
+      "exclude": [
+        "react",
+        "react-dom"
+      ]
+    }
+  },
+  "exports": {
+    "./runtime-extensions": {
+      "types": "./src/shared-storybook/components/runtime-extensions/runtime.tsx",
+      "default": "./src/shared-storybook/components/runtime-extensions/runtime.tsx"
+    }
+  }
+}
