@@ -96,6 +96,10 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.9e: Dogfood the released consumer skill example against public npm 1.1.1 in a real Expo consumer; retain strict types, all-platform runtime exports and actual iOS/Android button interaction. Record unperformed contexts separately.
 - [x] M1.9f: Promote the qualified SDK 57 profile to the playground default, align app peer resolution across shared workspace demos, retain Storybook and explicit SDK 56 packed regression coverage, update consumer instructions, and record fresh verification.
 - [x] M1.9g: Upgrade Storybook to the qualified SDK 57 app profile and Expo-matched native animation stack; retain SDK 56 fixture coverage, qualify LiteUI controls/actions on both native simulators, and add reproducible Storybook exports to developer commands and CI.
+- [ ] **M1.10 — Expo SDK 58 compatibility:** planned in the [assessment/design](assessments/2026-10-16-m1-10-expo58-assessment.md) and [implementation plan](superpowers/plans/2026-10-16-m1-10-expo58-upgrade.md); implementation not started. Preserve SDK 56/57 and qualify RN 0.88 explicitly.
+- [ ] **M1.10a:** parameterize the pinned SDK runner, qualify strict public types and the actual SDK 58 supervising/custom-worker chain, dependency invalidation and the same packed artifact across SDK 56/57/58. Broaden only the qualified RN intervals; no Noxcturnal or font-axis feature expansion.
+- [ ] **M1.10b:** upgrade Playground and Storybook together, align app-owned peers, retain installed 56/57 profiles, and qualify platform exports plus owned iOS/Android development-client interactions.
+- [ ] **M1.10c:** refresh docs and the consumer skill, obtain exact-source three-SDK CI and unchanged full release-gate evidence, and prepare a concrete release review. Prior numerical exceptions do not authorise a new version; publication requires separate authorisation.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
 
@@ -3204,3 +3208,11 @@ The [reproduction assessment](assessments/2026-10-12-m10-5-consumer-compiler-rep
 The known compiler slowdown reproduces; the consumer's **2.5×** ratio remains unverified without their comparator, versions and app. No product/API/dependency/baseline/budget/release-policy or publication changes; this is neither a complete host gate nor Metro/native performance qualification.
 
 **Next recommended slice: M10.5 — obtain the consumer app and comparator, reproduce the ratio under matched dependencies and Node/Expo/Metro, then profile cold, warm and dependency-edit paths before selecting one API-preserving remediation.** Include attribution of the newly observed cold source-budget failure.
+
+### 2026-10-16 — M1.10 Expo SDK 58 impact assessment and upgrade plan
+
+The [assessment](assessments/2026-10-16-m1-10-expo58-assessment.md) verifies public Expo 58.0.11 / React 19.3.0 / RN 0.88.0 metadata, the Metro 0.84.5-to-0.87.1 transition and SDK 58 supervising custom-worker behavior. Current Crumbs 1.1.1 excludes RN 0.88; the runner is SDK 57-specific and its Node predicate needs a profile-specific update. Existing contract checks pass (16 tests, 89 assertions); no SDK 58 functional qualification was run. [Receipts](evidence/2026-10-16-m1-10-expo58-assessment/README.md).
+
+The [three-slice native/inline plan](superpowers/plans/2026-10-16-m1-10-expo58-upgrade.md) preserves SDK 56/57, qualifies the packed library first (**M1.10a**), promotes both apps with native checks (**M1.10b**), then updates docs/skill and prepares release evidence (**M1.10c**). No app, dependency, compiler, peer, budget, release policy or publication changes in this planning slice. Experimental Rust-transformer work remains a separate **M10.5** decision; new variable-font authoring and optional **M11.6** integrations remain outside this batch.
+
+**Next recommended slice: M1.10a — approve the written upgrade plan, then execute isolated SDK 58 library qualification.** Native/inline execution preference is retained. Publication remains a later, concrete decision; physical hardware/readers/release-FPS acceptance remains deferred.
