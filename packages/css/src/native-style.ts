@@ -228,7 +228,7 @@ type StaticTransformEntry<TEntry> = TEntry extends unknown ? {
 } : never
 type NativeStaticTransform = StaticTransformEntry<Extract<NonNullable<ViewStyle["transform"]>, ReadonlyArray<unknown>>[number]>
 export type NativeStyleInput<TStyle> = {
-  readonly [K in keyof TStyle]?: NativeStyleValueInput<TStyle[K], K>
+  readonly [K in keyof TStyle]?: K extends "fontVariationSettings" ? never : NativeStyleValueInput<TStyle[K], K>
 } & UnsupportedSideBorderInput
 type StaticNativeStyleInput<TStyle> = Omit<NativeStyleInput<TStyle>, "transform"> & {
   readonly transform?: string | ReadonlyArray<NativeStaticTransform> | undefined

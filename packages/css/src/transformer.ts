@@ -1,3 +1,4 @@
+import { remapNativeTransformMaps } from "./compiler/native-source-map"
 import {linkRuntimeExtensions} from './compiler/runtime-extension-linkage'
 import {collectRuntimeExtensions,lowerRuntimeExtensionArguments,extensionStyleNames} from './compiler/runtime-extension-capture'
 import {NativeLocalVarType,type AnyLocalVar} from "./local-vars/model"
@@ -759,7 +760,7 @@ export async function transform(
   const result = await defaultTransform(config, projectRoot, filename, Buffer.from(transformed.code), options) as Record<string, unknown>
   const upstreamKey = typeof result.unstable_transformResultKey === "string" ? result.unstable_transformResultKey : "crumbs"
   const dependencyAwareKey = `${upstreamKey}:crumbs:${createHash("sha1").update(transformed.code).digest("hex")}`
-  return { ...result, unstable_transformResultKey: dependencyAwareKey, __crumbsNativeStyles: transformed.cacheMetadata }
+  return { ...remapNativeTransformMaps(result, transformed.code, data.toString(), filename), unstable_transformResultKey: dependencyAwareKey, __crumbsNativeStyles: transformed.cacheMetadata }
 }
 
 function getMetroTransformWorker(): TransformFn {

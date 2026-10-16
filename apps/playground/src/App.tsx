@@ -32,7 +32,7 @@ function Playground({ isDark, toggle }: { isDark: boolean; toggle: () => void })
   const [portal, setPortal] = useState(false)
   const [scrollProbe, setScrollProbe] = useState({ y: 0, first: 1, viewport: 0, content: 0, starts: 0, moves: 0, ends: 0, drags: 0 })
   const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index: number | null }> }) => {
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: Array<{ index?: number | null }> }) => {
     const index = viewableItems[0]?.index
     if (index !== null && index !== undefined) setScrollProbe(previous => ({ ...previous, first: index + 1 }))
   }).current

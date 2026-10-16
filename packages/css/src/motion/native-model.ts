@@ -25,7 +25,7 @@ export type NativeMotionRun<D extends NativeMotionDefinition = NativeMotionDefin
     cancel(): void;
 }>;
 export type NativeMotionController<D extends NativeMotionDefinition = NativeMotionDefinition> = Readonly<{
-    style: Animated.WithAnimatedObject<ViewStyle>;
+    style: Animated.WithAnimatedValue<ViewStyle>;
     animateTo(state: NativeMotionState<D>): NativeMotionRun<D>;
     set(state: NativeMotionState<D>): void;
     cancel(): void;

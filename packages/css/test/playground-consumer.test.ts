@@ -15,7 +15,7 @@ describe("isolated Expo consumer", () => {
     expect(parseArgs(["published"]).version).toBe("alpha")
     expect(parseArgs(["packed", "--sdk=56", "--check"]).sdk56).toBe(true)
     expect(() => parseArgs(["workspace", "--sdk=56"])).toThrow("installed modes")
-    expect(() => parseArgs(["packed", "--sdk=58"])).toThrow("Unknown option")
+    expect(parseArgs(["packed", "--sdk=58"]).sdk).toBe(58)
   })
 
   it("replaces only the Crumbs dependency and rejects links", () => {

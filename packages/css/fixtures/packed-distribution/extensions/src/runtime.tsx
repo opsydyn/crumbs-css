@@ -21,7 +21,7 @@ function useReferenceObservation(baseStyle: ViewStyle, props: ViewProps) {
     useEffect(() => {
         if (props.testID !== 'extensions-generated-card')
             return;
-        const rendered = StyleSheet.flatten([baseStyle, props.style]);
+        const rendered = StyleSheet.flatten([baseStyle, props.style]) ?? {};
         const old = counts.rendered, keys = Object.keys(rendered) as (keyof ViewStyle)[];
         if (old && keys.length === Object.keys(old).length && keys.every(key => Object.is(old[key], rendered[key])))
             return;

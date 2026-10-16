@@ -36,6 +36,8 @@ function createPackedConsumer(): string {
   run(["tar", "-xzf", resolve(tempRoot, tarball), "--strip-components=1", "-C", installedRoot], tempRoot)
   for (const dependency of [
     "@types/react",
+    "@babel/parser",
+    "@jridgewell/sourcemap-codec",
     "@vanilla-extract/css",
     "@vanilla-extract/integration",
     "css-to-react-native",
