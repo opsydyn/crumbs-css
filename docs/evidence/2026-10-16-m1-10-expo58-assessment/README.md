@@ -11,3 +11,7 @@ Date: 2026-10-16. This is read-only discovery for the [assessment](../../assessm
 Additional primary references: [Expo changelog](https://expo.dev/changelog/sdk-58), [technical matrix](https://docs.expo.dev/versions/v58.0.0/), [RN strict types](https://reactnative.dev/docs/strict-typescript-api), [SDK 58 bundled modules](https://github.com/expo/expo/blob/800752bfaa06d46f724cfdd221da6c1fb8453087/packages/expo/bundledNativeModules.json), [Noxcturnal proposal](https://github.com/expo/expo/pull/48443).
 
 No SDK 58 dependency install, compiler/export run, strict app typecheck, Metro invalidation run, native build, device check or performance measurement occurred. No support range or publication changed. Failure to establish those contexts is an explicit next-step boundary, not an implicit compatibility claim.
+
+## Rust-interoperability scope revision
+
+The user explicitly requested Rust-transformer compatibility as a desirable upgrade target. `rust-worker-source-receipts.json` identifies additional pinned upstream sources inspected for enablement, effective Babel-transformer/config checks, completion events and per-file fallback reasons. Both internal app Babel configs currently contain non-default preset options; Storybook also has an explicit Reanimated plugin. Eligibility must be demonstrated in the actual apps. No SDK 58 install, Rust execution, benchmark or runtime qualification has been performed. The assessment/plan now require positive eligible-file Rust execution evidence, separate from default compatibility and all-Babel fallback.
