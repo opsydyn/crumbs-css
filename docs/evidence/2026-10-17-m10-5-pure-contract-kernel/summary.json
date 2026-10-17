@@ -1,0 +1,108 @@
+{
+  "formatVersion": 1,
+  "base": "f8d7fdfc1c563e16c9cc8982e83afb2c41d5c918",
+  "controlSource": "5a13f913b17ae957172968144ec83c391caee337",
+  "controlTarballSha256": "4bd7897aa5beb6383b158f4e214436ba5d0d659b6b0fc005142c945a10dda02e",
+  "plan": "docs/superpowers/plans/2026-10-17-m10-5-pure-contract-kernel.md",
+  "newLayouts": 1,
+  "disposition": "rejected-at-initial-structure",
+  "preflight": "pass",
+  "controlControl": {
+    "status": "pass",
+    "casesPerWorker": 63,
+    "pairs": 252,
+    "workers": 8
+  },
+  "kernelBuild": {
+    "status": "pass",
+    "runtimeExports": 40,
+    "implementationModules": 5,
+    "artifactFormats": 2
+  },
+  "structure": {
+    "stage": "structure",
+    "status": "fail",
+    "issues": [
+      "sourceGuardFailures: 1 (required 0)"
+    ],
+    "evidence": [
+      "build-initial.json",
+      "structure-graphs.json"
+    ],
+    "summary": {
+      "exportRows": 59,
+      "ordinaryRows": 30,
+      "sourceGuardFailures": 1,
+      "kernelExternals": 0,
+      "duplicateMembers": 0,
+      "esmStyleFiles": 3,
+      "cjsStyleFiles": 4,
+      "nonliteralLoads": 0
+    },
+    "nextSubstages": "clean/skip-clean/prepack/negative-controls not-run after initial structure failure"
+  },
+  "guardFailure": {
+    "subpath": "./tokens",
+    "format": "cjs",
+    "status": "fail",
+    "error": "Error: Non-runtime Crumbs module in runtime bundle: /private/tmp/crumbs-m105-kernel-20261017-4tyejy94/candidate/packages/css/dist/rolldown-runtime-9BSl_Epz.cjs"
+  },
+  "style": {
+    "mjs": {
+      "controlFiles": 8,
+      "candidateFiles": 3,
+      "controlBytes": 78679,
+      "candidateBytes": 79755,
+      "byteChange": 1076
+    },
+    "cjs": {
+      "controlFiles": 9,
+      "candidateFiles": 4,
+      "controlBytes": 86990,
+      "candidateBytes": 87158,
+      "byteChange": 168
+    }
+  },
+  "originalInputsUnchanged": 369,
+  "shippingArtifactsRecorded": 181,
+  "candidateArtifacts": 172,
+  "harnessTests": {
+    "passed": 15,
+    "failed": 0,
+    "files": 2
+  },
+  "notRun": [
+    "clean-skip-clean-rebuilds",
+    "prepack-packed-export-contents",
+    "artifact-contamination-negative-controls",
+    "candidate-packed-binding-identity",
+    "candidate-consumer-declarations",
+    "candidate-behavioral-parity",
+    "kernel-cache-key-edit-restore",
+    "full-transform-warm-timing",
+    "actual-sdk-babel-rust-native-contexts",
+    "full-host-release-replay",
+    "full-library-suite"
+  ],
+  "cacheFixtureRuling": {
+    "planned": "--crumbs- -> --crumby-",
+    "reason": "planned prefix violates existing token-name validator",
+    "validReplacement": "unique const-varName join delimiter - -> _; prefix and registry keys preserved",
+    "executed": false
+  },
+  "runtimeFinding": "CJS tokens newly reaches the pure synthetic Rolldown interop helper; unchanged basename/source-list guard rejects that artifact. Token runtime externals remain empty.",
+  "shippingProductChanged": false,
+  "releaseAdmission": false,
+  "packetVerifierTests": {
+    "passed": 5,
+    "failed": 0,
+    "relocationRegression": "red-to-green"
+  },
+  "freshReview": {
+    "critical": 0,
+    "importantOutstanding": 0,
+    "minorDeferred": 1,
+    "executorRegradedAndFixed": 1
+  },
+  "scratchCleanup": "ownership-verified root removed after archive; dependency targets preserved"
+}

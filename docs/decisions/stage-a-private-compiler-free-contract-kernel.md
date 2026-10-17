@@ -54,3 +54,8 @@ Consequences: a deterministic contract boundary becomes independently auditable;
 ## Status and revisit conditions
 
 Production adoption remains proposed. The written design is approved for feasibility-plan preparation; the resulting plan requires review before execution. No prototype or production changes accompany this design. Reject/park on an unsafe cut, unsupported linking/lifetime assumption, missing canonical identity proof, inability to consolidate or warm-budget failure. No release gate is waived, and M1.10c npm publication remains blocked by the original three host failures.
+
+
+### Bounded proof disposition (2026-10-17)
+
+The separately approved [feasibility plan](../superpowers/plans/2026-10-17-m10-5-pure-contract-kernel.md) produced one [retained scratch outcome](../evidence/2026-10-17-m10-5-pure-contract-kernel/README.md). Kernel purity/membership and H1 consolidation pass; the current ordinary-runtime provenance guard rejects a newly reachable pure CJS interop helper. The whole candidate is rejected and removed before downstream identity/parity/cache/timing, with no production code admitted. This record remains a proposed architectural adoption, and this implementation is parked as release remediation; architecture-only adoption or a changed provenance contract requires its own decision. No runtime guard, host gate or release constraint is waived.
