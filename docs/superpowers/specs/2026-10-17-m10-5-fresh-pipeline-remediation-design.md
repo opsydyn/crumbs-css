@@ -1,6 +1,6 @@
 # M10.5 fresh-pipeline compiler remediation design
 
-- Status: **Approved design; implementation plan awaiting written review.** The user approved the written spec after commit `69152cd`. No implementation or performance acceptance is claimed.
+- Status: **Approved design; implementation attempt rejected and restored.** The user approved the spec at `69152cd` and the plan at `af4b490`. The complete candidate failed actual token-runtime isolation; no production or performance acceptance is claimed. See the [execution disposition](../../evidence/2026-10-17-m10-5-fresh-pipeline-remediation/README.md).
 - Date: 2026-10-17
 - Roadmap: **M10.5**, release closure for **M1.10c**
 - Control: immutable v1.2.0 source `5a13f913b17ae957172968144ec83c391caee337`, tarball SHA-256 `4bd7897aa5beb6383b158f4e214436ba5d0d659b6b0fc005142c945a10dda02e`.
