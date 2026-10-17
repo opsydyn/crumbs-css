@@ -1,0 +1,9 @@
+# Independent M1.10c review
+
+One fresh-context, read-only whole-slice reviewer inspected the plan, changed docs/skill, new release tools/tests, publish workflow, exact consumer receipts and final Run 04 evidence. No duplicate reviewer, build or benchmark was dispatched.
+
+No Critical finding. One Important/P2 finding: the SDK 56 qualifier inherited npm legacy-peer/force bypasses. Its real local conflicting-peer regression first passed an invalid resolution under poisoned environment (RED assertion), then explicit `--no-legacy-peer-deps` / `--no-force`, strict-peer CLI and safe environment defaults rejected poisoned resolution and ci while accepting a compatible local cohort (GREEN). The same arguments govern both actual qualification npm commands. Seven focused gate tests pass; the full post-fix suite is recorded separately. Final tagged SDK 56 qualification remains mandatory in the normal workflow.
+
+One Minor deferred: automatic before/after installed-file and lock revalidation inside the reusable measurement helper. This run's reviewer independently verified all 185 installed SDK 57/58 package files, and the executor additionally verified both locks after measurement; [receipt](performance/consumer-after-measurement.json). Future reuse without revalidation could mislabel changed installations. No silent assertion of future freshness is made.
+
+The review declined to infer final host compliance (report pending then), final preparation/tag hosted CI, npm publication/provenance, fresh native behavior, physical/spoken-reader/iOS27/DeviceHub/release-FPS acceptance, general speedup or resolution of the reported 2.5× regression, or ownership of preexisting untracked native/plan workspace contents. These boundaries remain in the release decision; existing native evidence is carried with its original scope. Final evidence-only status updates do not imply another review or waive remaining gates.

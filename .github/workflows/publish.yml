@@ -151,11 +151,26 @@ jobs:
           TARBALL_NAME="$(node -e 'process.stdout.write(JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8"))[0].filename)' "$PACK_RESULT")"
           echo "path=$BUNDLE_DIRECTORY/$TARBALL_NAME" >> "$GITHUB_OUTPUT"
 
-      - name: Qualify the exact release tarball on SDK 57
+      - name: Qualify the exact release tarball on SDK 56
         env:
           PACKAGE_TARBALL: ${{ steps.package-tarball.outputs.path }}
           BUNDLE_DIRECTORY: ${{ runner.temp }}/crumbs-m10-5-${{ github.run_id }}-${{ github.run_attempt }}/qualification-bundle
-        run: bun run playground:sdk-candidate --pinned --tarball "$PACKAGE_TARBALL" "$BUNDLE_DIRECTORY/sdk-57-qualification.json"
+        run: bun scripts/qualify-sdk56-tarball.ts "$PACKAGE_TARBALL" "$BUNDLE_DIRECTORY/sdk-56-qualification.json"
+
+      - name: Qualify the exact release tarball on SDK 57 and SDK 58
+        env:
+          PACKAGE_TARBALL: ${{ steps.package-tarball.outputs.path }}
+          BUNDLE_DIRECTORY: ${{ runner.temp }}/crumbs-m10-5-${{ github.run_id }}-${{ github.run_attempt }}/qualification-bundle
+        run: |
+          bun run playground:sdk-candidate --sdk=57 --pinned --tarball "$PACKAGE_TARBALL" "$BUNDLE_DIRECTORY/sdk-57-qualification.json"
+          bun run playground:sdk-candidate --sdk=58 --pinned --tarball "$PACKAGE_TARBALL" "$BUNDLE_DIRECTORY/sdk-58-qualification.json"
+
+      - name: Seal exact-source three-SDK qualification
+        env:
+          PACKAGE_TARBALL: ${{ steps.package-tarball.outputs.path }}
+          BUNDLE_DIRECTORY: ${{ runner.temp }}/crumbs-m10-5-${{ github.run_id }}-${{ github.run_attempt }}/qualification-bundle
+          RELEASE_REVISION: ${{ steps.target.outputs.release_commit }}
+        run: bun scripts/release-sdk-matrix.ts create "$BUNDLE_DIRECTORY" "$PACKAGE_TARBALL" "$RELEASE_REVISION"
 
       - name: Seal report and exact tarball
         env:
@@ -241,6 +256,13 @@ jobs:
         run: |
           TARBALL_NAME="$(node -e 'process.stdout.write(JSON.parse(require("node:fs").readFileSync(process.argv[1], "utf8")).tarballName)' "$QUALIFICATION_BUNDLE/manifest.json")"
           echo "path=$QUALIFICATION_BUNDLE/$TARBALL_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Reverify exact-source three-SDK qualification
+        env:
+          PACKAGE_TARBALL: ${{ steps.tarball.outputs.path }}
+          QUALIFICATION_BUNDLE: ${{ runner.temp }}/crumbs-release-qualification
+          RELEASE_REVISION: ${{ steps.target.outputs.release_commit }}
+        run: bun scripts/release-sdk-matrix.ts verify "$QUALIFICATION_BUNDLE" "$PACKAGE_TARBALL" "$RELEASE_REVISION"
 
       - name: Publish to npm
         working-directory: packages/css

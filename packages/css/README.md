@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Version `1.1.1` refreshes the package documentation and links the repository consumer agent skill. It inherits the exact JavaScript, declarations, exports and dependencies from `1.1.0`, including Expo SDK 56 / React Native 0.85 and SDK 57 / React Native 0.86 support and the complete v1 API. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.1.md) for publication and verification evidence. The [1.1.0 disposition](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.0.md) retains its recorded warm-transform failure; this patch adds no new performance pass or numerical exception, and generic future-release limits remain unchanged.
+Version `1.2.0` adds Expo SDK 58 / React Native 0.88 compatibility and optional genuine Expo Rust worker routing, retaining SDK 56/57 and the v1 API. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for publication and release-gate status. Earlier version-specific performance exceptions are not carried forward.
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -18,13 +18,14 @@ Validated consumer baseline:
 
 - Expo SDK 56 / React Native 0.85
 - Expo SDK 57 / React Native 0.86
-- React 19.2 (SDK 57 qualification uses React / React DOM 19.2.8)
+- Expo SDK 58 / React Native 0.88, React / React DOM 19.3.1 (requires Crumbs 1.2.0)
+- React 19.2 on the retained SDK 56/57 lines
 
-React Native peers are bounded to `>=0.85 <0.87`. Crumbs tooling requires Node `>=22.0.0`; SDK 57 requires Node `>=22.13.0`. Packed consumers pass types, motion contracts and production Metro exports for iOS, Android and web. Physical-device and performance acceptance are separate.
+React Native peers are bounded to `>=0.85 <0.87 || >=0.88 <0.89`; RN 0.87 remains unqualified. Crumbs tooling requires Node `>=22.0.0`; SDK 56/57 tooling needs `>=22.13.0` and SDK 58 needs `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. Packed consumers pass types, motion contracts and production Metro exports for iOS, Android and web. Physical-device and performance acceptance are separate.
 
 ## Coding agents
 
-The repository provides a [Crumbs consumer skill](https://github.com/opsydyn/crumbs-css/tree/main/.agents/skills/crumbs-css) for the published `1.1.1` APIs, including typed theme/slot patterns and native boundaries. [Copy the whole skill into your app](https://opsydyn.github.io/crumbs-css/how-to/use-agent-skill/) and invoke `$crumbs-css` in Codex. It is repository content; the npm 1.1.1 tarball does not contain the skill.
+The repository provides a [Crumbs consumer skill](https://github.com/opsydyn/crumbs-css/tree/main/.agents/skills/crumbs-css) for the versioned v1 APIs and SDK 56/57/58 setup, including typed theme/slot patterns and native boundaries. [Copy the whole skill into your app](https://opsydyn.github.io/crumbs-css/how-to/use-agent-skill/) and invoke `$crumbs-css` in Codex. It is repository content; the npm tarball does not contain the skill.
 
 ## What it is
 
@@ -79,12 +80,12 @@ See the full compatibility matrix in
 
 ## Install
 
-Install the verified stable release in your Expo app:
+Check the release status above for availability, then install the compatibility release in your Expo app:
 
 ```sh
-bun add @opsydyn/crumbs-css@1.1.1
+bun add @opsydyn/crumbs-css@1.2.0
 # or
-npm install @opsydyn/crumbs-css@1.1.1
+npm install @opsydyn/crumbs-css@1.2.0
 ```
 
 Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.
