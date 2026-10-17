@@ -3331,3 +3331,12 @@ The [approved single-candidate plan](superpowers/plans/2026-10-17-m10-5-pure-con
 Control/control runs under actual Node22/current ESM/CJS agree for 252 receipt pairs; 488 successful markers are independently derived. Fifteen focused build/oracle tests pass. Subsequent rebuild/prepack/artifact-negative controls, candidate binding/declaration/behavior/cache checks, warm timing and SDK/native/full-host release replay are explicitly not run. No speed claim or production subset is admitted; shipping product/policy and all 181 artifacts remain unchanged.
 
 **Next recommended M10.5 decision: park this kernel as release remediation and review the ordinary-runtime provenance contract and release decision.** Any change to how pure bundler interop is represented needs a separate assessment; no allowlist edit or further compiler prototype is authorized. M1.10c remains blocked by the original cold/warm/incremental host failures. Physical-device/spoken-reader items remain deferred.
+
+
+### M10.5 ordinary-runtime provenance assessed (2026-10-17)
+
+The [assessment](assessments/2026-10-17-m10-5-runtime-provenance-contract.md) separates the current filename-family source-list guard from the independent packed import auditor. Direct archive inspection confirms that the rejected 554-byte CJS helper contains interop glue with no imports; its related ESM helper imports `node:module` and is absent from the recorded token ESM closure. Neither a broad helper allowlist nor renaming establishes safe source provenance. Existing guards remain unchanged.
+
+Recommend a separately designed artifact-bound provenance contract with exact emitted-byte/module membership, reviewed generated helpers, independent import traversal and fail-closed packed/platform checks. This is a correctness direction, not adoption authority or speed evidence. The rejected kernel remains parked; its downstream identity/behavior/cache/timing stages stay unrun. Six current guard tests pass, and the packet verifier confirms all 181 shipping artifacts unchanged.
+
+**Next recommended M10.5 slice: design the artifact-bound runtime-provenance contract separately from compiler remediation.** No kernel retry, guard edit, benchmark or release exception follows from this assessment. A future performance candidate needs a credible full-transform mechanism for the retained approximately 47.24% warm reduction; M1.10c publication remains blocked by the original three host failures. Physical acceptance remains deferred.
