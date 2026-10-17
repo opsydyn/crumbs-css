@@ -1,5 +1,5 @@
 import { afterAll, describe, expect, it } from "bun:test"
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import { prepareMatchedMetroScaffold } from "../../../scripts/prepare-matched-metro-scaffold"
@@ -11,7 +11,7 @@ const fixturePaths = [
   "apps/playground/src/incremental.css.ts",
   "apps/playground/src/incremental-token.ts",
   "apps/playground/src/incremental-base.css.ts",
-  "packages/css/fixtures/m2-7-workspace-token.ts",
+  "packages/css/fixtures/m2-7-workspace-token.ts"
 ] as const
 
 afterAll(() => {
@@ -62,8 +62,9 @@ function makeRoots() {
     appNodeModules,
     join(baselineRoot, "node_modules"),
     join(packageRoot, "node_modules"),
-    join(packageRoot, "dist"),
-  ]) mkdirSync(path, { recursive: true })
+    join(packageRoot, "dist")
+  ])
+    mkdirSync(path, { recursive: true })
 
   writeFileSync(join(baselineRoot, "bun.lock"), "{}\n")
   writeJson(join(baselineRoot, "package.json"), { name: "crumbs-monorepo", private: true })
@@ -71,8 +72,8 @@ function makeRoots() {
     name: "@crumbs/playground",
     dependencies: {
       "@opsydyn/crumbs-css": "workspace:*",
-      expo: "~56.0.0",
-    },
+      expo: "~56.0.0"
+    }
   })
   writeFileSync(join(appRoot, "metro.config.js"), "module.exports = { baseline: true }\n")
   writeFileSync(join(appRoot, "src/incremental-entry.ts"), "export const baselineEntry = true\n")
@@ -87,8 +88,8 @@ function makeRoots() {
     dependencies: {
       "@opsydyn/crumbs-css": "workspace:*",
       "@vanilla-extract/css": "^1.20.1",
-      expo: "~56.0.0",
-    },
+      expo: "~56.0.0"
+    }
   })
   for (const [index, path] of fixturePaths.entries()) {
     const absolute = join(sourceRoot, path)
@@ -97,7 +98,7 @@ function makeRoots() {
   }
   writeJson(join(sourceRoot, "packages/css/package.json"), {
     name: "@opsydyn/crumbs-css",
-    version: "0.1.1-alpha.1",
+    version: "0.1.1-alpha.1"
   })
   writeFileSync(join(sourceRoot, "packages/css/tsdown.config.ts"), "export default {}\n")
   writeFileSync(join(sourceRoot, "packages/css/dist/index.mjs"), "export const currentBuild = true\n")
@@ -105,8 +106,18 @@ function makeRoots() {
 
   installPackage(appNodeModules, "expo", "expo", "56.0.4")
   installPackage(appNodeModules, "expo/node_modules/@expo/cli", "@expo/cli", "56.1.11")
-  installPackage(appNodeModules, "expo/node_modules/@expo/cli/node_modules/@expo/metro-config", "@expo/metro-config", "56.0.12")
-  installPackage(appNodeModules, "expo/node_modules/@expo/cli/node_modules/@expo/metro-config/node_modules/metro", "metro", "0.84.4")
+  installPackage(
+    appNodeModules,
+    "expo/node_modules/@expo/cli/node_modules/@expo/metro-config",
+    "@expo/metro-config",
+    "56.0.12"
+  )
+  installPackage(
+    appNodeModules,
+    "expo/node_modules/@expo/cli/node_modules/@expo/metro-config/node_modules/metro",
+    "metro",
+    "0.84.4"
+  )
   installPackage(appNodeModules, "react-native", "react-native", "0.85.3")
   installPackage(appNodeModules, "@expo/metro-runtime", "@expo/metro-runtime", "56.0.12")
   installPackage(appNodeModules, "react", "react", "19.2.5")
@@ -121,27 +132,35 @@ function makeRoots() {
 describe("M10.5 matched Metro scaffold", () => {
   it("copies current inputs and package artifacts into the pinned baseline scaffold", async () => {
     const roots = makeRoots()
-    const result = await withGitRevision(baselineRevision, () => prepareMatchedMetroScaffold({
-      baselineRoot: roots.baselineRoot,
-      baselineRevision,
-      sourceRoot: roots.sourceRoot,
-      outputRoot: roots.outputRoot,
-    }))
+    const result = await withGitRevision(baselineRevision, () =>
+      prepareMatchedMetroScaffold({
+        baselineRoot: roots.baselineRoot,
+        baselineRevision,
+        sourceRoot: roots.sourceRoot,
+        outputRoot: roots.outputRoot
+      })
+    )
 
     expect(result.appRoot).toBe(join(roots.outputRoot, "apps/playground"))
     expect(readFileSync(join(result.appRoot, "metro.config.js"), "utf8")).toBe(roots.currentMetroConfig)
     for (const [index, path] of fixturePaths.entries()) {
       expect(readFileSync(join(roots.outputRoot, path), "utf8")).toBe(`export const fixture${index} = ${index + 1}\n`)
     }
-    expect(readFileSync(join(roots.outputRoot, "packages/css/dist/index.mjs"), "utf8"))
-      .toContain("currentBuild")
-    expect(readFileSync(join(roots.outputRoot, "packages/css/dist/metro-plugin.mjs"), "utf8"))
-      .toContain("currentPlugin")
-    expect(JSON.parse(readFileSync(join(roots.outputRoot, "packages/css/node_modules/@vanilla-extract/css/package.json"), "utf8")))
-      .toMatchObject({ version: "1.20.1" })
-    expect(JSON.parse(readFileSync(join(roots.outputRoot, "apps/playground/package.json"), "utf8")))
-      .toMatchObject({ dependencies: { "@vanilla-extract/css": "^1.20.1", expo: "~56.0.0" } })
-    expect(result.fixtureHashes.map(item => item.path).sort()).toEqual(["apps/playground/metro.config.js", ...fixturePaths].sort())
+    expect(readFileSync(join(roots.outputRoot, "packages/css/dist/index.mjs"), "utf8")).toContain("currentBuild")
+    expect(readFileSync(join(roots.outputRoot, "packages/css/dist/metro-plugin.mjs"), "utf8")).toContain(
+      "currentPlugin"
+    )
+    expect(
+      JSON.parse(
+        readFileSync(join(roots.outputRoot, "packages/css/node_modules/@vanilla-extract/css/package.json"), "utf8")
+      )
+    ).toMatchObject({ version: "1.20.1" })
+    expect(JSON.parse(readFileSync(join(roots.outputRoot, "apps/playground/package.json"), "utf8"))).toMatchObject({
+      dependencies: { "@vanilla-extract/css": "^1.20.1", expo: "~56.0.0" }
+    })
+    expect(result.fixtureHashes.map((item) => item.path).sort()).toEqual(
+      ["apps/playground/metro.config.js", ...fixturePaths].sort()
+    )
     expect(result.resolvedVersions).toMatchObject({
       expo: "56.0.4",
       metro: "0.84.4",
@@ -150,47 +169,97 @@ describe("M10.5 matched Metro scaffold", () => {
       react: "19.2.5",
       reactDom: "19.2.5",
       babelPresetExpo: "56.0.12",
-      vanillaExtractCss: "1.20.1",
+      vanillaExtractCss: "1.20.1"
     })
-    expect(readFileSync(join(roots.baselineRoot, "apps/playground/metro.config.js"), "utf8"))
-      .toContain("baseline: true")
+    expect(readFileSync(join(roots.baselineRoot, "apps/playground/metro.config.js"), "utf8")).toContain(
+      "baseline: true"
+    )
+  })
+
+  it("provides newly declared compiler dependencies without changing the approved baseline", async () => {
+    const roots = makeRoots()
+    const sourcePackage = join(roots.sourceRoot, "packages/css")
+    const sourceManifest = join(sourcePackage, "package.json")
+    writeJson(sourceManifest, {
+      ...JSON.parse(readFileSync(sourceManifest, "utf8")),
+      dependencies: { "@babel/parser": "^7.29.3", "@jridgewell/sourcemap-codec": "^1.5.5" }
+    })
+    installPackage(sourcePackage, "node_modules/@babel/parser", "@babel/parser", "7.29.3")
+    installPackage(sourcePackage, "node_modules/@jridgewell/sourcemap-codec", "@jridgewell/sourcemap-codec", "1.5.5")
+    installPackage(join(roots.baselineRoot, "packages/css"), "node_modules/@babel/parser", "@babel/parser", "7.0.0")
+    const result = await withGitRevision(baselineRevision, () =>
+      prepareMatchedMetroScaffold({
+        baselineRoot: roots.baselineRoot,
+        baselineRevision,
+        sourceRoot: roots.sourceRoot,
+        outputRoot: roots.outputRoot
+      })
+    )
+    const dependencies = join(roots.outputRoot, "packages/css/node_modules")
+    expect(existsSync(join(dependencies, "@jridgewell/sourcemap-codec/package.json"))).toBe(true)
+    expect(JSON.parse(readFileSync(join(dependencies, "@babel/parser/package.json"), "utf8")).version).toBe("7.29.3")
+    expect(JSON.parse(readFileSync(join(dependencies, "@vanilla-extract/css/package.json"), "utf8")).version).toBe(
+      "1.20.1"
+    )
+    expect(
+      JSON.parse(readFileSync(join(roots.baselineRoot, "packages/css/node_modules/@babel/parser/package.json"), "utf8"))
+        .version
+    ).toBe("7.0.0")
+    expect(existsSync(join(roots.baselineRoot, "packages/css/node_modules/@jridgewell/sourcemap-codec"))).toBe(false)
+    expect(result.resolvedVersions).toMatchObject({ expo: "56.0.4", metro: "0.84.4", vanillaExtractCss: "1.20.1" })
   })
 
   it("rejects a baseline checkout at any other revision", async () => {
     const roots = makeRoots()
     await withGitRevision("1".repeat(40), async () => {
-      await expect(prepareMatchedMetroScaffold({
-        baselineRoot: roots.baselineRoot,
-        baselineRevision,
-        sourceRoot: roots.sourceRoot,
-        outputRoot: roots.outputRoot,
-      })).rejects.toThrow(/baseline revision/i)
+      await expect(
+        prepareMatchedMetroScaffold({
+          baselineRoot: roots.baselineRoot,
+          baselineRevision,
+          sourceRoot: roots.sourceRoot,
+          outputRoot: roots.outputRoot
+        })
+      ).rejects.toThrow(/baseline revision/i)
     })
   })
 
   it("rejects a mismatched direct Vanilla Extract resolution", async () => {
     const roots = makeRoots()
-    installPackage(join(roots.baselineRoot, "apps/playground/node_modules"), "@vanilla-extract/css", "@vanilla-extract/css", "1.20.2")
+    installPackage(
+      join(roots.baselineRoot, "apps/playground/node_modules"),
+      "@vanilla-extract/css",
+      "@vanilla-extract/css",
+      "1.20.2"
+    )
     await withGitRevision(baselineRevision, async () => {
-      await expect(prepareMatchedMetroScaffold({
-        baselineRoot: roots.baselineRoot,
-        baselineRevision,
-        sourceRoot: roots.sourceRoot,
-        outputRoot: roots.outputRoot,
-      })).rejects.toThrow(/1\.20\.1|vanilla-extract/i)
+      await expect(
+        prepareMatchedMetroScaffold({
+          baselineRoot: roots.baselineRoot,
+          baselineRevision,
+          sourceRoot: roots.sourceRoot,
+          outputRoot: roots.outputRoot
+        })
+      ).rejects.toThrow(/1\.20\.1|vanilla-extract/i)
     })
   })
 
   it("rejects a mismatched package runtime Vanilla Extract resolution", async () => {
     const roots = makeRoots()
-    installPackage(join(roots.baselineRoot, "packages/css"), "node_modules/@vanilla-extract/css", "@vanilla-extract/css", "1.20.2")
+    installPackage(
+      join(roots.baselineRoot, "packages/css"),
+      "node_modules/@vanilla-extract/css",
+      "@vanilla-extract/css",
+      "1.20.2"
+    )
     await withGitRevision(baselineRevision, async () => {
-      await expect(prepareMatchedMetroScaffold({
-        baselineRoot: roots.baselineRoot,
-        baselineRevision,
-        sourceRoot: roots.sourceRoot,
-        outputRoot: roots.outputRoot,
-      })).rejects.toThrow(/1\.20\.1|vanilla-extract/i)
+      await expect(
+        prepareMatchedMetroScaffold({
+          baselineRoot: roots.baselineRoot,
+          baselineRevision,
+          sourceRoot: roots.sourceRoot,
+          outputRoot: roots.outputRoot
+        })
+      ).rejects.toThrow(/1\.20\.1|vanilla-extract/i)
     })
   })
 
@@ -201,12 +270,14 @@ describe("M10.5 matched Metro scaffold", () => {
     manifest.dependencies["@vanilla-extract/css"] = "^1.21.0"
     writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n")
     await withGitRevision(baselineRevision, async () => {
-      await expect(prepareMatchedMetroScaffold({
-        baselineRoot: roots.baselineRoot,
-        baselineRevision,
-        sourceRoot: roots.sourceRoot,
-        outputRoot: roots.outputRoot,
-      })).rejects.toThrow(/source.*@vanilla-extract\/css|1\.20\.1/i)
+      await expect(
+        prepareMatchedMetroScaffold({
+          baselineRoot: roots.baselineRoot,
+          baselineRevision,
+          sourceRoot: roots.sourceRoot,
+          outputRoot: roots.outputRoot
+        })
+      ).rejects.toThrow(/source.*@vanilla-extract\/css|1\.20\.1/i)
     })
   })
 
@@ -214,12 +285,14 @@ describe("M10.5 matched Metro scaffold", () => {
     const roots = makeRoots()
     rmSync(join(roots.sourceRoot, fixturePaths[2]))
     await withGitRevision(baselineRevision, async () => {
-      await expect(prepareMatchedMetroScaffold({
-        baselineRoot: roots.baselineRoot,
-        baselineRevision,
-        sourceRoot: roots.sourceRoot,
-        outputRoot: roots.outputRoot,
-      })).rejects.toThrow(/incremental-token\.ts/i)
+      await expect(
+        prepareMatchedMetroScaffold({
+          baselineRoot: roots.baselineRoot,
+          baselineRevision,
+          sourceRoot: roots.sourceRoot,
+          outputRoot: roots.outputRoot
+        })
+      ).rejects.toThrow(/incremental-token\.ts/i)
     })
   })
 })

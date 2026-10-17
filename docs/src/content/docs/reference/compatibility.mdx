@@ -7,9 +7,11 @@ description: Supported features, dropped features, and browser CSS features that
 
 ## Expo SDK compatibility
 
-Crumbs `1.1.0` adds Expo SDK 57 / React Native 0.86 while retaining SDK 56 / React Native 0.85. The isolated SDK 57 profile uses Expo `57.0.27`, React / React DOM `19.2.8` and React Native `0.86.3`; it passes strict npm installation, packed types, motion contracts and production iOS/Android/web exports. React Native peers are `>=0.85 <0.87`.
+Crumbs `1.2.0` adds Expo SDK 58 / React Native 0.88, retaining SDK 56 / RN 0.85 and SDK 57 / RN 0.86. Published `1.1.1` covers SDK 56/57 only. The current internal apps use Expo 58.0.14, React/DOM 19.3.1 and RN 0.88.0. The retained installed profiles use Expo 56.0.4/RN 0.85.3 and Expo 57.0.27/RN 0.86.3 with React 19.2.8. Strict npm resolution, packed types, motion contracts and iOS/Android/web exports are checked without peer overrides.
 
-The SDK 57 profile uses a compatible React patch to satisfy current Expo CLI/router optional peers without overrides. SDK 57 requires Node `>=22.13.0`; Crumbs tooling retains its `>=22.0.0` floor. Internal apps remain on SDK 56. [Release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.1.0.md) records publication separately from compatibility. Physical-device and performance acceptance remain deferred.
+Native peers are `>=0.85 <0.87 || >=0.88 <0.89`; RN 0.87 remains unqualified. Crumbs tooling keeps Node >=22.0.0. SDK 56/57 tooling needs>=22.13.0; SDK 58 requires `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. Check [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for publication separately from source qualification.
+
+Babel remains the default. SDK 58's optional Expo Rust worker is qualified through actual eligible-file completion events, with explicit codegen/Animated/Worklets and custom-parser Babel fallbacks. See [worker setup](/crumbs-css/how-to/use-storybook-and-expo-dev-client/) and the [source/native packet](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-16-m1-10b-expo58-apps). Both apps have owned iOS/Android development-client interaction evidence under both workers. Physical devices, spoken readers, iOS 27/DeviceHub behavior and release FPS remain deferred. This interoperability work makes no throughput claim; M10.5 and prior release-specific numerical dispositions are unchanged.
 
 ## Supported
 

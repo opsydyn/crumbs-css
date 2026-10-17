@@ -1,6 +1,6 @@
 # Crumbs Expo playground
 
-This public-API consumer complements the internal Storybook. M1.9f promotes the qualified Expo 57.0.27 / React Native 0.86.3 / React 19.2.8 profile to its default. Use Node >=22.13.0. Storybook and the packed design-system fixture retain Expo 56 / React Native 0.85. The [isolated SDK profile](upgrade/README.md) continues to qualify SDK 57 independently. Run `bun run playground:sdk-candidate --pinned /tmp/crumbs-sdk-57/qualification.json` to check types, motion contracts and iOS/Android/web exports against a fresh packed artifact.
+This public-API consumer complements Storybook. Both apps use Expo 58.0.14 / RN 0.88.0 / React 19.3.1. Use Node `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. The library retains SDK 56 development peers and independent installed SDK 56/57 profiles. The [isolated SDK profiles](upgrade/README.md) record exact pins; the candidate runner still defaults to SDK 57, so select `--sdk=58` explicitly for the new line.
 
 From the repository root:
 
@@ -12,12 +12,13 @@ bun run playground:check
 bun run playground:packed --check
 # Retain the supported SDK 56 regression consumer.
 bun run playground:packed --sdk=56 --check
+bun run playground:packed --sdk=57 --check
 bun run playground:distribution --artifacts-only
 bun run playground:distribution --prepare-only
 bun run playground:distribution --check
 bun run playground:distribution --m8-2-check
 bun run playground:distribution --m8-3-check
-bun run playground:published --version=1.1.1 --check
+bun run playground:published --version=1.2.0 --sdk=58 --check
 bun run playground:sdk-candidate docs/evidence/YYYY-MM-DD-expo-sdk-candidate/qualification.json
 ```
 
@@ -25,11 +26,11 @@ Workspace mode resolves Crumbs' exported `dist` files. Its typecheck maps native
 
 The focused `bun run measure:metro-incremental <output.json>` workload uses a dedicated playground entry to exercise warm Metro invalidation and record direct `.css.ts` edit-to-bundle latency. It checks compiled values after edits to plain tokens, nested `.css.ts` dependencies and shared workspace theme configuration, then restores every fixture. It also restarts Metro with `strictDiagnostics` changed while retaining the transform cache; the same edited style must switch from a compiled value to the expected diagnostic and back again. The retained M8.4 receipt records these outputs. This is functional invalidation evidence, not a device-performance qualification.
 
-Expo Doctor detects both SDKs through the linked library's development dependencies in workspace mode (20/21 checks). The Metro source maps verify one app-owned React/native renderer; the standalone SDK 57 packed consumer passes all 21 Doctor checks. Use installed mode for independent dependency qualification. This Expo Go smoke check does not qualify a custom native development build or its autolinking.
+Expo Doctor reports the workspace's SDK 56 library development peers alongside the SDK 58 app peers; app-owned physical React/native/web resolution is checked separately. M1.10b retains 19/20 Playground and18/20 Storybook Doctor results, including Storybook's preexisting native-folder warning. Owned custom iOS/Android development builds pass under Babel and Rust. Export/Doctor checks alone do not qualify another app's native behavior.
 
-The SDK 57 profile uses React / React DOM 19.2.8 for the current Expo CLI optional peer requirements, retaining strict npm installation. Expo's recommended template pins 19.2.3; the two explicit `expo.install.exclude` entries preserve the qualified patch versions without excluding other dependency checks.
+The retained SDK 57 profile uses React / React DOM 19.2.8 for the current Expo CLI optional peer requirements, retaining strict npm installation. Expo's recommended template pins 19.2.3; the two explicit `expo.install.exclude` entries preserve the qualified patch versions without excluding other dependency checks.
 
-Packed mode builds, runs `npm pack` against the working tree and installs the tarball into a new temporary app outside the monorepo. Published mode defaults to `alpha`, resolves the requested registry version or tag to one exact version and installs it into a separate temporary app. Neither mode links workspace Crumbs. Both default to SDK 57; `--sdk=56` selects the pinned SDK 56 fixture dependencies and is valid only in packed/published modes. `--prepare-only` installs and prints the directory without launching. Keep the printed directory and its npm lockfile for reproducing feedback; delete it when finished. The separate packed-artifact directory and temporary npm cache can also be removed after use.
+Packed mode builds, runs `npm pack` against the working tree and installs the tarball into a new temporary app outside the monorepo. Published mode defaults to `alpha`, resolves the requested registry version or tag to one exact version and installs it into a separate temporary app. Neither mode links workspace Crumbs. Both default to the current SDK 58 app profile; explicit `--sdk=56`, `--sdk=57` or `--sdk=58` select pinned installed profiles. `--sdk=56` selects the retained SDK 56 dependencies and is valid only in packed/published modes. `--prepare-only` installs and prints the directory without launching. Keep the printed directory and its npm lockfile for reproducing feedback; delete it when finished. The separate packed-artifact directory and temporary npm cache can also be removed after use.
 
 Packed design-system mode builds three separate tarballs for Crumbs, a token package and a component package, then installs those local artifacts into a standalone Expo app outside the monorepo. `--artifacts-only` prints the three artifact identities and hashes. `--prepare-only` keeps the staged app and artifacts and prints their paths. `--check` additionally typechecks the app, exports production JavaScript bundles and source maps for iOS and web, and verifies that both maps reference the installed packages without repository or authored `.css.ts` paths. The receipt is written to `docs/evidence/2026-09-26-m8-1-packed-design-system/qualification.json`. This is separate-package and bundle-provenance qualification; it does not claim device rendering, Android, accessibility or performance acceptance. The existing `playground:packed` mode still qualifies one Crumbs tarball with the full playground app.
 
@@ -87,3 +88,7 @@ The report records each step, list/row layout-effect mount/unmount counts, and r
 Virtualization means requested rows, mounted rows and visible rows differ. Balanced effect counts do **not** prove absence of memory leaks. Request-to-layout-effect times include JS scheduling and commit delay, not render CPU, native layout or visual readiness. React Profiler durations, when enabled, describe render work inside the list boundary; unmount timing is not profiled there. Production profiling may be disabled and is reported unavailable. Instrumentation itself adds work. These are functional lifecycle/memo probes, not release-device frame/memory benchmarks, scrolling acceptance or calibrated budgets. Native Android remains deferred until last.
 
 [Retained web workload evidence](../../docs/assessments/2026-09-14-expo-list-workloads.md) separates actual web receipts, package/app checks and production JavaScript maps from native/device acceptance. Remaining M1.5 workloads cover recipe selection, nested scopes, orientation/font scaling and retained memory.
+
+## SDK 58 optional Rust worker
+
+Babel is the default. Start `CRUMBS_METRO_WORKER=rust bun run playground` to select the app's Expo experiment, then restart Metro after configuration changes. The canonical Expo preset preserves default eligibility; custom required transforms remain valid Babel fallback reasons. Actual eligible-file completion events establish Rust use; the flag or export alone does not. This retains the existing Crumbs compile phase and makes no speed claim. See the [Storybook/dev-client guide](../../docs/src/content/docs/how-to/use-storybook-and-expo-dev-client.mdx) for routing and native acceptance limits.
