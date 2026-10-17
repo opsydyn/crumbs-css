@@ -3288,3 +3288,12 @@ The user approved plan `af4b490`. The exact pinned v1.2.0 archive was recovered 
 The approved whole-candidate stop rule was followed: no warm timing cohort, SDK/native replay, full host report or publication was attempted. All source changes and eight added modules/harnesses were removed after archiving; **181 original artifacts** and the original tracked tree were byte-verified. The restored library suite passes **1,907 tests, zero failures, one existing optional skip**. [The packet](evidence/2026-10-17-m10-5-fresh-pipeline-remediation/README.md) retains source/artifact archives, complete failure names, raw receipts/logs, restoration proof and an independent verifier. No partial optimization was admitted.
 
 **Next M10.5 decision: reassess the compiler architecture while preserving the pure token/runtime boundary.** This candidate is closed; a different design needs its own decision. More timing runs of this rejected layout are unwarranted. M1.10c npm release closure remains blocked by the original three host failures; budgets, Node support, immutable v1.2.0 identity and deferred physical items remain unchanged.
+
+
+### M10.5 compiler architecture reassessed (2026-10-17)
+
+The [architecture assessment](assessments/2026-10-17-m10-5-compiler-architecture-reassessment.md) records a fresh audit of all 59 restored export targets (30 ordinary-runtime rows). Both token formats retain zero externals; four pure chunks are shared with authoring. The rejected recursive group crossed this real shared boundary. Separating token build configurations alone could also change bindings and identity contracts.
+
+The installed library build tool exposes entry-aware grouping. **Next recommended M10.5 step: review one bounded throwaway entry-aware packaging proof**, checking actual emitted runtime reachability and canonical bindings before five unchanged complete warm-transform runs. This is a hypothesis, not an accepted architecture or measured speedup. Stop after one layout if parity/isolation or warm feasibility fails; no replay of the rejected batch or automatic retained compiler service. Production adoption still needs a written design and complete plan.
+
+Live checks still show GitHub v1.2.0, npm latest 1.1.1 and release run 39020184159 with qualification failed/publication skipped. M1.10c remains blocked by the same three host failures. No production source/dependency, budget, tag or publication changed. Physical-device/spoken-reader work remains deferred.
