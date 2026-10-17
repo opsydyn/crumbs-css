@@ -1,6 +1,6 @@
 # M10.5 private pure-contract kernel design
 
-Date: 2026-10-17. Status: **proposed; written review required**. Design base: `8adba6a`.
+Date: 2026-10-17. Status: **design approved for feasibility-plan preparation; execution/adoption not approved**. Design base: `8adba6a`.
 
 This document delivers the approved design task. It authorizes no prototype, implementation plan execution, dependency change, performance exception or release. The [proposed ADR](../../decisions/stage-a-private-compiler-free-contract-kernel.md) records the architectural choice; [M10.5](../../roadmap.md) records delivery. The existing consumer-scoped release policy remains unchanged.
 
@@ -133,4 +133,4 @@ Implementation order and exact commands belong to the next written plan after sp
 
 ## Design review status
 
-The source cut, installed linking APIs, performance arithmetic and prior evidence were inspected read-only. No prototype, build, benchmark, install, runner, push or publication occurred. Independent review confirmed the source/API boundary and identified a format-mapping clarification. A subsequent source-level cache counterexample identified fixed kernel filenames as unsafe; this design now requires content-addressed paths, the exact existing marker recipe and a kernel-only edit/key/provenance/restore proof. These focused design corrections were checked against current source; they have not been prototyped. The design is ready for written review as a feasibility hypothesis with a weakly supported end-to-end benefit, not a guaranteed release path. **Next M10.5 slice: review this spec and decide whether one bounded proof merits an implementation plan.**
+The source cut, installed linking APIs, performance arithmetic and prior evidence were inspected read-only. No prototype, build, benchmark, install, runner, push or publication occurred. Independent review confirmed the source/API boundary and identified a format-mapping clarification. A subsequent source-level cache counterexample identified fixed kernel filenames as unsafe; this design now requires content-addressed paths, the exact existing marker recipe and a kernel-only edit/key/provenance/restore proof. These focused design corrections were checked against current source; they have not been prototyped. The reviewed design remains a feasibility hypothesis with a weakly supported end-to-end benefit, not a guaranteed release path. The user approved this written design on 2026-10-17 after commit `d10e504`, authorizing preparation of the [single bounded feasibility plan](../plans/2026-10-17-m10-5-pure-contract-kernel.md). This records design review, not prototype execution or production adoption. **Next M10.5 slice: review that plan before executing one complete scratch candidate.**
