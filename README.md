@@ -10,7 +10,7 @@ recipes and atomic utilities; add themes, scoped design tokens, conditions, moti
 factories through explicit package entrypoints.
 
 **Crumbs CSS v1 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases).**
-Version `1.2.0` adds Expo SDK 58 / React Native 0.88 qualification while retaining SDK 56 / RN 0.85 and SDK 57 / RN 0.86. Playground and Storybook now use SDK 58, with Babel as the default and qualified opt-in Expo Rust worker routing. See [release status](docs/releases/1.2.0.md) for publication and gate status, and [native/worker evidence](docs/evidence/2026-10-16-m1-10b-expo58-apps/README.md). Existing v1/v1.1 performance exceptions do not apply to this release.
+The [GitHub source release `1.2.0`](https://github.com/opsydyn/crumbs-css/releases/tag/v1.2.0) is published; npm `latest` remains `1.1.1` while the final performance gate is blocked. Version `1.2.0` adds Expo SDK 58 / React Native 0.88 qualification while retaining SDK 56 / RN 0.85 and SDK 57 / RN 0.86. Playground and Storybook now use SDK 58, with Babel as the default and qualified opt-in Expo Rust worker routing. See [release status](docs/releases/1.2.0.md) for publication and gate status, and [native/worker evidence](docs/evidence/2026-10-16-m1-10b-expo58-apps/README.md). Existing v1/v1.1 performance exceptions do not apply to this release.
 
 ## Get started
 

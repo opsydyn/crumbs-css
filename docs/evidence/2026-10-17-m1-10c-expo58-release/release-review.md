@@ -1,6 +1,8 @@
 # M1.10c release review — blocked for publication
 
-**Decision: publication remains blocked.** This is not a new exception request, final release acceptance or instruction to publish development bytes.
+**Final-tag update:** see the [exact v1.2.0 decision and report](final-release/README.md). PRs #10/#9 are merged, the GitHub release exists, and the approved one-job Mac qualification has completed with three numerical blockers. The preliminary snapshot below remains historical evidence.
+
+**Decision at the preliminary snapshot: publication remains blocked.** This is not a new exception request, final release acceptance or instruction to publish development bytes.
 
 - Merged functional source: `e33325035a343c448d97f83db2b9e68f55803ba8`, incorporating reviewed PR #8 / `441bd2e`.
 - Hosted frozen/three-SDK/app-worker CI: [39013112767](https://github.com/opsydyn/crumbs-css/actions/runs/39013112767), successful on `441bd2e`. Final preparation and generated release source need their own CI.
