@@ -13,7 +13,7 @@ export type MotionAnimation = {
 };
 export type MotionDriver = {
     createValue(initial: number): MotionValue;
-    createStyle(values: Readonly<Partial<Record<NativeMotionChannel, MotionValue>>>): Animated.WithAnimatedObject<ViewStyle>;
+    createStyle(values: Readonly<Partial<Record<NativeMotionChannel, MotionValue>>>): Animated.WithAnimatedValue<ViewStyle>;
     stop(value: MotionValue, onValue?: (value: unknown) => void, onStopped?: () => void): true | void;
     set(value: MotionValue, next: number): void;
     timing(value: MotionValue, next: number, policy: MotionPolicy): MotionAnimation;

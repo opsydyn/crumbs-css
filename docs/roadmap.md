@@ -96,6 +96,10 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.9e: Dogfood the released consumer skill example against public npm 1.1.1 in a real Expo consumer; retain strict types, all-platform runtime exports and actual iOS/Android button interaction. Record unperformed contexts separately.
 - [x] M1.9f: Promote the qualified SDK 57 profile to the playground default, align app peer resolution across shared workspace demos, retain Storybook and explicit SDK 56 packed regression coverage, update consumer instructions, and record fresh verification.
 - [x] M1.9g: Upgrade Storybook to the qualified SDK 57 app profile and Expo-matched native animation stack; retain SDK 56 fixture coverage, qualify LiteUI controls/actions on both native simulators, and add reproducible Storybook exports to developer commands and CI.
+- [ ] **M1.10 — Expo SDK 58 compatibility:** planned in the [assessment/design](assessments/2026-10-16-m1-10-expo58-assessment.md) and [implementation plan](superpowers/plans/2026-10-16-m1-10-expo58-upgrade.md); M1.10a is complete locally with independent review fixes verified. Preserve SDK 56/57 and qualify RN 0.88 explicitly.
+- [x] **M1.10a:** parameterize the pinned SDK runner, qualify strict public types and the actual SDK 58 supervising/custom-worker chain, dependency invalidation and the same packed artifact across SDK 56/57/58. Qualify actual optional Rust-worker interoperability alongside the Babel control, with positive backend events and safe fallbacks. Broaden only the qualified RN intervals; no font-axis expansion or Rust rewrite of Crumbs.
+- [ ] **M1.10b:** upgrade Playground and Storybook together, align app-owned peers, retain installed 56/57 profiles, and qualify default/Rust platform exports plus owned iOS/Android development-client interactions.
+- [ ] **M1.10c:** refresh docs and the consumer skill, obtain exact-source three-SDK CI and unchanged full release-gate evidence, and prepare a concrete release review. Prior numerical exceptions do not authorise a new version; publication requires separate authorisation.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
 
@@ -3196,3 +3200,43 @@ The playground now defaults to the already-qualified Expo 57.0.27 / RN 0.86.3 / 
 Storybook uses Expo 57.0.27 / RN 0.86.3 / React 19.2.8 and the matched animation stack, with app-owned renderer peers/types. `app:check` and CI perform clean three-platform exports and require LiteUI, Controls and Actions in each platform's source maps, rejecting a cached showcase entry. Frozen install, types, focused checks, isolated library/Storybook suites and the 34-page docs build pass. Actual iOS and Android LiteUI Controls edit/restore, Actions callback and Light/Disabled/Dark visits pass; Android confirms its disabled button is not enabled. Doctor retains two visible development-peer/generated-native-config warnings. [The qualification packet](evidence/2026-10-11-m1-9g-storybook57/README.md) preserves failed attempts and later passing evidence.
 
 **M1.9g is closed for this app upgrade scope.** SDK 56 library development peers, independent fixture/CI and public library APIs remain unchanged. Owned native sessions and Metro are cleaned up; user-authorised shutdown-device cache cleanup preserves simulator app data and the other active device. No library release, budget waiver, push or custom native-build acceptance is claimed. **Next: M1.9g hosted CI verification after pushing the accumulated local app/skill commits.** Physical/reader/HMR/release-performance contexts remain unqualified; M11.6 remains parked.
+
+### 2026-10-12 — M10.5 consumer compiler slowdown reproduction
+
+The [reproduction assessment](assessments/2026-10-12-m10-5-consumer-compiler-reproduction.md) records five fresh source-benchmark processes: warm **9.562208 ms / +68.821%** and cold **93.114542 ms / +40.223%** against the unchanged recorded baselines. Both scoped compiler budget rows fail with exact recorded environment and measurement identity. A separate retained npm **1.1.1** consumer records Node 24 warm recipe/button medians of **9.161750 / 8.806041 ms**, with matching outputs across 240 Node/Bun cold/warm samples. Diagnostic profiles corroborate fresh Vanilla Extract compilation as the largest measured boundary. [Raw evidence and reproduction](evidence/2026-10-12-m10-5-consumer-compiler-reproduction/README.md).
+
+The known compiler slowdown reproduces; the consumer's **2.5×** ratio remains unverified without their comparator, versions and app. No product/API/dependency/baseline/budget/release-policy or publication changes; this is neither a complete host gate nor Metro/native performance qualification.
+
+**Next recommended slice: M10.5 — obtain the consumer app and comparator, reproduce the ratio under matched dependencies and Node/Expo/Metro, then profile cold, warm and dependency-edit paths before selecting one API-preserving remediation.** Include attribution of the newly observed cold source-budget failure.
+
+### 2026-10-16 — M1.10 Expo SDK 58 impact assessment and upgrade plan
+
+The [assessment](assessments/2026-10-16-m1-10-expo58-assessment.md) verifies public Expo 58.0.11 / React 19.3.0 / RN 0.88.0 metadata, the Metro 0.84.5-to-0.87.1 transition and SDK 58 supervising custom-worker behavior. Current Crumbs 1.1.1 excludes RN 0.88; the runner is SDK 57-specific and its Node predicate needs a profile-specific update. Existing contract checks pass (16 tests, 89 assertions); no SDK 58 functional qualification was run. [Receipts](evidence/2026-10-16-m1-10-expo58-assessment/README.md).
+
+The [three-slice native/inline plan](superpowers/plans/2026-10-16-m1-10-expo58-upgrade.md) preserves SDK 56/57, qualifies the packed library first (**M1.10a**), promotes both apps with native checks (**M1.10b**), then updates docs/skill and prepares release evidence (**M1.10c**). No app, dependency, compiler, peer, budget, release policy or publication changes in this planning slice. The user subsequently added Rust-transformer interoperability to **M1.10a–c**, with positive eligible-file Rust evidence required; a Rust rewrite/deeper compiler optimisation remains a separate **M10.5** decision. New variable-font authoring and optional **M11.6** integrations remain outside this batch.
+
+**Next recommended slice: M1.10a — approve the written upgrade plan, then execute isolated SDK 58 library qualification.** Native/inline execution preference is retained. Publication remains a later, concrete decision; physical hardware/readers/release-FPS acceptance remains deferred.
+
+### 2026-10-16 — M1.10 Rust-transformer interoperability target
+
+The user wants compatibility with Expo's experimental Rust transformer. The [revised assessment](assessments/2026-10-16-m1-10-expo58-assessment.md) and [plan](superpowers/plans/2026-10-16-m1-10-expo58-upgrade.md) include it within **M1.10a** worker composition, **M1.10b** real-app/native checks and **M1.10c** documented capability/performance evidence. Preserve Crumbs compilation for authored `.css.ts` and route generated/ordinary JavaScript through Expo's worker. Require positive Rust-complete events for eligible app and dependency modules, explicit per-file fallback reasons, semantic/source-map parity and cache invalidation across backend switches. Flag-on or all-Babel success is insufficient. Existing custom Babel settings are eligibility risks to reproduce, not permission to bypass upstream checks.
+
+No direct Rust binary dependency, compiler rewrite, implementation or performance claim is introduced. The default Babel path remains a regression control. Any upstream interoperability blocker must be retained and discussed before marking the Rust target complete. **Next: M1.10a — execute the revised library/default-and-Rust qualification after plan approval**, retaining the user's native/inline preference.
+
+
+### 2026-10-16 — M1.10a local SDK 58 library qualification
+
+The [exact-artifact packet](evidence/2026-10-16-m1-10a-expo58/README.md) records strict packed-consumer checks across SDK 56/57/58, actual Metro 0.87.1 and genuine Rust/default routing. Both worker modes pass eight live mutations and all-platform production exports. The candidate repairs RN88 public types and authored source locations in legacy and encoded Metro maps. Existing APIs are preserved; checked-in apps stay on SDK57.
+
+The same candidate tarball passes all three SDKs. Rust records 875 development and 1,263 production completions, with explicit Worklets/codegen fallbacks. These counts establish backend execution, not speed. Full strict declaration checking still reports three RN88 failures reproduced without Crumbs; normal strict consumer/API checks pass. Source mapping is export-level, with file-start anchors for synthetic helpers. Independent review found and repaired parser syntax compatibility and a confounded environment-cache probe. Both backends now pass environment-only changes and restoration with unchanged source/configuration bytes. Build/types and 1,885 library plus 33 Storybook tests pass (one existing skip). Destructured-export declaration anchors remain a documented Minor.
+
+**Next recommended slice: M1.10b — upgrade Playground and Storybook together and verify actual iOS/Android interactions in default/Rust profiles.** M1.10c docs/skill/release preparation and the unchanged M10.5 performance gate remain later work. Physical items remain deferred.
+
+
+### M1.10b — SDK58 apps local qualification (2026-10-17)
+
+Playground and Storybook now use the pinned Expo58/React19.3/RN0.88 app cohort. Babel remains the default; actual Rust execution and expected native-codegen/Worklets/legacy-Flow fallback routes pass under the opt-in profile. Both apps pass all-platform exports and real owned iOS26.5/Android16 development-client journeys under both workers. SDK56/57 installed profiles and their prior Node range remain retained. RN88 native-event and Metro optional-name compatibility repairs are covered by focused regressions.
+
+The [source/tarball/native evidence packet](evidence/2026-10-16-m1-10b-expo58-apps/README.md) records1899 library and33Storybook passes, exact package bytes, binary identities, native interactions and the resolved independent-review finding. **M1.10b remains open for clean hosted frozen-install/three-SDK CI.** Physical/spoken-reader/iOS27/DeviceHub/release-FPS contexts stay deferred. No performance or release gate changed.
+
+**Next: finish M1.10b hosted CI closure, then M1.10c documentation, consumer skill and release preparation.** M1.10c has not started.

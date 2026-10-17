@@ -32,6 +32,15 @@ export type ContainerOwnerProtocol = Readonly<{
 function eventField(value: unknown, field: string, key: string): unknown { if (typeof value !== 'object' || value === null)
     return containerError(Code.InvalidContainerMeasurement, key, `missing ${field}`); const d = Object.getOwnPropertyDescriptor(value, field); if (!d || !('value' in d))
     return containerError(Code.InvalidContainerMeasurement, key, `expected own data ${field}`); return d.value; }
+// onLayout receives a host event, not a serialized configuration record.
+// RN88 exposes nativeEvent through a prototype getter. Read that public API
+// once; keep the payload layout and selected dimension on the data-only path.
+function nativeEventPayload(event: unknown, key: string): unknown {
+    if (typeof event !== 'object' || event === null)
+        return containerError(Code.InvalidContainerMeasurement, key, 'missing nativeEvent');
+    try { return (event as { nativeEvent?: unknown }).nativeEvent; }
+    catch { return containerError(Code.InvalidContainerMeasurement, key, 'nativeEvent could not be read'); }
+}
 export function createContainerOwner(input: NativeContainerDefinition): ContainerOwnerProtocol {
     const definition = admitContainerDefinition(input), key = containerDefinitionKey(definition), signature = containerDefinitionSignature(definition), snapshots = new Map<string, ContainerSnapshot>();
     const intern = (bucket: string) => { let s = snapshots.get(bucket); if (!s) {
@@ -69,7 +78,7 @@ export function createContainerOwner(input: NativeContainerDefinition): Containe
         return true;
     };
     const onLayout = (event: LayoutChangeEvent) => { if (phase === 'inactive')
-        return; const native = eventField(event, 'nativeEvent', key), layout = eventField(native, 'layout', key), size = eventField(layout, definition.axis, key); if (size === undefined)
+        return; const native = nativeEventPayload(event, key), layout = eventField(native, 'layout', key), size = eventField(layout, definition.axis, key); if (size === undefined)
         return containerError(Code.InvalidContainerMeasurement, key, `missing ${definition.axis}`); updateSize(size); };
     return Object.freeze({ formatVersion: 1, definition, key, signature, getSnapshot: () => current, getServerSnapshot: () => initial,
         subscribe(listener: () => void) { const registration = { listener }; listeners.add(registration); let live = true; return () => { if (live) {

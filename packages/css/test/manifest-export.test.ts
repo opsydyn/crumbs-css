@@ -89,6 +89,8 @@ function createPackedConsumer(): string {
   const consumerRoot = resolve(tempRoot, "consumer")
   for (const dependency of [
     "@types/react",
+    "@babel/parser",
+    "@jridgewell/sourcemap-codec",
     "@vanilla-extract/css",
     "@vanilla-extract/integration",
     "css-to-react-native",

@@ -5,7 +5,7 @@ const sharedExternals = [
 ]
 export const compilerDependencies = {
   // tsdown's CommonJS createRequire shim uses the unprefixed Node `url` builtin.
-  neverBundle: [...sharedExternals, "url"],
+  neverBundle: [...sharedExternals, "url", "@babel/parser", "@jridgewell/sourcemap-codec"],
   alwaysBundle: [/^effect(?:\/|$)/],
 }
 // Runtime denial tests remain authoritative: externalizing is not admission.

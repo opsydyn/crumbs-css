@@ -15,7 +15,7 @@ describe("isolated Expo consumer", () => {
     expect(parseArgs(["published"]).version).toBe("alpha")
     expect(parseArgs(["packed", "--sdk=56", "--check"]).sdk56).toBe(true)
     expect(() => parseArgs(["workspace", "--sdk=56"])).toThrow("installed modes")
-    expect(() => parseArgs(["packed", "--sdk=58"])).toThrow("Unknown option")
+    expect(parseArgs(["packed", "--sdk=58"]).sdk).toBe(58)
   })
 
   it("replaces only the Crumbs dependency and rejects links", () => {
@@ -73,21 +73,22 @@ describe("isolated Expo consumer", () => {
     } finally { await rm(parent, { recursive: true, force: true }) }
   })
 
-  it("retains a standalone SDK 56 regression consumer while the default advances to SDK 57", async () => {
+  it("retains a standalone SDK 56 regression consumer while the default advances to SDK 58", async () => {
     const parent = await mkdtemp(join(tmpdir(), "crumbs-stage-sdk-test-"))
     try {
       const modern = await stage("1.1.1", parent)
       const legacy = await stage("1.1.1", parent, {sdk56: true})
       const read = async (directory: string) => JSON.parse(await readFile(join(directory, "package.json"), "utf8"))
       const current = await read(modern), baseline = await read(legacy)
-      expect(current.dependencies.expo).toBe("57.0.27")
-      expect(current.dependencies["react-native"]).toBe("0.86.3")
+      expect(current.dependencies.expo).toBe("58.0.14")
+      expect(current.dependencies["react-native"]).toBe("0.88.0")
       expect(baseline.dependencies.expo).toBe("56.0.4")
       expect(baseline.dependencies["react-native"]).toBe("0.85.3")
       expect(baseline.dependencies.react).toBe(baseline.devDependencies["react-test-renderer"])
       expect(baseline.dependencies[packageName]).toBe("1.1.1")
       expect(baseline.dependencies["@vanilla-extract/css"]).toBe(current.dependencies["@vanilla-extract/css"])
       expect(baseline.dependencies["@acme/ui"]).toBeUndefined()
+      expect(baseline.dependencies["expo-dev-client"]).toBeUndefined()
       const runtime = createRequire(join(legacy, "package.json")).resolve("@crumbs/playground/runtime-extensions")
       expect(await realpath(runtime)).toStartWith(legacy + sep)
     } finally { await rm(parent, {recursive: true, force: true}) }
@@ -97,7 +98,7 @@ describe("isolated Expo consumer", () => {
     const app = resolve(import.meta.dir, "../../../apps/playground")
     const config = ts.readConfigFile(join(app, "tsconfig.json"), ts.sys.readFile)
     const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, app)
-    const expected = createRequire(join(app, "package.json")).resolve("react-native/types/index.d.ts")
+    const expected = join(dirname(createRequire(join(app, "package.json")).resolve("react-native/package.json")), "types_generated/index.d.ts")
     for (const origin of ["packages/css/dist/theme.d.mts", "apps/storybook/src/components/native-motion/MotionPanel.tsx"]) {
       const actual = ts.resolveModuleName("react-native", resolve(app, "../..", origin), parsed.options, ts.sys)
       expect(actual.resolvedModule?.resolvedFileName).toBe(expected)
@@ -143,4 +144,17 @@ describe("isolated Expo consumer", () => {
       await expect(identity(escaped, "packed", "1.2.3")).rejects.toThrow("escaped")
     } finally { await rm(parent, { recursive: true, force: true }) }
   })
+})
+
+it("retained SDK56/57 installed consumers preserve their prior Node engine contract", async () => {
+  const parent = await mkdtemp(join(tmpdir(), "crumbs-stage-engines-"))
+  try {
+    for (const sdk of [56, 57, 58] as const) {
+      const directory = await stage("1.1.1", parent, { sdk })
+      const manifest = JSON.parse(await readFile(join(directory, "package.json"), "utf8"))
+      expect(manifest.engines.node).toBe(sdk === 58
+        ? "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
+        : ">=22.13.0")
+    }
+  } finally { await rm(parent, {recursive: true, force: true}) }
 })

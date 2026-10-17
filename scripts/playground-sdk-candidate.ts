@@ -1,3 +1,4 @@
+export { assertRustWorkerEvidence } from "./sdk-worker-evidence"
 import { createHash } from "node:crypto"
 import { cp, mkdir, mkdtemp, readFile, readdir, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
@@ -34,7 +35,6 @@ export type SdkCandidate = {
 }
 
 const repoRoot = resolve(import.meta.dir, "..")
-const candidatePath = join(repoRoot, "apps/playground/upgrade/expo-57.json")
 const packageRoot = join(repoRoot, "packages/css")
 
 function exactVersion(value: string, label: string) {
@@ -73,14 +73,16 @@ function compare(left: number[], right: number[]) {
 }
 
 export function assessPeerCompatibility(candidate: SdkCandidate, peerRange: string) {
-  const match = /^>=(\d+\.\d+(?:\.\d+)?)\s+<(\d+\.\d+(?:\.\d+)?)$/.exec(peerRange)
-  if (!match) throw new Error(`Expected one bounded peer range, received: ${peerRange}`)
-  const reactNative = candidate.dependencies["react-native"]
-  const version = tuple(reactNative)
+  exactVersion(candidate.dependencies["react-native"], "React Native candidate")
+  const version = tuple(candidate.dependencies["react-native"])
+  const intervals = peerRange.split(" || ").map(clause => {
+    const match = /^>=(\d+\.\d+(?:\.\d+)?)\s+<(\d+\.\d+(?:\.\d+)?)$/.exec(clause)
+    if (!match || compare(tuple(match[1]!), tuple(match[2]!)) >= 0) throw new Error(`Expected complete bounded peer range intervals, received: ${peerRange}`)
+    return [tuple(match[1]!), tuple(match[2]!)] as const
+  })
   return {
-    compatible: compare(version, tuple(match[1]!)) >= 0 && compare(version, tuple(match[2]!)) < 0,
-    reactNative,
-    peerRange,
+    compatible: intervals.some(([lower, upper]) => compare(version, lower) >= 0 && compare(version, upper) < 0),
+    reactNative: candidate.dependencies["react-native"], peerRange,
   }
 }
 
@@ -112,7 +114,13 @@ export function assertOfficialSdkTemplate(candidate: SdkCandidate, template: Off
   }
 }
 
-export function assertSdkNodeVersion(version: string) {
+export function assertSdkNodeVersion(version: string, sdk: 57 | 58 = 57) {
+  if (sdk === 58) {
+    if (!/^v\d+\.\d+\.\d+$/.test(version)) throw new Error(`SDK 58 requires a stable supported Node version; received ${version}`)
+    const value = tuple(version.slice(1))
+    if ((value[0] === 22 && compare(value, [22, 13, 0]) >= 0) || (value[0] === 24 && compare(value, [24, 3, 0]) >= 0) || value[0]! >= 26) return
+    throw new Error(`SDK 58 requires Node ^22.13.0 || ^24.3.0 || >=26; received ${version}`)
+  }
   if (!/^v\d+\.\d+\.\d+$/.test(version) || compare(tuple(version.slice(1)), [22, 13, 0]) < 0) {
     throw new Error(`SDK 57 requires Node >=22.13.0; received ${version}`)
   }
@@ -129,10 +137,13 @@ export function assertCandidateExpectation(candidate: SdkCandidate, peerRange: s
 }
 
 export function parseSdkCandidateArgs(args: readonly string[]) {
-  const options: { pinned: boolean; tarball?: string; output?: string } = { pinned: false }
+  const options: { pinned: boolean; sdk: 57 | 58; keep: boolean; tarball?: string; output?: string } = { pinned: false, sdk: 57, keep: false }
+  let selectedSdk = false
   for (let index = 0; index < args.length; index++) {
     const arg = args[index]!
     if (arg === "--pinned" && !options.pinned) options.pinned = true
+    else if (arg === "--keep" && !options.keep) options.keep = true
+    else if ((arg === "--sdk=57" || arg === "--sdk=58") && !selectedSdk) { options.sdk = arg === "--sdk=58" ? 58 : 57; selectedSdk = true }
     else if (arg === "--tarball") {
       const value = args[++index]
       if (!value || value.startsWith("--") || !value.endsWith(".tgz") || options.tarball) {
@@ -191,14 +202,14 @@ export async function stagePureMotionProbe(consumer: string, installedRoot: stri
 async function main() {
   const options = parseSdkCandidateArgs(process.argv.slice(2))
   const outputPath = options.output ? resolve(options.output) : undefined
-  const candidate = JSON.parse(await readFile(candidatePath, "utf8")) as SdkCandidate
+  const candidate = JSON.parse(await readFile(join(repoRoot, `apps/playground/upgrade/expo-${options.sdk}.json`), "utf8")) as SdkCandidate
   const packageManifest = JSON.parse(await readFile(join(packageRoot, "package.json"), "utf8")) as {
     readonly name: string
     readonly version: string
     readonly peerDependencies: { readonly "react-native": string }
   }
   const artifacts = await mkdtemp(join(tmpdir(), "crumbs-sdk-candidate-artifacts-"))
-  const logsRoot = outputPath ? join(dirname(outputPath), "sdk-57-logs") : join(artifacts, "logs")
+  const logsRoot = outputPath ? join(dirname(outputPath), `sdk-${options.sdk}-logs`) : join(artifacts, "logs")
   await mkdir(logsRoot, { recursive: true })
   const npmCache = join(artifacts, "npm-cache")
   const env = {
@@ -215,7 +226,7 @@ async function main() {
   }
   const commands: Array<{ name: string; command: string[]; exitCode: number; log: string }> = []
   async function run(name: string, args: string[], cwd: string, extra: Record<string, string> = {}, allowFailure = false) {
-    console.log(`SDK 57: ${name}`)
+    console.log(`SDK ${options.sdk}: ${name}`)
     const result = await command(args, cwd, { ...env, ...extra })
     const log = join(logsRoot, name + ".log")
     await writeFile(log, result.stdout + "\n" + result.stderr + "\n")
@@ -225,11 +236,12 @@ async function main() {
   }
   const checks = { npmResolution: "not-run", installedBytes: "not-run", types: "not-run", motion: "not-run", exports: "not-run", runtimeGraph: "not-run" }
   const report: Record<string, unknown> = {
-    schemaVersion: 2, slice: "M1.9b", recordedAt: new Date().toISOString(),
+    schemaVersion: 2, slice: options.sdk === 58 ? "M1.10a" : "M1.9b", sdk: options.sdk, recordedAt: new Date().toISOString(),
     freshness: options.pinned ? "pinned official template" : "live latest and official template",
     candidate: { ...candidate.observed, react: candidate.dependencies.react, reactNative: candidate.dependencies["react-native"] },
     checks, commands, sdkSupported: false, supportBroadened: false, contractPassed: false,
     nativeDeviceAcceptance: "not-run", performanceQualification: "not-run",
+    artifacts: { root: artifacts, retained: options.keep },
   }
   async function save() {
     if (outputPath) {
@@ -239,7 +251,7 @@ async function main() {
   }
   try {
     const nodeVersion = (await run("node-version", ["node", "--version"], repoRoot)).stdout
-    assertSdkNodeVersion(nodeVersion)
+    assertSdkNodeVersion(nodeVersion, options.sdk)
     report.host = { node: nodeVersion, bun: Bun.version }
     const templateSelector = options.pinned ? candidate.observed.templateVersion : "latest"
     const template = JSON.parse((await run("official-template", ["npm", "view", `expo-template-blank@${templateSelector}`, "version", "dependencies", "--json"], repoRoot)).stdout) as {
@@ -265,7 +277,8 @@ async function main() {
       revision: (await run("source-revision", ["git", "rev-parse", "HEAD"], repoRoot)).stdout,
       dirty: (await run("source-status", ["git", "status", "--porcelain", "--untracked-files=no"], repoRoot)).stdout.length > 0,
     }
-    const consumer = await stage(`file:${tarball}`, artifacts)
+    const consumer = await stage(`file:${tarball}`, artifacts, {sdk: options.sdk})
+    report.consumer = consumer
     // Stage owns the app's self exports; retain its name and runtime import contract.
     const staged = JSON.parse(await readFile(join(consumer, "package.json"), "utf8")) as Manifest
     const manifest = candidateManifest(staged, candidate, `file:${tarball}`)
@@ -332,13 +345,13 @@ async function main() {
     report.supportBroadened = true
     report.contractPassed = true
     await save()
-    console.log(`SDK 57 types, motion contracts and iOS/Android/web exports passed${outputPath ? ": " + outputPath : ""}`)
+    console.log(`SDK ${options.sdk} types, motion contracts and iOS/Android/web exports passed${outputPath ? ": " + outputPath : ""}`)
   } catch (error) {
     report.failure = error instanceof Error ? error.message : String(error)
     await save()
     throw error
   } finally {
-    await rm(artifacts, { recursive: true, force: true })
+    if (!options.keep) await rm(artifacts, { recursive: true, force: true })
   }
 }
 

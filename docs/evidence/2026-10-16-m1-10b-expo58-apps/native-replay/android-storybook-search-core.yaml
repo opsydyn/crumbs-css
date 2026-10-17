@@ -1,0 +1,105 @@
+appId: ${STORYBOOK_APP_ID}
+---
+- extendedWaitUntil:
+    visible: "(Continue|Open story list)"
+    timeout: 45000
+- runFlow:
+    when:
+      visible: Continue
+    commands:
+      - tapOn: Continue
+- tapOn: Open story list
+# Owned AVD 1080x2400: drawer search bounds x26..1054,y1021..1129.
+- tapOn:
+    point: 50%,45%
+- eraseText: 8
+- inputText: Showcase
+- hideKeyboard
+- tapOn: ShowcaseCard, Components
+- tapOn: Close story list
+- assertVisible: Open stories
+- tapOn: Open addons panel
+- tapOn: Controls
+- tapOn:
+    id: actionLabel
+- eraseText: 12
+- inputText: M10.5 action
+- tapOn: Close addons panel
+- assertVisible: M10.5 action
+- tapOn: M10.5 action
+- tapOn: Open addons panel
+- tapOn: Actions
+- assertVisible: .*onActionPress.*
+- takeScreenshot: native-action-event
+- tapOn: Controls
+- tapOn:
+    id: actionLabel
+- eraseText: 12
+- inputText: Open stories
+- tapOn: Close addons panel
+- assertVisible: Open stories
+- tapOn: Open story list
+- tapOn:
+    text: "(?-i:Light)"
+    below: Close story list
+- tapOn: Close story list
+- assertVisible: Inspect tokens
+- takeScreenshot: native-light-story
+- tapOn: Open story list
+- tapOn:
+    text: Disabled
+    below: Close story list
+- tapOn: Close story list
+- assertVisible: Unavailable action
+- takeScreenshot: native-disabled-story
+- tapOn: Open story list
+- tapOn:
+    text: "(?-i:Dark)"
+    below: Close story list
+- tapOn: Close story list
+- assertVisible: Open stories
+- takeScreenshot: native-restored-story
+
+- tapOn: Open story list
+- scrollUntilVisible:
+    element: Native Gallery
+    direction: UP
+    timeout: 20000
+- runFlow:
+    when:
+      notVisible:
+        text: Context Menu
+        below: Close story list
+    commands:
+      - tapOn: Native Gallery
+- scrollUntilVisible:
+    element:
+      text: Context Menu
+      below: Close story list
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: Context Menu
+    below: Close story list
+- tapOn: Close story list
+- longPressOn: Long press squad card
+- assertVisible: QUICK ACTIONS
+- tapOn: Pin for quick add
+- assertVisible: Pinned to favourites.
+- takeScreenshot: native-context-longpress
+- tapOn: Open story list
+- scrollUntilVisible:
+    element:
+      text: Dialog
+      below: Close story list
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: Dialog
+    below: Close story list
+- tapOn: Close story list
+- tapOn: Open roster details
+- assertVisible: Share preview
+- takeScreenshot: native-dialog
+- tapOn: Close
+- assertNotVisible: Share preview

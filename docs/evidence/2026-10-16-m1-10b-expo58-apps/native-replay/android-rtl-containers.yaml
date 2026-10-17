@@ -1,0 +1,10 @@
+appId: dev.crumbs.playground
+---
+- extendedWaitUntil:
+    visible: Crumbs playground
+    timeout: 45000
+- tapOn: Container conditions
+- tapOn:
+    id: container-action-wide
+- assertVisible: 'A: wide / row / 288'
+- takeScreenshot: android-${PROFILE}-rtl-containers

@@ -19,7 +19,7 @@ export function createAnimatedMotionDriver(): MotionDriver {
             if (values.opacity) style.opacity = values.opacity;
             const transform = transforms.filter(k => values[k]).map(k => Object.freeze({ [k]: values[k] }));
             if (transform.length) style.transform = Object.freeze(transform);
-            return Object.freeze(style) as Animated.WithAnimatedObject<import('react-native').ViewStyle>;
+            return Object.freeze(style) as Animated.WithAnimatedValue<import('react-native').ViewStyle>;
         },
         stop(value, onValue, onStopped) {
             const current = states.get(value)!;

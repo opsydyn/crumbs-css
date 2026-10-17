@@ -73,8 +73,8 @@ describe("SDK candidate acceptance", () => {
 
   it("pins CI probes explicitly and rejects ambiguous artifact arguments", () => {
     expect(sdkRunner.parseSdkCandidateArgs(["--pinned", "--tarball", "/tmp/crumbs.tgz", "/tmp/report.json"]))
-      .toEqual({ pinned: true, tarball: "/tmp/crumbs.tgz", output: "/tmp/report.json" })
-    expect(sdkRunner.parseSdkCandidateArgs([])).toEqual({ pinned: false })
+      .toEqual({ pinned: true, sdk: 57, keep: false, tarball: "/tmp/crumbs.tgz", output: "/tmp/report.json" })
+    expect(sdkRunner.parseSdkCandidateArgs([])).toEqual({ pinned: false, sdk: 57, keep: false })
     expect(() => sdkRunner.parseSdkCandidateArgs(["--force"])).toThrow("Unknown")
     expect(() => sdkRunner.parseSdkCandidateArgs(["--tarball"])).toThrow("tarball")
     expect(() => sdkRunner.parseSdkCandidateArgs(["--tarball", "--pinned"])).toThrow("tarball")

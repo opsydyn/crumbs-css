@@ -1,6 +1,6 @@
 import { Profiler, useEffect, useMemo, useRef, useState } from "react"
 import { FlatList, Platform, Pressable, StyleSheet, Text, TextInput, View } from "react-native"
-import type { TextStyle, ViewStyle, ViewToken } from "react-native"
+import type { TextStyle, ViewStyle, FlatListProps } from "react-native"
 import { ThemeProvider, useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import * as screen from "./screen.css"
 import { light } from "./theme.css"
@@ -19,10 +19,10 @@ function ScrollList({ run, styles }: {run:Run;styles:Styles}) {
   const list = useRef<FlatList<Row>>(null)
   const data = useMemo(()=>Array.from({length:run.recorder.plan.rowCount},(_,i)=>({id:String(i),label:`Scroll component ${i+1}`})),[run])
   const live = useRef<ScrollSample>({offset:NaN,contentHeight:0,viewportHeight:0,visible:[],scrollAt:-Infinity,viewabilityAt:-Infinity})
-  const onViewableItemsChanged = useRef(({viewableItems}:{viewableItems:ViewToken<Row>[]})=>{
+  const onViewableItemsChanged = useRef(({viewableItems}:{viewableItems:Parameters<NonNullable<FlatListProps<Row>["onViewableItemsChanged"]>>[0]["viewableItems"]})=>{
     if (run.finished) return
     const at=performance.now()
-    live.current.visible=viewableItems.filter(v=>v.isViewable && v.index !== null).map(v=>v.index!).sort((a,b)=>a-b)
+    live.current.visible=viewableItems.filter(v=>v.isViewable && typeof v.index === "number").map(v=>v.index!).sort((a,b)=>a-b)
     live.current.viewabilityAt=at
     run.events.push({kind:"viewability",at,visible:[...live.current.visible]})
   }).current

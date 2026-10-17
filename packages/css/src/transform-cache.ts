@@ -18,7 +18,7 @@ type CachedTransformResult = {
   readonly __crumbsNativeStyles?: unknown
 }
 
-export function createNativeStylesCacheStore<T>(inner: CacheStore<T>): CacheStore<T> {
+export function createNativeStylesCacheStore<T>(inner: Omit<CacheStore<T>, "name"> & { readonly name?: string | undefined }): CacheStore<T> {
   return {
     name: `crumbs-dependency-aware:${inner.name ?? "cache"}`,
     async get(key) {

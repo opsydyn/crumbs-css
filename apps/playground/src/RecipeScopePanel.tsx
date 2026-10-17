@@ -14,7 +14,7 @@ function Probe({ scope, step, capture }: { scope:"parent"|"nested"; step:Step; c
   const previousArray = useRef<typeof resolved | undefined>(undefined)
   useLayoutEffect(() => { capture.counts.mounts++; return () => { capture.counts.unmounts++ } }, [capture])
   useLayoutEffect(() => {
-    const flattened = StyleSheet.flatten([...resolved])
+    const flattened = StyleSheet.flatten([...resolved]) ?? {}
     // Native lowering expands shorthands; require all four edges before recording their common value.
     const sample: Sample = { borderColor:typeof flattened.borderTopColor === "string" && [flattened.borderRightColor,flattened.borderBottomColor,flattened.borderLeftColor].every(v=>v === flattened.borderTopColor) ? flattened.borderTopColor : undefined, opacity:typeof flattened.opacity === "number" ? flattened.opacity : undefined, padding:typeof flattened.paddingTop === "number" && [flattened.paddingRight,flattened.paddingBottom,flattened.paddingLeft].every(v=>v === flattened.paddingTop) ? flattened.paddingTop : undefined, borderWidth:typeof flattened.borderTopWidth === "number" && [flattened.borderRightWidth,flattened.borderBottomWidth,flattened.borderLeftWidth].every(v=>v === flattened.borderTopWidth) ? flattened.borderTopWidth : undefined }
     const identity: Identity = !previous.current ? "initial" : previous.current === styles ? "same" : "changed"

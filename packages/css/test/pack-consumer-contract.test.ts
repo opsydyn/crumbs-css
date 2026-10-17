@@ -70,6 +70,8 @@ function createPackedConsumer(): string {
 
   for (const dependency of [
     "@types/react",
+    "@babel/parser",
+    "@jridgewell/sourcemap-codec",
     "@vanilla-extract/css",
     "@vanilla-extract/integration",
     "css-to-react-native",

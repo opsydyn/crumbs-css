@@ -287,12 +287,12 @@ type IsEqual<TLeft, TRight> =
 type StateVariantsFromConfig<
   TConfig,
   TVariants extends NativeComponentVariantsShape,
-> = TConfig extends {readonly stateVariants: infer TStates}
+> = TConfig extends {readonly stateVariants: infer TStates extends NativeComponentStateVariants<TVariants>}
   ? TStates
   : TConfig extends {readonly stateVariants?: infer TStates}
     ? IsEqual<TStates, NativeComponentStateVariants<TVariants> | undefined> extends true
       ? undefined
-      : Exclude<TStates, undefined> extends infer TExplicitStates
+      : Exclude<TStates, undefined> extends infer TExplicitStates extends NativeComponentStateVariants<TVariants>
         ? [TExplicitStates] extends [never] ? undefined : TExplicitStates
         : undefined
     : undefined

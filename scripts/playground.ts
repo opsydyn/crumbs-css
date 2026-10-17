@@ -13,13 +13,16 @@ type Mode = "workspace" | "packed" | "published"
 export function parseArgs(args: string[]) {
   const mode = args.shift() ?? "workspace"
   if (!["workspace", "packed", "published"].includes(mode)) throw new Error(`Unknown mode: ${mode}`)
-  const allowed = ["--check", "--prepare-only", "--web", "--ios", "--android", "--sdk=56"]
+  const allowed = ["--check", "--prepare-only", "--web", "--ios", "--android", "--sdk=56", "--sdk=57", "--sdk=58"]
   for (const arg of args) {
     if (!allowed.includes(arg) && !/^--version=[a-zA-Z0-9.+-]+$/.test(arg)) throw new Error(`Unknown option: ${arg}`)
   }
-  if (args.includes("--sdk=56") && mode === "workspace") throw new Error("--sdk=56 is only valid in installed modes")
+  const sdkArgs = args.filter(arg => arg.startsWith("--sdk="))
+  if (sdkArgs.length > 1) throw new Error("Specify only one installed SDK profile")
+  if (sdkArgs.length && mode === "workspace") throw new Error("--sdk is only valid in installed modes")
+  const sdk = sdkArgs.length ? Number(sdkArgs[0]!.slice(6)) as 56 | 57 | 58 : undefined
   if (args.some(arg => arg.startsWith("--version=")) && mode !== "published") throw new Error("--version is only valid in published mode")
-  return { mode: mode as Mode, check: args.includes("--check"), sdk56: args.includes("--sdk=56"), prepareOnly: args.includes("--prepare-only"), version: args.findLast(arg => arg.startsWith("--version="))?.slice(10) ?? "alpha", expoArgs: args.filter(arg => ["--web", "--ios", "--android"].includes(arg)) }
+  return { mode: mode as Mode, check: args.includes("--check"), ...(sdk === undefined ? {} : { sdk }), sdk56: args.includes("--sdk=56"), prepareOnly: args.includes("--prepare-only"), version: args.findLast(arg => arg.startsWith("--version="))?.slice(10) ?? "alpha", expoArgs: args.filter(arg => ["--web", "--ios", "--android"].includes(arg)) }
 }
 
 export function installedManifest(manifest: { dependencies: Record<string, string>; [key: string]: unknown }, specifier: string) {
@@ -34,7 +37,9 @@ async function run(command: string[], cwd: string, env = process.env, capture = 
   return output.trim()
 }
 
-export async function stage(specifier: string, stagingParent = tmpdir(), options: { sdk56?: boolean } = {}) {
+export async function stage(specifier: string, stagingParent = tmpdir(), options: { sdk56?: boolean; sdk?: 56 | 57 | 58 } = {}) {
+  if (options.sdk56 && options.sdk !== undefined && options.sdk !== 56) throw new Error("Conflicting SDK profiles")
+  const sdk = options.sdk ?? (options.sdk56 ? 56 : undefined)
   const directory = await mkdtemp(join(stagingParent, "crumbs-playground-"))
   // Explicit copy allowlist excludes node_modules, .expo, generated exports and local env.
   for (const name of ["src", "index.js", "app.json", "babel.config.js", "metro.config.js", "tsconfig.json", "README.md"]) {
@@ -54,7 +59,9 @@ export async function stage(specifier: string, stagingParent = tmpdir(), options
     await writeFile(file, (await readFile(file, "utf8")).replaceAll("../../storybook/src/", "./shared-storybook/"))
   }
   const manifest = JSON.parse(await readFile(join(template, "package.json"), "utf8"))
-  if (options.sdk56) {
+  if (sdk === 56) {
+    // A native client belongs to the app SDK, not the retained library consumer.
+    delete manifest.dependencies["expo-dev-client"]
     // Reuse the pinned SDK 56 fixture without its unrelated design-system packages.
     // Keep the playground's own authoring dependencies and self-export contract.
     const baseline = JSON.parse(await readFile(join(root, "packages/css/fixtures/packed-distribution/app/package.json"), "utf8"))
@@ -62,6 +69,27 @@ export async function stage(specifier: string, stagingParent = tmpdir(), options
       if (name in manifest.dependencies && name !== packageName) manifest.dependencies[name] = version
     }
     manifest.devDependencies = { ...manifest.devDependencies, ...baseline.devDependencies }
+    const retention = JSON.parse(await readFile(join(template, "upgrade/expo-56-retention.json"), "utf8"))
+    manifest.dependencies = { ...manifest.dependencies, ...retention.dependencies }
+    manifest.devDependencies = { ...manifest.devDependencies, ...retention.devDependencies }
+  }
+  if (sdk === 57 || sdk === 58) {
+    const profile = JSON.parse(await readFile(join(template, `upgrade/expo-${sdk}.json`), "utf8"))
+    manifest.dependencies = { ...profile.dependencies, [packageName]: specifier }
+    manifest.devDependencies = { ...profile.devDependencies }
+  }
+  if (sdk === 56 || sdk === 57) {
+    // Keep retained tooling on its existing Node contract, independently of SDK58.
+    manifest.engines = { ...manifest.engines, node: ">=22.13.0" }
+  }
+  if (sdk !== undefined) {
+    // Installed SDKs own every peer; remove workspace-specific native type redirection.
+    // Installed demos are already app-local and need no workspace peer redirection.
+    const tsconfigPath = join(directory, "tsconfig.json")
+    const tsconfig = JSON.parse(await readFile(tsconfigPath, "utf8"))
+    delete tsconfig.compilerOptions.paths?.["react-native"]
+    delete tsconfig.compilerOptions.paths?.["react-native/*"]
+    await writeFile(tsconfigPath, JSON.stringify(tsconfig, null, 2) + "\n")
   }
   const runtimeEntry = `${manifest.name}/runtime-extensions`
   const authoring = join(sharedRoot, "components/runtime-extensions/authoring.ts")
@@ -99,7 +127,7 @@ async function main() {
   if (options.mode === "published") {
     version = JSON.parse(await run(["npm", "view", `${packageName}@${options.version}`, "version", "--json"], root, process.env, true))
     if (typeof version !== "string" || !/^\d+\.\d+\.\d+(?:-[a-zA-Z0-9.-]+)?(?:\+[a-zA-Z0-9.-]+)?$/.test(version)) throw new Error("Registry selector must resolve to one exact version")
-    directory = await stage(version, tmpdir(), {sdk56: options.sdk56})
+    directory = await stage(version, tmpdir(), {sdk56: options.sdk56, ...(options.sdk === undefined ? {} : {sdk: options.sdk})})
   } else {
     await run(["bun", "run", "build:dev"], join(root, "packages/css"))
     if (options.mode === "packed") {
@@ -107,7 +135,7 @@ async function main() {
       console.log(`Packed artifacts: ${artifacts}`)
       // Build completed above. Suppress prepack's build logs so stdout remains machine-readable JSON.
       const packed = JSON.parse(await run(["npm", "pack", "--ignore-scripts", "--json", "--pack-destination", artifacts], join(root, "packages/css"), process.env, true))
-      directory = await stage(`file:${join(artifacts, packed[0].filename)}`, tmpdir(), {sdk56: options.sdk56})
+      directory = await stage(`file:${join(artifacts, packed[0].filename)}`, tmpdir(), {sdk56: options.sdk56, ...(options.sdk === undefined ? {} : {sdk: options.sdk})})
     }
   }
   console.log(`Preparing ${options.mode} consumer: ${directory}; requested Crumbs ${version}`)

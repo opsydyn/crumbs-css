@@ -29,6 +29,9 @@ async function compile(source: string, useStyleSheet = false, files: Record<stri
 }
 
 describe("structured native compilation", () => {
+  it("rejects unqualified variable-font axes instead of silently dropping them", async () => {
+    await expect(compile(`export const label = textStyle({fontVariationSettings:{wght:650}} as any);`)).rejects.toThrow("fontVariationSettings")
+  })
   it("preserves structured values from imported bases and every supported operation", async () => {
     const transforms = [{perspective: 800}, {rotateX: "1rad"}, {rotateY: "-2deg"}, {rotateZ: ".5rad"}, {scaleX: 2}, {scaleY: 3}, {skewX: "10deg"}, {skewY: "-.5rad"}, {translateY: -4}]
     const result = await compile(`import {base} from './base.css'; export const panel = viewStyle([base, {opacity: 1}]);`, false, {

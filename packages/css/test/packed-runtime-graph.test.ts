@@ -667,7 +667,7 @@ test("the devtools graph admits Effect and React but rejects Node and authoring 
 
 test("compiler entries allow only build-policy externals and reject Effect", async () => {
   const allowedPackage = await createFixturePackage({
-    overrides: {"dist/transformer.mjs": 'import "node:fs"; import "url"; import "metro"; export {};\n'},
+    overrides: {"dist/transformer.mjs": 'import "@babel/parser"; import "node:fs"; import "url"; import "metro"; export {};\n'},
   })
   const deniedPackage = await createFixturePackage({
     overrides: {"dist/transformer.mjs": 'import "not-in-build-policy"; export {};\n'},
@@ -682,7 +682,7 @@ test("compiler entries allow only build-policy externals and reject Effect", asy
   const allowedGraphs = await auditPackedRuntimeEntrypoints(allowedPackage)
   expect(allowedGraphs).toHaveLength(35)
   expect(allowedGraphs.find((graph) => graph.subpath === "./dist/transformer" && graph.format === "esm")?.externalSpecifiers)
-    .toEqual(["metro", "node:fs", "url"])
+    .toEqual(["@babel/parser", "metro", "node:fs", "url"])
   await expect(auditPackedRuntimeEntrypoints(deniedPackage)).rejects.toThrow(/compiler-tooling.*not-in-build-policy/i)
   await expect(auditPackedRuntimeEntrypoints(effectPackage)).rejects.toThrow(/compiler-tooling.*effect\/Schema/i)
   await expect(auditPackedRuntimeEntrypoints(policyEffectPackage)).rejects.toThrow(/compiler-tooling.*effect\/Schema/i)
@@ -713,3 +713,8 @@ test('motion entries cannot reach an existing runtime entry',async()=>{
  const pkg=await createFixturePackage({extraExports:{'./theme/motion':runtimeExport('motion')},overrides:{'dist/motion.mjs':'import "./theme-core.mjs";','dist/theme-core.mjs':'export const core=true;','dist/motion.cjs':'exports.defineMotion=()=>{};'}});
  await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow(/isolated motion/);
 });
+
+ test("ordinary runtime never admits the compiler source-map parser",async()=>{
+ const pkg=await createFixturePackage({overrides:{"dist/theme.mjs":'import "@babel/parser";export {};\n'}});
+ await expect(auditPackedRuntimeEntrypoints(pkg)).rejects.toThrow(/ordinary-runtime.*unauthorized external @babel\/parser/);
+ });
