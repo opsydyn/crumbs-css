@@ -1,6 +1,6 @@
 # M10.5 — bind runtime admission to artifact provenance
 
-Date: 2026-10-17. Design base: `d98361e`. **Proposed written design, awaiting review.** The user approved preparing this design after the [provenance assessment](../../assessments/2026-10-17-m10-5-runtime-provenance-contract.md). Implementation requires a separately reviewed plan; native/inline execution is retained. The [proposed ADR](../../decisions/bind-runtime-admission-to-artifact-provenance.md) records the decision and alternatives.
+Date: 2026-10-17. Design base: `d98361e`. **Written design approved on 2026-10-17 after `10438f5`; implementation plan awaits review.** The user approved preparing this design after the [provenance assessment](../../assessments/2026-10-17-m10-5-runtime-provenance-contract.md). Implementation requires a separately reviewed plan; native/inline execution is retained. The [proposed ADR](../../decisions/bind-runtime-admission-to-artifact-provenance.md) records the decision and alternatives.
 
 ## 1. Intent and scope
 
@@ -126,4 +126,11 @@ This contract detects drift relative to a reviewed, source-bound artifact. It is
 
 No guard or schema has been implemented, no candidate or consumer has been built, and no new qualification result is recorded by this document. The proposed ADR supersedes no accepted release policy. The kernel remains parked; the three original M1.10c host failures and deferred physical acceptance remain.
 
-**Next M10.5:** review this written design and proposed ADR, then prepare a single native/inline implementation plan. Approval of the design permits planning, not execution or publication.
+**Current next M10.5:** review the [prepared native/inline implementation plan](../plans/2026-10-17-m10-5-runtime-provenance.md). The written-design approval permits planning, not execution or publication.
+
+
+### Written-design review (2026-10-17)
+
+The user approved this written design after `10438f5`. The [single-slice implementation plan](../plans/2026-10-17-m10-5-runtime-provenance.md) is prepared for separate review; native/inline execution is retained. No product implementation or new qualification accompanies this planning update.
+
+Planning verification confirms installed Rolldown declares Node `^20.19.0 || >=22.12.0`. Full builds use current Node24.15.0; genuine Node22.0.0 compatibility remains required for emitted Crumbs code and applicable standalone helpers. No full-build support for Rolldown on Node22.0.0 is claimed or added.

@@ -3349,3 +3349,12 @@ The [written design](superpowers/specs/2026-10-17-m10-5-runtime-provenance-desig
 Normal/skip-clean/prepack builds would use an owned capture/finalization barrier without changing existing JS/DTS graphs. No public export, runtime import or dependency is added. Current release qualification would require strict provenance; exact artifact-pinned legacy profiles remain only for historical replay. The unchanged-build capture and real map-content connection must qualify before replacement; unsupported evidence stops the whole slice without a fallback or filename workaround.
 
 **Next M10.5: review the written design, then prepare one native/inline implementation plan.** This design slice changes documentation only. The kernel stays parked, its downstream stages remain unrun, and the original three M1.10c host failures still block publication. No compiler candidate, guard edit, install, benchmark, consumer build, public push or publication ran here. Physical acceptance remains deferred.
+
+
+### M10.5 runtime provenance implementation plan prepared (2026-10-17)
+
+The user approved the [written provenance design](superpowers/specs/2026-10-17-m10-5-runtime-provenance-design.md) after `10438f5`. The [one-slice plan](superpowers/plans/2026-10-17-m10-5-runtime-provenance.md) retains native/inline execution and one outcome commit: same-path baseline/capture and unchanged JS/DTS first, externally pinned installed bytes next, strict real platform maps, then SDK/current release integration with negative tests. A first real gate failure stops the slice and restores its task-owned product changes after archiving the outcome.
+
+The plan covers build-helper source fingerprints, independent SDK-matrix verification, exact historical legacy profiles and a required v3 release provenance record; a legacy success or true flag cannot qualify current publication. Real working-tree evidence retains its actual dirty/source state, distinct from synthetic positive release tests. No intermediate commit is used to fabricate clean-source release evidence.
+
+**Next M10.5: review the written implementation plan, then execute one complete correctness slice.** No implementation, build, consumer install, native operation, benchmark, public push or publication ran in this planning slice. The kernel remains parked, M1.10c publication remains blocked by the original three host failures, and physical acceptance remains deferred.

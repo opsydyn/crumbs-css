@@ -55,4 +55,9 @@ No new library dependency, engine floor, public option, serialized product API o
 
 ## Status and revisit conditions
 
-Proposed, awaiting written-design review. The user approved preparation of this design after `d98361e`; this does not approve implementation or accept the ADR. Nothing in this record supersedes an accepted ADR. If capture completeness or real map-to-installed-byte identity cannot be established with the current toolchain and unchanged output, park this replacement and retain the old guard. Revisit helper profiles on toolchain changes. A future compiler performance candidate requires its own credible mechanism, bounded approval and unchanged gates.
+Proposed architectural adoption. The user approved the written design after `10438f5`; the single-slice plan awaits separate review. This does not approve implementation or accept production adoption. Nothing in this record supersedes an accepted ADR. If capture completeness or real map-to-installed-byte identity cannot be established with the current toolchain and unchanged output, park this replacement and retain the old guard. Revisit helper profiles on toolchain changes. A future compiler performance candidate requires its own credible mechanism, bounded approval and unchanged gates.
+
+
+### Written design approved; implementation pending (2026-10-17)
+
+The user approved the written design after `10438f5`, authorizing the [single-slice implementation plan](../superpowers/plans/2026-10-17-m10-5-runtime-provenance.md). Architectural adoption remains proposed until the complete contract qualifies; no guard, build or release policy changed in planning. Written-plan review is still required before native/inline execution.
