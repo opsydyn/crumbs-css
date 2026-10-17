@@ -1,6 +1,6 @@
 # M10.5 fresh-pipeline compiler remediation design
 
-- Status: **Proposed for written review.** The user approved preparing this complete design after the bounded Rolldown spike. No implementation or performance acceptance is claimed.
+- Status: **Approved design; implementation plan awaiting written review.** The user approved the written spec after commit `69152cd`. No implementation or performance acceptance is claimed.
 - Date: 2026-10-17
 - Roadmap: **M10.5**, release closure for **M1.10c**
 - Control: immutable v1.2.0 source `5a13f913b17ae957172968144ec83c391caee337`, tarball SHA-256 `4bd7897aa5beb6383b158f4e214436ba5d0d659b6b0fc005142c945a10dda02e`.
