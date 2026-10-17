@@ -1,0 +1,44 @@
+import {readFile,writeFile,mkdir,cp,rm} from 'node:fs/promises';
+import {join,resolve} from 'node:path';
+import {createHash} from 'node:crypto';
+import {createRequire} from 'node:module';
+import assert from 'node:assert/strict';
+const repo='/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css';
+const base='/private/tmp/crumbs-m110c-20261017';
+const receipt=JSON.parse(await readFile(join(base,'sdk58/qualification.json'),'utf8'));
+const root=receipt.consumer,folder=join(root,'src/m110c-skill'),out=join(base,'skill-dogfood-04');await mkdir(out);await mkdir(folder);
+await cp(join(repo,'.agents/skills/crumbs-css'),join(out,'copied-skill'),{recursive:true});
+const reference=await readFile(join(out,'copied-skill/references/design-system.md'),'utf8');
+const blocks=[...reference.matchAll(/```tsx?\n([\s\S]*?)```/g)].map(m=>m[1]!);assert.equal(blocks.length,4);
+const files=['foundation.ts','card.css.ts','ActionCard.tsx','App.tsx'];
+const hash=(value:string)=>createHash('sha256').update(value).digest('hex');
+for(let i=0;i<files.length;i++)await writeFile(join(folder,files[i]!),blocks[i]!);
+await writeFile(join(folder,'negative.ts'),`import {viewStyle} from '@opsydyn/crumbs-css/style';import type {NativeComponentPublicProps} from '@opsydyn/crumbs-css/style';import {vars} from './foundation';import {card} from './card.css';\n// @ts-expect-error missing token\nvars.space.lg;\n// @ts-expect-error incompatible token domain\nviewStyle({padding:vars.color.accent});\ntype Props=NativeComponentPublicProps<typeof card>;\n// @ts-expect-error unsupported variant\nconst bad:Props={tone:'danger'};\n`);
+async function run(label:string,args:string[]){const p=Bun.spawn(args,{cwd:root,env:{...process.env,CI:'1',EXPO_NO_TELEMETRY:'1',NODE_OPTIONS:'--dns-result-order=ipv4first'},stdout:'pipe',stderr:'pipe'});const [a,b,status]=await Promise.all([new Response(p.stdout).text(),new Response(p.stderr).text(),p.exited]);await writeFile(join(out,label+'.log'),a+'\n'+b);assert.equal(status,0,label);}
+const entry=join(root,'index.js'),original=await readFile(entry,'utf8');
+try{
+await run('types',[join(root,'node_modules/.bin/tsc'),'--noEmit']);
+const req=createRequire(join(root,'package.json'));
+const {transformCssTsToStyleSheet}=req('@opsydyn/crumbs-css/dist/transformer');
+const code=await transformCssTsToStyleSheet(join(folder,'card.css.ts'),root,{useStyleSheet:false,includeStyleExplanations:false});await writeFile(join(out,'card.compiled.js'),code);
+const exports:Record<string,any>={};new Function('exports',code.replace(/^import .*;$/gm,'').replace(/export const (\w+) =/g,'exports.$1 ='))(exports);
+const {theme}=await import(join(folder,'foundation.ts'));
+const {resolveThemeStyles}=req('@opsydyn/crumbs-css/theme/core');
+const {createComponentRecipeResolver}=req('@opsydyn/crumbs-css/theme/recipes');
+const {createSprinklesResolver}=req('@opsydyn/crumbs-css/theme/sprinkles');
+const {assignVars,resolveAssignedStyles}=req('@opsydyn/crumbs-css/theme/vars');
+const themed=resolveThemeStyles({card:exports.card,paddingPlan:exports.paddingPlan},theme);
+const card=createComponentRecipeResolver(themed.card),padding=createSprinklesResolver(themed.paddingPlan);
+assert.equal(Object.assign({},...card({tone:'primary'}).root).backgroundColor,'#ffffff');
+assert.equal(Object.assign({},...card({tone:'secondary'}).root).backgroundColor,'#eef3ff');
+assert.equal(Object.assign({},...padding({padding:'sm'})).paddingTop,8);
+assert.equal(Object.assign({},...padding({padding:'md'})).paddingTop,16);
+const local={accentStyle:exports.accentStyle},assigned=assignVars({accent:exports.accent},{accent:'#087f8c'});
+assert.equal(resolveAssignedStyles(local,assigned,theme).accentStyle.borderTopColor,'#087f8c');
+assert.equal(resolveAssignedStyles(local,assignVars({},{}),theme).accentStyle.borderTopColor,'#185adb');
+await writeFile(entry,`import {registerRootComponent} from 'expo';import {App} from './src/m110c-skill/App';function Root(){return <App onActionPress={()=>{}}/>}registerRootComponent(Root);\n`.replace('return <App onActionPress={()=>{}}/>',"return require('react').createElement(App,{onActionPress:()=>{}})"));
+await run('exports',[join(root,'node_modules/.bin/expo'),'export','--platform','all','--source-maps','--output-dir',join(out,'exports')]);
+const {verifyRuntimeBundles}=await import(join(repo,'scripts/runtime-bundle-contract.ts'));
+const maps=await verifyRuntimeBundles(join(out,'exports'));
+await writeFile(join(out,'qualification.json'),JSON.stringify({sdk:58,artifactSha256:receipt.crumbs.tarballSha256,source:receipt.source,consumer:root,referenceSha256:hash(reference),examples:Object.fromEntries(files.map((f,i)=>[f,hash(blocks[i]!)])),strictTypes:'passed',negativeCases:3,compilerAndResolvers:'passed',allPlatformRuntimeMaps:maps,nativeInteraction:'carried separately from M1.10b; not rerun for this unchanged example'},null,2)+'\n');
+}finally{await writeFile(entry,original);await rm(folder,{recursive:true,force:true})}

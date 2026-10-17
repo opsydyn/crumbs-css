@@ -9,10 +9,7 @@ The repo includes an Expo Storybook app in `apps/storybook/`. It is useful for:
 - verifying Metro transform behavior
 - smoke testing Expo Dev Client support
 
-The internal app uses Expo SDK 57 / React Native 0.86 and requires Node >=22.13.0.
-Its native animation dependencies follow Expo's SDK 57 map: Reanimated 4.5.1,
-Worklets 0.10.1 and Gesture Handler 2.32.0. The independent packed consumer still
-checks SDK 56; this internal upgrade does not narrow published compatibility.
+Both internal apps use Expo 58.0.14 / React Native 0.88 / React 19.3.1. SDK 58 needs Node `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. The matched Storybook stack uses Reanimated 4.7.1, Worklets 0.13.0, Gesture Handler 3.3.0 and safe-area-context 5.10.1. Independent installed profiles retain SDK 56/57; the library keeps its SDK 56 development peers.
 
 ## Start Storybook
 
@@ -42,6 +39,26 @@ includes Controls and Actions; the animated FullUI is not qualified.
 After an SDK upgrade, regenerate local native projects and rebuild custom development
 clients before using them. An existing `ios/` or `android/` folder is not upgraded
 by changing JavaScript dependencies. Expo Go checks do not qualify a custom build.
+
+## Select the SDK 58 worker
+
+Babel is the default. To use Expo's genuine optional Rust worker:
+
+```sh
+CRUMBS_METRO_WORKER=rust bun run app:storybook
+CRUMBS_METRO_WORKER=rust bun run playground
+```
+
+Restart Metro after changing the worker or Babel configuration. Use separate caches when comparing modes. The internal app config validates this environment value and enables Expo's experimental `noxcturnalTransformWorker`; it is not a library-wide environment switch.
+
+Both apps use `presets: [require("expo/internal/babel-preset")]`. Expo supplies required Worklets transforms. Storybook retains a narrow Flow parser override for `react-native-modal-datetime-picker`; custom configuration and Worklets/codegen files can legitimately use Babel even in Rust mode. Keep required transforms intact. A successful flag-on export does not prove Rust execution: the qualification script requires real eligible-file completions and expected fallback routes.
+
+```sh
+bun scripts/expo-app-workers.ts playground rust /absolute/fresh-output
+bun scripts/expo-app-workers.ts storybook babel /absolute/other-fresh-output
+```
+
+The [M1.10b native packet](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-16-m1-10b-expo58-apps) records both apps under both workers on an owned iOS 26.5 simulator and Android 16 emulator. Physical devices, spoken readers and release FPS remain separate. Rust interoperability makes no compiler-speed claim.
 
 ## What to check
 

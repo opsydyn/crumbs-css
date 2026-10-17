@@ -5,11 +5,11 @@ description: Use when an Expo or React Native app uses @opsydyn/crumbs-css, or w
 
 # Crumbs CSS
 
-Build consumer apps and design systems with the installed public API. This reference targets published **1.1.0 and 1.1.1** (identical executable and declaration bytes); check the app's lockfile and installed export map before using it for another version. Preserve the app's architecture and requested scope.
+Build consumer apps and design systems with the installed public API. This reference covers the **1.2.0 SDK 58 compatibility release** and retained **1.1.0/1.1.1 SDK 56/57** APIs. Check the installed version, lockfile and export map; a source candidate is not proof of npm publication. Preserve the app's architecture and requested scope.
 
 ## Setup and imports
 
-1. Inspect the app's Expo, React Native and Crumbs versions and existing Metro config. Versions 1.1.0 and 1.1.1 support SDK 56 / RN 0.85 and SDK 57 / RN 0.86, with React 19. Crumbs tooling needs Node >=22; SDK 57 needs >=22.13. Use Expo-compatible dependencies; establish a new SDK's support before widening peers or bypassing installation checks.
+1. Inspect the app's Expo, React Native and Crumbs versions and existing Metro config. Versions 1.1.0/1.1.1 support SDK 56 / RN 0.85 and SDK 57 / RN 0.86; 1.2.0 adds SDK 58 / RN 0.88. React stays >=19 <20; RN 0.87 is unqualified. Crumbs tooling keeps Node >=22; SDK 56/57 tooling needs >=22.13. SDK 58 requires `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. Read [SDK setup and worker routing](references/expo-sdk.md) for the matched profiles, concrete Babel/Rust configuration and fallback limits. Use Expo-compatible dependencies without widening peers or bypassing installation checks.
 2. Wrap the existing Expo config with `withNativeStyles` from `/metro-plugin`, preserving its other customisations. Restart Metro after configuration changes. Applications need no Effect import, service or runner.
 3. Put native style authoring in `.css.ts`; import its compiled exports via `./card.css`. Use specific runtime entries in components. The package root is not a universal React runtime entry.
 

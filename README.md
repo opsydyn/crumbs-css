@@ -10,22 +10,20 @@ recipes and atomic utilities; add themes, scoped design tokens, conditions, moti
 factories through explicit package entrypoints.
 
 **Crumbs CSS v1 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases).**
-Version `1.1.1` refreshes the package documentation and links the repository consumer agent skill. Its JavaScript, declarations, exports and dependencies are byte-identical to `1.1.0`, which qualified Expo SDK 57 / React Native 0.86 alongside SDK 56 / React Native 0.85.
-See [release status](docs/releases/1.1.1.md) and [verification evidence](docs/evidence/2026-10-10-m1-9d-docs-patch/README.md). The inherited [1.1.0 disposition](docs/releases/1.1.0.md) retains its recorded warm-transform failure; this documentation patch adds no new performance pass or numerical exception. Generic future-release limits remain unchanged.
+Version `1.2.0` adds Expo SDK 58 / React Native 0.88 qualification while retaining SDK 56 / RN 0.85 and SDK 57 / RN 0.86. Playground and Storybook now use SDK 58, with Babel as the default and qualified opt-in Expo Rust worker routing. See [release status](docs/releases/1.2.0.md) for publication and gate status, and [native/worker evidence](docs/evidence/2026-10-16-m1-10b-expo58-apps/README.md). Existing v1/v1.1 performance exceptions do not apply to this release.
 
 ## Get started
 
-The published `1.1.1` supports **Expo SDK 56 / React Native 0.85** and **Expo SDK 57 / React Native 0.86**, with React 19.2. Node `>=22.0.0` is required
-for Crumbs tooling; SDK 57 requires Node `>=22.13.0`. Peer ranges are React `>=19 <20`, React Native `>=0.85 <0.87` and Metro `>=0.83 <1`. TypeScript
-`>=5.9 <7` is optional for source migration tooling. Effect 4 is Crumbs' implementation dependency; applications
-do not need an Effect import, service or runner.
+SDK 58 / RN 0.88 requires Crumbs `1.2.0`; published `1.1.1` covers SDK 56/57 only. React peers remain `>=19 <20`, native peers are `>=0.85 <0.87 || >=0.88 <0.89`, and Metro peers are `>=0.83 <1`. RN 0.87 is unqualified. Crumbs tooling keeps Node `>=22.0.0`; SDK 56/57 tooling needs `>=22.13.0`, and SDK 58 requires `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. The qualified SDK 58 apps use React/DOM 19.3.1 and Expo 58.0.14.
 
-Install the stable package into your Expo app:
+TypeScript `>=5.9 <7` is optional for source migration tooling. Effect 4 is Crumbs' implementation dependency; applications need no Effect import, service or runner.
+
+Install the SDK 58 compatibility version when available according to the release status above. Existing SDK 56/57 apps can retain `1.1.1`:
 
 ```sh
-npm install @opsydyn/crumbs-css@1.1.1
+npm install @opsydyn/crumbs-css@1.2.0
 # or
-bun add @opsydyn/crumbs-css@1.1.1
+bun add @opsydyn/crumbs-css@1.2.0
 ```
 
 Wrap Expo's Metro configuration:
@@ -68,7 +66,7 @@ APIs in components. Prefer the specific entry you use so optional tooling stays 
 To build the immutable v1 source yourself:
 
 ```sh
-git clone --branch v1.1.1 https://github.com/opsydyn/crumbs-css.git
+git clone --branch v1.2.0 https://github.com/opsydyn/crumbs-css.git
 cd crumbs-css
 bun install --frozen-lockfile
 bun run build
@@ -110,7 +108,7 @@ Sprinkles plans select from finite scales without enumerating a Cartesian produc
 
 ## Coding agents
 
-Use the repository [Crumbs consumer skill](.agents/skills/crumbs-css/SKILL.md) for the published `1.1.1` APIs. It covers Expo/Metro setup, import selection, typed design systems and native runtime boundaries, with a checked ActionCard example. [Copy the complete skill into your app repository](docs/src/content/docs/how-to/use-agent-skill.mdx), then invoke it as `$crumbs-css` in Codex. The skill is maintained in Git; it is not included in the npm 1.1.1 tarball.
+Use the repository [Crumbs consumer skill](.agents/skills/crumbs-css/SKILL.md) for the `1.2.0` API and SDK 56/57/58 setup. It covers Expo/Metro setup, import selection, typed design systems and native runtime boundaries, with a checked ActionCard example. [Copy the complete skill into your app repository](docs/src/content/docs/how-to/use-agent-skill.mdx), then invoke it as `$crumbs-css` in Codex. The skill is maintained in Git; it is not included in the npm tarball.
 
 ## Guides and architecture
 
@@ -534,14 +532,16 @@ Package metadata, including the exact installed version, peer ranges and public 
 | `bun run build` | Build the published package. |
 | `bun run test` | Run the package and Storybook test suites. |
 | `bun run typecheck` | Typecheck the published package. |
-| `bun run app:storybook` | Start the Expo SDK 57 Storybook LiteUI for component development (Node >=22.13.0). |
+| `bun run app:storybook` | Start the Expo SDK 58 Storybook LiteUI for component development (use a supported SDK 58 Node version). |
 | `bun run app:check` | Typecheck Storybook and export iOS, Android and web with runtime-source isolation checks. |
 | `bun run app:typecheck` | Typecheck the Storybook consumer against the workspace package. |
-| `bun run playground` | Run the Expo SDK 57 consumer with Crumbs build watching and Metro restarts (Node >=22.13.0). |
-| `bun run playground:packed --check` | Typecheck and bundle an isolated SDK 57 consumer of the working-tree tarball. |
+| `bun run playground` | Run the Expo SDK 58 consumer with Crumbs build watching and Metro restarts (use a supported SDK 58 Node version). |
+| `bun run playground:packed --check` | Typecheck and bundle an isolated SDK 58 consumer of the working-tree tarball. |
 | `bun run playground:packed --sdk=56 --check` | Retain SDK 56 types and iOS, Android and web exports against the working-tree tarball. |
+| `bun run playground:packed --sdk=57 --check` | Retain SDK 57 in an independent installed consumer. |
+| `bun run playground:sdk-candidate --sdk=58 --pinned /absolute/output/qualification.json` | Qualify a pinned SDK 58 packed consumer. |
 | `bun run playground:distribution --check` | Qualify packed Crumbs, token, and component packages in Expo on iOS and web. |
-| `bun run playground:published --version=1.1.1 --check` | Verify v1 in an isolated registry consumer after publication. |
+| `bun run playground:published --version=1.2.0 --sdk=58 --check` | Verify v1 in an isolated registry consumer after publication. |
 | `bun run docs:dev` | Run the Starlight docs site locally. |
 | `bun run docs:build` | Build the docs site. |
 | `bun run release:check` | Build, typecheck, test, bench, pack, and require a current-source host report admitted by release policy. |
@@ -557,11 +557,7 @@ Pull requests that change `apps/` run the same CI workflow as package changes;
 docs-only pull requests remain path-ignored. CI uses Bun 1.4.2, Node 24, and
 `bun install --frozen-lockfile` across all workspaces. `bun run test` covers the
 package and Storybook test suites, `bun run app:typecheck` checks the Storybook
-consumer on SDK 57. `bun run app:check` also exports its native Storybook browser
-on iOS, Android and web with runtime-source isolation checks. `bun run playground:check` checks the SDK 57 workspace;
-`bun run playground:packed --sdk=56 --check` retains SDK 56, and the independent
-SDK 57 packed profile also requires iOS, Android and web exports with runtime
-source isolation. `bun run playground:distribution --check` builds packed package
+consumer on SDK 58. `bun run app:check` exports its native Storybook browser on iOS, Android and web with runtime-source isolation checks. `bun run playground:check` checks the SDK 58 workspace. Explicit `--sdk=56`, `--sdk=57` and `--sdk=58` installed profiles retain all three SDK lines. Actual app-worker cohorts use separate Babel/Rust caches, require eligible Rust app/dependency completions, and check expected per-file Babel fallbacks. `bun run playground:distribution --check` builds packed package
 artifacts, typechecks an independent Expo consumer, and requires iOS and web
 bundle provenance. Missing required compiler fixtures or consumer maps fail
 the gate. These exports include Android JavaScript; CI does not establish native

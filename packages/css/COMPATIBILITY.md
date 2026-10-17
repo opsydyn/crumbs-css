@@ -3,27 +3,29 @@
 `@opsydyn/crumbs-css` intentionally implements a React Native subset of
 vanilla-extract authoring. It is not a browser CSS runtime.
 
-## Supported SDK lines (M1.9b)
+## Supported SDK lines (M1.10)
 
-Version `1.1.1` is a documentation-only patch inheriting the exact 1.1.0 JavaScript, declarations, exports and dependencies. Version `1.1.0` qualified Expo SDK 56 / React Native 0.85 and SDK 57 / React Native 0.86. The workspace and internal Storybook remain on SDK 56; a separate packed consumer qualifies SDK 57 without workspace links or npm peer overrides.
+Crumbs `1.2.0` adds Expo SDK 58 / React Native 0.88 while retaining Expo SDK 56 / React Native 0.85 and Expo SDK 57 / React Native 0.86. Published `1.1.0` and `1.1.1` retain SDK 56/57 only; check the [1.2.0 release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) before installing the new version. Both current internal apps use SDK 58. Independent installed profiles retain SDK 56 and SDK 57 with strict npm resolution, without workspace links or peer overrides.
 
-| Consumer | Exact stack | Checks |
+| Consumer | Qualified stack | Scope |
 | --- | --- | --- |
-| SDK 56 | Expo `56.0.23`, React `19.2.3`, React Native `0.85.3` | Existing workspace types and packed iOS/Android/web Metro exports. |
-| SDK 57 | Expo `57.0.27`, React / React DOM `19.2.8`, React Native `0.86.3`, TypeScript `6.0.3` | Strict npm resolution and installation, all installed Crumbs bytes, consumer types, ESM/CommonJS motion contracts, iOS/Android/web Metro exports and ordinary runtime source maps. |
+| SDK 56 | Expo `56.0.4`, React/DOM `19.2.8`, RN `0.85.3` | Retained installed types, motion contracts and iOS/Android/web exports. |
+| SDK 57 | Expo `57.0.27`, React/DOM `19.2.8`, RN `0.86.3` | Same packed-consumer checks; retained Node `>=22.13.0` tooling contract. |
+| SDK 58 | Expo `58.0.14`, React/DOM `19.3.1`, RN `0.88.0`, Metro `0.87.1` | Strict installed checks, actual Babel/Rust routing, live invalidation and source maps; both internal apps additionally exercise owned iOS/Android development clients under both workers. |
 
-The official SDK 57 blank template pins React `19.2.3`; the current optional Expo CLI/router graph requires `19.2.8`. Qualification uses that compatible patch across React, React DOM and the renderer, with no `--force` or `--legacy-peer-deps`. Crumbs' tooling floor remains Node `22.0.0`; SDK 57 requires Node `22.13.0` or newer. See [M1.9b evidence](https://github.com/opsydyn/crumbs-css/blob/main/docs/evidence/2026-10-10-m1-9b-expo57/README.md).
+M1.10a first qualified Expo 58.0.11; M1.10b promoted the matching 58.0.14 app patch cohort. Exact source/tarball/lock receipts, limits and native identities are retained in [M1.10 qualification](https://github.com/opsydyn/crumbs-css/tree/main/docs/evidence/2026-10-16-m1-10b-expo58-apps). Full clean hosted CI 39013112767 passes on source 441bd2e; PR#8 is merged as e333250. Historical rows below keep their original versions and scope.
 
-These checks cover package/type and bundle compatibility. Motion renderer probes use real React and a controlled public Animated peer; they are not native-device acceptance. Physical devices, spoken readers and release performance remain separate. Historical qualification rows below retain their exact versions and scope.
+Crumbs' Node floor remains `22.0.0`. SDK 56/57 tooling uses `>=22.13.0`; SDK 58 requires `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. The native peer union is `>=0.85 <0.87 || >=0.88 <0.89`; RN 0.87 remains unqualified. React peers stay `>=19 <20`. Matched React patch and optional Router/Worklets cohorts are pinned in the installed profiles; do not use `--force` or `--legacy-peer-deps`.
 
-When the Storybook consumer app is installed with Bun, `expo-doctor` may still
-report duplicate Expo packages from Bun's `.bun/` symlink layout even when the
-duplicate versions are identical. Treat that remaining warning as advisory until
-Expo Doctor and Bun converge on the same install model.
+### Babel and Expo's optional Rust worker
 
-The package currently declares `react-native` peer compatibility as
-`>=0.85 <0.87`. Earlier or later React Native baselines should not be assumed supported
-unless they are exercised explicitly in a future compatibility pass.
+Babel remains the default. SDK 58 consumers can opt into Expo's experimental `experiments.noxcturnalTransformWorker: true` in `app.config.js`; keep `withNativeStyles` around the existing Expo Metro config. The internal apps expose this with `CRUMBS_METRO_WORKER=rust`; the environment name is an app convenience, not a Crumbs public API. Use the canonical `presets: [require("expo/internal/babel-preset")]` when the app has no additional required Babel transforms. Custom configurations may legitimately select Babel.
+
+Crumbs still compiles `.css.ts` through its existing Vanilla Extract integration. Generated/ordinary JavaScript is delegated to Expo's worker. Rust eligibility is per file: codegen, Animated/Worklets candidates, Worklets and unsupported/custom parser configuration use explicit Babel fallbacks. Storybook's legacy modal datetime-picker needs its narrow Flow parser override. Do not remove required transforms or bypass Expo eligibility to force Rust. Actual eligible app/React JSX completion events establish execution; the flag or successful export alone does not. No throughput gain or Crumbs compiler rewrite is implied.
+
+Source maps provide authored export/import locations, not property-level precision. The minimal full-strict RN 88 declaration probe retains three independently reproduced upstream errors; normal Expo consumer checks pass. Expo Doctor still reports workspace duplicate development peers and Storybook's preexisting native-folder warning; Rust's internal flag is absent from Doctor's remote schema. Inspect installed peer identities instead of hiding these diagnostics.
+
+Owned simulator/emulator checks are functional native evidence. Physical hardware, spoken readers, iOS 27/DeviceHub behavior and release FPS remain deferred. M10.5 budgets and the unresolved consumer 2.5× report are unchanged; previous release exceptions do not qualify 1.2.0.
 
 ## Compiler, artifact and runtime matrix (M8.2)
 
@@ -921,7 +923,7 @@ The pure graph has no runtime peers; the native graph uses public React/React Na
 `/tokens/algebra` emits existing colour strings and scalar text metrics;
 existing token domains, expressions and native admission remain unchanged.
 The frozen qualification cohort uses React/RTR19.2.3, React Native0.85.3,
-Expo56.0.4, Metro0.87.1 and TypeScript6.0.3. Pure probes target genuine
+Expo 56.0.4, Metro 0.87.1 and TypeScript6.0.3. Pure probes target genuine
 Node22.0.0/current supported Node, both ESM/CommonJS and two physical copies
 with runtime peers absent. The evidence index records actual outcomes and
 source/artifact bindings. Simulator/emulator functional acceptance, host
