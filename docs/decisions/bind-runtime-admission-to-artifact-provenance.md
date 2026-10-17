@@ -61,3 +61,8 @@ Proposed architectural adoption. The user approved the written design after `104
 ### Written design approved; implementation pending (2026-10-17)
 
 The user approved the written design after `10438f5`, authorizing the [single-slice implementation plan](../superpowers/plans/2026-10-17-m10-5-runtime-provenance.md). Architectural adoption remains proposed until the complete contract qualifies; no guard, build or release policy changed in planning. Written-plan review is still required before native/inline execution.
+
+
+### Approved implementation stopped; replacement parked (2026-10-17)
+
+The [stopped outcome](../evidence/2026-10-17-m10-5-runtime-provenance/README.md) records unchanged JS/DTS and safe observed ordinary membership, but complete dependency agreement fails for seven tooling graphs because emitted loader/shim edges are absent from the build metadata. The user-approved stop rule was applied. All product edits/artifacts are restored; no partial guard or sidecar ships. This architecture remains proposed and this collector implementation is parked. Its next revision would need an explicit account of emitted loader edges; it is not a prerequisite for publication of the unchanged package. The original M1.10c numerical failures and release policy remain unchanged.
