@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/opsydyn/crumbs-css/compare/v1.1.1...v1.2.0) (2026-10-17)
+
+
+### Features
+
+* qualify Expo SDK 58 and upgrade native apps (M1.10a-b) ([e333250](https://github.com/opsydyn/crumbs-css/commit/e33325035a343c448d97f83db2b9e68f55803ba8))
+* qualify Expo SDK 58 compatibility (M1.10a) ([5e7e3d3](https://github.com/opsydyn/crumbs-css/commit/5e7e3d301125ed844d7d92a39c9d23fae05c0785))
+
 ## [1.1.1](https://github.com/opsydyn/crumbs-css/compare/v1.1.0...v1.1.1) (2026-10-10)
 
 ### Documentation
