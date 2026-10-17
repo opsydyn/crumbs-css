@@ -63,3 +63,8 @@ Reproduce the graph observation by calling `auditPackedRuntimeEntrypoints` from 
 Related decisions: [native compiler D1/D3/D5/D6/D11](../decisions/adopt-native-design-system-compiler.md) remains proposed as a whole; [consumer-scoped M10.5 release policy](../decisions/anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md#2026-10-08--consumer-scoped-host-policy-implemented) is accepted and implemented; [the earlier runtime-boundary split](../decisions/separate-mandatory-theme-resolution-from-optional-runtime-state.md) was rejected. This assessment supersedes none of them.
 
 **Next numbered item: M10.5 — review one entry-aware packaging feasibility proof. M1.10c npm publication remains blocked.**
+
+
+## 2026-10-17 — bounded proof executed
+
+The approved [entry-aware packaging proof](../evidence/2026-10-17-m10-5-entry-aware-packaging-proof/README.md) is closed at the unchanged source-list provenance preflight: all 59 import graphs pass, but two token format rows reject generated chunk names. This is not the earlier authoring dependency leak. No file-count consolidation, identity/parity qualification or timing improvement was established. Production remains unchanged. Next proposed M10.5 decision is an explicit pure-contract kernel design; no further grouping variation or retained service starts automatically.
