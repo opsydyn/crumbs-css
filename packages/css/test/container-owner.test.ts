@@ -16,3 +16,27 @@ test('sequential layout feedback is exposed rather than silently suppressed', ()
     o.updateSize(i % 2 ? 288 : 176);
     trace.push(o.getSnapshot().bucket);
 } expect(trace).toEqual(Array.from({ length: 12 }, (_, i) => i % 2 ? 'wide' : 'narrow')); expect(o.inspect().publications).toBe(12); });
+
+test('accepts RN88 prototype-backed nativeEvent accessors at the host event boundary', () => {
+    class LayoutEvent extends Event {
+        constructor(private readonly payload: unknown) { super('layout'); }
+        get nativeEvent() { return this.payload; }
+    }
+    const owner = createContainerOwner(d); let publications = 0; owner.subscribe(() => publications++);
+    owner.onLayout(new LayoutEvent({ layout: { width: 176, height: 100 } }) as never);
+    expect(owner.getSnapshot().bucket).toBe('narrow');
+    owner.onLayout(new LayoutEvent({ layout: { width: 288, height: 100 } }) as never);
+    expect(owner.getSnapshot().bucket).toBe('wide');
+    expect(publications).toBe(2);
+});
+
+test('normalizes failed host nativeEvent reads and never reads retired or nested accessors', () => {
+    const owner = createContainerOwner(d); owner.onLayout(event(176)); const before = owner.getSnapshot(); let reads = 0;
+    const broken = Object.defineProperty({}, 'nativeEvent', { get() { reads++; throw Error('host payload unavailable'); } });
+    expect(() => owner.onLayout(broken as never)).toThrow(/INVALID_CONTAINER_MEASUREMENT/);
+    expect(reads).toBe(1); expect(owner.getSnapshot()).toBe(before);
+    let nestedReads = 0;
+    expect(() => owner.onLayout({nativeEvent: Object.defineProperty({}, 'layout', {get() {nestedReads++; return {width:288};}})} as never)).toThrow(/INVALID_CONTAINER_MEASUREMENT/);
+    expect(nestedReads).toBe(0); expect(owner.getSnapshot()).toBe(before);
+    owner.deactivate(); owner.onLayout(broken as never); expect(reads).toBe(1);
+});

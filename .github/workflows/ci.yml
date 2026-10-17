@@ -56,17 +56,29 @@ jobs:
       - name: Typecheck Storybook consumer
         run: bun run app:typecheck
 
-      - name: Check SDK 57 Storybook types and iOS, Android and web exports
+      - name: Check SDK 58 Storybook types and iOS, Android and web exports
         run: bun run app:check
 
-      - name: Check SDK 57 workspace types and iOS, Android and web exports
+      - name: Check SDK 58 workspace types and iOS, Android and web exports
         run: bun run playground:check
 
       - name: Retain SDK 56 packed types and iOS, Android and web exports
         run: bun run playground:packed --sdk=56 --check
 
       - name: Qualify packed SDK 57 consumer on iOS, Android and web
-        run: bun run playground:sdk-candidate --pinned "${{ runner.temp }}/crumbs-sdk-57/qualification.json"
+        run: bun run playground:sdk-candidate --sdk=57 --pinned "${{ runner.temp }}/crumbs-sdk-57/qualification.json"
+
+      - name: Qualify packed SDK 58 consumer on iOS, Android and web
+        run: bun run playground:sdk-candidate --sdk=58 --pinned "${{ runner.temp }}/crumbs-sdk-58/qualification.json"
+
+      - name: Qualify actual app workers with separate Babel and Rust caches
+        shell: bash
+        run: |
+          for app in playground storybook; do
+            for worker in babel rust; do
+              bun scripts/expo-app-workers.ts "$app" "$worker" "${{ runner.temp }}/crumbs-sdk-58-${app}-${worker}"
+            done
+          done
 
       - name: Qualify packed Expo consumer on iOS and web
         run: bun run playground:distribution --check
@@ -77,5 +89,19 @@ jobs:
         with:
           name: crumbs-sdk-57-qualification
           path: ${{ runner.temp }}/crumbs-sdk-57
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Retain SDK 58 and actual app worker receipts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: crumbs-sdk-58-qualification
+          path: |
+            ${{ runner.temp }}/crumbs-sdk-58
+            ${{ runner.temp }}/crumbs-sdk-58-playground-babel
+            ${{ runner.temp }}/crumbs-sdk-58-playground-rust
+            ${{ runner.temp }}/crumbs-sdk-58-storybook-babel
+            ${{ runner.temp }}/crumbs-sdk-58-storybook-rust
           if-no-files-found: ignore
           retention-days: 14

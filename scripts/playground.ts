@@ -60,6 +60,8 @@ export async function stage(specifier: string, stagingParent = tmpdir(), options
   }
   const manifest = JSON.parse(await readFile(join(template, "package.json"), "utf8"))
   if (sdk === 56) {
+    // A native client belongs to the app SDK, not the retained library consumer.
+    delete manifest.dependencies["expo-dev-client"]
     // Reuse the pinned SDK 56 fixture without its unrelated design-system packages.
     // Keep the playground's own authoring dependencies and self-export contract.
     const baseline = JSON.parse(await readFile(join(root, "packages/css/fixtures/packed-distribution/app/package.json"), "utf8"))
@@ -76,8 +78,12 @@ export async function stage(specifier: string, stagingParent = tmpdir(), options
     manifest.dependencies = { ...profile.dependencies, [packageName]: specifier }
     manifest.devDependencies = { ...profile.devDependencies }
   }
-  if (sdk === 58) {
-    // RN 0.88 publishes types through exports only; a directory alias bypasses them.
+  if (sdk === 56 || sdk === 57) {
+    // Keep retained tooling on its existing Node contract, independently of SDK58.
+    manifest.engines = { ...manifest.engines, node: ">=22.13.0" }
+  }
+  if (sdk !== undefined) {
+    // Installed SDKs own every peer; remove workspace-specific native type redirection.
     // Installed demos are already app-local and need no workspace peer redirection.
     const tsconfigPath = join(directory, "tsconfig.json")
     const tsconfig = JSON.parse(await readFile(tsconfigPath, "utf8"))

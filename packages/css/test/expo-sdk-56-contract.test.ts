@@ -27,41 +27,6 @@ function readJson<T>(path: string): T {
 }
 
 describe("@opsydyn/crumbs-css Expo SDK 56/57 contract", () => {
-  it("pins Storybook to the SDK 57 native animation stack", () => {
-    const packageJson = readJson<PackageJson>(resolve(storybookRoot, "package.json"))
-
-    expect(packageJson.dependencies?.expo).toBe("57.0.27")
-    expect(packageJson.dependencies?.react).toBe("19.2.8")
-    expect(packageJson.dependencies?.["react-dom"]).toBe("19.2.8")
-    expect(packageJson.dependencies?.["react-native"]).toBe("0.86.3")
-    expect(packageJson.dependencies?.["@react-native-community/datetimepicker"]).toBe("9.1.0")
-    expect(packageJson.dependencies?.["@react-native-community/slider"]).toBe("5.2.0")
-    expect(packageJson.dependencies?.["react-native-gesture-handler"]).toBe("2.32.0")
-    expect(packageJson.dependencies?.["react-native-reanimated"]).toBe("4.5.1")
-    expect(packageJson.dependencies?.["react-native-safe-area-context"]).toBe("~5.7.0")
-    expect(packageJson.dependencies?.["react-native-worklets"]).toBe("0.10.1")
-    expect(packageJson.scripts?.["storybook:native"]).toContain(
-      "EXPO_PUBLIC_STORYBOOK_ENABLED=true",
-    )
-    expect(packageJson.scripts?.storybook).toBeUndefined()
-  })
-
-  it("aligns both apps with SDK 57 while retaining the library SDK 56 development baseline", () => {
-    const storybook = readJson<PackageJson>(resolve(storybookRoot, "package.json"))
-    const playground = readJson<PackageJson>(resolve(playgroundRoot, "package.json"))
-    const profile = readJson<SdkCandidate>(resolve(playgroundRoot, "upgrade", "expo-57.json"))
-    const lockfile = readFileSync(resolve(repoRoot, "bun.lock"), "utf8")
-    for (const [name, version] of Object.entries(profile.dependencies)) {
-      expect(playground.dependencies?.[name]).toBe(version)
-    }
-    expect(storybook.dependencies?.expo).toBe("57.0.27")
-    expect(storybook.dependencies?.react).toBe("19.2.8")
-    expect(storybook.dependencies?.["react-native"]).toBe("0.86.3")
-    expect(lockfile).toContain("expo@57.0.27")
-    expect(lockfile).toContain("react-native@0.86.3")
-    expect(lockfile).toContain("react-native@0.85.3")
-  })
-
   it("keeps the independent SDK 57 qualification profile outside the workspaces", () => {
     const root = readJson<{ readonly workspaces: readonly string[] }>(resolve(repoRoot, "package.json"))
     const candidate = readJson<SdkCandidate>(resolve(playgroundRoot, "upgrade", "expo-57.json"))

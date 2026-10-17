@@ -49,3 +49,24 @@ export function assertEnvironmentOnlyInputs(
     if (primed[file] !== current[file])
       throw new Error(`Environment-only cache probe changed input: ${file}`);
 }
+
+/** Pinned SDK58 app routes that require Expo's Babel transformations. */
+export function assertAppWorkerFallbackEvidence(
+  records: readonly unknown[],
+  app: "playground" | "storybook",
+): void {
+  const expected = [
+    ["node_modules/react-native/src/private/components/virtualview/VirtualViewNativeComponent.js", "full-metro:react-native-codegen"],
+    ["node_modules/react-native/Libraries/Animated/createAnimatedComponent.js", "full-metro:worklets-candidate"],
+    ...(app === "storybook" ? [
+      ["node_modules/react-native-worklets/src/debug/bundleMode.native.ts", "full-metro:worklets"],
+      ["node_modules/react-native-modal-datetime-picker/src/Modal.js", "full-metro:non-default-babel-config"],
+    ] : []),
+  ];
+  const { fallbacks } = summarizeRustWorkerEvents(records);
+  for (const [file, reason] of expected) {
+    if (!fallbacks.some(actual =>
+      (actual.file === file || actual.file.endsWith("/" + file)) && actual.reason === reason))
+      throw new Error(`Missing expected fallback for ${file}: ${reason}`);
+  }
+}

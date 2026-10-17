@@ -1,4 +1,4 @@
-import { useRef } from "react"
+import { useRef, type ElementRef } from "react"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
 import { ScrollView, Text, View } from "react-native"
 import { labelOfThemeMode } from "../styles/theme"
@@ -12,7 +12,7 @@ import { ThemeAxisPicker } from "./ThemeAxisPicker"
 import { ThemeModePicker } from "./ThemeModePicker"
 
 export function ShowcaseScreen() {
-  const scrollView = useRef<ScrollView>(null)
+  const scrollView = useRef<ElementRef<typeof ScrollView>>(null)
   const styles = useThemedStyles(s)
   const { mode } = useAppTheme()
 

@@ -201,7 +201,7 @@ describe("SDK 58 qualification boundaries", () => {
     try {
       for (const [sdk, expo] of [
         [57, "57.0.27"],
-        [58, "58.0.11"],
+        [58, "58.0.14"],
       ] as const) {
         const dir = await stage("file:/tmp/crumbs.tgz", parent, { sdk });
         const manifest = JSON.parse(

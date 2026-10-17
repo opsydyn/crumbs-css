@@ -1,0 +1,63 @@
+appId: dev.crumbs.playground
+---
+- assertVisible: Crumbs playground
+- tapOn: Switch to dark
+- assertVisible: Switch to light
+- swipe:
+    start: 50%, 82%
+    end: 50%, 48%
+    duration: 800
+- takeScreenshot: android-${PROFILE}-list-drag
+- tapOn: Switch to light
+- assertVisible: Switch to dark
+- tapOn: Form
+- tapOn: Component name
+- inputText: SDK58 Android
+- hideKeyboard
+- tapOn: Enabled
+- assertVisible: SDK58 Android · enabled
+- takeScreenshot: android-${PROFILE}-form
+- tapOn: Scopes
+- tapOn: Open portal from nested theme
+- assertVisible: Portal theme probe
+- takeScreenshot: android-${PROFILE}-portal
+- tapOn: Close
+- tapOn: Runtime extensions
+- tapOn:
+    id: extensions-generated-action
+- tapOn:
+    id: extensions-control-action
+- assertVisible: Action 1
+- tapOn:
+    id: extensions-mode
+- tapOn:
+    id: extensions-theme
+- takeScreenshot: android-${PROFILE}-factory
+- tapOn: Container conditions
+- assertVisible: 'A: narrow / column / .*'
+- tapOn:
+    id: container-action-wide
+- assertVisible: 'A: wide / row / .*'
+- takeScreenshot: android-${PROFILE}-containers
+- tapOn: Native motion
+- tapOn:
+    id: motion-policy-full
+- tapOn:
+    id: motion-a-select
+    waitToSettleTimeoutMs: 0
+- tapOn:
+    id: motion-a-cancel
+    waitToSettleTimeoutMs: 0
+- assertVisible: 'M113:.*"status":"cancelled".*'
+- takeScreenshot: android-${PROFILE}-motion-cancel
+- tapOn:
+    id: motion-a-set
+- tapOn:
+    id: motion-a-select
+    waitToSettleTimeoutMs: 0
+- tapOn:
+    id: motion-a-unmount
+    waitToSettleTimeoutMs: 0
+- assertNotVisible: Card A · mount 0
+- assertVisible: Card B · mount 0
+- takeScreenshot: android-${PROFILE}-motion-unmount

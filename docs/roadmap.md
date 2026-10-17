@@ -3231,3 +3231,12 @@ The [exact-artifact packet](evidence/2026-10-16-m1-10a-expo58/README.md) records
 The same candidate tarball passes all three SDKs. Rust records 875 development and 1,263 production completions, with explicit Worklets/codegen fallbacks. These counts establish backend execution, not speed. Full strict declaration checking still reports three RN88 failures reproduced without Crumbs; normal strict consumer/API checks pass. Source mapping is export-level, with file-start anchors for synthetic helpers. Independent review found and repaired parser syntax compatibility and a confounded environment-cache probe. Both backends now pass environment-only changes and restoration with unchanged source/configuration bytes. Build/types and 1,885 library plus 33 Storybook tests pass (one existing skip). Destructured-export declaration anchors remain a documented Minor.
 
 **Next recommended slice: M1.10b — upgrade Playground and Storybook together and verify actual iOS/Android interactions in default/Rust profiles.** M1.10c docs/skill/release preparation and the unchanged M10.5 performance gate remain later work. Physical items remain deferred.
+
+
+### M1.10b — SDK58 apps local qualification (2026-10-17)
+
+Playground and Storybook now use the pinned Expo58/React19.3/RN0.88 app cohort. Babel remains the default; actual Rust execution and expected native-codegen/Worklets/legacy-Flow fallback routes pass under the opt-in profile. Both apps pass all-platform exports and real owned iOS26.5/Android16 development-client journeys under both workers. SDK56/57 installed profiles and their prior Node range remain retained. RN88 native-event and Metro optional-name compatibility repairs are covered by focused regressions.
+
+The [source/tarball/native evidence packet](evidence/2026-10-16-m1-10b-expo58-apps/README.md) records1899 library and33Storybook passes, exact package bytes, binary identities, native interactions and the resolved independent-review finding. **M1.10b remains open for clean hosted frozen-install/three-SDK CI.** Physical/spoken-reader/iOS27/DeviceHub/release-FPS contexts stay deferred. No performance or release gate changed.
+
+**Next: finish M1.10b hosted CI closure, then M1.10c documentation, consumer skill and release preparation.** M1.10c has not started.
