@@ -1,0 +1,29 @@
+[
+  {
+    "id": "attribution",
+    "cmd": "PYTHONDONTWRITEBYTECODE=1 python3 docs/evidence/2026-10-17-m10-5-repeated-package-cost/verify.py --self-test --repository /Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css",
+    "chunk_id": "c8372d",
+    "wall_time_seconds": 0.291611333,
+    "exit_code": 0,
+    "original_token_count": 87,
+    "output": "{\"status\": \"verified-diagnostic-only\", \"retainedTransforms\": 120, \"observedCompileCalls\": 90, \"repeatedPackageFiles\": 8, \"performanceQualified\": false, \"livePreservationChecked\": true, \"selfTests\": {\"relocation\": \"pass\", \"overlapUnion\": \"pass\", \"negativeControls\": [\"output-drift\", \"missing-package-input\", \"false-qualification\", \"corrupt-raw\"]}}\n"
+  },
+  {
+    "id": "retained-context-history",
+    "cmd": "python3 docs/evidence/2026-10-07-m10-5-compiler-session-requalification/verify.py",
+    "chunk_id": "4b50ff",
+    "wall_time_seconds": 0.004399958,
+    "exit_code": 0,
+    "original_token_count": 27,
+    "output": "verified: 124 raw reports, 128 receipts, 105 matrix runs, 6690 exact paired rows; retained benefit rejected\n"
+  },
+  {
+    "id": "later-restore-correction",
+    "cmd": "/Users/alancurrie/.bun/bin/bun docs/evidence/2026-10-07-m10-5-fail-closed-metro-parity/verify.cjs",
+    "chunk_id": "254e07",
+    "wall_time_seconds": 0.000006459,
+    "exit_code": 1,
+    "original_token_count": 189,
+    "output": "4 | \n5 | const evidence = __dirname;\n6 | const repository = resolve(evidence, \"../../..\");\n7 | const sha256 = bytes => createHash(\"sha256\").update(bytes).digest(\"hex\");\n8 | const readJson = path => JSON.parse(readFileSync(join(evidence, path), \"utf8\"));\n9 | const fail = message => { throw new Error(message); };\n                                        ^\nerror: Source hash mismatch: packages/css/src/transformer.ts\n      at fail (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-07-m10-5-fail-closed-metro-parity/verify.cjs:9:37)\n      at <anonymous> (/Users/alancurrie/.codex/worktrees/crumbs-main-merge/crumbs-css/docs/evidence/2026-10-07-m10-5-fail-closed-metro-parity/verify.cjs:20:30)\n\nBun v1.4.2 (macOS arm64)\n"
+  }
+]

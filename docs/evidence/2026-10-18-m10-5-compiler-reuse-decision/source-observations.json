@@ -1,0 +1,77 @@
+[
+  {
+    "path": "packages/css/src/transformer.ts",
+    "sha256": "a2c51656e84d639ef634102649c03c189dfc4c99d88686b5620f1500f4ca146d",
+    "excerpts": [
+      {
+        "startLine": 155,
+        "endLine": 191,
+        "text": "\nfunction evaluateCompiledCssModule(source: string, filePath: string, cssAdapter: Adapter): unknown {\n  const fileRequire = createRequire(filePath)\n  const module = { exports: {} as unknown, filename: filePath, id: filePath }\n  const sandbox = {\n    Buffer,\n    __adapter__: cssAdapter,\n    __dirname: path.dirname(filePath),\n    __filename: filePath,\n    console,\n    exports: module.exports,\n    global: undefined as unknown,\n    module,\n    process,\n    require: fileRequire,\n  }\n  sandbox.global = sandbox\n\n  const adapterBoundSource = `\n    const { setAdapter, removeAdapter } = require('@vanilla-extract/css/adapter');\n    setAdapter(__adapter__);\n    try {\n      ${source}\n    } finally {\n      if (removeAdapter) {\n        removeAdapter();\n      }\n    }\n  `\n\n  new vm.Script(adapterBoundSource, { filename: filePath }).runInNewContext(sandbox)\n  return module.exports\n}\n\nfunction restoreNodeEnv(value: string | undefined): void {\n  if (value === undefined) {\n    delete process.env.NODE_ENV"
+      },
+      {
+        "startLine": 368,
+        "endLine": 409,
+        "text": "async function compile(options: Parameters<typeof compileVanilla>[0]) {\n  let inputs: Record<string, unknown> = {}\n  const capture: EsbuildPlugin = { name: \"crumbs-resolution-receipt\", setup(build) {\n    ;(build as OnEndBuild).onEnd(result => { inputs = result.metafile?.inputs ?? {} })\n  } }\n  return compileWithStableResolution({ cwd: options.cwd ?? process.cwd(), absoluteEntryPath: path.resolve(options.cwd ?? process.cwd(), options.filePath) }, async () => {\n    const result = await compileVanilla({ ...options, esbuildOptions: { ...options.esbuildOptions, plugins: [...(options.esbuildOptions?.plugins ?? []), capture] } })\n    return { ...result, inputs }\n  })\n}\n\nasync function transformCssTsToStyleSheetWithMetadata(\n  filePath: string,\n  cwd: string,\n  options: TransformCssTsOptions = {},\n  manifestSidecarOptions?: TransformCssTsManifestSidecarOptions,\n): Promise<NativeTransformResult> {\n  const identOption = process.env.NODE_ENV === \"production\" ? \"short\" : \"debug\"\n  const includeStyleExplanations = options.includeStyleExplanations ?? options.dev ?? process.env.NODE_ENV !== \"production\"\n  const absoluteFilePath = path.isAbsolute(filePath) ? filePath : path.resolve(cwd, filePath)\n  assertPackageScopeIdentity(cwd, getPackageInfo(cwd))\n\n  // Capture esbuild's resolved inputs via an onEnd plugin so we know which\n  // files this .css.ts depends on at compile time.\n  let capturedInputs: Record<string, unknown> = {}\n  const capturePlugin: EsbuildPlugin = {\n    name: \"crumbs-capture-deps\",\n    setup(build) {\n      ;(build as OnEndBuild).onEnd((result) => {\n        capturedInputs = result.metafile?.inputs ?? {}\n      })\n    },\n  }\n\n  const { source, resolutionIdentity: authoringResolutionIdentity } = await compile({\n    filePath: absoluteFilePath,\n    cwd,\n    identOption,\n    esbuildOptions: { plugins: [capturePlugin] },\n  })\n\n  const nativeLocalByClass = new Map<string, {capture:LocalVarCaptureResult;primitives:NativePrimitiveDomain}>()"
+      }
+    ]
+  },
+  {
+    "path": "packages/css/src/compiler/stable-resolution-compile.ts",
+    "sha256": "6f7012c3c4edc446300772a71d6c379ccc65d9a491f0569bf94e6d6195f678ee",
+    "excerpts": [
+      {
+        "startLine": 1,
+        "endLine": 54,
+        "text": "import * as path from 'node:path'\nimport {captureResolutionIdentity, type ResolutionIdentity} from './resolution-identity'\n\ntype Inputs = Readonly<Record<string, unknown>>\n// Resolution plans only: never source, exports, outputs or retained compiler contexts.\n// Bound both graph size and owner count; evict oldest owner deterministically.\nconst plans = new Map<string, Inputs>()\nconst receiptKey = (identity: ResolutionIdentity) => JSON.stringify({files:identity.files,links:identity.links})\nfunction authoredPlan(inputs: Inputs): Inputs | undefined {\n const entries=Object.entries(inputs).filter(([file])=>!file.split(/[\\\\/]/).some(segment=>segment==='node_modules'||segment==='dist'))\n if (entries.length>512) return undefined\n let totalImports=0, totalCharacters=0\n const plan: Record<string, unknown> = {}\n for (const [file, info] of entries) {\n  totalCharacters += file.length\n  if (file.length>4096 || totalCharacters>65536) return undefined\n  const imports=info !== null && typeof info==='object' && 'imports' in info && Array.isArray(info.imports) ? info.imports : []\n  const copies=[]\n  for(const item of imports){\n   if(++totalImports>1024) return undefined\n   if(item===null||typeof item!=='object'||typeof item.original!=='string') continue\n   totalCharacters += item.original.length\n   if(item.original.length>4096 || totalCharacters>65536) return undefined\n   copies.push(Object.freeze({original:item.original,external:item.external===true}))\n  }\n  plan[file]=Object.freeze({imports:Object.freeze(copies)})\n }\n return Object.freeze(plan)\n}\n\nexport async function compileWithStableResolution<T extends {source:string;inputs:Inputs}>(\n options: {readonly cwd:string;readonly absoluteEntryPath:string},\n compile:()=>Promise<T>,\n): Promise<T & {resolutionIdentity:ResolutionIdentity}> {\n const owner=path.resolve(options.cwd)+'\\0'+path.resolve(options.absoluteEntryPath)\n let inputs: Inputs=plans.get(owner) ?? {}\n for(let attempt=0;attempt<3;attempt++){\n  const before=captureResolutionIdentity(inputs,{...options,verification:true})\n  const result=await compile()\n  const after=captureResolutionIdentity(result.inputs,{...options,verification:true})\n  if (!after.cacheable) throw new Error(\"Native style resolution could not be verified; check configuration extends and resolution metadata\")\n  if(receiptKey(before)===receiptKey(after)){\n   const plan=authoredPlan(result.inputs)\n   if(plans.size>=128&&!plans.has(owner)) plans.delete(plans.keys().next().value!)\n   if(plan!==undefined) plans.set(owner,plan)\n   else plans.delete(owner)\n   return {...result,resolutionIdentity:after}\n  }\n  // Discovery or a concurrent edit requires a fresh pass whose complete\n  // resolution baseline is established before compilation begins.\n  // Large graphs are verified in full but never retained as resolution hints.\n  inputs=result.inputs\n }\n plans.delete(owner)"
+      }
+    ]
+  },
+  {
+    "path": "packages/css/src/theme-token.ts",
+    "sha256": "7166c3452b81da6a321ec194a4ffb5bf3f48c356e064a30e4343a395de22bd33",
+    "excerpts": [
+      {
+        "startLine": 115,
+        "endLine": 127,
+        "text": "const domainContracts = sharedRegistry(\n  Symbol.for(\"crumbs.css.theme-token-domain-contracts.v1\"),\n  () => new WeakMap<object, ReadonlyMap<string, ThemeTokenDomainMetadata>>(),\n)\nconst contractIdentities = sharedRegistry(\n  Symbol.for(\"crumbs.css.theme-contract-identities.v1\"),\n  () => new Map<string, { readonly identity: TokenContractIdentity; readonly signature: string }>(),\n)\nconst contractIdentitySymbol = Symbol.for(\"crumbs.css.theme-contract-identity.v1\")\nconst themeTokenRegistry = sharedRegistry(\n  Symbol.for(\"crumbs.css.theme-token-registry.v1\"),\n  () => new Map<ThemeVar, ThemeTokenReferenceMetadata>(),\n)"
+      },
+      {
+        "startLine": 287,
+        "endLine": 294,
+        "text": "function sharedRegistry<T>(key: symbol, create: () => T): T {\n  const root = globalThis as unknown as Record<PropertyKey, unknown>\n  const descriptor = Object.getOwnPropertyDescriptor(root, key)\n  if (descriptor !== undefined && \"value\" in descriptor) return descriptor.value as T\n  const value = create()\n  Object.defineProperty(root, key, {value, enumerable: false, configurable: false, writable: false})\n  return value\n}"
+      }
+    ]
+  },
+  {
+    "path": "node_modules/.bun/@vanilla-extract+integration@8.0.10/node_modules/@vanilla-extract/integration/dist/vanilla-extract-integration.cjs.dev.js",
+    "sha256": "172d84996b213ed3091b4028c085f399c8b598090c6bda4d84fc6d2b75159fc1",
+    "excerpts": [
+      {
+        "startLine": 465,
+        "endLine": 541,
+        "text": "\nconst vanillaExtractTransformPlugin = ({\n  identOption\n}) => ({\n  name: 'vanilla-extract-filescope',\n  setup(build) {\n    const packageInfo = getPackageInfo(build.initialOptions.absWorkingDir);\n    build.onLoad({\n      filter: cssFileFilter\n    }, async ({\n      path: path$1\n    }) => {\n      const originalSource = await fs.promises.readFile(path$1, 'utf-8');\n      const source = await transform({\n        source: originalSource,\n        filePath: path$1,\n        rootPath: build.initialOptions.absWorkingDir,\n        packageName: packageInfo.name,\n        identOption: identOption ?? (build.initialOptions.minify ? 'short' : 'debug')\n      });\n      return {\n        contents: source,\n        loader: path$1.match(/\\.(ts|tsx)$/i) ? 'ts' : undefined,\n        resolveDir: path.dirname(path$1)\n      };\n    });\n  }\n});\nasync function compile({\n  filePath,\n  identOption,\n  cwd = process.cwd(),\n  esbuildOptions\n}) {\n  const result = await esbuild.build({\n    entryPoints: [filePath],\n    metafile: true,\n    bundle: true,\n    external: ['@vanilla-extract', ...((esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.external) ?? [])],\n    platform: 'node',\n    write: false,\n    plugins: [vanillaExtractTransformPlugin({\n      identOption\n    }), ...((esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.plugins) ?? [])],\n    absWorkingDir: cwd,\n    loader: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.loader,\n    define: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.define,\n    tsconfig: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.tsconfig,\n    conditions: esbuildOptions === null || esbuildOptions === void 0 ? void 0 : esbuildOptions.conditions\n  });\n  const {\n    outputFiles,\n    metafile\n  } = result;\n  if (!outputFiles || outputFiles.length !== 1) {\n    throw new Error('Invalid child compilation');\n  }\n  return {\n    source: outputFiles[0].text,\n    watchFiles: Object.keys((metafile === null || metafile === void 0 ? void 0 : metafile.inputs) || {}).map(filePath => path.join(cwd, filePath))\n  };\n}\n\nexports.addFileScope = addFileScope;\nexports.compile = compile;\nexports.cssFileFilter = cssFileFilter;\nexports.deserializeCss = deserializeCss;\nexports.getPackageInfo = getPackageInfo;\nexports.getSourceFromVirtualCssFile = getSourceFromVirtualCssFile;\nexports.hash = hash;\nexports.normalizePath = normalizePath;\nexports.parseFileScope = parseFileScope;\nexports.processVanillaFile = processVanillaFile;\nexports.serializeCss = serializeCss;\nexports.serializeVanillaModule = serializeVanillaModule;\nexports.stringifyFileScope = stringifyFileScope;\nexports.transform = transform;"
+      }
+    ]
+  },
+  {
+    "path": "node_modules/.bun/esbuild@0.27.7/node_modules/esbuild/lib/main.d.ts",
+    "sha256": "161c8e0690c46021506e32fda85956d785b70f309ae97011fd27374c065cac9b",
+    "excerpts": [
+      {
+        "startLine": 443,
+        "endLine": 457,
+        "text": "export interface OnLoadResult {\n  pluginName?: string\n\n  errors?: PartialMessage[]\n  warnings?: PartialMessage[]\n\n  contents?: string | Uint8Array\n  resolveDir?: string\n  loader?: Loader\n  pluginData?: any\n\n  watchFiles?: string[]\n  watchDirs?: string[]\n}\n"
+      },
+      {
+        "startLine": 524,
+        "endLine": 537,
+        "text": "export interface BuildContext<ProvidedOptions extends BuildOptions = BuildOptions> {\n  /** Documentation: https://esbuild.github.io/api/#rebuild */\n  rebuild(): Promise<BuildResult<ProvidedOptions>>\n\n  /** Documentation: https://esbuild.github.io/api/#watch */\n  watch(options?: WatchOptions): Promise<void>\n\n  /** Documentation: https://esbuild.github.io/api/#serve */\n  serve(options?: ServeOptions): Promise<ServeResult>\n\n  cancel(): Promise<void>\n  dispose(): Promise<void>\n}\n"
+      },
+      {
+        "startLine": 549,
+        "endLine": 578,
+        "text": " * - Works in browser: yes\n *\n * Documentation: https://esbuild.github.io/api/#build\n */\nexport declare function build<T extends BuildOptions>(options: SameShape<BuildOptions, T>): Promise<BuildResult<T>>\n\n/**\n * This is the advanced long-running form of \"build\" that supports additional\n * features such as watch mode and a local development server.\n *\n * - Works in node: yes\n * - Works in browser: no\n *\n * Documentation: https://esbuild.github.io/api/#build\n */\nexport declare function context<T extends BuildOptions>(options: SameShape<BuildOptions, T>): Promise<BuildContext<T>>\n\n/**\n * This function transforms a single JavaScript file. It can be used to minify\n * JavaScript, convert TypeScript/JSX to JavaScript, or convert newer JavaScript\n * to older JavaScript. It returns a promise that is either resolved with a\n * \"TransformResult\" object or rejected with a \"TransformFailure\" object.\n *\n * - Works in node: yes\n * - Works in browser: yes\n *\n * Documentation: https://esbuild.github.io/api/#transform\n */\nexport declare function transform<T extends TransformOptions>(input: string | Uint8Array, options?: SameShape<TransformOptions, T>): Promise<TransformResult<T>>\n"
+      }
+    ]
+  }
+]
