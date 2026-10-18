@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/opsydyn/crumbs-css/compare/v1.2.0...v1.3.0) (2026-10-18)
+
+
+### Features
+
+* **m9.3a:** add and qualify native devtools widget ([bdc0ab7](https://github.com/opsydyn/crumbs-css/commit/bdc0ab7fb9c36f4576f14090df8a9efaf7a039db))
+
+
+### Bug Fixes
+
+* **m10.5:** adopt measured compiler baseline for v1.2 publication ([6e42881](https://github.com/opsydyn/crumbs-css/commit/6e428811ce0f908dda22212470a80d9325e40428))
+
 ## [1.2.0](https://github.com/opsydyn/crumbs-css/compare/v1.1.1...v1.2.0) (2026-10-17)
 
 
