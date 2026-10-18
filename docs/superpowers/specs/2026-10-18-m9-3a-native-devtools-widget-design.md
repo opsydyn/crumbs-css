@@ -1,7 +1,7 @@
 # M9.3a — Native developer widget and dogfooding
 
 **Date:** 2026-10-18\
-**Status:** Proposed written specification; direction approved, written review pending.\
+**Status:** Written specification approved by the user on 2026-10-18; implementation plan awaits review.\
 **Roadmap:** [M9.3a](../../roadmap.md), additive follow-up to shipped M9.3.\
 **Baseline:** npm 1.2.0; source documentation commit `383dd844c4d26c34c2bab6d09c83234e9f3816b0`.\
 **Execution:** Native/inline, retained from the user's preference. One implementation slice including Playground and Storybook dogfooding; commit its outcome.
