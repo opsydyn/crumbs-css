@@ -1,4 +1,4 @@
-# Typed component pattern (Crumbs 1.1.0 / 1.1.1 / 1.2.0)
+# Typed component pattern (Crumbs 1.1.0 / 1.1.1 / 1.2.0 / 1.3.0)
 
 Use identified typed contracts for shared design-system domains. Keep brand, mode
 and density as independent `TokenThemeScopeProvider` layers when the app needs
@@ -130,6 +130,8 @@ Plans store finite scale entries without enumerating combinations. Keep resolver
 for their descriptor lifetime; dispose explicitly owned long-lived resolvers when
 retiring them. Repeatedly allocating definitions or increasing cache sizes without
 measurement is not a performance improvement.
+
+For an opt-in development probe of the `card` recipe, use the [native inspector reference](native-inspector.md).
 
 ## Runtime factories
 

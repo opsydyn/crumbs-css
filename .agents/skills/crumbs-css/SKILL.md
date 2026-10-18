@@ -1,11 +1,11 @@
 ---
 name: crumbs-css
-description: Use when an Expo or React Native app uses @opsydyn/crumbs-css, or when adding or debugging its Metro setup, typed themes, component recipes, Sprinkles, local variables, native adapters or runtime extensions.
+description: Use when an Expo or React Native app uses @opsydyn/crumbs-css, or when adding or debugging its Metro setup, typed themes, component recipes, Sprinkles, local variables, native adapters, runtime extensions or the native style inspector.
 ---
 
 # Crumbs CSS
 
-Build consumer apps and design systems with the installed public API. This reference covers the **1.2.0 SDK 58 compatibility release** and retained **1.1.0/1.1.1 SDK 56/57** APIs. Check the installed version, lockfile and export map; a source candidate is not proof of npm publication. Preserve the app's architecture and requested scope.
+Build consumer apps and design systems with the installed public API. This reference covers the **1.3.0 native inspector**, **1.2.0 SDK 58 compatibility** and retained **1.1.0/1.1.1 SDK 56/57** APIs. Check the installed version, lockfile and export map; a source candidate is not proof of npm publication. Preserve the app's architecture and requested scope.
 
 ## Setup and imports
 
@@ -24,6 +24,10 @@ All suffixes below follow `@opsydyn/crumbs-css`:
 | Instance scalars | `/style`: `createVar`, `fallbackVar` | `/theme/vars`: `assignVars`, `useAssignedStyles` |
 
 Read [the design-system example](references/design-system.md) when combining these APIs or selecting an extension strategy. For optional features, consult the linked guides there; use the [complete API index](https://opsydyn.github.io/crumbs-css/reference/package-entrypoints-and-apis/) for exact exports.
+
+## Inspect native styles (1.3.0+)
+
+Read [the native inspector reference](references/native-inspector.md) before adding probes or diagnosing stale/partial reports. It supplies a development-only module boundary and a recipe probe for the ActionCard example. Register the original compiled module and current inputs in the target’s theme scope; preserve native interactions. Version 1.2.0 has headless `/devtools` explanations but no `/devtools/native` widget.
 
 ## Native boundaries and common mistakes
 

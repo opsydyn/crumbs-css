@@ -1,6 +1,6 @@
 # Expo SDK setup and worker routing
 
-Check the installed Crumbs version first. Crumbs 1.1.0/1.1.1 qualify SDK 56/RN 0.85 and SDK 57/RN 0.86; they do not declare RN 0.88. Crumbs 1.2.0 adds SDK 58/RN 0.88. A source candidate or matching version label does not establish npm publication: check the release status and installed artifact. Never fix an unsupported SDK by forcing peers.
+Check the installed Crumbs version first. Crumbs 1.1.0/1.1.1 qualify SDK 56/RN 0.85 and SDK 57/RN 0.86; they do not declare RN 0.88. Crumbs 1.2.0 adds SDK 58/RN 0.88; 1.3.0 retains these SDK profiles and adds the optional native inspector. A source candidate or matching version label does not establish npm publication: check the release status and installed artifact. Never fix an unsupported SDK by forcing peers.
 
 | SDK | Matched qualification inputs | Tooling Node |
 | --- | --- | --- |
