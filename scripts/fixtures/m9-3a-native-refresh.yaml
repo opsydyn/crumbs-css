@@ -1,0 +1,16 @@
+appId: ${APP_ID}
+---
+- scrollUntilVisible:
+    element: Refresh explanation
+    direction: UP
+    timeout: 20000
+- extendedWaitUntil:
+    visible: Stale — refresh to inspect current inputs
+    timeout: 20000
+- tapOn: Refresh explanation
+- assertNotVisible: Stale — refresh to inspect current inputs
+- scrollUntilVisible:
+    element: '${EXPECTED}'
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: devtools-refreshed

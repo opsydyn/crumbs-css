@@ -45,7 +45,10 @@ const containerRuntimeEntries = { "theme-containers": "src/theme-containers.ts" 
 const themeCoreRuntimeEntries = {"theme-core": "src/theme-core.ts"}
 const themeTokenRuntimeEntries = {"theme-token": "src/theme-token-only.ts"}
 
+const nativeDevtoolsEntries = { "devtools-native": "src/devtools/native/index.ts" }
+
 export default defineConfig([
+  { ...common, clean: false, dts: false, entry: nativeDevtoolsEntries },
   { ...common, clean: false, dts: false, entry: extensionRuntimeEntries },
   { ...common, clean: false, dts: false, entry: algebraRuntimeEntries },
   { ...common, clean: false, dts: false, entry: motionRuntimeEntries },
@@ -72,6 +75,7 @@ export default defineConfig([
     format: ["esm"],
     dts: { emitDtsOnly: true },
     entry: {
+      ...nativeDevtoolsEntries,
       ...extensionRuntimeEntries,
       ...algebraRuntimeEntries,
       ...motionRuntimeEntries,
@@ -88,7 +92,7 @@ export default defineConfig([
         // A dual-format declaration-only build emits CJS JavaScript when its
         // re-export optimization disables the second DTS pass. Write the same
         // canonical re-export stubs without rebuilding that JavaScript graph.
-        for (const name of [...Object.keys(extensionRuntimeEntries), ...Object.keys(algebraRuntimeEntries), ...Object.keys(motionRuntimeEntries), ...Object.keys(motionNativeRuntimeEntries), ...Object.keys(containerRuntimeEntries), ...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), ...Object.keys(themeCoreRuntimeEntries), ...Object.keys(themeTokenRuntimeEntries), "devtools"]) {
+        for (const name of [...Object.keys(nativeDevtoolsEntries), ...Object.keys(extensionRuntimeEntries), ...Object.keys(algebraRuntimeEntries), ...Object.keys(motionRuntimeEntries), ...Object.keys(motionNativeRuntimeEntries), ...Object.keys(containerRuntimeEntries), ...Object.keys(toolEntries), ...Object.keys(themeRuntimeEntries), ...Object.keys(themeCoreRuntimeEntries), ...Object.keys(themeTokenRuntimeEntries), "devtools"]) {
           writeFileSync(`dist/${name}.d.cts`, `export * from "./${name}.mjs";\n`)
         }
       },

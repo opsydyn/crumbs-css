@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Published version `1.2.0` adds Expo SDK 58 / React Native 0.88 compatibility and optional genuine Expo Rust worker routing, retaining SDK 56/57 and the v1 API. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for publication and release-gate status. Earlier version-specific performance exceptions are not carried forward.
+Version `1.3.0` adds the opt-in native inspector at `/devtools/native`, retaining SDK 56/57/58 compatibility and optional Expo Rust worker routing. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.3.0.md) for publication and exact-artifact qualification. Earlier version-specific performance exceptions are not carried forward.
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -53,6 +53,7 @@ The repository provides a [Crumbs consumer skill](https://github.com/opsydyn/cru
 | Policy and governance | `/tooling/policy`, `/tooling/ownership` | `checkDesignSystemPolicy`, `getBuiltInPolicyPreset`, `annotateDesignSystemReport` |
 | DTCG import and source migrations | `/tooling/dtcg`, `/tooling/migrations` | `importDtcgTheme`, `planSourceMigration` |
 | Explain styles | `/devtools` | `explainStyle`, `StyleExplanationInputError` |
+| Native inspector (1.3.0+) | `/devtools/native` | `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget` |
 | Metro integration and diagnostics | `/metro-plugin`, package root | `withNativeStyles`, `createNativeStylesCacheStore`, `NativeStylesDiagnosticCode`, `formatNativeStylesDiagnostic` |
 
 Every public value and type is listed in the [complete API index](https://github.com/opsydyn/crumbs-css#complete-public-api) and the [API reference](https://opsydyn.github.io/crumbs-css/reference/package-entrypoints-and-apis/).
@@ -83,9 +84,9 @@ See the full compatibility matrix in
 Check the release status above for availability, then install the compatibility release in your Expo app:
 
 ```sh
-bun add @opsydyn/crumbs-css@1.2.0
+bun add @opsydyn/crumbs-css@1.3.0
 # or
-npm install @opsydyn/crumbs-css@1.2.0
+npm install @opsydyn/crumbs-css@1.3.0
 ```
 
 Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.
@@ -551,3 +552,14 @@ For Node factory graphs, version 1 also refuses package export maps containing
 `module-sync` or `node-addons` conditions. Those built-in branches cannot share a
 reliable proof across the qualified Node floor/current versions and the integration
 compiler. Use the supported `node`/`import`/`require`/`default` export branches.
+
+### `./devtools/native` (1.3.0+)
+
+**Values:** `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget`.
+
+**Type-only exports:** `CrumbsDevtoolsCapture`, `CrumbsDevtoolsWidgetProps`,
+`CrumbsInspectorInput`, `CrumbsInspectorTargetId`, `CrumbsInspectorTargetOptions`.
+
+Opt-in React Native inspector for explicitly registered mounted targets. Requires a
+host clipboard adapter and a development-only import boundary. This entry is not
+in v1.2.0; it is introduced in v1.3.0. Check the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.3.0.md) for publication. See the [explanation guide](https://opsydyn.github.io/crumbs-css/how-to/explain-native-styles/).

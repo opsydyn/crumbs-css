@@ -1,0 +1,54 @@
+appId: ${APP_ID}
+---
+# Start in Diagnosis Light after the main/causes flows.
+- tapOn:
+    text: Close inspector
+    optional: true
+- runFlow:
+    when:
+      visible: 'Action disabled: true'
+    commands:
+      - tapOn: Toggle inspected variant
+- assertVisible: 'Action disabled: false'
+- tapOn: Open Crumbs inspector
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
+- tapOn: Inspect Showcase action
+- scrollUntilVisible:
+    element: '(?s).*resolvedValue.*#905f00.*'
+    direction: DOWN
+    timeout: 20000
+- tapOn: Close inspector
+- tapOn: '(?i)^Dark$'
+- tapOn: Open Crumbs inspector
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
+- tapOn: Inspect Showcase card
+- scrollUntilVisible:
+    element: '(?s).*resolvedValue.*#17120e.*'
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: devtools-dark-token
+- tapOn: Close inspector
+- tapOn: '(?i)^Light$'
+- tapOn: Open Crumbs inspector
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
+- tapOn: Inspect Showcase card
+- scrollUntilVisible:
+    element: '(?s).*resolvedValue.*#fbf6ed.*'
+    direction: DOWN
+    timeout: 20000
+- tapOn: Close inspector

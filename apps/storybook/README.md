@@ -23,3 +23,16 @@ Expo Doctor can report the library's distinct development React/native copies. T
 The Metro wrapper preserves strict Crumbs diagnostics, on-device addons and runtime factory imports. `app:check` clears Metro’s export cache, verifies LiteUI/Controls/Actions in every platform’s source maps, and checks runtime source isolation after exporting the actual Storybook entry. Tests run through `bun run test`; interaction and device performance require their own checks.
 
 The [M1.9g qualification packet](../../docs/evidence/2026-10-11-m1-9g-storybook57/README.md) records each platform’s current status. Selected iOS and Android LiteUI interactions pass; exports and native interaction are recorded separately.
+
+## M9.3a inspector dogfooding (source build)
+
+In development, open **Devtools / Diagnosis / Light** or **Dark**, then open **Crumbs**. Inspect a scoped card,
+the deliberate opacity override and a recipe variant. Change the fixture, Refresh,
+preview/copy a report and use **Verify copied report** to check the clipboard.
+Missing metadata and target removal are deliberate negative cases.
+
+The development adapter keeps widget/probe/clipboard imports out of production.
+Expo Go SDK58 includes the clipboard module; existing custom clients need a
+rebuild after adding it. See [native checks](e2e/README.md) and the
+[M9.3a evidence](../../docs/evidence/2026-10-18-m9-3a-native-devtools/README.md)
+for actual coverage and remaining gaps. This API is not in npm v1.2.0.

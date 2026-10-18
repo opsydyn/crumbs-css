@@ -10,7 +10,7 @@ recipes and atomic utilities; add themes, scoped design tokens, conditions, moti
 factories through explicit package entrypoints.
 
 **Crumbs CSS v1 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases).**
-[Crumbs CSS `1.2.0`](https://www.npmjs.com/package/@opsydyn/crumbs-css/v/1.2.0) is published on npm as `latest` and on [GitHub](https://github.com/opsydyn/crumbs-css/releases/tag/v1.2.0). It adds Expo SDK 58 / React Native 0.88 qualification while retaining SDK 56 / RN 0.85 and SDK 57 / RN 0.86. Playground and Storybook use SDK 58, with Babel as the default and qualified opt-in Expo Rust worker routing. See [release status](docs/releases/1.2.0.md) for the exact artifact and accepted compiler baseline, and [native/worker evidence](docs/evidence/2026-10-16-m1-10b-expo58-apps/README.md).
+Crumbs CSS **1.3.0** adds an opt-in native style inspector: select explicitly registered targets, explain token/variant/override inputs, refresh stale captures and preview/copy bounded reports. It retains Expo SDK 56/57/58 support, Babel by default and opt-in Expo Rust worker routing. See [release status](docs/releases/1.3.0.md) for publication and exact-artifact qualification, and the [screenshot guide](docs/src/content/docs/how-to/explain-native-styles.mdx#native-inspector-in-use).
 
 ## Get started
 
@@ -21,9 +21,9 @@ TypeScript `>=5.9 <7` is optional for source migration tooling. Effect 4 is Crum
 Install the published SDK 56/57/58 compatibility version:
 
 ```sh
-npm install @opsydyn/crumbs-css@1.2.0
+npm install @opsydyn/crumbs-css@1.3.0
 # or
-bun add @opsydyn/crumbs-css@1.2.0
+bun add @opsydyn/crumbs-css@1.3.0
 ```
 
 Wrap Expo's Metro configuration:
@@ -80,7 +80,7 @@ Stop Metro and run `npx expo start --clear`. Babel remains the default when this
 To build the immutable v1 source yourself:
 
 ```sh
-git clone --branch v1.2.0 https://github.com/opsydyn/crumbs-css.git
+git clone --branch v1.3.0 https://github.com/opsydyn/crumbs-css.git
 cd crumbs-css
 bun install --frozen-lockfile
 bun run build
@@ -113,6 +113,7 @@ recorded qualification identities; the supported registry quickstart above uses 
 | Policy and governance | `/tooling/policy`, `/tooling/ownership` | `checkDesignSystemPolicy`, `getBuiltInPolicyPreset`, `annotateDesignSystemReport` |
 | DTCG import and source migrations | `/tooling/dtcg`, `/tooling/migrations` | `importDtcgTheme`, `planSourceMigration` |
 | Explain styles | `/devtools` | `explainStyle`, `StyleExplanationInputError` |
+| Native inspector (1.3.0+) | `/devtools/native` | `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget` |
 | Metro integration and diagnostics | `/metro-plugin`, package root | `withNativeStyles`, `createNativeStylesCacheStore`, `NativeStylesDiagnosticCode`, `formatNativeStylesDiagnostic` |
 
 See the [full API reference](https://opsydyn.github.io/crumbs-css/reference/package-entrypoints-and-apis/)
@@ -466,6 +467,19 @@ outside the export map are not public APIs.
 `StyleExplanationReport`, `StyleExplanationSnapshot`, `StyleExplanationThemeToken`,
 `StyleExplanationThemeTokenIdentity`, `StyleExplanationTransitionStatus`, `StyleExplanationUndefined`,
 `StyleExplanationValue`, `StyleExplanationValueArray`, `StyleExplanationValueRecord`.
+
+### `./devtools/native` (1.3.0+)
+
+**Values:** `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget`.
+
+**Type-only exports:** `CrumbsDevtoolsCapture`, `CrumbsDevtoolsWidgetProps`,
+`CrumbsInspectorInput`, `CrumbsInspectorTargetId`, `CrumbsInspectorTargetOptions`.
+
+Opt-in React Native inspector for explicitly registered mounted targets. Requires a
+host clipboard adapter and a development-only import boundary. This entry is not
+in v1.2.0; it is introduced in v1.3.0. Check the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.3.0.md) for publication. See the [explanation guide](https://opsydyn.github.io/crumbs-css/how-to/explain-native-styles/).
+The [inspector guide](docs/src/content/docs/how-to/explain-native-styles.mdx#native-inspector-in-use)
+includes real iOS/Android screenshots of overrides, recipe output and coverage labels.
 
 ### `./metro-plugin`
 

@@ -51,6 +51,17 @@ describe("isolated Expo SDK candidate", () => {
 
 
 describe("SDK candidate acceptance", () => {
+  it("admits the checked-in SDK profiles without floating retained dependencies", async () => {
+    for (const sdk of [57, 58]) {
+      const profile = JSON.parse(await readFile(join(import.meta.dir, `../../../apps/playground/upgrade/expo-${sdk}.json`), "utf8"))
+      expect(() => candidateManifest({ name: "app", dependencies: {} }, profile, "file:/tmp/crumbs.tgz")).not.toThrow()
+    }
+    const retention = JSON.parse(await readFile(join(import.meta.dir, "../../../apps/playground/upgrade/expo-56-retention.json"), "utf8"))
+    for (const version of Object.values({ ...retention.dependencies, ...retention.devDependencies })) {
+      expect(version).toMatch(/^\d+\.\d+\.\d+$/)
+    }
+  })
+
   it("preserves the app's explicit runtime import when changing its Expo stack", async () => {
     const parent = await mkdtemp(join(tmpdir(), "crumbs-sdk-runtime-test-"))
     try {
