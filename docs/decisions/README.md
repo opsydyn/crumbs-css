@@ -30,3 +30,6 @@ The consumer-scoped release-enforcement proposal above was **accepted on 2026-10
 2026-10-08: consumer-scoped M10.5 enforcement is implemented in the [accepted Expo evidence ADR](anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md#2026-10-08--consumer-scoped-host-policy-implemented). Numerical contracts remain unchanged; current host qualification is separate.
 
 2026-10-18: the [dated compiler-reuse decision](adopt-native-design-system-compiler.md#compiler-reuse-decision--2026-10-18) retains shipping fresh compilation and parks new reuse remediation. It updates the existing retention history; the parent remains proposed and the accepted release policy is unchanged. No new cache or release exception is adopted.
+
+
+2026-10-18: the owner subsequently [approved the worker-lifetime compiler contract](adopt-native-design-system-compiler.md#approved-worker-lifetime-compiler-contract--2026-10-18), narrowly replacing fresh compiler-service-error equivalence and reopening compiled-text reuse design. Mutable-input proof, fresh authoring and all release budgets remain binding. The [complete written design](../superpowers/specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md) awaits review; no candidate or publication is adopted and the parent ADR remains proposed.

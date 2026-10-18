@@ -3398,3 +3398,12 @@ Original verifier replay against the pinned source content reproduces exactly th
 ### M10.5 — final root-cause investigation (2026-10-18)
 
 The user reopened remediation after exact-artifact disposition. [Matched historical/current attribution and proposed compiler contract](assessments/2026-10-18-m10-5-root-cause.md) isolate authoring-graph growth and added pipeline work. A partial compiled-text envelope measures 3.265 ms versus 8.900 ms matched control, but deliberately fails a new-resolution-candidate control and is not admitted. Production code, runtime isolation, release pins and numerical gates remain unchanged; publication stays blocked. Next: explicit worker-scoped compiler contract decision, then one complete witness/memo design if approved. The prior exact fresh-error-equivalence requirement has not been silently waived.
+
+
+### M10.5 — worker-lifetime contract approved; complete cache design prepared (2026-10-18)
+
+The owner approved the compiler-lifetime contract presented in `7903ba9`: compiler upgrades require process/Metro restart, and validated text hits need not reproduce compiler-service-start failures. The [ADR amendment](decisions/adopt-native-design-system-compiler.md#approved-worker-lifetime-compiler-contract--2026-10-18) explicitly supersedes only the earlier fresh-error-equivalence prerequisite. Full mutable-input invalidation, fresh authoring execution, runtime isolation and every numerical gate remain binding.
+
+The [written design](superpowers/specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md) covers complete resolution witnesses, fresh confirmation, bounded ownership, before/after checks and a proposed Metro session binding. Cross-restart native cache reuse is deliberately excluded from that proposal and its cost must be measured. The 3.265 ms incomplete envelope supplies a hypothesis budget only; its stale-resolution failure remains preserved. This slice changes documentation only; the shipping compiler and historical evidence packets are unchanged.
+
+**Next M10.5: written-spec review, then one native/inline implementation plan for the complete candidate.** No implementation, host qualification, release exception or publication is approved by the contract decision. The original v1.2.0 cold/warm/incremental failures still block publication; physical-device/spoken-reader acceptance remains deferred.

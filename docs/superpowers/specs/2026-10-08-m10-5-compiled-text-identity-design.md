@@ -49,3 +49,10 @@ Admission requires all software/public contracts, exact unchanged workloads, all
 ## 2026-10-08 — prerequisite disposition
 
 The user approved this investigation. The [owned three-runtime counterexample](../../assessments/2026-10-08-m10-5-compiler-identity-prerequisite.md) shows that loaded namespace identity and post-load executable hashes cannot certify the native service that supplied compiled text. No complete lifetime/origin guard has been established. The existing specification requires: “If this premise fails, reject this approach before integrating a memo.” That prerequisite has not passed, so no memo implementation plan or production candidate is admitted. The counterexample rejects the tested predicates, not every conceivable identity design. Fresh compilation and all numerical/API contracts remain in force.
+
+
+## 2026-10-18 — narrow contract supersession
+
+After the failed prerequisite and later root-cause investigation, the owner approved the [worker-lifetime contract amendment](../../decisions/adopt-native-design-system-compiler.md#approved-worker-lifetime-compiler-contract--2026-10-18). A fixed compiler installation now requires process/Metro restart to upgrade; a validated compiled-text hit need not reproduce compiler-service-start failures. This supersedes that exact error-equivalence premise above, not the historical rejection result or the mutable-input, fresh-execution, isolation and numerical requirements.
+
+The replacement [written design](2026-10-18-m10-5-worker-scoped-compiled-text-design.md) is proposed for review. It introduces a session-bound outer-cache proposal rather than claiming portable worker identity. No implementation or release admission follows from this amendment; original evidence remains unchanged.
