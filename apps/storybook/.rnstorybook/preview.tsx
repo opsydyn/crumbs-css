@@ -1,3 +1,4 @@
+import { InspectorHost } from "../src/components/devtools/adapter"
 import type { Preview } from "@storybook/react-native"
 import { PortalHost } from "@rn-primitives/portal"
 import { Pressable, StyleSheet, Text, View } from "react-native"
@@ -60,7 +61,7 @@ const preview: Preview = {
       const density = axisValueOf(context.globals.density, densityScopes, "comfortable")
 
       return (
-      <GestureHandlerRootView style={styles.root}>
+      <InspectorHost><GestureHandlerRootView style={styles.root}>
         <AppThemeProvider
           initialBrand={brand}
           initialDensity={density}
@@ -75,7 +76,7 @@ const preview: Preview = {
           </View>
           <PortalHost />
         </AppThemeProvider>
-      </GestureHandlerRootView>
+      </GestureHandlerRootView></InspectorHost>
       )
     },
   ],

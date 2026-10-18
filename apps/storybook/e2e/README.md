@@ -40,3 +40,34 @@ maestro --device <simulator-uuid> test \
 On Android, use its emulator ID and `STORYBOOK_APP_ID=host.exp.exponent`. The app must already show its Storybook preview with both drawers closed. The flow selects ShowcaseCard, edits and restores its action label, verifies an `onActionPress` event, visits Light and Disabled, and returns to Dark. It records bounded screenshots; it does not establish exhaustive variant coverage, spoken screen-reader output or physical-device performance.
 
 [Storybook documents the Lite UI Metro option](https://storybookjs.github.io/react-native/docs/intro/configuration/metro-configuration/#litemode).
+
+## M9.3a native inspector
+
+Start the development storybook server, then use an explicitly owned device:
+
+```sh
+maestro --device YOUR_DEVICE test apps/storybook/e2e/native-devtools.yaml \
+  -e APP_ID=YOUR_INSTALLED_APP_ID -e APP_URL=YOUR_EXPO_URL \
+  --format JUNIT --output /tmp/crumbs-storybook-devtools.xml
+```
+
+Expo Go SDK58 uses `host.exp.Exponent` on iOS and `host.exp.exponent` on Android.
+Use loopback for iOS and `10.0.2.2` for Android. Existing custom clients must
+include Expo Clipboard. The flow does not clear unrelated application data.
+These are replay recipes; consult the [evidence](../../../docs/evidence/2026-10-18-m9-3a-native-devtools/README.md)
+for which checks actually ran. A syntax check is not a live pass.
+
+Run the companion `native-devtools-causes.yaml` with the same parameters to
+assert scoped token and deterministic variant values. It leaves the override
+capture open for the controlled edit/restore check below. Storybook permits
+120 seconds for Expo Go startup; this is a harness download allowance, not a
+widget performance threshold.
+
+Also check each app's theme toggle, native back and
+web Escape/focus. While a capture is open, change the fixture opacity from 0.8
+to 0.7: Fast Refresh must mark it stale and disable Preview; Refresh must show
+0.7. Restore the file and verify the same sequence back to 0.8.
+The debug clipboard readback compares length plus FNV-1a checksum; it is a
+functional probe, not a cryptographic integrity mechanism. Unit tests separately
+assert exact equality of prepared text and the clipboard adapter argument.
+Physical devices, spoken screen readers and independent user testing are separate.

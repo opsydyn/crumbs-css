@@ -92,3 +92,16 @@ Virtualization means requested rows, mounted rows and visible rows differ. Balan
 ## SDK 58 optional Rust worker
 
 Babel is the default. Start `CRUMBS_METRO_WORKER=rust bun run playground` to select the app's Expo experiment, then restart Metro after configuration changes. The canonical Expo preset preserves default eligibility; custom required transforms remain valid Babel fallback reasons. Actual eligible-file completion events establish Rust use; the flag or export alone does not. This retains the existing Crumbs compile phase and makes no speed claim. See the [Storybook/dev-client guide](../../docs/src/content/docs/how-to/use-storybook-and-expo-dev-client.mdx) for routing and native acceptance limits.
+
+## M9.3a inspector dogfooding (source build)
+
+In development, select the **Devtools** journey, then open **Crumbs**. Inspect a scoped card,
+the deliberate opacity override and a recipe variant. Change the fixture, Refresh,
+preview/copy a report and use **Verify copied report** to check the clipboard.
+Missing metadata and target removal are deliberate negative cases.
+
+The development adapter keeps widget/probe/clipboard imports out of production.
+Expo Go SDK58 includes the clipboard module; existing custom clients need a
+rebuild after adding it. See [native checks](e2e/README.md) and the
+[M9.3a evidence](../../docs/evidence/2026-10-18-m9-3a-native-devtools/README.md)
+for actual coverage and remaining gaps. This API is not in npm v1.2.0.

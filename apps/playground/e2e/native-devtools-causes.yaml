@@ -1,0 +1,46 @@
+appId: ${APP_ID}
+---
+- stopApp
+- launchApp
+- openLink: ${APP_URL}
+- tapOn:
+    text: "^Open$"
+    optional: true
+- tapOn:
+    text: Continue
+    optional: true
+- extendedWaitUntil:
+    visible: Open Crumbs inspector
+    timeout: 45000
+- tapOn: Devtools
+- tapOn: Open Crumbs inspector
+- tapOn: Inspect Parent card
+- scrollUntilVisible:
+    element: '(?s).*resolvedValue.*#ffffff.*'
+    direction: DOWN
+    timeout: 20000
+- scrollUntilVisible:
+    element: Inspect Nested dark card
+    direction: UP
+    timeout: 20000
+- tapOn: Inspect Nested dark card
+- scrollUntilVisible:
+    element: '(?s).*resolvedValue.*#243149.*'
+    direction: DOWN
+    timeout: 20000
+- scrollUntilVisible:
+    element: Inspect Selected variant
+    direction: UP
+    timeout: 20000
+- tapOn: Inspect Selected variant
+- scrollUntilVisible:
+    element: '0.5'
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: devtools-diagnosis-causes
+- scrollUntilVisible:
+    element: Inspect Override opacity
+    direction: UP
+    timeout: 20000
+- tapOn: Inspect Override opacity
+# Deliberately leave the capture open for the controlled Fast Refresh edit/restore.

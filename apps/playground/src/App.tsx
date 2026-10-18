@@ -1,3 +1,4 @@
+import { InspectorHost, DevtoolsPanel } from "./devtools/adapter"
 import { useRef, useState } from "react"
 import { FlatList, Pressable, ScrollView, Switch, Text, TextInput, View } from "react-native"
 import { Portal, PortalHost } from "@rn-primitives/portal"
@@ -16,7 +17,7 @@ import { TokenStylesPanel } from "./TokenStylesPanel"
 
 const rows = Array.from({ length: 1000 }, (_, id) => ({ id: String(id), label: `Design system component ${id + 1}` }))
 const { screenTitle, ...styles } = screen
-type Journey = "List" | "Form" | "Scopes" | "Measure" | "Gradients" | "Token styles" | "Local styles" | "Container conditions" | "Native motion" | "Token algebra" | "Runtime extensions"
+type Journey = "Devtools" | "List" | "Form" | "Scopes" | "Measure" | "Gradients" | "Token styles" | "Local styles" | "Container conditions" | "Native motion" | "Token algebra" | "Runtime extensions"
 const scrollProbeEnabled = __DEV__ && process.env.EXPO_PUBLIC_CRUMBS_SCROLL_PROBE === "true"
 
 function ScopeCard() {
@@ -41,9 +42,10 @@ function Playground({ isDark, toggle }: { isDark: boolean; toggle: () => void })
     <Text style={s.copy}>{process.env.EXPO_PUBLIC_CRUMBS_MODE ?? "unverified"} · Crumbs {process.env.EXPO_PUBLIC_CRUMBS_VERSION ?? "unrecorded"}</Text>
     <Text style={s.copy}>Revision {process.env.EXPO_PUBLIC_CRUMBS_REVISION ?? "unrecorded"}</Text>
     <Pressable accessibilityRole="button" onPress={toggle} style={[...resolveRecipeStyle(s.button)]}><Text style={s.copy}>Switch to {isDark ? "light" : "dark"}</Text></Pressable>
-    <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>{(["List", "Form", "Scopes", "Measure", "Gradients", "Token styles", "Local styles", "Container conditions", "Native motion", "Token algebra", "Runtime extensions"] as const).map(item =>
+    <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>{(["List", "Form", "Scopes", "Measure", "Gradients", "Token styles", "Local styles", "Container conditions", "Native motion", "Token algebra", "Runtime extensions", ...(__DEV__ ? ["Devtools"] as const : [])] as const).map(item =>
       <Pressable key={item} accessibilityRole="button" accessibilityState={{ selected: journey === item }} onPress={() => setJourney(item)} style={[...resolveRecipeStyle(s.button, { selected: journey === item })]}><Text style={s.copy}>{item}</Text></Pressable>
     )}</View>
+    {journey === "Devtools" && <ScrollView><DevtoolsPanel /></ScrollView>}
     {journey === "List" && __DEV__ && scrollProbeEnabled && <Text testID="crumbs-scroll-probe" style={{ ...s.copy, fontSize: 12 }}>
       Scroll probe: y={scrollProbe.y} first={scrollProbe.first} viewport={scrollProbe.viewport} content={scrollProbe.content}{"\n"}
       Touch: starts={scrollProbe.starts} moves={scrollProbe.moves} ends={scrollProbe.ends} drags={scrollProbe.drags}
@@ -94,5 +96,5 @@ function PortalContent({ close }: { close: () => void }) {
 
 export default function App() {
   const [isDark, setDark] = useState(false)
-  return <ThemeProvider theme={isDark ? dark : light}><Playground isDark={isDark} toggle={() => setDark(value => !value)} /></ThemeProvider>
+  return <InspectorHost><ThemeProvider theme={isDark ? dark : light}><Playground isDark={isDark} toggle={() => setDark(value => !value)} /></ThemeProvider></InspectorHost>
 }

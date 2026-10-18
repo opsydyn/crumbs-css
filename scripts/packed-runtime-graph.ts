@@ -49,6 +49,7 @@ const exportClasses: Readonly<Record<string, PackedRuntimeClassification>> = {
   "./tokens/schema/value": "advanced-runtime",
   "./tokens/optic": "advanced-runtime",
   "./devtools": "advanced-runtime",
+  "./devtools/native": "advanced-runtime",
   "./style": "compiler-tooling",
   "./tooling/manifest": "compiler-tooling",
   "./tooling/policy": "compiler-tooling",
@@ -965,8 +966,8 @@ function assertExternalAllowed(
       neverBundle.some((pattern) => matchesPattern(specifier, pattern)) &&
       !alwaysBundle.some((pattern) => matchesPattern(specifier, pattern))
     )
-  } else if (classification === "advanced-runtime" && subpath === "./devtools") {
-    allowed = specifier === "effect" || specifier.startsWith("effect/") || specifier === "react" || specifier.startsWith("react/")
+  } else if (classification === "advanced-runtime" && (subpath === "./devtools" || subpath === "./devtools/native")) {
+    allowed = specifier === "effect" || specifier.startsWith("effect/") || specifier === "react" || specifier.startsWith("react/") || (subpath === "./devtools/native" && specifier === "react-native")
   }
   if (!allowed) {
     throw new Error(`${classification} export imports unauthorized external ${specifier} from ${importer}`)

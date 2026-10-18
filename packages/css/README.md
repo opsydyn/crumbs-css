@@ -53,6 +53,7 @@ The repository provides a [Crumbs consumer skill](https://github.com/opsydyn/cru
 | Policy and governance | `/tooling/policy`, `/tooling/ownership` | `checkDesignSystemPolicy`, `getBuiltInPolicyPreset`, `annotateDesignSystemReport` |
 | DTCG import and source migrations | `/tooling/dtcg`, `/tooling/migrations` | `importDtcgTheme`, `planSourceMigration` |
 | Explain styles | `/devtools` | `explainStyle`, `StyleExplanationInputError` |
+| Native inspector (next release / source build) | `/devtools/native` | `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget` |
 | Metro integration and diagnostics | `/metro-plugin`, package root | `withNativeStyles`, `createNativeStylesCacheStore`, `NativeStylesDiagnosticCode`, `formatNativeStylesDiagnostic` |
 
 Every public value and type is listed in the [complete API index](https://github.com/opsydyn/crumbs-css#complete-public-api) and the [API reference](https://opsydyn.github.io/crumbs-css/reference/package-entrypoints-and-apis/).
@@ -551,3 +552,14 @@ For Node factory graphs, version 1 also refuses package export maps containing
 `module-sync` or `node-addons` conditions. Those built-in branches cannot share a
 reliable proof across the qualified Node floor/current versions and the integration
 compiler. Use the supported `node`/`import`/`require`/`default` export branches.
+
+### `./devtools/native` (next release / source build)
+
+**Values:** `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget`.
+
+**Type-only exports:** `CrumbsDevtoolsCapture`, `CrumbsDevtoolsWidgetProps`,
+`CrumbsInspectorInput`, `CrumbsInspectorTargetId`, `CrumbsInspectorTargetOptions`.
+
+Opt-in React Native inspector for explicitly registered mounted targets. Requires a
+host clipboard adapter and a development-only import boundary. This entry is not
+in published v1.2.0. See the [explanation guide](https://opsydyn.github.io/crumbs-css/how-to/explain-native-styles/).

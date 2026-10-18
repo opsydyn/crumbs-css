@@ -1,3 +1,4 @@
+import { InspectorProbe } from "./devtools/adapter"
 import { useMemo } from "react"
 import { createComponentRecipeResolver } from "@opsydyn/crumbs-css/theme"
 import { useThemedStyles } from "@opsydyn/crumbs-css/theme/core"
@@ -47,6 +48,8 @@ export function ShowcaseCard({
 
   return (
     <View style={styles.card}>
+      <InspectorProbe label="Showcase card" module={s} exportPath={["card"]} />
+      <InspectorProbe label="Showcase action" module={s} exportPath={["action"]} selection={disabled ? disabledActionSelection : idleActionSelection} />
       <View style={styles.badge}>
         <Text style={styles.badgeLabel}>Expo + Storybook</Text>
       </View>

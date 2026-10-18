@@ -1,0 +1,74 @@
+appId: ${APP_ID}
+---
+- stopApp
+- launchApp
+- openLink: ${APP_URL}
+- tapOn:
+    text: "^Open$"
+    optional: true
+- tapOn:
+    text: Continue
+    optional: true
+- extendedWaitUntil:
+    visible: Open Crumbs inspector
+    timeout: 120000
+- tapOn: Open story list
+# The story list occupies the lower half; a screen-centre scroll hits its search bar.
+- repeat:
+    times: 3
+    commands:
+      - swipe:
+          start: 50%, 85%
+          end: 50%, 60%
+          duration: 500
+- assertVisible: Diagnosis
+- runFlow:
+    when:
+      notVisible: "(?-i)^Light$"
+    commands:
+      - tapOn: Diagnosis
+- tapOn: "(?-i)^Light$"
+- tapOn: Close story list
+- tapOn: Open stories
+- assertVisible: "Action count: 1"
+- tapOn: Toggle inspected variant
+- tapOn: Open stories
+- assertVisible: "Action count: 1"
+- tapOn: Open Crumbs inspector
+- tapOn: Inspect Override opacity
+- scrollUntilVisible:
+    element: "Overridden: .*opacity = 0.4"
+    direction: DOWN
+    timeout: 20000
+- assertVisible: "0.8"
+- takeScreenshot: devtools-override
+- scrollUntilVisible:
+    element: Preview report
+    direction: DOWN
+    timeout: 20000
+- tapOn: Preview report
+- scrollUntilVisible:
+    element: Copy report
+    direction: DOWN
+    timeout: 30000
+- tapOn: Copy report
+- assertVisible: Copied report
+- tapOn: Close inspector
+- tapOn: Verify copied report
+- assertVisible: "Clipboard matches: Override opacity.*"
+- tapOn: Open Crumbs inspector
+- tapOn: Inspect Missing metadata
+- scrollUntilVisible:
+    element: "Coverage: unavailable metadata-missing"
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: devtools-metadata-missing
+- tapOn: Close inspector
+- tapOn: Toggle inspector target
+- tapOn: Open Crumbs inspector
+- assertNotVisible: Inspect Missing metadata
+- tapOn: Close inspector
+- tapOn: Toggle inspector target
+- tapOn: Open Crumbs inspector
+- assertVisible: Inspect Missing metadata
+- tapOn: Close inspector

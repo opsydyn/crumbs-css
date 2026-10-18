@@ -113,6 +113,7 @@ recorded qualification identities; the supported registry quickstart above uses 
 | Policy and governance | `/tooling/policy`, `/tooling/ownership` | `checkDesignSystemPolicy`, `getBuiltInPolicyPreset`, `annotateDesignSystemReport` |
 | DTCG import and source migrations | `/tooling/dtcg`, `/tooling/migrations` | `importDtcgTheme`, `planSourceMigration` |
 | Explain styles | `/devtools` | `explainStyle`, `StyleExplanationInputError` |
+| Native inspector (next release / source build) | `/devtools/native` | `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget` |
 | Metro integration and diagnostics | `/metro-plugin`, package root | `withNativeStyles`, `createNativeStylesCacheStore`, `NativeStylesDiagnosticCode`, `formatNativeStylesDiagnostic` |
 
 See the [full API reference](https://opsydyn.github.io/crumbs-css/reference/package-entrypoints-and-apis/)
@@ -466,6 +467,17 @@ outside the export map are not public APIs.
 `StyleExplanationReport`, `StyleExplanationSnapshot`, `StyleExplanationThemeToken`,
 `StyleExplanationThemeTokenIdentity`, `StyleExplanationTransitionStatus`, `StyleExplanationUndefined`,
 `StyleExplanationValue`, `StyleExplanationValueArray`, `StyleExplanationValueRecord`.
+
+### `./devtools/native` (next release / source build)
+
+**Values:** `CrumbsDevtoolsProvider`, `CrumbsDevtoolsWidget`, `useCrumbsInspectorTarget`.
+
+**Type-only exports:** `CrumbsDevtoolsCapture`, `CrumbsDevtoolsWidgetProps`,
+`CrumbsInspectorInput`, `CrumbsInspectorTargetId`, `CrumbsInspectorTargetOptions`.
+
+Opt-in React Native inspector for explicitly registered mounted targets. Requires a
+host clipboard adapter and a development-only import boundary. This entry is not
+in published v1.2.0. See the [explanation guide](https://opsydyn.github.io/crumbs-css/how-to/explain-native-styles/).
 
 ### `./metro-plugin`
 

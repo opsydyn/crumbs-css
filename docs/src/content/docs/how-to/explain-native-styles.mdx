@@ -35,7 +35,12 @@ otherwise follow `dev` (or `NODE_ENV` when `dev` is omitted).
 
 ## Explain an explicit export
 
-Pass the compiled module namespace and the exact export path. Supply concrete
+Snapshot your trusted compiled module namespace and pass the exact export path.
+Metro namespaces can expose accessor bindings; the explanation boundary accepts
+own data properties and deliberately does not invoke arbitrary getters. Spreading
+your known imported namespace explicitly reads those bindings. Keep the original
+unresolved exports and metadata; do not pass the result of `useThemedStyles`.
+Supply concrete
 inputs instead of relying on ambient render state:
 
 ```ts
@@ -43,7 +48,7 @@ import { explainStyle, type StyleExplanationReport } from "@opsydyn/crumbs-css/d
 import * as cardStyles from "./card.css"
 
 const report: StyleExplanationReport = explainStyle({
-  module: cardStyles,
+  module: { ...cardStyles },
   exportPath: ["card"],
   current: { theme: activeTheme },
   previous: { theme: previousTheme },
@@ -62,7 +67,7 @@ chain as the resolver:
 
 ```ts
 const report = explainStyle({
-  module: componentStyles,
+  module: { ...componentStyles },
   exportPath: ["button"],
   current: {
     theme: activeTheme,
@@ -106,6 +111,104 @@ The API explains only the supplied module, export path, and snapshots. It does
 not inspect other files, observe React renders or cache hits, or read device
 state. `explainStyle` returns ordinary typed data; Effect 4 Schema is an
 internal validation boundary and is not part of the consumer call pattern.
+
+## Native widget (next release / source build)
+
+The widget is implemented at `@opsydyn/crumbs-css/devtools/native` for source-build
+consumers. Published v1.2.0 includes the headless report API, but not this entry.
+
+Keep **all value imports** of the widget and its probes in a separate development
+module. Conditional JSX around an unconditional import is insufficient to remove
+the dependency graph from production. For Metro, use this boundary:
+
+```tsx
+// inspector.tsx — safe to import from application components
+import type { ComponentType, ReactNode } from "react"
+
+const development: typeof import("./inspector.dev") | null =
+  __DEV__ ? require("./inspector.dev") : null
+
+export const InspectorHost: ComponentType<{ children: ReactNode }> =
+  development?.InspectorHost ?? (({ children }) => <>{children}</>)
+export const CardProbe = development?.CardProbe ?? (() => null)
+```
+
+```tsx
+// inspector.dev.tsx — reached only in development
+import type { ReactNode } from "react"
+import * as Clipboard from "expo-clipboard"
+import { useTheme } from "@opsydyn/crumbs-css/theme/core"
+import {
+  CrumbsDevtoolsProvider,
+  CrumbsDevtoolsWidget,
+  useCrumbsInspectorTarget,
+} from "@opsydyn/crumbs-css/devtools/native"
+import * as cardStyles from "./card.css"
+
+export function InspectorHost({ children }: { children: ReactNode }) {
+  return (
+    <CrumbsDevtoolsProvider>
+      {children}
+      <CrumbsDevtoolsWidget
+        placement="bottom-right"
+        insets={{ bottom: 32, right: 16 }}
+        copyText={async text => { await Clipboard.setStringAsync(text) }}
+      />
+    </CrumbsDevtoolsProvider>
+  )
+}
+
+export function CardProbe() {
+  const theme = useTheme()
+  useCrumbsInspectorTarget({
+    label: "Card",
+    exportPath: ["card"],
+    getInput: () => ({
+      module: { ...cardStyles },
+      exportPath: ["card"],
+      current: { theme },
+    }),
+  })
+  return null
+}
+```
+
+Wrap your app in `InspectorHost`. Mount `CardProbe` **inside the same ThemeProvider
+scope as the card**. Pass current recipe selections, conditions and extension
+chains to `current` when used. The getter must describe committed inputs; do not
+mutate them behind React's back. Separate probes can share labels: identities are
+per mounted instance. Registration outside the provider throws a setup error.
+Expo Clipboard is an app dependency, not a Crumbs dependency. Install it with
+`npx expo install expo-clipboard`; rebuild a development client if it lacks that
+native module. Other hosts can supply their own asynchronous clipboard adapter.
+
+Insets are logical units. Include your host's safe-area values; the widget does
+not add a safe-area library to your application. The launcher and actions have
+minimum 44-unit targets. Native back, Close and web Escape dismiss the panel.
+
+### Capture, refresh and copy
+
+The panel explains only the supplied Crumbs inputs. It does not pick elements,
+read the native rendered style, sample pressed/animated state or observe the
+whole application. Explicit selection and Refresh run the explanation; committed
+input changes mark the current report stale. Closing clears selection/report;
+unmounting releases the registration. A provider admits up to 200 targets and
+retains at most one report. After overflow, a conservative warning remains until
+the provider is remounted; rejected probes retry on their next commit. Closed updates do not call getters or explanation.
+
+Preview prepares the exact text subsequently passed to `copyText`. Reports can
+contain private style values or source paths. An optional `redactReport(capture)`
+callback returns the JSON value to preview/copy; it does not alter the on-screen
+explanation. Throwing redactors, accessors, cycles, non-JSON values and payloads
+over 256 KiB of UTF-8 are rejected before clipboard writes. Copy failures remain
+recoverable. Stale reports and late clipboard completions cannot become a fresh
+successful capture. Review the preview before sharing it.
+
+Coverage is explicit: missing metadata is `unavailable`, and unsupported or
+compatibility-only evidence is `partial`. Disabling development metadata using
+the option above does not manufacture complete provenance. Default production
+exports exclude both widget implementation (with this import boundary) and
+provenance. Opting production into metadata changes that guarantee.
 
 ## Related guides
 

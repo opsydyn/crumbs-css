@@ -1,7 +1,7 @@
 # M9.3a — Native developer widget and dogfooding
 
 **Date:** 2026-10-18\
-**Status:** Written specification approved by the user on 2026-10-18; implementation plan awaits review.\
+**Status:** Specification and implementation plan approved on 2026-10-18; implementation and automated qualification completed. Live results and remaining gaps are recorded in the [outcome](../../evidence/2026-10-18-m9-3a-native-devtools/README.md).\
 **Roadmap:** [M9.3a](../../roadmap.md), additive follow-up to shipped M9.3.\
 **Baseline:** npm 1.2.0; source documentation commit `383dd844c4d26c34c2bab6d09c83234e9f3816b0`.\
 **Execution:** Native/inline, retained from the user's preference. One implementation slice including Playground and Storybook dogfooding; commit its outcome.
@@ -10,7 +10,7 @@
 
 Help a design-system developer answer “why does this component look like this?” without manually assembling an `explainStyle` call. Provide an opt-in native launcher, registered-target list, property explanations and a copyable report. Reuse M9.3's typed reports and development metadata. Preserve authoring/runtime isolation and keep production artifacts free of the widget.
 
-The user approved specification and roadmap work followed by dogfooding in Playground and Storybook. This document specifies that first slice. It does not claim that the widget exists or that native acceptance has run. A two-engineering-day dogfooding appetite was proposed in discussion; it is a stop-and-assess boundary, not a delivery estimate or permission to lower correctness gates.
+The user approved specification and roadmap work followed by dogfooding in Playground and Storybook. This document specifies that first slice. Its acceptance evidence is maintained separately in the linked outcome; specification text alone is not proof of a passing native check. A two-engineering-day dogfooding appetite was proposed in discussion; it is a stop-and-assess boundary, not a delivery estimate or permission to lower correctness gates.
 
 ## Current evidence and alternatives
 

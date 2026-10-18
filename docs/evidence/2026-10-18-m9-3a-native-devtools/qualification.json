@@ -1,0 +1,94 @@
+{
+  "type": "crumbs.m9.3a.slice-qualification",
+  "version": 1,
+  "status": "implemented-qualification-incomplete",
+  "implementationBase": "bbb455742d353d9c994d3716a019d832da5b5cca",
+  "sourceDigest": "e88be55c13b2ea6cf0e412f88a52a5e934dd088d51cf918e0da95c5f31bb7f1e",
+  "tarSha256": "344c25078066cfcb84b1fa362dc71a7124800f9e6fcdc711b01f5c30813e526c",
+  "checks": [
+    {
+      "name": "library-and-storybook-tests",
+      "status": "passed",
+      "logSha256": "4942d7416b500190ee3fce396fc33b027cedacdc24e095777d780fdbacb91c94"
+    },
+    {
+      "name": "storybook-babel-production",
+      "status": "passed",
+      "logSha256": "02c25571a2a96b07533f8d3e277ac7d631706beadc8f23403f2d5ec230e0f6a6"
+    },
+    {
+      "name": "storybook-rust-production",
+      "status": "passed",
+      "logSha256": "1e575b9afc8854dc2e1ad928b36516b404626e63055a88b971e4566a0d12bd8a"
+    },
+    {
+      "name": "playground-types",
+      "status": "passed",
+      "logSha256": "84ee030eab40229ff2f589e6fac99d49a4bf75ebe88845004ef1e3fd561f4577"
+    },
+    {
+      "name": "docs-build",
+      "status": "passed",
+      "logSha256": "efa372bc06e6dd087dc0039e0a7fd6128d7a71e6c4d0131cf351f212db9955f3"
+    },
+    {
+      "name": "review-regressions",
+      "status": "passed",
+      "logSha256": "e5abd5485ae56d8644def3d10517b26a728f55e61f71726301052d42c7f0fdbe"
+    },
+    {
+      "name": "final-focused-widget-regressions",
+      "status": "passed",
+      "tests": 20,
+      "assertions": 1112,
+      "logSha256": "fb7f7e0d2fec355f4f031842c558926ef8ea331a33a108fb62a54e0646e8d80d"
+    }
+  ],
+  "tests": {
+    "libraryPass": 1931,
+    "librarySkip": 1,
+    "storybookPass": 34,
+    "failed": 0
+  },
+  "packed": [
+    "packed-babel.json",
+    "packed-rust.json"
+  ],
+  "live": {
+    "ios": "Playground and Storybook main Maestro flows passed; both manual Fast Refresh edit/restore journeys passed",
+    "android": "Playground main and token/variant causes passed; Storybook startup launcher assertions failed; final ADB reverse comparison could not run due to broken-pipe driver installation",
+    "web": "both apps select/Refresh/preview/copy/Escape/focus observed; native clipboard readback separate"
+  },
+  "deferred": [
+    "physical devices",
+    "spoken screen readers",
+    "independent usability comparison",
+    "native device cost/frame/memory comparison"
+  ],
+  "publication": "not requested; new API absent from npm1.2.0",
+  "nativeReceipts": [
+    {
+      "file": "android-playground-causes.xml",
+      "sha256": "df2701d29ed3ae9246665200164aae31303aab54765c412fe1f0240702d81f1e"
+    },
+    {
+      "file": "android-playground.xml",
+      "sha256": "5185380cf82c3766a2951b00d458b75d4e37a09624f1afb0931983b5cb1559aa"
+    },
+    {
+      "file": "ios-playground.xml",
+      "sha256": "0a894cf3d6f3ded4dfc71b48f01e058ca9f0a87ed6bba58bd9f93ec49a1e597d"
+    },
+    {
+      "file": "ios-storybook.xml",
+      "sha256": "f371bbb9fc7aba07a8d4e2785f5b5fa1e13a9bb9d787a4f678baa9d029b7bb2b"
+    }
+  ],
+  "remainingRequired": [
+    "Android Storybook complete functional journey",
+    "Android Fast Refresh edit/restore and native-back checks",
+    "native app disabled/closed/selected cost comparison"
+  ],
+  "remainingRequiredNote": "No device-cost or complete native-acceptance claim; broader theme/variant updates remain to be covered by the full live journey.",
+  "nextRoadmapAction": "M9.3a qualification closure before release preparation"
+}
