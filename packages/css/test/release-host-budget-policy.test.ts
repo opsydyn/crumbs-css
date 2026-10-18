@@ -45,10 +45,10 @@ function readRegistry() {
 const advisoryIds = approvedContracts.filter(([id]) => id.startsWith("runtime-")).map(([id]) => id)
 const policy = {
   formatVersion: 1,
-  policyId: "crumbs-host-budgets-2026-10-08-consumer-scope-v1",
-  registrySha256: "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b",
+  policyId: "crumbs-host-budgets-2026-10-18-v12-baseline-v1",
+  registrySha256: "f2c9c98ff841c679e80af43e251020e7461e665e4c2ae1f07b34bef615d2fa68",
   metrics: approvedContracts.map(([id, selector]) => ({ id, selector, enforcement: advisoryIds.includes(id as any) ? "advisory" : "blocking" })),
-  baselineFiles: JSON.parse(readFileSync(resolve(repositoryRoot, "docs/evidence/2026-10-08-m10-5-consumer-policy-plan/baseline-files.json"), "utf8")),
+  baselineFiles: JSON.parse(readFileSync(resolve(repositoryRoot, "docs/evidence/2026-10-18-m10-5-v12-rebaseline/baseline-files.json"), "utf8")),
 } as any
 const passingRows = approvedContracts.map(([id]) => ({ id, result: "pass" }))
 

@@ -30,9 +30,9 @@ export const releaseHostBudgetMetricContracts: readonly { id: string; selector: 
 ])
 
 
-const approvedRegistryCanonicalSha256 = "0a68e25d399b4e66f5aef5bcdada0d6e40cb3ec3aa11332950b476f11dc9fe95"
-const approvedPolicyId = "crumbs-host-budgets-2026-10-08-consumer-scope-v1"
-const approvedRegistrySha256 = "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b"
+const approvedRegistryCanonicalSha256 = "f12f4e9a0ab15b23887ca4a0455c3ab246f102507d0317ba29aefead8ebf5ab0"
+const approvedPolicyId = "crumbs-host-budgets-2026-10-18-v12-baseline-v1"
+const approvedRegistrySha256 = "f2c9c98ff841c679e80af43e251020e7461e665e4c2ae1f07b34bef615d2fa68"
 const approvedAdvisoryIds = new Set([
   "runtime-initialization-node22-esm", "runtime-initialization-node22-cjs",
   "runtime-initialization-current-esm", "runtime-initialization-current-cjs",
@@ -61,6 +61,14 @@ const approvedBaselineFiles = [
   {
     "path": "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json",
     "sha256": "a24cd238e72fa951b56ef2c89cb9fab09dafe392f78cad63a7ac46cdb674dda1"
+  },
+  {
+    "path": "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/benchmark-summary.json",
+    "sha256": "5cbe9620f654e0e9cd821ac3216cc0b850bc2b14b8fe51c6e58e90bca22d310c"
+  },
+  {
+    "path": "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/metro-incremental.json",
+    "sha256": "bccc8d30160b36afd7280287ca6725084b71f01275f169586e4506a13ab2789a"
   }
 ]
 const approvedMetrics = releaseHostBudgetMetricContracts.map(({ id, selector }) => ({
