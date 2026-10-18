@@ -1,6 +1,6 @@
 # M10.5 worker-scoped compiled-text reuse
 
-Status: **written design approved on 2026-10-18**, as reviewed at `090c4fd`. The earlier worker-lifetime contract approval at `7903ba9` remains recorded separately. The [single-slice implementation plan](../plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) now awaits written review. Native/inline execution is retained; no implementation or publication follows from spec approval alone.
+Status: **written design approved on 2026-10-18**, as reviewed at `090c4fd`. The earlier worker-lifetime contract approval at `7903ba9` remains recorded separately. The [single-slice implementation plan](../plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) was approved and executed inline. The [candidate was rejected](../../assessments/2026-10-18-m10-5-worker-scoped-compiled-text.md) at its required Metro session/cache isolation gate. No implementation is adopted and no publication follows.
 
 ## Purpose and evidence
 

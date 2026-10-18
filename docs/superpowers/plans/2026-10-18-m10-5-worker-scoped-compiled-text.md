@@ -8,7 +8,7 @@
 
 **Tech Stack:** Existing TypeScript/Bun, Vanilla Extract integration, esbuild, Babel parser, Metro/Expo and fast-check; no dependency changes. Current installed compiler versions must be captured, not inferred from manifest ranges.
 
-**Spec:** [Approved worker-scoped compiled-text design](../specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md), reviewed at `090c4fd` and approved by the owner on 2026-10-18. This implementation plan awaits written review.
+**Spec:** [Approved worker-scoped compiled-text design](../specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md), reviewed at `090c4fd` and approved by the owner on 2026-10-18. The owner approved this plan and inline execution. Execution stopped at the explicit Metro cache-isolation rejection gate; see the [outcome](../../assessments/2026-10-18-m10-5-worker-scoped-compiled-text.md). Unchecked qualification steps below were not admitted or passed.
 
 ## Global Constraints
 
@@ -171,4 +171,4 @@ New private qualification tooling: `packages/css/bench/compiled-text-reuse/quali
 
 Self-review checks: the spec's mutable proof, lifetime exception, fresh evaluation, bounds/concurrency, outer-cache binding, all output/SDK/native/host checks and rejection behavior map to steps above. The five additional Review Focus cases have explicit tests. This plan does not revive the rejected kernel/runtime-provenance work or alter accepted release policy.
 
-The owner's native/inline choice is retained. Written plan review is the remaining handoff before implementation; approval of the prior spec is recorded separately and is not requested again.
+The owner's native/inline choice is retained. Written plan review and inline execution were approved. This candidate was subsequently rejected at the required Metro session/cache gate; unrun downstream checks are documented in the outcome.

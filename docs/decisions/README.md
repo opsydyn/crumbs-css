@@ -36,3 +36,5 @@ The consumer-scoped release-enforcement proposal above was **accepted on 2026-10
 
 
 2026-10-18: the owner approved the complete worker-scoped cache design at `090c4fd`. Its [single implementation plan](../superpowers/plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) awaits review; native/inline execution and one outcome commit are retained. This approval does not qualify performance or publication.
+
+2026-10-18: execution of the approved worker-scoped plan [rejected its session-transport candidate](../assessments/2026-10-18-m10-5-worker-scoped-compiled-text.md). Expo's supervising cache key includes the session token, invalidating ordinary caches. Shipping code/artifacts are restored; host gates and publication block remain unchanged.
