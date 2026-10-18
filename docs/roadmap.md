@@ -3262,3 +3262,10 @@ The owner approved the [v1.2.0 compiler baseline and exact-artifact publication]
 
 
 **M1.10c publication complete:** [run 39120552775](https://github.com/opsydyn/crumbs-css/actions/runs/39120552775) published the exact retained tarball with provenance. npm latest/version/integrity and a fresh public-registry SDK58 consumer pass. Older blocked-publication entries above are historical and superseded by this release decision; the M10.5 consumer-specific slowdown investigation and deferred physical-device work remain separate backlog items.
+
+
+### M1.10 documentation follow-up — consumer Rust setup
+
+Added a consumer-facing SDK58 Rust opt-in recipe to Configure Metro and both READMEs, with the qualified Babel preset, config merging, restart/cache instructions, fallback semantics and returning to Babel. Linked onboarding, prerequisites, compatibility, internal app commands and the transform explanation to that guide. Corrected the package README’s stale RN peer range and remaining current-page publication/budget wording. Historical evidence and version-specific receipts are preserved. This documentation slice changes no compiler, dependency, package version or qualification policy; the already-published 1.2.0 tarball remains immutable.
+
+The same audit corrected four broken built-site links (DTCG, ownership and its evidence receipt). All current package export paths are represented in the API reference. Documentation build, config-example checks and a built-site link/anchor audit cover this slice; no new native or performance qualification is claimed. The npm 1.2.0 README remains part of its immutable tarball; the updated package README source will ship with the next package release.

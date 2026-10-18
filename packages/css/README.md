@@ -6,7 +6,7 @@
 
 Typed React Native style authoring, themes and design-system tooling with a familiar vanilla-extract-shaped API.
 
-Version `1.2.0` adds Expo SDK 58 / React Native 0.88 compatibility and optional genuine Expo Rust worker routing, retaining SDK 56/57 and the v1 API. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for publication and release-gate status. Earlier version-specific performance exceptions are not carried forward.
+Published version `1.2.0` adds Expo SDK 58 / React Native 0.88 compatibility and optional genuine Expo Rust worker routing, retaining SDK 56/57 and the v1 API. See the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for publication and release-gate status. Earlier version-specific performance exceptions are not carried forward.
 
 Full consumer documentation lives in the Starlight docs workspace in this repo:
 [github.com/opsydyn/crumbs-css/tree/main/docs](https://github.com/opsydyn/crumbs-css/tree/main/docs)
@@ -90,7 +90,7 @@ npm install @opsydyn/crumbs-css@1.2.0
 
 Peer dependencies: `react`, `react-native`, and `metro`. TypeScript `>=5.9 <7` is an optional peer only for consumers that import the source migration tooling.
 
-Current `react-native` peer range: `>=0.85 <0.87`.
+Current `react-native` peer range: `>=0.85 <0.87 || >=0.88 <0.89`. RN 0.87 remains unqualified.
 
 ## Minimal Metro setup
 
@@ -108,6 +108,20 @@ module.exports = withNativeStyles(config)
 The package ships with a pre-built transformer. Metro cache invalidation is based on the transformer file, so package updates invalidate stale `.css.ts` output automatically.
 
 Runtime APIs belong in `@opsydyn/crumbs-css/theme/core` for common provider, hook and token-resolution consumers. It is the lean runtime graph and imports only React externally. Use `@opsydyn/crumbs-css/theme` when you need token scopes, dependency plans or recipe resolver controls; that compatibility graph also imports only React externally. The package root, `/style` and Metro tooling remain build-time entrypoints. See the [runtime dependency boundary](./COMPATIBILITY.md#runtime-dependency-boundary).
+
+### Optional Expo Rust transformer (SDK 58)
+
+With Crumbs 1.2.0 and Expo SDK 58, keep `withNativeStyles` and merge the Rust experiment into your existing app config:
+
+```js
+// app.config.js
+module.exports = ({ config }) => ({
+  ...config,
+  experiments: { ...config.experiments, noxcturnalTransformWorker: true },
+})
+```
+
+Stop Metro and run `npx expo start --clear`. Babel remains the default when this option is absent; set it to `false` and restart to switch back. Expo can still use Babel for files requiring codegen, Worklets or custom transforms. Crumbs’ `.css.ts` compilation remains unchanged. Follow the [complete setup and Babel preset guidance](https://opsydyn.github.io/crumbs-css/how-to/configure-metro/#opt-into-expos-rust-transformer-sdk-58) before changing an existing app’s Babel configuration. `CRUMBS_METRO_WORKER` is only a convenience for this repository’s internal apps.
 
 ## Minimal theme example
 

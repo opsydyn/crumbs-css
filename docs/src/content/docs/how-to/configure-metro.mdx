@@ -16,15 +16,60 @@ const config = getDefaultConfig(__dirname)
 module.exports = withNativeStyles(config)
 ```
 
+## Opt into Expo’s Rust transformer (SDK 58)
+
+Use Crumbs **1.2.0** with the qualified Expo SDK 58 / React Native 0.88 stack. Babel is the default. Keep the `withNativeStyles` wrapper above and merge this option into your existing Expo app configuration:
+
+```js
+// app.config.js
+module.exports = ({ config }) => ({
+  ...config,
+  experiments: {
+    ...config.experiments,
+    noxcturnalTransformWorker: true,
+  },
+})
+```
+
+If your app already has a dynamic config function, add the experiment to its returned object rather than replacing the function. Preserve your existing app settings and experiments.
+
+For an SDK 58 app with no additional required Babel transforms, the qualified preset configuration is:
+
+```js
+// babel.config.js
+module.exports = function (api) {
+  api.cache(true)
+  return { presets: [require("expo/internal/babel-preset")] }
+}
+```
+
+This uses Expo’s own preset identity, which matters for Rust eligibility in the qualified SDK 58 setup. Keep any plugins or parser overrides your app needs; custom Babel configuration can legitimately make files use Babel. Expo supplies the matched Worklets transforms; do not remove required transforms just to force Rust execution.
+
+Stop Metro, then restart with a cleared cache:
+
+```sh
+npx expo start --clear
+```
+
+To return to Babel, remove `noxcturnalTransformWorker` or set it to `false`, then stop and restart Metro with `--clear` again. Use separate fresh caches when comparing the two modes. SDK 56/57 apps should retain their existing supported worker configuration.
+
+### What Rust mode changes
+
+Expo chooses its transformer per file. Eligible JavaScript/TypeScript uses its Rust worker; codegen, Animated/Worklets and unsupported custom parser/configuration cases can fall back to Babel. Crumbs continues to compile `.css.ts` through its existing Vanilla Extract integration before delegating generated JavaScript to Expo. No separate Rust dependency is required by Crumbs, and this option makes no Crumbs compiler-speed guarantee.
+
+A successful build with the flag enabled proves compatibility, not that every file ran through Rust. When diagnosing routing, inspect Expo’s `transform:noxcturnal:full` events for `status: complete` on eligible files and the fallback reasons for other files. Keep performance measurements separate from routing diagnostics.
+
+`CRUMBS_METRO_WORKER=rust` is a convenience implemented by this repository’s Playground and Storybook app configs. It does not enable Rust in an arbitrary consuming app. See the [internal app commands and routing checks](/crumbs-css/how-to/use-storybook-and-expo-dev-client/#select-the-sdk-58-worker).
+
 ## Why this is required
 
 `@opsydyn/crumbs-css` compiles `.css.ts` files at Metro transform time. Without the wrapper, Metro will evaluate the authoring module as plain JavaScript instead of converting it into native style output.
 
 ## When to clear Metro cache
 
-Use `expo start --clear` when:
+Use `npx expo start --clear` when:
 
-- you have changed Metro configuration
+- you have changed Metro, Expo worker or Babel configuration
 - you are debugging stale `.css.ts` transform output
 - you have upgraded the package and want a clean transform pass
 

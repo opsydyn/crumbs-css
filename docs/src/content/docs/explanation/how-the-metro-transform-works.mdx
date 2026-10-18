@@ -12,3 +12,8 @@ At a high level:
 5. the transformed module exports React Native-friendly values
 
 This is why Metro configuration is mandatory. The package is not a runtime CSS interpreter; it is a compiler and runtime resolution layer built around Metro.
+
+
+## Expo’s Babel and Rust workers
+
+Crumbs handles `.css.ts` authoring and delegates generated JavaScript, along with ordinary app JavaScript, to Expo’s supervising transform worker. On SDK 58, Expo can select its optional Rust backend for eligible files and Babel for files requiring fallback transforms. The [Rust opt-in guide](/crumbs-css/how-to/configure-metro/#opt-into-expos-rust-transformer-sdk-58) configures that Expo stage; it does not replace Crumbs’ Vanilla Extract compile phase. Keep `withNativeStyles` in both modes.

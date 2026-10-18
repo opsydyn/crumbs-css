@@ -7,9 +7,9 @@ This tutorial gets you to the first successful setup in an Expo + Metro app.
 
 ## 1. Install the package
 
-Check the release status for availability, then install the compatibility release from npm:
+Install the published compatibility release from npm:
 
-SDK 58/RN 0.88 requires Crumbs 1.2.0. Check the [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for availability; published 1.1.1 covers SDK 56/57. Match the app's [Node/SDK requirements](/crumbs-css/reference/install-prerequisites/).
+Crumbs 1.2.0 supports SDK 56/57/58; SDK 58/RN 0.88 requires this release. See the [verified release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md). Match the app's [Node/SDK requirements](/crumbs-css/reference/install-prerequisites/).
 
 ```sh
 bun add @opsydyn/crumbs-css@1.2.0
@@ -31,6 +31,8 @@ const config = getDefaultConfig(__dirname)
 
 module.exports = withNativeStyles(config)
 ```
+
+Babel is the default. SDK 58 apps can optionally [enable Expo’s Rust transformer](/crumbs-css/how-to/configure-metro/#opt-into-expos-rust-transformer-sdk-58); keep this Metro wrapper in either mode.
 
 ## 3. Add a `.css.ts` module
 
@@ -71,7 +73,7 @@ export function Screen() {
 ## 5. Start Expo
 
 ```sh
-expo start --clear
+npx expo start --clear
 ```
 
 If Metro starts cleanly and the screen renders, the transform pipeline is working.

@@ -18,17 +18,19 @@ Effect is an implementation dependency installed with Crumbs. Applications do no
 The current package contract is validated against:
 
 - Expo SDK 56 / React Native 0.85
-- Expo SDK 57 / React Native 0.86 with Crumbs 1.1.0
+- Expo SDK 57 / React Native 0.86 (supported since Crumbs 1.1.0)
 - Expo SDK 58 / React Native 0.88 with Crumbs 1.2.0; React / React DOM 19.3.1
 - React 19.2 on retained SDK 56/57 lines
 
-Crumbs 1.2.0 peers cover React Native `>=0.85 <0.87 || >=0.88 <0.89`; RN 0.87 is unqualified. Published 1.1.1 covers SDK 56/57 only. Crumbs tooling keeps Node `>=22.0.0`; SDK 56/57 tooling needs `>=22.13.0` and SDK 58 needs `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. See [compatibility](../compatibility/) and the [1.2.0 release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for the published compatibility release and its verification evidence.
+Crumbs 1.2.0 peers cover React Native `>=0.85 <0.87 || >=0.88 <0.89`; RN 0.87 is unqualified. Crumbs 1.2.0 retains SDK 56/57 support; earlier 1.1.1 covers those two SDKs only. Crumbs tooling keeps Node `>=22.0.0`; SDK 56/57 tooling needs `>=22.13.0` and SDK 58 needs `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. See [compatibility](../compatibility/) and the [1.2.0 release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md) for the published compatibility release and its verification evidence.
 
 ## Required app setup
 
-- Metro must be wrapped with `withNativeStyles`
+- Metro must be wrapped with `withNativeStyles` in both Babel and Rust modes
 - `.css.ts` authoring modules should import from `@opsydyn/crumbs-css/style`
-- themed styles should be resolved before render
+- themed styles should be resolved through the theme Hooks or resolver APIs; literal styles need no provider
+
+SDK 58 consumers may [opt into Expo’s Rust transformer](/crumbs-css/how-to/configure-metro/#opt-into-expos-rust-transformer-sdk-58). This is an Expo app experiment, not a Crumbs runtime dependency.
 
 ## Recommended environment
 
@@ -40,8 +42,10 @@ Crumbs 1.2.0 peers cover React Native `>=0.85 <0.87 || >=0.88 <0.89`; RN 0.87 is
 
 If the consumer app is installed with Bun, `expo-doctor` can still report
 duplicate Expo packages from Bun's `.bun/` symlink layout even when every
-duplicate is the same version. Treat that warning as advisory until Expo Doctor
-and Bun converge on the same install model.
+duplicate is the same version. Verify the versions and physical packages resolved
+by the app before treating this as a layout-only warning. Different React or
+React Native copies and mismatched SDK peers still need to be corrected; do not
+use peer overrides to silence them.
 
 ## Current scope
 

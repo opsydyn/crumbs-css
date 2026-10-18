@@ -19,13 +19,15 @@ Crumbs' Node floor remains `22.0.0`. SDK 56/57 tooling uses `>=22.13.0`; SDK 58 
 
 ### Babel and Expo's optional Rust worker
 
+Use the [consumer setup guide](https://opsydyn.github.io/crumbs-css/how-to/configure-metro/#opt-into-expos-rust-transformer-sdk-58) for copyable app/Babel config, Metro restart instructions and returning to Babel.
+
 Babel remains the default. SDK 58 consumers can opt into Expo's experimental `experiments.noxcturnalTransformWorker: true` in `app.config.js`; keep `withNativeStyles` around the existing Expo Metro config. The internal apps expose this with `CRUMBS_METRO_WORKER=rust`; the environment name is an app convenience, not a Crumbs public API. Use the canonical `presets: [require("expo/internal/babel-preset")]` when the app has no additional required Babel transforms. Custom configurations may legitimately select Babel.
 
 Crumbs still compiles `.css.ts` through its existing Vanilla Extract integration. Generated/ordinary JavaScript is delegated to Expo's worker. Rust eligibility is per file: codegen, Animated/Worklets candidates, Worklets and unsupported/custom parser configuration use explicit Babel fallbacks. Storybook's legacy modal datetime-picker needs its narrow Flow parser override. Do not remove required transforms or bypass Expo eligibility to force Rust. Actual eligible app/React JSX completion events establish execution; the flag or successful export alone does not. No throughput gain or Crumbs compiler rewrite is implied.
 
 Source maps provide authored export/import locations, not property-level precision. The minimal full-strict RN 88 declaration probe retains three independently reproduced upstream errors; normal Expo consumer checks pass. Expo Doctor still reports workspace duplicate development peers and Storybook's preexisting native-folder warning; Rust's internal flag is absent from Doctor's remote schema. Inspect installed peer identities instead of hiding these diagnostics.
 
-Owned simulator/emulator checks are functional native evidence. Physical hardware, spoken readers, iOS 27/DeviceHub behavior and release FPS remain deferred. M10.5 budgets and the unresolved consumer 2.5× report are unchanged; previous release exceptions do not qualify 1.2.0.
+Owned simulator/emulator checks are functional native evidence. Physical hardware, spoken readers, iOS 27/DeviceHub behavior and release FPS remain deferred. The [accepted M10.5 baseline amendment](https://github.com/opsydyn/crumbs-css/blob/main/docs/evidence/2026-10-18-m10-5-v12-rebaseline/README.md) admits the exact published 1.2.0 artifact with retained regression allowances and integrity checks. The consumer-specific 2.5× report remains unresolved; publication is not a claimed speedup.
 
 ## Compiler, artifact and runtime matrix (M8.2)
 

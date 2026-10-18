@@ -61,6 +61,20 @@ Restart Metro after changing its configuration. Literal styles need no provider;
 `ThemeProvider` and the resolution Hooks from `/theme/core`. Import authoring APIs in `.css.ts` files and runtime
 APIs in components. Prefer the specific entry you use so optional tooling stays outside the native runtime graph.
 
+### Optional Expo Rust transformer (SDK 58)
+
+With Crumbs 1.2.0 and Expo SDK 58, keep `withNativeStyles` and merge the Rust experiment into your existing app config:
+
+```js
+// app.config.js
+module.exports = ({ config }) => ({
+  ...config,
+  experiments: { ...config.experiments, noxcturnalTransformWorker: true },
+})
+```
+
+Stop Metro and run `npx expo start --clear`. Babel remains the default when this option is absent; set it to `false` and restart to switch back. Expo can still use Babel for files requiring codegen, Worklets or custom transforms. Crumbs’ `.css.ts` compilation remains unchanged. Follow the [complete setup and Babel preset guidance](https://opsydyn.github.io/crumbs-css/how-to/configure-metro/#opt-into-expos-rust-transformer-sdk-58) before changing an existing app’s Babel configuration. `CRUMBS_METRO_WORKER` is only a convenience for this repository’s internal apps.
+
 ### Build from source (optional)
 
 To build the immutable v1 source yourself:
