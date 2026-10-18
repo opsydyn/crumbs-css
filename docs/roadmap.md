@@ -3407,3 +3407,10 @@ The owner approved the compiler-lifetime contract presented in `7903ba9`: compil
 The [written design](superpowers/specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md) covers complete resolution witnesses, fresh confirmation, bounded ownership, before/after checks and a proposed Metro session binding. Cross-restart native cache reuse is deliberately excluded from that proposal and its cost must be measured. The 3.265 ms incomplete envelope supplies a hypothesis budget only; its stale-resolution failure remains preserved. This slice changes documentation only; the shipping compiler and historical evidence packets are unchanged.
 
 **Next M10.5: written-spec review, then one native/inline implementation plan for the complete candidate.** No implementation, host qualification, release exception or publication is approved by the contract decision. The original v1.2.0 cold/warm/incremental failures still block publication; physical-device/spoken-reader acceptance remains deferred.
+
+
+### M10.5 — worker-scoped cache spec approved; single implementation plan prepared (2026-10-18)
+
+The owner approved the written design at `090c4fd`. The [implementation plan](superpowers/plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) treats the whole witness/memo/Metro integration and qualification as one slice with one outcome commit. It explicitly tests higher-priority resolution, delayed completion, session restart/store growth, extension-only dependencies and malformed native receipts. Independent fresh controls and the unchanged 11-blocking/21-complete host policy remain required. Local dirty-source development checks cannot stand in for clean artifact sealing or hosted qualification.
+
+**Next M10.5: review the written plan, then execute it natively/inline as one complete candidate.** This planning slice changes documentation only. The original v1.2.0 cold/warm/incremental failures still block publication; no release exception or physical-device/spoken-reader acceptance is implied.

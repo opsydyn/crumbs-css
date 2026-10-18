@@ -1,6 +1,6 @@
 # M10.5 worker-scoped compiled-text reuse
 
-Status: **written design proposed for review**. On 2026-10-18 the owner approved the worker-lifetime contract presented in `7903ba9`. That approval permits this design; it does not approve its implementation or publication. Native/inline execution remains the intended method after plan review.
+Status: **written design approved on 2026-10-18**, as reviewed at `090c4fd`. The earlier worker-lifetime contract approval at `7903ba9` remains recorded separately. The [single-slice implementation plan](../plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) now awaits written review. Native/inline execution is retained; no implementation or publication follows from spec approval alone.
 
 ## Purpose and evidence
 

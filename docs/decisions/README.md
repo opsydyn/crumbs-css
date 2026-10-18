@@ -33,3 +33,6 @@ The consumer-scoped release-enforcement proposal above was **accepted on 2026-10
 
 
 2026-10-18: the owner subsequently [approved the worker-lifetime compiler contract](adopt-native-design-system-compiler.md#approved-worker-lifetime-compiler-contract--2026-10-18), narrowly replacing fresh compiler-service-error equivalence and reopening compiled-text reuse design. Mutable-input proof, fresh authoring and all release budgets remain binding. The [complete written design](../superpowers/specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md) awaits review; no candidate or publication is adopted and the parent ADR remains proposed.
+
+
+2026-10-18: the owner approved the complete worker-scoped cache design at `090c4fd`. Its [single implementation plan](../superpowers/plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) awaits review; native/inline execution and one outcome commit are retained. This approval does not qualify performance or publication.

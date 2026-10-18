@@ -586,3 +586,8 @@ Implementation scope after written spec/plan review: private compiler witness/me
 - [ ] All 11 blocking host comparisons pass, all 21 measurements valid/complete, advisory failures visible and restart costs recorded.
 
 The performance hypothesis is the incomplete 3.265 ms diagnostic envelope plus all missing checks beneath the unchanged effective warm limit, not a release pass. Fresh compilation remains the rejection fallback. Retained-context/package/kernel alternatives remain parked. If correctness, session transport, realistic restart/edit behavior or complete timing fails, reject this candidate rather than weaken its proof. The original v1.2.0 source/tarball/report and three numerical failures remain intact; no release exception or publication is approved.
+
+
+### Worker-scoped compiled-text spec approved; plan prepared — 2026-10-18
+
+The owner approved the complete written design at `090c4fd`, including full mutable witnesses, fresh authoring, bounded admission and session-bound native outer-cache receipts. The [one-slice implementation plan](../superpowers/plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) now awaits written review with native/inline execution retained. It requires independent fresh controls, actual Metro session/key behavior, runtime isolation, SDK/software-native checks and all unchanged local host gates before a development candidate is admitted. Dirty development receipts remain distinct from later clean exact-commit/artifact and hosted release qualification. No candidate, release exception or publication is adopted; the parent ADR remains Proposed.
