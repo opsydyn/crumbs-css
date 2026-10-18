@@ -1,7 +1,7 @@
 # Crumbs design-system architecture roadmap
 
 Date: 2026-09-06\
-Status: v1.2.0 published as npm latest and on GitHub; M1.10 SDK58 compatibility and publication complete under the accepted M10.5 compiler baseline. Physical acceptance and parked integrations remain separate.\
+Status: v1.2.0 published as npm latest and on GitHub; M1.10 SDK58 compatibility and publication complete under the accepted M10.5 compiler baseline. M9.3a native developer widget is specified for review; implementation and dogfooding are pending. Physical acceptance and parked integrations remain separate.\
 Architecture: [Adopt a native design-system compiler](decisions/adopt-native-design-system-compiler.md).\
 Evidence: [Current assessment and reproducible counterexamples](assessments/2026-09-06-design-system-assessment.md).
 
@@ -37,7 +37,7 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M6 | Native conditions and functional style programs | M3, M4, M5 | Complete; M6.1–M6.5 delivered |
 | M7 | Typed component slots, states, and extension contracts | M5, M6 | Complete; M7.1–M7.5 delivered |
 | M8 | Distributed package/artifact compatibility | M2, M3, M7 | Complete; M8.1–M8.6 delivered |
-| M9 | Manifests, change impact, policy, migrations, DTCG, and local ownership | M7, M8 | Complete; M9.1–M9.7 complete |
+| M9 | Manifests, change impact, policy, migrations, DTCG, and local ownership | M7, M8 | M9.1–M9.7 delivered; M9.3a native widget follow-up specified, implementation/dogfooding pending |
 | M10 | Qualify a reference design system and enterprise journeys | M8, M9 | M10.1–M10.4 delivered; M10.5 v1 release scope closed with exact approved exceptions; deferred acceptance remains open |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Selected M11.1–M11.5 delivered; M11.6 integrations parked |
 
@@ -303,12 +303,21 @@ token/recipe-slot codemods. Keep Android/device acceptance parked.
 - [x] M9.1: Emit deterministic versioned manifests for identities, public contracts, aliases/dependencies, source origins, capabilities, defaults, and deprecation/replacement metadata. Qualified with [receipt](evidence/2026-09-27-m9-1-deterministic-manifest/qualification.json) and [assessment](assessments/2026-09-27-m9-1-deterministic-manifest.md).
 - [x] M9.2: Provide local explicit-file checking and manifest comparison. Detect token/slot/variant contract changes, domain changes, changed defaults, and forbidden private dependencies; report affected supplied consumers and analysis limits. See the [qualification receipt](evidence/2026-09-27-m9-2-manifest-compatibility/qualification-v1.json) and [assessment](assessments/2026-09-27-m9-2-manifest-compatibility.md).
 - [x] M9.3: Add development-only style explanations for resolved values, matching conditions, override winners, dependencies, and recomputation causes. Exclude detailed provenance from production output unless deliberately requested. Qualified with the [receipt](evidence/2026-09-27-m9-3-style-explanations/qualification.json) and [assessment](assessments/2026-09-27-m9-3-style-explanations.md); Android/device acceptance remains not-run and parked.
+- [ ] M9.3a: Add an opt-in native developer widget over M9.3: registered-target selection, on-demand property/variant explanations and explicit report copying. Dogfood scoped tokens, override winners and deterministic recipe variants in Playground and Storybook; verify lifecycle, closed-panel work and packed production isolation. [Written specification](superpowers/specs/2026-10-18-m9-3a-native-devtools-widget-design.md) awaits review; no implementation or live acceptance claimed. iOS Simulator/Android emulator checks are included; physical-device work remains deferred.
 - [x] M9.4: Add versioned policy presets and incremental adoption. Cover semantic tokens, literals, private surfaces, capabilities, deprecations, and output budgets. Escape hatches carry a reason and optional expiry and remain visible in reports. Qualified with the [policy report](evidence/2026-09-28-m9-4-design-system-policies/policy-report-v1.json), [receipt](evidence/2026-09-28-m9-4-design-system-policies/qualification.json), and [assessment](assessments/2026-09-28-m9-4-design-system-policies.md); Android/device acceptance remains not-run and parked.
 - [x] M9.5: Add replacement metadata and codemods for a token rename and recipe/slot migration. Unsupported or ambiguous edits must be reported without corrupting source; verify dry-run, repeat execution, and changed-file boundaries. See the [qualification receipt](evidence/2026-09-28-m9-5-safe-migrations/qualification.json) and [assessment](assessments/2026-09-28-m9-5-safe-migrations.md).
 - [x] M9.6: Implement a DTCG 2025.10 format/resolver adapter with a documented native subset. Validate aliases/cycles/domains/context precedence, preserve supported metadata, and reject unmappable token types with origin context. See the [qualification receipt](evidence/2026-09-28-m9-6-dtcg/qualification.json) and [assessment](assessments/2026-09-28-m9-6-dtcg-adapter.md); input/format nodes, resolver steps, and emitted provenance each have explicit 100,000-unit guards.
 - [x] M9.7: Support versioned local ownership metadata across compatibility, policy, migration, style-explanation, and DTCG reports. Exact manifest IDs, explicit input paths, unresolved coverage, and the tooling-only API are documented and fixture-qualified in the [receipt](evidence/2026-09-29-m9-7-ownership/qualification.json) and [assessment](assessments/2026-09-29-m9-7-local-ownership.md); Android/device acceptance remains not-run and parked.
 
 **Exit:** release-impact fixtures identify expected consumers; reports distinguish proven breaks from potential visual impact; migrations preserve valid usage; DTCG support/limitations are explicit; tooling stays outside ordinary runtime bundles.
+
+### 2026-10-18 — M9.3a native developer widget specification
+
+The approved direction is recorded in the [M9.3a design](superpowers/specs/2026-10-18-m9-3a-native-devtools-widget-design.md). The first slice uses explicit mounted-target registration and the existing `explainStyle` report, with list selection, property/token/override explanations, stale-capture handling and explicit copy. It includes Playground and Storybook dogfooding as one implementation slice. Automatic element picking, desktop transport, editing and audits remain out of scope.
+
+Status: specification and roadmap only. Written-spec review and implementation planning precede product code; no widget has shipped and no dogfooding result is recorded. Proposed new APIs remain outside shipped consumer references. The M10.5 baseline and npm 1.2.0 publication are unchanged.
+
+Next recommended slice: **M9.3a implementation planning**, followed by native/inline implementation and the specified dogfooding within the proposed two-day effort window. Preserve incomplete gates explicitly at the stop point.
 
 ### 2026-09-27 — M9.1 deterministic design-system manifest
 
