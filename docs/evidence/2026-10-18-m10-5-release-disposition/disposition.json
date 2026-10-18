@@ -1,0 +1,38 @@
+{
+  "clientDate": "2026-10-18",
+  "reviewBase": "9597d79c82537262a252f045e44006c62a515ed6",
+  "defaultChoice": "keep-publication-blocked",
+  "explicitChoicePending": true,
+  "exceptionApproved": false,
+  "publicationAuthorizedByThisSlice": false,
+  "normalQualificationManifestSealed": false,
+  "genericPolicyChanged": false,
+  "newQualificationRun": false,
+  "newSdkOrNativeRun": false,
+  "pinsConfirmed": {
+    "sourceRevision": "5a13f913b17ae957172968144ec83c391caee337",
+    "sourceTree": "c28e6332fc68f7543faf9e7dc86a2f179fc20c67",
+    "tarballSha256": "4bd7897aa5beb6383b158f4e214436ba5d0d659b6b0fc005142c945a10dda02e",
+    "reportDigest": "22a99b9542d94242b46be612044687589e67a58a17bd09bafff112038e340094",
+    "sdkMatrixSha256": "6d1edeabd8b36bf0a44fe936153e7b6215a3e23baa50e87e30aa0ff07ffbe471",
+    "policySha256": "cd3f8408c8381591d16525c2cd8e66e1e45e28582c8c96a47ac84d05ef1edc07",
+    "registrySha256": "0f5752c430db6ced1f8d8a5c94c7de865a3ba9daadaa9a60584148eeb0a4687b"
+  },
+  "choices": [
+    {
+      "id": "keep-blocked",
+      "meaning": "Retain remediation-before-publication. Park this release until a materially different justified remediation is funded and changed bytes are fully qualified."
+    },
+    {
+      "id": "request-exact-v120-exception",
+      "meaning": "Separately approve only the three pinned numerical host failures for this exact source/report/tarball/SDK matrix; then design and verify a dedicated exception path before publication. Identity, compatibility and all other verifiers remain required."
+    }
+  ],
+  "exceptionMetricIds": [
+    "cold-transform-ms",
+    "warm-transform-ms",
+    "incremental-rebuild"
+  ],
+  "normalWorkflow": "failed qualification; publish skipped; no applicable v1.2.0 exception route exists",
+  "nextSlice": "M10.5 explicit release choice; if exact exception selected, a bounded exception-path design/review; otherwise keep blocked with no speculative prototype"
+}
