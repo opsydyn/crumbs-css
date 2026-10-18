@@ -317,7 +317,9 @@ The approved direction is recorded in the [M9.3a design](superpowers/specs/2026-
 
 Status: specification and plan approved, implementation and qualification completed inline. The new `devtools/native` entry and both development app integrations are present. Package tests, production graph checks, fresh packed SDK58 Babel/Rust exports, Android Storybook/refresh/back, four native source cost runs and screenshot docs pass. [Qualification closure](evidence/2026-10-18-m9-3a-qualification-closure/README.md) records native acceptance and its limits precisely. API references identify this as a v1.3.0 capability. The [publication record](evidence/2026-10-18-m9-3a-v130-release/README.md) verifies npm latest, exact bytes, fresh host admission and SDK56/57/58 qualification; the accepted M10.5 baseline is unchanged.
 
-Next recommended action: **M9.3a consumer-agent skill refresh**, documenting the published inspector setup and diagnosis workflow in the repository skill. This documentation follow-up is recommended, not started. Do not restart implementation or expand into picking, editing or desktop transport.
+The **M9.3a consumer-agent skill refresh is complete**: portable inspector setup, scoped recipe probes, production isolation, clipboard ownership and partial/stale diagnosis target the published 1.3.0 API. [Qualification](evidence/2026-10-18-m9-3a-agent-skill/README.md) records baseline/forward agent exercises, strict published-consumer types, actual report checks and iOS/Android/web production graphs. No new native interaction or performance acceptance is inferred.
+
+Next recommended slice: **M9.3a — integrate this documentation-only skill refresh through a PR**, making the portable guidance available from main. No npm release is needed because the skill is distributed through Git. Then collect real consumer feedback before considering inspector expansion; picking, editing and desktop transport remain outside the approved scope. Physical acceptance remains deferred and **M11.6** integrations remain parked.
 
 ### 2026-09-27 — M9.1 deterministic design-system manifest
 

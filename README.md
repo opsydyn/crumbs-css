@@ -123,7 +123,7 @@ Sprinkles plans select from finite scales without enumerating a Cartesian produc
 
 ## Coding agents
 
-Use the repository [Crumbs consumer skill](.agents/skills/crumbs-css/SKILL.md) for the `1.2.0` API and SDK 56/57/58 setup. It covers Expo/Metro setup, import selection, typed design systems and native runtime boundaries, with a checked ActionCard example. [Copy the complete skill into your app repository](docs/src/content/docs/how-to/use-agent-skill.mdx), then invoke it as `$crumbs-css` in Codex. The skill is maintained in Git; it is not included in the npm tarball.
+Use the repository [Crumbs consumer skill](.agents/skills/crumbs-css/SKILL.md) for the `1.3.0` API and SDK 56/57/58 setup. It covers Expo/Metro setup, import selection, typed design systems and native runtime boundaries, with a checked ActionCard example and development-only inspector probes. [Copy the complete skill into your app repository](docs/src/content/docs/how-to/use-agent-skill.mdx), then invoke it as `$crumbs-css` in Codex. The skill is maintained in Git; it is not included in the npm tarball.
 
 ## Guides and architecture
 

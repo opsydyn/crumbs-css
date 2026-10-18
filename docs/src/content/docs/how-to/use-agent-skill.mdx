@@ -4,9 +4,9 @@ description: Install the repository consumer skill for the Crumbs v1 APIs and SD
 ---
 
 The repository ships a portable **`crumbs-css` consumer skill** for Expo apps and
-React Native design systems. It covers the `1.2.0` SDK 58 compatibility release and retained 1.1.x SDK 56/57 APIs; check the installed version and [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.2.0.md). The copied folder includes matched Node/SDK guidance, concrete Babel/Rust setup and per-file fallback limits. It covers Metro setup, specific
+React Native design systems. It covers the `1.3.0` native inspector, `1.2.0` SDK 58 compatibility and retained 1.1.x SDK 56/57 APIs; check the installed version and [release status](https://github.com/opsydyn/crumbs-css/blob/main/docs/releases/1.3.0.md). The copied folder includes matched Node/SDK guidance, concrete Babel/Rust setup and per-file fallback limits. It covers Metro setup, specific
 package imports, typed tokens, slots, atomic utilities, instance variables and
-native boundaries, with a complete themed ActionCard example.
+native boundaries, with a complete themed ActionCard example and a development-only recipe probe.
 
 The skill is maintained in
 [`.agents/skills/crumbs-css`](https://github.com/opsydyn/crumbs-css/tree/main/.agents/skills/crumbs-css).
@@ -66,6 +66,22 @@ For capability and setup details, use the [quickstart](/crumbs-css/tutorials/get
 [API index](/crumbs-css/reference/package-entrypoints-and-apis/), and
 [reference design system](/crumbs-css/how-to/build-a-reference-design-system/).
 The skill adds guidance; it changes no public API or native/performance guarantee.
+
+## Inspect an existing component
+
+```text
+Use $crumbs-css to add the native inspector to our installed Crumbs 1.3.0 app.
+Register our Card recipe in its existing nested theme scope, using its current
+selection and conditions. Preserve onActionPress. Keep inspector value imports
+behind a development-only module boundary and use our clipboard adapter.
+Explain partial or stale reports and verify a production export excludes devtools.
+```
+
+The copied `references/native-inspector.md` includes the module boundary, typed
+recipe probe, clipboard ownership and diagnosis checklist. The widget requires
+1.3.0; 1.2.0 retains the headless explanation API. The probe describes one supplied
+Crumbs export, not the final rendered native style. See the
+[native inspector guide and screenshots](/crumbs-css/how-to/explain-native-styles/).
 
 ## Check the generated component in your app
 
