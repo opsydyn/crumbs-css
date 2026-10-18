@@ -71,3 +71,16 @@ The debug clipboard readback compares length plus FNV-1a checksum; it is a
 functional probe, not a cryptographic integrity mechanism. Unit tests separately
 assert exact equality of prepared text and the clipboard adapter argument.
 Physical devices, spoken screen readers and independent user testing are separate.
+
+### M9.3a qualification closure
+
+After the causes flow, use `scripts/fixtures/m9-3a-native-refresh.yaml` with
+`APP_ID` and `EXPECTED=0.7` after changing only the owned fixture's opacity0.8
+literal. Restore the file and repeat with `EXPECTED=0.8`; then run
+`scripts/fixtures/m9-3a-native-back.yaml` on Android. Run this app's
+`native-devtools-updates.yaml` to verify subsequent variant and theme changes.
+The comments in each recipe state its starting fixture state.
+
+The [closure packet](../../../docs/evidence/2026-10-18-m9-3a-qualification-closure/README.md)
+contains the native cost setup/restoration commands, platform receipts and limits.
+Never package or commit while the temporary cost instrumentation is staged.

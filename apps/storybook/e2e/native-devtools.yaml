@@ -35,6 +35,14 @@ appId: ${APP_ID}
 - tapOn: Open stories
 - assertVisible: "Action count: 1"
 - tapOn: Open Crumbs inspector
+# Android can discard the first tap immediately after Storybook updates its preview.
+# Retry only while the panel is still closed, then require its visible heading/action.
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
 - tapOn: Inspect Override opacity
 - scrollUntilVisible:
     element: "Overridden: .*opacity = 0.4"
@@ -57,6 +65,14 @@ appId: ${APP_ID}
 - tapOn: Verify copied report
 - assertVisible: "Clipboard matches: Override opacity.*"
 - tapOn: Open Crumbs inspector
+# Android can discard the first tap immediately after Storybook updates its preview.
+# Retry only while the panel is still closed, then require its visible heading/action.
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
 - tapOn: Inspect Missing metadata
 - scrollUntilVisible:
     element: "Coverage: unavailable metadata-missing"
@@ -66,9 +82,25 @@ appId: ${APP_ID}
 - tapOn: Close inspector
 - tapOn: Toggle inspector target
 - tapOn: Open Crumbs inspector
+# Android can discard the first tap immediately after Storybook updates its preview.
+# Retry only while the panel is still closed, then require its visible heading/action.
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
 - assertNotVisible: Inspect Missing metadata
 - tapOn: Close inspector
 - tapOn: Toggle inspector target
 - tapOn: Open Crumbs inspector
+# Android can discard the first tap immediately after Storybook updates its preview.
+# Retry only while the panel is still closed, then require its visible heading/action.
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
 - assertVisible: Inspect Missing metadata
 - tapOn: Close inspector

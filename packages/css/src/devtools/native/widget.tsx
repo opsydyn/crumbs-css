@@ -11,7 +11,7 @@ function Action({ label, onPress, disabled = false }: { label: string; onPress: 
 function focus(node: ComponentRef<typeof View> | null) {
   if (!node) return
   if (Platform.OS === "web") node.focus?.()
-  else { const tag = findNodeHandle(node); if (tag !== null) AccessibilityInfo.setAccessibilityFocus(tag) }
+  else { const tag = findNodeHandle(node); if (typeof tag === "number") AccessibilityInfo.setAccessibilityFocus(tag) }
 }
 export function CrumbsDevtoolsWidget(props: CrumbsDevtoolsWidgetProps): ReactElement {
   const store = useInspectorRegistry()

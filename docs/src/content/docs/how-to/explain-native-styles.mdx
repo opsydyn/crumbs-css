@@ -8,6 +8,30 @@ description: Inspect resolved style values and the explicit inputs that selected
 `@opsydyn/crumbs-css/devtools`, so ordinary theme and styling imports do not
 load the explanation implementation or Effect Schema.
 
+## Native inspector in use
+
+The opt-in native widget is available in the next release/source build; it is not
+included in published npm 1.2.0. These are real SDK58 Simulator/emulator captures
+from our Storybook and Playground qualification.
+
+<div className="devtools-shots">
+  <figure>
+    <img src={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/devtools/ios-override.png`} alt="Crumbs inspector on iOS showing opacity 0.8 winning over the earlier 0.4 declaration, with source paths and complete coverage." width="1170" height="2532" loading="lazy" />
+    <figcaption>iOS Storybook: the winning value, overridden declaration and source are shown together.</figcaption>
+  </figure>
+  <figure>
+    <img src={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/devtools/android-variant.png`} alt="Crumbs inspector on Android showing the selected recipe variant, opacity 0.5, and partial compatibility-only coverage." width="1080" height="2400" loading="lazy" />
+    <figcaption>Android Playground: recipe output retains its partial coverage label; the inspector does not invent missing provenance.</figcaption>
+  </figure>
+</div>
+
+<style>{`
+  .devtools-shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; align-items: start; }
+  .devtools-shots figure { margin: 0; min-width: 0; }
+  .devtools-shots img { display: block; width: 100%; max-width: 320px; height: auto; border-radius: 12px; }
+  .devtools-shots figcaption { margin-top: .75rem; font-size: .875rem; line-height: 1.5; }
+`}</style>
+
 ## Control metadata emission
 
 Metro development transforms include the `__crumbsDev` provenance sidecar by

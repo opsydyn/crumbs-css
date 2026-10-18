@@ -1,0 +1,29 @@
+appId: ${APP_ID}
+---
+# Start after native-devtools-causes + edit/restore/back: light theme, selected=false.
+- tapOn: Toggle inspected variant
+- assertVisible: 'Variant selected: true'
+- tapOn: Open Crumbs inspector
+- tapOn: Inspect Selected variant
+- scrollUntilVisible:
+    element: '(?s).*"opacity":\s*1[,\s].*'
+    direction: DOWN
+    timeout: 20000
+- tapOn: Close inspector
+- tapOn: Switch to dark
+- tapOn: Open Crumbs inspector
+- tapOn: Inspect Parent card
+- scrollUntilVisible:
+    element: '(?s).*resolvedValue.*#243149.*'
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: devtools-dark-token
+- tapOn: Close inspector
+- tapOn: Switch to light
+- tapOn: Open Crumbs inspector
+- tapOn: Inspect Parent card
+- scrollUntilVisible:
+    element: '(?s).*resolvedValue.*#ffffff.*'
+    direction: DOWN
+    timeout: 20000
+- tapOn: Close inspector

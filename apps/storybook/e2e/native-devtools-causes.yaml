@@ -35,6 +35,14 @@ appId: ${APP_ID}
 - tapOn: Open stories
 - assertVisible: "Action count: 1"
 - tapOn: Open Crumbs inspector
+# Android can discard the first tap immediately after Storybook updates its preview.
+# Retry only while the panel is still closed, then require its visible heading/action.
+- runFlow:
+    when:
+      notVisible: Close inspector
+    commands:
+      - tapOn: Open Crumbs inspector
+- assertVisible: Close inspector
 - tapOn: Inspect Showcase card
 - scrollUntilVisible:
     element: '(?s).*resolvedValue.*#fbf6ed.*'
@@ -46,7 +54,7 @@ appId: ${APP_ID}
     timeout: 20000
 - tapOn: Inspect Showcase action
 - scrollUntilVisible:
-    element: '0.55'
+    element: '(?s).*"opacity":\s*0\.55.*'
     direction: DOWN
     timeout: 20000
 - takeScreenshot: devtools-diagnosis-causes

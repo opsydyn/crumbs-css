@@ -3,9 +3,10 @@ import { strict as assert } from "node:assert"
 import { createElement } from "react"
 import { act, create, type ReactTestRenderer } from "react-test-renderer"
 Object.assign(globalThis,{IS_REACT_ACT_ENVIRONMENT:true})
+const nativePlatform={OS:"web"}; let nativeTag:number|null|undefined=1; const nativeFocusTags:unknown[]=[]
 let focusCalls=0, keydown:((e:{key:string})=>void)|undefined
 Object.assign(globalThis,{window:{addEventListener(_name:string,fn:typeof keydown){keydown=fn},removeEventListener(){keydown=undefined}}})
-mock.module("react-native",()=>({View:"View",Text:"Text",Pressable:"Pressable",ScrollView:"ScrollView",Modal:"Modal",Platform:{OS:"web"},StyleSheet:{create:(s:unknown)=>s},AccessibilityInfo:{setAccessibilityFocus(){focusCalls++}},findNodeHandle:()=>1}))
+mock.module("react-native",()=>({View:"View",Text:"Text",Pressable:"Pressable",ScrollView:"ScrollView",Modal:"Modal",Platform:nativePlatform,StyleSheet:{create:(s:unknown)=>s},AccessibilityInfo:{setAccessibilityFocus(tag:unknown){focusCalls++;nativeFocusTags.push(tag)}},findNodeHandle:()=>nativeTag}))
 const {CrumbsDevtoolsProvider,useCrumbsInspectorTarget,useInspectorRegistry}=await import("../../src/devtools/native/provider")
 const {CrumbsDevtoolsWidget}=await import("../../src/devtools/native/widget")
 let store:ReturnType<typeof useInspectorRegistry>,gets=0,copies:string[]=[],finish:(()=>void)|undefined
@@ -40,5 +41,12 @@ assert.ok(focusCalls>0)
 await press("Open Crumbs inspector")
 await act(async()=>{renderer.root.find(n=>n.type as unknown === "Modal").props.onRequestClose()})
 assert.equal(store!.getSnapshot().open,false)
+nativePlatform.OS="android"
+await press("Open Crumbs inspector")
+for(const tag of [undefined,null]) { nativeTag=tag;await act(async()=>{renderer.root.find(n=>n.type as unknown === "Modal").props.onShow()}) }
+assert.deepEqual(nativeFocusTags,[],"missing native handles must not be sent to accessibility focus")
+nativeTag=123
+await act(async()=>{renderer.root.find(n=>n.type as unknown === "Modal").props.onShow()})
+assert.deepEqual(nativeFocusTags,[123])
 await act(async()=>{renderer.unmount()})
 console.log("native inspector widget passed")

@@ -1,0 +1,119 @@
+{
+  "type": "crumbs.m9.3a.qualification-closure",
+  "version": 1,
+  "status": "qualified-unreleased",
+  "implementationBase": "3a795b41544634f5d5d65aefa9bdf99a058ffdb6",
+  "sourceDigest": "2363670387a4c03f860cde4c0fb9deb84a7e1d359816056edefd42cde2c87eff",
+  "tarSha256": "3e27843f07c5dfdddb170e46c49f00aef105896f81525484716cb20e8cb6ba54",
+  "artifactVersion": "1.2.0 (local qualification only; not the published npm artifact)",
+  "checks": [
+    {
+      "name": "repository-check",
+      "command": "bun run check",
+      "status": "passed",
+      "logSha256": "7c882d0acf733fda1302726658198ba65fe8c1333bc009436ab016b55af110af"
+    },
+    {
+      "name": "storybook-babel-production",
+      "command": "CRUMBS_METRO_WORKER=babel bun run app:check",
+      "status": "passed",
+      "logSha256": "5fe750f229912ba207ecf7c681f59364c20bfdf62b130b1efbb328fb9cae2a11"
+    },
+    {
+      "name": "storybook-rust-production",
+      "command": "CRUMBS_METRO_WORKER=rust bun run app:check",
+      "status": "passed",
+      "logSha256": "257939694614bb7f9f121a612a4d7ed5534a68267bbdee6a66900ad953d75871"
+    },
+    {
+      "name": "playground-types",
+      "command": "bun run --filter @crumbs/playground typecheck",
+      "status": "passed",
+      "logSha256": "84ee030eab40229ff2f589e6fac99d49a4bf75ebe88845004ef1e3fd561f4577"
+    },
+    {
+      "name": "strict-sdk58-native-types",
+      "command": "bunx --no-install tsc -p packages/css/tsconfig.native-devtools-qualification.json",
+      "status": "passed",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "name": "docs-build",
+      "command": "bun run docs:build",
+      "status": "passed",
+      "logSha256": "b297c839e00e8f1e29c1762eabb50dcc0e9530bc61c4bcc028747bdc15d370fc"
+    },
+    {
+      "name": "qualification-helper-and-native-regressions",
+      "command": "bun test scripts/test/m9-3a-native-cost-host.test.ts scripts/test/m9-3a-native-cost-verify.test.ts packages/css/test/devtools-native-react.test.ts",
+      "status": "passed",
+      "logSha256": "d9e2fe1f9a2482c4b8405db9a4b969f72ee42dec15db2a638512a0dd5d706153"
+    }
+  ],
+  "tests": {
+    "libraryPass": 1931,
+    "librarySkip": 1,
+    "storybookPass": 34,
+    "qualificationRegressionPass": 5,
+    "failed": 0
+  },
+  "packed": [
+    "packed-babel.json",
+    "packed-rust.json"
+  ],
+  "nativeReplays": "native-replays.json",
+  "nativeCost": "native-cost/matrix.json",
+  "earlierAcceptedEvidence": "../2026-10-18-m9-3a-native-devtools/qualification.json",
+  "remainingRequired": [],
+  "publication": "Not requested; widget remains source-build/next-release and absent from published npm 1.2.0",
+  "deferred": [
+    "physical devices",
+    "spoken screen readers",
+    "independent raw-report/widget usability comparison",
+    "release frame and heap measurements"
+  ],
+  "review": {
+    "critical": 0,
+    "important": 0,
+    "deferredMinor": "Successful restore retains staging.json; use a fresh output directory. Refusal wording remains misleading after restore."
+  },
+  "focusRegression": {
+    "redLogSha256": "41fcdf8e3326b50f2a9099384ef2ee433c917a279fee4e50ac6c42fe591255c5",
+    "greenLogSha256": "3322fb652ee079479ecbf34f8dd855aca5744c265083de07a09f44eee9a53c6c",
+    "behavior": "Reject undefined/null native focus handles; accept numeric handles"
+  },
+  "limits": [
+    "Native functional replays precede the one-line focus guard; later native source-cost runs and RED/GREEN regression exercise it.",
+    "Native cost uses instrumented source inside actual SDK58 apps, not an exact packed or release-build timing comparison.",
+    "Disabled mounts provider/context with probe/widget disabled; single diagnostic runs do not establish causal overhead.",
+    "Known-answer implementing-agent dogfooding is not independent usability evidence.",
+    "Conditional launcher retry is a harness accommodation; original tap-loss cause remains unknown."
+  ],
+  "nextRoadmapAction": "M9.3a release preparation",
+  "assets": [
+    {
+      "file": "docs/public/devtools/android-variant.png",
+      "sha256": "8b0a7902223ed3861bfdd9dbcce9761f8900192500bf77060c94564ef8fee9da"
+    },
+    {
+      "file": "docs/public/devtools/ios-override.png",
+      "sha256": "21e77fd6b06fff8e4f40e33f72c68d8d5494d56579b4902837ace6bfa58f63ba"
+    },
+    {
+      "file": "scripts/m9-3a-native-cost-host.py",
+      "sha256": "24beaa15f2fe1fd2a12976dddedb3b7d08e5483aa9bbe02603245c208a792b9b"
+    },
+    {
+      "file": "scripts/fixtures/m9-3a-native-refresh.yaml",
+      "sha256": "5640c309fd888b9f0d7c84bc689b694181031191d26676bd9071bf790052b8cd"
+    },
+    {
+      "file": "scripts/fixtures/m9-3a-native-back.yaml",
+      "sha256": "15cab48a829595a2cec2972d2bf79487673f0cedf415d90cc3159aef5f63973f"
+    },
+    {
+      "file": "scripts/fixtures/m9-3a-native-cost.yaml",
+      "sha256": "7b50be1e97cf08fb6fc50cbd9ab9bdb013988ccc48379eeee2352cc8cb8afdc1"
+    }
+  ]
+}

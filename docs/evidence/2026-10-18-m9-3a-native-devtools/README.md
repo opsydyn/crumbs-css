@@ -1,5 +1,8 @@
 # M9.3a native developer widget evidence
 
+> Historical implementation outcome. The approved [qualification continuation](../2026-10-18-m9-3a-qualification-closure/README.md) closes the Android and native-cost gaps below. These original receipts and failed attempts remain unchanged.
+
+
 Implementation and automated qualification passed. Native qualification is
 incomplete: both iOS main journeys and Android Playground passed, while Android
 Storybook failed to reach the launcher. Native app cost comparison remains unrun. This is an unreleased source-build candidate.

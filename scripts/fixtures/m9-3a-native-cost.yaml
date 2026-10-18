@@ -1,0 +1,15 @@
+appId: ${APP_ID}
+---
+- stopApp
+- launchApp
+- openLink: ${APP_URL}
+- tapOn:
+    text: '^Open$'
+    optional: true
+- tapOn:
+    text: Continue
+    optional: true
+- extendedWaitUntil:
+    visible: 'Native cost passed: ${APP_NAME} ${PLATFORM}'
+    timeout: 90000
+- takeScreenshot: native-cost-passed

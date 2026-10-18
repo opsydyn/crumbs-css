@@ -478,6 +478,8 @@ outside the export map are not public APIs.
 Opt-in React Native inspector for explicitly registered mounted targets. Requires a
 host clipboard adapter and a development-only import boundary. This entry is not
 in published v1.2.0. See the [explanation guide](https://opsydyn.github.io/crumbs-css/how-to/explain-native-styles/).
+The [source-build guide](docs/src/content/docs/how-to/explain-native-styles.mdx#native-inspector-in-use)
+includes real iOS/Android screenshots of overrides, recipe output and coverage labels.
 
 ### `./metro-plugin`
 
