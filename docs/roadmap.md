@@ -40,11 +40,11 @@ This roadmap covers the whole assessment session. It is a dependency-ordered del
 | M9 | Manifests, change impact, policy, migrations, DTCG, and local ownership | M7, M8 | M9.1–M9.7 delivered; M9.3a widget published in v1.3.0 |
 | M10 | Qualify a reference design system and enterprise journeys | M8, M9 | M10.1–M10.4 delivered; M10.5 v1 release scope closed with exact approved exceptions; deferred acceptance remains open |
 | M11 | Evaluate optional extensions against concrete consumer needs | M10 | Selected M11.1–M11.5 delivered; M11.6 integrations parked |
-| M12 | Source-library migration guides and an agent migration skill | Published API, consumer skill | Proposed; NativeWind-first design awaiting review |
+| M12 | Source-library migration guides and an agent migration skill | Published API, consumer skill | Design approved; M12.1 plan awaiting review |
 
 Reference examples should grow with each milestone. M10 qualifies their combined behavior; it is not the first time earlier features receive consumer or device tests. M8 extends the initial packed-consumer/import checks with a complete distribution contract.
 
-## M12 — Migration guides and agent-led adoption (proposed)
+## M12 — Migration guides and agent-led adoption (design approved)
 
 The [2026-10-18 migration design](superpowers/specs/2026-10-18-m12-migration-guides-and-agent-skill-design.md)
 proposes one prompt that carries an agent through discovery, semantic conversion,
@@ -63,7 +63,9 @@ are not cross-library CSS converters.
 Each item is a complete guide/skill/verification slice with one outcome commit.
 No universal codemod, compatibility runtime, implicit Expo upgrade or new Crumbs
 API is proposed. Physical/spoken-reader work stays deferred; M11.6 stays parked.
-Next: review the proposed design, then prepare the concrete **M12.1** plan.
+The design is approved. Next: review the [concrete **M12.1** plan](superpowers/plans/2026-10-18-m12-1-nativewind-migration.md),
+then execute inline as one complete slice. Exact NativeWind 4.2.7 and optional 5.0.0-rc.0
+profiles start on the retained SDK 57 cohort; profile admission requires actual evidence.
 Implementation and publication have not started.
 
 ## M0 — Establish native correctness and runtime isolation

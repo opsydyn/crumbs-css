@@ -1,7 +1,7 @@
 # M12 — Migration guides and an agent migration skill
 
 Date: 2026-10-18
-Status: proposed design and delivery plan; implementation not started
+Status: design approved 2026-10-18; M12.1 implementation plan prepared for review; implementation not started
 Target: the published Crumbs API, currently 1.3.0; inspect the installed version before applying any migration
 
 ## Outcome and recommendation
@@ -219,8 +219,9 @@ label by rehearsing the same held-out fixture or silently changing its acceptanc
 
 ## Decision and next slice
 
-Recommended: approve this NativeWind-first design, then prepare the exact **M12.1**
-implementation plan (fixture version pins, files and commands). The user's retained
+The user approved this NativeWind-first design on 2026-10-18. Review the
+[M12.1 implementation plan](../plans/2026-10-18-m12-1-nativewind-migration.md)
+with fixture version pins, files and commands before execution. The user's retained
 preference is native/inline execution, one complete slice and a commit with the
 next numbered recommendation. No product code, migration skill, app dependencies,
 CI settings or publication changes are implemented by this planning commit.
