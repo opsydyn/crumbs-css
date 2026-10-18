@@ -1,7 +1,7 @@
 # Crumbs design-system architecture roadmap
 
 Date: 2026-09-06\
-Status: v1.0.0 published on npm and GitHub; M10.5 authorised release scope closed with explicit v1-only exceptions. Physical acceptance and parked integrations remain separate.\
+Status: v1.2.0 published as npm latest and on GitHub; M1.10 SDK58 compatibility and publication complete under the accepted M10.5 compiler baseline. Physical acceptance and parked integrations remain separate.\
 Architecture: [Adopt a native design-system compiler](decisions/adopt-native-design-system-compiler.md).\
 Evidence: [Current assessment and reproducible counterexamples](assessments/2026-09-06-design-system-assessment.md).
 
@@ -96,10 +96,10 @@ Reference examples should grow with each milestone. M10 qualifies their combined
 - [x] M1.9e: Dogfood the released consumer skill example against public npm 1.1.1 in a real Expo consumer; retain strict types, all-platform runtime exports and actual iOS/Android button interaction. Record unperformed contexts separately.
 - [x] M1.9f: Promote the qualified SDK 57 profile to the playground default, align app peer resolution across shared workspace demos, retain Storybook and explicit SDK 56 packed regression coverage, update consumer instructions, and record fresh verification.
 - [x] M1.9g: Upgrade Storybook to the qualified SDK 57 app profile and Expo-matched native animation stack; retain SDK 56 fixture coverage, qualify LiteUI controls/actions on both native simulators, and add reproducible Storybook exports to developer commands and CI.
-- [ ] **M1.10 — Expo SDK 58 compatibility:** planned in the [assessment/design](assessments/2026-10-16-m1-10-expo58-assessment.md) and [implementation plan](superpowers/plans/2026-10-16-m1-10-expo58-upgrade.md); M1.10a is complete locally with independent review fixes verified. Preserve SDK 56/57 and qualify RN 0.88 explicitly.
+- [x] **M1.10 — Expo SDK 58 compatibility:** delivered from the [assessment/design](assessments/2026-10-16-m1-10-expo58-assessment.md) and [implementation plan](superpowers/plans/2026-10-16-m1-10-expo58-upgrade.md). SDK 56/57 are retained, RN 0.88 is qualified, and npm 1.2.0 is verified as latest.
 - [x] **M1.10a:** parameterize the pinned SDK runner, qualify strict public types and the actual SDK 58 supervising/custom-worker chain, dependency invalidation and the same packed artifact across SDK 56/57/58. Qualify actual optional Rust-worker interoperability alongside the Babel control, with positive backend events and safe fallbacks. Broaden only the qualified RN intervals; no font-axis expansion or Rust rewrite of Crumbs.
 - [x] **M1.10b:** upgrade Playground and Storybook together, align app-owned peers, retain installed 56/57 profiles, and qualify default/Rust platform exports plus owned iOS/Android development-client interactions.
-- [ ] **M1.10c:** refresh docs and the consumer skill, obtain exact-source three-SDK CI and unchanged full release-gate evidence, and prepare a concrete release review. Prior numerical exceptions do not authorise a new version; publication requires separate authorisation.
+- [x] **M1.10c:** docs and consumer skill refreshed, exact-source SDK56/57/58 qualification retained, and npm 1.2.0 published with verified provenance metadata and a fresh SDK58 registry consumer. The [accepted baseline amendment and publication receipt](evidence/2026-10-18-m10-5-v12-rebaseline/README.md) supersede the previous numerical blocker; earlier version-specific exceptions were not reused.
 
 **Exit:** Effect 4 boundaries are verified and isolated; budget metrics all name a scenario and execution environment; at least five independent repetitions per device scenario establish a noise envelope; remaining device/editor blockers are reported as incomplete. No performance claim may be based only on the historical Bun numbers.
 
@@ -3258,4 +3258,7 @@ Preparation PR #10 and release-please PR #9 are merged. The GitHub v1.2.0 source
 
 ### M10.5 / M1.10c — accepted compiler baseline, 2026-10-18
 
-The owner approved the [v1.2.0 compiler baseline and exact-artifact publication](evidence/2026-10-18-m10-5-v12-rebaseline/README.md). All 11 blocking checks pass when the retained full report is reassessed against this policy; eight advisory failures remain visible. This closes the numerical disposition decision. npm publication and its registry verification remain pending until a publication receipt is recorded. Physical-device work remains deferred; no further compiler prototype is required for this release.
+The owner approved the [v1.2.0 compiler baseline and exact-artifact publication](evidence/2026-10-18-m10-5-v12-rebaseline/README.md). All 11 blocking checks pass when the retained full report is reassessed against this policy; eight advisory failures remain visible. This closes the numerical disposition decision. npm `1.2.0` is now published as `latest`; [registry integrity and fresh SDK58 consumer verification](evidence/2026-10-18-m10-5-v12-rebaseline/publication.json) complete M1.10c. Physical-device work remains deferred; no further compiler prototype is required for this release.
+
+
+**M1.10c publication complete:** [run 39120552775](https://github.com/opsydyn/crumbs-css/actions/runs/39120552775) published the exact retained tarball with provenance. npm latest/version/integrity and a fresh public-registry SDK58 consumer pass. Older blocked-publication entries above are historical and superseded by this release decision; the M10.5 consumer-specific slowdown investigation and deferred physical-device work remain separate backlog items.

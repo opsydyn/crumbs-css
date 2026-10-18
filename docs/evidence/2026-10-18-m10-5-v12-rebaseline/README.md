@@ -36,4 +36,9 @@ The generic future-release workflow retains fresh hosted measurement. This one r
 - Local exact-source sealing/verification rehearsal passes. Actual tampering of the tarball, report log, SDK58 receipt and tooling-bound admission receipt is rejected; restoring each original restores verification.
 - Workflow YAML parses and its verifier SHA matches. Independent code review found no actionable findings.
 
-The rehearsal uses a local test tooling identity only. The final bundle must be sealed again against the actual merged workflow commit before upload. Until registry verification is recorded, npm publication is pending.
+The rehearsal uses a local test tooling identity only. The final bundle must be sealed again against the actual merged workflow commit before upload. [Registry verification is now recorded](publication.json): npm `1.2.0` is `latest`, downloaded bytes match the approved tarball, and a fresh published SDK58 consumer passes strict installation, types and all-platform exports. [Publication run 39120552775](https://github.com/opsydyn/crumbs-css/actions/runs/39120552775) succeeded in both jobs.
+
+
+## Publication outcome
+
+Published 2026-10-18 with npm provenance, without rebuilding or repacking. PR #12 merged the policy amendment as `53aefa90fd3efb28e18a4a5fd683b026c0e56f0a`; the bundle was resealed with that exact tooling identity before dispatch. npm initially returned processing/404 responses and subsequently exposed the verified package. This is a completed release under an accepted baseline tradeoff; it does not resolve the reported consumer-specific 2.5× slowdown.

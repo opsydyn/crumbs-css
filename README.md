@@ -10,15 +10,15 @@ recipes and atomic utilities; add themes, scoped design tokens, conditions, moti
 factories through explicit package entrypoints.
 
 **Crumbs CSS v1 is available on [npm](https://www.npmjs.com/package/@opsydyn/crumbs-css) and [GitHub](https://github.com/opsydyn/crumbs-css/releases).**
-The [GitHub source release `1.2.0`](https://github.com/opsydyn/crumbs-css/releases/tag/v1.2.0) is published; npm `latest` remains `1.1.1` while publication under the [approved compiler baseline](docs/evidence/2026-10-18-m10-5-v12-rebaseline/README.md) is being completed. Version `1.2.0` adds Expo SDK 58 / React Native 0.88 qualification while retaining SDK 56 / RN 0.85 and SDK 57 / RN 0.86. Playground and Storybook now use SDK 58, with Babel as the default and qualified opt-in Expo Rust worker routing. See [release status](docs/releases/1.2.0.md) for publication and gate status, and [native/worker evidence](docs/evidence/2026-10-16-m1-10b-expo58-apps/README.md). Existing v1/v1.1 performance exceptions do not apply to this release.
+[Crumbs CSS `1.2.0`](https://www.npmjs.com/package/@opsydyn/crumbs-css/v/1.2.0) is published on npm as `latest` and on [GitHub](https://github.com/opsydyn/crumbs-css/releases/tag/v1.2.0). It adds Expo SDK 58 / React Native 0.88 qualification while retaining SDK 56 / RN 0.85 and SDK 57 / RN 0.86. Playground and Storybook use SDK 58, with Babel as the default and qualified opt-in Expo Rust worker routing. See [release status](docs/releases/1.2.0.md) for the exact artifact and accepted compiler baseline, and [native/worker evidence](docs/evidence/2026-10-16-m1-10b-expo58-apps/README.md).
 
 ## Get started
 
-SDK 58 / RN 0.88 requires Crumbs `1.2.0`; published `1.1.1` covers SDK 56/57 only. React peers remain `>=19 <20`, native peers are `>=0.85 <0.87 || >=0.88 <0.89`, and Metro peers are `>=0.83 <1`. RN 0.87 is unqualified. Crumbs tooling keeps Node `>=22.0.0`; SDK 56/57 tooling needs `>=22.13.0`, and SDK 58 requires `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. The qualified SDK 58 apps use React/DOM 19.3.1 and Expo 58.0.14.
+SDK 58 / RN 0.88 requires Crumbs `1.2.0`; earlier `1.1.1` covers SDK 56/57 only. React peers remain `>=19 <20`, native peers are `>=0.85 <0.87 || >=0.88 <0.89`, and Metro peers are `>=0.83 <1`. RN 0.87 is unqualified. Crumbs tooling keeps Node `>=22.0.0`; SDK 56/57 tooling needs `>=22.13.0`, and SDK 58 requires `^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0`. The qualified SDK 58 apps use React/DOM 19.3.1 and Expo 58.0.14.
 
 TypeScript `>=5.9 <7` is optional for source migration tooling. Effect 4 is Crumbs' implementation dependency; applications need no Effect import, service or runner.
 
-Install the SDK 58 compatibility version when available according to the release status above. Existing SDK 56/57 apps can retain `1.1.1`:
+Install the published SDK 56/57/58 compatibility version:
 
 ```sh
 npm install @opsydyn/crumbs-css@1.2.0
