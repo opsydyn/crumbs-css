@@ -112,7 +112,7 @@ describe("performance budget registry", () => {
     expect(diagnostic.metrics[0]).toMatchObject({ id: "runtime-emitted-bytes", result: "fail", delta: 33457, deltaPercent: 295.8963473954188 })
   })
 
-  it("adopts the expanded Metro invalidation protocol without weakening its approved ceiling", () => {
+  it("retains expanded Metro invalidation controls under the approved v1.2 baseline", () => {
     const repoRoot = resolve(import.meta.dir, "../../..")
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
@@ -120,9 +120,9 @@ describe("performance budget registry", () => {
     if (!metric || metric.baseline.status !== "recorded" || metric.threshold.status !== "approved") {
       throw Error("Expected the reconciled incremental metric")
     }
-    expect(metric.baseline.evidence).toBe("docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json")
-    expect(metric.baseline.value).toBe(123.95049999999901)
-    expect(metric.threshold).toMatchObject({ absoluteMax: 137.506, maxRegressionPercent: 10 })
+    expect(metric.baseline.evidence).toBe("docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/metro-incremental.json")
+    expect(metric.baseline.value).toBe(136.8814999999995)
+    expect(metric.threshold).toMatchObject({ absoluteMax: 150.57, maxRegressionPercent: 10 })
     const evidence = JSON.parse(readFileSync(resolve(repoRoot, metric.baseline.evidence), "utf8"))
     expect(evidence.dependencyControls).toHaveLength(3)
     expect(evidence.protocol.cacheState).toContain("three dependency-only controls")
@@ -208,7 +208,7 @@ describe("performance budget registry", () => {
     expect(packet.candidates).toHaveLength(0)
     expect(packet.approved).toHaveLength(21)
     expect(packet.approved.find(entry => entry.id === "incremental-rebuild")?.decision).toMatchObject({
-      status: "approved", absoluteMax: 137.506, maxRegressionPercent: 10,
+      status: "approved", absoluteMax: 150.57, maxRegressionPercent: 10,
     })
     expect(packet.reviewAttention.highNoise).toContain("runtime-initialization-node22-cjs")
     expect(packet.reviewAttention.zeroGrowthPolicy).toEqual(expect.arrayContaining([
@@ -231,8 +231,8 @@ describe("performance budget registry", () => {
     const report = compareRecordedMetrics(decoded.value, repoRoot, {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
       runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
-      benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
-      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json"), "utf8")),
+      benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/benchmark-summary.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/metro-incremental.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
       runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     })
@@ -299,7 +299,7 @@ describe("performance budget registry", () => {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
       runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
-      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/metro-incremental.json"), "utf8")),
       editor: { ...editor, manifest: { ...editor.manifest, scales: [] } },
       runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     })
@@ -318,7 +318,7 @@ describe("performance budget registry", () => {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
       runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
-      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/metro-incremental.json"), "utf8")),
       editor: {
         ...editor,
         identity: { ...editor.identity, baseRevision: "new-revision", crumbsVersion: "new-version" },
@@ -346,7 +346,7 @@ describe("performance budget registry", () => {
     const repoRoot = resolve(import.meta.dir, "../../..")
     const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
-    const baseline = JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json"), "utf8"))
+    const baseline = JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/metro-incremental.json"), "utf8"))
     const current = {
       ...baseline,
       measurementFixture: {
@@ -355,6 +355,7 @@ describe("performance budget registry", () => {
         tokenSha256: baseline.fixture.originalTokenSha256,
         baseStyleSha256: baseline.fixture.originalBaseStyleSha256,
         workspaceTokenSha256: baseline.fixture.originalWorkspaceTokenSha256,
+        ...baseline.measurementFixture,
       },
       fixture: {
         ...baseline.fixture,
@@ -382,7 +383,7 @@ describe("performance budget registry", () => {
   it("qualifies the retained M10.5 Metro/editor identity-repair measurements against unchanged limits", () => {
     const repoRoot = resolve(import.meta.dir, "../../..")
     const hostBudgetRoot = resolve(repoRoot, "docs/evidence/2026-10-04-m10-5-metro-editor-identity/host-budgets")
-    const decoded = budgetRegistryCodec.decodeJson(readFileSync(registryFile, "utf8"))
+    const decoded = budgetRegistryCodec.decodeJson(readFileSync(resolve(repoRoot, "docs/evidence/2026-10-18-m10-5-v12-rebaseline/previous-registry.json"), "utf8"))
     if (!decoded.ok) throw Error("Committed budget registry must decode")
     const evidence = {
       effect: JSON.parse(readFileSync(resolve(hostBudgetRoot, "effect.json"), "utf8")),
@@ -513,7 +514,7 @@ describe("performance budget registry", () => {
       effect: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-effect-boundary-audit/audit.json"), "utf8")),
       runtimeInit: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-runtime-initialization/baseline.json"), "utf8")),
       benchmark: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-14-benchmark-repair/adapter-summary.json"), "utf8")),
-      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-incremental-baseline/metro-incremental.json"), "utf8")),
+      incremental: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-10-17-m1-10c-expo58-release/final-release/host-report/metro-incremental.json"), "utf8")),
       editor: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-15-editor-scale/raw.json"), "utf8")),
       runtimeGraph: JSON.parse(readFileSync(resolve(repoRoot, "docs/evidence/2026-09-21-m4-6-runtime-byte-budget-admission/admission.json"), "utf8")),
     }

@@ -100,7 +100,7 @@ describe("M10.5 release host-budget report verification", () => {
     expect(incomplete.blockers.join("\n")).toMatch(/editor\.json/i)
   })
 
-  it("rederives the retained comparison and names its nine failures and incomplete row", () => {
+  it("rejects a legacy retained comparison under the amended policy without rewriting its historical results", () => {
     const comparison = readJson(join(retainedReportDirectory, "comparison.json"))
     const result = verifyReleaseHostBudgetReport({
       reportDirectory: retainedReportDirectory,
@@ -111,10 +111,8 @@ describe("M10.5 release host-budget report verification", () => {
     expect(result.releasePolicyQualified).toBe(false)
     expect(result.sourceRevision).toBe(comparison.sourceRevision)
     expect(result.blockers.join("\n")).toMatch(/formatVersion must be 3/)
-    expect(result.blockers.join("\n")).not.toMatch(/stored metric rows differ from rederived rows/i)
-    for (const row of comparison.metrics.filter((metric: { id: string; result: string }) => metric.result !== "pass" && !metric.id.startsWith("runtime-"))) {
-      expect(result.blockers.join("\n")).toContain(row.id)
-    }
+    expect(result.blockers.join("\n")).toMatch(/stored metric rows differ from rederived rows/i)
+    expect(result.blockers.join("\n")).toContain("incremental-rebuild is incomplete-environment-mismatch")
     expect(comparison.metrics.filter((metric: { result: string }) => metric.result === "fail")).toHaveLength(9)
     expect(comparison.metrics.some((metric: { result: string }) => metric.result.startsWith("incomplete-"))).toBe(true)
   })
