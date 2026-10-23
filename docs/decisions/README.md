@@ -2,6 +2,8 @@
 
 ADRs record consequential architectural choices, their alternatives, and their verification criteria. The roadmap records delivery order; an ADR's status does not describe implementation progress.
 
+**Current release status (2026-10-23):** npm and GitHub publish **1.3.0**, including the native inspector. The [accepted M10.5 compiler-baseline decision](../evidence/2026-10-18-m10-5-v12-rebaseline/README.md) supersedes the blocked-publication states in the dated investigation history below. The [1.3.0 publication record](../releases/1.3.0.md) records subsequent normal release qualification. Rejected compiler prototypes remain rejected; this reconciliation introduces no compiler change or new budget exception.
+
 | Record | Status | Date | Delivery |
 | --- | --- | --- | --- |
 | [Adopt a native design-system compiler architecture](adopt-native-design-system-compiler.md) | Proposed | 2026-09-06 | [Design-system roadmap](../roadmap.md) |
