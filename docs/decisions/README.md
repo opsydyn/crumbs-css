@@ -7,6 +7,8 @@ ADRs record consequential architectural choices, their alternatives, and their v
 | [Adopt a native design-system compiler architecture](adopt-native-design-system-compiler.md) | Proposed | 2026-09-06 | [Design-system roadmap](../roadmap.md) |
 | [Separate mandatory theme resolution from optional runtime state](separate-mandatory-theme-resolution-from-optional-runtime-state.md) | Rejected | 2026-10-06 | M10.5 runtime-boundary candidate |
 | [Anchor M10.5 runtime-budget revisions in Expo consumer evidence](anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md) | Accepted | 2026-10-06 | [M10.5 runtime-budget policy](../roadmap.md) |
+| [Stage a private compiler-free contract kernel](stage-a-private-compiler-free-contract-kernel.md) | Proposed | 2026-10-17 | M10.5 pure-contract kernel design |
+| [Bind runtime admission to artifact provenance](bind-runtime-admission-to-artifact-provenance.md) | Proposed | 2026-10-17 | M10.5 runtime provenance design |
 
 ## Conventions
 
@@ -26,3 +28,13 @@ The accepted runtime-budget ADR also carries a [proposed consumer-scoped release
 The consumer-scoped release-enforcement proposal above was **accepted on 2026-10-08** after explicit review. The [dated accepted amendment](anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md#2026-10-08--accepted-consumer-scoped-release-enforcement) replaces the unactivated conditional byte-admission requirement. Implementation remains pending review of its single-task inline plan; current enforcement is still all 21 rows passing.
 
 2026-10-08: consumer-scoped M10.5 enforcement is implemented in the [accepted Expo evidence ADR](anchor-m10-5-runtime-budget-revisions-in-expo-consumer-evidence.md#2026-10-08--consumer-scoped-host-policy-implemented). Numerical contracts remain unchanged; current host qualification is separate.
+
+2026-10-18: the [dated compiler-reuse decision](adopt-native-design-system-compiler.md#compiler-reuse-decision--2026-10-18) retains shipping fresh compilation and parks new reuse remediation. It updates the existing retention history; the parent remains proposed and the accepted release policy is unchanged. No new cache or release exception is adopted.
+
+
+2026-10-18: the owner subsequently [approved the worker-lifetime compiler contract](adopt-native-design-system-compiler.md#approved-worker-lifetime-compiler-contract--2026-10-18), narrowly replacing fresh compiler-service-error equivalence and reopening compiled-text reuse design. Mutable-input proof, fresh authoring and all release budgets remain binding. The [complete written design](../superpowers/specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md) awaits review; no candidate or publication is adopted and the parent ADR remains proposed.
+
+
+2026-10-18: the owner approved the complete worker-scoped cache design at `090c4fd`. Its [single implementation plan](../superpowers/plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) awaits review; native/inline execution and one outcome commit are retained. This approval does not qualify performance or publication.
+
+2026-10-18: execution of the approved worker-scoped plan [rejected its session-transport candidate](../assessments/2026-10-18-m10-5-worker-scoped-compiled-text.md). Expo's supervising cache key includes the session token, invalidating ordinary caches. Shipping code/artifacts are restored; host gates and publication block remain unchanged.

@@ -3267,6 +3267,173 @@ Preparation PR #10 and release-please PR #9 are merged. The GitHub v1.2.0 source
 **Next: M10.5 disposition for the M1.10c v1.2.0 release** — remediate these compiler/incremental failures or explicitly accept them for the pinned final source/report/tarball, preserving every other release check and the generic future-release budgets. M1.10c publication remains open until registry/provenance/fresh-consumer verification. Physical items remain deferred.
 
 
+### Historical M10.5 compiler investigations — 2026-10-17 to 2026-10-18
+
+The following investigation entries preserve the decisions and observations made before the accepted compiler baseline and verified publication recorded below. Their blocked-publication statements and proposed next steps are historical, not the current release status. Rejected candidates remain rejected; merging this evidence does not reopen their implementation plans.
+
+### M10.5 v1.2 compiler remediation investigation (2026-10-17)
+
+The user explicitly selected **remediate before publication**, retaining all three final-tag numerical blockers and authorizing the audited evidence push (PR #11). A [bounded current-artifact diagnosis](evidence/2026-10-17-m10-5-v12-fresh-compiler-diagnosis/README.md) confirms fresh compilation remains the largest measured boundary. Five alternating control/esbuild0.28.2 diagnostic pairs retain output/input parity but record full-transform selectors11.490750/11.056750 ms, both above6.514 ms. No production upgrade or qualifying fix is admitted. Source/artifacts, public APIs and all generic budgets remain unchanged; npm publication stays blocked.
+
+**Next proposed M10.5 step: one bounded fresh-compilation backend feasibility spike**, with complete output/input/edit parity and no Node-floor increase, before considering a production adapter. The installed Rust/Rolldown toolchain is only a possible diagnostic backend; it is not the existing Expo Rust worker and is not approved for shipping. Physical items remain deferred.
+
+
+### M10.5 approved bounded Rolldown spike completed (2026-10-17)
+
+The user approved one throwaway fresh-compilation backend comparison, retaining the6.514 ms warm target, Node22.0.0 support and all release gates. [The single prototype is rejected](evidence/2026-10-17-m10-5-rolldown-spike/README.md): complete-transform pilot medians are12.200959/10.407375 ms for the README/consumer fixtures, and full-output/cache identity does not match. The same ten on-disk inputs and native module bodies agree only after excluding the cache marker; that partial comparison is not parity acceptance. The bridge's raw receipt shape/order changes cache markers even for unchanged input and restored edits. Actual entry/dependency values update correctly, but both full restoration checks fail. All28 bundle handles were closed; released source and181 measured artifacts remain unchanged. No shipping adapter, dependency change, broader timing run, host/native qualification or numerical exception was admitted. The one-prototype stop rule is complete.
+
+PR #11 for the earlier explicitly approved final-release evidence has green CI/docs build; it remains open. The new diagnosis/spike evidence is committed locally. **Next recommended M10.5 step: an end-to-end compiler remediation design**, addressing fresh compilation, validation/lowering and canonical cache receipts together. Backend substitution alone has not established a qualifying fix. npm publication and all three final-tag blocking metrics remain unresolved; physical items remain deferred.
+
+### M10.5 complete fresh-pipeline design prepared (2026-10-17)
+
+The user approved preparing a complete compiler remediation design after rejecting the single Rolldown prototype. The [proposed written spec](superpowers/specs/2026-10-17-m10-5-fresh-pipeline-remediation-design.md) retains fresh esbuild/Vanilla Extract compilation and combines canonical authoring build grouping, compilation-local validated IR ownership, shared source-map anchor analysis and deterministic private input fingerprints. It does not revive the failed compiler lifetime/memo premise or adopt a production Rust backend. Savings remain unproven. All public/Node 22.0.0/SDK contracts and the existing 11-blocking/10-advisory policy remain unchanged.
+
+One complete candidate must pass behavioral and package-identity proofs, then the unchanged complete warm selector before expensive host/native requalification. Any blocking failure rejects the whole shipping candidate. Private marker changes require an independent derivation, not blanket output normalization. New source needs a new release identity; the existing v1.2.0 tag stays immutable. **Next M10.5 step: review the written spec, then prepare one complete inline implementation plan.** No implementation or further prototype was started in this design slice; npm publication remains blocked.
+
+### M10.5 complete fresh-pipeline implementation plan prepared (2026-10-17)
+
+The user approved the written design at `69152cd`. The [complete inline implementation plan](superpowers/plans/2026-10-17-m10-5-fresh-pipeline-remediation.md) covers one four-part candidate, independent control/parity tests, the unchanged five-process warm selector, complete packed/SDK/native checks and all 21 host rows with existing 11-blocking/10-advisory enforcement. One admitted production commit or fully restored rejection evidence is the outcome; task boundaries are not partial shipping slices.
+
+The original pinned v1.2.0 control tarball is absent from its recorded temporary path. Recovery and exact hash verification are required before product edits; rebuilt bytes cannot silently replace it. This is a prerequisite identified during planning, not a newly measured performance result. **Next M10.5 step: review the complete plan, then execute inline after approval and verified control recovery.** npm publication remains blocked; numerical limits and deferred physical items are unchanged.
+
+### M10.5 complete fresh-pipeline candidate rejected and restored (2026-10-17)
+
+The user approved plan `af4b490`. The exact pinned v1.2.0 archive was recovered from npm's content-addressed cache, hash-verified and retained as control; a dedicated immutable-tag checkout supplied independent source runs. The four-part candidate reduced observed library input files from eight to two, passed focused/type checks and 17 recorded differential cases, but its full suite recorded **1,896 passes, 22 failures and one skip**. The canonical authoring group makes ordinary `tokens` import Vanilla Extract authoring modules, breaking real lean/packed runtime consumers. Source-seam tests also fail; every failed test is retained. This is an API/runtime isolation rejection, not a numerical performance result.
+
+The approved whole-candidate stop rule was followed: no warm timing cohort, SDK/native replay, full host report or publication was attempted. All source changes and eight added modules/harnesses were removed after archiving; **181 original artifacts** and the original tracked tree were byte-verified. The restored library suite passes **1,907 tests, zero failures, one existing optional skip**. [The packet](evidence/2026-10-17-m10-5-fresh-pipeline-remediation/README.md) retains source/artifact archives, complete failure names, raw receipts/logs, restoration proof and an independent verifier. No partial optimization was admitted.
+
+**Next M10.5 decision: reassess the compiler architecture while preserving the pure token/runtime boundary.** This candidate is closed; a different design needs its own decision. More timing runs of this rejected layout are unwarranted. M1.10c npm release closure remains blocked by the original three host failures; budgets, Node support, immutable v1.2.0 identity and deferred physical items remain unchanged.
+
+
+### M10.5 compiler architecture reassessed (2026-10-17)
+
+The [architecture assessment](assessments/2026-10-17-m10-5-compiler-architecture-reassessment.md) records a fresh audit of all 59 restored export targets (30 ordinary-runtime rows). Both token formats retain zero externals; four pure chunks are shared with authoring. The rejected recursive group crossed this real shared boundary. Separating token build configurations alone could also change bindings and identity contracts.
+
+The installed library build tool exposes entry-aware grouping. **Next recommended M10.5 step: review one bounded throwaway entry-aware packaging proof**, checking actual emitted runtime reachability and canonical bindings before five unchanged complete warm-transform runs. This is a hypothesis, not an accepted architecture or measured speedup. Stop after one layout if parity/isolation or warm feasibility fails; no replay of the rejected batch or automatic retained compiler service. Production adoption still needs a written design and complete plan.
+
+Live checks still show GitHub v1.2.0, npm latest 1.1.1 and release run 39020184159 with qualification failed/publication skipped. M1.10c remains blocked by the same three host failures. No production source/dependency, budget, tag or publication changed. Physical-device/spoken-reader work remains deferred.
+
+
+### M10.5 bounded entry-aware packaging proof stopped at preflight (2026-10-17)
+
+The [one-layout proof](evidence/2026-10-17-m10-5-entry-aware-packaging-proof/README.md) built the approved entry-aware group only in scratch. All 59 control/candidate import graphs pass and token externals remain empty. The unchanged source-list provenance guard rejects candidate token chunks in both formats because their generated names are outside the runtime allowlist; raw membership shows pure helpers, not the previous authoring dependency leak. No guard or naming change followed. Four direct/transitive ESM/CJS leak controls reject as required.
+
+The style closures stay at 8 ESM / 9 CJS files and grow by 942 / 953 local bytes. Identity, consumer declaration, behavioral parity and warm timing were not run after the isolation preflight failed. The exact same layout built under Bun and the normal Node host produces identical 182-file artifacts; all 369 source/benchmark/fixture inputs match control. All 181 actual shipping artifacts and tracked product source are unchanged.
+
+**Next recommended M10.5 slice: an explicitly staged pure-contract kernel design and feasibility decision**, preserving canonical bindings, runtime provenance and nominal declarations before another prototype. A retained compiler-service alternative needs a materially different lifetime/freshness mechanism; prior rejected context designs do not justify another benchmark. No new prototype or adoption is approved. M1.10c npm publication remains blocked by the original three host failures; physical items remain deferred.
+
+
+### M10.5 pure-contract kernel design prepared (2026-10-17)
+
+The [proposed design](superpowers/specs/2026-10-17-m10-5-pure-contract-kernel-design.md) and [proposed ADR](decisions/stage-a-private-compiler-free-contract-kernel.md) define exactly five existing compiler-free helper modules, their unchanged registry semantics, one content-addressed private artifact per format, sequential kernel/tool builds, literal same-format linking, canonical root/style ownership and one unchanged source-based declaration graph. Other runtime build families remain independent. No public API/dependency/floor or guard change is proposed.
+
+A required kernel-only equal-length edit/restore proof must propagate through the actual compiled transformer key, loaded-artifact provenance, native output and unchanged marker recipe; fixed kernel names are excluded. The falsifiable structural target is 8→at most 3 ESM / 9→at most 4 CJS style files. Fresh compilation still parses their bodies; the design does not remove validation, evaluation or authored CSS/Babel work. Reaching the effective 6.513743750000014 ms warm ceiling from the retained 12.346250000000055 ms failure would require 47.2411157% less time. Current evidence establishes no effect size of that scale. The kernel is a possible bounded feasibility question, not a promised release fix.
+
+**Next M10.5 slice: review the written spec and decide whether one complete, separately planned feasibility proof is worth pursuing.** No prototype/build/benchmark/install or implementation plan ran in this design slice. Any later proof stops on structure, identity/parity or either warm-bound failure, preserving the unchanged host policy and M1.10c publication blocker. Physical items remain deferred.
+
+
+### M10.5 pure-contract kernel feasibility plan prepared (2026-10-17)
+
+The user approved the [kernel design](superpowers/specs/2026-10-17-m10-5-pure-contract-kernel-design.md) after `d10e504`. The [single-candidate plan](superpowers/plans/2026-10-17-m10-5-pure-contract-kernel.md) keeps all implementation in owned scratch, with control/control agreement, staged build/link failure controls, all existing runtime/source guards and H1, packed binding/registry/declaration checks, behavior/maps, actual compiled cache-key edit/restore, then the unchanged five-process warm gate. Native/inline execution is retained.
+
+**Next M10.5 slice: review the written plan, then execute one complete bounded feasibility candidate.** Commit one reproducible outcome; neither success nor failure admits a production subset. A successful feasibility proof still needs a complete production admission plan and all 11 blocking release rows. Current evidence predicts no effect size sufficient to close the warm gap. No prototype, product build/test, benchmark, install, push or publication ran in this planning slice. The three original M1.10c host blockers and deferred physical items remain unchanged.
+
+
+### M10.5 pure-contract kernel proof rejected at initial structure (2026-10-17)
+
+The [approved single-candidate plan](superpowers/plans/2026-10-17-m10-5-pure-contract-kernel.md) reached its stop rule. [Retained evidence](evidence/2026-10-17-m10-5-pure-contract-kernel/README.md) records a 40-export, zero-external private kernel and real style consolidation from 8→3 ESM / 9→4 CJS files. Local bytes increase by 1,076 / 168. All 59 import rows pass, but the ordinary-runtime source-list guard passes 29/30 candidate rows: `./tokens` CJS newly reaches the pure `rolldown-runtime-*` interop helper, outside its unchanged family allowlist. Both token formats retain zero externals. No rename, guard relaxation or second layout followed.
+
+Control/control runs under actual Node22/current ESM/CJS agree for 252 receipt pairs; 488 successful markers are independently derived. Fifteen focused build/oracle tests pass. Subsequent rebuild/prepack/artifact-negative controls, candidate binding/declaration/behavior/cache checks, warm timing and SDK/native/full-host release replay are explicitly not run. No speed claim or production subset is admitted; shipping product/policy and all 181 artifacts remain unchanged.
+
+**Next recommended M10.5 decision: park this kernel as release remediation and review the ordinary-runtime provenance contract and release decision.** Any change to how pure bundler interop is represented needs a separate assessment; no allowlist edit or further compiler prototype is authorized. M1.10c remains blocked by the original cold/warm/incremental host failures. Physical-device/spoken-reader items remain deferred.
+
+
+### M10.5 ordinary-runtime provenance assessed (2026-10-17)
+
+The [assessment](assessments/2026-10-17-m10-5-runtime-provenance-contract.md) separates the current filename-family source-list guard from the independent packed import auditor. Direct archive inspection confirms that the rejected 554-byte CJS helper contains interop glue with no imports; its related ESM helper imports `node:module` and is absent from the recorded token ESM closure. Neither a broad helper allowlist nor renaming establishes safe source provenance. Existing guards remain unchanged.
+
+Recommend a separately designed artifact-bound provenance contract with exact emitted-byte/module membership, reviewed generated helpers, independent import traversal and fail-closed packed/platform checks. This is a correctness direction, not adoption authority or speed evidence. The rejected kernel remains parked; its downstream identity/behavior/cache/timing stages stay unrun. Six current guard tests pass, and the packet verifier confirms all 181 shipping artifacts unchanged.
+
+**Next recommended M10.5 slice: design the artifact-bound runtime-provenance contract separately from compiler remediation.** No kernel retry, guard edit, benchmark or release exception follows from this assessment. A future performance candidate needs a credible full-transform mechanism for the retained approximately 47.24% warm reduction; M1.10c publication remains blocked by the original three host failures. Physical acceptance remains deferred.
+
+
+### M10.5 artifact-bound runtime provenance design prepared (2026-10-17)
+
+The [written design](superpowers/specs/2026-10-17-m10-5-runtime-provenance-design.md) and [proposed ADR](decisions/bind-runtime-admission-to-artifact-provenance.md) define reviewed source/helper admission, a deterministic byte-bound build receipt, independent packed import traversal and strict installed-artifact/platform-map validation. The generated receipt cannot authorize its own membership. An external source/tarball/receipt identity prevents a modified installed artifact plus rewritten receipt from self-qualifying; trusted build integrity remains a separate assumption.
+
+Normal/skip-clean/prepack builds would use an owned capture/finalization barrier without changing existing JS/DTS graphs. No public export, runtime import or dependency is added. Current release qualification would require strict provenance; exact artifact-pinned legacy profiles remain only for historical replay. The unchanged-build capture and real map-content connection must qualify before replacement; unsupported evidence stops the whole slice without a fallback or filename workaround.
+
+**Next M10.5: review the written design, then prepare one native/inline implementation plan.** This design slice changes documentation only. The kernel stays parked, its downstream stages remain unrun, and the original three M1.10c host failures still block publication. No compiler candidate, guard edit, install, benchmark, consumer build, public push or publication ran here. Physical acceptance remains deferred.
+
+
+### M10.5 runtime provenance implementation plan prepared (2026-10-17)
+
+The user approved the [written provenance design](superpowers/specs/2026-10-17-m10-5-runtime-provenance-design.md) after `10438f5`. The [one-slice plan](superpowers/plans/2026-10-17-m10-5-runtime-provenance.md) retains native/inline execution and one outcome commit: same-path baseline/capture and unchanged JS/DTS first, externally pinned installed bytes next, strict real platform maps, then SDK/current release integration with negative tests. A first real gate failure stops the slice and restores its task-owned product changes after archiving the outcome.
+
+The plan covers build-helper source fingerprints, independent SDK-matrix verification, exact historical legacy profiles and a required v3 release provenance record; a legacy success or true flag cannot qualify current publication. Real working-tree evidence retains its actual dirty/source state, distinct from synthetic positive release tests. No intermediate commit is used to fabricate clean-source release evidence.
+
+**Next M10.5: review the written implementation plan, then execute one complete correctness slice.** No implementation, build, consumer install, native operation, benchmark, public push or publication ran in this planning slice. The kernel remains parked, M1.10c publication remains blocked by the original three host failures, and physical acceptance remains deferred.
+
+
+### M10.5 runtime provenance candidate stopped and restored (2026-10-17)
+
+The approved [single-slice plan](superpowers/plans/2026-10-17-m10-5-runtime-provenance.md) stopped at build-provenance agreement. The [outcome packet](evidence/2026-10-17-m10-5-runtime-provenance/README.md) retains two agreeing original builds,20 capture owners, byte-identical105 JS/76 declaration artifacts and62 original ordinary-runtime source members with no vendor/generated member. All59 independent import rows pass and all30 ordinary dependency graphs agree.
+
+The metadata omits actual `url` shim and/or `metro-transform-worker` loader edges in seven tooling rows. After the expected-edge normalization and forged-graph regression controls, the corrected finalizer rejects that real disagreement. No additional layout, narrowed gate or synthesized missing edge follows. All948 tracked non-doc product files and181 shipping artifacts are restored; candidate code stays archived. Nineteen focused tests pass, but complete finalization/installed/platform/floor/release qualification and performance remain unrun. The final failed-run temporary capture files were cleaned before archiving; retained bootstrap receipts reproduce the same omissions against identical artifacts, without claiming final-run capture identity.
+
+**Next recommended M10.5 slice: keep the existing provenance guard and return to bounded compiler cost attribution on the existing graph.** Establish avoidable repeated package-compilation cost and whether its upper bound could cover the retained approximately47.24% warm gap before another implementation. This replacement is parked and adds no release prerequisite. M1.10c remains blocked by the original cold/warm/incremental failures; physical acceptance remains deferred. No push or publication occurred.
+
+
+### M10.5 repeated package-compilation attribution closed (2026-10-17)
+
+The approved [bounded assessment](assessments/2026-10-17-m10-5-repeated-package-cost.md) retains five serial alternating control/profile pairs,120 timed transforms and40 setup transforms over the unchanged compiled CJS transformer. Every observed retained call compiles once and reaches the same eight Crumbs package inputs (78,679 metafile bytes), two authored inputs and no bundled vendors. All160 final outputs agree by fixture; observed compiled source/input/metafile/watch receipts agree. All948 tracked non-document product files and181 shipping artifacts are unchanged.
+
+The generous whole-compilation envelope could cover the local diagnostic gap, but its removable package subset is not measured. Overlapping native/plugin work and input byte counts cannot establish that cost. Even free observed synchronous host reads leave the diagnostic above the reference ceiling under a fixed-remainder model. No performance candidate, guard/budget change, source-host qualification, native replay or public action ran. This assessment does not establish a release improvement.
+
+**Next recommended M10.5 slice: one compiler-reuse architecture decision**, defining a safe content-addressed package-compilation reuse mechanism, fresh resolution/content verification, request-owned authored CSS/evaluation, canonical bindings, bounded lifetime and concurrency before another prototype. Prior rejected context reuse is not revived. If no concrete mechanism and complete-transform saving hypothesis can be specified, park the route and return to an explicit release decision. Fresh-packaging/kernel and metadata replacement remain parked; the existing guard stays in place. M1.10c remains blocked by the original three host failures; physical acceptance stays deferred.
+
+
+### M10.5 compiler-reuse architecture decision closed (2026-10-18)
+
+The approved [bounded decision](assessments/2026-10-18-m10-5-compiler-reuse-decision.md) selects the shipping fresh-compilation architecture and parks compiler reuse as release remediation. Retained contexts have rejected performance evidence; cached package text does not eliminate parsing/linking; an external package capsule needs a new loader/linker, identity and freshness contract without an established net saving. Reusing evaluated authoring results is not an API-preserving shortcut. This is a decision to stop speculative implementation, not a claim that reuse is impossible.
+
+The existing [compiler ADR](decisions/adopt-native-design-system-compiler.md#compiler-reuse-decision--2026-10-18) records alternatives and concrete revisit conditions. The latest attribution replay confirms all948 product files/181 shipping artifacts unchanged. Historical105-run retained-context evidence replays its rejection; the later restore-fix verifier rejects current-source drift and passes only against its14 pinned historical sources. No new candidate, performance cohort, build, dependency, flag, guard, accepted cache policy, native run or release exception was introduced. Physical acceptance remains deferred.
+
+**Next recommended M10.5 slice: exact-artifact release disposition using existing source/tarball/report/SDK pins**, first checking those bytes and prerequisite evidence remain available. Stop scheduling further compiler prototypes without a materially different safe mechanism and full-transform saving hypothesis. The user's remediation-before-publication choice remains binding: continued blocking is the default, and a specific exception would need separate explicit authorization. Do not rebuild, retag, bump, rerun expensive qualification or publish merely to prepare that review. Original M1.10c cold/warm/incremental failures remain unchanged.
+
+
+### M10.5 exact-artifact release disposition prepared (2026-10-18)
+
+The [disposition](assessments/2026-10-18-m10-5-release-disposition.md) confirms the immutable v1.2.0 source/tree, exact original tarball, all 20 hosted report files and the original SDK 56/57/58 matrix. The recovered tarball and downloaded hosted ZIP are now retained in the [packet](evidence/2026-10-18-m10-5-release-disposition/README.md), avoiding dependency on temporary files or hosted expiry. All 185 installed-file hashes per SDK and 181 current dist hashes match the tarball. Live reads confirm source release present, npm latest 1.1.1/version 1.2.0 absent, successful final CI on the same tree, failed qualification and skipped publication.
+
+Original verifier replay against the pinned source content reproduces exactly three numerical failures; no incomplete or identity rows are waived. This later working branch has a root README source-fingerprint difference and cannot substitute for release source; the expected mismatch and partial-mirror setup failure are retained separately. No build/repack, fresh qualification, SDK/native run, gate/exception change or publication occurred. Physical acceptance remains deferred.
+
+**Next M10.5: explicit choice A (keep blocked, current/default) or B (separately approve exactly the three numerical failures for the pinned v1.2.0 artifact).** Remediation-before-publication remains binding and generic approval of preparation does not authorize B. No further compiler experiment is scheduled. If B is explicitly selected, the next engineering slice is a v1.2.0-only exception-path design/review; the normal workflow still cannot seal or publish this failed report and older exceptions do not apply. Until that choice, M1.10c npm publication remains blocked.
+
+### M10.5 — final root-cause investigation (2026-10-18)
+
+The user reopened remediation after exact-artifact disposition. [Matched historical/current attribution and proposed compiler contract](assessments/2026-10-18-m10-5-root-cause.md) isolate authoring-graph growth and added pipeline work. A partial compiled-text envelope measures 3.265 ms versus 8.900 ms matched control, but deliberately fails a new-resolution-candidate control and is not admitted. Production code, runtime isolation, release pins and numerical gates remain unchanged; publication stays blocked. Next: explicit worker-scoped compiler contract decision, then one complete witness/memo design if approved. The prior exact fresh-error-equivalence requirement has not been silently waived.
+
+
+### M10.5 — worker-lifetime contract approved; complete cache design prepared (2026-10-18)
+
+The owner approved the compiler-lifetime contract presented in `7903ba9`: compiler upgrades require process/Metro restart, and validated text hits need not reproduce compiler-service-start failures. The [ADR amendment](decisions/adopt-native-design-system-compiler.md#approved-worker-lifetime-compiler-contract--2026-10-18) explicitly supersedes only the earlier fresh-error-equivalence prerequisite. Full mutable-input invalidation, fresh authoring execution, runtime isolation and every numerical gate remain binding.
+
+The [written design](superpowers/specs/2026-10-18-m10-5-worker-scoped-compiled-text-design.md) covers complete resolution witnesses, fresh confirmation, bounded ownership, before/after checks and a proposed Metro session binding. Cross-restart native cache reuse is deliberately excluded from that proposal and its cost must be measured. The 3.265 ms incomplete envelope supplies a hypothesis budget only; its stale-resolution failure remains preserved. This slice changes documentation only; the shipping compiler and historical evidence packets are unchanged.
+
+**Next M10.5: written-spec review, then one native/inline implementation plan for the complete candidate.** No implementation, host qualification, release exception or publication is approved by the contract decision. The original v1.2.0 cold/warm/incremental failures still block publication; physical-device/spoken-reader acceptance remains deferred.
+
+
+### M10.5 — worker-scoped cache spec approved; single implementation plan prepared (2026-10-18)
+
+The owner approved the written design at `090c4fd`. The [implementation plan](superpowers/plans/2026-10-18-m10-5-worker-scoped-compiled-text.md) treats the whole witness/memo/Metro integration and qualification as one slice with one outcome commit. It explicitly tests higher-priority resolution, delayed completion, session restart/store growth, extension-only dependencies and malformed native receipts. Independent fresh controls and the unchanged 11-blocking/21-complete host policy remain required. Local dirty-source development checks cannot stand in for clean artifact sealing or hosted qualification.
+
+**Next M10.5: review the written plan, then execute it natively/inline as one complete candidate.** This planning slice changes documentation only. The original v1.2.0 cold/warm/incremental failures still block publication; no release exception or physical-device/spoken-reader acceptance is implied.
+
+### M10.5 — worker-scoped candidate rejected at Expo session isolation (2026-10-18)
+
+The owner approved and executed the single inline slice. The [outcome](assessments/2026-10-18-m10-5-worker-scoped-compiled-text.md) rejects this candidate: Expo 58's supervising transformer hashes its private session token into the global cache key, invalidating ordinary modules and adding seven disk entries per observed restart. The implementation plan's stop gate was applied; shipping source/artifacts were restored. SDK/native/complete host qualification was not run for this rejected candidate. Numerical budgets, release policy and runtime boundaries remain unchanged. **Next M10.5: exact-artifact release disposition; publication remains blocked by default.**
+
 ### M10.5 / M1.10c — accepted compiler baseline, 2026-10-18
 
 The owner approved the [v1.2.0 compiler baseline and exact-artifact publication](evidence/2026-10-18-m10-5-v12-rebaseline/README.md). All 11 blocking checks pass when the retained full report is reassessed against this policy; eight advisory failures remain visible. This closes the numerical disposition decision. npm `1.2.0` is now published as `latest`; [registry integrity and fresh SDK58 consumer verification](evidence/2026-10-18-m10-5-v12-rebaseline/publication.json) complete M1.10c. Physical-device work remains deferred; no further compiler prototype is required for this release.

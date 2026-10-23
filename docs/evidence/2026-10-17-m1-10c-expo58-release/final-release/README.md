@@ -39,3 +39,8 @@ Final-version hosted [CI 39019104094](https://github.com/opsydyn/crumbs-css/acti
 The remaining M1.10c publication decision belongs to the existing **M10.5 host gate**: remediate the compiler/incremental failures and requalify changed bytes, or explicitly accept all three numerical failures for only this source, report and tarball. Any release-only exception must pin this candidate and SDK matrix, retain all other verifier requirements and leave future-release policy unchanged. Publication remains blocked until that decision and verified publication complete.
 
 The release-status documentation build passes all 34 pages. This evidence update changes documentation only; the released tag, library bytes, generic budgets and publication workflow stay unchanged.
+
+
+## 2026-10-18 — pins reverified, publication still blocked
+
+The later [exact-artifact disposition](../../../assessments/2026-10-18-m10-5-release-disposition.md) confirms this source, tarball, complete downloaded hosted report and three-SDK matrix without rebuilding or requalifying. Original bytes are retained in its packet. Exact-source content replay reproduces this same three-failure host verification; the later branch's root README identity mismatch is retained separately rather than waived. Live npm reads still show latest 1.1.1 and no 1.2.0 version. No exception or publication is approved by the review. This dated note does not alter the original measured report or SDK receipts.
